@@ -1,0 +1,137 @@
+"use client"
+
+import Link from "next/link"
+import { ArrowRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion"
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+    },
+  },
+}
+
+export function Hero() {
+  return (
+    <section className="relative min-h-[80vh] flex items-center overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(3)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-[500px] h-[500px] rounded-full bg-black/5"
+            initial={{
+              x: `${Math.random() * 100}%`,
+              y: `${Math.random() * 100}%`,
+              scale: 0.5 + Math.random() * 0.5,
+            }}
+            animate={{
+              x: [
+                `${Math.random() * 100}%`,
+                `${Math.random() * 100}%`,
+                `${Math.random() * 100}%`,
+              ],
+              y: [
+                `${Math.random() * 100}%`,
+                `${Math.random() * 100}%`,
+                `${Math.random() * 100}%`,
+              ],
+            }}
+            transition={{
+              duration: 20 + Math.random() * 10,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="max-width-wrapper section-padding py-20 md:py-32 relative z-10">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="mx-auto max-w-3xl"
+        >
+          {/* Main Heading */}
+          <motion.h1
+            variants={itemVariants}
+            className="mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light leading-tight"
+          >
+            Supercharge Your Brand's{" "}
+            <motion.span
+              className="font-normal inline-block"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              Media Presence
+            </motion.span>
+          </motion.h1>
+
+          {/* Subheading */}
+          <motion.p
+            variants={itemVariants}
+            className="mb-10 text-base sm:text-lg text-muted-foreground max-w-xl"
+          >
+            Transform your content into viral moments. We amplify your reach across 
+            every media channel.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-col sm:flex-row gap-4"
+          >
+            <Button size="lg" className="group font-normal">
+              <Link href="/contact" className="flex items-center">
+                Get More Views
+                <motion.span
+                  className="ml-2"
+                  whileHover={{ x: 5 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </motion.span>
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" className="font-normal">
+              <Link href="#how-it-works">
+                See How It Works
+              </Link>
+            </Button>
+          </motion.div>
+
+          {/* Trust indicator */}
+          <motion.div
+            variants={itemVariants}
+            className="mt-16 pt-16 border-t border-black/5"
+          >
+            <motion.p
+              className="text-sm text-muted-foreground"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              Helping brands go viral since 2024
+            </motion.p>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  )
+} 
