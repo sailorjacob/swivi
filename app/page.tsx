@@ -17,16 +17,16 @@ export default function HomePage() {
       <Header />
       <main className="flex min-h-screen flex-col pt-16">
         <Hero />
+        <Founder />
         <CreatorViewsCalculator />
         {/* <MusicHubPreview /> */}
         {/* <Testimonials /> */}
-        <Founder />
         <div className="space-y-32 md:space-y-48">
           {/* <Showcase /> */}
           <Features />
           <HowItWorks />
-          <FAQ />
           <CTA />
+          <FAQ />
         </div>
       </main>
       <Footer />
