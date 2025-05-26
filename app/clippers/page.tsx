@@ -22,7 +22,7 @@ const stats = [
   {
     icon: DollarSign,
     label: "Avg. Earnings",
-    value: "$450",
+    value: "XXX",
     description: "Per clipper/month"
   },
   {
