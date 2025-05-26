@@ -18,7 +18,7 @@ export function CTA() {
               rel="noopener noreferrer"
               className="inline-flex items-center text-sm font-normal bg-foreground text-background px-6 py-3 rounded-sm hover:bg-foreground/90 transition-colors"
             >
-              Schedule Consultation
+              Book a Call
             </a>
           </div>
         </div>
