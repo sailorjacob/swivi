@@ -1,4 +1,6 @@
 import { Hero } from "@/components/marketing/hero"
+import { EarningsCalculator } from "@/components/marketing/earnings-calculator"
+import { Testimonials } from "@/components/marketing/testimonials"
 import { Features } from "@/components/marketing/features"
 import { HowItWorks } from "@/components/marketing/how-it-works"
 import { FAQ } from "@/components/marketing/faq"
@@ -14,6 +16,8 @@ export default function HomePage() {
       <Header />
       <main className="flex min-h-screen flex-col pt-16">
         <Hero />
+        <EarningsCalculator />
+        <Testimonials />
         <Founder />
         <div className="space-y-32 md:space-y-48">
           <Showcase />

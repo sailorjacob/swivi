@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/components/providers/theme-provider"
 import { QueryProvider } from "@/components/providers/query-provider"
 import { AuthProvider } from "@/components/providers/auth-provider"
 import { ClickAnimation } from "@/components/ui/click-animation"
+import { OnboardingTour } from "@/components/onboarding/tour"
+import { cn } from "@/lib/utils"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -58,7 +60,25 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <head>
+        <link
+          rel="preconnect"
+          href="https://fonts.googleapis.com"
+        />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className={cn(
+        "min-h-screen bg-background font-sans antialiased",
+        inter.className
+      )}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -80,6 +100,7 @@ export default function RootLayout({
                   },
                 }}
               />
+              <OnboardingTour />
             </QueryProvider>
           </AuthProvider>
         </ThemeProvider>
