@@ -182,29 +182,6 @@ export default function AboutPage() {
             </motion.div>
           </div>
         </section>
-
-        {/* Mission Section */}
-        <section className="py-20 md:py-32 border-t border-black/5">
-          <div className="max-width-wrapper section-padding">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="mx-auto max-w-3xl text-center"
-            >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-6">
-                Our Mission
-              </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-                At Swivimedia, we're revolutionizing how brands connect with audiences. By leveraging authentic content creators and our network of skilled clippers, we deliver genuine engagement at a fraction of traditional advertising costs.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                We believe in the power of real people sharing real experiences with your brand. This authentic approach not only saves you money but creates deeper, more meaningful connections with your target audience.
-              </p>
-            </motion.div>
-          </div>
-        </section>
       </main>
       <Footer />
     </>
