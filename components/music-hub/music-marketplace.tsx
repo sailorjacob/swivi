@@ -202,18 +202,20 @@ export function MusicMarketplace() {
                 </div>
 
                 {/* Genre Filter */}
-                <div className="flex gap-2 overflow-x-auto">
-                  {genres.map((genre) => (
-                    <Button
-                      key={genre}
-                      variant={selectedGenre === genre ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedGenre(genre)}
-                      className="whitespace-nowrap"
-                    >
-                      {genre}
-                    </Button>
-                  ))}
+                <div className="overflow-x-auto">
+                  <div className="flex gap-2 min-w-max pb-2">
+                    {genres.map((genre) => (
+                      <Button
+                        key={genre}
+                        variant={selectedGenre === genre ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedGenre(genre)}
+                        className="whitespace-nowrap flex-shrink-0"
+                      >
+                        {genre}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Price Range */}

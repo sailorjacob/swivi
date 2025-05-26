@@ -190,7 +190,7 @@ export function CreatorViewsCalculator() {
                     <span className="text-sm text-muted-foreground">Monthly Views</span>
                     <TrendingUp className="h-4 w-4 text-primary" />
                   </div>
-                  <p className="text-2xl font-light text-primary">{formatNumber(monthlyViews)}</p>
+                  <p className="text-2xl font-light text-primary">{formatNumber(monthlyViews)} 🧀</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {formatNumber(Math.round(monthlyViews / 30))} views per day
                   </p>
@@ -208,7 +208,7 @@ export function CreatorViewsCalculator() {
                     <span className="text-sm text-muted-foreground">Annual Ad Savings</span>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <p className="text-2xl font-light">{formatCurrency(annualSavings)}</p>
+                  <p className="text-2xl font-light">{formatCurrency(annualSavings)} 🤯</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     vs. traditional paid ads
                   </p>
