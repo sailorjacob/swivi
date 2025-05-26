@@ -191,13 +191,14 @@ export function MusicMarketplace() {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-0 bottom-0 my-auto h-4 w-4 text-muted-foreground" />
-                  <Input
+                <div className="flex items-center bg-background rounded-md border px-3 py-2 focus-within:ring-2 focus-within:ring-primary transition">
+                  <Search className="h-4 w-4 text-muted-foreground mr-2" />
+                  <input
+                    type="text"
                     placeholder="Search songs or artists..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="flex-1 bg-transparent outline-none text-sm"
                   />
                 </div>
 
