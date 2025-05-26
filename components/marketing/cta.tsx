@@ -21,10 +21,10 @@ export function CTA() {
               Schedule Consultation
             </a>
             <a
-              href="mailto:hello@swivi.com"
+              href="mailto:hello@swivimedia.com"
               className="inline-flex items-center text-sm font-normal border-b border-foreground pb-1 hover:opacity-70 transition-opacity"
             >
-              hello@swivi.com
+              hello@swivimedia.com
             </a>
           </div>
         </div>

@@ -41,8 +41,8 @@ export function Footer() {
           {/* Contact info */}
           <div className="text-sm text-muted-foreground">
             <p className="mb-2">Ready to scale your brand?</p>
-            <a href="mailto:hello@swivi.com" className="hover:text-foreground transition-colors font-medium">
-              hello@swivi.com
+            <a href="mailto:hello@swivimedia.com" className="hover:text-foreground transition-colors font-medium">
+              hello@swivimedia.com
             </a>
           </div>
 

@@ -41,10 +41,18 @@ export function Header() {
             </Link>
           ))}
           <Link
-            href="/contact"
+            href="https://calendly.com/bykevingeorge/30min?month=2025-05"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-sm font-normal bg-foreground text-background px-6 py-3 rounded-sm hover:bg-foreground/90 transition-colors"
           >
             Get More Views
+          </Link>
+          <Link
+            href="/contact"
+            className="text-sm font-normal border border-foreground px-6 py-3 rounded-sm hover:bg-foreground hover:text-background transition-colors"
+          >
+            Contact
           </Link>
         </div>
 
@@ -78,11 +86,20 @@ export function Header() {
               </Link>
             ))}
             <Link
-              href="/contact"
+              href="https://calendly.com/bykevingeorge/30min?month=2025-05"
+              target="_blank"
+              rel="noopener noreferrer"
               className="block mt-4 text-sm font-normal bg-foreground text-background px-6 py-3 rounded-sm hover:bg-foreground/90 transition-colors text-center"
               onClick={() => setMobileMenuOpen(false)}
             >
               Get More Views
+            </Link>
+            <Link
+              href="/contact"
+              className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-sm hover:bg-foreground hover:text-background transition-colors text-center"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Contact
             </Link>
           </div>
         </div>
