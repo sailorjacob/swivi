@@ -38,14 +38,6 @@ export function Footer() {
             </Link>
           </nav>
 
-          {/* Contact info */}
-          <div className="text-sm text-muted-foreground">
-            <p className="mb-2">Ready to scale your brand?</p>
-            <a href="mailto:hello@swivimedia.com" className="hover:text-foreground transition-colors font-medium">
-              hello@swivimedia.com
-            </a>
-          </div>
-
           {/* Copyright */}
           <div className="pt-6 border-t border-black/5 w-full">
             <p className="text-xs text-muted-foreground">
