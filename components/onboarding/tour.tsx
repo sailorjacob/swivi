@@ -140,10 +140,10 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
+            className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-50 md:w-full md:max-w-md flex items-center justify-center"
           >
-            <Card className="shadow-2xl">
-              <CardContent className="p-6">
+            <Card className="shadow-2xl w-full max-h-[90vh] overflow-y-auto">
+              <CardContent className="p-4 md:p-6">
                 {/* Progress Bar */}
                 <div className="mb-4">
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -170,38 +170,41 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
                 </Button>
 
                 {/* Content */}
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold pr-8">
+                <div className="space-y-3 md:space-y-4">
+                  <h3 className="text-lg md:text-xl font-semibold pr-8">
                     {currentStepData.title}
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm md:text-base text-muted-foreground">
                     {currentStepData.description}
                   </p>
                 </div>
 
                 {/* Navigation */}
-                <div className="flex items-center justify-between mt-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handlePrevious}
                     disabled={currentStep === 0}
+                    className="w-full sm:w-auto"
                   >
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     Previous
                   </Button>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={handleSkip}
+                      className="flex-1 sm:flex-initial"
                     >
                       Skip Tour
                     </Button>
                     <Button
                       size="sm"
                       onClick={handleNext}
+                      className="flex-1 sm:flex-initial"
                     >
                       {currentStep === tourSteps.length - 1 ? (
                         <>
