@@ -103,11 +103,11 @@ export function Testimonials() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-light mb-4">
               Success Stories
-            </h2>
+          </h2>
             <p className="text-lg text-muted-foreground">
               Real results from real creators and brands
             </p>
-          </div>
+        </div>
 
           <div className="relative">
             {/* Testimonial Carousel */}
@@ -119,7 +119,7 @@ export function Testimonials() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                >
+            >
                   <Card className="border-0 shadow-lg">
                     <CardContent className="p-8 md:p-12">
                       <Quote className="h-8 w-8 text-primary/20 mb-4" />
@@ -128,8 +128,8 @@ export function Testimonials() {
                       <div className="flex gap-1 mb-4">
                         {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
                           <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-                        ))}
-                      </div>
+          ))}
+        </div>
 
                       {/* Content */}
                       <p className="text-lg md:text-xl mb-6 leading-relaxed">
@@ -153,10 +153,10 @@ export function Testimonials() {
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
                             {testimonials[currentIndex].role} • {testimonials[currentIndex].company}
-                          </p>
-                        </div>
+          </p>
+        </div>
                       </div>
                     </CardContent>
                   </Card>
