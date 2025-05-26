@@ -5,7 +5,6 @@ import { motion } from "framer-motion"
 import { Users, Video, Share2, Calendar, TrendingUp, DollarSign } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
-import { Badge } from "@/components/ui/badge"
 
 interface CalculatorValues {
   numberOfClippers: number
@@ -75,7 +74,7 @@ export function CreatorViewsCalculator() {
   }
 
   return (
-    <section className="py-20 md:py-32 bg-gradient-to-b from-primary/5 to-transparent">
+    <section className="py-20 md:py-32">
       <div className="max-width-wrapper section-padding">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -84,7 +83,6 @@ export function CreatorViewsCalculator() {
           className="mx-auto max-w-4xl"
         >
           <div className="text-center mb-12">
-            <Badge className="mb-4" variant="secondary">NEW CALCULATOR</Badge>
             <h2 className="text-3xl md:text-4xl font-light mb-4">
               Creator Views Calculator
             </h2>
@@ -93,22 +91,16 @@ export function CreatorViewsCalculator() {
             </p>
           </div>
 
-          <Card className="mb-8 border-2">
+          <Card className="mb-8">
             <CardHeader>
-              <CardTitle className="text-xl font-normal flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                Adjust Your Campaign Parameters
-              </CardTitle>
+              <CardTitle className="text-xl font-normal">Adjust Your Campaign Parameters</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
               {/* Number of Clippers */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <label className="text-sm font-medium">Number of Clippers</label>
-                  </div>
-                  <span className="text-2xl font-light text-primary">{values.numberOfClippers} CLIPPERS</span>
+                  <label className="text-sm font-medium">Number of Clippers</label>
+                  <span className="text-2xl font-light">{values.numberOfClippers}</span>
                 </div>
                 <Slider
                   value={[values.numberOfClippers]}
@@ -118,24 +110,13 @@ export function CreatorViewsCalculator() {
                   step={1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>1</span>
-                  <span>10</span>
-                  <span>20</span>
-                  <span>50</span>
-                  <span>75</span>
-                  <span>100</span>
-                </div>
               </div>
 
               {/* Posts per Day */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <Video className="h-4 w-4 text-muted-foreground" />
-                    <label className="text-sm font-medium">Posts per Day (per platform)</label>
-                  </div>
-                  <span className="text-2xl font-light text-primary">{values.postsPerDay} POSTS</span>
+                  <label className="text-sm font-medium">Posts per Day (per platform)</label>
+                  <span className="text-2xl font-light">{values.postsPerDay}</span>
                 </div>
                 <Slider
                   value={[values.postsPerDay]}
@@ -145,23 +126,13 @@ export function CreatorViewsCalculator() {
                   step={1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>1</span>
-                  <span>2</span>
-                  <span>3</span>
-                  <span>4</span>
-                  <span>5</span>
-                </div>
               </div>
 
               {/* Number of Platforms */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <Share2 className="h-4 w-4 text-muted-foreground" />
-                    <label className="text-sm font-medium">Number of Social Media Platforms</label>
-                  </div>
-                  <span className="text-2xl font-light text-primary">{values.platforms}</span>
+                  <label className="text-sm font-medium">Social Media Platforms</label>
+                  <span className="text-2xl font-light">{values.platforms}</span>
                 </div>
                 <Slider
                   value={[values.platforms]}
@@ -171,23 +142,13 @@ export function CreatorViewsCalculator() {
                   step={1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>1</span>
-                  <span>2</span>
-                  <span>3</span>
-                  <span>4</span>
-                  <span>5</span>
-                </div>
               </div>
 
               {/* Days per Week */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <label className="text-sm font-medium">Days per Week Clippers Post</label>
-                  </div>
-                  <span className="text-2xl font-light text-primary">{values.daysPerWeek} DAYS</span>
+                  <label className="text-sm font-medium">Days per Week</label>
+                  <span className="text-2xl font-light">{values.daysPerWeek}</span>
                 </div>
                 <Slider
                   value={[values.daysPerWeek]}
@@ -197,22 +158,13 @@ export function CreatorViewsCalculator() {
                   step={1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>1</span>
-                  <span>3</span>
-                  <span>5</span>
-                  <span>7</span>
-                </div>
               </div>
 
               {/* Views per Post */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    <label className="text-sm font-medium">Views per Post</label>
-                  </div>
-                  <span className="text-2xl font-light text-primary">{formatNumber(values.viewsPerPost)}</span>
+                  <label className="text-sm font-medium">Average Views per Post</label>
+                  <span className="text-2xl font-light">{formatNumber(values.viewsPerPost)}</span>
                 </div>
                 <Slider
                   value={[values.viewsPerPost]}
@@ -222,99 +174,134 @@ export function CreatorViewsCalculator() {
                   step={100}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>400</span>
-                  <span>5K</span>
-                  <span>10K</span>
-                  <span>20K</span>
-                  <span>35K</span>
-                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Results Display */}
-          <div className="space-y-6">
-            {/* Monthly Views */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <motion.div
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <Card className="border-primary border-2 bg-primary/5">
-                <CardContent className="p-8 text-center">
-                  <p className="text-sm text-muted-foreground mb-2">MONTHLY VIEWS FROM CLIPPERS:</p>
-                  <p className="text-4xl md:text-5xl font-light text-primary mb-2">
-                    {formatNumber(monthlyViews)} 🧀
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    That's {formatNumber(Math.round(monthlyViews / 30))} views per day!
+              <Card className="border-primary">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Monthly Views</span>
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                  </div>
+                  <p className="text-2xl font-light text-primary">{formatNumber(monthlyViews)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatNumber(Math.round(monthlyViews / 30))} views per day
                   </p>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Annual Savings */}
             <motion.div
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <Card className="border-2 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
-                <CardContent className="p-8 text-center">
-                  <p className="text-sm text-muted-foreground mb-2">ANNUAL SAVINGS VS TRADITIONAL PAID ADS:</p>
-                  <p className="text-4xl md:text-5xl font-light text-green-600 dark:text-green-400 mb-2">
-                    {formatCurrency(annualSavings)} 🤯
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Based on $30 CPM industry average
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Annual Ad Savings</span>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <p className="text-2xl font-light">{formatCurrency(annualSavings)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    vs. traditional paid ads
                   </p>
                 </CardContent>
               </Card>
             </motion.div>
+          </div>
 
-            {/* Additional Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-2xl font-light mb-1">
-                    {formatNumber(values.numberOfClippers * values.postsPerDay * values.platforms * values.daysPerWeek)}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Posts per Week</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-2xl font-light mb-1">
-                    {formatNumber(Math.round(monthlyViews * 12))}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Annual Views</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-2xl font-light mb-1">
-                    {formatCurrency(Math.round(annualSavings / 12))}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Monthly Savings</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Info Box */}
-            <Card className="bg-muted/50">
+          {/* Additional Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <Card>
               <CardContent className="p-6">
-                <h4 className="font-medium mb-3 flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
-                  Why This Matters
-                </h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Traditional paid ads cost $20-50 per 1,000 views (CPM)</li>
-                  <li>• Organic content from clippers has higher engagement rates</li>
-                  <li>• Authentic creator content converts 3x better than ads</li>
-                  <li>• Scale your reach without scaling your ad spend</li>
-                </ul>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">Posts/Week</span>
+                  <Video className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <p className="text-2xl font-light">
+                  {formatNumber(values.numberOfClippers * values.postsPerDay * values.platforms * values.daysPerWeek)}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">Annual Views</span>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <p className="text-2xl font-light">
+                  {formatNumber(Math.round(monthlyViews * 12))}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">Monthly Savings</span>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <p className="text-2xl font-light">
+                  {formatCurrency(Math.round(annualSavings / 12))}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">CPM Saved</span>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <p className="text-2xl font-light">$30</p>
               </CardContent>
             </Card>
           </div>
+
+          {/* Info Box */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl font-normal flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Why Clipper Marketing Wins
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Traditional Paid Ads</h4>
+                    <ul className="space-y-1 text-sm text-muted-foreground">
+                      <li>• $20-50 CPM costs</li>
+                      <li>• Low engagement rates</li>
+                      <li>• Ad fatigue issues</li>
+                      <li>• Limited authenticity</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2">Clipper Marketing</h4>
+                    <ul className="space-y-1 text-sm text-muted-foreground">
+                      <li>• $0 media costs</li>
+                      <li>• 3x higher engagement</li>
+                      <li>• Authentic content</li>
+                      <li>• Scalable reach</li>
+                    </ul>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground pt-2 border-t">
+                  Based on {formatNumber(monthlyViews)} monthly views, you're saving {formatCurrency(annualSavings)} annually compared to traditional advertising.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     </section>
