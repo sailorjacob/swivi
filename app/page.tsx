@@ -1,6 +1,7 @@
 import { Hero } from "@/components/marketing/hero"
 import { Features } from "@/components/marketing/features"
 import { HowItWorks } from "@/components/marketing/how-it-works"
+import { FAQ } from "@/components/marketing/faq"
 import { CTA } from "@/components/marketing/cta"
 import { Showcase } from "@/components/marketing/showcase"
 import { Founder } from "@/components/marketing/founder"
@@ -18,6 +19,7 @@ export default function HomePage() {
           <Showcase />
           <Features />
           <HowItWorks />
+          <FAQ />
           <CTA />
         </div>
       </main>

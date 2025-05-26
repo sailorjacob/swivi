@@ -1,18 +1,18 @@
 const steps = [
   {
     number: "01",
-    title: "Define Your Focus",
-    description: "Tell us about your brand, keywords, and channels to monitor.",
+    title: "Send Us Your Content",
+    description: "We build a private clipping community tailored for your brand. Just send us your content (ideally via Google Drive), and we'll handle everything, including recruiting clippers from your audience and our extensive network.",
   },
   {
     number: "02",
-    title: "Gather Intelligence",
-    description: "We track and analyze mentions across all relevant media.",
+    title: "Launch & Coach",
+    description: "Once in your community, clippers follow our streamlined launch process. We coach them to create high-quality content that matches your brand's vision, guidelines, and platform strategy.",
   },
   {
     number: "03",
-    title: "Act on Insights",
-    description: "Use data-driven strategies to amplify your brand's reach.",
+    title: "Manage & Scale",
+    description: "Our team manages your community daily, engaging clippers, answering questions, and keeping momentum strong. Every post is manually reviewed for quality before approval, ensuring only the best content earns payouts. As your top clippers thrive, your brand's reach and impact grow.",
   },
 ]
 
@@ -22,10 +22,10 @@ export function HowItWorks() {
       <div className="max-width-wrapper section-padding">
         <div className="mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
-            Simple Process
+            How It Works
           </h2>
           <p className="text-muted-foreground max-w-2xl">
-            From setup to insights in minutes, not weeks.
+            We build and manage your clipping community to boost your brand's reach.
           </p>
         </div>
 
@@ -50,13 +50,15 @@ export function HowItWorks() {
         {/* Simple CTA */}
         <div className="mt-20 pt-16 border-t border-black/5">
           <p className="text-sm text-muted-foreground mb-6">
-            Ready to elevate your brand intelligence?
+            Ready to scale your content reach?
           </p>
           <a
-            href="/signup"
+            href="https://calendly.com/bykevingeorge/30min?month=2025-05"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center text-sm font-normal border-b border-foreground pb-1 hover:opacity-70 transition-opacity"
           >
-            Get Started →
+            Book a Call →
           </a>
         </div>
       </div>

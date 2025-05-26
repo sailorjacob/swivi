@@ -13,7 +13,9 @@ export function CTA() {
           
           <div className="flex flex-col sm:flex-row gap-6 items-start">
             <a
-              href="/contact"
+              href="https://calendly.com/bykevingeorge/30min?month=2025-05"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center text-sm font-normal bg-foreground text-background px-6 py-3 rounded-sm hover:bg-foreground/90 transition-colors"
             >
               Schedule Consultation

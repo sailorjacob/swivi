@@ -89,8 +89,8 @@ export function Hero() {
             variants={itemVariants}
             className="mb-10 text-base sm:text-lg text-muted-foreground max-w-xl"
           >
-            Transform your content into viral moments. We amplify your reach across 
-            every media channel.
+            Turn your content into viral moments and more sales. We amplify your reach across 
+            all media. Book a call now!
           </motion.p>
 
           {/* CTA Buttons */}
@@ -99,7 +99,7 @@ export function Hero() {
             className="flex flex-col sm:flex-row gap-4"
           >
             <Button size="lg" className="group font-normal">
-              <Link href="/contact" className="flex items-center">
+              <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center">
                 Get More Views
                 <motion.span
                   className="ml-2"
