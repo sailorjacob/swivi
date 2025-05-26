@@ -25,7 +25,7 @@ export function Header() {
             alt="Swivi"
             width={300}
             height={100}
-            className="h-18 w-auto"
+            className="h-16 w-auto"
             priority
           />
         </Link>
