@@ -169,7 +169,7 @@ export default function AboutPage() {
                       </div>
                       <div>
                         <h4 className="font-medium mb-2 text-primary">Clipper Marketing</h4>
-                        <p className="text-2xl font-light text-primary mb-2">$1 CPM</p>
+                        <p className="text-2xl font-light text-primary mb-2">$0.50 - $3 CPM</p>
                         <p className="text-sm text-muted-foreground">Authentic content, precise tracking</p>
                       </div>
                     </div>
