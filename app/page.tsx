@@ -5,7 +5,6 @@ import { Testimonials } from "@/components/marketing/testimonials"
 import { Features } from "@/components/marketing/features"
 import { HowItWorks } from "@/components/marketing/how-it-works"
 import { FAQ } from "@/components/marketing/faq"
-import { CTA } from "@/components/marketing/cta"
 import { Showcase } from "@/components/marketing/showcase"
 import { Founder } from "@/components/marketing/founder"
 import { Header } from "@/components/layout/header"
@@ -25,7 +24,6 @@ export default function HomePage() {
           {/* <Showcase /> */}
           <Features />
           <HowItWorks />
-          <CTA />
           <FAQ />
         </div>
       </main>
