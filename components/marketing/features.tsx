@@ -1,3 +1,7 @@
+"use client"
+
+import { motion } from "framer-motion"
+
 const features = [
   {
     name: "Viral Content Strategy",
@@ -15,6 +19,11 @@ const features = [
     name: "Trend Optimization",
     description: "Stay ahead of the curve by identifying and capitalizing on emerging trends.",
   },
+]
+
+const useCases = [
+  "Streamers", "Artists", "Brands", "Athletes", "Creators", "Musicians", "Podcasters",
+  "Influencers", "Coaches", "Entrepreneurs", "Authors", "Speakers"
 ]
 
 export function Features() {
@@ -48,6 +57,37 @@ export function Features() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Animated Use Cases Billboard */}
+        <div className="mt-16 overflow-hidden">
+          <motion.div
+            className="flex whitespace-nowrap"
+            animate={{
+              x: [0, -1000],
+            }}
+            transition={{
+              x: {
+                repeat: Infinity,
+                repeatType: "loop",
+                duration: 20,
+                ease: "linear",
+              },
+            }}
+          >
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center space-x-8 mr-8">
+                {useCases.map((useCase, index) => (
+                  <span
+                    key={`${i}-${index}`}
+                    className="text-lg font-light text-muted-foreground/60"
+                  >
+                    {useCase}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </motion.div>
         </div>
       </div>
     </section>
