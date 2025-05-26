@@ -18,9 +18,9 @@ export default function HomePage() {
       <main className="flex min-h-screen flex-col pt-16">
         <Hero />
         <CreatorViewsCalculator />
-        <MusicHubPreview />
+        {/* <MusicHubPreview /> */}
         {/* <Testimonials /> */}
-        <Founder />
+        {/* <Founder /> */}
         <div className="space-y-32 md:space-y-48">
           <Showcase />
           <Features />

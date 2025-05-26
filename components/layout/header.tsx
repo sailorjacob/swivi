@@ -8,8 +8,8 @@ import { Menu, X } from "lucide-react"
 const navigation = [
   { name: "For Brands", href: "/" },
   { name: "Clippers", href: "/clippers" },
-  { name: "Music Hub", href: "/music-hub" },
-  { name: "Community", href: "/community" },
+  // { name: "Music Hub", href: "/music-hub" },
+  // { name: "Community", href: "/community" },
 ]
 
 export function Header() {
