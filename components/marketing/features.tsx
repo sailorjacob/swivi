@@ -60,7 +60,7 @@ export function Features() {
         </div>
 
         {/* Animated Use Cases Billboard */}
-        <div className="mt-16 overflow-hidden">
+        <div className="mt-8 overflow-hidden">
           <motion.div
             className="flex whitespace-nowrap"
             animate={{
