@@ -127,7 +127,7 @@ export function Hero() {
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              Helping brands go viral since 2024
+              Helping brands go viral.
             </motion.p>
           </motion.div>
         </motion.div>

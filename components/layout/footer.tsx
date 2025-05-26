@@ -22,22 +22,6 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Simple navigation */}
-          <nav className="flex flex-wrap justify-center gap-6 text-sm">
-            <Link href="/how-it-works" className="hover:text-muted-foreground transition-colors">
-              How It Works
-            </Link>
-            <Link href="/success-stories" className="hover:text-muted-foreground transition-colors">
-              Success Stories
-            </Link>
-            <Link href="/contact" className="hover:text-muted-foreground transition-colors">
-              Contact Us
-            </Link>
-            <Link href="/privacy" className="hover:text-muted-foreground transition-colors">
-              Privacy
-            </Link>
-          </nav>
-
           {/* Copyright */}
           <div className="pt-6 border-t border-black/5 w-full">
             <p className="text-xs text-muted-foreground">
