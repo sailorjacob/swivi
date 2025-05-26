@@ -100,7 +100,7 @@ export function Hero() {
           >
             <Button size="lg" className="group font-normal">
               <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center">
-                Get More Views
+                Book a Call
                 <motion.span
                   className="ml-2"
                   whileHover={{ x: 5 }}
