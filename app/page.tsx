@@ -1,5 +1,5 @@
 import { Hero } from "@/components/marketing/hero"
-import { EarningsCalculator } from "@/components/marketing/earnings-calculator"
+import { CreatorViewsCalculator } from "@/components/marketing/creator-views-calculator"
 import { MusicHubPreview } from "@/components/marketing/music-hub-preview"
 import { Testimonials } from "@/components/marketing/testimonials"
 import { Features } from "@/components/marketing/features"
@@ -17,7 +17,7 @@ export default function HomePage() {
       <Header />
       <main className="flex min-h-screen flex-col pt-16">
         <Hero />
-        <EarningsCalculator />
+        <CreatorViewsCalculator />
         <MusicHubPreview />
         <Testimonials />
         <Founder />
