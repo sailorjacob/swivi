@@ -19,7 +19,7 @@ export default function HomePage() {
         <Hero />
         <CreatorViewsCalculator />
         <MusicHubPreview />
-        <Testimonials />
+        {/* <Testimonials /> */}
         <Founder />
         <div className="space-y-32 md:space-y-48">
           <Showcase />
