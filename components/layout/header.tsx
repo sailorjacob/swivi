@@ -46,7 +46,7 @@ export function Header() {
             href="https://calendly.com/bykevingeorge/30min?month=2025-05"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-normal bg-foreground text-background px-6 py-3 rounded-sm hover:bg-foreground/90 transition-colors"
+            className="text-sm font-normal bg-foreground text-background px-6 py-3 rounded-full hover:bg-foreground/90 transition-all duration-300"
           >
             Launch a Campaign
           </Link>
@@ -54,7 +54,7 @@ export function Header() {
             href="https://whop.com/swivi/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-normal border border-foreground px-6 py-3 rounded-sm hover:bg-foreground hover:text-background transition-colors"
+            className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
           >
             Become a Clipper
           </Link>
@@ -63,7 +63,7 @@ export function Header() {
         {/* Mobile menu button */}
         <button
           type="button"
-          className="md:hidden inline-flex items-center justify-center rounded-sm p-2"
+          className="md:hidden inline-flex items-center justify-center rounded-full p-2"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           <span className="sr-only">Open main menu</span>
@@ -93,7 +93,7 @@ export function Header() {
               href="https://calendly.com/bykevingeorge/30min?month=2025-05"
               target="_blank"
               rel="noopener noreferrer"
-              className="block mt-4 text-sm font-normal bg-foreground text-background px-6 py-3 rounded-sm hover:bg-foreground/90 transition-colors text-center"
+              className="block mt-4 text-sm font-normal bg-foreground text-background px-6 py-3 rounded-full hover:bg-foreground/90 transition-all duration-300 text-center"
               onClick={() => setMobileMenuOpen(false)}
             >
               Launch a Campaign
@@ -102,7 +102,7 @@ export function Header() {
               href="https://whop.com/swivi/"
               target="_blank"
               rel="noopener noreferrer"
-              className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-sm hover:bg-foreground hover:text-background transition-colors text-center"
+              className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
               onClick={() => setMobileMenuOpen(false)}
             >
               Become a Clipper
