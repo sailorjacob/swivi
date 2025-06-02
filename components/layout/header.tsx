@@ -51,7 +51,9 @@ export function Header() {
             Launch a Campaign
           </Link>
           <Link
-            href="/clippers"
+            href="https://whop.com/swivi/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-sm font-normal border border-foreground px-6 py-3 rounded-sm hover:bg-foreground hover:text-background transition-colors"
           >
             Become a Clipper
@@ -97,7 +99,9 @@ export function Header() {
               Launch a Campaign
             </Link>
             <Link
-              href="/clippers"
+              href="https://whop.com/swivi/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-sm hover:bg-foreground hover:text-background transition-colors text-center"
               onClick={() => setMobileMenuOpen(false)}
             >
