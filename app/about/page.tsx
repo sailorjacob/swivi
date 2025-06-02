@@ -85,10 +85,26 @@ export default function AboutPage() {
 
               <motion.p
                 variants={itemVariants}
-                className="mb-16 text-lg text-muted-foreground text-center max-w-2xl mx-auto"
+                className="mb-8 text-lg text-muted-foreground text-center max-w-2xl mx-auto"
               >
                 Understanding the landscape of traditional advertising costs and how clipper marketing revolutionizes brand reach.
               </motion.p>
+              
+              {/* Video Section */}
+              <motion.div
+                variants={itemVariants}
+                className="w-full max-w-3xl mx-auto mb-16 rounded-lg overflow-hidden"
+              >
+                <video 
+                  className="w-full h-auto object-cover"
+                  src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs//SwiviBilker.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                />
+              </motion.div>
             </motion.div>
           </div>
         </section>
