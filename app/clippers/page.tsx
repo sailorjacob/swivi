@@ -122,7 +122,7 @@ export default function ClippersPage() {
 
               <motion.div variants={itemVariants}>
                 <Link
-                  href="http://whop.com/swiviclippers"
+                  href="https://whop.com/swivi/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center text-sm font-normal bg-foreground text-background px-8 py-4 rounded-sm hover:bg-foreground/90 transition-all group"
@@ -289,7 +289,7 @@ export default function ClippersPage() {
               </p>
               
               <Link
-                href="http://whop.com/swiviclippers"
+                href="https://whop.com/swivi/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center text-sm font-normal bg-foreground text-background px-8 py-4 rounded-sm hover:bg-foreground/90 transition-all group"
