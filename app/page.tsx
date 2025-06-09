@@ -20,7 +20,7 @@ export default function HomePage() {
         <CreatorViewsCalculator />
         {/* <MusicHubPreview /> */}
         {/* <Testimonials /> */}
-        <div className="space-y-16 md:space-y-24">
+        <div className="space-y-8 md:space-y-16">
           {/* <Showcase /> */}
           <Features />
           <HowItWorks />
