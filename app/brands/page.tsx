@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { ArrowRight, TrendingUp, DollarSign, Users, BarChart3 } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import Image from "next/image"
 
 const stats = [
   {
@@ -121,7 +122,7 @@ export default function BrandsPage() {
                 viral content that drives real engagement and growth for your brand.
               </motion.p>
 
-              <motion.div variants={itemVariants}>
+              <motion.div variants={itemVariants} className="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8">
                 <Link
                   href="https://calendly.com/bykevingeorge/30min?month=2025-05"
                   target="_blank"
@@ -137,6 +138,21 @@ export default function BrandsPage() {
                     <ArrowRight className="h-4 w-4" />
                   </motion.span>
                 </Link>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="relative w-full md:w-auto"
+                >
+                  <Image
+                    src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/swivi/swivi39.png"
+                    alt="Swivi Brand Campaign"
+                    width={400}
+                    height={300}
+                    className="rounded-lg shadow-lg"
+                    priority
+                  />
+                </motion.div>
               </motion.div>
             </motion.div>
           </div>
