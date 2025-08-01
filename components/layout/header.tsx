@@ -51,7 +51,7 @@ export function Header() {
             Launch a Campaign
           </Link>
           <Link
-            href="https://whop.com/swivi/"
+            href="https://discord.gg/CtZ4tecJ7Y"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
@@ -99,7 +99,7 @@ export function Header() {
               Launch a Campaign
             </Link>
             <Link
-              href="https://whop.com/swivi/"
+              href="https://discord.gg/CtZ4tecJ7Y"
               target="_blank"
               rel="noopener noreferrer"
               className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
