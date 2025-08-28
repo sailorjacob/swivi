@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider"
 import { QueryProvider } from "@/components/providers/query-provider"
 import { AuthProvider } from "@/components/providers/auth-provider"
 import { ClickAnimation } from "@/components/ui/click-animation"
-import { OnboardingTour } from "@/components/onboarding/tour"
+
 import { cn } from "@/lib/utils"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -100,7 +100,6 @@ export default function RootLayout({
                   },
                 }}
               />
-              <OnboardingTour />
             </QueryProvider>
           </AuthProvider>
         </ThemeProvider>
