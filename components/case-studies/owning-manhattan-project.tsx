@@ -182,7 +182,7 @@ export default function OwningManhattanProject() {
             />
           </div>
           <h1 className="text-3xl md:text-4xl font-light mb-3">
-            Owning Manhattan <span className="font-normal">Campaign</span>
+            Owning Manhattan
           </h1>
           <div className="flex items-center justify-center gap-3">
             <Badge variant="outline" className="text-xs">Netflix TV Series</Badge>
@@ -205,7 +205,7 @@ export default function OwningManhattanProject() {
           className="bg-gray-50 rounded-xl p-6 mt-8 mb-8 max-w-6xl mx-auto"
         >
           <motion.h3 variants={itemVariants} className="text-lg font-light mb-4">
-            Campaign Impact
+            Impact
           </motion.h3>
           <motion.div variants={itemVariants} className="grid md:grid-cols-3 gap-4">
             <div>
