@@ -70,15 +70,18 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                     <CardTitle className="text-2xl font-light mb-2">
                       {campaign.title}
                     </CardTitle>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       {campaign.clientLogo && (
-                        <Image
-                          src={campaign.clientLogo}
-                          alt={campaign.client}
-                          width={28}
-                          height={28}
-                          className="rounded-sm object-cover"
-                        />
+                        <div className="flex-shrink-0">
+                          <Image
+                            src={campaign.clientLogo}
+                            alt={campaign.client}
+                            width={32}
+                            height={32}
+                            className="rounded-md object-cover ring-1 ring-black/10"
+                            unoptimized
+                          />
+                        </div>
                       )}
                       <p className="text-muted-foreground">
                         {campaign.client} • {campaign.industry}

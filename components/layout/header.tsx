@@ -3,13 +3,23 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
-import { Menu, X } from "lucide-react"
+import { Menu, X, ChevronDown } from "lucide-react"
 
 const navigation = [
-  { name: "For Brands", href: "/brands" },
-  { name: "Clippers", href: "/clippers" },
-  { name: "Live Activations", href: "/activations" },
-  { name: "Case Studies", href: "/case-studies" },
+  { 
+    name: "For Brands", 
+    href: "/brands",
+    dropdown: [
+      { name: "Case Studies", href: "/case-studies", description: "Previous campaign results" }
+    ]
+  },
+  { 
+    name: "Clippers", 
+    href: "/clippers",
+    dropdown: [
+      { name: "Live Activations", href: "/activations", description: "Current earning opportunities" }
+    ]
+  },
   { name: "About", href: "/about" },
   // { name: "Music Hub", href: "/music-hub" },
   // { name: "Community", href: "/community" },
@@ -36,13 +46,39 @@ export function Header() {
         {/* Desktop Navigation */}
         <div className="hidden md:flex md:items-center md:space-x-8">
           {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="text-sm font-light text-foreground/80 transition-colors hover:text-foreground"
-            >
-              {item.name}
-            </Link>
+            <div key={item.name} className="relative group">
+              <Link
+                href={item.href}
+                className="text-sm font-light text-foreground/80 transition-colors hover:text-foreground flex items-center gap-1"
+              >
+                {item.name}
+                {item.dropdown && (
+                  <ChevronDown className="h-3 w-3 transition-transform group-hover:rotate-180" />
+                )}
+              </Link>
+              
+              {/* Dropdown Menu */}
+              {item.dropdown && (
+                <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-black/10 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="py-2">
+                    {item.dropdown.map((dropdownItem) => (
+                      <Link
+                        key={dropdownItem.name}
+                        href={dropdownItem.href}
+                        className="block px-4 py-3 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="font-medium text-sm text-foreground">
+                          {dropdownItem.name}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {dropdownItem.description}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
           <Link
             href="https://calendly.com/bykevingeorge/30min?month=2025-05"
@@ -82,14 +118,29 @@ export function Header() {
         <div className="md:hidden bg-background border-b border-black/5">
           <div className="space-y-1 px-6 py-4">
             {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="block py-2 text-sm font-light text-foreground/80 hover:text-foreground transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
+              <div key={item.name} className="space-y-1">
+                <Link
+                  href={item.href}
+                  className="block py-2 text-sm font-light text-foreground/80 hover:text-foreground transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+                {item.dropdown && (
+                  <div className="pl-4 space-y-1">
+                    {item.dropdown.map((dropdownItem) => (
+                      <Link
+                        key={dropdownItem.name}
+                        href={dropdownItem.href}
+                        className="block py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {dropdownItem.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
             <Link
               href="https://calendly.com/bykevingeorge/30min?month=2025-05"

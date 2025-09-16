@@ -127,34 +127,6 @@ const liveCampaigns: LiveCampaign[] = [
     tags: ["Real Estate", "Education", "Finance", "High-Payout"],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/rodkhlief.avif"
   },
-  {
-    id: "campaign-4",
-    title: "Food & Culture Fusion",
-    client: "Taste Explorer",
-    industry: "Food/Travel",
-    description: "Share unique food experiences, cultural cuisine, and cooking tips. Perfect for food enthusiasts and cultural content creators.",
-    budget: 2500,
-    budgetSpent: 1500,
-    viewGoal: 2500000,
-    viewsGenerated: 1600000,
-    duration: "12 days",
-    timeRemaining: "2 days",
-    payoutStructure: "$1.00 per 1K views",
-    platforms: ["Instagram Reels", "TikTok", "YouTube Shorts"],
-    requirements: [
-      "Food/cooking content",
-      "0.5% minimum engagement rate",
-      "8+ seconds duration",
-      "Show recipe or process"
-    ],
-    status: "ending-soon",
-    participants: 28,
-    maxParticipants: 60,
-    featured: false,
-    difficulty: "beginner",
-    estimatedEarnings: { min: 10, max: 75 },
-    tags: ["Food", "Culture", "Creative", "Visual"]
-  }
 ]
 
 const campaignStats = [
@@ -167,13 +139,13 @@ const campaignStats = [
   {
     icon: Users,
     label: "Total Participants",
-    value: "105+",
+    value: "60+",
     description: "Clippers earning"
   },
   {
     icon: DollarSign,
     label: "Live Budgets",
-    value: "$18.5K",
+    value: "$9.5K",
     description: "Available payouts"
   },
   {
@@ -185,15 +157,15 @@ const campaignStats = [
 ]
 
 const difficultyColors = {
-  beginner: "bg-green-100 text-green-800 border-green-200",
-  intermediate: "bg-yellow-100 text-yellow-800 border-yellow-200", 
-  advanced: "bg-red-100 text-red-800 border-red-200"
+  beginner: "bg-slate-900 text-slate-100 border-slate-700",
+  intermediate: "bg-amber-600 text-white border-amber-500", 
+  advanced: "bg-rose-600 text-white border-rose-500"
 }
 
 const statusColors = {
-  active: "bg-blue-100 text-blue-800 border-blue-200",
-  "ending-soon": "bg-orange-100 text-orange-800 border-orange-200",
-  "launching-soon": "bg-purple-100 text-purple-800 border-purple-200"
+  active: "bg-emerald-600 text-white border-emerald-500",
+  "ending-soon": "bg-orange-600 text-white border-orange-500",
+  "launching-soon": "bg-violet-600 text-white border-violet-500"
 }
 
 export function LiveCampaigns() {
@@ -375,13 +347,16 @@ export function LiveCampaigns() {
                       </CardTitle>
                       <div className="flex items-center gap-2 mb-1">
                         {campaign.clientLogo && (
-                          <Image
-                            src={campaign.clientLogo}
-                            alt={campaign.client}
-                            width={24}
-                            height={24}
-                            className="rounded-sm object-cover"
-                          />
+                          <div className="flex-shrink-0">
+                            <Image
+                              src={campaign.clientLogo}
+                              alt={campaign.client}
+                              width={28}
+                              height={28}
+                              className="rounded-md object-cover ring-1 ring-black/10"
+                              unoptimized
+                            />
+                          </div>
                         )}
                         <p className="text-sm text-muted-foreground">
                           {campaign.client} • {campaign.industry}
@@ -464,7 +439,7 @@ export function LiveCampaigns() {
                   <div className="mb-4">
                     <div className="flex flex-wrap gap-1">
                       {campaign.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
+                        <Badge key={tag} className="text-xs bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200">
                           {tag}
                         </Badge>
                       ))}
