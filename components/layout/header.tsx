@@ -8,6 +8,8 @@ import { Menu, X } from "lucide-react"
 const navigation = [
   { name: "For Brands", href: "/brands" },
   { name: "Clippers", href: "/clippers" },
+  { name: "Live Activations", href: "/activations" },
+  { name: "Case Studies", href: "/case-studies" },
   { name: "About", href: "/about" },
   // { name: "Music Hub", href: "/music-hub" },
   // { name: "Community", href: "/community" },

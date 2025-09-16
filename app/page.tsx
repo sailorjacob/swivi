@@ -7,6 +7,7 @@ import { HowItWorks } from "@/components/marketing/how-it-works"
 import { FAQ } from "@/components/marketing/faq"
 import { Showcase } from "@/components/marketing/showcase"
 import { Founder } from "@/components/marketing/founder"
+import { CampaignsPreview } from "@/components/marketing/campaigns-preview"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 
@@ -18,6 +19,7 @@ export default function HomePage() {
         <Hero />
         <Founder />
         <CreatorViewsCalculator />
+        <CampaignsPreview />
         {/* <MusicHubPreview /> */}
         {/* <Testimonials /> */}
         <div className="space-y-8 md:space-y-16">
