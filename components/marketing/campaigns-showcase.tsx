@@ -53,6 +53,30 @@ const campaignResults: CampaignResult[] = [
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
   },
   {
+    id: "rod-khlief",
+    clientName: "Rod Khlief",
+    clientType: "Real Estate Educator",
+    description: "Real estate education and investment content targeting property investors and aspiring entrepreneurs",
+    budget: 750,
+    budgetStructure: "$1 per 1,000 views",
+    goal: "750,000 views",
+    timeline: "3 days",
+    clipsDistributed: 85,
+    clipsPaid: 68,
+    viewsGenerated: 1800000,
+    roi: 240,
+    exampleContent: "https://www.instagram.com/reel/example-rod-khlief/",
+    contentPlatform: "instagram",
+    status: "completed",
+    highlights: [
+      "240% ROI achieved",
+      "1.8M views generated",
+      "80% clip success rate",
+      "Real estate education focus"
+    ],
+    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/rodkhlief.avif"
+  },
+  {
     id: "shvfty",
     clientName: "Shvfty",
     clientType: "Twitch Streamer",
@@ -99,30 +123,6 @@ const campaignResults: CampaignResult[] = [
       "Exceeded goal by 224%"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png"
-  },
-  {
-    id: "rod-khlief",
-    clientName: "Rod Khlief",
-    clientType: "Real Estate Educator",
-    description: "Real estate education and investment content targeting property investors and aspiring entrepreneurs",
-    budget: 750,
-    budgetStructure: "$1 per 1,000 views",
-    goal: "750,000 views",
-    timeline: "3 days",
-    clipsDistributed: 85,
-    clipsPaid: 68,
-    viewsGenerated: 1800000,
-    roi: 240,
-    exampleContent: "https://www.instagram.com/reel/example-rod-khlief/",
-    contentPlatform: "instagram",
-    status: "completed",
-    highlights: [
-      "240% ROI achieved",
-      "1.8M views generated",
-      "80% clip success rate",
-      "Real estate education focus"
-    ],
-    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/rodkhlief.avif"
   }
 ]
 
