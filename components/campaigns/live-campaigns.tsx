@@ -127,25 +127,54 @@ const liveCampaigns: LiveCampaign[] = [
     tags: ["Real Estate", "Education", "Finance", "High-Payout"],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/rodkhlief.avif"
   },
+  {
+    id: "campaign-4",
+    title: "Shvfty Streaming Highlights",
+    client: "Shvfty",
+    industry: "Gaming/Streaming",
+    description: "Create viral moments from Twitch streams featuring epic gameplay, funny reactions, and community interactions. Perfect for gaming content creators.",
+    budget: 2000,
+    budgetSpent: 500,
+    viewGoal: 2200000,
+    viewsGenerated: 650000,
+    duration: "10 days",
+    timeRemaining: "7 days",
+    payoutStructure: "$1.20 per 1K views",
+    platforms: ["TikTok", "YouTube Shorts", "Instagram Reels"],
+    requirements: [
+      "Gaming/streaming content focus",
+      "0.5% minimum engagement rate",
+      "8+ seconds duration",
+      "Include #Shvfty hashtag"
+    ],
+    status: "active",
+    participants: 18,
+    maxParticipants: 50,
+    featured: false,
+    difficulty: "beginner",
+    estimatedEarnings: { min: 15, max: 85 },
+    tags: ["Gaming", "Streaming", "Highlights", "Community"],
+    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/shvty.jpeg"
+  }
 ]
 
 const campaignStats = [
   {
     icon: Target,
     label: "Active Activations",
-    value: "3",
+    value: "4",
     description: "Available now"
   },
   {
     icon: Users,
     label: "Total Participants",
-    value: "60+",
+    value: "78+",
     description: "Clippers earning"
   },
   {
     icon: DollarSign,
     label: "Live Budgets",
-    value: "$9.5K",
+    value: "$11.5K",
     description: "Available payouts"
   },
   {
@@ -157,15 +186,15 @@ const campaignStats = [
 ]
 
 const difficultyColors = {
-  beginner: "bg-slate-900 text-slate-100 border-slate-700",
-  intermediate: "bg-amber-600 text-white border-amber-500", 
-  advanced: "bg-rose-600 text-white border-rose-500"
+  beginner: "bg-white text-black border-gray-300",
+  intermediate: "bg-gray-800 text-white border-gray-700", 
+  advanced: "bg-black text-white border-gray-800"
 }
 
 const statusColors = {
-  active: "bg-emerald-600 text-white border-emerald-500",
-  "ending-soon": "bg-orange-600 text-white border-orange-500",
-  "launching-soon": "bg-violet-600 text-white border-violet-500"
+  active: "bg-black text-white border-gray-800",
+  "ending-soon": "bg-gray-700 text-white border-gray-600",
+  "launching-soon": "bg-white text-black border-gray-300"
 }
 
 export function LiveCampaigns() {
@@ -439,7 +468,7 @@ export function LiveCampaigns() {
                   <div className="mb-4">
                     <div className="flex flex-wrap gap-1">
                       {campaign.tags.map((tag) => (
-                        <Badge key={tag} className="text-xs bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200">
+                        <Badge key={tag} className="text-xs bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200">
                           {tag}
                         </Badge>
                       ))}

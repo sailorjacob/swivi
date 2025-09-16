@@ -1,10 +1,11 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ExternalLink, TrendingUp, Users, DollarSign, Clock, Play, Target, Award } from "lucide-react"
+import { ExternalLink, TrendingUp, Users, DollarSign, Clock, Play, Target, Award, Eye } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import Image from "next/image"
 
 interface CampaignResult {
   id: string
@@ -23,6 +24,7 @@ interface CampaignResult {
   contentPlatform: "instagram" | "tiktok" | "youtube"
   status: "completed" | "ongoing"
   highlights: string[]
+  clientLogo?: string
 }
 
 const campaignResults: CampaignResult[] = [
@@ -47,7 +49,8 @@ const campaignResults: CampaignResult[] = [
       "Completed in just 2 days",
       "81.7% clip success rate",
       "6.1M views on $1K budget"
-    ]
+    ],
+    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
   },
   {
     id: "shvfty",
@@ -70,7 +73,8 @@ const campaignResults: CampaignResult[] = [
       "258 clips distributed",
       "60% clip success rate",
       "1.9M views generated"
-    ]
+    ],
+    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/shvty.jpeg"
   },
   {
     id: "sportz-playz",
@@ -93,7 +97,8 @@ const campaignResults: CampaignResult[] = [
       "8.1M views on $250 budget",
       "324x return on investment",
       "Exceeded goal by 224%"
-    ]
+    ],
+    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png"
   }
 ]
 
@@ -256,9 +261,21 @@ export function CampaignsShowcase() {
             >
               <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="border-b border-black/5">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 mb-3">
+                        {campaign.clientLogo && (
+                          <div className="flex-shrink-0">
+                            <Image
+                              src={campaign.clientLogo}
+                              alt={campaign.clientName}
+                              width={80}
+                              height={80}
+                              className="rounded-lg object-cover ring-1 ring-black/10"
+                              unoptimized
+                            />
+                          </div>
+                        )}
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-1">
                         <CardTitle className="text-xl font-normal">
                           {campaign.clientName}
                         </CardTitle>
@@ -270,14 +287,6 @@ export function CampaignsShowcase() {
                       <p className="text-sm text-muted-foreground">
                         {campaign.description}
                       </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-light text-green-600 mb-1">
-                        {campaign.roi.toLocaleString()}% ROI
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Return on Investment
-                      </div>
                     </div>
                   </div>
                 </CardHeader>
@@ -347,6 +356,12 @@ export function CampaignsShowcase() {
                             ${(campaign.budget / (campaign.viewsGenerated / 1000)).toFixed(2)}/1K views
                           </span>
                         </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">ROI:</span>
+                          <span className="text-sm font-medium text-green-600">
+                            {campaign.roi.toLocaleString()}%
+                          </span>
+                        </div>
                       </div>
                     </div>
 
@@ -365,7 +380,7 @@ export function CampaignsShowcase() {
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-black/5">
+                  <div className="pt-4 border-t border-black/5 flex items-center gap-4">
                     <Link
                       href={campaign.exampleContent}
                       target="_blank"
@@ -376,6 +391,15 @@ export function CampaignsShowcase() {
                       View Example Content
                       <ExternalLink className="h-3 w-3" />
                     </Link>
+                    {campaign.id === "owning-manhattan" && (
+                      <Link
+                        href="/case-studies/owning-manhattan"
+                        className="inline-flex items-center gap-2 text-sm font-medium bg-foreground text-background px-4 py-2 rounded-full hover:bg-foreground/90 transition-colors"
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Full Gallery
+                      </Link>
+                    )}
                   </div>
                 </CardContent>
               </Card>

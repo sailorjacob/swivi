@@ -19,7 +19,7 @@ export default function HomePage() {
         <Hero />
         <Founder />
         <CreatorViewsCalculator />
-        <CampaignsPreview />
+        {/* <CampaignsPreview /> */}
         {/* <MusicHubPreview /> */}
         {/* <Testimonials /> */}
         <div className="space-y-8 md:space-y-16">
