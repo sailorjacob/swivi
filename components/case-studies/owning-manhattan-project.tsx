@@ -175,9 +175,9 @@ export default function OwningManhattanProject() {
             <Image
               src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
               alt="Owning Manhattan"
-              width={120}
-              height={120}
-              className="rounded-xl object-cover ring-2 ring-black/10"
+              width={400}
+              height={400}
+              className="rounded-2xl object-cover ring-2 ring-black/10 shadow-lg"
               unoptimized
             />
           </div>
@@ -191,14 +191,49 @@ export default function OwningManhattanProject() {
           </div>
         </motion.div>
 
-        <motion.p variants={itemVariants} className="text-lg text-muted-foreground max-w-3xl">
+        <motion.p variants={itemVariants} className="text-lg text-muted-foreground max-w-3xl mx-auto text-center mb-8">
           Netflix series promotion campaign targeting real estate and lifestyle audiences. 
           Our clipper network created viral content showcasing the luxury real estate and drama 
           from Netflix's hit series, achieving exceptional reach and engagement.
         </motion.p>
 
+        {/* Campaign Results Summary */}
+        <motion.section
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="bg-gray-50 rounded-xl p-6 mt-8 mb-8 max-w-6xl mx-auto"
+        >
+          <motion.h3 variants={itemVariants} className="text-lg font-light mb-4">
+            Campaign Impact
+          </motion.h3>
+          <motion.div variants={itemVariants} className="grid md:grid-cols-3 gap-4">
+            <div>
+              <h4 className="font-medium mb-2">Reach & Engagement</h4>
+              <p className="text-sm text-muted-foreground">
+                Generated 6.1M+ views across all platforms with high engagement rates, 
+                significantly exceeding the initial goal of 1M views.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2">Content Diversity</h4>
+              <p className="text-sm text-muted-foreground">
+                Created content across YouTube, TikTok, and Instagram, ensuring 
+                maximum platform optimization and audience reach.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2">ROI Achievement</h4>
+              <p className="text-sm text-muted-foreground">
+                Delivered exceptional 610% return on investment within just 2 days, 
+                demonstrating the power of our clipper network.
+              </p>
+            </div>
+          </motion.div>
+        </motion.section>
+
         {/* Campaign Stats */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8 mb-8">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8 mb-8 max-w-6xl mx-auto">
           <div className="text-center">
             <div className="text-2xl font-light mb-1">49</div>
             <div className="text-sm text-muted-foreground">Clips Created</div>
@@ -225,11 +260,8 @@ export default function OwningManhattanProject() {
         animate="visible"
         className="mb-12"
       >
-        <motion.h2 variants={itemVariants} className="text-2xl font-light mb-6">
-          Campaign Content Gallery
-        </motion.h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 max-w-6xl mx-auto">
           <AnimatePresence>
             {contentItems.slice(0, visibleContent).map((item, index) => (
               <motion.div
@@ -259,15 +291,29 @@ export default function OwningManhattanProject() {
                       
                       {/* Instagram Thumbnail */}
                       {item.platform === "instagram" && (
-                        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                          <div className="text-6xl opacity-20">📸</div>
+                        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                          <div className="relative">
+                            <div className="w-16 h-16 bg-white/20 rounded-xl backdrop-blur-sm flex items-center justify-center">
+                              <div className="text-3xl">📸</div>
+                            </div>
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white flex items-center justify-center">
+                              <div className="text-xs text-white">IG</div>
+                            </div>
+                          </div>
                         </div>
                       )}
 
                       {/* TikTok Thumbnail */}
                       {item.platform === "tiktok" && (
                         <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
-                          <div className="text-6xl opacity-20">🎵</div>
+                          <div className="relative">
+                            <div className="w-16 h-16 bg-white/10 rounded-xl backdrop-blur-sm flex items-center justify-center">
+                              <div className="text-3xl">🎵</div>
+                            </div>
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full border-2 border-white flex items-center justify-center">
+                              <div className="text-xs text-white font-bold">T</div>
+                            </div>
+                          </div>
                         </div>
                       )}
                       
@@ -362,40 +408,6 @@ export default function OwningManhattanProject() {
         </motion.div>
       </motion.section>
 
-      {/* Campaign Results Summary */}
-      <motion.section
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="bg-gray-50 rounded-xl p-8 mt-12"
-      >
-        <motion.h3 variants={itemVariants} className="text-xl font-light mb-6">
-          Campaign Impact
-        </motion.h3>
-        <motion.div variants={itemVariants} className="grid md:grid-cols-3 gap-6">
-          <div>
-            <h4 className="font-medium mb-2">Reach & Engagement</h4>
-            <p className="text-sm text-muted-foreground">
-              Generated 6.1M+ views across all platforms with high engagement rates, 
-              significantly exceeding the initial goal of 1M views.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-medium mb-2">Content Diversity</h4>
-            <p className="text-sm text-muted-foreground">
-              Created content across YouTube, TikTok, and Instagram, ensuring 
-              maximum platform optimization and audience reach.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-medium mb-2">ROI Achievement</h4>
-            <p className="text-sm text-muted-foreground">
-              Delivered exceptional 610% return on investment within just 2 days, 
-              demonstrating the power of our clipper network.
-            </p>
-          </div>
-        </motion.div>
-      </motion.section>
     </div>
   )
 }

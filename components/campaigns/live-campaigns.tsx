@@ -186,15 +186,15 @@ const campaignStats = [
 ]
 
 const difficultyColors = {
-  beginner: "bg-white text-black border-gray-300",
-  intermediate: "bg-gray-800 text-white border-gray-700", 
-  advanced: "bg-black text-white border-gray-800"
+  beginner: "bg-green-100 text-green-800 border-green-200",
+  intermediate: "bg-yellow-100 text-yellow-800 border-yellow-200", 
+  advanced: "bg-red-100 text-red-800 border-red-200"
 }
 
 const statusColors = {
-  active: "bg-black text-white border-gray-800",
-  "ending-soon": "bg-gray-700 text-white border-gray-600",
-  "launching-soon": "bg-white text-black border-gray-300"
+  active: "bg-green-100 text-green-800 border-green-200",
+  "ending-soon": "bg-orange-100 text-orange-800 border-orange-200",
+  "launching-soon": "bg-purple-100 text-purple-800 border-purple-200"
 }
 
 export function LiveCampaigns() {
@@ -464,16 +464,6 @@ export function LiveCampaigns() {
                     </div>
                   </div>
 
-                  {/* Tags */}
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-1">
-                      {campaign.tags.map((tag) => (
-                        <Badge key={tag} className="text-xs bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
 
                   {/* Actions */}
                   <div className="flex gap-2">
