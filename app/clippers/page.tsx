@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { ArrowRight, TrendingUp, DollarSign, Users, BarChart3 } from "lucide-react"
+import { ArrowRight, TrendingUp, DollarSign, Users, BarChart3, HelpCircle, BookOpen } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 
@@ -272,6 +272,101 @@ export default function ClippersPage() {
                   </p>
                 </div>
               </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Preview Section */}
+        <section className="py-20 md:py-32 border-t border-black/5">
+          <div className="max-width-wrapper section-padding">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
+                  Frequently Asked Questions
+                </h2>
+                <p className="text-muted-foreground">
+                  Get answers to common questions about joining Swivi Clippers.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 mb-12">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  viewport={{ once: true }}
+                  className="border border-black/10 rounded-lg p-6 hover:border-black/20 transition-colors"
+                >
+                  <h3 className="font-normal text-lg mb-3">How much can I earn?</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Each campaign has different payouts. Earn $20-100+ per approved clip. 
+                    Top performers earn $2,000+ monthly. Check specific campaign details for exact rates.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  viewport={{ once: true }}
+                  className="border border-black/10 rounded-lg p-6 hover:border-black/20 transition-colors"
+                >
+                  <h3 className="font-normal text-lg mb-3">What's the minimum requirement?</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    No minimum follower count needed. All clips must have a minimum of 0.5% 
+                    engagement rate and be longer than 7 seconds to qualify for payout.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  viewport={{ once: true }}
+                  className="border border-black/10 rounded-lg p-6 hover:border-black/20 transition-colors"
+                >
+                  <h3 className="font-normal text-lg mb-3">When do I get paid?</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Payments are sent within one week after campaigns finish, often quicker. 
+                    We pay all clippers using PayPal.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  viewport={{ once: true }}
+                  className="border border-black/10 rounded-lg p-6 hover:border-black/20 transition-colors"
+                >
+                  <h3 className="font-normal text-lg mb-3">What platforms are supported?</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Currently TikTok, YouTube Shorts, Instagram Reels, and X (Twitter). 
+                    You can connect multiple accounts with no limits.
+                  </p>
+                </motion.div>
+              </div>
+
+              <div className="text-center space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link
+                    href="/clippers/onboarding"
+                    className="inline-flex items-center text-sm font-normal bg-foreground text-background px-6 py-3 rounded-full hover:bg-foreground/90 transition-all duration-300 group"
+                  >
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    Start Onboarding
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link
+                    href="/clippers/faq"
+                    className="inline-flex items-center text-sm font-normal border border-black/20 px-6 py-3 rounded-full hover:bg-black/5 transition-all duration-300 group"
+                  >
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    View All FAQs
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
