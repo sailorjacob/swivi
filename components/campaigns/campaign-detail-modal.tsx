@@ -4,7 +4,6 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Clock, DollarSign, Users, Target, ExternalLink, Play, CheckCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
@@ -95,20 +94,6 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
               </CardHeader>
 
               <CardContent className="p-6">
-                {/* Status and Tags */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  <Badge variant="outline" className="text-xs">
-                    {campaign.status.replace('-', ' ')}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {campaign.difficulty}
-                  </Badge>
-                  {campaign.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
 
                 {/* Description */}
                 <div className="mb-6">
@@ -198,17 +183,6 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                   </div>
                 </div>
 
-                {/* Platforms */}
-                <div className="mb-6">
-                  <h4 className="font-medium mb-3">Supported Platforms</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {campaign.platforms.map((platform) => (
-                      <Badge key={platform} variant="outline">
-                        {platform}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
 
                 {/* Requirements */}
                 <div className="mb-6">

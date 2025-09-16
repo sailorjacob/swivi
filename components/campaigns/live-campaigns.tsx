@@ -4,7 +4,6 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Clock, DollarSign, Users, TrendingUp, Eye, Filter, Search, Play, ExternalLink, Calendar, Target, Globe } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -185,17 +184,6 @@ const campaignStats = [
   }
 ]
 
-const difficultyColors = {
-  beginner: "bg-green-100 text-green-800 border-green-200",
-  intermediate: "bg-yellow-100 text-yellow-800 border-yellow-200", 
-  advanced: "bg-red-100 text-red-800 border-red-200"
-}
-
-const statusColors = {
-  active: "bg-green-100 text-green-800 border-green-200",
-  "ending-soon": "bg-orange-100 text-orange-800 border-orange-200",
-  "launching-soon": "bg-purple-100 text-purple-800 border-purple-200"
-}
 
 export function LiveCampaigns() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -348,29 +336,10 @@ export function LiveCampaigns() {
               whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
             >
-              <Card className={`h-full hover:shadow-lg transition-shadow duration-300 ${
-                campaign.featured ? 'ring-2 ring-blue-200 bg-blue-50/30' : ''
-              }`}>
+              <Card className="h-full hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        {campaign.featured && (
-                          <Badge className="bg-blue-600 text-white text-xs">Featured</Badge>
-                        )}
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${statusColors[campaign.status]}`}
-                        >
-                          {campaign.status.replace('-', ' ')}
-                        </Badge>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${difficultyColors[campaign.difficulty]}`}
-                        >
-                          {campaign.difficulty}
-                        </Badge>
-                      </div>
                       <CardTitle className="text-xl font-normal mb-2">
                         {campaign.title}
                       </CardTitle>
@@ -452,17 +421,6 @@ export function LiveCampaigns() {
                     </div>
                   </div>
 
-                  {/* Platforms */}
-                  <div className="mb-4">
-                    <p className="text-xs text-muted-foreground mb-2">Platforms:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {campaign.platforms.map((platform) => (
-                        <Badge key={platform} variant="outline" className="text-xs">
-                          {platform}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
 
 
                   {/* Actions */}
