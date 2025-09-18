@@ -135,7 +135,6 @@ function StatCard({ stat }: { stat: typeof stats[0] }) {
               <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
               <p className={`text-sm mt-1 ${
                 stat.changeType === 'positive' ? 'text-green-400' :
-                stat.changeType === 'negative' ? 'text-red-400' :
                 'text-neutral-400'
               }`}>
                 {stat.change}
