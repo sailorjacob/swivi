@@ -141,7 +141,7 @@ function ProfileForm() {
             className="bg-gray-800 border-gray-700 text-white"
           />
           {errors.displayName && (
-            <p className="text-red-400 text-sm mt-1">{errors.displayName.message}</p>
+            <p className="text-red-400 text-sm mt-1">{errors.displayName.message || 'This field is required'}</p>
           )}
         </div>
 
@@ -154,7 +154,7 @@ function ProfileForm() {
             rows={3}
           />
           {errors.bio && (
-            <p className="text-red-400 text-sm mt-1">{errors.bio.message}</p>
+            <p className="text-red-400 text-sm mt-1">{errors.bio.message || 'This field is required'}</p>
           )}
         </div>
 
@@ -167,7 +167,7 @@ function ProfileForm() {
             className="bg-gray-800 border-gray-700 text-white"
           />
           {errors.paypalEmail && (
-            <p className="text-red-400 text-sm mt-1">{errors.paypalEmail.message}</p>
+            <p className="text-red-400 text-sm mt-1">{errors.paypalEmail.message || 'This field is required'}</p>
           )}
         </div>
       </div>
@@ -211,7 +211,7 @@ function SubmitClipForm() {
           className="bg-gray-800 border-gray-700 text-white"
         />
         {errors.url && (
-          <p className="text-red-400 text-sm mt-1">{errors.url.message}</p>
+          <p className="text-red-400 text-sm mt-1">{errors.url.message || 'This field is required'}</p>
         )}
       </div>
 
@@ -228,7 +228,7 @@ function SubmitClipForm() {
           <option value="twitter">X (Twitter)</option>
         </select>
         {errors.platform && (
-          <p className="text-red-400 text-sm mt-1">{errors.platform.message}</p>
+          <p className="text-red-400 text-sm mt-1">{errors.platform.message || 'This field is required'}</p>
         )}
       </div>
 
@@ -246,7 +246,7 @@ function SubmitClipForm() {
           ))}
         </select>
         {errors.campaignId && (
-          <p className="text-red-400 text-sm mt-1">{errors.campaignId.message}</p>
+          <p className="text-red-400 text-sm mt-1">{errors.campaignId.message || 'This field is required'}</p>
         )}
       </div>
 
@@ -348,9 +348,9 @@ function SocialAccountsForm() {
                   <option value="instagram">Instagram</option>
                   <option value="twitter">X (Twitter)</option>
                 </select>
-                {errors.platform && (
-                  <p className="text-red-400 text-sm mt-1">{errors.platform.message}</p>
-                )}
+                  {errors.platform && (
+                    <p className="text-red-400 text-sm mt-1">{errors.platform.message || 'This field is required'}</p>
+                  )}
               </div>
 
               <div>
@@ -360,9 +360,9 @@ function SocialAccountsForm() {
                   placeholder="@username"
                   className="bg-gray-800 border-gray-700 text-white"
                 />
-                {errors.handle && (
-                  <p className="text-red-400 text-sm mt-1">{errors.handle.message}</p>
-                )}
+                  {errors.handle && (
+                    <p className="text-red-400 text-sm mt-1">{errors.handle.message || 'This field is required'}</p>
+                  )}
               </div>
 
               <div className="flex space-x-2">
