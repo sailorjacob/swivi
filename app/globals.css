@@ -109,10 +109,13 @@ html {
   animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Minimal focus styles */
+/* Remove focus outlines */
 *:focus {
-  outline: 1px solid currentColor;
-  outline-offset: 2px;
+  outline: none;
+}
+
+*:focus-visible {
+  outline: none;
 }
 
 /* Typography refinements */

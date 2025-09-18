@@ -17,7 +17,8 @@ const navigation = [
     name: "Clippers", 
     href: "/clippers",
     dropdown: [
-      { name: "Live Activations", href: "/activations", description: "Current earning opportunities" }
+      { name: "Live Activations", href: "/activations", description: "Current earning opportunities" },
+      { name: "Platform Demo", href: "/clippers-demo", description: "Try the complete clipper experience" }
     ]
   },
   { name: "About", href: "/about" },

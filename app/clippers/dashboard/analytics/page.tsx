@@ -161,21 +161,21 @@ function StatCard({ title, value, change, changeType, icon: Icon, color }: {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="bg-neutral-900 border-gray-800">
+      <Card className="bg-card border-border">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm font-medium">{title}</p>
+              <p className="text-muted-foreground text-sm font-medium">{title}</p>
               <p className="text-2xl font-bold text-white mt-1">{value}</p>
               <p className={`text-sm mt-1 ${
-                changeType === 'positive' ? 'text-green-400' :
+                changeType === 'positive' ? 'text-foreground' :
                 changeType === 'negative' ? 'text-red-400' :
-                'text-gray-400'
+                'text-muted-foreground'
               }`}>
                 {change}
               </p>
             </div>
-            <div className={`p-3 rounded-full bg-gray-800 ${color}`}>
+            <div className={`p-3 rounded-full bg-muted ${color}`}>
               <Icon className="w-6 h-6" />
             </div>
           </div>
@@ -198,28 +198,28 @@ function ActivityItem({ activity }: { activity: typeof recentActivity[0] }) {
 
   const getActivityColor = (type: string) => {
     switch (type) {
-      case 'clip_approved': return 'text-green-400'
-      case 'payment_received': return 'text-green-400'
+      case 'clip_approved': return 'text-foreground'
+      case 'payment_received': return 'text-foreground'
       case 'clip_submitted': return 'text-white'
       case 'campaign_joined': return 'text-purple-400'
-      default: return 'text-gray-400'
+      default: return 'text-muted-foreground'
     }
   }
 
   return (
-    <div className="flex items-center space-x-4 py-3 border-b border-gray-800 last:border-b-0">
+    <div className="flex items-center space-x-4 py-3 border-b border-border last:border-b-0">
       <div className={`text-lg ${getActivityColor(activity.type)}`}>
         {getActivityIcon(activity.type)}
       </div>
       <div className="flex-1">
         <p className="text-white font-medium">{activity.title}</p>
-        <p className="text-gray-400 text-sm">{activity.date}</p>
+        <p className="text-muted-foreground text-sm">{activity.date}</p>
       </div>
       {activity.amount > 0 && (
         <div className="text-right">
-          <p className="text-green-400 font-medium">${activity.amount}</p>
+          <p className="text-foreground font-medium">${activity.amount}</p>
           {activity.views > 0 && (
-            <p className="text-gray-400 text-sm">{activity.views.toLocaleString()} views</p>
+            <p className="text-muted-foreground text-sm">{activity.views.toLocaleString()} views</p>
           )}
         </div>
       )}
@@ -236,25 +236,25 @@ export default function AnalyticsPage() {
       legend: {
         position: 'top' as const,
         labels: {
-          color: '#ffffff',
+          color: 'hsl(var(--foreground))',
         },
       },
     },
     scales: {
       x: {
         ticks: {
-          color: '#9ca3af',
+          color: 'hsl(var(--muted-foreground))',
         },
         grid: {
-          color: '#374151',
+          color: 'hsl(var(--border))',
         },
       },
       y: {
         ticks: {
-          color: '#9ca3af',
+          color: 'hsl(var(--muted-foreground))',
         },
         grid: {
-          color: '#374151',
+          color: 'hsl(var(--border))',
         },
       },
     },
@@ -266,7 +266,7 @@ export default function AnalyticsPage() {
       legend: {
         position: 'bottom' as const,
         labels: {
-          color: '#ffffff',
+          color: 'hsl(var(--foreground))',
           padding: 20,
         },
       },
@@ -279,21 +279,21 @@ export default function AnalyticsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-light text-white mb-2">Analytics</h1>
-          <p className="text-gray-400">Track your performance and earnings over time.</p>
+          <p className="text-muted-foreground">Track your performance and earnings over time.</p>
         </div>
         <div className="flex items-center space-x-4">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32 bg-gray-800 border-gray-700 text-white">
+            <SelectTrigger className="w-32 bg-muted border-border text-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectContent className="bg-muted border-border">
               <SelectItem value="7d" className="text-white">7 days</SelectItem>
               <SelectItem value="30d" className="text-white">30 days</SelectItem>
               <SelectItem value="90d" className="text-white">90 days</SelectItem>
               <SelectItem value="1y" className="text-white">1 year</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800">
+          <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted">
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>
@@ -308,7 +308,7 @@ export default function AnalyticsPage() {
           change="+12.5% from last month"
           changeType="positive"
           icon={DollarSign}
-          color="text-green-400"
+          color="text-foreground"
         />
         <StatCard
           title="Total Views"
@@ -338,20 +338,20 @@ export default function AnalyticsPage() {
 
       {/* Charts Section */}
       <Tabs defaultValue="earnings" className="space-y-6">
-        <TabsList className="bg-gray-800 border border-gray-700">
-          <TabsTrigger value="earnings" className="text-gray-300 data-[state=active]:text-white">
+        <TabsList className="bg-background border-b border-border rounded-none h-auto p-0">
+          <TabsTrigger value="earnings" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent text-muted-foreground data-[state=active]:text-foreground px-4 py-3 font-medium transition-all ">
             Earnings
           </TabsTrigger>
-          <TabsTrigger value="views" className="text-gray-300 data-[state=active]:text-white">
+          <TabsTrigger value="views" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent text-muted-foreground data-[state=active]:text-foreground px-4 py-3 font-medium transition-all ">
             Views
           </TabsTrigger>
-          <TabsTrigger value="platforms" className="text-gray-300 data-[state=active]:text-white">
+          <TabsTrigger value="platforms" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent text-muted-foreground data-[state=active]:text-foreground px-4 py-3 font-medium transition-all ">
             Platforms
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="earnings" className="space-y-6">
-          <Card className="bg-neutral-900 border-gray-800">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-white">Earnings Over Time</CardTitle>
             </CardHeader>
@@ -364,7 +364,7 @@ export default function AnalyticsPage() {
         </TabsContent>
 
         <TabsContent value="views" className="space-y-6">
-          <Card className="bg-neutral-900 border-gray-800">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-white">Views Over Time</CardTitle>
             </CardHeader>
@@ -378,7 +378,7 @@ export default function AnalyticsPage() {
 
         <TabsContent value="platforms" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-neutral-900 border-gray-800">
+            <Card className="bg-card border-border">
               <CardHeader>
                 <CardTitle className="text-white">Earnings by Platform</CardTitle>
               </CardHeader>
@@ -389,7 +389,7 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-neutral-900 border-gray-800">
+            <Card className="bg-card border-border">
               <CardHeader>
                 <CardTitle className="text-white">Platform Performance</CardTitle>
               </CardHeader>
@@ -411,7 +411,7 @@ export default function AnalyticsPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-white font-medium">${platform.earnings}</p>
-                        <p className="text-gray-400 text-sm">{platform.views.toLocaleString()} views</p>
+                        <p className="text-muted-foreground text-sm">{platform.views.toLocaleString()} views</p>
                       </div>
                     </div>
                   ))}
@@ -425,26 +425,26 @@ export default function AnalyticsPage() {
       {/* Bottom Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Top Campaigns */}
-        <Card className="bg-neutral-900 border-gray-800">
+        <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-white">Top Performing Campaigns</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {topCampaigns.map((campaign, index) => (
-                <div key={campaign.name} className="flex items-center justify-between p-3 border border-gray-800 rounded-lg">
+                <div key={campaign.name} className="flex items-center justify-between p-3 border border-border rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                    <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center text-white text-sm font-bold">
                       {index + 1}
                     </div>
                     <div>
                       <p className="text-white font-medium">{campaign.name}</p>
-                      <p className="text-gray-400 text-sm">{campaign.clips} clips</p>
+                      <p className="text-muted-foreground text-sm">{campaign.clips} clips</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-green-400 font-medium">${campaign.earnings}</p>
-                    <p className="text-gray-400 text-sm">{campaign.views.toLocaleString()} views</p>
+                    <p className="text-foreground font-medium">${campaign.earnings}</p>
+                    <p className="text-muted-foreground text-sm">{campaign.views.toLocaleString()} views</p>
                   </div>
                 </div>
               ))}
@@ -453,12 +453,12 @@ export default function AnalyticsPage() {
         </Card>
 
         {/* Recent Activity */}
-        <Card className="bg-neutral-900 border-gray-800">
+        <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-white">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-border">
               {recentActivity.map((activity, index) => (
                 <ActivityItem key={index} activity={activity} />
               ))}

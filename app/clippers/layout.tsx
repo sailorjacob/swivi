@@ -41,9 +41,9 @@ export default function ClippersLayout({
             toastOptions={{
               duration: 5000,
               style: {
-                background: "#1f2937",
-                color: "#ffffff",
-                border: "1px solid #374151",
+                background: "hsl(var(--background))",
+                color: "hsl(var(--foreground))",
+                border: "1px solid hsl(var(--border))",
               },
             }}
           />

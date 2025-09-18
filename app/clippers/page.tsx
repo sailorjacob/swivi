@@ -358,7 +358,7 @@ export default function ClippersPage() {
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                   <Link
-                    href="/clippers/faq"
+                    href="/clippers/dashboard/faq"
                     className="inline-flex items-center text-sm font-normal border border-black/20 px-6 py-3 rounded-full hover:bg-black/5 transition-all duration-300 group"
                   >
                     <HelpCircle className="mr-2 h-4 w-4" />

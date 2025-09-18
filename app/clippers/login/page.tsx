@@ -44,7 +44,7 @@ export default function ClippersLoginPage() {
         <div className="mb-8">
           <Link
             href="/"
-            className="inline-flex items-center text-sm text-gray-400 hover:text-white transition-colors"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Swivi
@@ -56,7 +56,7 @@ export default function ClippersLoginPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="bg-neutral-900 border border-gray-700 backdrop-blur-sm shadow-2xl text-white">
+          <Card className="bg-card border border-border backdrop-blur-sm shadow-2xl text-white">
             <CardHeader className="text-center pb-6">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -69,7 +69,7 @@ export default function ClippersLoginPage() {
               <CardTitle className="text-2xl font-light text-white mb-2">
                 Welcome to Swivi Clippers
               </CardTitle>
-              <p className="text-gray-400 text-sm leading-relaxed max-w-sm mx-auto">
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
                 Join an exclusive community of content creators earning competitive payouts for viral clips
               </p>
             </CardHeader>
@@ -78,7 +78,7 @@ export default function ClippersLoginPage() {
               <Button
                 onClick={() => handleSignIn("discord")}
                 disabled={isLoading !== null}
-                className="w-full bg-gray-800 hover:bg-gray-750 text-white border border-gray-600 h-12 transition-all duration-200 group shadow-sm hover:shadow-md"
+                className="w-full bg-muted hover:bg-gray-750 text-white border border-gray-600 h-12 transition-all duration-200 group shadow-sm hover:shadow-md"
               >
                 {isLoading === "discord" ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-3" />
@@ -90,10 +90,10 @@ export default function ClippersLoginPage() {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-700"></div>
+                  <div className="w-full border-t border-border"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-neutral-900 text-gray-400">or</span>
+                  <span className="px-2 bg-card text-muted-foreground">or</span>
                 </div>
               </div>
 
@@ -101,7 +101,7 @@ export default function ClippersLoginPage() {
                 onClick={() => handleSignIn("google")}
                 disabled={isLoading !== null}
                 variant="outline"
-                className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white h-12 transition-all duration-200 group hover:shadow-sm"
+                className="w-full border-gray-600 text-muted-foreground hover:bg-muted hover:text-white h-12 transition-all duration-200 group hover:shadow-sm"
               >
                 {isLoading === "google" ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-3" />
@@ -111,10 +111,10 @@ export default function ClippersLoginPage() {
                 <span className="font-medium">Continue with Google</span>
               </Button>
 
-              <div className="text-center mt-6 pt-4 border-t border-gray-700/50">
+              <div className="text-center mt-6 pt-4 border-t border-border/50">
                 <p className="text-xs text-gray-500 leading-relaxed">
                   By continuing, you agree to our{" "}
-                  <Link href="/clippers/rules" className="text-green-400 hover:text-green-300 underline underline-offset-2 transition-colors">
+                  <Link href="/clippers/rules" className="text-foreground hover:text-green-300 underline underline-offset-2 transition-colors">
                     rules and guidelines
                   </Link>
                 </p>
@@ -130,28 +130,28 @@ export default function ClippersLoginPage() {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4"
         >
-          <div className="group text-center p-4 bg-neutral-900 rounded-lg border border-gray-700 hover:border-white/20 transition-all duration-300 hover:shadow-lg hover:shadow-white/5">
+          <div className="group text-center p-4 bg-card rounded-lg border border-border hover:border-white/20 transition-all duration-300 hover:shadow-lg hover:shadow-white/5">
             <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-white/20 transition-colors">
               <Zap className="w-5 h-5 text-white" />
             </div>
             <div className="text-white text-xl font-bold mb-1">$20-100+</div>
-            <div className="text-gray-400 text-sm">Per approved clip</div>
+            <div className="text-muted-foreground text-sm">Per approved clip</div>
           </div>
 
-          <div className="group text-center p-4 bg-neutral-900 rounded-lg border border-gray-700 hover:border-white/20 transition-all duration-300 hover:shadow-lg hover:shadow-white/5">
+          <div className="group text-center p-4 bg-card rounded-lg border border-border hover:border-white/20 transition-all duration-300 hover:shadow-lg hover:shadow-white/5">
             <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-white/20 transition-colors">
               <Users className="w-5 h-5 text-white" />
             </div>
             <div className="text-white text-xl font-bold mb-1">87+</div>
-            <div className="text-gray-400 text-sm">Active Clippers</div>
+            <div className="text-muted-foreground text-sm">Active Clippers</div>
           </div>
 
-          <div className="group text-center p-4 bg-neutral-900 rounded-lg border border-gray-700 hover:border-white/20 transition-all duration-300 hover:shadow-lg hover:shadow-white/5">
+          <div className="group text-center p-4 bg-card rounded-lg border border-border hover:border-white/20 transition-all duration-300 hover:shadow-lg hover:shadow-white/5">
             <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-white/20 transition-colors">
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
             <div className="text-white text-xl font-bold mb-1">2.3K</div>
-            <div className="text-gray-400 text-sm">Clips this month</div>
+            <div className="text-muted-foreground text-sm">Clips this month</div>
           </div>
         </motion.div>
       </div>

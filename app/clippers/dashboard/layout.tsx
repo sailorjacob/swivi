@@ -37,33 +37,52 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/clippers/dashboard", icon: Home },
-  { label: "Active Campaigns", href: "/clippers/campaigns", icon: Target },
-  { label: "Profile", href: "/clippers/profile", icon: User },
-  { label: "Analytics", href: "/clippers/analytics", icon: BarChart3 },
-  { label: "Payouts", href: "/clippers/payouts", icon: DollarSign },
-  { label: "Social Accounts", href: "/clippers/social-accounts", icon: Users },
-  { label: "Referrals", href: "/clippers/referrals", icon: Trophy },
-  { label: "Rules", href: "/clippers/rules", icon: FileText },
-  { label: "Support", href: "/clippers/support", icon: HelpCircle },
+  { label: "Active Campaigns", href: "/clippers/dashboard/campaigns", icon: Target },
+  { label: "Profile", href: "/clippers/dashboard/profile", icon: User },
+  { label: "Analytics", href: "/clippers/dashboard/analytics", icon: BarChart3 },
+  { label: "Payouts", href: "/clippers/dashboard/payouts", icon: DollarSign },
+  { label: "Social Accounts", href: "/clippers/dashboard/social-accounts", icon: Users },
+  { label: "Referrals", href: "/clippers/dashboard/referrals", icon: Trophy },
+  { label: "Rules", href: "/clippers/dashboard/rules", icon: FileText },
+  { label: "Support", href: "/clippers/dashboard/support", icon: HelpCircle },
 ]
 
 function Sidebar({ className }: { className?: string }) {
   const { data: session } = useSession()
   const router = useRouter()
 
+  // Demo mode mock session
+  const isDemoMode = process.env.NODE_ENV === "development"
+  const mockSession = isDemoMode ? {
+    user: {
+      name: "Demo Clipper",
+      email: "demo@swivi.com",
+      image: null
+    }
+  } : null
+
+  const activeSession = session || mockSession
+
   const handleSignOut = async () => {
+    if (isDemoMode) {
+      // In demo mode, just redirect to clipper landing page
+      router.push("/clippers")
+      return
+    }
     await signOut({ callbackUrl: "/clippers/login" })
   }
 
   return (
-    <div className={cn("flex flex-col h-full bg-neutral-900 border-r border-neutral-800", className)}>
+    <div className={cn("flex flex-col h-full bg-card border-r border-border", className)}>
       {/* Logo */}
-      <div className="p-6 border-b border-neutral-800">
+      <div className="p-6 border-b border-border">
         <div className="flex items-center space-x-4">
           <SwiviLogo size={36} />
           <div>
             <h1 className="text-white font-light text-lg">Swivi Clippers</h1>
-            <p className="text-neutral-400 text-xs">Premium content platform</p>
+            <p className="text-muted-foreground text-xs">
+              {isDemoMode ? "Demo Mode - Explore Features" : "Premium content platform"}
+            </p>
           </div>
         </div>
       </div>
@@ -74,12 +93,12 @@ function Sidebar({ className }: { className?: string }) {
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-800 hover:text-white transition-colors group"
+            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-white transition-colors group"
           >
             <item.icon className="w-5 h-5" />
             <span className="font-medium">{item.label}</span>
             {item.badge && (
-              <span className="ml-auto bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+              <span className="ml-auto bg-foreground text-white text-xs px-2 py-1 rounded-full">
                 {item.badge}
               </span>
             )}
@@ -88,20 +107,20 @@ function Sidebar({ className }: { className?: string }) {
       </nav>
 
       {/* User Profile */}
-      <div className="p-4 border-t border-neutral-800">
+      <div className="p-4 border-t border-border">
         <div className="flex items-center space-x-3 mb-3">
           <Avatar className="w-8 h-8">
-            <AvatarImage src={session?.user?.image || ""} />
-            <AvatarFallback className="bg-green-600 text-white">
-              {session?.user?.name?.[0] || "U"}
+            <AvatarImage src={activeSession?.user?.image || ""} />
+            <AvatarFallback className="bg-foreground text-white">
+              {activeSession?.user?.name?.[0] || "U"}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-white text-sm font-medium truncate">
-              {session?.user?.name || "Clipper"}
+              {activeSession?.user?.name || "Clipper"}
             </p>
-            <p className="text-neutral-400 text-xs truncate">
-              {session?.user?.email || ""}
+            <p className="text-muted-foreground text-xs truncate">
+              {activeSession?.user?.email || ""}
             </p>
           </div>
         </div>
@@ -110,7 +129,7 @@ function Sidebar({ className }: { className?: string }) {
           onClick={handleSignOut}
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800"
+          className="w-full justify-start text-muted-foreground hover:text-white hover:bg-muted"
         >
           <LogOut className="w-4 h-4 mr-2" />
           Sign Out
@@ -136,7 +155,7 @@ export default function DashboardLayout({
 
       {/* Mobile Sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="p-0 w-64 bg-neutral-900 border-r border-neutral-800">
+        <SheetContent side="left" className="p-0 w-64 bg-card border-r border-border">
           <Sidebar />
         </SheetContent>
       </Sheet>
@@ -144,18 +163,18 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Mobile Header */}
-        <div className="lg:hidden flex items-center justify-between p-4 border-b border-neutral-800">
+        <div className="lg:hidden flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center space-x-3">
             <SwiviLogo size={32} />
             <h1 className="text-white font-light">Swivi Clippers</h1>
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-white">
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white">
                 <Menu className="w-6 h-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-64 bg-neutral-900 border-r border-neutral-800">
+            <SheetContent side="left" className="p-0 w-64 bg-card border-r border-border">
               <Sidebar />
             </SheetContent>
           </Sheet>

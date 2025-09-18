@@ -69,13 +69,13 @@ function SupportTicketForm() {
   }
 
   return (
-    <Card className="bg-neutral-900 border-gray-800">
+    <Card className="bg-card border-gray-800">
       <CardHeader>
         <CardTitle className="text-white flex items-center">
           <MessageSquare className="w-5 h-5 mr-2 text-white" />
           Create Support Ticket
         </CardTitle>
-        <p className="text-gray-400 text-sm">
+        <p className="text-muted-foreground text-sm">
           Can't find what you're looking for? Submit a ticket and our team will help you out.
         </p>
       </CardHeader>
@@ -89,7 +89,7 @@ function SupportTicketForm() {
                 value={formData.subject}
                 onChange={(e) => handleChange("subject", e.target.value)}
                 placeholder="Brief description of your issue"
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-muted border-border text-white"
                 required
               />
             </div>
@@ -97,10 +97,10 @@ function SupportTicketForm() {
             <div>
               <Label htmlFor="topic" className="text-white">Topic</Label>
               <Select value={formData.topic} onValueChange={(value) => handleChange("topic", value)}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="bg-muted border-border text-white">
                   <SelectValue placeholder="Select a topic" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-muted border-border">
                   {supportTopics.map((topic) => (
                     <SelectItem key={topic} value={topic} className="text-white">
                       {topic}
@@ -114,10 +114,10 @@ function SupportTicketForm() {
           <div>
             <Label htmlFor="priority" className="text-white">Priority</Label>
             <Select value={formData.priority} onValueChange={(value) => handleChange("priority", value)}>
-              <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+              <SelectTrigger className="bg-muted border-border text-white">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
+              <SelectContent className="bg-muted border-border">
                 <SelectItem value="low" className="text-white">Low - General question</SelectItem>
                 <SelectItem value="normal" className="text-white">Normal - Standard issue</SelectItem>
                 <SelectItem value="high" className="text-white">High - Urgent issue</SelectItem>
@@ -133,7 +133,7 @@ function SupportTicketForm() {
               value={formData.description}
               onChange={(e) => handleChange("description", e.target.value)}
               placeholder="Please provide detailed information about your issue..."
-              className="bg-gray-800 border-gray-700 text-white"
+              className="bg-muted border-border text-white"
               rows={6}
               required
             />
@@ -184,10 +184,10 @@ function QuickStats() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {stats.map((stat, index) => (
-        <Card key={index} className="bg-neutral-900 border-gray-800">
+        <Card key={index} className="bg-card border-gray-800">
           <CardContent className="p-6 text-center">
             <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-            <div className="text-gray-400 text-sm font-medium mb-1">{stat.label}</div>
+            <div className="text-muted-foreground text-sm font-medium mb-1">{stat.label}</div>
             <div className="text-gray-500 text-xs">{stat.description}</div>
           </CardContent>
         </Card>
@@ -198,7 +198,7 @@ function QuickStats() {
 
 function ContactInfo() {
   return (
-    <Card className="bg-neutral-900 border-gray-800">
+    <Card className="bg-card border-gray-800">
       <CardHeader>
         <CardTitle className="text-white">Contact Information</CardTitle>
       </CardHeader>
@@ -207,20 +207,20 @@ function ContactInfo() {
           <Mail className="w-5 h-5 text-white" />
           <div>
             <p className="text-white font-medium">Email Support</p>
-            <p className="text-gray-400 text-sm">support@swivi.com</p>
+            <p className="text-muted-foreground text-sm">support@swivi.com</p>
           </div>
         </div>
 
         <div className="flex items-center space-x-3">
-          <Clock className="w-5 h-5 text-green-400" />
+          <Clock className="w-5 h-5 text-foreground" />
           <div>
             <p className="text-white font-medium">Response Time</p>
-            <p className="text-gray-400 text-sm">Within 24 hours for all inquiries</p>
+            <p className="text-muted-foreground text-sm">Within 24 hours for all inquiries</p>
           </div>
         </div>
 
         <div className="pt-4 border-t border-gray-800">
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             For urgent payment or account issues, please use the support ticket form above.
             We'll prioritize critical issues and get back to you as soon as possible.
           </p>
@@ -236,7 +236,7 @@ export default function SupportPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-light text-white mb-2">Support & FAQ</h1>
-        <p className="text-gray-400">Find answers to common questions or get help from our team.</p>
+        <p className="text-muted-foreground">Find answers to common questions or get help from our team.</p>
       </div>
 
       {/* Quick Stats */}
@@ -244,16 +244,16 @@ export default function SupportPage() {
 
       {/* Main Content */}
       <Tabs defaultValue="faq" className="space-y-6">
-        <TabsList className="bg-gray-800 border border-gray-700">
-          <TabsTrigger value="faq" className="text-gray-300 data-[state=active]:text-white">
+        <TabsList className="bg-muted border border-border">
+          <TabsTrigger value="faq" className="text-muted-foreground data-[state=active]:text-white">
             <HelpCircle className="w-4 h-4 mr-2" />
             FAQ
           </TabsTrigger>
-          <TabsTrigger value="ticket" className="text-gray-300 data-[state=active]:text-white">
+          <TabsTrigger value="ticket" className="text-muted-foreground data-[state=active]:text-white">
             <MessageSquare className="w-4 h-4 mr-2" />
             Support Ticket
           </TabsTrigger>
-          <TabsTrigger value="contact" className="text-gray-300 data-[state=active]:text-white">
+          <TabsTrigger value="contact" className="text-muted-foreground data-[state=active]:text-white">
             <Mail className="w-4 h-4 mr-2" />
             Contact Info
           </TabsTrigger>

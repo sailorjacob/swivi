@@ -180,8 +180,8 @@ function RuleCard({ rule }: { rule: typeof rulesSections[0]['rules'][0] }) {
       case 'critical': return 'text-red-400 border-red-400/20 bg-red-400/10'
       case 'high': return 'text-orange-400 border-orange-400/20 bg-orange-400/10'
       case 'medium': return 'text-yellow-400 border-yellow-400/20 bg-yellow-400/10'
-      case 'low': return 'text-green-400 border-green-400/20 bg-green-400/10'
-      default: return 'text-gray-400 border-gray-400/20 bg-gray-400/10'
+      case 'low': return 'text-foreground border-green-400/20 bg-green-400/10'
+      default: return 'text-muted-foreground border-gray-400/20 bg-muted/20'
     }
   }
 
@@ -196,7 +196,7 @@ function RuleCard({ rule }: { rule: typeof rulesSections[0]['rules'][0] }) {
   }
 
   return (
-    <Card className="bg-neutral-900 border-gray-800">
+    <Card className="bg-card border-gray-800">
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-3">
           <h4 className="text-white font-medium">{rule.title}</h4>
@@ -204,7 +204,7 @@ function RuleCard({ rule }: { rule: typeof rulesSections[0]['rules'][0] }) {
             {getSeverityLabel(rule.severity)}
           </Badge>
         </div>
-        <p className="text-gray-300 text-sm leading-relaxed">{rule.description}</p>
+        <p className="text-muted-foreground text-sm leading-relaxed">{rule.description}</p>
       </CardContent>
     </Card>
   )
@@ -212,7 +212,7 @@ function RuleCard({ rule }: { rule: typeof rulesSections[0]['rules'][0] }) {
 
 function ConsequencesSection() {
   return (
-    <Card className="bg-neutral-900 border-gray-800">
+    <Card className="bg-card border-gray-800">
       <CardHeader>
         <CardTitle className="text-white flex items-center">
           <AlertTriangle className="w-5 h-5 mr-2 text-red-400" />
@@ -224,11 +224,11 @@ function ConsequencesSection() {
           {consequences.map((item, index) => {
             const Icon = item.icon
             return (
-              <div key={index} className="flex items-start space-x-4 p-4 border border-gray-700 rounded-lg">
+              <div key={index} className="flex items-start space-x-4 p-4 border border-border rounded-lg">
                 <Icon className={`w-6 h-6 mt-0.5 ${item.color}`} />
                 <div className="flex-1">
                   <h4 className="text-white font-medium mb-1">{item.violation}</h4>
-                  <p className="text-gray-300 text-sm">{item.consequence}</p>
+                  <p className="text-muted-foreground text-sm">{item.consequence}</p>
                 </div>
               </div>
             )
@@ -241,7 +241,7 @@ function ConsequencesSection() {
 
 function FTCCompliance() {
   return (
-    <Card className="bg-neutral-900 border-gray-800">
+    <Card className="bg-card border-gray-800">
       <CardHeader>
         <CardTitle className="text-white flex items-center">
           <Shield className="w-5 h-5 mr-2 text-white" />
@@ -249,9 +249,9 @@ function FTCCompliance() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-lg">
+        <div className="p-4 bg-muted/50 border border-border/50 rounded-lg">
           <h4 className="text-white font-medium mb-2">Federal Trade Commission Guidelines</h4>
-          <ul className="text-gray-300 text-sm space-y-1">
+          <ul className="text-muted-foreground text-sm space-y-1">
             <li>• Clearly disclose sponsored content and brand partnerships</li>
             <li>• Use appropriate hashtags (#ad, #sponsored, #partner) when required</li>
             <li>• Maintain transparency about affiliate relationships</li>
@@ -260,11 +260,11 @@ function FTCCompliance() {
         </div>
 
         <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="disclosure" className="border-gray-700">
-            <AccordionTrigger className="text-white hover:text-gray-300">
+          <AccordionItem value="disclosure" className="border-border">
+            <AccordionTrigger className="text-white hover:text-muted-foreground">
               Disclosure Requirements by Platform
             </AccordionTrigger>
-            <AccordionContent className="text-gray-300">
+            <AccordionContent className="text-muted-foreground">
               <div className="space-y-3">
                 <div>
                   <strong className="text-white">TikTok:</strong> Use #ad or #sponsored in caption for paid partnerships
@@ -282,11 +282,11 @@ function FTCCompliance() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="compliance" className="border-gray-700">
-            <AccordionTrigger className="text-white hover:text-gray-300">
+          <AccordionItem value="compliance" className="border-border">
+            <AccordionTrigger className="text-white hover:text-muted-foreground">
               Why Compliance Matters
             </AccordionTrigger>
-            <AccordionContent className="text-gray-300">
+            <AccordionContent className="text-muted-foreground">
               FTC compliance ensures transparency and builds trust with your audience. Non-compliant content may result in:
               <ul className="list-disc list-inside mt-2 space-y-1">
                 <li>Content rejection</li>
@@ -308,19 +308,19 @@ export default function RulesPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-light text-white mb-2">Rules & Guidelines</h1>
-        <p className="text-gray-400">
+        <p className="text-muted-foreground">
           Important rules and policies for all Swivi Clippers. Please read carefully and follow all guidelines.
         </p>
       </div>
 
       {/* Overview */}
-      <Card className="bg-neutral-900 border-gray-800">
+      <Card className="bg-card border-gray-800">
         <CardContent className="p-6">
           <div className="flex items-center space-x-3 mb-4">
-            <CheckCircle className="w-6 h-6 text-green-400" />
+            <CheckCircle className="w-6 h-6 text-foreground" />
             <h2 className="text-xl font-medium text-white">Welcome to Swivi Clippers</h2>
           </div>
-          <p className="text-gray-300 leading-relaxed">
+          <p className="text-muted-foreground leading-relaxed">
             These rules ensure fair play, quality content, and a positive community for all clippers.
             By participating in campaigns, you agree to follow all guidelines. Our team monitors compliance
             and takes violations seriously to maintain the integrity of our platform.
@@ -355,10 +355,10 @@ export default function RulesPage() {
       <FTCCompliance />
 
       {/* Contact */}
-      <Card className="bg-neutral-900 border-gray-800">
+      <Card className="bg-card border-gray-800">
         <CardContent className="p-6 text-center">
           <h3 className="text-white font-medium mb-2">Questions about these rules?</h3>
-          <p className="text-gray-400 mb-4">
+          <p className="text-muted-foreground mb-4">
             If you have questions about any of these guidelines, please contact our support team.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -370,7 +370,7 @@ export default function RulesPage() {
             </a>
             <a
               href="/clippers/faq"
-              className="inline-flex items-center px-6 py-3 border border-gray-700 text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
+              className="inline-flex items-center px-6 py-3 border border-border text-muted-foreground hover:bg-muted rounded-lg transition-colors"
             >
               View FAQ
             </a>

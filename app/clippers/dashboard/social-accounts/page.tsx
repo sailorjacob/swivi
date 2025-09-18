@@ -87,10 +87,10 @@ function AccountCard({ account }: { account: typeof connectedAccounts[0] }) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'text-green-400'
+      case 'active': return 'text-foreground'
       case 'pending_verification': return 'text-yellow-400'
       case 'suspended': return 'text-red-400'
-      default: return 'text-gray-400'
+      default: return 'text-muted-foreground'
     }
   }
 
@@ -109,7 +109,7 @@ function AccountCard({ account }: { account: typeof connectedAccounts[0] }) {
   }
 
   return (
-    <Card className="bg-neutral-900 border-gray-800">
+    <Card className="bg-card border-gray-800">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
@@ -121,7 +121,7 @@ function AccountCard({ account }: { account: typeof connectedAccounts[0] }) {
             </div>
             <div>
               <h3 className="text-white font-medium">{platform.name}</h3>
-              <p className="text-gray-400 text-sm">{account.handle}</p>
+              <p className="text-muted-foreground text-sm">{account.handle}</p>
             </div>
           </div>
           <Badge variant="outline" className={getStatusColor(account.status)}>
@@ -131,11 +131,11 @@ function AccountCard({ account }: { account: typeof connectedAccounts[0] }) {
 
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <p className="text-gray-400 text-sm">Followers</p>
+            <p className="text-muted-foreground text-sm">Followers</p>
             <p className="text-white font-medium">{account.followers.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Connected</p>
+            <p className="text-muted-foreground text-sm">Connected</p>
             <p className="text-white font-medium">
               {new Date(account.connectedAt).toLocaleDateString()}
             </p>
@@ -146,8 +146,8 @@ function AccountCard({ account }: { account: typeof connectedAccounts[0] }) {
           <div className="flex items-center space-x-2">
             {account.verified ? (
               <>
-                <CheckCircle className="w-4 h-4 text-green-400" />
-                <span className="text-green-400 text-sm">Verified</span>
+                <CheckCircle className="w-4 h-4 text-foreground" />
+                <span className="text-foreground text-sm">Verified</span>
               </>
             ) : (
               <>
@@ -157,7 +157,7 @@ function AccountCard({ account }: { account: typeof connectedAccounts[0] }) {
             )}
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm" className="border-gray-700 text-gray-300 hover:bg-gray-800">
+            <Button variant="outline" size="sm" className="border-border text-muted-foreground hover:bg-muted">
               <ExternalLink className="w-4 h-4 mr-1" />
               View
             </Button>
@@ -199,12 +199,12 @@ function ConnectAccountDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-green-600 hover:bg-green-700">
+        <Button className="bg-foreground hover:bg-foreground/90">
           <Plus className="w-4 h-4 mr-2" />
           Connect Account
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-neutral-900 border-gray-800 text-white">
+      <DialogContent className="bg-card border-gray-800 text-white">
         <DialogHeader>
           <DialogTitle>Connect Social Account</DialogTitle>
         </DialogHeader>
@@ -212,10 +212,10 @@ function ConnectAccountDialog() {
           <div>
             <Label htmlFor="platform" className="text-white">Platform</Label>
             <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
-              <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+              <SelectTrigger className="bg-muted border-border text-white">
                 <SelectValue placeholder="Select platform" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
+              <SelectContent className="bg-muted border-border">
                 {Object.entries(platformConfigs).map(([key, config]) => (
                   <SelectItem key={key} value={key} className="text-white">
                     {config.name}
@@ -232,17 +232,17 @@ function ConnectAccountDialog() {
               value={accountHandle}
               onChange={(e) => setAccountHandle(e.target.value)}
               placeholder="@username or channel name"
-              className="bg-gray-800 border-gray-700 text-white"
+              className="bg-muted border-border text-white"
             />
           </div>
 
           {selectedPlatform && (
-            <div className="p-4 bg-gray-800 rounded-lg">
+            <div className="p-4 bg-muted rounded-lg">
               <h4 className="text-white font-medium mb-2">Requirements:</h4>
-              <ul className="text-gray-300 text-sm space-y-1">
+              <ul className="text-muted-foreground text-sm space-y-1">
                 {platformConfigs[selectedPlatform as keyof typeof platformConfigs].requirements.map((req, index) => (
                   <li key={index} className="flex items-center">
-                    <CheckCircle className="w-3 h-3 text-green-400 mr-2" />
+                    <CheckCircle className="w-3 h-3 text-foreground mr-2" />
                     {req}
                   </li>
                 ))}
@@ -253,7 +253,7 @@ function ConnectAccountDialog() {
           <Button
             onClick={handleConnect}
             disabled={isConnecting || !selectedPlatform || !accountHandle}
-            className="w-full bg-green-600 hover:bg-green-700"
+            className="w-full bg-foreground hover:bg-foreground/90"
           >
             {isConnecting ? "Connecting..." : "Connect Account"}
           </Button>
@@ -265,7 +265,7 @@ function ConnectAccountDialog() {
 
 function PlatformRequirements() {
   return (
-    <Card className="bg-neutral-900 border-gray-800">
+    <Card className="bg-card border-gray-800">
       <CardHeader>
         <CardTitle className="text-white flex items-center">
           <Shield className="w-5 h-5 mr-2 text-white" />
@@ -277,11 +277,11 @@ function PlatformRequirements() {
           {Object.entries(platformConfigs).map(([key, config]) => {
             const Icon = config.icon
             return (
-              <div key={key} className="flex items-start space-x-3 p-3 border border-gray-700 rounded-lg">
+              <div key={key} className="flex items-start space-x-3 p-3 border border-border rounded-lg">
                 <Icon className="w-6 h-6 mt-0.5" style={{ color: config.color }} />
                 <div className="flex-1">
                   <h4 className="text-white font-medium mb-1">{config.name}</h4>
-                  <ul className="text-gray-400 text-sm space-y-0.5">
+                  <ul className="text-muted-foreground text-sm space-y-0.5">
                     {config.requirements.map((req, index) => (
                       <li key={index}>• {req}</li>
                     ))}
@@ -303,44 +303,44 @@ export default function SocialAccountsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-light text-white mb-2">Social Accounts</h1>
-          <p className="text-gray-400">Manage your connected social media accounts for clipping.</p>
+          <p className="text-muted-foreground">Manage your connected social media accounts for clipping.</p>
         </div>
         <ConnectAccountDialog />
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-neutral-900 border-gray-800">
+        <Card className="bg-card border-gray-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Total Accounts</p>
+                <p className="text-muted-foreground text-sm">Total Accounts</p>
                 <p className="text-2xl font-bold text-white">{connectedAccounts.length}</p>
               </div>
-              <CheckCircle className="w-8 h-8 text-green-400" />
+              <CheckCircle className="w-8 h-8 text-foreground" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-neutral-900 border-gray-800">
+        <Card className="bg-card border-gray-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Verified Accounts</p>
-                <p className="text-2xl font-bold text-green-400">
+                <p className="text-muted-foreground text-sm">Verified Accounts</p>
+                <p className="text-2xl font-bold text-foreground">
                   {connectedAccounts.filter(a => a.verified).length}
                 </p>
               </div>
-              <Shield className="w-8 h-8 text-green-400" />
+              <Shield className="w-8 h-8 text-foreground" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-neutral-900 border-gray-800">
+        <Card className="bg-card border-gray-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Total Followers</p>
+                <p className="text-muted-foreground text-sm">Total Followers</p>
                 <p className="text-2xl font-bold text-white">
                   {connectedAccounts.reduce((sum, acc) => sum + acc.followers, 0).toLocaleString()}
                 </p>
@@ -371,7 +371,7 @@ export default function SocialAccountsPage() {
             <AlertCircle className="w-6 h-6 text-yellow-400 mt-0.5" />
             <div>
               <h3 className="text-yellow-400 font-medium mb-2">Account Verification Required</h3>
-              <p className="text-gray-300 text-sm mb-3">
+              <p className="text-muted-foreground text-sm mb-3">
                 All connected accounts must be verified to participate in campaigns and receive payments.
                 Unverified accounts can still be connected but won't be eligible for earnings.
               </p>

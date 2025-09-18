@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
+import { ClipSubmissionModal } from "@/components/clippers/clip-submission-modal"
 
 // Mock data - replace with real data later
 const stats = [
@@ -27,7 +28,7 @@ const stats = [
     change: "+12.5%",
     changeType: "positive" as const,
     icon: DollarSign,
-    color: "text-green-400"
+    color: "text-foreground"
   },
   {
     title: "Active Campaigns",
@@ -127,21 +128,21 @@ function StatCard({ stat }: { stat: typeof stats[0] }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="bg-neutral-900 border-neutral-800">
+      <Card className="bg-card border-border">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-neutral-400 text-sm font-medium">{stat.title}</p>
+              <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
               <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
               <p className={`text-sm mt-1 ${
-                stat.changeType === 'positive' ? 'text-green-400' :
-                'text-neutral-400'
+                stat.changeType === 'positive' ? 'text-foreground' :
+                'text-muted-foreground'
               }`}>
                 {stat.change}
               </p>
             </div>
-            <div className={`p-3 rounded-full bg-gray-800 ${stat.color}`}>
-              <Icon className="w-6 h-6" />
+            <div className="p-3 rounded-lg bg-muted">
+              <Icon className="w-6 h-6 text-muted-foreground" />
             </div>
           </div>
         </CardContent>
@@ -153,10 +154,10 @@ function StatCard({ stat }: { stat: typeof stats[0] }) {
 function RecentClipCard({ clip }: { clip: typeof recentClips[0] }) {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'text-green-400 bg-green-400/10'
-      case 'pending': return 'text-yellow-400 bg-yellow-400/10'
-      case 'rejected': return 'text-red-400 bg-red-400/10'
-      default: return 'text-neutral-400 bg-gray-400/10'
+      case 'approved': return 'text-foreground bg-muted border-muted-foreground'
+      case 'pending': return 'text-muted-foreground bg-background border-muted-foreground'
+      case 'rejected': return 'text-muted-foreground bg-muted border-border'
+      default: return 'text-muted-foreground bg-background border-border'
     }
   }
 
@@ -172,7 +173,7 @@ function RecentClipCard({ clip }: { clip: typeof recentClips[0] }) {
   const StatusIcon = getStatusIcon(clip.status)
 
   return (
-    <Card className="bg-neutral-900 border-neutral-800">
+    <Card className="bg-card border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
@@ -181,18 +182,18 @@ function RecentClipCard({ clip }: { clip: typeof recentClips[0] }) {
               {clip.status}
             </Badge>
           </div>
-          <span className="text-neutral-400 text-sm">{clip.submittedAt}</span>
+          <span className="text-muted-foreground text-sm">{clip.submittedAt}</span>
         </div>
 
         <h4 className="text-white font-medium mb-1">{clip.title}</h4>
-        <p className="text-neutral-400 text-sm mb-3">{clip.campaign}</p>
+        <p className="text-muted-foreground text-sm mb-3">{clip.campaign}</p>
 
         <div className="flex items-center justify-between text-sm">
-          <span className="text-neutral-400">
+          <span className="text-muted-foreground">
             {clip.views > 0 ? `${clip.views.toLocaleString()} views` : 'Under review'}
           </span>
           {clip.earnings > 0 && (
-            <span className="text-green-400 font-medium">${clip.earnings}</span>
+            <span className="text-foreground font-medium">${clip.earnings}</span>
           )}
         </div>
       </CardContent>
@@ -200,29 +201,32 @@ function RecentClipCard({ clip }: { clip: typeof recentClips[0] }) {
   )
 }
 
-function CampaignCard({ campaign }: { campaign: typeof activeCampaigns[0] }) {
+function CampaignCard({ campaign, onSubmitClip }: { campaign: typeof activeCampaigns[0]; onSubmitClip: (campaign: typeof activeCampaigns[0]) => void }) {
   return (
-    <Card className="bg-neutral-900 border-neutral-800">
+    <Card className="bg-card border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <h4 className="text-white font-medium">{campaign.title}</h4>
-          <Badge variant="outline" className="text-yellow-400 border-yellow-400">
+          <Badge variant="outline" className="text-muted-foreground border-muted-foreground">
             {campaign.deadline}
           </Badge>
         </div>
 
-        <p className="text-neutral-400 text-sm mb-4">{campaign.creator}</p>
+        <p className="text-muted-foreground text-sm mb-4">{campaign.creator}</p>
 
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
-            <span className="text-neutral-400">Budget Progress</span>
+            <span className="text-muted-foreground">Budget Progress</span>
             <span className="text-white">${campaign.spent}/${campaign.budget}</span>
           </div>
           <Progress value={campaign.progress} className="h-2" />
-          <p className="text-green-400 text-sm font-medium">{campaign.payout}</p>
+          <p className="text-foreground text-sm font-medium">{campaign.payout}</p>
         </div>
 
-        <Button className="w-full mt-4 bg-green-600 hover:bg-green-700">
+        <Button 
+          className="w-full mt-4 bg-foreground hover:bg-foreground/90"
+          onClick={() => onSubmitClip(campaign)}
+        >
           Submit Clip
         </Button>
       </CardContent>
@@ -231,12 +235,20 @@ function CampaignCard({ campaign }: { campaign: typeof activeCampaigns[0] }) {
 }
 
 export default function DashboardPage() {
+  const [submissionModalOpen, setSubmissionModalOpen] = useState(false)
+  const [selectedCampaignForSubmission, setSelectedCampaignForSubmission] = useState<typeof activeCampaigns[0] | null>(null)
+
+  const handleSubmitClip = (campaign: typeof activeCampaigns[0]) => {
+    setSelectedCampaignForSubmission(campaign)
+    setSubmissionModalOpen(true)
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-light text-white mb-2">Dashboard</h1>
-        <p className="text-neutral-400">Welcome back! Here's your clipping overview.</p>
+        <p className="text-muted-foreground">Welcome back! Here's your clipping overview.</p>
       </div>
 
       {/* Stats Grid */}
@@ -252,8 +264,8 @@ export default function DashboardPage() {
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-medium text-white">Recent Clips</h2>
-            <Link href="/clippers/profile">
-              <Button variant="outline" size="sm" className="border-gray-700 text-gray-300 hover:bg-gray-800">
+            <Link href="/clippers/dashboard/profile">
+              <Button variant="outline" size="sm" className="border-border text-muted-foreground hover:bg-muted">
                 View All
               </Button>
             </Link>
@@ -270,8 +282,8 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-medium text-white">Active Campaigns</h2>
-            <Link href="/clippers/campaigns">
-              <Button variant="outline" size="sm" className="border-gray-700 text-gray-300 hover:bg-gray-800">
+            <Link href="/clippers/dashboard/campaigns">
+              <Button variant="outline" size="sm" className="border-border text-muted-foreground hover:bg-muted">
                 View All
               </Button>
             </Link>
@@ -279,40 +291,51 @@ export default function DashboardPage() {
 
           <div className="space-y-4">
             {activeCampaigns.map((campaign) => (
-              <CampaignCard key={campaign.id} campaign={campaign} />
+              <CampaignCard key={campaign.id} campaign={campaign} onSubmitClip={handleSubmitClip} />
             ))}
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <Card className="bg-neutral-900 border-neutral-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <Trophy className="w-5 h-5 mr-2 text-yellow-400" />
+          <CardTitle className="text-white">
             Quick Actions
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link href="/clippers/campaigns">
-              <Button className="w-full bg-green-600 hover:bg-green-700">
+            <Link href="/clippers/dashboard/campaigns">
+              <Button className="w-full bg-foreground text-background hover:bg-foreground/90">
                 Browse Campaigns
               </Button>
             </Link>
-            <Link href="/clippers/profile">
-              <Button variant="outline" className="w-full border-gray-700 text-gray-300 hover:bg-gray-800">
+            <Link href="/clippers/dashboard/profile">
+              <Button variant="outline" className="w-full">
                 Update Profile
               </Button>
             </Link>
-            <Link href="/clippers/payouts">
-              <Button variant="outline" className="w-full border-gray-700 text-gray-300 hover:bg-gray-800">
+            <Link href="/clippers/dashboard/payouts">
+              <Button variant="outline" className="w-full">
                 Request Payout
               </Button>
             </Link>
           </div>
         </CardContent>
       </Card>
+
+      {/* Submission Modal */}
+      <ClipSubmissionModal
+        open={submissionModalOpen}
+        onOpenChange={setSubmissionModalOpen}
+        campaign={selectedCampaignForSubmission ? {
+          id: selectedCampaignForSubmission.id,
+          title: selectedCampaignForSubmission.title,
+          creator: selectedCampaignForSubmission.creator,
+          payout: selectedCampaignForSubmission.payout
+        } : undefined}
+      />
     </div>
   )
 }

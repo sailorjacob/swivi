@@ -122,11 +122,11 @@ function ProfileForm() {
       <div className="flex items-center space-x-4">
         <Avatar className="w-16 h-16">
           <AvatarImage src="" />
-          <AvatarFallback className="bg-green-600 text-white text-xl">
+          <AvatarFallback className="bg-foreground text-white text-xl">
             CP
           </AvatarFallback>
         </Avatar>
-        <Button type="button" variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800">
+        <Button type="button" variant="outline" className="border-border text-muted-foreground hover:bg-muted">
           <Upload className="w-4 h-4 mr-2" />
           Change Avatar
         </Button>
@@ -138,7 +138,7 @@ function ProfileForm() {
           <Input
             id="displayName"
             {...register("displayName")}
-            className="bg-gray-800 border-gray-700 text-white"
+            className="bg-input border-border text-white"
           />
           {errors.displayName && (
             <p className="text-red-400 text-sm mt-1">{String(errors.displayName?.message || 'This field is required')}</p>
@@ -150,7 +150,7 @@ function ProfileForm() {
           <Textarea
             id="bio"
             {...register("bio")}
-            className="bg-gray-800 border-gray-700 text-white"
+            className="bg-input border-border text-white"
             rows={3}
           />
           {errors.bio && (
@@ -164,7 +164,7 @@ function ProfileForm() {
             id="paypalEmail"
             type="email"
             {...register("paypalEmail")}
-            className="bg-gray-800 border-gray-700 text-white"
+            className="bg-input border-border text-white"
           />
           {errors.paypalEmail && (
             <p className="text-red-400 text-sm mt-1">{String(errors.paypalEmail?.message || 'This field is required')}</p>
@@ -172,7 +172,7 @@ function ProfileForm() {
         </div>
       </div>
 
-      <Button type="submit" disabled={isLoading} className="bg-green-600 hover:bg-green-700">
+      <Button type="submit" disabled={isLoading} className="bg-foreground hover:bg-foreground/90">
         {isLoading ? "Saving..." : "Save Profile"}
       </Button>
     </form>
@@ -208,7 +208,7 @@ function SubmitClipForm() {
           id="url"
           placeholder="https://tiktok.com/@user/clip"
           {...register("url")}
-          className="bg-gray-800 border-gray-700 text-white"
+          className="bg-input border-border text-white"
         />
         {errors.url && (
           <p className="text-red-400 text-sm mt-1">{String(errors.url?.message || 'This field is required')}</p>
@@ -219,7 +219,7 @@ function SubmitClipForm() {
         <Label htmlFor="platform" className="text-white">Platform</Label>
         <select
           {...register("platform")}
-          className="w-full bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2"
+          className="w-full bg-muted border border-border text-white rounded-md px-3 py-2"
         >
           <option value="">Select platform</option>
           <option value="tiktok">TikTok</option>
@@ -236,7 +236,7 @@ function SubmitClipForm() {
         <Label htmlFor="campaignId" className="text-white">Campaign</Label>
         <select
           {...register("campaignId")}
-          className="w-full bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2"
+          className="w-full bg-muted border border-border text-white rounded-md px-3 py-2"
         >
           <option value="">Select campaign</option>
           {activeCampaigns.map(campaign => (
@@ -250,7 +250,7 @@ function SubmitClipForm() {
         )}
       </div>
 
-      <Button type="submit" disabled={isLoading} className="w-full bg-green-600 hover:bg-green-700">
+      <Button type="submit" disabled={isLoading} className="w-full bg-foreground hover:bg-foreground/90">
         {isLoading ? "Submitting..." : "Submit Clip"}
       </Button>
     </form>
@@ -289,21 +289,21 @@ function SocialAccountsForm() {
       {/* Existing Accounts */}
       <div className="space-y-4">
         {accounts.map((account, index) => (
-          <Card key={index} className="bg-neutral-900 border-neutral-800">
+          <Card key={index} className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-white capitalize">
                       {account.platform[0]}
                     </span>
                   </div>
                   <div>
                     <p className="text-white font-medium capitalize">{account.platform}</p>
-                    <p className="text-neutral-400 text-sm">{account.handle}</p>
+                    <p className="text-muted-foreground text-sm">{account.handle}</p>
                   </div>
                   {account.verified ? (
-                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    <CheckCircle className="w-5 h-5 text-foreground" />
                   ) : (
                     <Clock className="w-5 h-5 text-yellow-400" />
                   )}
@@ -327,20 +327,20 @@ function SocialAccountsForm() {
         <Button
           onClick={() => setIsAdding(true)}
           variant="outline"
-          className="border-gray-700 text-gray-300 hover:bg-gray-800"
+          className="border-border text-muted-foreground hover:bg-muted"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Social Account
         </Button>
       ) : (
-        <Card className="bg-neutral-900 border-neutral-800">
+        <Card className="bg-card border-border">
           <CardContent className="p-4">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
                 <Label className="text-white">Platform</Label>
                 <select
                   {...register("platform")}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2"
+                  className="w-full bg-muted border border-border text-white rounded-md px-3 py-2"
                 >
                   <option value="">Select platform</option>
                   <option value="tiktok">TikTok</option>
@@ -358,7 +358,7 @@ function SocialAccountsForm() {
                 <Input
                   {...register("handle")}
                   placeholder="@username"
-                  className="bg-gray-800 border-gray-700 text-white"
+                  className="bg-input border-border text-white"
                 />
                   {errors.handle && (
                     <p className="text-red-400 text-sm mt-1">{String(errors.handle?.message || 'This field is required')}</p>
@@ -366,7 +366,7 @@ function SocialAccountsForm() {
               </div>
 
               <div className="flex space-x-2">
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                <Button type="submit" className="bg-foreground hover:bg-foreground/90">
                   Add Account
                 </Button>
                 <Button
@@ -376,7 +376,7 @@ function SocialAccountsForm() {
                     setIsAdding(false)
                     reset()
                   }}
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                  className="border-border text-muted-foreground hover:bg-muted"
                 >
                   Cancel
                 </Button>
@@ -392,10 +392,10 @@ function SocialAccountsForm() {
 function SubmittedClipsList() {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'text-green-400 bg-green-400/10'
-      case 'pending': return 'text-yellow-400 bg-yellow-400/10'
-      case 'rejected': return 'text-red-400 bg-red-400/10'
-      default: return 'text-neutral-400 bg-gray-400/10'
+      case 'approved': return 'text-foreground bg-muted border-muted-foreground'
+      case 'pending': return 'text-muted-foreground bg-background border-muted-foreground'
+      case 'rejected': return 'text-muted-foreground bg-muted border-border'
+      default: return 'text-muted-foreground bg-background border-border'
     }
   }
 
@@ -413,7 +413,7 @@ function SubmittedClipsList() {
       {submittedClips.map((clip) => {
         const StatusIcon = getStatusIcon(clip.status)
         return (
-          <Card key={clip.id} className="bg-neutral-900 border-neutral-800">
+          <Card key={clip.id} className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-2">
@@ -421,32 +421,32 @@ function SubmittedClipsList() {
                   <Badge variant="outline" className={getStatusColor(clip.status)}>
                     {clip.status}
                   </Badge>
-                  <Badge variant="outline" className="text-neutral-400">
+                  <Badge variant="outline" className="text-muted-foreground">
                     {clip.platform}
                   </Badge>
                 </div>
-                <span className="text-neutral-400 text-sm">
+                <span className="text-muted-foreground text-sm">
                   {new Date(clip.submittedAt).toLocaleDateString()}
                 </span>
               </div>
 
               <h4 className="text-white font-medium mb-1">{clip.campaign}</h4>
-              <p className="text-neutral-400 text-sm mb-3 truncate">{clip.url}</p>
+              <p className="text-muted-foreground text-sm mb-3 truncate">{clip.url}</p>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 text-sm">
-                  <span className="text-neutral-400 flex items-center">
+                  <span className="text-muted-foreground flex items-center">
                     <Eye className="w-4 h-4 mr-1" />
                     {clip.views.toLocaleString()}
                   </span>
                   {clip.earnings > 0 && (
-                    <span className="text-green-400 flex items-center font-medium">
+                    <span className="text-foreground flex items-center font-medium">
                       <DollarSign className="w-4 h-4 mr-1" />
                       {clip.earnings}
                     </span>
                   )}
                 </div>
-                <Button variant="ghost" size="sm" className="text-neutral-400 hover:text-white">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-white">
                   View Details
                 </Button>
               </div>
@@ -463,27 +463,39 @@ export default function ProfilePage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-light text-white mb-2">Profile</h1>
-        <p className="text-neutral-400">Manage your account and track your submissions.</p>
+        <p className="text-muted-foreground">Manage your account and track your submissions.</p>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-800 border border-gray-700">
-          <TabsTrigger value="profile" className="text-gray-300 data-[state=active]:text-white">
+        <TabsList className="grid w-full grid-cols-4 bg-background border-b border-border rounded-none h-auto p-0">
+          <TabsTrigger 
+            value="profile" 
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent text-muted-foreground data-[state=active]:text-foreground px-4 py-3 font-medium transition-all "
+          >
             Profile
           </TabsTrigger>
-          <TabsTrigger value="submit" className="text-gray-300 data-[state=active]:text-white">
+          <TabsTrigger 
+            value="submit" 
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent text-muted-foreground data-[state=active]:text-foreground px-4 py-3 font-medium transition-all "
+          >
             Submit Clip
           </TabsTrigger>
-          <TabsTrigger value="social" className="text-gray-300 data-[state=active]:text-white">
+          <TabsTrigger 
+            value="social" 
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent text-muted-foreground data-[state=active]:text-foreground px-4 py-3 font-medium transition-all "
+          >
             Social Accounts
           </TabsTrigger>
-          <TabsTrigger value="clips" className="text-gray-300 data-[state=active]:text-white">
+          <TabsTrigger 
+            value="clips" 
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent text-muted-foreground data-[state=active]:text-foreground px-4 py-3 font-medium transition-all "
+          >
             My Clips
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
-          <Card className="bg-neutral-900 border-neutral-800">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-white">Profile Information</CardTitle>
             </CardHeader>
@@ -494,7 +506,7 @@ export default function ProfilePage() {
         </TabsContent>
 
         <TabsContent value="submit">
-          <Card className="bg-neutral-900 border-neutral-800">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-white">Submit New Clip</CardTitle>
             </CardHeader>
@@ -505,10 +517,10 @@ export default function ProfilePage() {
         </TabsContent>
 
         <TabsContent value="social">
-          <Card className="bg-neutral-900 border-neutral-800">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-white">Social Media Accounts</CardTitle>
-              <p className="text-neutral-400 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Connect your social accounts to submit clips and track performance.
               </p>
             </CardHeader>
@@ -519,10 +531,10 @@ export default function ProfilePage() {
         </TabsContent>
 
         <TabsContent value="clips">
-          <Card className="bg-neutral-900 border-neutral-800">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-white">Submitted Clips</CardTitle>
-              <p className="text-neutral-400 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Track the status and performance of your submitted clips.
               </p>
             </CardHeader>
