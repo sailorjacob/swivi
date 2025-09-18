@@ -1,0 +1,181 @@
+"use client"
+
+import { useState } from "react"
+import { useSession, signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  BarChart3,
+  User,
+  DollarSign,
+  Users,
+  Settings,
+  HelpCircle,
+  LogOut,
+  Menu,
+  X,
+  Trophy,
+  FileText,
+  MessageSquare,
+  Home,
+  Target,
+  TrendingUp
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
+import { cn } from "@/lib/utils"
+
+interface NavItem {
+  label: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  badge?: string
+}
+
+const navItems: NavItem[] = [
+  { label: "Dashboard", href: "/clippers/dashboard", icon: Home },
+  { label: "Active Campaigns", href: "/clippers/campaigns", icon: Target },
+  { label: "Profile", href: "/clippers/profile", icon: User },
+  { label: "Analytics", href: "/clippers/analytics", icon: BarChart3 },
+  { label: "Payouts", href: "/clippers/payouts", icon: DollarSign },
+  { label: "Social Accounts", href: "/clippers/social-accounts", icon: Users },
+  { label: "Referrals", href: "/clippers/referrals", icon: Trophy },
+  { label: "Rules", href: "/clippers/rules", icon: FileText },
+  { label: "Support", href: "/clippers/support", icon: HelpCircle },
+]
+
+function Sidebar({ className }: { className?: string }) {
+  const { data: session } = useSession()
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/clippers/login" })
+  }
+
+  return (
+    <div className={cn("flex flex-col h-full bg-neutral-900 border-r border-neutral-800", className)}>
+      {/* Logo */}
+      <div className="p-6 border-b border-neutral-800">
+        <div className="flex items-center space-x-4">
+          <SwiviLogo size={36} />
+          <div>
+            <h1 className="text-white font-light text-lg">Swivi Clippers</h1>
+            <p className="text-neutral-400 text-xs">Premium content platform</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 p-4 space-y-2">
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-neutral-300 hover:bg-neutral-800 hover:text-white transition-colors group"
+          >
+            <item.icon className="w-5 h-5" />
+            <span className="font-medium">{item.label}</span>
+            {item.badge && (
+              <span className="ml-auto bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+                {item.badge}
+              </span>
+            )}
+          </Link>
+        ))}
+      </nav>
+
+      {/* User Profile */}
+      <div className="p-4 border-t border-neutral-800">
+        <div className="flex items-center space-x-3 mb-3">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={session?.user?.image || ""} />
+            <AvatarFallback className="bg-green-600 text-white">
+              {session?.user?.name?.[0] || "U"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-sm font-medium truncate">
+              {session?.user?.name || "Clipper"}
+            </p>
+            <p className="text-neutral-400 text-xs truncate">
+              {session?.user?.email || ""}
+            </p>
+          </div>
+        </div>
+
+        <Button
+          onClick={handleSignOut}
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800"
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          Sign Out
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  return (
+    <div className="min-h-screen bg-black flex">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block w-64">
+        <Sidebar />
+      </div>
+
+      {/* Mobile Sidebar */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="left" className="p-0 w-64 bg-neutral-900 border-r border-neutral-800">
+          <Sidebar />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Mobile Header */}
+        <div className="lg:hidden flex items-center justify-between p-4 border-b border-neutral-800">
+          <div className="flex items-center space-x-3">
+            <SwiviLogo size={32} />
+            <h1 className="text-white font-light">Swivi Clippers</h1>
+          </div>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-white">
+                <Menu className="w-6 h-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-64 bg-neutral-900 border-r border-neutral-800">
+              <Sidebar />
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="p-6"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
+    </div>
+  )
+}

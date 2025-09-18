@@ -35,7 +35,7 @@ export function Hero() {
         {[...Array(3)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-[500px] h-[500px] rounded-full bg-black/5"
+            className="absolute w-[500px] h-[500px] rounded-full bg-white/10"
             initial={{
               x: `${Math.random() * 100}%`,
               y: `${Math.random() * 100}%`,
@@ -120,7 +120,7 @@ export function Hero() {
           {/* Trust indicator */}
           <motion.div
             variants={itemVariants}
-            className="mt-16 pt-16 border-t border-black/5"
+            className="mt-16 pt-16 border-t border-white/10"
           >
             <motion.p
               className="text-sm text-muted-foreground"

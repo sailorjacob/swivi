@@ -80,14 +80,15 @@ export default function RootLayout({
         />
       </head>
       <body className={cn(
-        "min-h-screen bg-background font-sans antialiased",
+        "min-h-screen bg-background font-sans antialiased dark",
         inter.className
       )}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
+          forcedTheme="dark"
         >
           <AuthProvider>
             <QueryProvider>

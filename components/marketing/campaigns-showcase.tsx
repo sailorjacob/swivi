@@ -283,8 +283,8 @@ export function CampaignsShowcase() {
               variants={itemVariants}
               className="relative"
             >
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="border-b border-black/5">
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-neutral-800/60 border-neutral-700">
+                <CardHeader className="border-b border-neutral-600/30">
                   <div className="flex items-center gap-3 mb-3">
                         {campaign.clientLogo && (
                           <div className="flex-shrink-0">
@@ -293,7 +293,7 @@ export function CampaignsShowcase() {
                               alt={campaign.clientName}
                               width={80}
                               height={80}
-                              className="rounded-lg object-cover ring-1 ring-black/10"
+                              className="rounded-lg object-cover ring-1 ring-neutral-600/30"
                               unoptimized
                             />
                           </div>

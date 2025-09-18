@@ -83,7 +83,7 @@ export default function ClippersPage() {
           {/* Subtle animated background */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <motion.div
-              className="absolute w-[600px] h-[600px] rounded-full bg-black/3"
+              className="absolute w-[600px] h-[600px] rounded-full bg-neutral-100/60"
               initial={{ x: "-50%", y: "-50%" }}
               animate={{
                 x: ["0%", "100%", "0%"],

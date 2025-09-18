@@ -85,13 +85,13 @@ const getPlatformIcon = (platform: string) => {
 const getPlatformColor = (platform: string) => {
   switch (platform) {
     case "youtube":
-      return "bg-red-600"
+      return "bg-red-500"
     case "tiktok":
-      return "bg-black"
+      return "bg-gray-200"
     case "instagram":
-      return "bg-gradient-to-r from-purple-600 to-pink-600"
+      return "bg-gradient-to-r from-purple-500 to-pink-500"
     default:
-      return "bg-gray-600"
+      return "bg-gray-400"
   }
 }
 
@@ -112,6 +112,8 @@ export default function OwningManhattanProject() {
   const loadMoreContent = () => {
     setVisibleContent(prev => Math.min(prev + 16, contentItems.length))
   }
+
+  // Theme is handled by the case studies layout now
 
   useEffect(() => {
     const handleScroll = () => {
@@ -152,7 +154,7 @@ export default function OwningManhattanProject() {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-white text-gray-900 min-h-screen">
       {/* Header */}
       <motion.div
         variants={containerVariants}
@@ -185,7 +187,7 @@ export default function OwningManhattanProject() {
             Owning Manhattan
           </h1>
           <div className="flex items-center justify-center gap-3">
-            <Badge variant="outline" className="text-xs">Netflix TV Series</Badge>
+            <Badge variant="outline" className="text-xs text-gray-900 border-gray-300">Netflix TV Series</Badge>
             <span className="text-2xl">📸</span>
             <span className="text-sm text-muted-foreground">2 days • 6.1M views • 610% ROI</span>
           </div>
@@ -272,7 +274,7 @@ export default function OwningManhattanProject() {
                 exit="hidden"
                 layout
               >
-                <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+                <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden border-0">
                   <CardContent className="p-0">
                     <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
                       {/* YouTube Thumbnail */}
@@ -305,13 +307,13 @@ export default function OwningManhattanProject() {
 
                       {/* TikTok Thumbnail */}
                       {item.platform === "tiktok" && (
-                        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
+                        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
                           <div className="relative">
-                            <div className="w-16 h-16 bg-white/10 rounded-xl backdrop-blur-sm flex items-center justify-center">
+                            <div className="w-16 h-16 bg-white/20 rounded-xl backdrop-blur-sm flex items-center justify-center">
                               <div className="text-3xl">🎵</div>
                             </div>
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full border-2 border-white flex items-center justify-center">
-                              <div className="text-xs text-white font-bold">T</div>
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full border-2 border-cyan-400 flex items-center justify-center">
+                              <div className="text-xs text-cyan-600 font-bold">T</div>
                             </div>
                           </div>
                         </div>
@@ -319,7 +321,7 @@ export default function OwningManhattanProject() {
                       
                       {/* Platform Icon Overlay */}
                       <div className="absolute top-3 left-3 z-10">
-                        <div className={`${getPlatformColor(item.platform)} text-white text-xs px-2 py-1 rounded-full flex items-center gap-1`}>
+                        <div className={`${getPlatformColor(item.platform)} ${item.platform === 'tiktok' ? 'text-gray-800' : 'text-white'} text-xs px-2 py-1 rounded-full flex items-center gap-1`}>
                           <span>{getPlatformIcon(item.platform)}</span>
                           <span className="capitalize">{item.platform}</span>
                         </div>
@@ -327,7 +329,7 @@ export default function OwningManhattanProject() {
 
                       {/* View Count Badge */}
                       <div className="absolute top-3 right-3 z-10">
-                        <div className="bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                        <div className="bg-black/80 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 backdrop-blur-sm">
                           <Eye className="h-3 w-3" />
                           <span>{formatViews(item.views)}</span>
                         </div>
@@ -342,22 +344,22 @@ export default function OwningManhattanProject() {
 
                       {/* Content Preview Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      
+
                       {/* Creator Info */}
                       <div className="absolute bottom-3 left-3 z-10">
-                        <div className="text-white text-xs font-medium">
+                        <div className="text-white text-xs font-medium drop-shadow-lg">
                           @{item.creator}
                         </div>
                       </div>
                     </div>
 
                     {/* Content Info */}
-                    <div className="p-3">
+                    <div className="p-3 bg-white">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium text-sm truncate">
+                        <h3 className="font-medium text-sm truncate text-gray-900">
                           {item.creator}
                         </h3>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs text-gray-600">
                           {item.date}
                         </span>
                       </div>
@@ -366,7 +368,7 @@ export default function OwningManhattanProject() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-xs h-7 flex-1 mr-2"
+                          className="text-xs h-7 flex-1 mr-2 border-gray-300 text-gray-700 hover:bg-gray-50"
                           asChild
                         >
                           <a href={item.url} target="_blank" rel="noopener noreferrer">

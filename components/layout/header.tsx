@@ -34,7 +34,7 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center">
           <Image
-            src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs//swivi%20logo.png"
+            src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
             alt="Swivi"
             width={300}
             height={100}
@@ -59,18 +59,18 @@ export function Header() {
               
               {/* Dropdown Menu */}
               {item.dropdown && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-black/10 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="absolute top-full left-0 mt-2 w-72 bg-neutral-900 border border-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-2">
                     {item.dropdown.map((dropdownItem) => (
                       <Link
                         key={dropdownItem.name}
                         href={dropdownItem.href}
-                        className="block px-4 py-3 hover:bg-gray-50 transition-colors"
+                        className="block px-4 py-3 hover:bg-neutral-800 transition-colors"
                       >
-                        <div className="font-medium text-sm text-foreground">
+                        <div className="font-medium text-sm text-white">
                           {dropdownItem.name}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className="text-xs text-gray-400 mt-1">
                           {dropdownItem.description}
                         </div>
                       </Link>

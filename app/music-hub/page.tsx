@@ -3,12 +3,13 @@ import { ArtistSubmission } from "@/components/music-hub/artist-submission"
 import { ClipperDashboard } from "@/components/music-hub/clipper-dashboard"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { DarkThemeWrapper } from "../layout-wrapper"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Music, Upload, DollarSign } from "lucide-react"
 
 export default function MusicHubPage() {
   return (
-    <>
+    <DarkThemeWrapper>
       <Header />
       <main className="flex min-h-screen flex-col pt-16">
         <section className="py-20 md:py-32 bg-gradient-to-b from-primary/5 to-transparent">
@@ -70,6 +71,6 @@ export default function MusicHubPage() {
         </section>
       </main>
       <Footer />
-    </>
+    </DarkThemeWrapper>
   )
 } 

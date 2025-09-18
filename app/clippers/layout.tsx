@@ -1,0 +1,54 @@
+"use client"
+
+import { useEffect } from "react"
+import { useTheme } from "next-themes"
+import { ThemeProvider } from "@/components/providers/theme-provider"
+import { QueryProvider } from "@/components/providers/query-provider"
+import { AuthProvider } from "@/components/providers/auth-provider"
+import { Toaster } from "react-hot-toast"
+
+function ClippersThemeEnforcer({ children }: { children: React.ReactNode }) {
+  const { setTheme } = useTheme()
+
+  useEffect(() => {
+    setTheme("dark")
+  }, [setTheme])
+
+  return <>{children}</>
+}
+
+export default function ClippersLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem={false}
+      disableTransitionOnChange
+    >
+      <AuthProvider>
+        <QueryProvider>
+          <div className="min-h-screen bg-black text-white">
+            <ClippersThemeEnforcer>
+              {children}
+            </ClippersThemeEnforcer>
+          </div>
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              duration: 5000,
+              style: {
+                background: "#1f2937",
+                color: "#ffffff",
+                border: "1px solid #374151",
+              },
+            }}
+          />
+        </QueryProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  )
+}

@@ -116,7 +116,7 @@ export function CampaignsPreview() {
                 whileHover={{ y: -5 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+                <Card className="h-full hover:shadow-lg transition-shadow duration-300 bg-neutral-800/60 border-neutral-700">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>

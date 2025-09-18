@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { ArrowRight, TrendingUp, DollarSign, Users, BarChart3 } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { DarkThemeWrapper } from "../layout-wrapper"
 import Image from "next/image"
 
 const stats = [
@@ -77,7 +78,7 @@ const itemVariants = {
 
 export default function BrandsPage() {
   return (
-    <>
+    <DarkThemeWrapper>
       <Header />
       <main className="flex min-h-screen flex-col pt-16">
         {/* Hero Section */}
@@ -85,7 +86,7 @@ export default function BrandsPage() {
           {/* Subtle animated background */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <motion.div
-              className="absolute w-[600px] h-[600px] rounded-full bg-black/3"
+              className="absolute w-[600px] h-[600px] rounded-full bg-gray-800/20"
               initial={{ x: "-50%", y: "-50%" }}
               animate={{
                 x: ["0%", "100%", "0%"],
@@ -330,6 +331,6 @@ export default function BrandsPage() {
         </section>
       </main>
       <Footer />
-    </>
+    </DarkThemeWrapper>
   )
 } 

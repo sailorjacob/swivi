@@ -10,10 +10,11 @@ import { Founder } from "@/components/marketing/founder"
 import { CampaignsPreview } from "@/components/marketing/campaigns-preview"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { DarkThemeWrapper } from "./layout-wrapper"
 
 export default function HomePage() {
   return (
-    <>
+    <DarkThemeWrapper>
       <Header />
       <main className="flex min-h-screen flex-col pt-16">
         <Hero />
@@ -30,6 +31,6 @@ export default function HomePage() {
         </div>
       </main>
       <Footer />
-    </>
+    </DarkThemeWrapper>
   )
 } 

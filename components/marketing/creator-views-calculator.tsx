@@ -225,7 +225,7 @@ export function CreatorViewsCalculator() {
                   <p className="text-xs text-muted-foreground mt-1">
                     vs. traditional paid ads
                   </p>
-                  <p className="text-xs text-blue-600 mt-1 font-medium">
+                  <p className="text-xs text-gray-400 mt-1 font-medium">
                     Click to see breakdown
                   </p>
                 </CardContent>
@@ -335,44 +335,44 @@ export function CreatorViewsCalculator() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.3 }}
-            className="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-black/10"
+            className="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-gray-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <h3 className="text-xl font-medium text-black mb-2">Your Annual Savings Breakdown</h3>
-                  <p className="text-2xl font-bold text-primary">{formatCurrency(annualSavings)}</p>
-                  <p className="text-sm text-black/60 mt-1">vs. traditional advertising</p>
+                  <h3 className="text-xl font-medium text-gray-900 mb-2">Your Annual Savings Breakdown</h3>
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(annualSavings)}</p>
+                  <p className="text-sm text-gray-600 mt-1">vs. traditional advertising</p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowSavingsPopup(false)}
-                  className="shrink-0 hover:bg-black/5"
+                  className="shrink-0 hover:bg-gray-100"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
               
               <div className="space-y-5">
-                <p className="text-base text-black/70 leading-relaxed">
+                <p className="text-base text-gray-700 leading-relaxed">
                   Our clipper network delivers authentic reach at just $1 CPM—saving you up to 80% compared to traditional paid ads at $5 CPM.
                 </p>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-black/80">Traditional Ads</h4>
-                    <Card className="border border-black/20">
+                    <h4 className="text-sm font-medium text-gray-700">Traditional Ads</h4>
+                    <Card className="border border-gray-200 bg-gray-50">
                       <CardContent className="p-3">
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="text-xs text-black/60">CPM:</span>
-                            <span className="font-semibold text-sm">$5.00</span>
+                            <span className="text-xs text-gray-600">CPM:</span>
+                            <span className="font-semibold text-sm text-gray-900">$5.00</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-xs text-black/60">Annual Cost:</span>
-                            <span className="font-bold text-sm">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 5))}</span>
+                            <span className="text-xs text-gray-600">Annual Cost:</span>
+                            <span className="font-bold text-sm text-red-600">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 5))}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -380,17 +380,17 @@ export function CreatorViewsCalculator() {
                   </div>
 
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-primary">Clipper Network</h4>
-                    <Card className="border border-primary/30 bg-primary/5">
+                    <h4 className="text-sm font-medium text-green-700">Clipper Network</h4>
+                    <Card className="border border-green-200 bg-green-50">
                       <CardContent className="p-3">
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="text-xs text-black/60">CPM:</span>
-                            <span className="font-semibold text-sm text-primary">$1.00</span>
+                            <span className="text-xs text-gray-600">CPM:</span>
+                            <span className="font-semibold text-sm text-green-700">$1.00</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-xs text-black/60">Annual Cost:</span>
-                            <span className="font-bold text-sm text-primary">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 1))}</span>
+                            <span className="text-xs text-gray-600">Annual Cost:</span>
+                            <span className="font-bold text-sm text-green-700">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 1))}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -398,12 +398,12 @@ export function CreatorViewsCalculator() {
                   </div>
                 </div>
 
-                <Card className="bg-black text-white border-black">
+                <Card className="bg-white border border-gray-200 shadow-lg">
                   <CardContent className="p-4 text-center">
-                    <h5 className="text-sm font-medium mb-2">Total Annual Savings</h5>
-                    <p className="text-2xl font-bold mb-2">{formatCurrency(annualSavings)}</p>
-                    <p className="text-xs text-white/80">
-                      That's an <span className="font-semibold text-white">80% reduction</span> in ad costs
+                    <h5 className="text-sm font-medium mb-2 text-gray-900">Total Annual Savings</h5>
+                    <p className="text-2xl font-bold mb-2 text-green-600">{formatCurrency(annualSavings)}</p>
+                    <p className="text-xs text-gray-600">
+                      That's an <span className="font-semibold text-green-600">80% reduction</span> in ad costs
                     </p>
                   </CardContent>
                 </Card>
@@ -413,7 +413,7 @@ export function CreatorViewsCalculator() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowDetailedBreakdown(!showDetailedBreakdown)}
-                    className="text-black/60 hover:text-black hover:bg-black/5 text-xs"
+                    className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 text-xs"
                   >
                     {showDetailedBreakdown ? (
                       <>
@@ -438,44 +438,44 @@ export function CreatorViewsCalculator() {
                       transition={{ duration: 0.3 }}
                       className="space-y-4 overflow-hidden"
                     >
-                      <div className="pt-2 border-t border-black/10">
-                        <h5 className="text-sm font-medium text-black mb-3">Detailed Comparison</h5>
+                      <div className="pt-2 border-t border-gray-200">
+                        <h5 className="text-sm font-medium text-gray-900 mb-3">Detailed Comparison</h5>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-3">
-                            <h6 className="text-xs font-medium text-black/80">Traditional Paid Ads</h6>
-                            <Card className="border border-black/20">
+                            <h6 className="text-xs font-medium text-gray-700">Traditional Paid Ads</h6>
+                            <Card className="border border-gray-200 bg-gray-50">
                               <CardContent className="p-3">
                                 <div className="space-y-2">
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-black/60">CPM Rate:</span>
-                                    <span className="font-semibold text-xs">$5.00</span>
+                                    <span className="text-xs text-gray-600">CPM Rate:</span>
+                                    <span className="font-semibold text-xs text-gray-900">$5.00</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-black/60">Annual Views:</span>
-                                    <span className="font-medium text-xs">{formatNumber(monthlyViews * 12)}</span>
+                                    <span className="text-xs text-gray-600">Annual Views:</span>
+                                    <span className="font-medium text-xs text-gray-900">{formatNumber(monthlyViews * 12)}</span>
                                   </div>
-                                  <div className="flex justify-between items-center border-t pt-2">
-                                    <span className="font-medium text-xs">Annual Cost:</span>
-                                    <span className="font-bold text-xs">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 5))}</span>
+                                  <div className="flex justify-between items-center border-t border-gray-200 pt-2">
+                                    <span className="font-medium text-xs text-gray-900">Annual Cost:</span>
+                                    <span className="font-bold text-xs text-red-600">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 5))}</span>
                                   </div>
                                 </div>
-                                <div className="mt-3 pt-3 border-t">
-                                  <ul className="space-y-1 text-xs text-black/60">
+                                <div className="mt-3 pt-3 border-t border-gray-200">
+                                  <ul className="space-y-1 text-xs text-gray-600">
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-black/40 rounded-full"></div>
+                                      <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                                       Low engagement (1-2%)
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-black/40 rounded-full"></div>
+                                      <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                                       Ad fatigue issues
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-black/40 rounded-full"></div>
+                                      <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                                       Limited authenticity
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-black/40 rounded-full"></div>
+                                      <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                                       High acquisition cost
                                     </li>
                                   </ul>
@@ -485,39 +485,39 @@ export function CreatorViewsCalculator() {
                           </div>
 
                           <div className="space-y-3">
-                            <h6 className="text-xs font-medium text-primary">Clipper Marketing</h6>
-                            <Card className="border border-primary/30 bg-primary/5">
+                            <h6 className="text-xs font-medium text-green-700">Clipper Marketing</h6>
+                            <Card className="border border-green-200 bg-green-50">
                               <CardContent className="p-3">
                                 <div className="space-y-2">
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-black/60">CPM Rate:</span>
-                                    <span className="font-semibold text-xs text-primary">$1.00</span>
+                                    <span className="text-xs text-gray-600">CPM Rate:</span>
+                                    <span className="font-semibold text-xs text-green-700">$1.00</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-black/60">Annual Views:</span>
-                                    <span className="font-medium text-xs">{formatNumber(monthlyViews * 12)}</span>
+                                    <span className="text-xs text-gray-600">Annual Views:</span>
+                                    <span className="font-medium text-xs text-gray-900">{formatNumber(monthlyViews * 12)}</span>
                                   </div>
-                                  <div className="flex justify-between items-center border-t pt-2">
-                                    <span className="font-medium text-xs">Annual Cost:</span>
-                                    <span className="font-bold text-xs text-primary">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 1))}</span>
+                                  <div className="flex justify-between items-center border-t border-gray-200 pt-2">
+                                    <span className="font-medium text-xs text-gray-900">Annual Cost:</span>
+                                    <span className="font-bold text-xs text-green-700">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 1))}</span>
                                   </div>
                                 </div>
-                                <div className="mt-3 pt-3 border-t">
-                                  <ul className="space-y-1 text-xs text-black/60">
+                                <div className="mt-3 pt-3 border-t border-gray-200">
+                                  <ul className="space-y-1 text-xs text-gray-600">
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-primary rounded-full"></div>
+                                      <div className="w-1 h-1 bg-green-600 rounded-full"></div>
                                       High engagement (5-8%)
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-primary rounded-full"></div>
+                                      <div className="w-1 h-1 bg-green-600 rounded-full"></div>
                                       Authentic content
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-primary rounded-full"></div>
+                                      <div className="w-1 h-1 bg-green-600 rounded-full"></div>
                                       Scalable reach
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-primary rounded-full"></div>
+                                      <div className="w-1 h-1 bg-green-600 rounded-full"></div>
                                       Lower acquisition cost
                                     </li>
                                   </ul>
@@ -527,7 +527,7 @@ export function CreatorViewsCalculator() {
                           </div>
                         </div>
 
-                        <div className="text-xs text-black/60 text-center pt-3 border-t">
+                        <div className="text-xs text-gray-600 text-center pt-3 border-t border-gray-200">
                           Based on {formatNumber(monthlyViews)} monthly views, our clipper network saves you {formatCurrency(annualSavings)} annually compared to traditional advertising while delivering 3x higher engagement rates.
                         </div>
                       </div>

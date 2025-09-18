@@ -375,7 +375,7 @@ export function LiveCampaigns() {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-gray-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${getProgressPercentage(campaign.budgetSpent, campaign.budget)}%` }}
                       />
                     </div>

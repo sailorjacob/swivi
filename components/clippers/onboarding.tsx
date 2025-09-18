@@ -33,20 +33,20 @@ const onboardingSteps: OnboardingStep[] = [
         </div>
         
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="text-center p-4 border border-black/10 rounded-lg">
-            <DollarSign className="h-8 w-8 mx-auto mb-2 text-green-600" />
-            <h4 className="font-medium mb-1">Earn $20-100+</h4>
-            <p className="text-sm text-muted-foreground">Per approved clip</p>
+          <div className="text-center p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
+            <DollarSign className="h-8 w-8 mx-auto mb-2 text-green-400" />
+            <h4 className="font-medium mb-1 text-white">Earn $20-100+</h4>
+            <p className="text-sm text-neutral-400">Per approved clip</p>
           </div>
-          <div className="text-center p-4 border border-black/10 rounded-lg">
-            <TrendingUp className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-            <h4 className="font-medium mb-1">Top Performers</h4>
-            <p className="text-sm text-muted-foreground">Earn $2,000+ monthly</p>
+          <div className="text-center p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
+            <TrendingUp className="h-8 w-8 mx-auto mb-2 text-white" />
+            <h4 className="font-medium mb-1 text-white">Top Performers</h4>
+            <p className="text-sm text-neutral-400">Earn $2,000+ monthly</p>
           </div>
-          <div className="text-center p-4 border border-black/10 rounded-lg">
-            <Users className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-            <h4 className="font-medium mb-1">87+ Clippers</h4>
-            <p className="text-sm text-muted-foreground">Growing community</p>
+          <div className="text-center p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
+            <Users className="h-8 w-8 mx-auto mb-2 text-purple-400" />
+            <h4 className="font-medium mb-1 text-white">87+ Clippers</h4>
+            <p className="text-sm text-neutral-400">Growing community</p>
           </div>
         </div>
       </div>
@@ -62,7 +62,7 @@ const onboardingSteps: OnboardingStep[] = [
         <h3 className="text-2xl font-light mb-4">Clip Requirements & Guidelines</h3>
         
         <div className="space-y-4">
-          <div className="flex items-start gap-4 p-4 border border-black/10 rounded-lg">
+          <div className="flex items-start gap-4 p-4 border border-neutral-700 rounded-lg">
             <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
             <div>
               <h4 className="font-medium mb-1">Engagement Rate: 0.5% minimum</h4>
@@ -73,7 +73,7 @@ const onboardingSteps: OnboardingStep[] = [
             </div>
           </div>
           
-          <div className="flex items-start gap-4 p-4 border border-black/10 rounded-lg">
+          <div className="flex items-start gap-4 p-4 border border-neutral-700 rounded-lg">
             <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
             <div>
               <h4 className="font-medium mb-1">Duration: 7+ seconds</h4>
@@ -83,7 +83,7 @@ const onboardingSteps: OnboardingStep[] = [
             </div>
           </div>
           
-          <div className="flex items-start gap-4 p-4 border border-black/10 rounded-lg">
+          <div className="flex items-start gap-4 p-4 border border-neutral-700 rounded-lg">
             <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
             <div>
               <h4 className="font-medium mb-1">Public Engagement Stats</h4>
@@ -93,7 +93,7 @@ const onboardingSteps: OnboardingStep[] = [
             </div>
           </div>
           
-          <div className="flex items-start gap-4 p-4 border border-black/10 rounded-lg">
+          <div className="flex items-start gap-4 p-4 border border-neutral-700 rounded-lg">
             <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
             <div>
               <h4 className="font-medium mb-1">Daily Limit: 30 clips</h4>
@@ -116,37 +116,37 @@ const onboardingSteps: OnboardingStep[] = [
         <h3 className="text-2xl font-light mb-4">Platform Support</h3>
         
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="p-4 border border-black/10 rounded-lg">
-            <h4 className="font-medium mb-2 text-red-500">🎵 TikTok</h4>
-            <p className="text-sm text-muted-foreground">
+          <div className="p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
+            <h4 className="font-medium mb-2 text-white">TikTok</h4>
+            <p className="text-sm text-neutral-400">
               Perfect for viral short-form content. Great engagement rates and discovery.
             </p>
           </div>
           
-          <div className="p-4 border border-black/10 rounded-lg">
-            <h4 className="font-medium mb-2 text-red-600">📺 YouTube Shorts</h4>
-            <p className="text-sm text-muted-foreground">
+          <div className="p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
+            <h4 className="font-medium mb-2 text-white">YouTube Shorts</h4>
+            <p className="text-sm text-neutral-400">
               Excellent for reaching YouTube's massive audience. High revenue potential.
             </p>
           </div>
           
-          <div className="p-4 border border-black/10 rounded-lg">
-            <h4 className="font-medium mb-2 text-purple-600">📸 Instagram Reels</h4>
-            <p className="text-sm text-muted-foreground">
+          <div className="p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
+            <h4 className="font-medium mb-2 text-white">Instagram Reels</h4>
+            <p className="text-sm text-neutral-400">
               Great for lifestyle and entertainment content. Strong engagement from followers.
             </p>
           </div>
           
-          <div className="p-4 border border-black/10 rounded-lg">
-            <h4 className="font-medium mb-2 text-blue-500">🐦 X (Twitter)</h4>
-            <p className="text-sm text-muted-foreground">
+          <div className="p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
+            <h4 className="font-medium mb-2 text-white">X (Twitter)</h4>
+            <p className="text-sm text-neutral-400">
               Perfect for news, commentary, and trending topics. Fast virality potential.
             </p>
           </div>
         </div>
         
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">
+        <div className="p-4 bg-neutral-800 border border-neutral-700 rounded-lg">
+          <p className="text-sm text-white">
             <strong>Pro Tip:</strong> You can connect multiple accounts from each platform. 
             There's no limit to how many accounts you can link to maximize your earning potential.
           </p>
@@ -229,9 +229,9 @@ const onboardingSteps: OnboardingStep[] = [
         <h3 className="text-2xl font-light mb-4">Earnings & Payments</h3>
         
         <div className="space-y-4">
-          <div className="p-4 border border-green-200 bg-green-50 rounded-lg">
-            <h4 className="font-medium mb-2 text-green-800">💰 Payment Structure</h4>
-            <ul className="text-sm text-green-700 space-y-1">
+          <div className="p-4 border border-neutral-700 bg-neutral-800/50 rounded-lg">
+            <h4 className="font-medium mb-2 text-white">Payment Structure</h4>
+            <ul className="text-sm text-neutral-300 space-y-1">
               <li>• Each campaign has different payout rates</li>
               <li>• Maximum 30% of total budget per clipper</li>
               <li>• Views from all your clips add up together</li>
@@ -239,9 +239,9 @@ const onboardingSteps: OnboardingStep[] = [
             </ul>
           </div>
           
-          <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
-            <h4 className="font-medium mb-2 text-blue-800">📊 Performance Tracking</h4>
-            <ul className="text-sm text-blue-700 space-y-1">
+          <div className="p-4 border border-neutral-700 bg-neutral-800/50 rounded-lg">
+            <h4 className="font-medium mb-2 text-white">Performance Tracking</h4>
+            <ul className="text-sm text-neutral-300 space-y-1">
               <li>• Stats update automatically every 2 hours</li>
               <li>• Real-time leaderboards show your ranking</li>
               <li>• Final update before campaign closes</li>
@@ -249,9 +249,9 @@ const onboardingSteps: OnboardingStep[] = [
             </ul>
           </div>
           
-          <div className="p-4 border border-yellow-200 bg-yellow-50 rounded-lg">
-            <h4 className="font-medium mb-2 text-yellow-800">⚠️ Important Notes</h4>
-            <ul className="text-sm text-yellow-700 space-y-1">
+          <div className="p-4 border border-neutral-700 bg-neutral-800/50 rounded-lg">
+            <h4 className="font-medium mb-2 text-white">Important Notes</h4>
+            <ul className="text-sm text-neutral-300 space-y-1">
               <li>• Views don't carry over between campaigns</li>
               <li>• Suspicious engagement can result in permanent bans</li>
               <li>• Keep engagement stats public during campaigns</li>
@@ -306,12 +306,12 @@ export function ClippersOnboarding() {
           <button
             key={step.id}
             onClick={() => handleStepClick(index)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors border ${
               currentStep === index
-                ? 'bg-black text-white'
+                ? 'bg-neutral-800 text-white border-white'
                 : completedSteps.has(index)
-                ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-neutral-800/50 text-green-400 border-green-600 hover:bg-neutral-700'
+                : 'bg-transparent text-neutral-400 border-neutral-600 hover:bg-neutral-800/50 hover:text-white'
             }`}
           >
             {completedSteps.has(index) ? (
@@ -384,8 +384,8 @@ export function ClippersOnboarding() {
       </div>
 
       {/* Quick Actions */}
-      <div className="mt-12 p-6 bg-gray-50 rounded-lg">
-        <h3 className="font-medium mb-4">Quick Actions</h3>
+      <div className="mt-12 p-6 bg-neutral-800/50 border border-neutral-700 rounded-lg">
+        <h3 className="font-medium mb-4 text-white">Quick Actions</h3>
         <div className="grid md:grid-cols-3 gap-4">
           <Button variant="outline" size="sm" className="justify-start">
             <HelpCircle className="mr-2 h-4 w-4" />
