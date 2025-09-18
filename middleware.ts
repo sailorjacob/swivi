@@ -1,21 +1,29 @@
+import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
 
-export function middleware(request: NextRequest) {
-  // Demo mode: Allow access to all clipper pages in development
-  const isDemoMode = process.env.NODE_ENV === "development"
-  
-  if (isDemoMode) {
+export default withAuth(
+  function middleware(req) {
+    // Add any additional middleware logic here
     return NextResponse.next()
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        // Demo mode: Allow access in development
+        if (process.env.NODE_ENV === "development" && req.nextUrl.pathname.includes("clippers-demo")) {
+          return true
+        }
+        
+        // Check if user is authenticated for protected routes
+        return !!token
+      },
+    },
   }
-  
-  // In production, you would add authentication logic here
-  // For now, just allow access
-  return NextResponse.next()
-}
+)
 
 export const config = {
   matcher: [
     "/clippers/dashboard/:path*",
+    "/api/clippers/:path*",
   ],
 }

@@ -46,14 +46,34 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
     setIsLoading(true)
     
     try {
-      // TODO: Implement actual submission logic
-      await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate API call
-      
+      const submissionData = {
+        campaignId: campaign?.id,
+        clipUrl: data.clipUrl,
+        platform: data.platform?.toUpperCase(),
+        // mediaFileUrl would be set after file upload to Cloudinary
+        mediaFileUrl: uploadedFile ? "pending_upload" : undefined,
+      }
+
+      const response = await fetch("/api/clippers/submissions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submissionData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to submit clip")
+      }
+
+      const result = await response.json()
       toast.success("Clip submitted successfully! You'll be notified once it's reviewed.")
       reset()
       setUploadedFile(null)
       onOpenChange(false)
     } catch (error) {
+      console.error("Submission error:", error)
       toast.error("Failed to submit clip. Please try again.")
     } finally {
       setIsLoading(false)
