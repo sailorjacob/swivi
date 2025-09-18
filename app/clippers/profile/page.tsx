@@ -211,7 +211,7 @@ function SubmitClipForm() {
           className="bg-gray-800 border-gray-700 text-white"
         />
         {errors.url && (
-          <p className="text-red-400 text-sm mt-1">{errors.url?.message || 'This field is required'}</p>
+          <p className="text-red-400 text-sm mt-1">{String(errors.url?.message || 'This field is required')}</p>
         )}
       </div>
 
