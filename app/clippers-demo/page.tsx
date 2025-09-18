@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { motion } from "framer-motion"
 import {
   Home,
   User,
@@ -155,7 +154,6 @@ function DemoPageCard({ page, index }: { page: DemoPage; index: number }) {
   const Icon = page.icon
   
   return (
-    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -205,7 +203,6 @@ function DemoPageCard({ page, index }: { page: DemoPage; index: number }) {
           </div>
         </CardContent>
       </Card>
-    </motion.div>
   )
 }
 
@@ -222,14 +219,11 @@ export default function ClippersDemoPage() {
         <section className="py-20 md:py-32 bg-background">
           <div className="max-width-wrapper section-padding">
             <div className="text-center mb-16">
-              <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-3xl sm:text-4xl md:text-5xl font-light mb-6"
               >
                 Clippers Platform <span className="font-normal">Demo</span>
-              </motion.h1>
-              <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -237,9 +231,7 @@ export default function ClippersDemoPage() {
               >
                 Explore the complete clippers platform experience. Navigate through all the pages and features 
                 built for content creators to earn money through viral clip creation.
-              </motion.p>
               
-              <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -257,11 +249,9 @@ export default function ClippersDemoPage() {
                   <Target className="w-4 h-4 text-neutral-500" />
                   <span>No Auth Required</span>
                 </div>
-              </motion.div>
             </div>
 
             {/* Quick Start */}
-            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
@@ -294,7 +284,6 @@ export default function ClippersDemoPage() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
 
             {/* Complete Pages */}
             <div className="mb-16">
@@ -319,7 +308,6 @@ export default function ClippersDemoPage() {
             )}
 
             {/* Platform Overview */}
-            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
@@ -360,7 +348,6 @@ export default function ClippersDemoPage() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
           </div>
         </section>
       </main>

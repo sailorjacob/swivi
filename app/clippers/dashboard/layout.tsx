@@ -35,17 +35,14 @@ interface NavItem {
   badge?: string
 }
 
-const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/clippers/dashboard", icon: Home },
-  { label: "Active Campaigns", href: "/clippers/dashboard/campaigns", icon: Target },
-  { label: "Profile", href: "/clippers/dashboard/profile", icon: User },
-  { label: "Analytics", href: "/clippers/dashboard/analytics", icon: BarChart3 },
-  { label: "Payouts", href: "/clippers/dashboard/payouts", icon: DollarSign },
-  { label: "Social Accounts", href: "/clippers/dashboard/social-accounts", icon: Users },
-  { label: "Referrals", href: "/clippers/dashboard/referrals", icon: Trophy },
-  { label: "Rules", href: "/clippers/dashboard/rules", icon: FileText },
-  { label: "Support", href: "/clippers/dashboard/support", icon: HelpCircle },
-]
+  const navItems: NavItem[] = [
+    { label: "Dashboard", href: "/clippers/dashboard", icon: Home },
+    { label: "Campaigns", href: "/clippers/dashboard/campaigns", icon: Target },
+    { label: "Profile", href: "/clippers/dashboard/profile", icon: User },
+    { label: "Analytics", href: "/clippers/dashboard/analytics", icon: BarChart3 },
+    { label: "Payouts", href: "/clippers/dashboard/payouts", icon: DollarSign },
+    { label: "Support", href: "/clippers/dashboard/support", icon: HelpCircle },
+  ]
 
 function Sidebar({ className }: { className?: string }) {
   const { data: session } = useSession()

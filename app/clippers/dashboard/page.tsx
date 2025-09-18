@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
 import {
   DollarSign,
   TrendingUp,
@@ -123,31 +122,25 @@ function StatCard({ stat }: { stat: typeof stats[0] }) {
   const Icon = stat.icon
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Card className="bg-card border-border">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
-              <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
-              <p className={`text-sm mt-1 ${
-                stat.changeType === 'positive' ? 'text-foreground' :
-                'text-muted-foreground'
-              }`}>
-                {stat.change}
-              </p>
-            </div>
-            <div className="p-3 rounded-lg bg-muted">
-              <Icon className="w-6 h-6 text-muted-foreground" />
-            </div>
+    <Card className="bg-card border-border">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
+            <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
+            <p className={`text-sm mt-1 ${
+              stat.changeType === 'positive' ? 'text-green-500' :
+              'text-muted-foreground'
+            }`}>
+              {stat.change}
+            </p>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+          <div className="p-3 rounded-lg bg-muted">
+            <Icon className="w-6 h-6 text-muted-foreground" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -307,8 +300,8 @@ export default function DashboardPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link href="/clippers/dashboard/campaigns">
-              <Button className="w-full bg-foreground text-background hover:bg-foreground/90">
-                Browse Campaigns
+              <Button className="w-full bg-green-600 text-white hover:bg-green-700">
+                🎯 Browse Active Campaigns
               </Button>
             </Link>
             <Link href="/clippers/dashboard/profile">

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -72,7 +71,6 @@ export default function ClippersLanding() {
       {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -118,14 +116,12 @@ export default function ClippersLanding() {
               <Lock className="w-4 h-4" />
               <span>Gated platform - Email required to view campaigns</span>
             </div>
-          </motion.div>
         </div>
       </section>
 
       {/* Stats Section */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -144,14 +140,12 @@ export default function ClippersLanding() {
                 )
               })}
             </div>
-          </motion.div>
         </div>
       </section>
 
       {/* How It Works */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -163,7 +157,6 @@ export default function ClippersLanding() {
             <p className="text-xl text-muted-foreground">
               Simple, fast, and profitable
             </p>
-          </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -188,7 +181,6 @@ export default function ClippersLanding() {
             ].map((item, index) => {
               const Icon = item.icon
               return (
-                <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -207,7 +199,6 @@ export default function ClippersLanding() {
                       </p>
                     </CardContent>
                   </Card>
-                </motion.div>
               )
             })}
           </div>
@@ -217,7 +208,6 @@ export default function ClippersLanding() {
       {/* Testimonials */}
       <section className="py-20 px-4 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
@@ -229,11 +219,9 @@ export default function ClippersLanding() {
             <p className="text-xl text-muted-foreground">
               Real clippers, real earnings
             </p>
-          </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -265,7 +253,6 @@ export default function ClippersLanding() {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
             ))}
           </div>
         </div>
@@ -274,7 +261,6 @@ export default function ClippersLanding() {
       {/* CTA Section */}
       <section className="py-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.4 }}
@@ -294,7 +280,6 @@ export default function ClippersLanding() {
               Get Started Now
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-          </motion.div>
         </div>
       </section>
     </div>

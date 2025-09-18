@@ -55,6 +55,8 @@ model User {
   website       String?
   location      String?
   verified      Boolean   @default(false)
+  walletAddress String?   @map("wallet_address") // USDC wallet
+  paypalEmail   String?   @map("paypal_email")
   totalEarnings Decimal   @default(0) @db.Decimal(10, 2)
   totalViews    BigInt    @default(0)
   createdAt     DateTime  @default(now()) @map("created_at")
