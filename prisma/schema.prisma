@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL", "postgresql://localhost:5432/swivi_dev")
 }
 
 // NextAuth.js Models
