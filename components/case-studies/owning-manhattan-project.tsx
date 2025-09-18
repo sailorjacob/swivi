@@ -177,23 +177,25 @@ export default function OwningManhattanProject() {
             <Image
               src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
               alt="Owning Manhattan"
-              width={400}
-              height={400}
-              className="rounded-2xl object-cover ring-2 ring-black/10 shadow-lg"
+              width={300}
+              height={300}
+              className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-2xl object-cover ring-2 ring-black/10 shadow-lg"
               unoptimized
             />
           </div>
-          <h1 className="text-3xl md:text-4xl font-light mb-3">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-light mb-3">
             Owning Manhattan
           </h1>
-          <div className="flex items-center justify-center gap-3">
-            <Badge variant="outline" className="text-xs text-gray-900 border-gray-300">Netflix TV Series</Badge>
-            <span className="text-2xl">📸</span>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs text-gray-900 border-gray-300">Netflix TV Series</Badge>
+              <span className="text-2xl">📸</span>
+            </div>
             <span className="text-sm text-muted-foreground">2 days • 6.1M views • 610% ROI</span>
           </div>
         </motion.div>
 
-        <motion.p variants={itemVariants} className="text-lg text-muted-foreground max-w-3xl mx-auto text-center mb-8">
+        <motion.p variants={itemVariants} className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto text-center mb-8 px-4">
           Netflix series promotion campaign targeting real estate and lifestyle audiences. 
           Our clipper network created viral content showcasing the luxury real estate and drama 
           from Netflix's hit series, achieving exceptional reach and engagement.
@@ -204,12 +206,12 @@ export default function OwningManhattanProject() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="bg-gray-50 rounded-xl p-6 mt-8 mb-8 max-w-6xl mx-auto"
+          className="bg-gray-50 rounded-xl p-4 sm:p-6 mt-8 mb-8 max-w-6xl mx-auto"
         >
           <motion.h3 variants={itemVariants} className="text-lg font-light mb-4">
             Impact
           </motion.h3>
-          <motion.div variants={itemVariants} className="grid md:grid-cols-3 gap-4">
+          <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             <div>
               <h4 className="font-medium mb-2">Reach & Engagement</h4>
               <p className="text-sm text-muted-foreground">
@@ -235,22 +237,22 @@ export default function OwningManhattanProject() {
         </motion.section>
 
         {/* Campaign Stats */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8 mb-8 max-w-6xl mx-auto">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-8 mb-8 max-w-6xl mx-auto px-4">
           <div className="text-center">
-            <div className="text-2xl font-light mb-1">49</div>
-            <div className="text-sm text-muted-foreground">Clips Created</div>
+            <div className="text-xl sm:text-2xl font-light mb-1">49</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">Clips Created</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-light mb-1">6.1M</div>
-            <div className="text-sm text-muted-foreground">Total Views</div>
+            <div className="text-xl sm:text-2xl font-light mb-1">6.1M</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">Total Views</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-light mb-1">610%</div>
-            <div className="text-sm text-muted-foreground">ROI Achieved</div>
+            <div className="text-xl sm:text-2xl font-light mb-1">610%</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">ROI Achieved</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-light mb-1">$1,000</div>
-            <div className="text-sm text-muted-foreground">Total Budget</div>
+            <div className="text-xl sm:text-2xl font-light mb-1">$1,000</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">Total Budget</div>
           </div>
         </motion.div>
       </motion.div>
@@ -263,7 +265,7 @@ export default function OwningManhattanProject() {
         className="mb-12"
       >
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 max-w-6xl mx-auto px-4">
           <AnimatePresence>
             {contentItems.slice(0, visibleContent).map((item, index) => (
               <motion.div
@@ -320,18 +322,18 @@ export default function OwningManhattanProject() {
                       )}
                       
                       {/* Platform Icon Overlay */}
-                      <div className="absolute top-3 left-3 z-10">
+                      <div className="absolute top-2 left-2 z-10">
                         <div className={`${getPlatformColor(item.platform)} ${item.platform === 'tiktok' ? 'text-gray-800' : 'text-white'} text-xs px-2 py-1 rounded-full flex items-center gap-1`}>
-                          <span>{getPlatformIcon(item.platform)}</span>
-                          <span className="capitalize">{item.platform}</span>
+                          <span className="text-xs">{getPlatformIcon(item.platform)}</span>
+                          <span className="capitalize hidden sm:inline">{item.platform}</span>
                         </div>
                       </div>
 
                       {/* View Count Badge */}
-                      <div className="absolute top-3 right-3 z-10">
-                        <div className="bg-black/80 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 backdrop-blur-sm">
-                          <Eye className="h-3 w-3" />
-                          <span>{formatViews(item.views)}</span>
+                      <div className="absolute top-2 right-2 z-10">
+                        <div className="bg-black/90 text-white text-xs px-2 py-1.5 rounded-full flex items-center gap-1 backdrop-blur-sm min-w-0">
+                          <Eye className="h-3 w-3 flex-shrink-0" />
+                          <span className="font-medium whitespace-nowrap">{formatViews(item.views)}</span>
                         </div>
                       </div>
 
@@ -346,8 +348,8 @@ export default function OwningManhattanProject() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
                       {/* Creator Info */}
-                      <div className="absolute bottom-3 left-3 z-10">
-                        <div className="text-white text-xs font-medium drop-shadow-lg">
+                      <div className="absolute bottom-2 left-2 right-2 z-10">
+                        <div className="text-white text-xs font-medium drop-shadow-lg truncate">
                           @{item.creator}
                         </div>
                       </div>
@@ -355,30 +357,30 @@ export default function OwningManhattanProject() {
 
                     {/* Content Info */}
                     <div className="p-3 bg-white">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium text-sm truncate text-gray-900">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium text-sm truncate text-gray-900 flex-1 mr-2">
                           {item.creator}
                         </h3>
-                        <span className="text-xs text-gray-600">
+                        <span className="text-xs text-gray-600 whitespace-nowrap">
                           {item.date}
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-xs h-7 flex-1 mr-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                          className="text-xs h-7 flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
                           asChild
                         >
                           <a href={item.url} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-3 w-3 mr-1" />
-                            Open {item.platform}
+                            <span className="hidden sm:inline">Open </span>{item.platform}
                           </a>
                         </Button>
-                        <div className="flex items-center gap-1 text-xs font-medium text-green-600">
+                        <div className="flex items-center gap-1 text-xs font-medium text-green-600 justify-center sm:justify-start">
                           <TrendingUp className="h-3 w-3" />
-                          {formatViews(item.views)}
+                          {formatViews(item.views)} views
                         </div>
                       </div>
                     </div>

@@ -300,20 +300,20 @@ export function LiveCampaigns() {
 
             {/* Filter Tabs */}
             <Tabs value={selectedStatus} onValueChange={setSelectedStatus}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="all">All Status</TabsTrigger>
-                <TabsTrigger value="active">Active</TabsTrigger>
-                <TabsTrigger value="ending-soon">Ending Soon</TabsTrigger>
-                <TabsTrigger value="launching-soon">Launching Soon</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto p-1">
+                <TabsTrigger value="all" className="text-xs sm:text-sm px-2 py-2">All Status</TabsTrigger>
+                <TabsTrigger value="active" className="text-xs sm:text-sm px-2 py-2">Active</TabsTrigger>
+                <TabsTrigger value="ending-soon" className="text-xs sm:text-sm px-2 py-2">Ending Soon</TabsTrigger>
+                <TabsTrigger value="launching-soon" className="text-xs sm:text-sm px-2 py-2">Launching Soon</TabsTrigger>
               </TabsList>
             </Tabs>
 
             <Tabs value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="all">All Levels</TabsTrigger>
-                <TabsTrigger value="beginner">Beginner</TabsTrigger>
-                <TabsTrigger value="intermediate">Intermediate</TabsTrigger>
-                <TabsTrigger value="advanced">Advanced</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto p-1">
+                <TabsTrigger value="all" className="text-xs sm:text-sm px-2 py-2">All Levels</TabsTrigger>
+                <TabsTrigger value="beginner" className="text-xs sm:text-sm px-2 py-2">Beginner</TabsTrigger>
+                <TabsTrigger value="intermediate" className="text-xs sm:text-sm px-2 py-2">Intermediate</TabsTrigger>
+                <TabsTrigger value="advanced" className="text-xs sm:text-sm px-2 py-2">Advanced</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardContent>

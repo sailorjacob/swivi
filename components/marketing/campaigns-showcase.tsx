@@ -315,8 +315,8 @@ export function CampaignsShowcase() {
                   </div>
                 </CardHeader>
 
-                <CardContent className="p-6">
-                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
                     <div className="space-y-4">
                       <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
                         Campaign Details
@@ -404,7 +404,7 @@ export function CampaignsShowcase() {
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-black/5 flex items-center gap-4">
+                  <div className="pt-4 border-t border-black/5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
                     <Link
                       href={campaign.exampleContent}
                       target="_blank"
