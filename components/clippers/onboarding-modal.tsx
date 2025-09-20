@@ -210,14 +210,14 @@ const initialSteps: OnboardingStep[] = [
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link href="/clippers/campaigns">
+          <Link href="/clippers/dashboard/campaigns">
             <Button className="w-full bg-green-600 hover:bg-green-700">
               <Play className="w-4 h-4 mr-2" />
               Browse Campaigns
             </Button>
           </Link>
 
-          <Link href="/clippers/profile">
+          <Link href="/clippers/dashboard/profile">
             <Button variant="outline" className="w-full border-gray-700 text-gray-300 hover:bg-gray-800">
               <User className="w-4 h-4 mr-2" />
               Complete Profile

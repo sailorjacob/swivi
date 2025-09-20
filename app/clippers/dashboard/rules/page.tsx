@@ -362,13 +362,13 @@ export default function RulesPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="/clippers/support"
+              href="/clippers/dashboard/support"
               className="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
             >
               Contact Support
             </a>
             <a
-              href="/clippers/faq"
+              href="/clippers/dashboard/faq"
               className="inline-flex items-center px-6 py-3 border border-border text-muted-foreground hover:bg-muted rounded-lg transition-colors"
             >
               View FAQ
