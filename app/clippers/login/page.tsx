@@ -105,6 +105,12 @@ export default function ClippersLoginPage() {
               </Button>
 
               <div className="text-center mt-6 pt-4 border-t border-border/50">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Don't have an account?{" "}
+                  <Link href="/clippers/signup" className="text-white hover:text-green-300 underline underline-offset-2 transition-colors">
+                    Sign up
+                  </Link>
+                </p>
                 <p className="text-xs text-gray-500 leading-relaxed">
                   By continuing, you agree to our{" "}
                   <Link href="/clippers/dashboard/rules" className="text-foreground hover:text-green-300 underline underline-offset-2 transition-colors">
