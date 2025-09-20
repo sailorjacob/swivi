@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
-    "vercel-build": "prisma generate && next build",
+    "build": "npm run build:db && npm run build:next",
+    "build:db": "prisma generate",
+    "build:next": "next build",
+    "vercel-build": "npm run build:db && npm run build:next",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
@@ -14,7 +17,8 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx scripts/setup.ts",
-    "setup": "npm run prisma:migrate && npm run prisma:seed"
+    "setup": "npm run prisma:migrate && npm run prisma:seed",
+    "build:production": "npm run build:db && npm run prisma:migrate:deploy && npm run build:next"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.18",

@@ -18,7 +18,28 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'twejikjgxkzmphocbvpt.supabase.co',
       },
+      {
+        protocol: 'https',
+        hostname: 'xaxleljcctobmnwiwxvx.supabase.co',
+      },
     ],
+  },
+  // Optimize for Vercel builds
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
+  // Build optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  // Better error handling during build
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
+  // Ensure environment variables are available during build
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
 }
 
