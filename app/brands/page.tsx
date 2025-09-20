@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import Link from "next/link"
 import { ArrowRight, TrendingUp, DollarSign, Users, BarChart3 } from "lucide-react"
 import { Header } from "@/components/layout/header"
@@ -285,6 +284,7 @@ function BrandsPage() {
 
             <div className="grid md:grid-cols-2 gap-12">
               {features.map((feature, index) => (
+                <motion.div
                   key={feature.title}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -296,6 +296,7 @@ function BrandsPage() {
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
+                </motion.div>
               ))}
             </div>
           </div>
