@@ -364,13 +364,23 @@ export function ClippersOnboarding() {
 
         <div className="flex items-center gap-4">
           {currentStep === onboardingSteps.length - 1 ? (
-            <Button
-              onClick={() => window.open('https://discord.gg/CtZ4tecJ7Y', '_blank')}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-            >
-              <Play className="h-4 w-4" />
-              Join Discord Community
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => window.open('https://discord.gg/CtZ4tecJ7Y', '_blank')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Play className="h-4 w-4" />
+                Join Discord
+              </Button>
+              <Button
+                onClick={() => window.location.href = '/clippers/dashboard'}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+              >
+                Enter Dashboard
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           ) : (
             <Button
               onClick={handleNext}

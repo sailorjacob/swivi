@@ -133,10 +133,8 @@ export const authOptions: NextAuthOptions = {
       // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url
       
-      // For new OAuth users, redirect to onboarding first
-      // For existing users, go to dashboard
-      // We'll let the onboarding page handle the logic
-      return `${baseUrl}/clippers/onboarding`
+      // Always go to dashboard - let the dashboard handle onboarding logic
+      return `${baseUrl}/clippers/dashboard`
     },
   },
   session: {
