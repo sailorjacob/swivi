@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -97,7 +97,7 @@ const platformIcons = {
   twitter: Twitter,
 }
 
-const CampaignsPage = () => {
+function CampaignsPage() {
   const [selectedCampaign, setSelectedCampaign] = useState<typeof campaigns[0] | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
 
