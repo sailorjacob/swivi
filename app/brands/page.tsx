@@ -202,6 +202,7 @@ export default function BrandsPage() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-12 items-center">
+              <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
@@ -237,7 +238,9 @@ export default function BrandsPage() {
                   Learn More
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
+              </motion.div>
 
+              <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
@@ -265,6 +268,7 @@ export default function BrandsPage() {
                     </div>
                   </div>
                 </div>
+              </motion.div>
             </div>
           </div>
         </section>
