@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { motion } from "framer-motion"
 
 interface DemoPage {
   title: string
@@ -154,6 +155,7 @@ function DemoPageCard({ page, index }: { page: DemoPage; index: number }) {
   const Icon = page.icon
   
   return (
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -203,6 +205,7 @@ function DemoPageCard({ page, index }: { page: DemoPage; index: number }) {
           </div>
         </CardContent>
       </Card>
+    </motion.div>
   )
 }
 
