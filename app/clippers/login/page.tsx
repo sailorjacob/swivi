@@ -107,7 +107,7 @@ export default function ClippersLoginPage() {
               <div className="text-center mt-6 pt-4 border-t border-border/50">
                 <p className="text-xs text-gray-500 leading-relaxed">
                   By continuing, you agree to our{" "}
-                  <Link href="/clippers/rules" className="text-foreground hover:text-green-300 underline underline-offset-2 transition-colors">
+                  <Link href="/clippers/dashboard/rules" className="text-foreground hover:text-green-300 underline underline-offset-2 transition-colors">
                     rules and guidelines
                   </Link>
                 </p>
