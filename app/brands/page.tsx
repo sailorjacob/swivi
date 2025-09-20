@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
 import { ArrowRight, TrendingUp, DollarSign, Users, BarChart3 } from "lucide-react"
 import { Header } from "@/components/layout/header"
