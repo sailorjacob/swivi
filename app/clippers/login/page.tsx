@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { motion } from "framer-motion"
 import { signIn, getSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -50,18 +51,21 @@ export default function ClippersLoginPage() {
           </Link>
         </div>
 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           <Card className="bg-card border border-border backdrop-blur-sm shadow-2xl text-white">
             <CardHeader className="text-center pb-6">
+              <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                 className="mx-auto mb-6 flex items-center justify-center"
               >
                 <SwiviLogo size={56} />
+              </motion.div>
               <CardTitle className="text-2xl font-light text-white mb-2">
                 Welcome to Swivi Clippers
               </CardTitle>
@@ -119,6 +123,7 @@ export default function ClippersLoginPage() {
           </Card>
 
         {/* Benefits */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
@@ -147,6 +152,8 @@ export default function ClippersLoginPage() {
             <div className="text-white text-xl font-bold mb-1">2.3K</div>
             <div className="text-muted-foreground text-sm">Clips this month</div>
           </div>
+        </motion.div>
+        </motion.div>
       </div>
     </div>
   )

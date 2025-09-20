@@ -64,7 +64,7 @@ export function Showcase() {
                 x: currentIndex === index ? 0 : 100,
                 scale: currentIndex === index ? 1 : 0.8,
               }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
+              transition={{ duration: 0.5 }}
               className={`absolute inset-0 flex items-center justify-center ${
                 currentIndex === index ? "z-10" : "z-0"
               }`}

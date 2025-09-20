@@ -50,52 +50,44 @@ const demoPages: DemoPage[] = [
     path: "/clippers/onboarding",
     icon: BookOpen,
     status: 'complete',
-    features: ["5-step tutorial", "Progress tracking", "Interactive content", "Platform overview", "Quick actions"]
+    features: ["Step-by-step guide", "Interactive elements", "Progress tracking", "Completion rewards"]
   },
   {
-    title: "Clipper Dashboard",
-    description: "Main hub with earnings overview, recent clips, active campaigns, and quick actions",
+    title: "Dashboard Overview",
+    description: "Main dashboard showing stats, recent activities, and quick actions for clippers",
     path: "/clippers/dashboard",
-    icon: Home,
+    icon: BarChart3,
     status: 'complete',
-    features: ["Earnings stats", "Recent clips", "Active campaigns", "Performance metrics", "Quick actions"]
+    features: ["Performance metrics", "Recent submissions", "Quick actions", "Earnings overview"]
   },
   {
-    title: "Campaign Browser",
-    description: "Browse and join active campaigns with detailed requirements and payout information",
+    title: "Active Campaigns",
+    description: "Browse and join available campaigns with detailed requirements and payout information",
     path: "/clippers/dashboard/campaigns",
     icon: Target,
     status: 'complete',
-    features: ["Campaign grid", "Search & filters", "Detailed views", "Join functionality", "Budget tracking"]
+    features: ["Campaign listing", "Filter options", "Join campaigns", "Requirements display"]
   },
   {
-    title: "Clipper Profile",
-    description: "Manage profile, submit clips, connect social accounts, and track all submissions",
-    path: "/clippers/dashboard/profile",
-    icon: User,
-    status: 'complete',
-    features: ["Profile management", "Clip submission", "Social accounts", "Submission history", "Form validation"]
-  },
-  {
-    title: "Performance Analytics",
-    description: "Comprehensive analytics with charts, platform breakdowns, and performance insights",
+    title: "Analytics Dashboard",
+    description: "Detailed performance analytics with charts, trends, and insights",
     path: "/clippers/dashboard/analytics",
     icon: BarChart3,
-    status: 'complete',
-    features: ["Chart.js integration", "Multi-platform stats", "Time-based analytics", "Top campaigns", "Export options"]
+    status: 'partial',
+    features: ["Performance charts", "Trend analysis", "Comparison metrics", "Export options"]
   },
   {
-    title: "FAQ & Support",
-    description: "Searchable FAQ system with categories covering all aspects of the clipper program",
-    path: "/clippers/dashboard/faq",
-    icon: HelpCircle,
-    status: 'complete',
-    features: ["Search functionality", "Category filters", "Expandable answers", "Comprehensive content", "Mobile-friendly"]
+    title: "Profile Management",
+    description: "Manage personal information, preferences, and account settings",
+    path: "/clippers/dashboard/profile",
+    icon: User,
+    status: 'partial',
+    features: ["Personal info", "Preferences", "Account settings", "Profile completion"]
   },
   {
-    title: "Payouts Management",
+    title: "Payout Management",
     description: "Track earnings, request payouts, and manage payment methods",
-    path: "/clippers/dashboard/payouts", 
+    path: "/clippers/dashboard/payouts",
     icon: DollarSign,
     status: 'partial',
     features: ["Payment history", "Payout requests", "PayPal integration", "Earnings breakdown"]
@@ -173,31 +165,29 @@ function DemoPageCard({ page, index }: { page: DemoPage; index: number }) {
             </div>
             <StatusBadge status={page.status} />
           </div>
-          <p className="text-muted-foreground text-sm leading-relaxed">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {page.description}
           </p>
         </CardHeader>
-        
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm text-foreground">Key Features:</h4>
-            <div className="flex flex-wrap gap-1">
-              {page.features.map((feature, i) => (
-                <Badge key={i} variant="secondary" className="text-xs">
-                  {feature}
-                </Badge>
-              ))}
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h4 className="text-sm font-medium mb-2">Key Features</h4>
+              <ul className="space-y-1">
+                {page.features.map((feature, i) => (
+                  <li key={i} className="text-sm text-muted-foreground flex items-center">
+                    <span className="w-1 h-1 bg-muted-foreground rounded-full mr-2 flex-shrink-0"></span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-          
-          <div className="flex space-x-2 pt-2">
-            <Link href={page.path} className="flex-1">
-              <Button className="w-full" size="sm">
-                <Eye className="w-4 h-4 mr-2" />
-                View Page
-              </Button>
-            </Link>
-            <Button variant="outline" size="sm" asChild>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full mt-4 group"
+              asChild
+            >
               <a href={page.path} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="w-4 h-4" />
               </a>
@@ -222,71 +212,34 @@ export default function ClippersDemoPage() {
         <section className="py-20 md:py-32 bg-background">
           <div className="max-width-wrapper section-padding">
             <div className="text-center mb-16">
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-3xl sm:text-4xl md:text-5xl font-light mb-6"
+                transition={{ duration: 0.8 }}
               >
-                Clippers Platform <span className="font-normal">Demo</span>
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8"
-              >
-                Explore the complete clippers platform experience. Navigate through all the pages and features 
-                built for content creators to earn money through viral clip creation.
-              
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex flex-wrap justify-center gap-6 text-sm"
-              >
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>{completePages.length} Complete Pages</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Play className="w-4 h-4 text-yellow-500" />
-                  <span>{inProgressPages.length} In Development</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Target className="w-4 h-4 text-neutral-500" />
-                  <span>No Auth Required</span>
-                </div>
-            </div>
-
-            {/* Quick Start */}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mb-16"
-            >
-              <Card className="bg-gradient-to-r from-muted/50 to-muted border-border">
-                <CardContent className="p-8">
-                  <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-                    <div>
-                      <h3 className="text-xl font-medium mb-2">Quick Start</h3>
-                      <p className="text-muted-foreground">
-                        Jump straight into the full clipper experience with our comprehensive dashboard
-                      </p>
-                    </div>
-                    <div className="flex space-x-3">
-                      <Link href="/clippers/dashboard">
-                        <Button size="lg" className="shadow-lg">
-                          <Home className="w-4 h-4 mr-2" />
-                          Go to Dashboard
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </Button>
-                      </Link>
-                      <Link href="/clippers/onboarding">
-                        <Button variant="outline" size="lg">
-                          <BookOpen className="w-4 h-4 mr-2" />
-                          Start Tutorial
-                        </Button>
-                      </Link>
-                    </div>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-light mb-6">
+                  Platform <span className="italic">Demo</span>
+                </h1>
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+                  Explore the complete Swivi Clippers experience. Click through live pages 
+                  to see how clippers discover campaigns, track earnings, and grow their income.
+                </p>
+                <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span>{completePages.length} Complete</span>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <span>{inProgressPages.length} In Progress</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                    <span>{plannedPages.length} Planned</span>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
 
             {/* Complete Pages */}
             <div className="mb-16">
@@ -311,11 +264,7 @@ export default function ClippersDemoPage() {
             )}
 
             {/* Platform Overview */}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="mt-16"
-            >
+            <div className="mt-16">
               <Card className="border-border bg-card">
                 <CardHeader>
                   <CardTitle className="text-xl font-medium">Platform Overview</CardTitle>
@@ -331,16 +280,15 @@ export default function ClippersDemoPage() {
                       <ul className="space-y-2 text-sm text-muted-foreground">
                         <li>• Campaign-based clip creation</li>
                         <li>• Performance tracking & analytics</li>
-                        <li>• Multi-platform support (TikTok, YouTube, Instagram, X)</li>
-                        <li>• PayPal integration for payments</li>
-                        <li>• Real-time leaderboards</li>
-                        <li>• Social account verification</li>
+                        <li>• Automated payout system</li>
+                        <li>• Multi-platform social integration</li>
+                        <li>• Referral program</li>
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-medium mb-3">Technology Stack</h4>
+                      <h4 className="font-medium mb-3">Tech Stack</h4>
                       <ul className="space-y-2 text-sm text-muted-foreground">
-                        <li>• Next.js 14 with App Router</li>
+                        <li>• Next.js 14 & React</li>
                         <li>• TypeScript & Tailwind CSS</li>
                         <li>• Framer Motion animations</li>
                         <li>• Chart.js for analytics</li>
@@ -351,6 +299,7 @@ export default function ClippersDemoPage() {
                   </div>
                 </CardContent>
               </Card>
+            </div>
           </div>
         </section>
       </main>

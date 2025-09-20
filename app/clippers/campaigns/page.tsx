@@ -135,11 +135,7 @@ function CampaignsPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {campaigns.map((campaign) => (
-              key={campaign.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
+            <div key={campaign.id}>
               <Card className="bg-card border-border hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-0">
                   {/* Campaign Image */}
@@ -229,6 +225,7 @@ function CampaignsPage() {
                   </div>
                 </CardContent>
               </Card>
+            </div>
           ))}
         </div>
       </div>

@@ -136,7 +136,6 @@ export default function OwningManhattanProject() {
       transition: {
         staggerChildren: 0.1,
         duration: 0.6,
-        ease: "easeOut",
       },
     },
   }
@@ -148,7 +147,6 @@ export default function OwningManhattanProject() {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: "easeOut",
       },
     },
   }

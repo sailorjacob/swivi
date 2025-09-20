@@ -71,7 +71,6 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
     },
   },
 }
@@ -95,7 +94,6 @@ const BrandsPage = () => {
               transition={{
                 duration: 30,
                 repeat: Infinity,
-                ease: "linear",
               }}
             />
           </div>

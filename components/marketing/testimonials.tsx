@@ -118,7 +118,7 @@ export function Testimonials() {
                   initial={{ opacity: 0, x: 100 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -100 }}
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  transition={{ duration: 0.5 }}
             >
                   <Card className="border-0 shadow-lg">
                     <CardContent className="p-8 md:p-12">

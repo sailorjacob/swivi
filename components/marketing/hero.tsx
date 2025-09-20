@@ -22,7 +22,6 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
     },
   },
 }
@@ -56,7 +55,6 @@ export function Hero() {
             transition={{
               duration: 20 + Math.random() * 10,
               repeat: Infinity,
-              ease: "linear",
             }}
           />
         ))}
