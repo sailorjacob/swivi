@@ -97,7 +97,7 @@ const platformIcons = {
   twitter: Twitter,
 }
 
-export default function CampaignsPage() {
+function CampaignsPage() {
   const [selectedCampaign, setSelectedCampaign] = useState<typeof campaigns[0] | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
 
@@ -242,3 +242,5 @@ export default function CampaignsPage() {
     </div>
   )
 }
+
+export default CampaignsPage

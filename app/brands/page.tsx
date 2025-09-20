@@ -76,7 +76,7 @@ const itemVariants = {
   },
 }
 
-export default function BrandsPage() {
+function BrandsPage() {
   return (
     <DarkThemeWrapper>
       <Header />
@@ -332,4 +332,6 @@ export default function BrandsPage() {
       <Footer />
     </DarkThemeWrapper>
   )
-} 
+}
+
+export default BrandsPage
