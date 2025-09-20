@@ -60,10 +60,10 @@ export default function ClippersLoginPage() {
                 <SwiviLogo size={56} />
               </motion.div>
               <CardTitle className="text-2xl font-light text-white mb-2">
-                Welcome to Swivi Clippers
+                Welcome Back
               </CardTitle>
               <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
-                Join an exclusive community of content creators earning competitive payouts for viral clips
+                Sign in to access your clipper dashboard and continue earning
               </p>
             </CardHeader>
 
