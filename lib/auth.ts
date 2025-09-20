@@ -62,18 +62,57 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Temporarily bypass database operations to test OAuth flow
-      console.log("OAuth sign in attempt:", { 
-        provider: account?.provider, 
-        email: user.email,
-        name: user.name 
-      })
+      if (account?.provider === "discord" || account?.provider === "google") {
+        try {
+          console.log("OAuth sign in attempt:", { 
+            provider: account?.provider, 
+            email: user.email,
+            name: user.name 
+          })
+
+          // Check if user exists, if not create with default clipper role
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email! }
+          })
+          
+          if (!existingUser) {
+            console.log("Creating new user for:", user.email)
+            await prisma.user.create({
+              data: {
+                email: user.email!,
+                name: user.name,
+                image: user.image,
+                role: "CLIPPER",
+                verified: false,
+              }
+            })
+            console.log("User created successfully")
+          } else {
+            console.log("Existing user found:", existingUser.email)
+          }
+          
+          return true
+        } catch (error) {
+          console.error("Error during OAuth sign in:", error)
+          // Still allow sign in even if database fails
+          return true
+        }
+      }
       return true
     },
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
-        token.role = "CLIPPER" // Temporarily hardcode role
+        try {
+          // Get user role from database
+          const dbUser = await prisma.user.findUnique({
+            where: { id: user.id }
+          })
+          token.role = dbUser?.role || "CLIPPER"
+        } catch (error) {
+          console.error("Error fetching user role:", error)
+          token.role = "CLIPPER" // Fallback role
+        }
       }
       if (account) {
         token.accessToken = account.access_token
@@ -89,11 +128,15 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Always redirect to dashboard after successful authentication
+      // Handle post-authentication redirects
       if (url.startsWith("/")) return `${baseUrl}${url}`
       // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url
-      return `${baseUrl}/clippers/dashboard`
+      
+      // For new OAuth users, redirect to onboarding first
+      // For existing users, go to dashboard
+      // We'll let the onboarding page handle the logic
+      return `${baseUrl}/clippers/onboarding`
     },
   },
   session: {
