@@ -62,41 +62,18 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === "discord" || account?.provider === "google") {
-        try {
-          // Check if user exists, if not create with default clipper role
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! }
-          })
-          
-          if (!existingUser) {
-            await prisma.user.create({
-              data: {
-                email: user.email!,
-                name: user.name,
-                image: user.image,
-                role: "CLIPPER",
-                verified: false,
-              }
-            })
-          }
-          
-          return true
-        } catch (error) {
-          console.error("Error during sign in:", error)
-          return false
-        }
-      }
+      // Temporarily bypass database operations to test OAuth flow
+      console.log("OAuth sign in attempt:", { 
+        provider: account?.provider, 
+        email: user.email,
+        name: user.name 
+      })
       return true
     },
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
-        // Get user role from database
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id }
-        })
-        token.role = dbUser?.role || "CLIPPER"
+        token.role = "CLIPPER" // Temporarily hardcode role
       }
       if (account) {
         token.accessToken = account.access_token
