@@ -97,11 +97,23 @@ export default function AuthPage() {
   const handleOAuthSignIn = async (provider: string) => {
     setIsLoading(true)
     
-    // Simulate OAuth
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    toast.success(`Signed in with ${provider}!`)
-    window.location.href = "/clippers/campaigns"
+    try {
+      // Use NextAuth signIn
+      const { signIn } = await import("next-auth/react")
+      const result = await signIn(provider.toLowerCase(), {
+        callbackUrl: "/clippers/dashboard",
+        redirect: false,
+      })
+
+      if (result?.error) {
+        toast.error("Authentication failed. Please try again.")
+      } else if (result?.url) {
+        toast.success(`Welcome to Swivi!`)
+        window.location.href = result.url
+      }
+    } catch (error) {
+      toast.error("Something went wrong")
+    }
     
     setIsLoading(false)
   }

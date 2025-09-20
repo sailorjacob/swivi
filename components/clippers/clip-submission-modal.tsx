@@ -48,9 +48,9 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
     try {
       const submissionData = {
         campaignId: campaign?.id,
-        clipUrl: data.clipUrl,
-        platform: data.platform?.toUpperCase(),
-        // mediaFileUrl would be set after file upload to Cloudinary
+        clipUrl: data.url, // Fix: use 'url' from form data
+        platform: "TIKTOK", // Fix: provide default platform or get from form
+        // mediaFileUrl would be set after file upload to Supabase
         mediaFileUrl: uploadedFile ? "pending_upload" : undefined,
       }
 
