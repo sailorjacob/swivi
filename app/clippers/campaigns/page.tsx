@@ -97,7 +97,7 @@ const platformIcons = {
   twitter: Twitter,
 }
 
-function CampaignsPage() {
+const CampaignsPage = () => {
   const [selectedCampaign, setSelectedCampaign] = useState<typeof campaigns[0] | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
 

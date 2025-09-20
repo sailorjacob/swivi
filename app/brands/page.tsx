@@ -76,7 +76,7 @@ const itemVariants = {
   },
 }
 
-function BrandsPage() {
+const BrandsPage = () => {
   return (
     <DarkThemeWrapper>
       <Header />
