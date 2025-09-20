@@ -6,7 +6,8 @@ import { prisma } from "@/lib/prisma"
 import { env } from "@/lib/env"
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // Temporarily disable PrismaAdapter to test OAuth flow
+  // adapter: PrismaAdapter(prisma),
   providers: [
     // OAuth providers only
     ...(env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET ? [
@@ -27,61 +28,54 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
+      console.log("🔍 OAuth signIn callback triggered:", {
+        provider: account?.provider,
+        email: user.email,
+        name: user.name,
+        userId: user.id
+      })
+      
       if (account?.provider === "discord" || account?.provider === "google") {
         try {
-          console.log("OAuth sign in attempt:", { 
-            provider: account?.provider, 
-            email: user.email,
-            name: user.name 
-          })
-
-          // Check if user exists, if not create with default clipper role
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! }
-          })
+          console.log("✅ OAuth provider recognized, allowing sign in")
           
-          if (!existingUser) {
-            console.log("Creating new user for:", user.email)
-            await prisma.user.create({
-              data: {
-                email: user.email!,
-                name: user.name,
-                image: user.image,
-                role: "CLIPPER",
-                verified: false,
-              }
-            })
-            console.log("User created successfully")
-          } else {
-            console.log("Existing user found:", existingUser.email)
-          }
-          
+          // For now, just allow the sign in without database operations
+          // We'll handle user creation manually in the JWT callback
           return true
+          
         } catch (error) {
-          console.error("Error during OAuth sign in:", error)
-          // Still allow sign in even if database fails
-          return true
+          console.error("❌ Error during OAuth sign in:", error)
+          return false
         }
       }
+      
+      console.log("✅ Non-OAuth sign in, allowing")
       return true
     },
     async jwt({ token, user, account }) {
+      console.log("🔍 JWT callback triggered:", {
+        hasUser: !!user,
+        hasAccount: !!account,
+        tokenId: token.id,
+        userEmail: user?.email
+      })
+      
       if (user) {
         token.id = user.id
-        try {
-          // Get user role from database
-          const dbUser = await prisma.user.findUnique({
-            where: { id: user.id }
-          })
-          token.role = dbUser?.role || "CLIPPER"
-        } catch (error) {
-          console.error("Error fetching user role:", error)
-          token.role = "CLIPPER" // Fallback role
-        }
+        token.email = user.email
+        token.name = user.name
+        token.role = "CLIPPER" // Default role for now
+        
+        console.log("✅ JWT token updated with user info")
       }
+      
       if (account) {
         token.accessToken = account.access_token
+        token.provider = account.provider
+        
+        console.log("✅ JWT token updated with account info")
       }
+      
       return token
     },
     async session({ session, token }) {
