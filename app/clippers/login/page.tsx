@@ -20,19 +20,12 @@ export default function ClippersLoginPage() {
   const handleSignIn = async (provider: string) => {
     setIsLoading(provider)
     try {
-      const result = await signIn(provider, {
+      // Let NextAuth handle the redirect automatically
+      await signIn(provider, {
         callbackUrl: "/clippers/dashboard",
-        redirect: false,
       })
-
-      if (result?.error) {
-        toast.error("Authentication failed. Please try again.")
-      } else if (result?.url) {
-        router.push(result.url)
-      }
     } catch (error) {
       toast.error("An error occurred during sign in.")
-    } finally {
       setIsLoading(null)
     }
   }

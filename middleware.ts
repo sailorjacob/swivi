@@ -9,10 +9,6 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Demo mode: Allow access in development
-        if (process.env.NODE_ENV === "development" && req.nextUrl.pathname.includes("clippers-demo")) {
-          return true
-        }
         
         // Check if user is authenticated for protected routes
         return !!token

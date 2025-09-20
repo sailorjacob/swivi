@@ -58,7 +58,7 @@ export const authOptions: NextAuthOptions = {
     ] : []),
   ],
   pages: {
-    signIn: "/clippers/auth",
+    signIn: "/clippers/login",
   },
   callbacks: {
     async signIn({ user, account, profile }) {
@@ -112,11 +112,7 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Redirect to onboarding for new users, dashboard for existing
-      if (url.includes("signin")) {
-        return `${baseUrl}/clippers/dashboard`
-      }
-      // Allows relative callback URLs
+      // Always redirect to dashboard after successful authentication
       if (url.startsWith("/")) return `${baseUrl}${url}`
       // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url

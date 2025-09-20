@@ -31,7 +31,7 @@ export default function ClippersLanding() {
     await new Promise(resolve => setTimeout(resolve, 1500))
     
     // Redirect to signup/login
-    window.location.href = "/clippers/auth"
+    window.location.href = "/clippers/login"
     
     setIsLoading(false)
   }
@@ -289,7 +289,7 @@ export default function ClippersLanding() {
             <Button 
               size="lg"
               className="bg-green-600 hover:bg-green-700 text-lg px-8 py-6"
-              onClick={() => window.location.href = "/clippers/auth"}
+              onClick={() => window.location.href = "/clippers/login"}
             >
               Get Started Now
               <ArrowRight className="w-5 h-5 ml-2" />
