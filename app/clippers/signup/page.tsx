@@ -18,11 +18,22 @@ export default function SignupPage() {
   const handleOAuthSignup = async (provider: string) => {
     setIsLoading(provider)
     try {
-      await signIn(provider, {
-        callbackUrl: "/clippers/onboarding",
+      const result = await signIn(provider, {
+        callbackUrl: "/clippers/dashboard",
+        redirect: false,
       })
+      
+      if (result?.error) {
+        console.error("OAuth error:", result.error)
+        toast.error(`${provider} authentication failed. Please try again or contact support.`)
+        setIsLoading(null)
+      } else if (result?.url) {
+        // Success - redirect to the callback URL
+        window.location.href = result.url
+      }
     } catch (error) {
-      toast.error("An error occurred during signup.")
+      console.error("OAuth signup error:", error)
+      toast.error("An error occurred during signup. Please try again.")
       setIsLoading(null)
     }
   }

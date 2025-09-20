@@ -20,12 +20,22 @@ export default function ClippersLoginPage() {
   const handleSignIn = async (provider: string) => {
     setIsLoading(provider)
     try {
-      // Let NextAuth handle the redirect automatically
-      await signIn(provider, {
+      const result = await signIn(provider, {
         callbackUrl: "/clippers/dashboard",
+        redirect: false,
       })
+      
+      if (result?.error) {
+        console.error("OAuth error:", result.error)
+        toast.error(`${provider} authentication failed. Please check if callback URLs are configured.`)
+        setIsLoading(null)
+      } else if (result?.url) {
+        // Success - redirect to the callback URL
+        window.location.href = result.url
+      }
     } catch (error) {
-      toast.error("An error occurred during sign in.")
+      console.error("OAuth login error:", error)
+      toast.error("An error occurred during sign in. Please try again.")
       setIsLoading(null)
     }
   }
