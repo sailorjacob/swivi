@@ -19,75 +19,61 @@ import {
   Music
 } from "lucide-react"
 
-// Mock campaigns data (same as before)
+// Real campaigns data
 const campaigns = [
   {
     id: "1",
-    title: "Olivia Dean Clipping",
-    creator: "PromoteFun",
-    description: "Creators will help bring Olivia Dean's music and personality into TikTok feeds by posting short clips from her music videos, live performances, and interviews.",
-    image: "/olivia-dean.jpg",
-    pool: 4000,
-    spent: 3040,
-    cpm: 2.0,
+    title: "Owning Manhattan Viral Clips",
+    creator: "Swivi Media",
+    description: "Create engaging clips from Owning Manhattan episodes highlighting the most dramatic and entertaining moments. Focus on luxury real estate, personal drama, and behind-the-scenes content.",
+    image: "/owning-manhattan.jpg",
+    pool: 8000,
+    spent: 2100,
+    cpm: 3.5,
     platforms: ["tiktok", "instagram"],
-    totalSubmissions: 0,
-    totalViews: 0,
+    totalSubmissions: 12,
+    totalViews: 89420,
     status: "live",
     requirements: [
-      "Use provided content sources as base material",
-      "Focus on emotional moments and strong vocals",
-      "Keep edits natural and engaging",
-      "Highlight Olivia Dean's unique sound and style"
+      "Use official Owning Manhattan episode content",
+      "Focus on high-drama moments and luxury showcases",
+      "Keep clips 15-60 seconds for maximum engagement",
+      "Include relevant hashtags and mentions",
+      "Maintain professional editing quality"
     ],
     contentSources: [
-      "Lady Lazy - Music Video",
-      "Nice To Each Other - Music Video", 
-      "Echo - Live Performance",
-      "The Hardest Part - Interview"
+      "Season 1 Episodes 1-8 (Netflix)",
+      "Behind-the-scenes footage",
+      "Cast interview segments",
+      "Property showcase moments"
     ]
   },
   {
-    id: "2",
-    title: "SinParty Logo Campaign New",
-    creator: "PromoteFun",
-    description: "Showcase the new SinParty logo in creative and engaging content across social platforms.",
-    image: "/sinparty-logo.jpg",
-    pool: 5000,
-    spent: 0,
-    cpm: 0.04,
-    platforms: ["instagram", "tiktok", "twitter"],
-    totalSubmissions: 0,
-    totalViews: 0,
+    id: "2", 
+    title: "Music Discovery Hub",
+    creator: "Swivi Media",
+    description: "Promote emerging artists and new music releases through creative short-form content. Help artists gain exposure while earning from viral music clips.",
+    image: "/music-hub.jpg",
+    pool: 12000,
+    spent: 890,
+    cpm: 2.8,
+    platforms: ["tiktok", "instagram", "youtube"],
+    totalSubmissions: 6,
+    totalViews: 34200,
     status: "live",
     requirements: [
-      "Feature logo prominently",
-      "Creative integration",
-      "High engagement content",
-      "Brand-appropriate style"
+      "Feature provided music tracks prominently",
+      "Create engaging visual content to match the music",
+      "Use proper artist credits and tags",
+      "Focus on hook/chorus sections for maximum impact",
+      "Maintain high audio quality"
     ],
-    contentSources: []
-  },
-  {
-    id: "3",
-    title: "Giggles Meme Campaign", 
-    creator: "PromoteFun",
-    description: "Create viral meme content featuring Giggles brand in a fun and authentic way.",
-    image: "/giggles-meme.jpg", 
-    pool: 4000,
-    spent: 0,
-    cpm: 2.0,
-    platforms: ["tiktok", "instagram"],
-    totalSubmissions: 0,
-    totalViews: 0,
-    status: "live",
-    requirements: [
-      "Meme-style content",
-      "Authentic humor",
-      "Brand integration",
-      "Viral potential"
-    ],
-    contentSources: []
+    contentSources: [
+      "Featured artist tracks (provided monthly)",
+      "Music video footage",
+      "Artist promotional materials",
+      "Lyric graphics and visualizers"
+    ]
   }
 ]
 

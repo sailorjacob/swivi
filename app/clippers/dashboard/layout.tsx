@@ -39,7 +39,8 @@ interface NavItem {
     { label: "Dashboard", href: "/clippers/dashboard", icon: Home },
     { label: "Campaigns", href: "/clippers/dashboard/campaigns", icon: Target },
     { label: "Profile", href: "/clippers/dashboard/profile", icon: User },
-    { label: "Analytics", href: "/clippers/dashboard/analytics", icon: BarChart3 },
+    // Analytics temporarily hidden for platform cleanup
+    // { label: "Analytics", href: "/clippers/dashboard/analytics", icon: BarChart3 },
     { label: "Payouts", href: "/clippers/dashboard/payouts", icon: DollarSign },
     { label: "Support", href: "/clippers/dashboard/support", icon: HelpCircle },
   ]

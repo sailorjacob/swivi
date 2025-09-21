@@ -17,43 +17,15 @@ import {
 } from "lucide-react"
 import toast from "react-hot-toast"
 
-// Mock payout history
-const payoutHistory = [
-  {
-    id: "1",
-    amount: 500.00,
-    method: "USDC Wallet",
-    status: "completed",
-    requestedAt: "2024-01-10",
-    processedAt: "2024-01-11",
-    transactionId: "0x1234...abcd"
-  },
-  {
-    id: "2", 
-    amount: 250.00,
-    method: "PayPal",
-    status: "processing",
-    requestedAt: "2024-01-14",
-    processedAt: null,
-    transactionId: null
-  },
-  {
-    id: "3",
-    amount: 100.00,
-    method: "PayPal", 
-    status: "failed",
-    requestedAt: "2024-01-08",
-    processedAt: "2024-01-09",
-    transactionId: null
-  }
-]
+// Payout history will be loaded from user's actual data
+const payoutHistory: any[] = []
 
 export default function PayoutsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [payoutAmount, setPayoutAmount] = useState("")
   const [payoutMethod, setPayoutMethod] = useState("")
 
-  const availableBalance = 847.50 // Mock available balance
+  const availableBalance = 0.00 // Will be loaded from user's actual earnings
   const minimumPayout = 50.00
 
   const handlePayoutRequest = async (e: React.FormEvent) => {
@@ -198,45 +170,55 @@ export default function PayoutsPage() {
             <CardTitle className="text-white">Payout History</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {payoutHistory.map((payout) => (
-                <div key={payout.id} className="p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="font-bold text-white text-lg">
-                      ${payout.amount.toFixed(2)}
-                    </div>
-                    <Badge variant="outline" className={getStatusColor(payout.status)}>
-                      {payout.status}
-                    </Badge>
-                  </div>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Method:</span>
-                      <span className="text-white">{payout.method}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Requested:</span>
-                      <span className="text-white">{payout.requestedAt}</span>
-                    </div>
-                    {payout.processedAt && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Processed:</span>
-                        <span className="text-white">{payout.processedAt}</span>
+            {payoutHistory.length > 0 ? (
+              <div className="space-y-4">
+                {payoutHistory.map((payout) => (
+                  <div key={payout.id} className="p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="font-bold text-white text-lg">
+                        ${payout.amount.toFixed(2)}
                       </div>
-                    )}
-                    {payout.transactionId && (
+                      <Badge variant="outline" className={getStatusColor(payout.status)}>
+                        {payout.status}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">TX ID:</span>
-                        <span className="text-white font-mono text-xs">
-                          {payout.transactionId}
-                        </span>
+                        <span className="text-muted-foreground">Method:</span>
+                        <span className="text-white">{payout.method}</span>
                       </div>
-                    )}
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Requested:</span>
+                        <span className="text-white">{payout.requestedAt}</span>
+                      </div>
+                      {payout.processedAt && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Processed:</span>
+                          <span className="text-white">{payout.processedAt}</span>
+                        </div>
+                      )}
+                      {payout.transactionId && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">TX ID:</span>
+                          <span className="text-white font-mono text-xs">
+                            {payout.transactionId}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <DollarSign className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground text-lg mb-2">No payout history yet</p>
+                <p className="text-muted-foreground text-sm">
+                  Complete approved campaigns to start earning and request payouts
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

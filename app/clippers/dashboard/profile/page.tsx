@@ -20,46 +20,18 @@ import {
 } from "lucide-react"
 import toast from "react-hot-toast"
 
-// Mock user data
+// User data will be loaded from session/database
 const user = {
-  name: "Demo Clipper",
-  email: "demo@swivi.com",
-  bio: "Content creator specializing in viral clips",
-  website: "https://mywebsite.com",
-  walletAddress: "0x1234...abcd",
-  paypalEmail: "demo@paypal.com"
+  name: "",
+  email: "",
+  bio: "",
+  website: "",
+  walletAddress: "",
+  paypalEmail: ""
 }
 
-// Mock submissions
-const submissions = [
-  {
-    id: "1",
-    campaignTitle: "Olivia Dean Clipping",
-    clipUrl: "https://tiktok.com/@user/video/123",
-    platform: "TikTok",
-    status: "approved",
-    earnings: 125.00,
-    submittedAt: "2024-01-15"
-  },
-  {
-    id: "2",
-    campaignTitle: "SinParty Logo Campaign",
-    clipUrl: "https://instagram.com/reel/abc123",
-    platform: "Instagram",
-    status: "pending",
-    earnings: 0,
-    submittedAt: "2024-01-18"
-  },
-  {
-    id: "3",
-    campaignTitle: "Giggles Meme Campaign",
-    clipUrl: "https://tiktok.com/@user/video/456",
-    platform: "TikTok",
-    status: "rejected",
-    earnings: 0,
-    submittedAt: "2024-01-12"
-  }
-]
+// Submissions will be loaded from user's actual data
+const submissions: any[] = []
 
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -177,13 +149,13 @@ export default function ProfilePage() {
                   <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="wallet"
-                    placeholder="0x..."
+                    placeholder="0x742d35Cc6635C0532925a3b8D951D9C9..."
                     defaultValue={user.walletAddress}
                     className="pl-10 font-mono text-sm"
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  For USDC payments on Ethereum, Polygon, or BSC
+                  Enter your USDC wallet address for crypto payments (Ethereum, Polygon, or BSC)
                 </p>
               </div>
 
@@ -194,7 +166,7 @@ export default function ProfilePage() {
                   <Input
                     id="paypal"
                     type="email"
-                    placeholder="your@paypal.com"
+                    placeholder="yourname@gmail.com"
                     defaultValue={user.paypalEmail}
                     className="pl-10"
                   />
@@ -208,50 +180,23 @@ export default function ProfilePage() {
           </Card>
         </div>
 
-        {/* Submission History */}
+        {/* Social Account Connections */}
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white">Recent Submissions</CardTitle>
+            <CardTitle className="text-white">Social Account Connections</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {submissions.map((submission) => (
-                <div key={submission.id} className="p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h4 className="font-medium text-white">{submission.campaignTitle}</h4>
-                      <p className="text-sm text-muted-foreground">{submission.platform}</p>
-                    </div>
-                    <Badge variant="outline" className={getStatusColor(submission.status)}>
-                      {submission.status}
-                    </Badge>
-                  </div>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Submitted:</span>
-                      <span className="text-white">{submission.submittedAt}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Earnings:</span>
-                      <span className="text-white font-medium">
-                        {submission.earnings > 0 ? `$${submission.earnings.toFixed(2)}` : "-"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Clip:</span>
-                      <a 
-                        href={submission.clipUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 text-xs"
-                      >
-                        View Clip ↗
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <div className="text-center py-8">
+                <User className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground text-lg mb-2">Connect Your Social Accounts</p>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Connect your social media accounts to verify your content creation capabilities
+                </p>
+                <Button className="bg-green-600 hover:bg-green-700">
+                  Connect Accounts
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
