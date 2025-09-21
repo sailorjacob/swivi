@@ -22,23 +22,19 @@ const rulesSections = [
     rules: [
       {
         title: "Be Respectful",
-        description: "Treat all community members with respect. Harassment, discrimination, or inappropriate behavior will result in immediate removal.",
-        severity: "high"
+        description: "Treat all community members with respect. Harassment, discrimination, or inappropriate behavior will result in immediate removal."
       },
       {
         title: "No Fake Engagement",
-        description: "Do not use bots, fake accounts, or any artificial means to inflate engagement rates. This includes buying likes, comments, or views.",
-        severity: "critical"
+        description: "Do not use bots, fake accounts, or any artificial means to inflate engagement rates. This includes buying likes, comments, or views."
       },
       {
         title: "Quality Content Only",
-        description: "All clips must be high-quality, engaging, and follow the campaign guidelines. Low-quality or spam content will be rejected.",
-        severity: "high"
+        description: "All clips must be high-quality, engaging, and follow the campaign guidelines. Low-quality or spam content will be rejected."
       },
       {
         title: "Platform Compliance",
-        description: "Ensure all content complies with the platform's terms of service (TikTok, YouTube, Instagram, Twitter).",
-        severity: "high"
+        description: "Ensure all content complies with the platform's terms of service (TikTok, YouTube, Instagram, Twitter)."
       }
     ]
   },
@@ -49,23 +45,19 @@ const rulesSections = [
     rules: [
       {
         title: "Minimum Duration",
-        description: "All clips must be at least 7 seconds long. Shorter clips will be automatically rejected.",
-        severity: "medium"
+        description: "All clips must be at least 7 seconds long. Shorter clips will be automatically rejected."
       },
       {
         title: "Engagement Rate",
-        description: "Clips must maintain a minimum 0.5% engagement rate (likes + comments + shares ÷ views × 100).",
-        severity: "high"
+        description: "Clips must maintain a minimum 0.5% engagement rate (likes + comments + shares ÷ views × 100)."
       },
       {
         title: "Public Statistics",
-        description: "Keep all engagement statistics (likes, comments, views) public during the campaign period.",
-        severity: "medium"
+        description: "Keep all engagement statistics (likes, comments, views) public during the campaign period."
       },
       {
         title: "Original Content",
-        description: "Content must be original and not previously posted. Reposts may be allowed with campaign approval.",
-        severity: "medium"
+        description: "Content must be original and not previously posted. Reposts may be allowed with campaign approval."
       }
     ]
   },
@@ -76,23 +68,19 @@ const rulesSections = [
     rules: [
       {
         title: "Fair Distribution",
-        description: "No clipper can earn more than 30% of the total campaign budget to ensure fair distribution.",
-        severity: "high"
+        description: "No clipper can earn more than 30% of the total campaign budget to ensure fair distribution."
       },
       {
         title: "Performance Based",
-        description: "Earnings are based on actual performance metrics. Inflated or manipulated stats will result in payment denial.",
-        severity: "critical"
+        description: "Earnings are based on actual performance metrics. Inflated or manipulated stats will result in payment denial."
       },
       {
         title: "Payment Timeline",
-        description: "Payments are processed within 1 week of campaign completion. Delays may occur for verification purposes.",
-        severity: "low"
+        description: "Payments are processed within 1 week of campaign completion. Delays may occur for verification purposes."
       },
       {
         title: "Minimum Payout",
-        description: "Minimum payout threshold is $50. Earnings below this amount will roll over to the next payout cycle.",
-        severity: "low"
+        description: "Minimum payout threshold is $50. Earnings below this amount will roll over to the next payout cycle."
       }
     ]
   },
@@ -103,23 +91,19 @@ const rulesSections = [
     rules: [
       {
         title: "Account Ownership",
-        description: "You must own and have full control of all social media accounts used for clipping.",
-        severity: "critical"
+        description: "You must own and have full control of all social media accounts used for clipping."
       },
       {
         title: "Verification Required",
-        description: "All accounts must be verified through our demographic verification process before earning.",
-        severity: "high"
+        description: "All accounts must be verified through our demographic verification process before earning."
       },
       {
         title: "Multiple Accounts",
-        description: "You may connect multiple accounts, but each must meet verification requirements independently.",
-        severity: "medium"
+        description: "You may connect multiple accounts, but each must meet verification requirements independently."
       },
       {
         title: "Account Age",
-        description: "Accounts should be established and have consistent posting history. Brand new accounts may require additional verification.",
-        severity: "medium"
+        description: "Accounts should be established and have consistent posting history. Brand new accounts may require additional verification."
       }
     ]
   },
@@ -130,23 +114,19 @@ const rulesSections = [
     rules: [
       {
         title: "Format Compliance",
-        description: "Clips must be in the correct format for each platform (TikTok, YouTube Shorts, Instagram Reels, etc.).",
-        severity: "medium"
+        description: "Clips must be in the correct format for each platform (TikTok, YouTube Shorts, Instagram Reels, etc.)."
       },
       {
         title: "Metadata Accuracy",
-        description: "All clip submissions must include accurate metadata and follow the submission guidelines.",
-        severity: "medium"
+        description: "All clip submissions must include accurate metadata and follow the submission guidelines."
       },
       {
         title: "Tracking Enablement",
-        description: "Ensure your accounts allow proper tracking of engagement metrics for payout calculations.",
-        severity: "high"
+        description: "Ensure your accounts allow proper tracking of engagement metrics for payout calculations."
       },
       {
         title: "Platform Updates",
-        description: "Stay updated with platform algorithm changes and adjust your content strategy accordingly.",
-        severity: "low"
+        description: "Stay updated with platform algorithm changes and adjust your content strategy accordingly."
       }
     ]
   }
@@ -156,52 +136,26 @@ const consequences = [
   {
     violation: "Minor violations (first offense)",
     consequence: "Warning and content rejection",
-    icon: AlertTriangle,
-    color: "text-yellow-400"
+    icon: AlertTriangle
   },
   {
     violation: "Repeated violations",
     consequence: "Temporary suspension (3-7 days)",
-    icon: XCircle,
-    color: "text-orange-400"
+    icon: XCircle
   },
   {
     violation: "Serious violations (fake engagement, account fraud)",
     consequence: "Permanent ban and payment forfeiture",
-    icon: XCircle,
-    color: "text-red-400"
+    icon: XCircle
   }
 ]
 
 function RuleCard({ rule }: { rule: typeof rulesSections[0]['rules'][0] }) {
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return 'text-red-400 border-red-400/20 bg-red-400/10'
-      case 'high': return 'text-orange-400 border-orange-400/20 bg-orange-400/10'
-      case 'medium': return 'text-yellow-400 border-yellow-400/20 bg-yellow-400/10'
-      case 'low': return 'text-foreground border-green-400/20 bg-green-400/10'
-      default: return 'text-muted-foreground border-gray-400/20 bg-muted/20'
-    }
-  }
-
-  const getSeverityLabel = (severity: string) => {
-    switch (severity) {
-      case 'critical': return 'Critical'
-      case 'high': return 'High'
-      case 'medium': return 'Medium'
-      case 'low': return 'Low'
-      default: return 'Unknown'
-    }
-  }
-
   return (
-    <Card className="bg-card border-gray-800">
+    <Card className="bg-card border-border">
       <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-3">
+        <div className="mb-3">
           <h4 className="text-white font-medium">{rule.title}</h4>
-          <Badge variant="outline" className={getSeverityColor(rule.severity)}>
-            {getSeverityLabel(rule.severity)}
-          </Badge>
         </div>
         <p className="text-muted-foreground text-sm leading-relaxed">{rule.description}</p>
       </CardContent>
@@ -211,10 +165,10 @@ function RuleCard({ rule }: { rule: typeof rulesSections[0]['rules'][0] }) {
 
 function ConsequencesSection() {
   return (
-    <Card className="bg-card border-gray-800">
+    <Card className="bg-card border-border">
       <CardHeader>
         <CardTitle className="text-white flex items-center">
-          <AlertTriangle className="w-5 h-5 mr-2 text-red-400" />
+          <AlertTriangle className="w-5 h-5 mr-2 text-muted-foreground" />
           Violations & Consequences
         </CardTitle>
       </CardHeader>
@@ -224,7 +178,7 @@ function ConsequencesSection() {
             const Icon = item.icon
             return (
               <div key={index} className="flex items-start space-x-4 p-4 border border-border rounded-lg">
-                <Icon className={`w-6 h-6 mt-0.5 ${item.color}`} />
+                <Icon className="w-6 h-6 mt-0.5 text-muted-foreground" />
                 <div className="flex-1">
                   <h4 className="text-white font-medium mb-1">{item.violation}</h4>
                   <p className="text-muted-foreground text-sm">{item.consequence}</p>
@@ -240,10 +194,10 @@ function ConsequencesSection() {
 
 function FTCCompliance() {
   return (
-    <Card className="bg-card border-gray-800">
+    <Card className="bg-card border-border">
       <CardHeader>
         <CardTitle className="text-white flex items-center">
-          <Shield className="w-5 h-5 mr-2 text-white" />
+          <Shield className="w-5 h-5 mr-2 text-muted-foreground" />
           FTC Compliance & Disclosures
         </CardTitle>
       </CardHeader>
@@ -313,7 +267,7 @@ export default function RulesPage() {
       </div>
 
       {/* Overview */}
-      <Card className="bg-card border-gray-800">
+      <Card className="bg-card border-border">
         <CardContent className="p-6">
           <div className="flex items-center space-x-3 mb-4">
             <CheckCircle className="w-6 h-6 text-foreground" />
@@ -353,29 +307,6 @@ export default function RulesPage() {
       {/* FTC Compliance */}
       <FTCCompliance />
 
-      {/* Contact */}
-      <Card className="bg-card border-gray-800">
-        <CardContent className="p-6 text-center">
-          <h3 className="text-white font-medium mb-2">Questions about these rules?</h3>
-          <p className="text-muted-foreground mb-4">
-            If you have questions about any of these guidelines, please contact our support team.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/clippers/dashboard/support"
-              className="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-            >
-              Contact Support
-            </a>
-            <a
-              href="/clippers/dashboard/faq"
-              className="inline-flex items-center px-6 py-3 border border-border text-muted-foreground hover:bg-muted rounded-lg transition-colors"
-            >
-              View FAQ
-            </a>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
