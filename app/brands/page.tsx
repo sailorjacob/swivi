@@ -103,57 +103,61 @@ const BrandsPage = () => {
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="mx-auto max-w-3xl"
+              className="mx-auto max-w-6xl"
             >
-              <motion.h1
-                variants={itemVariants}
-                className="mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light leading-tight"
-              >
-                Scale Your Brand with{" "}
-                <span className="font-normal">Viral Content</span>
-              </motion.h1>
-
-              <motion.p
-                variants={itemVariants}
-                className="mb-10 text-base sm:text-lg text-muted-foreground max-w-xl"
-              >
-                Partner with top creators and our expert clipper network to create 
-                viral content that drives real engagement and growth for your brand.
-              </motion.p>
-
-              <motion.div variants={itemVariants}>
-                <Link
-                  href="https://calendly.com/bykevingeorge/30min?month=2025-05"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-sm font-normal bg-foreground text-background px-8 py-4 rounded-full hover:bg-foreground/90 transition-all duration-300 group"
-                >
-                  Launch Your Campaign
-                  <motion.span
-                    className="ml-2"
-                    whileHover={{ x: 5 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div className="space-y-8">
+                  <motion.h1
+                    variants={itemVariants}
+                    className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light leading-tight"
                   >
-                    <ArrowRight className="h-4 w-4" />
-                  </motion.span>
-                </Link>
-              </motion.div>
+                    Scale Your Brand with{" "}
+                    <span className="font-normal">Viral Content</span>
+                  </motion.h1>
 
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="relative w-full md:w-auto"
-              >
-                <Image
-                  src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/swivi/swivi39.png"
-                  alt="Swivi Brand Campaign"
-                  width={400}
-                  height={300}
-                  className="rounded-lg shadow-lg"
-                  priority
-                />
-              </motion.div>
+                  <motion.p
+                    variants={itemVariants}
+                    className="text-base sm:text-lg text-muted-foreground max-w-xl"
+                  >
+                    Partner with top creators and our expert clipper network to create
+                    viral content that drives real engagement and growth for your brand.
+                  </motion.p>
+
+                  <motion.div variants={itemVariants}>
+                    <Link
+                      href="https://calendly.com/bykevingeorge/30min?month=2025-05"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-sm font-normal bg-foreground text-background px-8 py-4 rounded-full hover:bg-foreground/90 transition-all duration-300 group"
+                    >
+                      Launch Your Campaign
+                      <motion.span
+                        className="ml-2"
+                        whileHover={{ x: 5 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </motion.span>
+                    </Link>
+                  </motion.div>
+                </div>
+
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="flex justify-center lg:justify-end"
+                >
+                  <Image
+                    src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/swivi/swivi39.png"
+                    alt="Swivi Brand Campaign"
+                    width={400}
+                    height={300}
+                    className="rounded-lg shadow-lg"
+                    priority
+                  />
+                </motion.div>
+              </div>
             </motion.div>
           </div>
         </section>

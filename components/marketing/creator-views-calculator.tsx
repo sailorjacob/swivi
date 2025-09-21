@@ -326,8 +326,8 @@ export function CreatorViewsCalculator() {
 
       {/* Savings Popup */}
       {showSavingsPopup && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-4"
           onClick={() => setShowSavingsPopup(false)}
         >
           <motion.div
@@ -335,62 +335,62 @@ export function CreatorViewsCalculator() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.3 }}
-            className="bg-background border border-border rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            className="bg-background/95 backdrop-blur-xl border border-border/50 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4 sm:p-6">
-              <div className="flex items-start justify-between mb-6">
+            <div className="p-6 sm:p-8">
+              <div className="flex items-start justify-between mb-8">
                 <div>
-                  <h3 className="text-lg sm:text-xl font-medium text-foreground mb-2">Your Annual Savings Breakdown</h3>
-                  <p className="text-xl sm:text-2xl font-bold text-green-400">{formatCurrency(annualSavings)}</p>
-                  <p className="text-sm text-muted-foreground mt-1">vs. traditional advertising</p>
+                  <h3 className="text-xl sm:text-2xl font-light text-foreground mb-3">Your Annual Savings Breakdown</h3>
+                  <p className="text-2xl sm:text-3xl font-light text-foreground">{formatCurrency(annualSavings)}</p>
+                  <p className="text-sm text-muted-foreground mt-2">vs. traditional advertising</p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowSavingsPopup(false)}
-                  className="shrink-0 hover:bg-muted"
+                  className="shrink-0 hover:bg-muted/50 -mt-2 -mr-2"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              
-              <div className="space-y-5">
+
+              <div className="space-y-6">
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   Our clipper network delivers authentic reach at just $1 CPM—saving you up to 80% compared to traditional paid ads at $5 CPM.
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-3">
                     <h4 className="text-sm font-medium text-muted-foreground">Traditional Ads</h4>
-                    <Card className="border border-border bg-muted/50">
-                      <CardContent className="p-3">
-                        <div className="space-y-2">
+                    <Card className="border border-border/50 bg-muted/30">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-muted-foreground">CPM:</span>
-                            <span className="font-semibold text-sm text-foreground">$5.00</span>
+                            <span className="font-light text-sm text-foreground">$5.00</span>
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-muted-foreground">Annual Cost:</span>
-                            <span className="font-bold text-sm text-red-400">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 5))}</span>
+                            <span className="font-light text-sm text-muted-foreground">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 5))}</span>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
                   </div>
 
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-green-400">Clipper Network</h4>
-                    <Card className="border border-green-500/20 bg-green-500/10">
-                      <CardContent className="p-3">
-                        <div className="space-y-2">
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-foreground">Clipper Network</h4>
+                    <Card className="border border-border/50 bg-card/50">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-muted-foreground">CPM:</span>
-                            <span className="font-semibold text-sm text-green-400">$1.00</span>
+                            <span className="font-light text-sm text-foreground">$1.00</span>
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-muted-foreground">Annual Cost:</span>
-                            <span className="font-bold text-sm text-green-400">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 1))}</span>
+                            <span className="font-light text-sm text-foreground">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 1))}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -398,22 +398,22 @@ export function CreatorViewsCalculator() {
                   </div>
                 </div>
 
-                <Card className="bg-card border border-border shadow-lg">
-                  <CardContent className="p-4 text-center">
-                    <h5 className="text-sm font-medium mb-2 text-foreground">Total Annual Savings</h5>
-                    <p className="text-xl sm:text-2xl font-bold mb-2 text-green-400">{formatCurrency(annualSavings)}</p>
+                <Card className="bg-card/30 border border-border/50 shadow-sm">
+                  <CardContent className="p-5 text-center">
+                    <h5 className="text-sm font-medium mb-3 text-foreground">Total Annual Savings</h5>
+                    <p className="text-2xl sm:text-3xl font-light mb-3 text-foreground">{formatCurrency(annualSavings)}</p>
                     <p className="text-xs text-muted-foreground">
-                      That's an <span className="font-semibold text-green-400">80% reduction</span> in ad costs
+                      That's an <span className="font-medium text-foreground">80% reduction</span> in ad costs
                     </p>
                   </CardContent>
                 </Card>
 
-                <div className="text-center">
+                <div className="text-center pt-2">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowDetailedBreakdown(!showDetailedBreakdown)}
-                    className="text-muted-foreground hover:text-foreground hover:bg-muted text-xs"
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted/50 text-xs"
                   >
                     {showDetailedBreakdown ? (
                       <>
@@ -436,46 +436,46 @@ export function CreatorViewsCalculator() {
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="space-y-4 overflow-hidden"
+                      className="space-y-5 overflow-hidden"
                     >
-                      <div className="pt-2 border-t border-border">
-                        <h5 className="text-sm font-medium text-foreground mb-3">Detailed Comparison</h5>
-                        
-                        <div className="grid grid-cols-1 gap-4">
+                      <div className="pt-4 border-t border-border/30">
+                        <h5 className="text-sm font-medium text-foreground mb-4">Detailed Comparison</h5>
+
+                        <div className="grid grid-cols-1 gap-5">
                           <div className="space-y-3">
                             <h6 className="text-xs font-medium text-muted-foreground">Traditional Paid Ads</h6>
-                            <Card className="border border-border bg-muted/50">
-                              <CardContent className="p-3">
-                                <div className="space-y-2">
+                            <Card className="border border-border/30 bg-muted/20">
+                              <CardContent className="p-4">
+                                <div className="space-y-3">
                                   <div className="flex justify-between items-center">
                                     <span className="text-xs text-muted-foreground">CPM Rate:</span>
-                                    <span className="font-semibold text-xs text-foreground">$5.00</span>
+                                    <span className="font-light text-xs text-foreground">$5.00</span>
                                   </div>
                                   <div className="flex justify-between items-center">
                                     <span className="text-xs text-muted-foreground">Annual Views:</span>
-                                    <span className="font-medium text-xs text-foreground">{formatNumber(monthlyViews * 12)}</span>
+                                    <span className="font-light text-xs text-foreground">{formatNumber(monthlyViews * 12)}</span>
                                   </div>
-                                  <div className="flex justify-between items-center border-t border-border pt-2">
-                                    <span className="font-medium text-xs text-foreground">Annual Cost:</span>
-                                    <span className="font-bold text-xs text-red-400">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 5))}</span>
+                                  <div className="flex justify-between items-center border-t border-border/30 pt-3">
+                                    <span className="font-light text-xs text-foreground">Annual Cost:</span>
+                                    <span className="font-light text-xs text-muted-foreground">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 5))}</span>
                                   </div>
                                 </div>
-                                <div className="mt-3 pt-3 border-t border-border">
-                                  <ul className="space-y-1 text-xs text-muted-foreground">
+                                <div className="mt-4 pt-4 border-t border-border/30">
+                                  <ul className="space-y-2 text-xs text-muted-foreground">
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
+                                      <div className="w-1 h-1 bg-muted-foreground/50 rounded-full"></div>
                                       Low engagement (1-2%)
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
+                                      <div className="w-1 h-1 bg-muted-foreground/50 rounded-full"></div>
                                       Ad fatigue issues
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
+                                      <div className="w-1 h-1 bg-muted-foreground/50 rounded-full"></div>
                                       Limited authenticity
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
+                                      <div className="w-1 h-1 bg-muted-foreground/50 rounded-full"></div>
                                       High acquisition cost
                                     </li>
                                   </ul>
@@ -485,39 +485,39 @@ export function CreatorViewsCalculator() {
                           </div>
 
                           <div className="space-y-3">
-                            <h6 className="text-xs font-medium text-green-400">Clipper Marketing</h6>
-                            <Card className="border border-green-500/20 bg-green-500/10">
-                              <CardContent className="p-3">
-                                <div className="space-y-2">
+                            <h6 className="text-xs font-medium text-foreground">Clipper Marketing</h6>
+                            <Card className="border border-border/30 bg-card/30">
+                              <CardContent className="p-4">
+                                <div className="space-y-3">
                                   <div className="flex justify-between items-center">
                                     <span className="text-xs text-muted-foreground">CPM Rate:</span>
-                                    <span className="font-semibold text-xs text-green-400">$1.00</span>
+                                    <span className="font-light text-xs text-foreground">$1.00</span>
                                   </div>
                                   <div className="flex justify-between items-center">
                                     <span className="text-xs text-muted-foreground">Annual Views:</span>
-                                    <span className="font-medium text-xs text-foreground">{formatNumber(monthlyViews * 12)}</span>
+                                    <span className="font-light text-xs text-foreground">{formatNumber(monthlyViews * 12)}</span>
                                   </div>
-                                  <div className="flex justify-between items-center border-t border-green-500/20 pt-2">
-                                    <span className="font-medium text-xs text-foreground">Annual Cost:</span>
-                                    <span className="font-bold text-xs text-green-400">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 1))}</span>
+                                  <div className="flex justify-between items-center border-t border-border/30 pt-3">
+                                    <span className="font-light text-xs text-foreground">Annual Cost:</span>
+                                    <span className="font-light text-xs text-foreground">{formatCurrency(Math.round((monthlyViews * 12 / 1000) * 1))}</span>
                                   </div>
                                 </div>
-                                <div className="mt-3 pt-3 border-t border-green-500/20">
-                                  <ul className="space-y-1 text-xs text-muted-foreground">
+                                <div className="mt-4 pt-4 border-t border-border/30">
+                                  <ul className="space-y-2 text-xs text-muted-foreground">
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-green-400 rounded-full"></div>
+                                      <div className="w-1 h-1 bg-foreground/30 rounded-full"></div>
                                       High engagement (5-8%)
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-green-400 rounded-full"></div>
+                                      <div className="w-1 h-1 bg-foreground/30 rounded-full"></div>
                                       Authentic content
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-green-400 rounded-full"></div>
+                                      <div className="w-1 h-1 bg-foreground/30 rounded-full"></div>
                                       Scalable reach
                                     </li>
                                     <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-green-400 rounded-full"></div>
+                                      <div className="w-1 h-1 bg-foreground/30 rounded-full"></div>
                                       Lower acquisition cost
                                     </li>
                                   </ul>
@@ -527,7 +527,7 @@ export function CreatorViewsCalculator() {
                           </div>
                         </div>
 
-                        <div className="text-xs text-muted-foreground text-center pt-3 border-t border-border">
+                        <div className="text-xs text-muted-foreground text-center pt-4 border-t border-border/30 mt-4">
                           Based on {formatNumber(monthlyViews)} monthly views, our clipper network saves you {formatCurrency(annualSavings)} annually compared to traditional advertising while delivering 3x higher engagement rates.
                         </div>
                       </div>
@@ -535,11 +535,11 @@ export function CreatorViewsCalculator() {
                   )}
                 </AnimatePresence>
 
-                <div className="text-center pt-3">
-                  <Button asChild className="w-full" size="default">
-                    <Link 
-                      href="https://calendly.com/bykevingeorge/30min?month=2025-05" 
-                      target="_blank" 
+                <div className="text-center pt-4">
+                  <Button asChild className="w-full bg-foreground text-background hover:bg-foreground/90" size="default">
+                    <Link
+                      href="https://calendly.com/bykevingeorge/30min?month=2025-05"
+                      target="_blank"
                       rel="noopener noreferrer"
                     >
                       Get Started

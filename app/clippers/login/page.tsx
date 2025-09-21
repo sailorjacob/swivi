@@ -133,37 +133,6 @@ export default function ClippersLoginPage() {
             </CardContent>
           </Card>
 
-        {/* Benefits */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4"
-        >
-          <div className="group text-center p-4 bg-card rounded-lg border border-border hover:border-white/20 transition-all duration-300 hover:shadow-lg hover:shadow-white/5">
-            <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-white/20 transition-colors">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <div className="text-white text-xl font-bold mb-1">$20-100+</div>
-            <div className="text-muted-foreground text-sm">Per approved clip</div>
-          </div>
-
-          <div className="group text-center p-4 bg-card rounded-lg border border-border hover:border-white/20 transition-all duration-300 hover:shadow-lg hover:shadow-white/5">
-            <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-white/20 transition-colors">
-              <Users className="w-5 h-5 text-white" />
-            </div>
-            <div className="text-white text-xl font-bold mb-1">87+</div>
-            <div className="text-muted-foreground text-sm">Active Clippers</div>
-          </div>
-
-          <div className="group text-center p-4 bg-card rounded-lg border border-border hover:border-white/20 transition-all duration-300 hover:shadow-lg hover:shadow-white/5">
-            <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-white/20 transition-colors">
-              <TrendingUp className="w-5 h-5 text-white" />
-            </div>
-            <div className="text-white text-xl font-bold mb-1">2.3K</div>
-            <div className="text-muted-foreground text-sm">Clips this month</div>
-          </div>
-        </motion.div>
         </motion.div>
       </div>
     </div>

@@ -249,7 +249,8 @@ export function LiveCampaigns() {
           </motion.p>
       </motion.div>
 
-      {/* Stats */}
+      {/* Stats - Hidden */}
+      {/*
       <motion.section
         variants={containerVariants}
         initial="hidden"
@@ -272,6 +273,7 @@ export function LiveCampaigns() {
           ))}
         </div>
       </motion.section>
+      */}
 
       {/* Filters */}
       <motion.section
@@ -496,17 +498,11 @@ export function LiveCampaigns() {
             Join our Discord community to get access to all live campaigns, 
             connect with other clippers, and start building your earnings today.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Button asChild size="lg">
               <Link href="https://discord.gg/CtZ4tecJ7Y" target="_blank">
                 <Users className="mr-2 h-4 w-4" />
                 Join Discord Community
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link href="/clippers/onboarding">
-                <Play className="mr-2 h-4 w-4" />
-                Start Onboarding
               </Link>
             </Button>
           </div>
