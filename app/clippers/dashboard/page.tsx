@@ -228,9 +228,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         {/* Recent Clips */}
-        <div className="lg:col-span-2">
+        <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-medium text-white">Recent Clips</h2>
             <Link href="/clippers/dashboard/profile">
@@ -262,8 +262,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Active Campaigns */}
-        <div>
+        {/* Active Campaigns - Hidden */}
+        {/* <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-medium text-white">Active Campaigns</h2>
             <Link href="/clippers/dashboard/campaigns">
@@ -278,7 +278,7 @@ export default function DashboardPage() {
               <CampaignCard key={campaign.id} campaign={campaign} onSubmitClip={handleSubmitClip} />
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
 
 

@@ -238,8 +238,8 @@ export default function SupportPage() {
         <p className="text-muted-foreground">Find answers to common questions or get help from our team.</p>
       </div>
 
-      {/* Quick Stats */}
-      <QuickStats />
+      {/* Quick Stats - Hidden */}
+      {/* <QuickStats /> */}
 
       {/* Main Content */}
       <Tabs defaultValue="faq" className="space-y-6">

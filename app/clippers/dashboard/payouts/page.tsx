@@ -155,7 +155,7 @@ export default function PayoutsPage() {
           <CardTitle className="text-white">Available Balance</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center">
+          <div className="text-left">
             <div className="text-4xl font-bold text-white mb-2">
               ${availableBalance.toFixed(2)}
             </div>
