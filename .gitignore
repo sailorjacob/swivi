@@ -26,6 +26,10 @@ yarn-error.log*
 .env*.local
 .env
 
+# temp files (may contain sensitive data)
+temp_db_url.txt
+temp_pooler_url.txt
+
 # vercel
 .vercel
 
