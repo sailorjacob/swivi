@@ -95,23 +95,23 @@ export function Header() {
           {session ? (
             <Link
               href="/clippers/dashboard"
-              className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-foreground text-background hover:bg-foreground/90 transition-all duration-300"
+              className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
             >
               Dashboard
             </Link>
           ) : (
             <>
               <Link
-                href="/clippers/login"
-                className="text-sm font-normal px-6 py-3 rounded-full bg-transparent text-foreground hover:text-foreground/80 transition-all duration-300"
-              >
-                Sign In
-              </Link>
-              <Link
                 href="/clippers/signup"
                 className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
               >
                 Become a Clipper
+              </Link>
+              <Link
+                href="/clippers/login"
+                className="text-sm font-normal px-6 py-3 rounded-full bg-transparent text-foreground hover:text-foreground/80 transition-all duration-300"
+              >
+                Sign In
               </Link>
             </>
           )}
@@ -175,7 +175,7 @@ export function Header() {
             {session ? (
               <Link
                 href="/clippers/dashboard"
-                className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-foreground text-background hover:bg-foreground/90 transition-all duration-300 text-center"
+                className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Dashboard
@@ -183,18 +183,18 @@ export function Header() {
             ) : (
               <>
                 <Link
-                  href="/clippers/login"
-                  className="block mt-2 text-sm font-normal px-6 py-3 rounded-full bg-transparent text-foreground hover:text-foreground/80 transition-all duration-300 text-center"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Sign In
-                </Link>
-                <Link
                   href="/clippers/signup"
                   className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Become a Clipper
+                </Link>
+                <Link
+                  href="/clippers/login"
+                  className="block mt-2 text-sm font-normal px-6 py-3 rounded-full bg-transparent text-foreground hover:text-foreground/80 transition-all duration-300 text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sign In
                 </Link>
               </>
             )}
