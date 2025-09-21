@@ -28,7 +28,7 @@ export function CreatorViewsCalculator() {
   const [monthlyViews, setMonthlyViews] = useState(0)
   const [annualSavings, setAnnualSavings] = useState(0)
   const [showSavingsPopup, setShowSavingsPopup] = useState(false)
-  const [showDetailedBreakdown, setShowDetailedBreakdown] = useState(false)
+  const [showDetailedBreakdown, setShowDetailedBreakdown] = useState(true)
 
   // Calculate views and savings whenever values change
   useEffect(() => {
