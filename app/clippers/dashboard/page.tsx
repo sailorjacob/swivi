@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import {
   DollarSign,
   TrendingUp,
@@ -206,10 +208,48 @@ function CampaignCard({ campaign, onSubmitClip }: { campaign: typeof activeCampa
 export default function DashboardPage() {
   const [submissionModalOpen, setSubmissionModalOpen] = useState(false)
   const [selectedCampaignForSubmission, setSelectedCampaignForSubmission] = useState<typeof activeCampaigns[0] | null>(null)
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    console.log("🔍 Dashboard session check:", { status, session })
+    
+    if (status === "loading") {
+      console.log("⏳ Session loading...")
+      return
+    }
+    
+    if (status === "unauthenticated") {
+      console.log("❌ Not authenticated, redirecting to login")
+      router.push("/clippers/login")
+      return
+    }
+    
+    if (session) {
+      console.log("✅ User authenticated:", session.user)
+    }
+  }, [status, session, router])
 
   const handleSubmitClip = (campaign: typeof activeCampaigns[0]) => {
     setSelectedCampaignForSubmission(campaign)
     setSubmissionModalOpen(true)
+  }
+
+  // Show loading state while checking authentication
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render anything if not authenticated (redirect will happen)
+  if (status === "unauthenticated") {
+    return null
   }
 
   return (

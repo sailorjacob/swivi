@@ -31,15 +31,23 @@ export const authOptions: NextAuthOptions = {
       console.log("🔍 OAuth signIn callback triggered:", {
         provider: account?.provider,
         email: user.email,
-        name: user.name
+        name: user.name,
+        accountId: account?.providerAccountId
       })
       
-      // Allow OAuth sign in (PrismaAdapter will handle user creation)
-      if (account?.provider === "discord" || account?.provider === "google") {
+      try {
+        // Allow OAuth sign in (PrismaAdapter will handle user creation)
+        if (account?.provider === "discord" || account?.provider === "google") {
+          console.log("✅ OAuth provider accepted:", account.provider)
+          return true
+        }
+        
+        console.log("⚠️ Unknown provider:", account?.provider)
         return true
+      } catch (error) {
+        console.error("❌ SignIn callback error:", error)
+        return false
       }
-      
-      return true
     },
     async jwt({ token, user, account }) {
       if (user) {
@@ -67,12 +75,22 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Handle post-authentication redirects
-      if (url.startsWith("/")) return `${baseUrl}${url}`
+      console.log("🔄 Redirect callback triggered:", { url, baseUrl })
+      
+      // Handle relative URLs
+      if (url.startsWith("/")) {
+        console.log("📍 Relative URL redirect:", `${baseUrl}${url}`)
+        return `${baseUrl}${url}`
+      }
+      
       // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
+      if (new URL(url).origin === baseUrl) {
+        console.log("📍 Same origin redirect:", url)
+        return url
+      }
       
       // Always go to dashboard - let the dashboard handle onboarding logic
+      console.log("📍 Default redirect to dashboard")
       return `${baseUrl}/clippers/dashboard`
     },
   },

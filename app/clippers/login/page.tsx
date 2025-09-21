@@ -20,21 +20,32 @@ export default function ClippersLoginPage() {
   const handleSignIn = async (provider: string) => {
     setIsLoading(provider)
     try {
+      console.log(`🚀 Starting ${provider} authentication...`)
       const result = await signIn(provider, {
         callbackUrl: "/clippers/dashboard",
         redirect: false,
       })
       
+      console.log("📊 SignIn result:", result)
+      
       if (result?.error) {
-        console.error("OAuth error:", result.error)
-        toast.error(`${provider} authentication failed. Please check if callback URLs are configured.`)
+        console.error("❌ OAuth error:", result.error)
+        toast.error(`${provider} authentication failed. Please check the browser console for details.`)
         setIsLoading(null)
       } else if (result?.url) {
+        console.log("✅ Redirecting to:", result.url)
         // Success - redirect to the callback URL
         window.location.href = result.url
+      } else if (result?.ok) {
+        console.log("✅ Authentication successful, redirecting to dashboard")
+        router.push("/clippers/dashboard")
+      } else {
+        console.warn("⚠️ Unexpected result:", result)
+        toast.error("Authentication completed but redirect failed. Trying manual redirect...")
+        setTimeout(() => router.push("/clippers/dashboard"), 1000)
       }
     } catch (error) {
-      console.error("OAuth login error:", error)
+      console.error("💥 OAuth login error:", error)
       toast.error("An error occurred during sign in. Please try again.")
       setIsLoading(null)
     }
