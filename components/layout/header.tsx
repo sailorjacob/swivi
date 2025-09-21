@@ -3,6 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
+import { useSession } from "next-auth/react"
 import { Menu, X, ChevronDown } from "lucide-react"
 
 const navigation = [
@@ -27,6 +28,7 @@ const navigation = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { data: session } = useSession()
 
   return (
     <header className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-sm border-b border-black/5">
@@ -88,12 +90,31 @@ export function Header() {
           >
             Launch a Campaign
           </Link>
-          <Link
-            href="/clippers/signup"
-            className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
-          >
-            Become a Clipper
-          </Link>
+          
+          {/* Platform Access Button */}
+          {session ? (
+            <Link
+              href="/clippers/dashboard"
+              className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-foreground text-background hover:bg-foreground/90 transition-all duration-300"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/clippers/login"
+                className="text-sm font-normal px-6 py-3 rounded-full bg-transparent text-foreground hover:text-foreground/80 transition-all duration-300"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/clippers/signup"
+                className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
+              >
+                Become a Clipper
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu button */}
@@ -149,13 +170,34 @@ export function Header() {
             >
               Launch a Campaign
             </Link>
-            <Link
-              href="/clippers/signup"
-              className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Become a Clipper
-            </Link>
+            
+            {/* Mobile Platform Access Buttons */}
+            {session ? (
+              <Link
+                href="/clippers/dashboard"
+                className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-foreground text-background hover:bg-foreground/90 transition-all duration-300 text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/clippers/login"
+                  className="block mt-2 text-sm font-normal px-6 py-3 rounded-full bg-transparent text-foreground hover:text-foreground/80 transition-all duration-300 text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/clippers/signup"
+                  className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Become a Clipper
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
