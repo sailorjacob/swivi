@@ -273,53 +273,6 @@ export function LiveCampaigns() {
           ))}
         </div>
       </motion.section>
-      */}
-
-      {/* Filters */}
-      <motion.section
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        className="mb-8"
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-normal">Find Your Perfect Campaign</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search campaigns, clients, or industries..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {/* Filter Tabs */}
-            <Tabs value={selectedStatus} onValueChange={setSelectedStatus}>
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto p-1">
-                <TabsTrigger value="all" className="text-xs sm:text-sm px-2 py-2">All Status</TabsTrigger>
-                <TabsTrigger value="active" className="text-xs sm:text-sm px-2 py-2">Active</TabsTrigger>
-                <TabsTrigger value="ending-soon" className="text-xs sm:text-sm px-2 py-2">Ending Soon</TabsTrigger>
-                <TabsTrigger value="launching-soon" className="text-xs sm:text-sm px-2 py-2">Launching Soon</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <Tabs value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto p-1">
-                <TabsTrigger value="all" className="text-xs sm:text-sm px-2 py-2">All Levels</TabsTrigger>
-                <TabsTrigger value="beginner" className="text-xs sm:text-sm px-2 py-2">Beginner</TabsTrigger>
-                <TabsTrigger value="intermediate" className="text-xs sm:text-sm px-2 py-2">Intermediate</TabsTrigger>
-                <TabsTrigger value="advanced" className="text-xs sm:text-sm px-2 py-2">Advanced</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </motion.section>
 
       {/* Campaign Cards */}
       <motion.section
