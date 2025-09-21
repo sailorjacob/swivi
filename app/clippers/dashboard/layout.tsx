@@ -74,7 +74,7 @@ function Sidebar({ className }: { className?: string }) {
     <div className={cn("flex flex-col h-full bg-card border-r border-border", className)}>
       {/* Logo */}
       <div className="p-6 border-b border-border">
-        <div className="flex items-center space-x-4">
+        <Link href="/" className="flex items-center space-x-4 hover:opacity-80 transition-opacity">
           <SwiviLogo size={36} />
           <div>
             <h1 className="text-white font-light text-lg">Swivi Clippers</h1>
@@ -84,7 +84,7 @@ function Sidebar({ className }: { className?: string }) {
               </p>
             )}
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Navigation */}
@@ -164,10 +164,10 @@ export default function DashboardLayout({
       <div className="flex-1 flex flex-col h-full">
         {/* Mobile Header */}
         <div className="lg:hidden flex items-center justify-between p-4 border-b border-border flex-shrink-0">
-          <div className="flex items-center space-x-3">
+          <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <SwiviLogo size={32} />
             <h1 className="text-white font-light">Swivi Clippers</h1>
-          </div>
+          </Link>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white">

@@ -149,92 +149,90 @@ export default function PayoutsPage() {
     <div className="space-y-8">
       <h1 className="text-3xl font-light text-foreground">Payouts</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Balance & Request Payout */}
-        <div className="space-y-6">
-          {/* Available Balance */}
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-white">Available Balance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">
-                  ${availableBalance.toFixed(2)}
+      {/* Balance Overview */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="text-white">Available Balance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center">
+            <div className="text-4xl font-bold text-white mb-2">
+              ${availableBalance.toFixed(2)}
+            </div>
+            <p className="text-muted-foreground">
+              Minimum payout: ${minimumPayout.toFixed(2)}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Request Payout */}
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle className="text-white">Request Payout</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handlePayoutRequest} className="space-y-4">
+              <div>
+                <Label htmlFor="amount">Amount (USD)</Label>
+                <div className="relative mt-1">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="amount"
+                    type="number"
+                    placeholder="0.00"
+                    min={minimumPayout}
+                    max={availableBalance}
+                    step="0.01"
+                    value={payoutAmount}
+                    onChange={(e) => setPayoutAmount(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
                 </div>
-                <p className="text-muted-foreground">
-                  Minimum payout: ${minimumPayout.toFixed(2)}
-                </p>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Request Payout */}
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-white">Request Payout</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handlePayoutRequest} className="space-y-4">
-                <div>
-                  <Label htmlFor="amount">Amount (USD)</Label>
-                  <div className="relative mt-1">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="amount"
-                      type="number"
-                      placeholder="0.00"
-                      min={minimumPayout}
-                      max={availableBalance}
-                      step="0.01"
-                      value={payoutAmount}
-                      onChange={(e) => setPayoutAmount(e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
+              <div>
+                <Label htmlFor="method">Payout Method</Label>
+                <Select value={payoutMethod} onValueChange={setPayoutMethod} required>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select payout method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="usdc">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="w-4 h-4" />
+                        USDC Wallet
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="paypal">
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-4 h-4" />
+                        PayPal
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div>
-                  <Label htmlFor="method">Payout Method</Label>
-                  <Select value={payoutMethod} onValueChange={setPayoutMethod} required>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select payout method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="usdc">
-                        <div className="flex items-center gap-2">
-                          <Wallet className="w-4 h-4" />
-                          USDC Wallet
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="paypal">
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4" />
-                          PayPal
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
+                <p className="font-medium text-foreground mb-1">Processing Times:</p>
+                <p>• USDC: 1-2 hours</p>
+                <p>• PayPal: 1-3 business days</p>
+              </div>
 
-                <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground mb-1">Processing Times:</p>
-                  <p>• USDC: 1-2 hours</p>
-                  <p>• PayPal: 1-3 business days</p>
-                </div>
-
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full"
-                >
-                  {isLoading ? "Processing..." : "Request Payout"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                size="sm"
+                className="w-full"
+              >
+                {isLoading ? "Processing..." : "Request Payout"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
 
         {/* Payout Settings */}
         <Card className="bg-card border-border">
@@ -275,7 +273,12 @@ export default function PayoutsPage() {
                 </div>
               </div>
 
-              <Button type="submit" disabled={payoutSaving} className={`w-full transition-all duration-300 ${payoutSuccess ? 'bg-green-600 hover:bg-green-600' : ''}`}>
+              <Button 
+                type="submit" 
+                disabled={payoutSaving} 
+                size="sm"
+                className={`w-full transition-all duration-300 ${payoutSuccess ? 'bg-green-600 hover:bg-green-600' : ''}`}
+              >
                 {payoutSaving ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -287,12 +290,17 @@ export default function PayoutsPage() {
                     Settings Updated!
                   </>
                 ) : (
-                  "Update Payout Settings"
+                  "Update Settings"
                 )}
               </Button>
             </form>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Payout History */}
+      <div>
+        {/* Payout History */}
 
         {/* Payout History */}
         <Card className="bg-card border-border">
