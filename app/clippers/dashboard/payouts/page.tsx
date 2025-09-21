@@ -119,7 +119,7 @@ export default function PayoutsPage() {
 
       if (response.ok) {
         const updatedUser = await response.json()
-        setUser(prev => prev ? { ...prev, ...updatedUser } : null)
+        setUser((prev: any) => prev ? { ...prev, ...updatedUser } : null)
         setPayoutSuccess(true)
         toast.success("Payout settings updated successfully!")
         // Reset success state after animation
