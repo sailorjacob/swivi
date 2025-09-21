@@ -372,9 +372,9 @@ export function LiveCampaigns() {
                       <span>Budget Progress</span>
                       <span>${campaign.budgetSpent.toLocaleString()} / ${campaign.budget.toLocaleString()}</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-muted rounded-full h-2">
                       <div 
-                        className="bg-gray-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-foreground h-2 rounded-full transition-all duration-300"
                         style={{ width: `${getProgressPercentage(campaign.budgetSpent, campaign.budget)}%` }}
                       />
                     </div>
@@ -403,7 +403,7 @@ export function LiveCampaigns() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-xs text-muted-foreground">Potential:</span>
-                        <span className="text-xs font-medium text-green-600">
+                        <span className="text-xs font-medium">
                           ${campaign.estimatedEarnings.min}-${campaign.estimatedEarnings.max}
                         </span>
                       </div>

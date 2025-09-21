@@ -22,36 +22,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import toast from "react-hot-toast"
 
-// Mock data
-const connectedAccounts = [
-  {
-    id: "1",
-    platform: "instagram",
-    handle: "@clipper_pro",
-    followers: 12500,
-    verified: true,
-    connectedAt: "2024-01-15",
-    status: "active"
-  },
-  {
-    id: "2",
-    platform: "tiktok",
-    handle: "@clipper_pro",
-    followers: 8900,
-    verified: true,
-    connectedAt: "2024-01-20",
-    status: "active"
-  },
-  {
-    id: "3",
-    platform: "youtube",
-    handle: "ClipperPro",
-    followers: 3200,
-    verified: false,
-    connectedAt: "2024-02-01",
-    status: "pending_verification"
-  }
-]
+// User's connected social accounts - will be loaded from database
+const connectedAccounts: any[] = []
 
 const platformConfigs = {
   instagram: {
@@ -353,11 +325,22 @@ export default function SocialAccountsPage() {
       {/* Connected Accounts */}
       <div className="space-y-6">
         <h2 className="text-xl font-medium text-white">Connected Accounts</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {connectedAccounts.map((account) => (
-            <AccountCard key={account.id} account={account} />
-          ))}
-        </div>
+        {connectedAccounts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {connectedAccounts.map((account) => (
+              <AccountCard key={account.id} account={account} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">No accounts connected</h3>
+            <p className="text-muted-foreground mb-6">
+              Connect your social media accounts to start earning from campaigns
+            </p>
+            <ConnectAccountDialog />
+          </div>
+        )}
       </div>
 
       {/* Platform Requirements */}

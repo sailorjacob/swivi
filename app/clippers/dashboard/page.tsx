@@ -17,104 +17,71 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
+import Image from "next/image"
 import { ClipSubmissionModal } from "@/components/clippers/clip-submission-modal"
 
-// Mock data - replace with real data later
+// Real stats - will be populated from user's actual data
 const stats = [
   {
     title: "Total Earned",
-    value: "$2,847",
-    change: "+12.5%",
-    changeType: "positive" as const,
+    value: "$0.00",
+    change: "Start earning from approved clips",
+    changeType: "neutral" as const,
     icon: DollarSign,
     color: "text-foreground"
   },
   {
     title: "Active Campaigns",
-    value: "3",
-    change: "2 ending soon",
+    value: "2",
+    change: "Available to join",
     changeType: "neutral" as const,
     icon: Target,
-    color: "text-white"
+    color: "text-muted-foreground"
   },
   {
     title: "Clips Submitted",
-    value: "127",
-    change: "23 this week",
-    changeType: "positive" as const,
+    value: "0",
+    change: "Submit your first clip",
+    changeType: "neutral" as const,
     icon: Play,
-    color: "text-purple-400"
+    color: "text-muted-foreground"
   },
   {
-    title: "Avg. Views",
-    value: "12.4K",
-    change: "+8.2%",
-    changeType: "positive" as const,
+    title: "Total Views",
+    value: "0",
+    change: "Grow your audience",
+    changeType: "neutral" as const,
     icon: Eye,
-    color: "text-orange-400"
+    color: "text-muted-foreground"
   }
 ]
 
-const recentClips = [
-  {
-    id: "1",
-    title: "Viral TikTok Dance Edit",
-    campaign: "Dance Challenge 2024",
-    status: "approved",
-    views: 15420,
-    earnings: 85,
-    submittedAt: "2 hours ago"
-  },
-  {
-    id: "2",
-    title: "Comedy Skit Compilation",
-    campaign: "Funny Moments",
-    status: "pending",
-    views: 0,
-    earnings: 0,
-    submittedAt: "5 hours ago"
-  },
-  {
-    id: "3",
-    title: "Cooking Tutorial Edit",
-    campaign: "Kitchen Hacks",
-    status: "rejected",
-    views: 3200,
-    earnings: 0,
-    submittedAt: "1 day ago"
-  }
-]
+// User's recent clips - will be loaded from database
+const recentClips: any[] = []
 
+// Real active campaigns from the campaigns page
 const activeCampaigns = [
   {
-    id: "1",
-    title: "Summer Vibes Collection",
-    creator: "Lifestyle Guru",
+    id: "campaign-1",
+    title: "Owning Manhattan Netflix Series",
+    creator: "Owning Manhattan",
+    budget: 3000,
+    spent: 750,
+    deadline: "6 days left",
+    payout: "$1.25 per 1K views",
+    progress: 25,
+    image: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
+  },
+  {
+    id: "campaign-2",
+    title: "Sportz Playz Betting Campaign",
+    creator: "Sportz Playz", 
     budget: 2500,
-    spent: 1800,
-    deadline: "2 days left",
-    payout: "$25-75 per clip",
-    progress: 72
-  },
-  {
-    id: "2",
-    title: "Tech Reviews 2024",
-    creator: "Tech Reviewer Pro",
-    budget: 5000,
-    spent: 3200,
-    deadline: "5 days left",
-    payout: "$50-150 per clip",
-    progress: 64
-  },
-  {
-    id: "3",
-    title: "Fitness Motivation",
-    creator: "Fit Coach Max",
-    budget: 1800,
     spent: 1200,
-    deadline: "1 day left",
-    payout: "$30-90 per clip",
-    progress: 67
+    deadline: "3 days left",
+    payout: "$1.50 per 1K views",
+    progress: 48,
+    image: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png"
   }
 ]
 
@@ -128,10 +95,7 @@ function StatCard({ stat }: { stat: typeof stats[0] }) {
           <div>
             <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
             <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
-            <p className={`text-sm mt-1 ${
-              stat.changeType === 'positive' ? 'text-green-500' :
-              'text-muted-foreground'
-            }`}>
+            <p className="text-sm mt-1 text-muted-foreground">
               {stat.change}
             </p>
           </div>
@@ -199,7 +163,19 @@ function CampaignCard({ campaign, onSubmitClip }: { campaign: typeof activeCampa
     <Card className="bg-card border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-white font-medium">{campaign.title}</h4>
+          <div className="flex items-center gap-3">
+            {campaign.image && (
+              <Image
+                src={campaign.image}
+                alt={campaign.creator}
+                width={32}
+                height={32}
+                className="rounded-md object-cover ring-1 ring-border"
+                unoptimized
+              />
+            )}
+            <h4 className="text-white font-medium">{campaign.title}</h4>
+          </div>
           <Badge variant="outline" className="text-muted-foreground border-muted-foreground">
             {campaign.deadline}
           </Badge>
@@ -217,7 +193,7 @@ function CampaignCard({ campaign, onSubmitClip }: { campaign: typeof activeCampa
         </div>
 
         <Button 
-          className="w-full mt-4 bg-foreground hover:bg-foreground/90"
+          className="w-full mt-4"
           onClick={() => onSubmitClip(campaign)}
         >
           Submit Clip
@@ -265,9 +241,24 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-4">
-            {recentClips.map((clip) => (
-              <RecentClipCard key={clip.id} clip={clip} />
-            ))}
+            {recentClips.length > 0 ? (
+              recentClips.map((clip) => (
+                <RecentClipCard key={clip.id} clip={clip} />
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <Play className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-white mb-2">No clips submitted yet</h3>
+                <p className="text-muted-foreground mb-6">
+                  Start earning by submitting clips to active campaigns
+                </p>
+                <Link href="/clippers/dashboard/campaigns">
+                  <Button>
+                    Browse Campaigns
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 
@@ -300,8 +291,8 @@ export default function DashboardPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link href="/clippers/dashboard/campaigns">
-              <Button className="w-full bg-green-600 text-white hover:bg-green-700">
-                🎯 Browse Active Campaigns
+              <Button className="w-full">
+                Browse Active Campaigns
               </Button>
             </Link>
             <Link href="/clippers/dashboard/profile">

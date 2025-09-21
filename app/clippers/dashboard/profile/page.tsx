@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,39 +17,156 @@ import {
   Link2,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
+  Loader2
 } from "lucide-react"
 import toast from "react-hot-toast"
 
-// User data will be loaded from session/database
-const user = {
-  name: "",
-  email: "",
-  bio: "",
-  website: "",
-  walletAddress: "",
-  paypalEmail: ""
+interface UserProfile {
+  id: string
+  name: string | null
+  email: string | null
+  bio: string | null
+  website: string | null
+  walletAddress: string | null
+  paypalEmail: string | null
+  image: string | null
+  verified: boolean
+  totalEarnings: number
+  totalViews: number
+  createdAt: string
 }
 
-// Submissions will be loaded from user's actual data
-const submissions: any[] = []
-
 export default function ProfilePage() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState("profile")
+  const { data: session } = useSession()
+  const [user, setUser] = useState<UserProfile | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [payoutSaving, setPayoutSaving] = useState(false)
+  const [payoutSuccess, setPayoutSuccess] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Form data
+  const [profileData, setProfileData] = useState({
+    name: "",
+    bio: "",
+    website: ""
+  })
+  const [payoutData, setPayoutData] = useState({
+    walletAddress: "",
+    paypalEmail: ""
+  })
+
+  // Load user profile data
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!session?.user?.id) return
+      
+      try {
+        const response = await fetch("/api/user/profile")
+        if (response.ok) {
+          const userData = await response.json()
+          setUser(userData)
+          setProfileData({
+            name: userData.name || "",
+            bio: userData.bio || "",
+            website: userData.website || ""
+          })
+          setPayoutData({
+            walletAddress: userData.walletAddress || "",
+            paypalEmail: userData.paypalEmail || ""
+          })
+        }
+      } catch (error) {
+        console.error("Error loading profile:", error)
+        toast.error("Failed to load profile")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadProfile()
+  }, [session])
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    if (!session?.user?.id) return
+    
+    setIsSaving(true)
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success("Profile updated successfully!")
+      const response = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "profile",
+          ...profileData
+        })
+      })
+
+      if (response.ok) {
+        const updatedUser = await response.json()
+        setUser(prev => prev ? { ...prev, ...updatedUser } : null)
+        toast.success("Profile updated successfully!")
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to update profile")
+      }
     } catch (error) {
+      console.error("Error updating profile:", error)
       toast.error("Failed to update profile")
     } finally {
-      setIsLoading(false)
+      setIsSaving(false)
     }
+  }
+
+  const handlePayoutSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!session?.user?.id) return
+    
+    setPayoutSaving(true)
+    
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "payout",
+          ...payoutData
+        })
+      })
+
+      if (response.ok) {
+        const updatedUser = await response.json()
+        setUser(prev => prev ? { ...prev, ...updatedUser } : null)
+        setPayoutSuccess(true)
+        toast.success("Payout settings updated successfully!")
+        // Reset success state after animation
+        setTimeout(() => setPayoutSuccess(false), 3000)
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to update payout settings")
+      }
+    } catch (error) {
+      console.error("Error updating payout settings:", error)
+      toast.error("Failed to update payout settings")
+    } finally {
+      setPayoutSaving(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-3xl font-light text-foreground">Profile & Settings</h1>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    )
   }
 
   const getStatusColor = (status: string) => {
@@ -73,25 +191,33 @@ export default function ProfilePage() {
               <CardTitle className="text-white">Profile Information</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <div className="flex items-center gap-4 mb-6">
                   <Avatar className="w-16 h-16">
-                    <AvatarImage src={user.email} />
+                    <AvatarImage 
+                      src={user?.image || session?.user?.image || ""} 
+                      alt={user?.name || "Profile"}
+                    />
                     <AvatarFallback className="bg-foreground text-white text-xl">
-                      {user.name?.[0] || "U"}
+                      {user?.name?.[0] || session?.user?.name?.[0] || user?.email?.[0] || session?.user?.email?.[0] || "U"}
                     </AvatarFallback>
                   </Avatar>
-                  <Button type="button" variant="outline" className="border-border text-muted-foreground hover:bg-muted">
-                    Change Photo
-                  </Button>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-muted-foreground">Profile Photo</span>
+                    <span className="text-xs text-muted-foreground">
+                      {session?.user?.image ? "From your connected account" : "Default avatar"}
+                    </span>
+                  </div>
                 </div>
 
                 <div>
                   <Label htmlFor="name">Full Name</Label>
                   <Input
                     id="name"
-                    defaultValue={user.name}
+                    value={profileData.name}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
                     className="mt-1"
+                    required
                   />
                 </div>
 
@@ -100,7 +226,7 @@ export default function ProfilePage() {
                   <Input
                     id="email"
                     type="email"
-                    defaultValue={user.email}
+                    value={user?.email || ""}
                     className="mt-1"
                     disabled
                   />
@@ -111,10 +237,15 @@ export default function ProfilePage() {
                   <Textarea
                     id="bio"
                     placeholder="Tell us about yourself..."
-                    defaultValue={user.bio}
+                    value={profileData.bio}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
                     className="mt-1"
                     rows={3}
+                    maxLength={500}
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {profileData.bio.length}/500 characters
+                  </p>
                 </div>
 
                 <div>
@@ -124,14 +255,22 @@ export default function ProfilePage() {
                     <Input
                       id="website"
                       placeholder="https://yourwebsite.com"
-                      defaultValue={user.website}
+                      value={profileData.website}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, website: e.target.value }))}
                       className="pl-10"
                     />
                   </div>
                 </div>
 
-                <Button type="submit" disabled={isLoading} className="w-full bg-foreground hover:bg-foreground/90">
-                  {isLoading ? "Saving..." : "Save Profile"}
+                <Button type="submit" disabled={isSaving} className="w-full">
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Profile"
+                  )}
                 </Button>
               </form>
             </CardContent>
@@ -142,60 +281,80 @@ export default function ProfilePage() {
             <CardHeader>
               <CardTitle className="text-white">Payout Settings</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="wallet">USDC Wallet Address</Label>
-                <div className="relative mt-1">
-                  <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="wallet"
-                    placeholder="0x742d35Cc6635C0532925a3b8D951D9C9..."
-                    defaultValue={user.walletAddress}
-                    className="pl-10 font-mono text-sm"
-                  />
+            <CardContent>
+              <form onSubmit={handlePayoutSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="wallet">Ethereum Address for USDC</Label>
+                  <div className="relative mt-1">
+                    <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="wallet"
+                      placeholder="0x742d35Cc6635C0532925a3b8D951D9C9..."
+                      value={payoutData.walletAddress}
+                      onChange={(e) => setPayoutData(prev => ({ ...prev, walletAddress: e.target.value }))}
+                      className="pl-10 font-mono text-sm"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Enter your Ethereum address for USDC payments
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Enter your USDC wallet address for crypto payments (Ethereum, Polygon, or BSC)
-                </p>
-              </div>
 
-              <div>
-                <Label htmlFor="paypal">PayPal Email</Label>
-                <div className="relative mt-1">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="paypal"
-                    type="email"
-                    placeholder="yourname@gmail.com"
-                    defaultValue={user.paypalEmail}
-                    className="pl-10"
-                  />
+                <div>
+                  <Label htmlFor="paypal">PayPal Email</Label>
+                  <div className="relative mt-1">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="paypal"
+                      type="email"
+                      placeholder="yourname@gmail.com"
+                      value={payoutData.paypalEmail}
+                      onChange={(e) => setPayoutData(prev => ({ ...prev, paypalEmail: e.target.value }))}
+                      className="pl-10"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <Button className="w-full bg-green-600 hover:bg-green-700">
-                Update Payout Settings
-              </Button>
+                <Button type="submit" disabled={payoutSaving} className={`w-full transition-all duration-300 ${payoutSuccess ? 'bg-green-600 hover:bg-green-600' : ''}`}>
+                  {payoutSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Updating...
+                    </>
+                  ) : payoutSuccess ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Settings Updated!
+                    </>
+                  ) : (
+                    "Update Payout Settings"
+                  )}
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>
 
-        {/* Social Account Connections */}
+        {/* Account Statistics */}
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white">Social Account Connections</CardTitle>
+            <CardTitle className="text-white">Account Statistics</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="text-center py-8">
-                <User className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground text-lg mb-2">Connect Your Social Accounts</p>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Connect your social media accounts to verify your content creation capabilities
-                </p>
-                <Button className="bg-green-600 hover:bg-green-700">
-                  Connect Accounts
-                </Button>
+              <div className="flex justify-between py-3 border-b border-border">
+                <span className="text-muted-foreground">Total Earnings</span>
+                <span className="text-white font-medium">${user?.totalEarnings?.toFixed(2) || "0.00"}</span>
+              </div>
+              <div className="flex justify-between py-3 border-b border-border">
+                <span className="text-muted-foreground">Total Views</span>
+                <span className="text-white font-medium">{user?.totalViews?.toLocaleString() || "0"}</span>
+              </div>
+              <div className="flex justify-between py-3">
+                <span className="text-muted-foreground">Member Since</span>
+                <span className="text-white font-medium">
+                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
+                </span>
               </div>
             </div>
           </CardContent>

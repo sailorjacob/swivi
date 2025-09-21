@@ -78,9 +78,11 @@ function Sidebar({ className }: { className?: string }) {
           <SwiviLogo size={36} />
           <div>
             <h1 className="text-white font-light text-lg">Swivi Clippers</h1>
-            <p className="text-muted-foreground text-xs">
-              {isDemoMode ? "Demo Mode - Explore Features" : "Premium content platform"}
-            </p>
+            {isDemoMode && (
+              <p className="text-muted-foreground text-xs">
+                Demo Mode - Explore Features
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -145,9 +147,9 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="h-screen bg-black flex overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block w-64">
+      <div className="hidden lg:block w-64 h-full">
         <Sidebar />
       </div>
 
@@ -159,9 +161,9 @@ export default function DashboardLayout({
       </Sheet>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full">
         {/* Mobile Header */}
-        <div className="lg:hidden flex items-center justify-between p-4 border-b border-border">
+        <div className="lg:hidden flex items-center justify-between p-4 border-b border-border flex-shrink-0">
           <div className="flex items-center space-x-3">
             <SwiviLogo size={32} />
             <h1 className="text-white font-light">Swivi Clippers</h1>
@@ -179,14 +181,14 @@ export default function DashboardLayout({
         </div>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="p-6"
+              className="p-6 min-h-full"
             >
               {children}
             </motion.div>
