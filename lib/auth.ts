@@ -6,8 +6,7 @@ import { prisma } from "@/lib/prisma"
 import { env } from "@/lib/env"
 
 export const authOptions: NextAuthOptions = {
-  // Temporarily disable PrismaAdapter to test OAuth flow
-  // adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma),
   providers: [
     // OAuth providers only
     ...(env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET ? [
@@ -31,49 +30,29 @@ export const authOptions: NextAuthOptions = {
       console.log("🔍 OAuth signIn callback triggered:", {
         provider: account?.provider,
         email: user.email,
-        name: user.name,
-        userId: user.id
+        name: user.name
       })
       
+      // Allow OAuth sign in (PrismaAdapter will handle user creation)
       if (account?.provider === "discord" || account?.provider === "google") {
-        try {
-          console.log("✅ OAuth provider recognized, allowing sign in")
-          
-          // For now, just allow the sign in without database operations
-          // We'll handle user creation manually in the JWT callback
-          return true
-          
-        } catch (error) {
-          console.error("❌ Error during OAuth sign in:", error)
-          return false
-        }
+        return true
       }
       
-      console.log("✅ Non-OAuth sign in, allowing")
       return true
     },
     async jwt({ token, user, account }) {
-      console.log("🔍 JWT callback triggered:", {
-        hasUser: !!user,
-        hasAccount: !!account,
-        tokenId: token.id,
-        userEmail: user?.email
-      })
-      
       if (user) {
         token.id = user.id
         token.email = user.email
         token.name = user.name
-        token.role = "CLIPPER" // Default role for now
         
-        console.log("✅ JWT token updated with user info")
+        // Set default role for new users
+        token.role = "CLIPPER"
       }
       
       if (account) {
         token.accessToken = account.access_token
         token.provider = account.provider
-        
-        console.log("✅ JWT token updated with account info")
       }
       
       return token
