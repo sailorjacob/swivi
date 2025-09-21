@@ -281,33 +281,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-white">
-            Quick Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link href="/clippers/dashboard/campaigns">
-              <Button className="w-full">
-                Browse Active Campaigns
-              </Button>
-            </Link>
-            <Link href="/clippers/dashboard/profile">
-              <Button variant="outline" className="w-full">
-                Update Profile
-              </Button>
-            </Link>
-            <Link href="/clippers/dashboard/payouts">
-              <Button variant="outline" className="w-full">
-                Request Payout
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Submission Modal */}
       <ClipSubmissionModal

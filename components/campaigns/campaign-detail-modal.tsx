@@ -60,13 +60,13 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="relative bg-card border border-border rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
-            <Card className="border-0 shadow-none">
-              <CardHeader className="border-b">
+            <Card className="border-0 shadow-none bg-transparent">
+              <CardHeader className="border-b border-border">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-2xl font-light mb-2">
+                    <CardTitle className="text-2xl font-light mb-2 text-white">
                       {campaign.title}
                     </CardTitle>
                     <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                             alt={campaign.client}
                             width={32}
                             height={32}
-                            className="rounded-md object-cover ring-1 ring-black/10"
+                            className="rounded-md object-cover ring-1 ring-border"
                             unoptimized
                           />
                         </div>
@@ -87,7 +87,7 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                       </p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={onClose}>
+                  <Button variant="ghost" size="sm" onClick={onClose} className="text-muted-foreground hover:text-white">
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -97,7 +97,7 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
 
                 {/* Description */}
                 <div className="mb-6">
-                  <h3 className="font-medium mb-2">Campaign Description</h3>
+                  <h3 className="font-medium mb-2 text-white">Campaign Description</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {campaign.description}
                   </p>
@@ -106,23 +106,23 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                 {/* Key Metrics */}
                 <div className="grid grid-cols-2 gap-6 mb-6">
                   <div>
-                    <h4 className="font-medium mb-3">Campaign Details</h4>
+                    <h4 className="font-medium mb-3 text-white">Campaign Details</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Budget:</span>
-                        <span className="text-sm font-medium">${campaign.budget.toLocaleString()}</span>
+                        <span className="text-sm font-medium text-white">${campaign.budget.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Duration:</span>
-                        <span className="text-sm font-medium">{campaign.duration}</span>
+                        <span className="text-sm font-medium text-white">{campaign.duration}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Time Remaining:</span>
-                        <span className="text-sm font-medium">{campaign.timeRemaining}</span>
+                        <span className="text-sm font-medium text-white">{campaign.timeRemaining}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">View Goal:</span>
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-white">
                           {(campaign.viewGoal / 1000000).toFixed(1)}M views
                         </span>
                       </div>
@@ -130,21 +130,21 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                   </div>
 
                   <div>
-                    <h4 className="font-medium mb-3">Earnings</h4>
+                    <h4 className="font-medium mb-3 text-white">Earnings</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Payout Rate:</span>
-                        <span className="text-sm font-medium">{campaign.payoutStructure}</span>
+                        <span className="text-sm font-medium text-white">{campaign.payoutStructure}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Potential Earnings:</span>
-                        <span className="text-sm font-medium text-green-600">
+                        <span className="text-sm font-medium text-white">
                           ${campaign.estimatedEarnings.min}-${campaign.estimatedEarnings.max}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Participants:</span>
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-white">
                           {campaign.participants}{campaign.maxParticipants && `/${campaign.maxParticipants}`}
                         </span>
                       </div>
@@ -154,28 +154,28 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
 
                 {/* Progress */}
                 <div className="mb-6">
-                  <h4 className="font-medium mb-3">Campaign Progress</h4>
+                  <h4 className="font-medium mb-3 text-white">Campaign Progress</h4>
                   <div className="space-y-3">
                     <div>
                       <div className="flex justify-between text-sm mb-1">
-                        <span>Budget Spent</span>
-                        <span>${campaign.budgetSpent.toLocaleString()} / ${campaign.budget.toLocaleString()}</span>
+                        <span className="text-muted-foreground">Budget Spent</span>
+                        <span className="text-white">${campaign.budgetSpent.toLocaleString()} / ${campaign.budget.toLocaleString()}</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-muted rounded-full h-2">
                         <div 
-                          className="bg-gray-600 h-2 rounded-full transition-all duration-300"
+                          className="bg-foreground h-2 rounded-full transition-all duration-300"
                           style={{ width: `${getProgressPercentage(campaign.budgetSpent, campaign.budget)}%` }}
                         />
                       </div>
                     </div>
                     <div>
                       <div className="flex justify-between text-sm mb-1">
-                        <span>Views Generated</span>
-                        <span>{(campaign.viewsGenerated / 1000000).toFixed(1)}M / {(campaign.viewGoal / 1000000).toFixed(1)}M</span>
+                        <span className="text-muted-foreground">Views Generated</span>
+                        <span className="text-white">{(campaign.viewsGenerated / 1000000).toFixed(1)}M / {(campaign.viewGoal / 1000000).toFixed(1)}M</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-muted rounded-full h-2">
                         <div 
-                          className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                          className="bg-foreground h-2 rounded-full transition-all duration-300"
                           style={{ width: `${getProgressPercentage(campaign.viewsGenerated, campaign.viewGoal)}%` }}
                         />
                       </div>
@@ -186,11 +186,11 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
 
                 {/* Requirements */}
                 <div className="mb-6">
-                  <h4 className="font-medium mb-3">Requirements</h4>
+                  <h4 className="font-medium mb-3 text-white">Requirements</h4>
                   <div className="space-y-2">
                     {campaign.requirements.map((requirement, index) => (
                       <div key={index} className="flex items-start gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                         <span className="text-sm text-muted-foreground">{requirement}</span>
                       </div>
                     ))}
@@ -198,7 +198,7 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 pt-4 border-t">
+                <div className="flex gap-3 pt-4 border-t border-border">
                   <Button 
                     className="flex-1"
                     disabled={campaign.status === "launching-soon"}

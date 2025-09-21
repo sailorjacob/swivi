@@ -12,12 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { 
   User,
-  Mail,
-  Wallet,
   Link2,
-  CheckCircle,
-  Clock,
-  XCircle,
   Loader2
 } from "lucide-react"
 import toast from "react-hot-toast"
@@ -42,18 +37,12 @@ export default function ProfilePage() {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [payoutSaving, setPayoutSaving] = useState(false)
-  const [payoutSuccess, setPayoutSuccess] = useState(false)
 
   // Form data
   const [profileData, setProfileData] = useState({
     name: "",
     bio: "",
     website: ""
-  })
-  const [payoutData, setPayoutData] = useState({
-    walletAddress: "",
-    paypalEmail: ""
   })
 
   // Load user profile data
@@ -70,10 +59,6 @@ export default function ProfilePage() {
             name: userData.name || "",
             bio: userData.bio || "",
             website: userData.website || ""
-          })
-          setPayoutData({
-            walletAddress: userData.walletAddress || "",
-            paypalEmail: userData.paypalEmail || ""
           })
         }
       } catch (error) {
@@ -121,42 +106,6 @@ export default function ProfilePage() {
     }
   }
 
-  const handlePayoutSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!session?.user?.id) return
-    
-    setPayoutSaving(true)
-    
-    try {
-      const response = await fetch("/api/user/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: "payout",
-          ...payoutData
-        })
-      })
-
-      if (response.ok) {
-        const updatedUser = await response.json()
-        setUser(prev => prev ? { ...prev, ...updatedUser } : null)
-        setPayoutSuccess(true)
-        toast.success("Payout settings updated successfully!")
-        // Reset success state after animation
-        setTimeout(() => setPayoutSuccess(false), 3000)
-      } else {
-        const error = await response.json()
-        toast.error(error.error || "Failed to update payout settings")
-      }
-    } catch (error) {
-      console.error("Error updating payout settings:", error)
-      toast.error("Failed to update payout settings")
-    } finally {
-      setPayoutSaving(false)
-    }
-  }
 
   if (isLoading) {
     return (
@@ -276,63 +225,6 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Payout Settings */}
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-white">Payout Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handlePayoutSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="wallet">Ethereum Address for USDC</Label>
-                  <div className="relative mt-1">
-                    <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="wallet"
-                      placeholder="0x742d35Cc6635C0532925a3b8D951D9C9..."
-                      value={payoutData.walletAddress}
-                      onChange={(e) => setPayoutData(prev => ({ ...prev, walletAddress: e.target.value }))}
-                      className="pl-10 font-mono text-sm"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Enter your Ethereum address for USDC payments
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="paypal">PayPal Email</Label>
-                  <div className="relative mt-1">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="paypal"
-                      type="email"
-                      placeholder="yourname@gmail.com"
-                      value={payoutData.paypalEmail}
-                      onChange={(e) => setPayoutData(prev => ({ ...prev, paypalEmail: e.target.value }))}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <Button type="submit" disabled={payoutSaving} className={`w-full transition-all duration-300 ${payoutSuccess ? 'bg-green-600 hover:bg-green-600' : ''}`}>
-                  {payoutSaving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Updating...
-                    </>
-                  ) : payoutSuccess ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Settings Updated!
-                    </>
-                  ) : (
-                    "Update Payout Settings"
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Account Statistics */}
