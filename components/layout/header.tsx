@@ -17,9 +17,6 @@ const navigation = [
   { 
     name: "Clippers", 
     href: "/clippers/signup",
-    dropdown: [
-      { name: "Live Activations", href: "/activations", description: "Current earning opportunities" }
-    ]
   },
   { name: "About", href: "/about" },
   // { name: "Music Hub", href: "/music-hub" },
