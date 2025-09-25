@@ -36,6 +36,12 @@ export const authOptions: NextAuthOptions = {
       })
       
       try {
+        // Validate required fields
+        if (!user.email) {
+          console.error("❌ No email provided by OAuth provider")
+          return false
+        }
+        
         // Allow OAuth sign in (PrismaAdapter will handle user creation)
         if (account?.provider === "discord" || account?.provider === "google") {
           console.log("✅ OAuth provider accepted:", account.provider)
@@ -43,7 +49,7 @@ export const authOptions: NextAuthOptions = {
         }
         
         console.log("⚠️ Unknown provider:", account?.provider)
-        return true
+        return false
       } catch (error) {
         console.error("❌ SignIn callback error:", error)
         return false
@@ -79,19 +85,21 @@ export const authOptions: NextAuthOptions = {
       
       // Handle relative URLs
       if (url.startsWith("/")) {
-        console.log("📍 Relative URL redirect:", `${baseUrl}${url}`)
-        return `${baseUrl}${url}`
+        const fullUrl = `${baseUrl}${url}`
+        console.log("📍 Relative URL redirect:", fullUrl)
+        return fullUrl
       }
       
-      // Allows callback URLs on the same origin
-      if (new URL(url).origin === baseUrl) {
+      // Handle same origin URLs (including OAuth callbacks)
+      if (url.startsWith(baseUrl)) {
         console.log("📍 Same origin redirect:", url)
         return url
       }
       
-      // Always go to dashboard - let the dashboard handle onboarding logic
-      console.log("📍 Default redirect to dashboard")
-      return `${baseUrl}/clippers/dashboard`
+      // For external URLs or invalid redirects, go to dashboard
+      const dashboardUrl = `${baseUrl}/clippers/dashboard`
+      console.log("📍 Default redirect to dashboard:", dashboardUrl)
+      return dashboardUrl
     },
   },
   session: {

@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider"
 import { QueryProvider } from "@/components/providers/query-provider"
 import { AuthProvider } from "@/components/providers/auth-provider"
 import { ClickAnimation } from "@/components/ui/click-animation"
+import { SessionDebug } from "@/components/debug/session-debug"
 
 import { cn } from "@/lib/utils"
 
@@ -94,6 +95,7 @@ export default function RootLayout({
             <QueryProvider>
               <ClickAnimation />
               {children}
+              <SessionDebug />
               <Toaster
                 position="bottom-right"
                 toastOptions={{

@@ -25,7 +25,7 @@ const navigation = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
 
   return (
     <header className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-sm border-b border-black/5">
@@ -89,7 +89,11 @@ export function Header() {
           </Link>
           
           {/* Platform Access Button */}
-          {session ? (
+          {status === "loading" ? (
+            <div className="text-sm font-normal border border-border px-6 py-3 rounded-full bg-transparent text-muted-foreground">
+              Loading...
+            </div>
+          ) : session ? (
             <Link
               href="/clippers/dashboard"
               className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
@@ -169,7 +173,11 @@ export function Header() {
             </Link>
             
             {/* Mobile Platform Access Buttons */}
-            {session ? (
+            {status === "loading" ? (
+              <div className="block mt-2 text-sm font-normal border border-border px-6 py-3 rounded-full bg-transparent text-muted-foreground text-center">
+                Loading...
+              </div>
+            ) : session ? (
               <Link
                 href="/clippers/dashboard"
                 className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"

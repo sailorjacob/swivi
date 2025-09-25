@@ -221,7 +221,7 @@ export default function DashboardPage() {
     
     if (status === "unauthenticated") {
       console.log("❌ Not authenticated, redirecting to login")
-      router.push("/clippers/login")
+      router.replace("/clippers/login")
       return
     }
     
