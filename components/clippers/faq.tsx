@@ -279,17 +279,6 @@ export function ClippersFAQ() {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl font-light mb-4">
-          Clipper FAQ
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          Have a question? Chances are the answer to your question may be in here somewhere, 
-          these are all of our frequently asked questions!
-        </p>
-      </div>
-
       {/* Search */}
       <div className="mb-8">
         <div className="relative">
