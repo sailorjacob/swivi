@@ -240,7 +240,6 @@ const faqData: FAQItem[] = [
   }
 ]
 
-
 export function ClippersFAQ() {
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set())
 
@@ -259,33 +258,33 @@ export function ClippersFAQ() {
       {/* FAQ Items */}
       <div className="space-y-4">
         {faqData.map((faq, index) => {
-            const isExpanded = expandedItems.has(index)
-            return (
-              <Card key={index} className="transition-all duration-200 hover:shadow-md">
-                <CardHeader
-                  className="cursor-pointer"
-                  onClick={() => toggleExpanded(index)}
-                >
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-normal text-left pr-4">
-                      {faq.question}
-                    </CardTitle>
-                    {isExpanded ? (
-                      <ChevronUp className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                    ) : (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                    )}
+          const isExpanded = expandedItems.has(index)
+          return (
+            <Card key={index} className="transition-all duration-200 hover:shadow-md">
+              <CardHeader
+                className="cursor-pointer"
+                onClick={() => toggleExpanded(index)}
+              >
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-normal text-left pr-4">
+                    {faq.question}
+                  </CardTitle>
+                  {isExpanded ? (
+                    <ChevronUp className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  )}
+                </div>
+              </CardHeader>
+              {isExpanded && (
+                <CardContent className="pt-0">
+                  <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {faq.answer}
                   </div>
-                </CardHeader>
-                {isExpanded && (
-                  <CardContent className="pt-0">
-                    <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                      {faq.answer}
-                    </div>
-                  </CardContent>
-                )}
-              </Card>
-            )
+                </CardContent>
+              )}
+            </Card>
+          )
           })
         )}
       </div>
