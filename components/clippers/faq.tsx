@@ -243,7 +243,7 @@ const faqData: FAQItem[] = [
 export function ClippersFAQ() {
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set())
 
-  const toggleExpanded = (index: number) => {
+const toggleExpanded = (index: number) => {
     const newExpanded = new Set(expandedItems)
     if (newExpanded.has(index)) {
       newExpanded.delete(index)
