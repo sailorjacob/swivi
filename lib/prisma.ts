@@ -4,15 +4,15 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Enhanced Prisma configuration with better error handling
+// Enhanced Prisma configuration with better error handling for Supabase pooler
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   datasources: {
     db: {
-      url: process.env.DATABASE_URL,
+      url: process.env.DATABASE_URL + '?pgbouncer=true&connection_limit=1',
     },
   },
-  errorFormat: 'minimal',
+  errorFormat: 'minimal'
 })
 
 // Only cache in development to prevent memory leaks
