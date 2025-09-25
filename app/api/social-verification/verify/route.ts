@@ -3,44 +3,179 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-// Function to check if verification code exists in social media bio
+// Real function to check if verification code exists in social media bio
 async function checkCodeInBio(platform: string, username: string, code: string): Promise<boolean> {
   try {
     console.log(`🔍 Checking ${platform} profile for user: ${username} with code: ${code}`)
 
-    // For now, we'll simulate a successful check for testing
-    // In production, this would integrate with platform APIs
-    
-    if (platform === 'instagram') {
-      // For Instagram, we would use Instagram Basic Display API
-      // For now, simulate success to test the flow
-      console.log(`✅ Instagram verification simulated for @${username}`)
-      return true
+    switch (platform) {
+      case 'instagram':
+        return await checkInstagramBio(username, code)
+      case 'youtube':
+        return await checkYouTubeBio(username, code)
+      case 'tiktok':
+        return await checkTikTokBio(username, code)
+      case 'twitter':
+        return await checkTwitterBio(username, code)
+      default:
+        console.error(`Unsupported platform: ${platform}`)
+        return false
     }
-    
-    if (platform === 'youtube') {
-      // For YouTube, we would use YouTube Data API v3
-      console.log(`✅ YouTube verification simulated for ${username}`)
-      return true
-    }
-    
-    if (platform === 'tiktok') {
-      // For TikTok, we would use TikTok API (requires approval)
-      console.log(`✅ TikTok verification simulated for @${username}`)
-      return true
-    }
-    
-    if (platform === 'twitter') {
-      // For Twitter/X, we would use Twitter API v2
-      console.log(`✅ Twitter verification simulated for @${username}`)
-      return true
-    }
-
-    // Default to success for testing
-    return true
-
   } catch (error) {
     console.error(`Error checking ${platform} bio:`, error)
+    return false
+  }
+}
+
+// Instagram bio checking via web scraping (no API key required)
+async function checkInstagramBio(username: string, code: string): Promise<boolean> {
+  try {
+    const url = `https://www.instagram.com/${username}/`
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    })
+    
+    if (!response.ok) {
+      console.error(`Instagram profile not found: ${username}`)
+      return false
+    }
+    
+    const html = await response.text()
+    
+    // Instagram embeds profile data in JSON-LD script tags
+    const bioMatch = html.match(/"biography":"([^"]*)"/)
+    if (!bioMatch) {
+      console.error(`Could not extract Instagram bio for: ${username}`)
+      return false
+    }
+    
+    const bio = bioMatch[1].replace(/\\u[\dA-F]{4}/gi, (match) => {
+      return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
+    })
+    
+    const codeFound = bio.includes(code)
+    console.log(`Instagram bio check for @${username}: ${codeFound ? 'FOUND' : 'NOT FOUND'}`)
+    return codeFound
+    
+  } catch (error) {
+    console.error(`Instagram bio check failed for ${username}:`, error)
+    return false
+  }
+}
+
+// YouTube channel description checking
+async function checkYouTubeBio(username: string, code: string): Promise<boolean> {
+  try {
+    // Try both channel URL formats
+    const urls = [
+      `https://www.youtube.com/@${username}`,
+      `https://www.youtube.com/c/${username}`,
+      `https://www.youtube.com/user/${username}`
+    ]
+    
+    for (const url of urls) {
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          }
+        })
+        
+        if (response.ok) {
+          const html = await response.text()
+          
+          // YouTube embeds channel data in script tags
+          const descriptionMatch = html.match(/"description":{"simpleText":"([^"]*)"/)
+          if (descriptionMatch) {
+            const description = descriptionMatch[1]
+            const codeFound = description.includes(code)
+            console.log(`YouTube description check for ${username}: ${codeFound ? 'FOUND' : 'NOT FOUND'}`)
+            return codeFound
+          }
+        }
+      } catch (error) {
+        console.log(`Failed to check YouTube URL: ${url}`)
+        continue
+      }
+    }
+    
+    console.error(`Could not find YouTube channel: ${username}`)
+    return false
+    
+  } catch (error) {
+    console.error(`YouTube bio check failed for ${username}:`, error)
+    return false
+  }
+}
+
+// TikTok bio checking via web scraping
+async function checkTikTokBio(username: string, code: string): Promise<boolean> {
+  try {
+    const url = `https://www.tiktok.com/@${username}`
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    })
+    
+    if (!response.ok) {
+      console.error(`TikTok profile not found: ${username}`)
+      return false
+    }
+    
+    const html = await response.text()
+    
+    // TikTok embeds user data in script tags
+    const bioMatch = html.match(/"desc":"([^"]*)"/)
+    if (!bioMatch) {
+      console.error(`Could not extract TikTok bio for: ${username}`)
+      return false
+    }
+    
+    const bio = bioMatch[1]
+    const codeFound = bio.includes(code)
+    console.log(`TikTok bio check for @${username}: ${codeFound ? 'FOUND' : 'NOT FOUND'}`)
+    return codeFound
+    
+  } catch (error) {
+    console.error(`TikTok bio check failed for ${username}:`, error)
+    return false
+  }
+}
+
+// Twitter/X bio checking via web scraping
+async function checkTwitterBio(username: string, code: string): Promise<boolean> {
+  try {
+    const url = `https://twitter.com/${username}`
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    })
+    
+    if (!response.ok) {
+      console.error(`Twitter profile not found: ${username}`)
+      return false
+    }
+    
+    const html = await response.text()
+    
+    // Twitter embeds user data in script tags
+    const bioMatch = html.match(/"description":"([^"]*)"/)
+    if (!bioMatch) {
+      console.error(`Could not extract Twitter bio for: ${username}`)
+      return false
+    }
+    
+    const bio = bioMatch[1]
+    const codeFound = bio.includes(code)
+    console.log(`Twitter bio check for @${username}: ${codeFound ? 'FOUND' : 'NOT FOUND'}`)
+    return codeFound
+    
+  } catch (error) {
+    console.error(`Twitter bio check failed for ${username}:`, error)
     return false
   }
 }

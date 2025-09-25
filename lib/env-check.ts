@@ -19,26 +19,58 @@ export function validateEnvironment(): EnvConfig {
     'NEXTAUTH_SECRET'
   ]
 
+  // Additional requirements for production
+  if (process.env.NODE_ENV === 'production') {
+    required.push('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'NEXTAUTH_URL')
+  }
+
   const missing = required.filter(key => !process.env[key])
   
   if (missing.length > 0) {
-    throw new Error(`Missing required environment variables: ${missing.join(', ')}`)
+    const error = `Missing required environment variables: ${missing.join(', ')}`
+    console.error('❌', error)
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(error)
+    } else {
+      console.warn('⚠️  Missing environment variables in development mode')
+    }
   }
 
   // Validate DATABASE_URL format
-  const dbUrl = process.env.DATABASE_URL!
-  if (!dbUrl.startsWith('postgresql://')) {
-    throw new Error('DATABASE_URL must be a valid PostgreSQL connection string')
+  const dbUrl = process.env.DATABASE_URL
+  if (dbUrl) {
+    if (!dbUrl.startsWith('postgresql://')) {
+      throw new Error('DATABASE_URL must be a valid PostgreSQL connection string')
+    }
+
+    // Ensure pgBouncer parameters are present for Supabase
+    if (dbUrl.includes('pooler.supabase.com') && !dbUrl.includes('pgbouncer=true')) {
+      console.warn('⚠️  DATABASE_URL missing pgBouncer parameters. Adding automatically.')
+    }
+
+    // Check if it's a Supabase pooler URL (recommended for our setup)
+    if (!dbUrl.includes('pooler.supabase.com')) {
+      console.warn('⚠️  DATABASE_URL does not appear to be a Supabase pooler URL. This may cause connection issues.')
+    }
   }
 
-  // Check if it's a Supabase pooler URL (which we need for our setup)
-  if (!dbUrl.includes('pooler.supabase.com')) {
-    console.warn('⚠️  DATABASE_URL does not appear to be a Supabase pooler URL. This may cause connection issues.')
+  // Validate NEXTAUTH_SECRET length for security
+  const secret = process.env.NEXTAUTH_SECRET
+  if (secret && secret.length < 32) {
+    console.warn('⚠️  NEXTAUTH_SECRET should be at least 32 characters for security')
+  }
+
+  // Validate production URLs
+  if (process.env.NODE_ENV === 'production') {
+    const nextAuthUrl = process.env.NEXTAUTH_URL
+    if (nextAuthUrl && !nextAuthUrl.startsWith('https://')) {
+      console.warn('⚠️  NEXTAUTH_URL should use HTTPS in production')
+    }
   }
 
   return {
-    DATABASE_URL: dbUrl,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET!,
+    DATABASE_URL: dbUrl || '',
+    NEXTAUTH_SECRET: secret || '',
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
