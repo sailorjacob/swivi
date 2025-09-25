@@ -73,6 +73,8 @@ export async function POST(request: NextRequest) {
     const platformName = platformNames[platform] || platform
 
     // Find the latest unverified code for this platform and user
+    console.log(`🔍 Looking for verification: userId=${session.user.id}, platform=${platformEnum}, username=${username}`)
+    
     const verification = await prisma.socialVerification.findFirst({
       where: {
         userId: session.user.id,
@@ -87,9 +89,34 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    console.log(`🔍 Found verification:`, verification ? { id: verification.id, code: verification.code, platform: verification.platform } : 'None')
+
     if (!verification) {
+      // Also check for any verifications regardless of platform to debug
+      const allUserVerifications = await prisma.socialVerification.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 5
+      })
+      
+      console.log(`🔍 All user verifications:`, allUserVerifications.map(v => ({ 
+        platform: v.platform, 
+        code: v.code, 
+        verified: v.verified, 
+        expired: v.expiresAt < new Date() 
+      })))
+      
       return NextResponse.json(
-        { error: "No pending verification found. Please generate a new code." },
+        { 
+          error: "No pending verification found. Please generate a new code.",
+          debug: {
+            userId: session.user.id,
+            requestedPlatform: platform,
+            platformEnum,
+            username,
+            allVerifications: allUserVerifications.length
+          }
+        },
         { status: 404 }
       )
     }

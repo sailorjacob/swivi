@@ -30,6 +30,15 @@ export async function GET(request: NextRequest) {
           },
           orderBy: {
             verifiedAt: 'desc'
+          },
+          select: {
+            id: true,
+            platform: true,
+            username: true,
+            displayName: true,
+            verified: true,
+            verifiedAt: true,
+            createdAt: true
           }
         }
       }
