@@ -53,6 +53,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Map platform strings to enum values
+    const platformMap: Record<string, string> = {
+      instagram: 'INSTAGRAM',
+      youtube: 'YOUTUBE',
+      tiktok: 'TIKTOK',
+      twitter: 'TWITTER'
+    }
+    
+    const platformEnum = platformMap[platform.toLowerCase()]
+    
     // Get platform name for displayName fallback
     const platformNames: Record<string, string> = {
       instagram: 'Instagram',
@@ -66,7 +76,7 @@ export async function POST(request: NextRequest) {
     const verification = await prisma.socialVerification.findFirst({
       where: {
         userId: session.user.id,
-        platform: platform as any,
+        platform: platformEnum as any,
         verified: false,
         expiresAt: {
           gt: new Date()
@@ -98,7 +108,7 @@ export async function POST(request: NextRequest) {
       const existingAccount = await prisma.socialAccount.findFirst({
         where: {
           userId: session.user.id,
-          platform: platform as any,
+          platform: platformEnum as any,
           username: username
         }
       })
@@ -118,7 +128,7 @@ export async function POST(request: NextRequest) {
         await prisma.socialAccount.create({
           data: {
             userId: session.user.id,
-            platform: platform as any,
+            platform: platformEnum as any,
             username: username,
             displayName: displayName || platformName,
             platformId: `${platform}_${username}_${Date.now()}`, // Generate unique platform ID

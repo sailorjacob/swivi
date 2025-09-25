@@ -12,6 +12,7 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
       url: process.env.DATABASE_URL,
     },
   },
+  errorFormat: 'minimal',
 })
 
 // Only cache in development to prevent memory leaks
@@ -23,5 +24,16 @@ if (process.env.NODE_ENV !== 'production') {
 if (typeof window === "undefined") {
   process.on('beforeExit', async () => {
     await prisma.$disconnect()
+  })
+  
+  // Handle prepared statement errors
+  process.on('SIGINT', async () => {
+    await prisma.$disconnect()
+    process.exit(0)
+  })
+  
+  process.on('SIGTERM', async () => {
+    await prisma.$disconnect()
+    process.exit(0)
   })
 }

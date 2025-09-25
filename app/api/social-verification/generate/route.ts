@@ -49,11 +49,21 @@ export async function POST(request: NextRequest) {
     }
     const platformName = platformNames[platform] || platform
 
+    // Map platform strings to enum values
+    const platformMap: Record<string, string> = {
+      instagram: 'INSTAGRAM',
+      youtube: 'YOUTUBE',
+      tiktok: 'TIKTOK',
+      twitter: 'TWITTER'
+    }
+    
+    const platformEnum = platformMap[platform.toLowerCase()]
+    
     // Check if user already has 5 verified accounts for this platform
     const verifiedCount = await prisma.socialAccount.count({
       where: {
         userId: session.user.id,
-        platform: platform as any,
+        platform: platformEnum as any,
         verified: true
       }
     })
@@ -69,7 +79,7 @@ export async function POST(request: NextRequest) {
     const existingVerification = await prisma.socialVerification.findFirst({
       where: {
         userId: session.user.id,
-        platform: platform as any,
+        platform: platformEnum as any,
         verified: false,
         expiresAt: {
           gt: new Date()
@@ -94,7 +104,7 @@ export async function POST(request: NextRequest) {
     const verification = await prisma.socialVerification.create({
       data: {
         userId: session.user.id,
-        platform: platform as any,
+        platform: platformEnum as any,
         code: code,
         expiresAt: expiresAt,
         verified: false

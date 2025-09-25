@@ -38,6 +38,12 @@ export async function GET() {
         totalEarnings: true,
         totalViews: true,
         createdAt: true,
+        accounts: {
+          select: {
+            provider: true,
+            providerAccountId: true,
+          }
+        }
       }
     })
 
