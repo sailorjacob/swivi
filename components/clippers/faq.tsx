@@ -255,7 +255,6 @@ export function ClippersFAQ() {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      {/* FAQ Items */}
       <div className="space-y-4">
         {faqData.map((faq, index) => {
           const isExpanded = expandedItems.has(index)
@@ -285,10 +284,8 @@ export function ClippersFAQ() {
               )}
             </Card>
           )
-          })
-        )}
+        })}
       </div>
-
     </div>
   )
 }
