@@ -13,9 +13,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { 
   User,
   Link2,
-  Loader2
+  Loader2,
+  Youtube,
+  Instagram,
+  Music,
+  Plus,
+  ArrowRight
 } from "lucide-react"
 import toast from "react-hot-toast"
+import Link from "next/link"
 
 interface UserProfile {
   id: string
@@ -171,14 +177,17 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">Email (from Discord)</Label>
                   <Input
                     id="email"
                     type="email"
-                    value={user?.email || ""}
+                    value={session?.user?.email || ""}
                     className="mt-1"
                     disabled
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Email from your Discord account cannot be changed
+                  </p>
                 </div>
 
                 <div>
@@ -222,6 +231,111 @@ export default function ProfilePage() {
                   )}
                 </Button>
               </form>
+            </CardContent>
+          </Card>
+
+          {/* Social Media Connections */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Link2 className="w-5 h-5" />
+                  Social Media Accounts
+                </CardTitle>
+                <Link href="/clippers/dashboard/social-accounts">
+                  <Button variant="outline" size="sm" className="border-border text-muted-foreground hover:bg-muted">
+                    Manage All
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground text-sm mb-6">
+                Connect your social media accounts to participate in campaigns.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* YouTube */}
+                <div className="border border-border rounded-lg p-4 hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+                        <Youtube className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-white">YouTube</h3>
+                        <p className="text-xs text-muted-foreground">Not connected</p>
+                      </div>
+                    </div>
+                  </div>
+                  <Link href="/clippers/dashboard/social-accounts">
+                    <Button variant="outline" size="sm" className="w-full border-border text-muted-foreground hover:bg-muted">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Connect
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Instagram */}
+                <div className="border border-border rounded-lg p-4 hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                        <Instagram className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-white">Instagram</h3>
+                        <p className="text-xs text-muted-foreground">Not connected</p>
+                      </div>
+                    </div>
+                  </div>
+                  <Link href="/clippers/dashboard/social-accounts">
+                    <Button variant="outline" size="sm" className="w-full border-border text-muted-foreground hover:bg-muted">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Connect
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* TikTok */}
+                <div className="border border-border rounded-lg p-4 hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center border border-white">
+                        <Music className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-white">TikTok</h3>
+                        <p className="text-xs text-muted-foreground">Not connected</p>
+                      </div>
+                    </div>
+                  </div>
+                  <Link href="/clippers/dashboard/social-accounts">
+                    <Button variant="outline" size="sm" className="w-full border-border text-muted-foreground hover:bg-muted">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Connect
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              
+              <div className="mt-6 p-4 bg-muted/20 rounded-lg border border-border">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">i</span>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-white mb-1">Why connect accounts?</h4>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• Automatically track your clip performance</li>
+                      <li>• Participate in platform-specific campaigns</li>
+                      <li>• Get faster payment processing</li>
+                      <li>• Access advanced analytics</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 

@@ -121,16 +121,6 @@ function CampaignsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border bg-card">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-light text-foreground">Active Campaigns</h1>
-          <p className="text-muted-foreground mt-2">
-            Join campaigns and start earning from your content
-          </p>
-        </div>
-      </div>
-
       {/* Campaigns Grid */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

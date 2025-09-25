@@ -42,7 +42,6 @@ interface NavItem {
     // Analytics temporarily hidden for platform cleanup
     // { label: "Analytics", href: "/clippers/dashboard/analytics", icon: BarChart3 },
     { label: "Payouts", href: "/clippers/dashboard/payouts", icon: DollarSign },
-    { label: "Support", href: "/clippers/dashboard/support", icon: HelpCircle },
   ]
 
 function Sidebar({ className }: { className?: string }) {
@@ -194,6 +193,21 @@ export default function DashboardLayout({
             </motion.div>
           </AnimatePresence>
         </main>
+
+        {/* Footer */}
+        <footer className="border-t border-border bg-card flex-shrink-0">
+          <div className="px-6 py-4 flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} Swivi. All rights reserved.
+            </div>
+            <Link href="/clippers/dashboard/support">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-white">
+                <HelpCircle className="w-4 h-4 mr-2" />
+                Support
+              </Button>
+            </Link>
+          </div>
+        </footer>
       </div>
     </div>
   )

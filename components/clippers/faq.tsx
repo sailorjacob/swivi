@@ -1,10 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Search, ChevronDown, ChevronUp } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { ChevronDown, ChevronUp } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface FAQItem {
   question: string
@@ -242,30 +240,9 @@ const faqData: FAQItem[] = [
   }
 ]
 
-const categories = [
-  { id: "all", label: "All Questions" },
-  { id: "getting-started", label: "Getting Started" },
-  { id: "campaigns", label: "Campaigns & Submissions" },
-  { id: "requirements", label: "Requirements & Guidelines" },
-  { id: "earnings", label: "Earnings & Payments" },
-  { id: "tracking", label: "Tracking & Analytics" },
-  { id: "account", label: "Account & Demographics" },
-  { id: "troubleshooting", label: "Troubleshooting" },
-  { id: "support", label: "Support & Community" },
-  { id: "technical", label: "Technical" }
-]
 
 export function ClippersFAQ() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [activeCategory, setActiveCategory] = useState("all")
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set())
-
-  const filteredFAQs = faqData.filter(faq => {
-    const matchesSearch = faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = activeCategory === "all" || faq.category === activeCategory
-    return matchesSearch && matchesCategory
-  })
 
   const toggleExpanded = (index: number) => {
     const newExpanded = new Set(expandedItems)
@@ -279,57 +256,9 @@ export function ClippersFAQ() {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      {/* Search */}
-      <div className="mb-8">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search questions..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
-
-      {/* Category Tabs */}
-      <Tabs value={activeCategory} onValueChange={setActiveCategory} className="mb-8">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:grid-cols-5 h-auto gap-1 p-1">
-          {categories.slice(0, 5).map((category) => (
-            <TabsTrigger
-              key={category.id}
-              value={category.id}
-              className="text-xs py-2"
-            >
-              {category.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:grid-cols-5 h-auto gap-1 p-1 mt-2">
-          {categories.slice(5).map((category) => (
-            <TabsTrigger
-              key={category.id}
-              value={category.id}
-              className="text-xs py-2"
-            >
-              {category.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-
       {/* FAQ Items */}
       <div className="space-y-4">
-        {filteredFAQs.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center">
-              <p className="text-muted-foreground">
-                No questions found matching your search criteria.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredFAQs.map((faq, index) => {
+        {faqData.map((faq, index) => {
             const isExpanded = expandedItems.has(index)
             return (
               <Card key={index} className="transition-all duration-200 hover:shadow-md">
@@ -361,13 +290,6 @@ export function ClippersFAQ() {
         )}
       </div>
 
-      {/* Results count */}
-      {searchTerm && (
-        <div className="mt-6 text-center text-sm text-muted-foreground">
-          Found {filteredFAQs.length} question{filteredFAQs.length !== 1 ? 's' : ''} 
-          {searchTerm && ` matching "${searchTerm}"`}
-        </div>
-      )}
     </div>
   )
 }
