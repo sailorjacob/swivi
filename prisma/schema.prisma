@@ -63,15 +63,16 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  accounts        Account[]
-  sessions        Session[]
-  socialAccounts  SocialAccount[]
-  clips           Clip[]
-  submissions     ClipSubmission[]
-  payouts         Payout[]
-  referrals       Referral[] @relation("ReferredBy")
-  referredUsers   Referral[] @relation("Referrer")
-  viewTracking    ViewTracking[]
+  accounts          Account[]
+  sessions          Session[]
+  socialAccounts    SocialAccount[]
+  socialVerifications SocialVerification[]
+  clips             Clip[]
+  submissions       ClipSubmission[]
+  payouts           Payout[]
+  referrals         Referral[] @relation("ReferredBy")
+  referredUsers     Referral[] @relation("Referrer")
+  viewTracking      ViewTracking[]
 
   @@map("users")
 }
@@ -285,4 +286,21 @@ enum ReferralStatus {
   ACTIVE
   COMPLETED
   EXPIRED
+}
+
+model SocialVerification {
+  id         String          @id @default(cuid())
+  userId     String          @map("user_id")
+  platform   SocialPlatform
+  code       String          // 6-character verification code
+  verified   Boolean         @default(false)
+  verifiedAt DateTime?       @map("verified_at")
+  expiresAt  DateTime        @map("expires_at")
+  createdAt  DateTime        @default(now()) @map("created_at")
+  updatedAt  DateTime        @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform, code])
+  @@map("social_verifications")
 }

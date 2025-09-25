@@ -19,6 +19,7 @@ import {
   Music
 } from "lucide-react"
 import toast from "react-hot-toast"
+import { SocialVerificationDialog } from "@/components/clippers/social-verification-dialog"
 
 interface UserProfile {
   id: string
@@ -244,30 +245,94 @@ export default function ProfilePage() {
                 Connect your accounts to participate in campaigns
               </p>
 
-              <div className="flex gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* YouTube */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                    <Youtube className="w-4 h-4 text-muted-foreground" />
+                <SocialVerificationDialog
+                  platform="youtube"
+                  icon={<Youtube className="w-4 h-4 text-red-500" />}
+                  platformName="YouTube"
+                >
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/20 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 bg-red-600/10 rounded-full flex items-center justify-center">
+                        <Youtube className="w-4 h-4 text-red-500" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-white text-sm">YouTube</h3>
+                        <p className="text-xs text-muted-foreground">Not verified</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted">
+                      Verify
+                    </Button>
                   </div>
-                  <span className="text-xs text-muted-foreground">YouTube</span>
-                </div>
+                </SocialVerificationDialog>
 
                 {/* Instagram */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                    <Instagram className="w-4 h-4 text-muted-foreground" />
+                <SocialVerificationDialog
+                  platform="instagram"
+                  icon={<Instagram className="w-4 h-4 text-pink-500" />}
+                  platformName="Instagram"
+                >
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/20 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full flex items-center justify-center">
+                        <Instagram className="w-4 h-4 text-pink-500" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-white text-sm">Instagram</h3>
+                        <p className="text-xs text-muted-foreground">Not verified</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted">
+                      Verify
+                    </Button>
                   </div>
-                  <span className="text-xs text-muted-foreground">Instagram</span>
-                </div>
+                </SocialVerificationDialog>
 
                 {/* TikTok */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                    <Music className="w-4 h-4 text-muted-foreground" />
+                <SocialVerificationDialog
+                  platform="tiktok"
+                  icon={<Music className="w-4 h-4 text-white" />}
+                  platformName="TikTok"
+                >
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/20 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center">
+                        <Music className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-white text-sm">TikTok</h3>
+                        <p className="text-xs text-muted-foreground">Not verified</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted">
+                      Verify
+                    </Button>
                   </div>
-                  <span className="text-xs text-muted-foreground">TikTok</span>
-                </div>
+                </SocialVerificationDialog>
+
+                {/* X (Twitter) */}
+                <SocialVerificationDialog
+                  platform="twitter"
+                  icon={<span className="text-white font-bold text-sm">𝕏</span>}
+                  platformName="X (Twitter)"
+                >
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/20 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">𝕏</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-white text-sm">X (Twitter)</h3>
+                        <p className="text-xs text-muted-foreground">Not verified</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted">
+                      Verify
+                    </Button>
+                  </div>
+                </SocialVerificationDialog>
               </div>
             </CardContent>
           </Card>
