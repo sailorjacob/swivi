@@ -83,6 +83,13 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       console.log("🔄 Redirect callback triggered:", { url, baseUrl })
       
+      // If it's a sign-in page and user is authenticated, redirect to dashboard
+      if (url.includes('/clippers/login') || url.includes('/api/auth/signin')) {
+        const dashboardUrl = `${baseUrl}/clippers/dashboard`
+        console.log("📍 Redirecting from login to dashboard:", dashboardUrl)
+        return dashboardUrl
+      }
+      
       // Handle relative URLs
       if (url.startsWith("/")) {
         const fullUrl = `${baseUrl}${url}`

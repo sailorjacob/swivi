@@ -219,7 +219,21 @@ export default function DashboardPage() {
       return
     }
     
+    // Add a small delay to allow OAuth callback to complete
     if (status === "unauthenticated") {
+      // Check if we're coming from an OAuth callback
+      const urlParams = new URLSearchParams(window.location.search)
+      const isCallback = urlParams.has('callbackUrl') || window.location.hash.includes('access_token')
+      
+      if (isCallback) {
+        console.log("🔄 OAuth callback detected, waiting for session...")
+        // Give OAuth callback time to complete
+        setTimeout(() => {
+          window.location.reload()
+        }, 1500)
+        return
+      }
+      
       console.log("❌ Not authenticated, redirecting to login")
       router.replace("/clippers/login")
       return

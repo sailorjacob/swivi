@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { signIn, getSession } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,20 +16,40 @@ import toast from "react-hot-toast"
 export default function ClippersLoginPage() {
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const router = useRouter()
+  const { data: session, status } = useSession()
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (status === "loading") return
+    
+    if (session) {
+      console.log("🔄 User already authenticated, redirecting to dashboard")
+      router.push("/clippers/dashboard")
+    }
+  }, [session, status, router])
 
   const handleSignIn = async (provider: string) => {
     setIsLoading(provider)
     try {
       console.log(`🚀 Starting ${provider} authentication...`)
       
-      // Use redirect: true for more reliable authentication flow
+      // Use redirect: false to handle the response properly
       const result = await signIn(provider, {
         callbackUrl: "/clippers/dashboard",
-        redirect: true,
+        redirect: false,
       })
       
-      // This code should not execute since redirect: true will navigate away
-      console.log("📊 SignIn result (unexpected):", result)
+      console.log("📊 SignIn result:", result)
+      
+      if (result?.error) {
+        console.error("❌ SignIn error:", result.error)
+        toast.error("Authentication failed. Please try again.")
+        setIsLoading(null)
+      } else if (result?.ok) {
+        console.log("✅ SignIn successful, redirecting to dashboard...")
+        // Manually redirect to ensure proper navigation
+        router.push("/clippers/dashboard")
+      }
       
     } catch (error) {
       console.error("💥 OAuth login error:", error)
