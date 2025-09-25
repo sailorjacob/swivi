@@ -121,6 +121,7 @@ export async function POST(request: NextRequest) {
             platform: platform as any,
             username: username,
             displayName: displayName || platformName,
+            platformId: `${platform}_${username}_${Date.now()}`, // Generate unique platform ID
             verified: true,
             verifiedAt: new Date()
           }
