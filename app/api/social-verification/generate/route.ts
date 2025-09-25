@@ -101,8 +101,6 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
     // Create verification record
-    console.log(`🎯 Creating verification: userId=${session.user.id}, platform=${platformEnum}, code=${code}, username=${username}`)
-    
     const verification = await prisma.socialVerification.create({
       data: {
         userId: session.user.id,
@@ -112,8 +110,6 @@ export async function POST(request: NextRequest) {
         verified: false
       }
     })
-    
-    console.log(`✅ Verification created:`, { id: verification.id, platform: verification.platform, code: verification.code })
 
     return NextResponse.json({
       code: verification.code,
