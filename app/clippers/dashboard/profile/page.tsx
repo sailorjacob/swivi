@@ -420,10 +420,10 @@ export default function ProfilePage() {
                           )}
                         </p>
                         <p className="text-xs text-muted-foreground">@{account.username}</p>
+                        <p className="text-xs text-green-400">✓ Verified</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
                       <Button
                         variant="ghost"
                         size="sm"

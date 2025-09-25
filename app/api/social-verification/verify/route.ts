@@ -94,29 +94,38 @@ export async function POST(request: NextRequest) {
         data: { verified: true, verifiedAt: new Date() }
       })
 
-      // Create or update social account record
-      await prisma.socialAccount.upsert({
+      // Check if account already exists (since we allow multiple accounts per platform)
+      const existingAccount = await prisma.socialAccount.findFirst({
         where: {
-          userId_platform: {
-            userId: session.user.id,
-            platform: platform as any
-          }
-        },
-        update: {
-          username: username,
-          displayName: displayName || platformName,
-          verified: true,
-          verifiedAt: new Date()
-        },
-        create: {
           userId: session.user.id,
           platform: platform as any,
-          username: username,
-          displayName: displayName || platformName,
-          verified: true,
-          verifiedAt: new Date()
+          username: username
         }
       })
+
+      if (existingAccount) {
+        // Update existing account
+        await prisma.socialAccount.update({
+          where: { id: existingAccount.id },
+          data: {
+            displayName: displayName || platformName,
+            verified: true,
+            verifiedAt: new Date()
+          }
+        })
+      } else {
+        // Create new account
+        await prisma.socialAccount.create({
+          data: {
+            userId: session.user.id,
+            platform: platform as any,
+            username: username,
+            displayName: displayName || platformName,
+            verified: true,
+            verifiedAt: new Date()
+          }
+        })
+      }
 
       return NextResponse.json({
         success: true,
