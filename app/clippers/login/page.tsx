@@ -39,24 +39,26 @@ export default function ClippersLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-black">
-      <div className="w-full max-w-md">
-        {/* Back to main site */}
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Swivi
-          </Link>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+    <div className="min-h-screen bg-black relative">
+      {/* Back to main site - Fixed at top */}
+      <div className="absolute top-6 left-6 z-10">
+        <Link
+          href="/"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-white transition-colors"
         >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Swivi
+        </Link>
+      </div>
+
+      {/* Centered login form */}
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
           <Card className="bg-card border border-border backdrop-blur-sm shadow-2xl text-white">
             <CardHeader className="text-center pb-6">
               <motion.div
@@ -130,8 +132,8 @@ export default function ClippersLoginPage() {
               </div>
             </CardContent>
           </Card>
-
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </div>
   )
