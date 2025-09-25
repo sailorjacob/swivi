@@ -96,6 +96,7 @@ model SocialAccount {
   platformId   String            @map("platform_id")
   followers    Int               @default(0)
   verified     Boolean           @default(false)
+  verifiedAt   DateTime?         @map("verified_at")
   connected    Boolean           @default(true)
   accessToken  String?           @map("access_token") @db.Text
   refreshToken String?           @map("refresh_token") @db.Text
