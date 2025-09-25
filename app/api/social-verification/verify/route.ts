@@ -3,21 +3,40 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-// Mock function to check if verification code exists in social media bio
-// In production, this would integrate with platform APIs
+// Function to check if verification code exists in social media bio
 async function checkCodeInBio(platform: string, username: string, code: string): Promise<boolean> {
   try {
-    // This is a mock implementation
-    // In production, you would:
-    // 1. Use Instagram Basic Display API for Instagram
-    // 2. Use YouTube Data API for YouTube
-    // 3. Use TikTok API for TikTok
-    // 4. Use Twitter API for X/Twitter
-
     console.log(`🔍 Checking ${platform} profile for user: ${username} with code: ${code}`)
 
-    // For now, we'll simulate a successful check
-    // In reality, you'd make API calls to the respective platforms
+    // For now, we'll simulate a successful check for testing
+    // In production, this would integrate with platform APIs
+    
+    if (platform === 'instagram') {
+      // For Instagram, we would use Instagram Basic Display API
+      // For now, simulate success to test the flow
+      console.log(`✅ Instagram verification simulated for @${username}`)
+      return true
+    }
+    
+    if (platform === 'youtube') {
+      // For YouTube, we would use YouTube Data API v3
+      console.log(`✅ YouTube verification simulated for ${username}`)
+      return true
+    }
+    
+    if (platform === 'tiktok') {
+      // For TikTok, we would use TikTok API (requires approval)
+      console.log(`✅ TikTok verification simulated for @${username}`)
+      return true
+    }
+    
+    if (platform === 'twitter') {
+      // For Twitter/X, we would use Twitter API v2
+      console.log(`✅ Twitter verification simulated for @${username}`)
+      return true
+    }
+
+    // Default to success for testing
     return true
 
   } catch (error) {
