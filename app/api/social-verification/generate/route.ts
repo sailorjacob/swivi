@@ -24,11 +24,43 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { platform } = await request.json()
+    const { platform, username, displayName } = await request.json()
 
     if (!platform || !['instagram', 'youtube', 'tiktok', 'twitter'].includes(platform)) {
       return NextResponse.json(
         { error: "Invalid platform" },
+        { status: 400 }
+      )
+    }
+
+    if (!username) {
+      return NextResponse.json(
+        { error: "Username is required" },
+        { status: 400 }
+      )
+    }
+
+    // Get platform name for displayName fallback
+    const platformNames: Record<string, string> = {
+      instagram: 'Instagram',
+      youtube: 'YouTube',
+      tiktok: 'TikTok',
+      twitter: 'X (Twitter)'
+    }
+    const platformName = platformNames[platform] || platform
+
+    // Check if user already has 5 verified accounts for this platform
+    const verifiedCount = await prisma.socialAccount.count({
+      where: {
+        userId: session.user.id,
+        platform: platform as any,
+        verified: true
+      }
+    })
+
+    if (verifiedCount >= 5) {
+      return NextResponse.json(
+        { error: `You can only have up to 5 verified ${platform} accounts` },
         { status: 400 }
       )
     }
@@ -49,7 +81,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         code: existingVerification.code,
         expiresAt: existingVerification.expiresAt,
-        platform: existingVerification.platform
+        platform: existingVerification.platform,
+        username: username
       })
     }
 
@@ -71,7 +104,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       code: verification.code,
       expiresAt: verification.expiresAt,
-      platform: verification.platform
+      platform: verification.platform,
+      username: username,
+      displayName: displayName || platformName
     })
 
   } catch (error) {

@@ -16,7 +16,9 @@ import {
   Loader2,
   Youtube,
   Instagram,
-  Music
+  Music,
+  CheckCircle,
+  Trash2
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { SocialVerificationDialog } from "@/components/clippers/social-verification-dialog"
@@ -41,6 +43,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [verifiedAccounts, setVerifiedAccounts] = useState<any[]>([])
 
   // Form data
   const [profileData, setProfileData] = useState({
@@ -49,21 +52,29 @@ export default function ProfilePage() {
     website: ""
   })
 
-  // Load user profile data
+  // Load user profile data and verified accounts
   useEffect(() => {
     const loadProfile = async () => {
       if (!session?.user?.id) return
-      
+
       try {
-        const response = await fetch("/api/user/profile")
-        if (response.ok) {
-          const userData = await response.json()
+        // Load profile data
+        const profileResponse = await fetch("/api/user/profile")
+        if (profileResponse.ok) {
+          const userData = await profileResponse.json()
           setUser(userData)
           setProfileData({
             name: userData.name || "",
             bio: userData.bio || "",
             website: userData.website || ""
           })
+        }
+
+        // Load verified social accounts
+        const accountsResponse = await fetch("/api/user/verified-accounts")
+        if (accountsResponse.ok) {
+          const accountsData = await accountsResponse.json()
+          setVerifiedAccounts(accountsData)
         }
       } catch (error) {
         console.error("Error loading profile:", error)
@@ -79,9 +90,9 @@ export default function ProfilePage() {
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!session?.user?.id) return
-    
+
     setIsSaving(true)
-    
+
     try {
       const response = await fetch("/api/user/profile", {
         method: "PUT",
@@ -107,6 +118,34 @@ export default function ProfilePage() {
       toast.error("Failed to update profile")
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handleDeleteAccount = async (accountId: string) => {
+    if (!confirm("Are you sure you want to delete this verified account?")) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/user/verified-accounts?id=${accountId}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        toast.success("Account deleted successfully")
+        // Refresh the verified accounts list
+        const accountsResponse = await fetch("/api/user/verified-accounts")
+        if (accountsResponse.ok) {
+          const accountsData = await accountsResponse.json()
+          setVerifiedAccounts(accountsData)
+        }
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to delete account")
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error)
+      toast.error("Failed to delete account")
     }
   }
 
@@ -338,6 +377,68 @@ export default function ProfilePage() {
           </Card>
 
         </div>
+
+        {/* Verified Accounts */}
+        {verifiedAccounts.length > 0 && (
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                Verified Accounts
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {verifiedAccounts.map((account: any) => (
+                  <div key={account.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      {account.platform === 'INSTAGRAM' && (
+                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full flex items-center justify-center">
+                          <Instagram className="w-4 h-4 text-pink-500" />
+                        </div>
+                      )}
+                      {account.platform === 'YOUTUBE' && (
+                        <div className="w-8 h-8 bg-red-600/10 rounded-full flex items-center justify-center">
+                          <Youtube className="w-4 h-4 text-red-500" />
+                        </div>
+                      )}
+                      {account.platform === 'TIKTOK' && (
+                        <div className="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center">
+                          <Music className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                      {account.platform === 'TWITTER' && (
+                        <div className="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">𝕏</span>
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-medium text-white text-sm">
+                          {account.platform.charAt(0) + account.platform.slice(1).toLowerCase()}
+                          {account.displayName && (
+                            <span className="text-muted-foreground ml-1">({account.displayName})</span>
+                          )}
+                        </p>
+                        <p className="text-xs text-muted-foreground">@{account.username}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteAccount(account.id)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Account Statistics */}
         <Card className="bg-card border-border">

@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { platform, username } = await request.json()
+    const { platform, username, displayName } = await request.json()
 
     if (!platform || !['instagram', 'youtube', 'tiktok', 'twitter'].includes(platform)) {
       return NextResponse.json(
@@ -52,6 +52,15 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Get platform name for displayName fallback
+    const platformNames: Record<string, string> = {
+      instagram: 'Instagram',
+      youtube: 'YouTube',
+      tiktok: 'TikTok',
+      twitter: 'X (Twitter)'
+    }
+    const platformName = platformNames[platform] || platform
 
     // Find the latest unverified code for this platform and user
     const verification = await prisma.socialVerification.findFirst({
@@ -95,6 +104,7 @@ export async function POST(request: NextRequest) {
         },
         update: {
           username: username,
+          displayName: displayName || platformName,
           verified: true,
           verifiedAt: new Date()
         },
@@ -102,6 +112,7 @@ export async function POST(request: NextRequest) {
           userId: session.user.id,
           platform: platform as any,
           username: username,
+          displayName: displayName || platformName,
           verified: true,
           verifiedAt: new Date()
         }

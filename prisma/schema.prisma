@@ -92,6 +92,7 @@ model SocialAccount {
   userId       String            @map("user_id")
   platform     SocialPlatform
   username     String
+  displayName  String?           @map("display_name") // e.g., "Main", "Personal", "Business"
   platformId   String            @map("platform_id")
   followers    Int               @default(0)
   verified     Boolean           @default(false)
@@ -104,7 +105,6 @@ model SocialAccount {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, platform])
   @@map("social_accounts")
 }
 

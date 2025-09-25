@@ -21,10 +21,28 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
   const [step, setStep] = useState(1)
   const [code, setCode] = useState("")
   const [username, setUsername] = useState("")
+  const [displayName, setDisplayName] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
 
+  // Reset state when dialog opens/closes
+  useEffect(() => {
+    if (!open) {
+      setStep(1)
+      setCode("")
+      setUsername("")
+      setDisplayName("")
+      setIsGenerating(false)
+      setIsVerifying(false)
+    }
+  }, [open])
+
   const handleGenerateCode = async () => {
+    if (!username.trim()) {
+      toast.error('Please enter your username first')
+      return
+    }
+
     setIsGenerating(true)
     try {
       const response = await fetch('/api/social-verification/generate', {
@@ -32,7 +50,11 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ platform }),
+        body: JSON.stringify({
+          platform,
+          username: username.trim(),
+          displayName: displayName.trim() || platformName
+        }),
       })
 
       const data = await response.json()
@@ -43,6 +65,9 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
         toast.success(`Verification code generated for ${platformName}`)
       } else {
         toast.error(data.error || 'Failed to generate verification code')
+        if (data.error?.includes('up to 5')) {
+          setStep(1) // Reset to allow trying a different username
+        }
       }
     } catch (error) {
       console.error('Error generating code:', error)
@@ -65,7 +90,11 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ platform, username: username.trim() }),
+        body: JSON.stringify({
+          platform,
+          username: username.trim(),
+          displayName: displayName.trim() || platformName
+        }),
       })
 
       const data = await response.json()
@@ -154,21 +183,50 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
               <CardContent className="p-4">
                 <h3 className="font-medium text-white mb-2">How verification works:</h3>
                 <ol className="text-sm text-muted-foreground space-y-1">
-                  <li>1. We'll generate a unique verification code</li>
-                  <li>2. Add this code to your {platformName} bio/description</li>
-                  <li>3. We'll verify the code exists on your profile</li>
-                  <li>4. Your account will be marked as verified</li>
+                  <li>1. Enter your {platformName} username</li>
+                  <li>2. We'll generate a unique verification code</li>
+                  <li>3. Add this code to your {platformName} bio/description</li>
+                  <li>4. We'll verify the code exists on your profile</li>
+                  <li>5. Your account will be marked as verified</li>
                 </ol>
               </CardContent>
             </Card>
 
-            <Button
-              onClick={handleGenerateCode}
-              disabled={isGenerating}
-              className="w-full bg-foreground hover:bg-foreground/90"
-            >
-              {isGenerating ? "Generating..." : "Generate Verification Code"}
-            </Button>
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="username" className="text-white">
+                  Your {platformName} username (without @)
+                </Label>
+                <Input
+                  id="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder={`Enter your ${platformName} username`}
+                  className="mt-1 bg-muted border-border text-white"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="displayName" className="text-white text-sm">
+                  Account name (optional)
+                </Label>
+                <Input
+                  id="displayName"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder={`e.g., Main, Personal, Business`}
+                  className="mt-1 bg-muted border-border text-white"
+                />
+              </div>
+
+              <Button
+                onClick={handleGenerateCode}
+                disabled={isGenerating || !username.trim()}
+                className="w-full bg-foreground hover:bg-foreground/90"
+              >
+                {isGenerating ? "Generating..." : "Generate Verification Code"}
+              </Button>
+            </div>
           </div>
         )}
 
@@ -223,19 +281,6 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
                 </div>
               </div>
 
-              <div className="pt-2">
-                <Label htmlFor="username" className="text-white text-sm">
-                  Your {platformName} username (without @)
-                </Label>
-                <Input
-                  id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder={`Enter your ${platformName} username`}
-                  className="mt-1 bg-muted border-border text-white"
-                />
-              </div>
-
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -246,7 +291,7 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
                 </Button>
                 <Button
                   onClick={handleVerifyAccount}
-                  disabled={isVerifying || !username.trim()}
+                  disabled={isVerifying}
                   className="flex-1 bg-foreground hover:bg-foreground/90"
                 >
                   {isVerifying ? "Verifying..." : "Verify Account"}
