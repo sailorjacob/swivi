@@ -8,8 +8,8 @@ import { FAQ } from "@/components/marketing/faq"
 import { Showcase } from "@/components/marketing/showcase"
 import { Founder } from "@/components/marketing/founder"
 import { CampaignsPreview } from "@/components/marketing/campaigns-preview"
-import { Header } from "@/components/layout/header"
-import { Footer } from "@/components/layout/footer"
+import { Header } from "@/components/layout"
+import { Footer } from "@/components/layout"
 import { DarkThemeWrapper } from "./layout-wrapper"
 
 export default function HomePage() {
