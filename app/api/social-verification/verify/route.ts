@@ -629,15 +629,28 @@ export async function POST(request: NextRequest) {
       })
 
       if (existingAccount) {
-        // Update existing account
-        await prisma.socialAccount.update({
-          where: { id: existingAccount.id },
-          data: {
-            displayName: displayName || platformName,
-            verified: true,
-            verifiedAt: new Date()
+        // Only update if not already verified, or update non-critical fields
+        if (!existingAccount.verified) {
+          await prisma.socialAccount.update({
+            where: { id: existingAccount.id },
+            data: {
+              displayName: displayName || platformName,
+              verified: true,
+              verifiedAt: new Date()
+            }
+          })
+        } else {
+          // Account already verified - just update display name if provided
+          if (displayName && displayName !== existingAccount.displayName) {
+            await prisma.socialAccount.update({
+              where: { id: existingAccount.id },
+              data: {
+                displayName: displayName
+              }
+            })
           }
-        })
+          console.log(`✅ Account @${username} on ${platform} is already verified`)
+        }
       } else {
         // Create new account
         await prisma.socialAccount.create({
