@@ -43,25 +43,35 @@ export async function POST(request: NextRequest) {
         break
         
       case 'instagram':
-        profileUrl = `https://instagram.com/${username}`
+        // Instagram URLs: clean username (remove @)
+        const instagramUsername = username.replace('@', '')
+        profileUrl = `https://www.instagram.com/${instagramUsername}/`
         bioSelectors = [
           '.-vDIg span',
-          'div.-vDIg',
+          'div.-vDIg', 
           'header section div div span',
           'div[data-testid="ig-bio"]',
-          'article header div span'
+          'article header div span',
+          'section main article header section div span',
+          'h1 + div span'
         ]
+        logs.push(`📸 Instagram URL: ${profileUrl}`)
         break
         
       case 'tiktok':
-        profileUrl = `https://tiktok.com/@${username}`
+        // TikTok URLs: handle both @username and username formats
+        const tiktokUsername = username.startsWith('@') ? username : `@${username}`
+        profileUrl = `https://www.tiktok.com/${tiktokUsername}`
         bioSelectors = [
           '[data-e2e="user-bio"]',
+          '[data-e2e="user-subtitle"]', 
           '.user-bio',
           'h2[data-e2e="user-subtitle"]',
           'div[data-e2e="user-bio-text"]',
-          '.user-subtitle'
+          '.user-subtitle',
+          '[data-testid="user-bio"]'
         ]
+        logs.push(`🎵 TikTok URL: ${profileUrl}`)
         break
         
       case 'youtube':
