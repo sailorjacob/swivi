@@ -32,7 +32,7 @@ export async function GET() {
     
     console.log("✅ Profile API: Valid session for user", session.user.id)
 
-    const user = await prisma.user.findUnique({
+    const userRaw = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: {
         id: true,
@@ -56,8 +56,15 @@ export async function GET() {
       }
     })
 
-    if (!user) {
+    if (!userRaw) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    // Convert BigInt fields to strings for JSON serialization
+    const user = {
+      ...userRaw,
+      totalEarnings: userRaw.totalEarnings?.toString() || "0",
+      totalViews: userRaw.totalViews?.toString() || "0"
     }
 
     return NextResponse.json(user)
