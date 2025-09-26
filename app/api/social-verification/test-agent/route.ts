@@ -100,7 +100,7 @@ async function testTwitterAgent(username: string, code: string): Promise<AgentRe
       // Click Next
       const nextButtons = await page.$$('[role="button"]')
       for (const button of nextButtons) {
-        const text = await page.evaluate(el => el.textContent, button)
+        const text = await page.evaluate((el: any) => el.textContent, button)
         if (text && text.includes('Next')) {
           await button.click()
           break
@@ -153,7 +153,7 @@ async function testTwitterAgent(username: string, code: string): Promise<AgentRe
         logs.push(`Trying selector ${i+1}: ${selector}`)
         const bioElement = await page.$(selector)
         if (bioElement) {
-          bio = await page.evaluate(el => el.textContent || '', bioElement)
+          bio = await page.evaluate((el: any) => el.textContent || '', bioElement)
           if (bio && bio.trim()) {
             logs.push(`📝 SUCCESS with selector ${i+1}: Found bio`)
             break

@@ -249,7 +249,7 @@ async function verifyTwitterWithAgent(username: string, code: string): Promise<A
       try {
         const bioElement = await page.$(selector)
         if (bioElement) {
-          bio = await page.evaluate(el => el.textContent || '', bioElement)
+          bio = await page.evaluate((el: any) => el.textContent || '', bioElement)
           if (bio && bio.trim()) {
             logs.push(`📝 Found bio using selector: ${selector}`)
             break
@@ -408,7 +408,7 @@ async function verifyInstagramWithAgent(username: string, code: string): Promise
       try {
         const bioElement = await page.$(selector)
         if (bioElement) {
-          bio = await page.evaluate(el => el.textContent || '', bioElement)
+          bio = await page.evaluate((el: any) => el.textContent || '', bioElement)
           if (bio && bio.trim()) {
             logs.push(`📝 Found bio using selector: ${selector}`)
             break
