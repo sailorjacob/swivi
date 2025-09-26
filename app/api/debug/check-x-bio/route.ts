@@ -46,11 +46,6 @@ export async function POST(request: NextRequest) {
       gotoOptions: {
         waitUntil: "networkidle2",
         timeout: 30000
-      },
-      screenshot: {
-        type: "jpeg",
-        quality: 70,
-        fullPage: false
       }
     }
 

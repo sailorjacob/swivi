@@ -68,11 +68,6 @@ export class BrowserlessScrapeClient {
         waitUntil: 'networkidle2', // Wait for content to load
         timeout: 30000
       },
-      screenshot: {
-        type: 'jpeg',
-        quality: 50,
-        fullPage: false
-      }
     }
 
     logs.push(`📡 Sending scrape request...`)
