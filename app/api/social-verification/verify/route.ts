@@ -70,6 +70,11 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
         return false
       }
       
+      if (response.status === 403) {
+        console.log(`Access forbidden for profile: ${username} - may be private or restricted`)
+        return false
+      }
+      
       return false
     }
     
