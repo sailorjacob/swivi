@@ -239,7 +239,7 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
               </div>
 
               <Button
-                onClick={handleGenerateCode}
+                onClick={() => handleGenerateCode()}
                 disabled={isGenerating || !username.trim()}
                 className="w-full bg-foreground hover:bg-foreground/90"
               >
@@ -278,40 +278,39 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
               </CardContent>
             </Card>
 
-              <div className="space-y-3">
-                <h4 className="font-medium text-white">Add code to your {platformName} profile:</h4>
+            <div className="space-y-3">
+              <h4 className="font-medium text-white">Add code to your {platformName} profile:</h4>
 
-                <div className="space-y-2 text-sm">
-                  <div className="flex gap-2">
-                    <span className="text-muted-foreground">1.</span>
-                    <span>{instructions.step1}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-muted-foreground">2.</span>
-                    <span>{instructions.step2}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-muted-foreground">3.</span>
-                    <span>{instructions.step3}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-muted-foreground">4.</span>
-                    <span>{instructions.step4}</span>
-                  </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground">1.</span>
+                  <span>{instructions.step1}</span>
                 </div>
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground">2.</span>
+                  <span>{instructions.step2}</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground">3.</span>
+                  <span>{instructions.step3}</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="text-muted-foreground">4.</span>
+                  <span>{instructions.step4}</span>
+                </div>
+              </div>
 
-                <div className="bg-amber-900/20 border border-amber-700/50 rounded p-3 text-sm">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle className="w-4 h-4 text-amber-400" />
-                    <span className="font-medium text-amber-400">Important:</span>
-                  </div>
-                  <ul className="text-amber-100 space-y-1 text-xs">
-                    <li>• Make sure your profile is public (not private)</li>
-                    <li>• Add the code exactly as shown above</li>
-                    <li>• Save your changes before clicking verify</li>
-                    <li>• Wait a few seconds after saving</li>
-                  </ul>
+              <div className="bg-amber-900/20 border border-amber-700/50 rounded p-3 text-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="w-4 h-4 text-amber-400" />
+                  <span className="font-medium text-amber-400">Important:</span>
                 </div>
+                <ul className="text-amber-100 space-y-1 text-xs">
+                  <li>• Make sure your profile is public (not private)</li>
+                  <li>• Add the code exactly as shown above</li>
+                  <li>• Save your changes before clicking verify</li>
+                  <li>• Wait a few seconds after saving</li>
+                </ul>
               </div>
 
               <div className="space-y-2">

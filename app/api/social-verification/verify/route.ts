@@ -632,7 +632,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Provide more specific error messages based on the platform
       let errorMessage = `Verification code ${verification.code} not found in your ${platform} bio.`
-      let suggestions = []
+      let suggestions: string[] = []
 
       if (platform === 'instagram') {
         suggestions = [
