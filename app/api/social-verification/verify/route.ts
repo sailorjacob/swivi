@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { authOptions } from "../../../../lib/auth"
+import { prisma } from "../../../../lib/prisma"
 
 // Real function to check if verification code exists in social media bio
 async function checkCodeInBio(platform: string, username: string, code: string): Promise<boolean> {
@@ -31,36 +31,94 @@ async function checkCodeInBio(platform: string, username: string, code: string):
 async function checkInstagramBio(username: string, code: string): Promise<boolean> {
   try {
     const url = `https://www.instagram.com/${username}/`
+    console.log(`🔍 Checking Instagram profile: ${url}`)
+    
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'DNT': '1',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
       }
     })
     
     if (!response.ok) {
-      console.error(`Instagram profile not found: ${username}`)
+      console.error(`Instagram profile not accessible: ${username} - Status: ${response.status}`)
       return false
     }
     
     const html = await response.text()
+    console.log(`✅ Successfully fetched Instagram page (${html.length} characters)`)
     
-    // Instagram embeds profile data in JSON-LD script tags
-    const bioMatch = html.match(/"biography":"([^"]*)"/)
-    if (!bioMatch) {
-      console.error(`Could not extract Instagram bio for: ${username}`)
+    // Try multiple patterns to extract bio/description
+    const patterns = [
+      // Standard biography field
+      /"biography":"([^"]*)"/,
+      /"bio":"([^"]*)"/,
+      // Alternative patterns
+      /"description":"([^"]*)"/,
+      /biography.*?:.*?"([^"]*)"/, 
+      // More specific patterns for newer Instagram structure
+      /"edge_user_profile_pic".*?"biography":"([^"]*)"/,
+      /"graphql".*?"biography":"([^"]*)"/,
+      /"user".*?"biography":"([^"]*)"/,
+      // JSON-LD schema
+      /"@type":"Person".*?"description":"([^"]*)"/,
+      // Window shared data
+      /window\._sharedData.*?"biography":"([^"]*)"/
+    ]
+    
+    let bio = ''
+    let patternUsed = -1
+    
+    for (let i = 0; i < patterns.length; i++) {
+      const match = html.match(patterns[i])
+      if (match && match[1]) {
+        bio = match[1]
+        patternUsed = i
+        break
+      }
+    }
+    
+    if (!bio) {
+      console.error(`❌ Could not extract Instagram bio for: ${username} (tried ${patterns.length} patterns)`)
+      
+      // Additional debugging - check for any profile data
+      const hasProfileData = html.includes('profile') || html.includes('biography') || html.includes('description')
+      console.log(`Profile data present: ${hasProfileData}`)
+      
+      // Check if it's a private account
+      const isPrivate = html.includes('private') || html.includes('This Account is Private')
+      if (isPrivate) {
+        console.log(`❌ Account appears to be private: ${username}`)
+      }
+      
       return false
     }
     
-    const bio = bioMatch[1].replace(/\\u[\dA-F]{4}/gi, (match) => {
+    // Decode Unicode escape sequences
+    const decodedBio = bio.replace(/\\u[\dA-F]{4}/gi, (match) => {
       return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
     })
     
-    const codeFound = bio.includes(code)
-    console.log(`Instagram bio check for @${username}: ${codeFound ? 'FOUND' : 'NOT FOUND'}`)
+    console.log(`📝 Bio extracted (pattern ${patternUsed + 1}): "${decodedBio}"`)
+    console.log(`🔍 Looking for code: "${code}"`)
+    
+    const codeFound = decodedBio.includes(code)
+    console.log(`Instagram bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+    
+    if (!codeFound) {
+      console.log(`Bio content: "${decodedBio}"`)
+      console.log(`Expected code: "${code}"`)
+    }
+    
     return codeFound
     
   } catch (error) {
-    console.error(`Instagram bio check failed for ${username}:`, error)
+    console.error(`❌ Instagram bio check failed for ${username}:`, error)
     return false
   }
 }
@@ -302,7 +360,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: `Verification code ${verification.code} not found in your ${platform} bio. Please add it and try again.`
+          error: `Verification code ${verification.code} not found in your ${platform} bio. Please add it and try again.`,
+          details: {
+            platform,
+            username,
+            code: verification.code,
+            codeChecked: true,
+            timestamp: new Date().toISOString()
+          }
         },
         { status: 400 }
       )
@@ -310,8 +375,22 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("Error verifying social account:", error)
+    
+    // Enhanced error logging for debugging
+    const errorDetails = {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+      endpoint: '/api/social-verification/verify'
+    }
+    
+    console.error("Detailed error info:", errorDetails)
+    
     return NextResponse.json(
-      { error: "Internal server error" },
+      { 
+        error: "Internal server error",
+        ...(process.env.NODE_ENV === 'development' && { details: errorDetails })
+      },
       { status: 500 }
     )
   }

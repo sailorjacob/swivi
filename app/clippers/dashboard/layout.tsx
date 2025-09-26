@@ -26,7 +26,7 @@ import { Button } from "../../../components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "../../../components/ui/sheet"
 import { SwiviLogo } from "../../../components/ui/icons/swivi-logo"
-import { cn } from "@/lib/utils"
+import { cn } from "../../../lib/utils"
 
 interface NavItem {
   label: string

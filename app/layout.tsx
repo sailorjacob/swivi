@@ -9,7 +9,7 @@ import { AuthProvider } from "../components/providers/auth-provider"
 import { ClickAnimation } from "../components/ui/click-animation"
 import { SessionDebug } from "../components/debug/session-debug"
 
-import { cn } from "@/lib/utils"
+import { cn } from "./lib/utils"
 
 const inter = Inter({ subsets: ["latin"] })
 
