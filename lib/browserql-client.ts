@@ -34,7 +34,7 @@ export class BrowserQLClient {
     const response = await fetch(`${this.endpoint}?token=${this.token}`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         query,
@@ -56,16 +56,16 @@ export class BrowserQLClient {
   }
 
   /**
-   * Navigate to a URL and extract text content from specific selectors
+   * Navigate to a URL and get page title and screenshot
    */
-  async extractContent(url: string, selectors: string[]): Promise<{ content: string[], screenshot?: string }> {
+  async getBasicPageInfo(url: string): Promise<{ title: string, screenshot?: string }> {
     const query = `
-      mutation ExtractContent($url: String!, $selectors: [String!]!) {
+      mutation GetBasicPageInfo($url: String!) {
         goto(url: $url, waitUntil: load) {
           status
         }
-        content: querySelectorAll(selector: $selectors) {
-          text
+        title {
+          title
         }
         screenshot(type: jpeg, quality: 50) {
           base64
@@ -73,13 +73,10 @@ export class BrowserQLClient {
       }
     `
 
-    const result = await this.executeQuery(query, { 
-      url, 
-      selectors 
-    })
+    const result = await this.executeQuery(query, { url })
 
     return {
-      content: result.data?.content?.map((item: any) => item.text) || [],
+      title: result.data?.title?.title || '',
       screenshot: result.data?.screenshot?.base64
     }
   }

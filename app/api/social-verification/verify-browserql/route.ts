@@ -79,23 +79,15 @@ export async function POST(request: NextRequest) {
     logs.push(`📍 Profile URL: ${profileUrl}`)
     logs.push(`🎯 Bio selectors: ${bioSelectors.length} patterns`)
 
-    // Extract content using BrowserQL
-    const result = await client.extractContent(profileUrl, bioSelectors)
+    // Extract content using BrowserQL (simplified approach)
+    const result = await client.getBasicPageInfo(profileUrl)
     
-    logs.push(`📄 Content extracted: ${result.content.length} elements`)
+    logs.push(`📄 Page title: "${result.title}"`)
     logs.push(`📸 Screenshot: ${result.screenshot ? 'captured' : 'none'}`)
 
-    // Combine all extracted text
-    const allText = result.content.join(' ').trim()
-    logs.push(`📝 Combined text length: ${allText.length} chars`)
-    
-    if (allText.length > 0) {
-      logs.push(`📝 Bio preview: "${allText.substring(0, 200)}${allText.length > 200 ? '...' : ''}"`)
-    }
-
-    // If no text from selectors, try getting full page HTML
-    let bio = allText
-    if (!bio) {
+    // For now, we'll use a simplified approach and get the HTML content
+    let bio = ""
+    {
       logs.push("🔄 No text from selectors, trying full page HTML...")
       const htmlResult = await client.getPageContent(profileUrl)
       
@@ -140,10 +132,10 @@ export async function POST(request: NextRequest) {
         data: {
           userId: session.user.id,
           platform: platform.toUpperCase() as any,
-          username,
           code,
           verified: true,
-          verifiedAt: new Date()
+          verifiedAt: new Date(),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
         }
       })
       
