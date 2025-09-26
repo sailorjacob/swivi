@@ -1,8 +1,8 @@
 "use client"
 
-import { Header } from "@/components/layout/header"
-import { Footer } from "@/components/layout/footer"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Header } from "../../components/layout/header"
+import { Footer } from "../../components/layout/footer"
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
 import { TrendingUp, DollarSign, BarChart3, Target } from "lucide-react"
 import { motion } from "framer-motion"
 
