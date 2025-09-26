@@ -119,7 +119,9 @@ export class BrowserQLClient {
       variables[`selector${index}`] = selector
       selectorFields.push(`
         bio${index}: querySelector(selector: $selector${index}) {
-          text
+          content {
+            text
+          }
         }`)
     })
 
@@ -139,7 +141,7 @@ export class BrowserQLClient {
     
     const bioTexts: string[] = []
     selectors.forEach((_, index) => {
-      const text = result.data?.[`bio${index}`]?.text
+      const text = result.data?.[`bio${index}`]?.content?.text
       if (text && text.trim()) {
         bioTexts.push(text.trim())
       }
@@ -162,7 +164,9 @@ export class BrowserQLClient {
             status
           }
           content: querySelector(selector: "h1") {
-            text
+            content {
+              text
+            }
           }
         }
       `
@@ -171,7 +175,7 @@ export class BrowserQLClient {
       
       return {
         success: true,
-        message: `Connected successfully! Page title: ${result.data?.content?.text || 'Unknown'}`
+        message: `Connected successfully! Page title: ${result.data?.content?.content?.text || 'Unknown'}`
       }
     } catch (error) {
       return {
