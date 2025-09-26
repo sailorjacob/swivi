@@ -108,48 +108,49 @@ export class BrowserQLClient {
   }
 
   /**
-   * Navigate to a URL and extract text from specific selectors
+   * Navigate to a URL and extract text from specific selectors (simplified approach)
    */
   async extractBioContent(url: string, selectors: string[]): Promise<{ bioTexts: string[], screenshot?: string }> {
-    // Use variables for selectors to avoid GraphQL syntax issues
-    const variables: Record<string, any> = { url }
-    const selectorFields: string[] = []
-    
-    selectors.forEach((selector, index) => {
-      variables[`selector${index}`] = selector
-      selectorFields.push(`
-        bio${index}: querySelector(selector: $selector${index}) {
-          content {
-            text
-          }
-        }`)
-    })
-
-    const query = `
-      mutation ExtractBioContent($url: String!, ${selectors.map((_, index) => `$selector${index}: String!`).join(', ')}) {
-        goto(url: $url, waitUntil: load) {
-          status
-        }
-        ${selectorFields.join('')}
-        screenshot(type: jpeg, quality: 30) {
-          base64
-        }
-      }
-    `
-
-    const result = await this.executeQuery(query, variables)
-    
+    // Try one selector at a time to avoid complex GraphQL queries
     const bioTexts: string[] = []
-    selectors.forEach((_, index) => {
-      const text = result.data?.[`bio${index}`]?.content?.text
-      if (text && text.trim()) {
-        bioTexts.push(text.trim())
+    let screenshot: string | undefined
+
+    for (let i = 0; i < Math.min(selectors.length, 3); i++) { // Limit to 3 selectors to avoid timeout
+      try {
+        const query = `
+          mutation ExtractSingleBio($url: String!, $selector: String!) {
+            goto(url: $url, waitUntil: load) {
+              status
+            }
+            element: querySelector(selector: $selector) {
+              text
+            }
+            screenshot(type: jpeg, quality: 30) {
+              base64
+            }
+          }
+        `
+
+        const result = await this.executeQuery(query, { url, selector: selectors[i] })
+        
+        const text = result.data?.element?.text
+        if (text && text.trim()) {
+          bioTexts.push(text.trim())
+        }
+        
+        // Capture screenshot from first successful query
+        if (!screenshot && result.data?.screenshot?.base64) {
+          screenshot = result.data.screenshot.base64
+        }
+      } catch (error) {
+        console.log(`Selector ${i} failed:`, error)
+        // Continue with next selector
       }
-    })
+    }
 
     return {
       bioTexts,
-      screenshot: result.data?.screenshot?.base64
+      screenshot
     }
   }
 
@@ -163,10 +164,8 @@ export class BrowserQLClient {
           goto(url: "https://example.com", waitUntil: load) {
             status
           }
-          content: querySelector(selector: "h1") {
-            content {
-              text
-            }
+          element: querySelector(selector: "h1") {
+            text
           }
         }
       `
@@ -175,7 +174,7 @@ export class BrowserQLClient {
       
       return {
         success: true,
-        message: `Connected successfully! Page title: ${result.data?.content?.content?.text || 'Unknown'}`
+        message: `Connected successfully! H1 text: ${result.data?.element?.text || 'Unknown'}`
       }
     } catch (error) {
       return {
