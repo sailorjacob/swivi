@@ -122,13 +122,17 @@ export default function ProfilePage() {
     }
   }
 
-  const handleDeleteAccount = async (accountId: string, canDelete: boolean) => {
+  const handleDeleteAccount = async (accountId: string, canDelete: boolean, accountInfo?: any) => {
     if (!canDelete) {
       toast.error("This account cannot be removed")
       return
     }
     
-    if (!confirm("Are you sure you want to delete this verified account?")) {
+    const confirmMessage = accountInfo 
+      ? `Are you sure you want to delete @${accountInfo.username} (${accountInfo.platform})? This will remove the verified account and you'll need to verify again to reconnect it.`
+      : "Are you sure you want to delete this verified account?"
+      
+    if (!confirm(confirmMessage)) {
       return
     }
 
@@ -440,7 +444,7 @@ export default function ProfilePage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeleteAccount(account.id, account.canDelete)}
+                          onClick={() => handleDeleteAccount(account.id, account.canDelete, account)}
                           className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
                         >
                           <Trash2 className="w-4 h-4" />

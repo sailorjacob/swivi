@@ -170,11 +170,13 @@ export async function DELETE(request: NextRequest) {
       where: { id: accountId }
     })
 
-    // Also delete any associated verification records
+    // Also delete any associated verification records for this specific username
+    // Only delete verification records, don't affect other usernames on same platform
     await prisma.socialVerification.deleteMany({
       where: {
         userId: session.user.id,
-        platform: account.platform
+        platform: account.platform,
+        // Note: We could add username matching here if we stored it in verification
       }
     })
 

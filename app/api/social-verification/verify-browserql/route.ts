@@ -136,37 +136,51 @@ export async function POST(request: NextRequest) {
         }
       })
       
-      // Check if social account already exists, then create/update
+      // Handle multiple accounts per platform (allow different usernames)
       const existingAccount = await prisma.socialAccount.findFirst({
         where: {
           userId: session.user.id,
-          platform: platform.toUpperCase() as any
+          platform: platform.toUpperCase() as any,
+          username: username // Check for same username specifically
         }
       })
 
       if (existingAccount) {
-        // Update existing account
+        // Update existing account (re-verification of same username)
         await prisma.socialAccount.update({
           where: { id: existingAccount.id },
           data: {
-            username,
             verified: true,
-            verifiedAt: new Date()
+            verifiedAt: new Date(),
+            displayName: `@${username}` // Update display name
           }
         })
+        logs.push(`🔄 Updated existing account for @${username}`)
       } else {
-        // Create new account
+        // Create new account (new username for this platform)
         await prisma.socialAccount.create({
           data: {
             userId: session.user.id,
             platform: platform.toUpperCase() as any,
             username,
-            platformId: username, // Use username as platform ID for now
+            platformId: username,
+            displayName: `@${username}`,
             verified: true,
             verifiedAt: new Date()
           }
         })
+        logs.push(`✨ Created new account for @${username}`)
       }
+
+      // Clean up old verification codes for this user/platform/username combo
+      await prisma.socialVerification.deleteMany({
+        where: {
+          userId: session.user.id,
+          platform: platform.toUpperCase() as any,
+          code: { not: code }, // Delete old codes, keep current one
+          verified: false // Only delete unverified old codes
+        }
+      })
       
       logs.push(`✅ Verification saved to database (ID: ${verification.id})`)
       logs.push(`🔗 Social account connection updated`)

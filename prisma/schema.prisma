@@ -106,7 +106,7 @@ model SocialAccount {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, platform])
+  @@unique([userId, platform, username]) // Allow multiple accounts per platform, but unique username per user/platform
   @@map("social_accounts")
 }
 
