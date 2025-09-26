@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { conditionalConnect } from "../../lib/db-retry"
+import { conditionalConnect } from "@/lib/db-retry"
 
 export async function GET() {
   try {

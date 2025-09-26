@@ -3,13 +3,13 @@ import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/react"
 import { Toaster } from "react-hot-toast"
 import "./globals.css"
-import { ThemeProvider } from "../components/providers/theme-provider"
-import { QueryProvider } from "../components/providers/query-provider"
-import { AuthProvider } from "../components/providers/auth-provider"
-import { ClickAnimation } from "../components/ui/click-animation"
-import { SessionDebug } from "../components/debug/session-debug"
+import { ThemeProvider } from "@/components/providers/theme-provider"
+import { QueryProvider } from "@/components/providers/query-provider"
+import { AuthProvider } from "@/components/providers/auth-provider"
+import { ClickAnimation } from "@/components/ui/click-animation"
+import { SessionDebug } from "@/components/debug/session-debug"
 
-import { cn } from "./lib/utils"
+import { cn } from "@/lib/utils"
 
 const inter = Inter({ subsets: ["latin"] })
 

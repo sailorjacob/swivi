@@ -1,8 +1,8 @@
 "use client"
 
-import { Header } from "../../components/layout/header"
-import { Footer } from "../../components/layout/footer"
-import { LiveCampaigns } from "../../components/campaigns/live-campaigns"
+import { Header } from "@/components/layout/header"
+import { Footer } from "@/components/layout/footer"
+import { LiveCampaigns } from "@/components/campaigns/live-campaigns"
 
 export default function CampaignsPage() {
   return (

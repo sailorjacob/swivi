@@ -1,12 +1,12 @@
 "use client"
 
 import React, { useState } from "react"
-import { Card, CardContent } from "../../../components/ui/card"
-import { Badge } from "../../../components/ui/badge"
-import { Button } from "../../../components/ui/button"
-import { Progress } from "../../../components/ui/progress"
-import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar"
-import { CampaignDetailModal } from "../../../components/clippers/campaign-detail-modal"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { CampaignDetailModal } from "@/components/clippers/campaign-detail-modal"
 import { 
   TrendingUp, 
   DollarSign, 

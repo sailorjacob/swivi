@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { authOptions } from "../../../../lib/auth"
-import { prisma } from "../../../../lib/prisma"
+import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 // Real function to check if verification code exists in social media bio
 async function checkCodeInBio(platform: string, username: string, code: string): Promise<boolean> {
