@@ -106,6 +106,7 @@ model SocialAccount {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, platform])
   @@map("social_accounts")
 }
 

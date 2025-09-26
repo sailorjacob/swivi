@@ -171,28 +171,37 @@ export async function POST(request: NextRequest) {
         }
       })
       
-      // Also create/update social account connection
-      await prisma.socialAccount.upsert({
+      // Check if social account already exists, then create/update
+      const existingAccount = await prisma.socialAccount.findFirst({
         where: {
-          userId_platform: {
-            userId: session.user.id,
-            platform: platform.toUpperCase() as any
-          }
-        },
-        update: {
-          username,
-          verified: true,
-          verifiedAt: new Date()
-        },
-        create: {
           userId: session.user.id,
-          platform: platform.toUpperCase() as any,
-          username,
-          platformId: username, // Use username as platform ID for now
-          verified: true,
-          verifiedAt: new Date()
+          platform: platform.toUpperCase() as any
         }
       })
+
+      if (existingAccount) {
+        // Update existing account
+        await prisma.socialAccount.update({
+          where: { id: existingAccount.id },
+          data: {
+            username,
+            verified: true,
+            verifiedAt: new Date()
+          }
+        })
+      } else {
+        // Create new account
+        await prisma.socialAccount.create({
+          data: {
+            userId: session.user.id,
+            platform: platform.toUpperCase() as any,
+            username,
+            platformId: username, // Use username as platform ID for now
+            verified: true,
+            verifiedAt: new Date()
+          }
+        })
+      }
       
       logs.push(`✅ Verification saved to database (ID: ${verification.id})`)
       logs.push(`🔗 Social account connection updated`)
