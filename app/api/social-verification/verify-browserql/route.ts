@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { BrowserQLClient } from "@/lib/browserql-client"
+import { BrowserlessScrapeClient } from "@/lib/browserless-scrape"
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     logs.push(`🤖 Starting BrowserQL ${platform} verification for @${username}`)
     logs.push(`🔑 Looking for code: ${code}`)
 
-    const client = new BrowserQLClient()
+    const client = new BrowserlessScrapeClient()
     
     let profileUrl = ""
     let bioSelectors: string[] = []
@@ -101,22 +101,19 @@ export async function POST(request: NextRequest) {
     logs.push(`📍 Profile URL: ${profileUrl}`)
     logs.push(`🎯 Bio selectors: ${bioSelectors.length} patterns`)
 
-    // Extract bio content using BrowserQL selectors
-    const result = await client.extractBioContent(profileUrl, bioSelectors)
+    // Extract bio content using Browserless scrape API
+    const result = await client.scrapeProfile(profileUrl, bioSelectors)
     
-    logs.push(`📄 Bio extraction completed`)
-    logs.push(`📝 Found ${result.bioTexts.length} bio elements`)
-    logs.push(`📸 Screenshot: ${result.screenshot ? 'captured' : 'none'}`)
-
+    // Add scrape logs to our logs
+    logs.push(...result.logs)
+    
     // Combine all bio texts
     let bio = result.bioTexts.join(' ').trim()
     
-    // If no bio found via selectors, try getting page title as fallback
-    if (!bio) {
-      logs.push("🔄 No bio from selectors, trying page title as fallback...")
-      const titleResult = await client.getBasicPageInfo(profileUrl)
-      bio = titleResult.title || ""
-      logs.push(`📄 Page title: "${bio}"`)
+    if (bio) {
+      logs.push(`📝 Combined bio text: "${bio.substring(0, 200)}${bio.length > 200 ? '...' : ''}"`)
+    } else {
+      logs.push("⚠️ No bio text extracted from any selectors")
     }
 
     if (!bio || bio.trim() === '') {
