@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { launchBrowser } from "@/lib/puppeteer-config"
 
 interface AgentResult {
   success: boolean
@@ -66,21 +67,8 @@ async function testTwitterAgent(username: string, code: string): Promise<AgentRe
     logs.push(`🔍 Target: @${username}`)
     logs.push(`🔑 Looking for code: ${code}`)
 
-    const puppeteer = require('puppeteer')
-    
     logs.push("🚀 Launching browser...")
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu'
-      ]
-    })
+    browser = await launchBrowser()
 
     const page = await browser.newPage()
     
