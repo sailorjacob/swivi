@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { CampaignDetailModal } from "@/components/clippers/campaign-detail-modal"
+import { Card, CardContent } from "../../../../components/ui/card"
+import { Badge } from "../../../../components/ui/badge"
+import { Button } from "../../../../components/ui/button"
+import { Progress } from "../../../../components/ui/progress"
+import { CampaignDetailModal } from "../../../../components/clippers/campaign-detail-modal"
 import Image from "next/image"
 import { 
   TrendingUp, 

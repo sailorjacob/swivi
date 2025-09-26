@@ -10,9 +10,9 @@ import {
   DollarSign,
   Eye
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
+import { Badge } from "../../../../components/ui/badge"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../../components/ui/accordion"
 
 const rulesSections = [
   {

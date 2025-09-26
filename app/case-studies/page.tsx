@@ -1,8 +1,8 @@
 "use client"
 
-import { Header } from "@/components/layout/header"
-import { Footer } from "@/components/layout/footer"
-import { CampaignsShowcase } from "@/components/marketing/campaigns-showcase"
+import { Header } from "../../components/layout/header"
+import { Footer } from "../../components/layout/footer"
+import { CampaignsShowcase } from "../../components/marketing/campaigns-showcase"
 import { DarkThemeWrapper } from "../layout-wrapper"
 
 export default function CampaignsPage() {

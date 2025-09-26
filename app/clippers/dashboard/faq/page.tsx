@@ -1,6 +1,6 @@
 "use client"
 
-import { ClippersFAQ } from "@/components/clippers/faq"
+import { ClippersFAQ } from "../../../../components/clippers/faq"
 
 export default function ClippersFAQPage() {
   return (

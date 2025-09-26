@@ -2,9 +2,9 @@
 
 import { useEffect } from "react"
 import { useTheme } from "next-themes"
-import { ThemeProvider } from "@/components/providers/theme-provider"
-import { QueryProvider } from "@/components/providers/query-provider"
-import { AuthProvider } from "@/components/providers/auth-provider"
+import { ThemeProvider } from "../../components/providers/theme-provider"
+import { QueryProvider } from "../../components/providers/query-provider"
+import { AuthProvider } from "../../components/providers/auth-provider"
 import { Toaster } from "react-hot-toast"
 
 function ClippersThemeEnforcer({ children }: { children: React.ReactNode }) {

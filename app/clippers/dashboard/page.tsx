@@ -14,13 +14,13 @@ import {
   Play,
   Trophy
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
+import { Button } from "../../../components/ui/button"
+import { Badge } from "../../../components/ui/badge"
+import { Progress } from "../../../components/ui/progress"
 import Link from "next/link"
 import Image from "next/image"
-import { ClipSubmissionModal } from "@/components/clippers/clip-submission-modal"
+import { ClipSubmissionModal } from "../../../components/clippers/clip-submission-modal"
 
 // Real stats - will be populated from user's actual data
 const stats = [
