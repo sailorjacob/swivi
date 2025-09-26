@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
       bioLength: combinedBio.length,
       codeFound: code ? codeFound : null,
       codeContext: codeContext || null,
-      screenshot: result.screenshot,
+      screenshot: null, // Screenshots require separate API call
       logs
     })
 
