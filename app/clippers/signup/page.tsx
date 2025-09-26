@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DiscordIcon } from "@/components/ui/icons/discord-icon"
 import { GoogleIcon } from "@/components/ui/icons/google-icon"
 import { SwiviLogo } from "@/components/ui/icons/swivi-logo"

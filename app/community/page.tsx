@@ -1,6 +1,6 @@
 import { ClipperChat } from "@/components/community/clipper-chat"
-import { Header } from "@/components/layout"
-import { Footer } from "@/components/layout"
+import { Header } from "@/components/layout/header"
+import { Footer } from "@/components/layout/footer"
 
 export default function CommunityPage() {
   return (
