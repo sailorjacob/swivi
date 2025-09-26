@@ -31,41 +31,43 @@ export function serializeBigInt<T>(obj: T): T {
 }
 
 /**
- * Convert specific BigInt fields to strings for a user object
+ * Convert specific BigInt fields to appropriate types for a user object
  */
 export function serializeUser(user: any) {
   if (!user) return user
   
   return {
     ...user,
-    totalEarnings: user.totalEarnings?.toString() || "0",
-    totalViews: user.totalViews?.toString() || "0"
+    // Convert Decimal to number for totalEarnings (so .toFixed() works)
+    totalEarnings: user.totalEarnings ? Number(user.totalEarnings.toString()) : 0,
+    // Convert BigInt to number for totalViews (so .toFixed() works)
+    totalViews: user.totalViews ? Number(user.totalViews.toString()) : 0
   }
 }
 
 /**
- * Convert specific BigInt fields to strings for a clip object
+ * Convert specific BigInt fields to numbers for a clip object
  */
 export function serializeClip(clip: any) {
   if (!clip) return clip
   
   return {
     ...clip,
-    views: clip.views?.toString() || "0",
-    likes: clip.likes?.toString() || "0", 
-    shares: clip.shares?.toString() || "0"
+    views: clip.views ? Number(clip.views.toString()) : 0,
+    likes: clip.likes ? Number(clip.likes.toString()) : 0,
+    shares: clip.shares ? Number(clip.shares.toString()) : 0
   }
 }
 
 /**
- * Convert specific BigInt fields to strings for view tracking
+ * Convert specific BigInt fields to numbers for view tracking
  */
 export function serializeViewTracking(viewTracking: any) {
   if (!viewTracking) return viewTracking
   
   return {
     ...viewTracking,
-    views: viewTracking.views?.toString() || "0"
+    views: viewTracking.views ? Number(viewTracking.views.toString()) : 0
   }
 }
 
