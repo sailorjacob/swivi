@@ -3,7 +3,7 @@ import { ArtistSubmission } from "@/components/music-hub/artist-submission"
 import { ClipperDashboard } from "@/components/music-hub/clipper-dashboard"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { DarkThemeWrapper } from "@/layout-wrapper"
+import { DarkThemeWrapper } from "../layout-wrapper"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Music, Upload, DollarSign } from "lucide-react"
 
