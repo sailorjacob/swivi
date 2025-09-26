@@ -92,7 +92,7 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
 
     setIsVerifying(true)
     try {
-      const response = await fetch('/api/social-verification/verify', {
+      const response = await fetch('/api/social-verification/verify-browserql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
         body: JSON.stringify({
           platform,
           username: username.trim(),
-          displayName: displayName.trim() || platformName
+          code: code.trim()
         }),
       })
 

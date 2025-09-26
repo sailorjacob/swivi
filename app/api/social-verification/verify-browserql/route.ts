@@ -32,13 +32,13 @@ export async function POST(request: NextRequest) {
     switch (platform.toLowerCase()) {
       case 'twitter':
       case 'x':
-        profileUrl = `https://twitter.com/${username}`
+        profileUrl = `https://x.com/${username}` // Updated to X.com
         bioSelectors = [
           '[data-testid="UserDescription"]',
           '[data-testid="UserBio"]',
-          '.ProfileHeaderCard-bio',
-          '.ProfileHeaderCard-bio p',
-          '.css-901oao.r-18jsvk2.r-37j5jr.r-a023e6.r-16dba41.r-rjixqe.r-bcqeeo.r-qvutc0'
+          'div[data-testid="UserDescription"] span',
+          '[data-testid="UserProfileHeader_Items"] div[lang]',
+          'div[role="tabpanel"] div[lang]'
         ]
         break
         
@@ -46,9 +46,10 @@ export async function POST(request: NextRequest) {
         profileUrl = `https://instagram.com/${username}`
         bioSelectors = [
           '.-vDIg span',
-          '.C7I1f span',
-          'section main article div span',
-          'h1 + div span'
+          'div.-vDIg',
+          'header section div div span',
+          'div[data-testid="ig-bio"]',
+          'article header div span'
         ]
         break
         
@@ -56,17 +57,28 @@ export async function POST(request: NextRequest) {
         profileUrl = `https://tiktok.com/@${username}`
         bioSelectors = [
           '[data-e2e="user-bio"]',
-          '.jsx-1438747715',
-          'h2 + p'
+          '.user-bio',
+          'h2[data-e2e="user-subtitle"]',
+          'div[data-e2e="user-bio-text"]',
+          '.user-subtitle'
         ]
         break
         
       case 'youtube':
-        profileUrl = `https://youtube.com/@${username}`
+        // Try multiple YouTube URL formats
+        const youtubeUrls = [
+          `https://youtube.com/@${username}`,
+          `https://youtube.com/c/${username}`,
+          `https://youtube.com/channel/${username}`,
+          `https://youtube.com/user/${username}`
+        ]
+        profileUrl = youtubeUrls[0] // Start with @username format
         bioSelectors = [
-          '#description-container',
-          '.about-description',
-          'yt-formatted-string#description'
+          'yt-formatted-string[slot="content"]',
+          '#description-content',
+          'ytd-channel-about-metadata-renderer',
+          '#description yt-formatted-string',
+          'yt-about-channel-renderer #description'
         ]
         break
         
@@ -91,8 +103,28 @@ export async function POST(request: NextRequest) {
       logs.push("🔄 No text from selectors, trying full page HTML...")
       const htmlResult = await client.getPageContent(profileUrl)
       
-      // Extract bio from HTML using patterns
-      const bioPatterns = [
+      // Extract bio from HTML using platform-specific patterns
+      const bioPatterns = platform.toLowerCase() === 'instagram' ? [
+        /"biography":"([^"]*(?:\\.[^"]*)*)"/g,
+        /"bio":"([^"]*(?:\\.[^"]*)*)"/g,
+        /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
+        /"edge_owner_to_timeline_media":.*?"biography":"([^"]*(?:\\.[^"]*)*)"/g
+      ] : platform.toLowerCase() === 'x' || platform.toLowerCase() === 'twitter' ? [
+        /"description":"([^"]*(?:\\.[^"]*)*)"/g,
+        /"bio":"([^"]*(?:\\.[^"]*)*)"/g,
+        /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
+        /"legacy":.*?"description":"([^"]*(?:\\.[^"]*)*)"/g
+      ] : platform.toLowerCase() === 'youtube' ? [
+        /"description":{"simpleText":"([^"]*(?:\\.[^"]*)*)"/g,
+        /"description":"([^"]*(?:\\.[^"]*)*)"/g,
+        /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
+        /"channelMetadataRenderer":.*?"description":"([^"]*(?:\\.[^"]*)*)"/g
+      ] : platform.toLowerCase() === 'tiktok' ? [
+        /"desc":"([^"]*(?:\\.[^"]*)*)"/g,
+        /"signature":"([^"]*(?:\\.[^"]*)*)"/g,
+        /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
+        /"userInfo":.*?"signature":"([^"]*(?:\\.[^"]*)*)"/g
+      ] : [
         /"description":"([^"]*(?:\\.[^"]*)*)"/g,
         /"bio":"([^"]*(?:\\.[^"]*)*)"/g,
         /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
@@ -139,7 +171,31 @@ export async function POST(request: NextRequest) {
         }
       })
       
+      // Also create/update social account connection
+      await prisma.socialAccount.upsert({
+        where: {
+          userId_platform: {
+            userId: session.user.id,
+            platform: platform.toUpperCase() as any
+          }
+        },
+        update: {
+          username,
+          verified: true,
+          verifiedAt: new Date()
+        },
+        create: {
+          userId: session.user.id,
+          platform: platform.toUpperCase() as any,
+          username,
+          platformId: username, // Use username as platform ID for now
+          verified: true,
+          verifiedAt: new Date()
+        }
+      })
+      
       logs.push(`✅ Verification saved to database (ID: ${verification.id})`)
+      logs.push(`🔗 Social account connection updated`)
     }
 
     return NextResponse.json({
