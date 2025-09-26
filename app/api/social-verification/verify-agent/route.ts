@@ -159,6 +159,7 @@ interface AgentResult {
  */
 async function verifyTwitterWithAgent(username: string, code: string): Promise<AgentResult> {
   const logs: string[] = []
+  let browser: any = null
   
   try {
     // Check if required environment variables are set
@@ -177,31 +178,128 @@ async function verifyTwitterWithAgent(username: string, code: string): Promise<A
     logs.push(`🔍 Target: @${username}`)
     logs.push(`🔑 Looking for code: ${code}`)
 
-    // Here you would use Puppeteer/Playwright to:
-    // 1. Launch browser
-    // 2. Login to Twitter with your credentials
-    // 3. Navigate to the user's profile
-    // 4. Extract bio content
-    // 5. Check for verification code
+    // Import Puppeteer dynamically
+    const puppeteer = require('puppeteer')
+    
+    // Launch browser
+    logs.push("🚀 Launching browser...")
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu'
+      ]
+    })
 
-    // For now, return a placeholder result
-    logs.push("🚧 Browser agent implementation coming soon...")
-    logs.push("📝 Would navigate to: https://x.com/" + username)
-    logs.push("🔐 Would login with configured credentials")
-    logs.push("📄 Would extract bio and search for code")
+    const page = await browser.newPage()
+    
+    // Set realistic user agent
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36')
+    
+    // Set viewport
+    await page.setViewport({ width: 1280, height: 720 })
 
+    logs.push("🔐 Logging into Twitter...")
+    
+    // Navigate to Twitter login
+    await page.goto('https://x.com/i/flow/login', { waitUntil: 'networkidle2' })
+    
+    // Wait for login form and fill email
+    await page.waitForSelector('input[name="text"]', { timeout: 10000 })
+    await page.type('input[name="text"]', twitterEmail, { delay: 100 })
+    
+    // Click Next button
+    await page.click('[role="button"]:has-text("Next")')
+    
+    // Wait for password field and fill it
+    await page.waitForSelector('input[name="password"]', { timeout: 10000 })
+    await page.type('input[name="password"]', twitterPassword, { delay: 100 })
+    
+    // Click Login button
+    await page.click('[data-testid="LoginForm_Login_Button"]')
+    
+    // Wait for login to complete (check for home timeline or profile)
+    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 })
+    
+    logs.push("✅ Successfully logged into Twitter")
+    logs.push(`📍 Navigating to @${username} profile...`)
+    
+    // Navigate to target user's profile
+    await page.goto(`https://x.com/${username}`, { waitUntil: 'networkidle2' })
+    
+    // Wait for profile to load
+    await page.waitForTimeout(3000)
+    
+    // Extract bio content - try multiple selectors
+    let bio = ''
+    const bioSelectors = [
+      '[data-testid="UserDescription"]',
+      '[data-testid="UserBio"]', 
+      '.css-1dbjc4n.r-1s2bzr4 > .css-901oao',
+      '.ProfileHeaderCard-bio',
+      '.ProfileCard-content .u-dir'
+    ]
+    
+    for (const selector of bioSelectors) {
+      try {
+        const bioElement = await page.$(selector)
+        if (bioElement) {
+          bio = await page.evaluate(el => el.textContent || '', bioElement)
+          if (bio && bio.trim()) {
+            logs.push(`📝 Found bio using selector: ${selector}`)
+            break
+          }
+        }
+      } catch (e) {
+        // Continue to next selector
+      }
+    }
+    
+    if (!bio || !bio.trim()) {
+      logs.push("❌ Could not extract bio content")
+      return {
+        success: false,
+        error: "Could not find or extract bio content from Twitter profile",
+        logs: logs
+      }
+    }
+    
+    logs.push(`📄 Bio extracted: "${bio.substring(0, 100)}${bio.length > 100 ? '...' : ''}"`)
+    
+    // Check if verification code is in bio
+    const codeFound = bio.toLowerCase().includes(code.toLowerCase())
+    logs.push(`🔍 Code search result: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+    
+    if (codeFound) {
+      logs.push(`🎉 Verification code "${code}" found in @${username}'s bio!`)
+    } else {
+      logs.push(`📝 Bio content: "${bio}"`)
+      logs.push(`🔑 Expected code: "${code}"`)
+    }
+    
     return {
-      success: false,
-      error: "Browser agent implementation in progress. Use API or manual verification for now.",
-      logs: logs
+      success: codeFound,
+      error: codeFound ? undefined : `Verification code "${code}" not found in bio`,
+      logs: logs,
+      bio: bio
     }
 
   } catch (error) {
     logs.push(`❌ Agent error: ${error instanceof Error ? error.message : String(error)}`)
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown agent error",
+      error: error instanceof Error ? error.message : "Twitter agent verification failed",
       logs: logs
+    }
+  } finally {
+    if (browser) {
+      await browser.close()
+      logs.push("🔒 Browser closed")
     }
   }
 }
@@ -211,6 +309,7 @@ async function verifyTwitterWithAgent(username: string, code: string): Promise<A
  */
 async function verifyInstagramWithAgent(username: string, code: string): Promise<AgentResult> {
   const logs: string[] = []
+  let browser: any = null
   
   try {
     const instagramEmail = process.env.INSTAGRAM_AGENT_EMAIL
@@ -228,24 +327,138 @@ async function verifyInstagramWithAgent(username: string, code: string): Promise
     logs.push(`🔍 Target: @${username}`)
     logs.push(`🔑 Looking for code: ${code}`)
 
-    // Browser agent implementation would go here
-    logs.push("🚧 Browser agent implementation coming soon...")
-    logs.push("📝 Would navigate to: https://instagram.com/" + username)
-    logs.push("🔐 Would login with configured credentials")
-    logs.push("📄 Would extract bio and search for code")
+    // Import Puppeteer dynamically
+    const puppeteer = require('puppeteer')
+    
+    // Launch browser
+    logs.push("🚀 Launching browser...")
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu'
+      ]
+    })
 
+    const page = await browser.newPage()
+    
+    // Set realistic user agent
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36')
+    
+    // Set viewport
+    await page.setViewport({ width: 1280, height: 720 })
+
+    logs.push("🔐 Logging into Instagram...")
+    
+    // Navigate to Instagram login
+    await page.goto('https://www.instagram.com/accounts/login/', { waitUntil: 'networkidle2' })
+    
+    // Wait for login form
+    await page.waitForSelector('input[name="username"]', { timeout: 10000 })
+    
+    // Fill username
+    await page.type('input[name="username"]', instagramEmail, { delay: 100 })
+    
+    // Fill password
+    await page.type('input[name="password"]', instagramPassword, { delay: 100 })
+    
+    // Click login button
+    await page.click('button[type="submit"]')
+    
+    // Wait for login to complete
+    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 })
+    
+    // Handle potential "Save Info" dialog
+    try {
+      await page.waitForTimeout(2000)
+      const notNowButton = await page.$('button:has-text("Not Now")')
+      if (notNowButton) {
+        await notNowButton.click()
+        logs.push("✅ Dismissed save info dialog")
+      }
+    } catch (e) {
+      // Continue if no dialog appears
+    }
+    
+    logs.push("✅ Successfully logged into Instagram")
+    logs.push(`📍 Navigating to @${username} profile...`)
+    
+    // Navigate to target user's profile
+    await page.goto(`https://www.instagram.com/${username}/`, { waitUntil: 'networkidle2' })
+    
+    // Wait for profile to load
+    await page.waitForTimeout(3000)
+    
+    // Extract bio content - try multiple selectors
+    let bio = ''
+    const bioSelectors = [
+      '.-vDIg span',
+      '.C7I1f',
+      '._aa_c ._aacl._aaco._aacw._aacx._aad7._aade',
+      'article header section div div span',
+      '[data-testid="bio"]'
+    ]
+    
+    for (const selector of bioSelectors) {
+      try {
+        const bioElement = await page.$(selector)
+        if (bioElement) {
+          bio = await page.evaluate(el => el.textContent || '', bioElement)
+          if (bio && bio.trim()) {
+            logs.push(`📝 Found bio using selector: ${selector}`)
+            break
+          }
+        }
+      } catch (e) {
+        // Continue to next selector
+      }
+    }
+    
+    if (!bio || !bio.trim()) {
+      logs.push("❌ Could not extract bio content")
+      return {
+        success: false,
+        error: "Could not find or extract bio content from Instagram profile",
+        logs: logs
+      }
+    }
+    
+    logs.push(`📄 Bio extracted: "${bio.substring(0, 100)}${bio.length > 100 ? '...' : ''}"`)
+    
+    // Check if verification code is in bio
+    const codeFound = bio.toLowerCase().includes(code.toLowerCase())
+    logs.push(`🔍 Code search result: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+    
+    if (codeFound) {
+      logs.push(`🎉 Verification code "${code}" found in @${username}'s bio!`)
+    } else {
+      logs.push(`📝 Bio content: "${bio}"`)
+      logs.push(`🔑 Expected code: "${code}"`)
+    }
+    
     return {
-      success: false,
-      error: "Browser agent implementation in progress. Use manual verification for now.",
-      logs: logs
+      success: codeFound,
+      error: codeFound ? undefined : `Verification code "${code}" not found in bio`,
+      logs: logs,
+      bio: bio
     }
 
   } catch (error) {
     logs.push(`❌ Agent error: ${error instanceof Error ? error.message : String(error)}`)
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown agent error",
+      error: error instanceof Error ? error.message : "Instagram agent verification failed",
       logs: logs
+    }
+  } finally {
+    if (browser) {
+      await browser.close()
+      logs.push("🔒 Browser closed")
     }
   }
 }
