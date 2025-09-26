@@ -124,17 +124,26 @@ export async function POST(request: NextRequest) {
     logs.push(`🔍 Code search result: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
 
     if (codeFound) {
+      logs.push(`🎯 Code found! Saving to database...`)
+      
       // Save verification to database
-      const verification = await prisma.socialVerification.create({
-        data: {
-          userId: session.user.id,
-          platform: platform.toUpperCase() as any,
-          code,
-          verified: true,
-          verifiedAt: new Date(),
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
-        }
-      })
+      let verification
+      try {
+        verification = await prisma.socialVerification.create({
+          data: {
+            userId: session.user.id,
+            platform: platform.toUpperCase() as any,
+            code,
+            verified: true,
+            verifiedAt: new Date(),
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
+          }
+        })
+        logs.push(`✅ Verification record created (ID: ${verification.id})`)
+      } catch (verificationError) {
+        logs.push(`❌ Verification record failed: ${verificationError instanceof Error ? verificationError.message : String(verificationError)}`)
+        throw verificationError
+      }
       
       // Handle multiple accounts per platform (allow different usernames)
       const existingAccount = await prisma.socialAccount.findFirst({
@@ -145,31 +154,36 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      if (existingAccount) {
-        // Update existing account (re-verification of same username)
-        await prisma.socialAccount.update({
-          where: { id: existingAccount.id },
-          data: {
-            verified: true,
-            verifiedAt: new Date(),
-            displayName: `@${username}` // Update display name
-          }
-        })
-        logs.push(`🔄 Updated existing account for @${username}`)
-      } else {
-        // Create new account (new username for this platform)
-        await prisma.socialAccount.create({
-          data: {
-            userId: session.user.id,
-            platform: platform.toUpperCase() as any,
-            username,
-            platformId: username,
-            displayName: `@${username}`,
-            verified: true,
-            verifiedAt: new Date()
-          }
-        })
-        logs.push(`✨ Created new account for @${username}`)
+      try {
+        if (existingAccount) {
+          // Update existing account (re-verification of same username)
+          await prisma.socialAccount.update({
+            where: { id: existingAccount.id },
+            data: {
+              verified: true,
+              verifiedAt: new Date(),
+              displayName: `@${username}` // Update display name
+            }
+          })
+          logs.push(`🔄 Updated existing account for @${username}`)
+        } else {
+          // Create new account (new username for this platform)
+          const socialAccount = await prisma.socialAccount.create({
+            data: {
+              userId: session.user.id,
+              platform: platform.toUpperCase() as any,
+              username,
+              platformId: username,
+              displayName: `@${username}`,
+              verified: true,
+              verifiedAt: new Date()
+            }
+          })
+          logs.push(`✨ Created new account for @${username} (ID: ${socialAccount.id})`)
+        }
+      } catch (socialAccountError) {
+        logs.push(`❌ Social account save failed: ${socialAccountError instanceof Error ? socialAccountError.message : String(socialAccountError)}`)
+        // Don't throw here - verification record was already created
       }
 
       // Clean up old verification codes for this user/platform/username combo
