@@ -98,12 +98,16 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Delete existing verification if regenerating
-    if (existingVerification && force) {
-      await prisma.socialVerification.delete({
-        where: { id: existingVerification.id }
+    // Delete ALL existing unverified verifications for this user/platform if regenerating
+    if (force || existingVerification) {
+      const deletedCount = await prisma.socialVerification.deleteMany({
+        where: {
+          userId: session.user.id,
+          platform: platformEnum as any,
+          verified: false
+        }
       })
-      console.log(`🔄 Deleted existing verification for ${username} on ${platform}`)
+      console.log(`🔄 Deleted ${deletedCount.count} existing verification(s) for ${username} on ${platform}`)
     }
 
     // Generate new code

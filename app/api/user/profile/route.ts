@@ -17,11 +17,20 @@ const updatePayoutSchema = z.object({
 
 export async function GET() {
   try {
+    console.log("🔍 Profile API: Getting session...")
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!session) {
+      console.log("❌ Profile API: No session found")
+      return NextResponse.json({ error: "No session found" }, { status: 401 })
     }
+    
+    if (!session.user?.id) {
+      console.log("❌ Profile API: Session found but no user ID", session.user)
+      return NextResponse.json({ error: "Invalid session - no user ID" }, { status: 401 })
+    }
+    
+    console.log("✅ Profile API: Valid session for user", session.user.id)
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },

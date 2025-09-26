@@ -578,6 +578,31 @@ export async function POST(request: NextRequest) {
     })
 
     if (!verification) {
+      // Check if there are any verifications for this user/platform (even expired ones)
+      const anyVerification = await prisma.socialVerification.findFirst({
+        where: {
+          userId: session.user.id,
+          platform: platformEnum as any
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      })
+
+      if (anyVerification) {
+        if (anyVerification.verified) {
+          return NextResponse.json(
+            { error: "This platform is already verified for your account." },
+            { status: 400 }
+          )
+        } else {
+          return NextResponse.json(
+            { error: "Your verification code has expired. Please generate a new code." },
+            { status: 400 }
+          )
+        }
+      }
+
       return NextResponse.json(
         { error: "No pending verification found. Please generate a new code." },
         { status: 404 }

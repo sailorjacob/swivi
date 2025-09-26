@@ -5,14 +5,26 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   try {
+    console.log("🔍 Connected Accounts API: Getting session...")
     const session = await getServerSession(authOptions)
 
-    if (!session?.user?.id) {
+    if (!session) {
+      console.log("❌ Connected Accounts API: No session found")
       return NextResponse.json(
-        { error: "Not authenticated" },
+        { error: "No session found" },
         { status: 401 }
       )
     }
+
+    if (!session.user?.id) {
+      console.log("❌ Connected Accounts API: Session found but no user ID", session.user)
+      return NextResponse.json(
+        { error: "Invalid session - no user ID" },
+        { status: 401 }
+      )
+    }
+    
+    console.log("✅ Connected Accounts API: Valid session for user", session.user.id)
 
     // Get user with their OAuth accounts
     const user = await prisma.user.findUnique({
