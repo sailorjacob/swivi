@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { BrowserSessionManager } from "@/lib/browser-sessions"
 
 export async function POST(request: NextRequest) {
   try {
@@ -196,37 +197,45 @@ async function verifyTwitterWithAgent(username: string, code: string): Promise<A
       ]
     })
 
-    const page = await browser.newPage()
-    
-    // Set realistic user agent
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36')
-    
-    // Set viewport
-    await page.setViewport({ width: 1280, height: 720 })
+    // Initialize page with session management
+    logs.push("🔄 Checking for existing Twitter session...")
+    const { page, needsLogin } = await BrowserSessionManager.initializePageWithSession(browser, 'twitter')
 
-    logs.push("🔐 Logging into Twitter...")
-    
-    // Navigate to Twitter login
-    await page.goto('https://x.com/i/flow/login', { waitUntil: 'networkidle2' })
-    
-    // Wait for login form and fill email
-    await page.waitForSelector('input[name="text"]', { timeout: 10000 })
-    await page.type('input[name="text"]', twitterEmail, { delay: 100 })
-    
-    // Click Next button
-    await page.click('[role="button"]:has-text("Next")')
-    
-    // Wait for password field and fill it
-    await page.waitForSelector('input[name="password"]', { timeout: 10000 })
-    await page.type('input[name="password"]', twitterPassword, { delay: 100 })
-    
-    // Click Login button
-    await page.click('[data-testid="LoginForm_Login_Button"]')
-    
-    // Wait for login to complete (check for home timeline or profile)
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 })
-    
-    logs.push("✅ Successfully logged into Twitter")
+    if (needsLogin) {
+      logs.push("🔐 No valid session found, logging into Twitter...")
+      
+      try {
+        // Navigate to Twitter login
+        await page.goto('https://x.com/i/flow/login', { waitUntil: 'networkidle2' })
+        
+        // Wait for login form and fill email
+        await page.waitForSelector('input[name="text"]', { timeout: 10000 })
+        await page.type('input[name="text"]', twitterEmail, { delay: 100 })
+        
+        // Click Next button
+        await page.click('[role="button"]:has-text("Next")')
+        
+        // Wait for password field and fill it
+        await page.waitForSelector('input[name="password"]', { timeout: 10000 })
+        await page.type('input[name="password"]', twitterPassword, { delay: 100 })
+        
+        // Click Login button
+        await page.click('[data-testid="LoginForm_Login_Button"]')
+        
+        // Wait for login to complete
+        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 })
+        
+        // Save session after successful login
+        await BrowserSessionManager.saveSessionAfterLogin(page, 'twitter')
+        
+        logs.push("✅ Successfully logged into Twitter and saved session")
+      } catch (loginError) {
+        logs.push(`❌ Login failed: ${loginError instanceof Error ? loginError.message : String(loginError)}`)
+        throw new Error("Failed to login to Twitter")
+      }
+    } else {
+      logs.push("✅ Reusing existing Twitter session (no login required)")
+    }
     logs.push(`📍 Navigating to @${username} profile...`)
     
     // Navigate to target user's profile
