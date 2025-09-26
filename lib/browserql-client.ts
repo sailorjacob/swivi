@@ -90,7 +90,7 @@ export class BrowserQLClient {
         goto(url: $url, waitUntil: load) {
           status
         }
-        content: content {
+        content(html: "body") {
           html
         }
         screenshot(type: jpeg, quality: 30) {
@@ -103,6 +103,41 @@ export class BrowserQLClient {
 
     return {
       html: result.data?.content?.html || '',
+      screenshot: result.data?.screenshot?.base64
+    }
+  }
+
+  /**
+   * Navigate to a URL and extract text from specific selectors
+   */
+  async extractBioContent(url: string, selectors: string[]): Promise<{ bioTexts: string[], screenshot?: string }> {
+    const query = `
+      mutation ExtractBioContent($url: String!) {
+        goto(url: $url, waitUntil: load) {
+          status
+        }
+        ${selectors.map((selector, index) => `
+        bio${index}: querySelector(selector: "${selector}") {
+          text
+        }`).join('')}
+        screenshot(type: jpeg, quality: 30) {
+          base64
+        }
+      }
+    `
+
+    const result = await this.executeQuery(query, { url })
+    
+    const bioTexts: string[] = []
+    selectors.forEach((_, index) => {
+      const text = result.data?.[`bio${index}`]?.text
+      if (text && text.trim()) {
+        bioTexts.push(text.trim())
+      }
+    })
+
+    return {
+      bioTexts,
       screenshot: result.data?.screenshot?.base64
     }
   }

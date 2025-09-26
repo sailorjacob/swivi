@@ -91,57 +91,22 @@ export async function POST(request: NextRequest) {
     logs.push(`📍 Profile URL: ${profileUrl}`)
     logs.push(`🎯 Bio selectors: ${bioSelectors.length} patterns`)
 
-    // Extract content using BrowserQL (simplified approach)
-    const result = await client.getBasicPageInfo(profileUrl)
+    // Extract bio content using BrowserQL selectors
+    const result = await client.extractBioContent(profileUrl, bioSelectors)
     
-    logs.push(`📄 Page title: "${result.title}"`)
+    logs.push(`📄 Bio extraction completed`)
+    logs.push(`📝 Found ${result.bioTexts.length} bio elements`)
     logs.push(`📸 Screenshot: ${result.screenshot ? 'captured' : 'none'}`)
 
-    // For now, we'll use a simplified approach and get the HTML content
-    let bio = ""
-    {
-      logs.push("🔄 No text from selectors, trying full page HTML...")
-      const htmlResult = await client.getPageContent(profileUrl)
-      
-      // Extract bio from HTML using platform-specific patterns
-      const bioPatterns = platform.toLowerCase() === 'instagram' ? [
-        /"biography":"([^"]*(?:\\.[^"]*)*)"/g,
-        /"bio":"([^"]*(?:\\.[^"]*)*)"/g,
-        /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
-        /"edge_owner_to_timeline_media":.*?"biography":"([^"]*(?:\\.[^"]*)*)"/g
-      ] : platform.toLowerCase() === 'x' || platform.toLowerCase() === 'twitter' ? [
-        /"description":"([^"]*(?:\\.[^"]*)*)"/g,
-        /"bio":"([^"]*(?:\\.[^"]*)*)"/g,
-        /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
-        /"legacy":.*?"description":"([^"]*(?:\\.[^"]*)*)"/g
-      ] : platform.toLowerCase() === 'youtube' ? [
-        /"description":{"simpleText":"([^"]*(?:\\.[^"]*)*)"/g,
-        /"description":"([^"]*(?:\\.[^"]*)*)"/g,
-        /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
-        /"channelMetadataRenderer":.*?"description":"([^"]*(?:\\.[^"]*)*)"/g
-      ] : platform.toLowerCase() === 'tiktok' ? [
-        /"desc":"([^"]*(?:\\.[^"]*)*)"/g,
-        /"signature":"([^"]*(?:\\.[^"]*)*)"/g,
-        /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
-        /"userInfo":.*?"signature":"([^"]*(?:\\.[^"]*)*)"/g
-      ] : [
-        /"description":"([^"]*(?:\\.[^"]*)*)"/g,
-        /"bio":"([^"]*(?:\\.[^"]*)*)"/g,
-        /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
-        /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi
-      ]
-      
-      for (const pattern of bioPatterns) {
-        const matches = htmlResult.html.match(pattern)
-        if (matches && matches.length > 0) {
-          const match = pattern.exec(htmlResult.html)
-          if (match && match[1]) {
-            bio = match[1].trim()
-            logs.push(`📝 Bio found via HTML pattern: "${bio.substring(0, 100)}..."`)
-            break
-          }
-        }
-      }
+    // Combine all bio texts
+    let bio = result.bioTexts.join(' ').trim()
+    
+    // If no bio found via selectors, try getting page title as fallback
+    if (!bio) {
+      logs.push("🔄 No bio from selectors, trying page title as fallback...")
+      const titleResult = await client.getBasicPageInfo(profileUrl)
+      bio = titleResult.title || ""
+      logs.push(`📄 Page title: "${bio}"`)
     }
 
     if (!bio || bio.trim() === '') {
