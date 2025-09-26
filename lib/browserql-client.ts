@@ -111,22 +111,31 @@ export class BrowserQLClient {
    * Navigate to a URL and extract text from specific selectors
    */
   async extractBioContent(url: string, selectors: string[]): Promise<{ bioTexts: string[], screenshot?: string }> {
+    // Use variables for selectors to avoid GraphQL syntax issues
+    const variables: Record<string, any> = { url }
+    const selectorFields: string[] = []
+    
+    selectors.forEach((selector, index) => {
+      variables[`selector${index}`] = selector
+      selectorFields.push(`
+        bio${index}: querySelector(selector: $selector${index}) {
+          text
+        }`)
+    })
+
     const query = `
-      mutation ExtractBioContent($url: String!) {
+      mutation ExtractBioContent($url: String!, ${selectors.map((_, index) => `$selector${index}: String!`).join(', ')}) {
         goto(url: $url, waitUntil: load) {
           status
         }
-        ${selectors.map((selector, index) => `
-        bio${index}: querySelector(selector: "${selector}") {
-          text
-        }`).join('')}
+        ${selectorFields.join('')}
         screenshot(type: jpeg, quality: 30) {
           base64
         }
       }
     `
 
-    const result = await this.executeQuery(query, { url })
+    const result = await this.executeQuery(query, variables)
     
     const bioTexts: string[] = []
     selectors.forEach((_, index) => {
