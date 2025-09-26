@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
         error: "Profile bio not found or empty",
         logs,
         screenshot: result.screenshot
-      })
+      }, { status: 400 })
     }
 
     // Search for the verification code
@@ -146,13 +146,26 @@ export async function POST(request: NextRequest) {
       }
       
       // Handle multiple accounts per platform (allow different usernames)
+      // Use case-insensitive username comparison
+      const platformUpper = platform.toUpperCase()
+      logs.push(`🔍 Looking for existing account: platform=${platformUpper}, username=${username}`)
+      
       const existingAccount = await prisma.socialAccount.findFirst({
         where: {
           userId: session.user.id,
-          platform: platform.toUpperCase() as any,
-          username: username // Check for same username specifically
+          platform: platformUpper as any,
+          username: {
+            equals: username,
+            mode: 'insensitive' // Case-insensitive comparison
+          }
         }
       })
+      
+      if (existingAccount) {
+        logs.push(`🔍 Found existing account: ${existingAccount.id}`)
+      } else {
+        logs.push(`🔍 No existing account found for @${username}`)
+      }
 
       try {
         if (existingAccount) {
@@ -167,13 +180,13 @@ export async function POST(request: NextRequest) {
           })
           logs.push(`🔄 Updated existing account for @${username}`)
         } else {
-          // Create new account (new username for this platform)
+          // Create new account (new username for this platform)  
           const socialAccount = await prisma.socialAccount.create({
             data: {
               userId: session.user.id,
-              platform: platform.toUpperCase() as any,
-              username,
-              platformId: username,
+              platform: platformUpper as any,
+              username: username.toLowerCase(), // Store username in lowercase for consistency
+              platformId: username.toLowerCase(),
               displayName: `@${username}`,
               verified: true,
               verifiedAt: new Date()
@@ -186,30 +199,46 @@ export async function POST(request: NextRequest) {
         // Don't throw here - verification record was already created
       }
 
-      // Clean up old verification codes for this user/platform/username combo
-      await prisma.socialVerification.deleteMany({
-        where: {
-          userId: session.user.id,
-          platform: platform.toUpperCase() as any,
-          code: { not: code }, // Delete old codes, keep current one
-          verified: false // Only delete unverified old codes
-        }
-      })
+      // Clean up old verification codes for this user/platform combo
+      try {
+        const deletedCodes = await prisma.socialVerification.deleteMany({
+          where: {
+            userId: session.user.id,
+            platform: platformUpper as any,
+            code: { not: code }, // Delete old codes, keep current one
+            verified: false // Only delete unverified old codes
+          }
+        })
+        logs.push(`🧹 Cleaned up ${deletedCodes.count} old verification codes`)
+      } catch (cleanupError) {
+        logs.push(`⚠️ Cleanup warning: ${cleanupError instanceof Error ? cleanupError.message : String(cleanupError)}`)
+        // Don't fail the verification for cleanup issues
+      }
       
       logs.push(`✅ Verification saved to database (ID: ${verification.id})`)
       logs.push(`🔗 Social account connection updated`)
     }
 
-    return NextResponse.json({
-      success: codeFound,
-      verified: codeFound,
-      message: codeFound 
-        ? `✅ Verification successful! Code "${code}" found in @${username}'s bio`
-        : `❌ Code "${code}" not found in @${username}'s bio`,
-      logs,
-      bio: bio.substring(0, 500), // First 500 chars for debugging
-      screenshot: result.screenshot
-    })
+    if (codeFound) {
+      return NextResponse.json({
+        success: true,
+        verified: true,
+        message: `✅ Verification successful! Code "${code}" found in @${username}'s bio`,
+        logs,
+        bio: bio.substring(0, 500), // First 500 chars for debugging
+        screenshot: result.screenshot
+      })
+    } else {
+      return NextResponse.json({
+        success: false,
+        verified: false,
+        error: `Code "${code}" not found in @${username}'s bio`,
+        message: `❌ Code "${code}" not found in @${username}'s bio`,
+        logs,
+        bio: bio.substring(0, 500), // First 500 chars for debugging
+        screenshot: result.screenshot
+      }, { status: 400 })
+    }
 
   } catch (error) {
     console.error('BrowserQL verification error:', error)
