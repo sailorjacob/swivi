@@ -444,32 +444,43 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
         const html = await response.text()
         console.log(`✅ Successfully fetched Twitter/X page (${html.length} characters)`)
         
-        // Enhanced patterns for Twitter/X bio extraction
+        // Enhanced patterns for Twitter/X bio extraction (updated for 2025 X.com structure)
         const patterns = [
-          // Twitter structure patterns
-          /"description":"([^"]*(?:\\.[^"]*)*)"/,
-          /"bio":"([^"]*(?:\\.[^"]*)*)"/,
-          // Alternative patterns
-          /description['"]:[\s]*['"]([^'"]*)['"],/,
-          /bio['"]:[\s]*['"]([^'"]*)['"],/,
-          // Meta tag patterns
-          /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-          /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-          /<meta\s+property=['"]twitter:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-          // JSON-LD patterns
-          /@type['"]:[\s]*['"]Person['"][\s\S]*?description['"]:[\s]*['"]([^'"]*)['"],/
+          // Modern X.com JSON patterns
+          /"description":"([^"]*(?:\\.[^"]*)*)"/g,
+          /"legacy":\{[^}]*"description":"([^"]*(?:\\.[^"]*)*)"/g,
+          /"entities":\{[^}]*"description":\{[^}]*"urls":\[[^\]]*\][^}]*\}[^}]*"description":"([^"]*)"/g,
+          // Legacy Twitter patterns
+          /"bio":"([^"]*(?:\\.[^"]*)*)"/g,
+          // Meta tag patterns (more specific for X.com)
+          /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
+          /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
+          /<meta\s+property=['"]twitter:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
+          // X.com specific JSON-LD
+          /"@type"\s*:\s*"Person"[^}]*"description"\s*:\s*"([^"]*)"/gi,
+          // Fallback patterns
+          /description['"]\s*:\s*['"]([^'"]*)['"],?/gi,
+          // Very broad patterns as last resort
+          /"([^"]*(?:swivi|verification|code|SWIVI|VERIFICATION|CODE)[^"]*)"/gi
         ]
         
         let bio = ''
         let patternUsed = -1
         
         for (let i = 0; i < patterns.length; i++) {
-          const match = html.match(patterns[i])
-          if (match && match[1] && match[1].trim()) {
-            bio = match[1].trim()
-            patternUsed = i
-            console.log(`📝 Found Twitter/X bio using pattern ${i + 1}: "${bio.substring(0, 100)}${bio.length > 100 ? '...' : ''}"`)
-            break
+          const matches = html.match(patterns[i])
+          if (matches) {
+            // For global patterns, we might get multiple matches - try all of them
+            for (const match of matches) {
+              const exec = patterns[i].exec(html)
+              if (exec && exec[1] && exec[1].trim()) {
+                bio = exec[1].trim()
+                patternUsed = i
+                console.log(`📝 Found Twitter/X bio using pattern ${i + 1}: "${bio.substring(0, 100)}${bio.length > 100 ? '...' : ''}"`)
+                break
+              }
+            }
+            if (bio) break
           }
         }
         
