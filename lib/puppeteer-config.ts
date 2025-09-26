@@ -10,14 +10,23 @@ export async function launchBrowser() {
   if (browserlessToken) {
     // Use Browserless.io cloud service
     console.log(`🌐 Connecting to Browserless.io cloud browser...`)
+    console.log(`🔑 Using API key: ${browserlessToken.substring(0, 10)}...${browserlessToken.slice(-5)}`)
     
-    const browser = await puppeteer.connect({
-      browserWSEndpoint: `wss://chrome.browserless.io?token=${browserlessToken}&stealth&blockAds`,
-      defaultViewport: { width: 1280, height: 720 }
-    })
-    
-    console.log(`✅ Connected to Browserless.io cloud browser`)
-    return browser
+    try {
+      const wsEndpoint = `wss://chrome.browserless.io?token=${browserlessToken}&stealth&blockAds`
+      console.log(`🔗 WebSocket endpoint: ${wsEndpoint.replace(browserlessToken, '[TOKEN]')}`)
+      
+      const browser = await puppeteer.connect({
+        browserWSEndpoint: wsEndpoint,
+        defaultViewport: { width: 1280, height: 720 }
+      })
+      
+      console.log(`✅ Connected to Browserless.io cloud browser`)
+      return browser
+    } catch (error) {
+      console.error(`❌ Browserless.io connection failed:`, error)
+      throw new Error(`Browserless connection failed: ${error instanceof Error ? error.message : String(error)}`)
+    }
   } else {
     // Fallback to local Puppeteer (for development)
     console.log(`🔄 Browserless token not found, trying local Puppeteer...`)

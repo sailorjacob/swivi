@@ -196,7 +196,11 @@ async function testTwitterAgent(username: string, code: string): Promise<AgentRe
     }
 
   } catch (error) {
+    console.error('Twitter agent error:', error)
     logs.push(`❌ Agent error: ${error instanceof Error ? error.message : String(error)}`)
+    logs.push(`❌ Error stack: ${error instanceof Error ? error.stack : 'No stack trace'}`)
+    logs.push(`❌ Error type: ${typeof error}`)
+    logs.push(`❌ Error details: ${JSON.stringify(error, Object.getOwnPropertyNames(error))}`)
     return {
       success: false,
       error: error instanceof Error ? error.message : "Twitter agent test failed",
