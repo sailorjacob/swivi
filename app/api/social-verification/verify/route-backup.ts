@@ -27,7 +27,7 @@ async function checkCodeInBio(platform: string, username: string, code: string):
   }
 }
 
-// Instagram bio checking via web scraping with enhanced anti-bot measures
+// Instagram bio checking via web scraping (no API key required)
 async function checkInstagramBio(username: string, code: string): Promise<boolean> {
   try {
     const url = `https://www.instagram.com/${username}/`
@@ -183,330 +183,117 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
   }
 }
 
-// YouTube channel description checking with enhanced anti-bot measures
+// YouTube channel description checking
 async function checkYouTubeBio(username: string, code: string): Promise<boolean> {
   try {
-    console.log(`🔍 Checking YouTube channel: @${username}`)
-    
-    // Try multiple channel URL formats
+    // Try both channel URL formats
     const urls = [
       `https://www.youtube.com/@${username}`,
       `https://www.youtube.com/c/${username}`,
-      `https://www.youtube.com/user/${username}`,
-      `https://www.youtube.com/channel/${username}`
+      `https://www.youtube.com/user/${username}`
     ]
-    
-    // Add randomized delay
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000))
     
     for (const url of urls) {
       try {
-        console.log(`🔍 Trying YouTube URL: ${url}`)
-        
         const response = await fetch(url, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Cache-Control': 'no-cache',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none'
-          },
-          signal: AbortSignal.timeout(15000)
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          }
         })
         
-        if (!response.ok) {
-          console.log(`YouTube URL ${url} returned ${response.status}`)
-          continue
-        }
-        
-        const html = await response.text()
-        console.log(`✅ Successfully fetched YouTube page (${html.length} characters)`)
-        
-        // Enhanced patterns for YouTube description extraction
-        const patterns = [
-          // New YouTube structure patterns
-          /"description":{"simpleText":"([^"]*(?:\\.[^"]*)*)"/,
-          /"description":"([^"]*(?:\\.[^"]*)*)"/,
-          // Alternative patterns
-          /description['"]:[\s]*['"]([^'"]*)['"],/,
-          // Meta tag patterns
-          /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-          /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-          // JSON-LD patterns
-          /@type['"]:[\s]*['"]VideoObject['"][\s\S]*?description['"]:[\s]*['"]([^'"]*)['"],/,
-          // Fallback patterns
-          /channelMetadataRenderer[\s\S]*?description['"]:[\s]*['"]([^'"]*)['"],/
-        ]
-        
-        let description = ''
-        let patternUsed = -1
-        
-        for (let i = 0; i < patterns.length; i++) {
-          const match = html.match(patterns[i])
-          if (match && match[1] && match[1].trim()) {
-            description = match[1].trim()
-            patternUsed = i
-            console.log(`📝 Found YouTube description using pattern ${i + 1}: "${description.substring(0, 100)}${description.length > 100 ? '...' : ''}"`)
-            break
+        if (response.ok) {
+          const html = await response.text()
+          
+          // YouTube embeds channel data in script tags
+          const descriptionMatch = html.match(/"description":{"simpleText":"([^"]*)"/)
+          if (descriptionMatch) {
+            const description = descriptionMatch[1]
+            const codeFound = description.includes(code)
+            console.log(`YouTube description check for ${username}: ${codeFound ? 'FOUND' : 'NOT FOUND'}`)
+            return codeFound
           }
         }
-        
-        if (!description) {
-          console.log(`❌ No description found for YouTube channel: ${username}`)
-          continue
-        }
-        
-        // Decode entities
-        const decodedDescription = description
-          .replace(/\\u[\dA-F]{4}/gi, (match) => {
-            return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
-          })
-          .replace(/\\n/g, ' ')
-          .replace(/\\t/g, ' ')
-          .replace(/\\"/g, '"')
-          .replace(/\\'/g, "'")
-          .replace(/&quot;/g, '"')
-          .replace(/&amp;/g, '&')
-        
-        console.log(`📝 YouTube description: "${decodedDescription}"`)
-        console.log(`🔍 Looking for code: "${code}"`)
-        
-        // Case-insensitive search
-        const codeFound = decodedDescription.toLowerCase().includes(code.toLowerCase())
-        console.log(`YouTube description check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
-        
-        if (codeFound) {
-          return true
-        }
-        
       } catch (error) {
-        console.log(`Failed to check YouTube URL: ${url} - ${error}`)
+        console.log(`Failed to check YouTube URL: ${url}`)
         continue
       }
     }
     
-    console.error(`❌ Could not find verification code in YouTube channel: ${username}`)
+    console.error(`Could not find YouTube channel: ${username}`)
     return false
     
   } catch (error) {
-    console.error(`❌ YouTube bio check failed for ${username}:`, error)
+    console.error(`YouTube bio check failed for ${username}:`, error)
     return false
   }
 }
 
-// TikTok bio checking with enhanced anti-bot measures
+// TikTok bio checking via web scraping
 async function checkTikTokBio(username: string, code: string): Promise<boolean> {
   try {
     const url = `https://www.tiktok.com/@${username}`
-    console.log(`🔍 Checking TikTok profile: ${url}`)
-    
-    // Add randomized delay
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000))
-    
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Cache-Control': 'no-cache',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none'
-      },
-      signal: AbortSignal.timeout(15000)
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
     })
     
     if (!response.ok) {
-      console.error(`TikTok profile not accessible: ${username} - Status: ${response.status}`)
-      
-      if (response.status === 429) {
-        console.log(`Rate limited - TikTok is blocking our requests`)
-      } else if (response.status === 404) {
-        console.log(`TikTok profile not found: ${username}`)
-      }
-      
+      console.error(`TikTok profile not found: ${username}`)
       return false
     }
     
     const html = await response.text()
-    console.log(`✅ Successfully fetched TikTok page (${html.length} characters)`)
     
-    // Enhanced patterns for TikTok bio extraction
-    const patterns = [
-      // TikTok structure patterns
-      /"desc":"([^"]*(?:\\.[^"]*)*)"/,
-      /"description":"([^"]*(?:\\.[^"]*)*)"/,
-      /"bio":"([^"]*(?:\\.[^"]*)*)"/,
-      // Alternative patterns
-      /description['"]:[\s]*['"]([^'"]*)['"],/,
-      /bio['"]:[\s]*['"]([^'"]*)['"],/,
-      // Meta tag patterns
-      /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-      /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-      // JSON-LD patterns
-      /@type['"]:[\s]*['"]Person['"][\s\S]*?description['"]:[\s]*['"]([^'"]*)['"],/
-    ]
-    
-    let bio = ''
-    let patternUsed = -1
-    
-    for (let i = 0; i < patterns.length; i++) {
-      const match = html.match(patterns[i])
-      if (match && match[1] && match[1].trim()) {
-        bio = match[1].trim()
-        patternUsed = i
-        console.log(`📝 Found TikTok bio using pattern ${i + 1}: "${bio.substring(0, 100)}${bio.length > 100 ? '...' : ''}"`)
-        break
-      }
-    }
-    
-    if (!bio) {
-      console.error(`❌ Could not extract TikTok bio for: ${username}`)
-      
-      // Check for common issues
-      if (html.includes('private') || html.includes('Private account')) {
-        console.log(`❌ TikTok account appears to be private: ${username}`)
-      } else if (html.includes('not found') || html.includes('User not found')) {
-        console.log(`❌ TikTok account does not exist: ${username}`)
-      }
-      
+    // TikTok embeds user data in script tags
+    const bioMatch = html.match(/"desc":"([^"]*)"/)
+    if (!bioMatch) {
+      console.error(`Could not extract TikTok bio for: ${username}`)
       return false
     }
     
-    // Decode entities
-    const decodedBio = bio
-      .replace(/\\u[\dA-F]{4}/gi, (match) => {
-        return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
-      })
-      .replace(/\\n/g, ' ')
-      .replace(/\\t/g, ' ')
-      .replace(/\\"/g, '"')
-      .replace(/\\'/g, "'")
-      .replace(/&quot;/g, '"')
-      .replace(/&amp;/g, '&')
-    
-    console.log(`📝 TikTok bio: "${decodedBio}"`)
-    console.log(`🔍 Looking for code: "${code}"`)
-    
-    // Case-insensitive search
-    const codeFound = decodedBio.toLowerCase().includes(code.toLowerCase())
-    console.log(`TikTok bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
-    
+    const bio = bioMatch[1]
+    const codeFound = bio.includes(code)
+    console.log(`TikTok bio check for @${username}: ${codeFound ? 'FOUND' : 'NOT FOUND'}`)
     return codeFound
     
   } catch (error) {
-    console.error(`❌ TikTok bio check failed for ${username}:`, error)
+    console.error(`TikTok bio check failed for ${username}:`, error)
     return false
   }
 }
 
-// Twitter/X bio checking with enhanced anti-bot measures
+// Twitter/X bio checking via web scraping
 async function checkTwitterBio(username: string, code: string): Promise<boolean> {
   try {
-    // Try both twitter.com and x.com
-    const urls = [`https://twitter.com/${username}`, `https://x.com/${username}`]
-    
-    for (const url of urls) {
-      try {
-        console.log(`🔍 Checking Twitter/X profile: ${url}`)
-        
-        // Add randomized delay
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000))
-        
-        const response = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Cache-Control': 'no-cache',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none'
-          },
-          signal: AbortSignal.timeout(15000)
-        })
-        
-        if (!response.ok) {
-          console.log(`Twitter/X URL ${url} returned ${response.status}`)
-          continue
-        }
-        
-        const html = await response.text()
-        console.log(`✅ Successfully fetched Twitter/X page (${html.length} characters)`)
-        
-        // Enhanced patterns for Twitter/X bio extraction
-        const patterns = [
-          // Twitter structure patterns
-          /"description":"([^"]*(?:\\.[^"]*)*)"/,
-          /"bio":"([^"]*(?:\\.[^"]*)*)"/,
-          // Alternative patterns
-          /description['"]:[\s]*['"]([^'"]*)['"],/,
-          /bio['"]:[\s]*['"]([^'"]*)['"],/,
-          // Meta tag patterns
-          /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-          /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-          /<meta\s+property=['"]twitter:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-          // JSON-LD patterns
-          /@type['"]:[\s]*['"]Person['"][\s\S]*?description['"]:[\s]*['"]([^'"]*)['"],/
-        ]
-        
-        let bio = ''
-        let patternUsed = -1
-        
-        for (let i = 0; i < patterns.length; i++) {
-          const match = html.match(patterns[i])
-          if (match && match[1] && match[1].trim()) {
-            bio = match[1].trim()
-            patternUsed = i
-            console.log(`📝 Found Twitter/X bio using pattern ${i + 1}: "${bio.substring(0, 100)}${bio.length > 100 ? '...' : ''}"`)
-            break
-          }
-        }
-        
-        if (!bio) {
-          console.log(`❌ No bio found for Twitter/X profile: ${username}`)
-          continue
-        }
-        
-        // Decode entities
-        const decodedBio = bio
-          .replace(/\\u[\dA-F]{4}/gi, (match) => {
-            return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
-          })
-          .replace(/\\n/g, ' ')
-          .replace(/\\t/g, ' ')
-          .replace(/\\"/g, '"')
-          .replace(/\\'/g, "'")
-          .replace(/&quot;/g, '"')
-          .replace(/&amp;/g, '&')
-        
-        console.log(`📝 Twitter/X bio: "${decodedBio}"`)
-        console.log(`🔍 Looking for code: "${code}"`)
-        
-        // Case-insensitive search
-        const codeFound = decodedBio.toLowerCase().includes(code.toLowerCase())
-        console.log(`Twitter/X bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
-        
-        if (codeFound) {
-          return true
-        }
-        
-      } catch (error) {
-        console.log(`Failed to check Twitter/X URL: ${url} - ${error}`)
-        continue
+    const url = `https://twitter.com/${username}`
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       }
+    })
+    
+    if (!response.ok) {
+      console.error(`Twitter profile not found: ${username}`)
+      return false
     }
     
-    console.error(`❌ Could not find verification code in Twitter/X profile: ${username}`)
-    return false
+    const html = await response.text()
+    
+    // Twitter embeds user data in script tags
+    const bioMatch = html.match(/"description":"([^"]*)"/)
+    if (!bioMatch) {
+      console.error(`Could not extract Twitter bio for: ${username}`)
+      return false
+    }
+    
+    const bio = bioMatch[1]
+    const codeFound = bio.includes(code)
+    console.log(`Twitter bio check for @${username}: ${codeFound ? 'FOUND' : 'NOT FOUND'}`)
+    return codeFound
     
   } catch (error) {
-    console.error(`❌ Twitter/X bio check failed for ${username}:`, error)
+    console.error(`Twitter bio check failed for ${username}:`, error)
     return false
   }
 }
@@ -682,16 +469,20 @@ export async function POST(request: NextRequest) {
     console.error("Error verifying social account:", error)
     
     // Enhanced error logging for debugging
-    if (error instanceof Error) {
-      console.error("Error details:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      })
+    const errorDetails = {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+      endpoint: '/api/social-verification/verify'
     }
     
+    console.error("Detailed error info:", errorDetails)
+    
     return NextResponse.json(
-      { error: "Internal server error" },
+      { 
+        error: "Internal server error",
+        ...(process.env.NODE_ENV === 'development' && { details: errorDetails })
+      },
       { status: 500 }
     )
   }

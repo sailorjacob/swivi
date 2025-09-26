@@ -24,7 +24,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { platform, username, displayName } = await request.json()
+    const body = await request.json()
+    const { platform, username, displayName, force } = body
 
     if (!platform || !['instagram', 'youtube', 'tiktok', 'twitter'].includes(platform)) {
       return NextResponse.json(
@@ -87,13 +88,22 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    if (existingVerification) {
+    if (existingVerification && !force) {
       return NextResponse.json({
         code: existingVerification.code,
         expiresAt: existingVerification.expiresAt,
         platform: existingVerification.platform,
-        username: username
+        username: username,
+        existing: true
       })
+    }
+
+    // Delete existing verification if regenerating
+    if (existingVerification && force) {
+      await prisma.socialVerification.delete({
+        where: { id: existingVerification.id }
+      })
+      console.log(`🔄 Deleted existing verification for ${username} on ${platform}`)
     }
 
     // Generate new code
