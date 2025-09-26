@@ -13,7 +13,7 @@ export async function launchBrowser() {
     console.log(`🔑 Using API key: ${browserlessToken.substring(0, 10)}...${browserlessToken.slice(-5)}`)
     
     try {
-      const wsEndpoint = `wss://chrome.browserless.io?token=${browserlessToken}&stealth&blockAds`
+      const wsEndpoint = `wss://production-sfo.browserless.io?token=${browserlessToken}&stealth&blockAds`
       console.log(`🔗 WebSocket endpoint: ${wsEndpoint.replace(browserlessToken, '[TOKEN]')}`)
       
       const browser = await puppeteer.connect({
@@ -25,7 +25,10 @@ export async function launchBrowser() {
       return browser
     } catch (error) {
       console.error(`❌ Browserless.io connection failed:`, error)
-      throw new Error(`Browserless connection failed: ${error instanceof Error ? error.message : String(error)}`)
+      const errorMessage = error instanceof Error ? error.message : JSON.stringify(error)
+      const errorDetails = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
+      console.error(`❌ Error details: ${errorDetails}`)
+      throw new Error(`Browserless connection failed: ${errorDetails}`)
     }
   } else {
     // Fallback to local Puppeteer (for development)
