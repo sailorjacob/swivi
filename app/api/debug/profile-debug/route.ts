@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         console.log("🔍 Profile Debug: Querying database...")
         result.step = "querying_database"
         
-        const user = await prisma.user.findUnique({
+        const userRaw = await prisma.user.findUnique({
           where: { id: session.user.id },
           select: {
             id: true,
@@ -70,16 +70,23 @@ export async function GET(request: NextRequest) {
           }
         })
 
-        result.debug_info.database_query = {
-          user_found: !!user,
-          user_id: user?.id,
-          accounts_count: user?.accounts?.length || 0
-        }
-
-        if (!user) {
+        if (!userRaw) {
           result.error = "User not found in database"
           result.step = "user_not_found"
           return NextResponse.json(result, { status: 404 })
+        }
+
+        // Convert BigInt fields to strings for JSON serialization
+        const user = {
+          ...userRaw,
+          totalEarnings: userRaw.totalEarnings?.toString() || "0",
+          totalViews: userRaw.totalViews?.toString() || "0"
+        }
+
+        result.debug_info.database_query = {
+          user_found: true,
+          user_id: user.id,
+          accounts_count: user.accounts?.length || 0
         }
 
         console.log("✅ Profile Debug: User found in database")
