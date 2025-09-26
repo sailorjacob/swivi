@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { serializeUser } from "@/lib/bigint-utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -77,11 +78,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Convert BigInt fields to strings for JSON serialization
-        const user = {
-          ...userRaw,
-          totalEarnings: userRaw.totalEarnings?.toString() || "0",
-          totalViews: userRaw.totalViews?.toString() || "0"
-        }
+        const user = serializeUser(userRaw)
 
         result.debug_info.database_query = {
           user_found: true,

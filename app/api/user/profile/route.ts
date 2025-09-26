@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { serializeUser } from "@/lib/bigint-utils"
 import { z } from "zod"
 
 const updateProfileSchema = z.object({
@@ -32,7 +33,7 @@ export async function GET() {
     
     console.log("✅ Profile API: Valid session for user", session.user.id)
 
-    const userRaw = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: {
         id: true,
@@ -56,18 +57,14 @@ export async function GET() {
       }
     })
 
-    if (!userRaw) {
+    if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     // Convert BigInt fields to strings for JSON serialization
-    const user = {
-      ...userRaw,
-      totalEarnings: userRaw.totalEarnings?.toString() || "0",
-      totalViews: userRaw.totalViews?.toString() || "0"
-    }
+    const serializedUser = serializeUser(user)
 
-    return NextResponse.json(user)
+    return NextResponse.json(serializedUser)
   } catch (error) {
     console.error("Error fetching user profile:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
