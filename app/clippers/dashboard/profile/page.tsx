@@ -190,7 +190,7 @@ export default function ProfilePage() {
           {/* Basic Profile */}
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white">Profile Information</CardTitle>
+              <CardTitle className="text-foreground">Profile Information</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleProfileSubmit} className="space-y-4">
@@ -284,7 +284,7 @@ export default function ProfilePage() {
           {/* Social Media Connections */}
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-foreground flex items-center gap-2">
                 <Link2 className="w-5 h-5" />
                 Connect Social Accounts
               </CardTitle>
@@ -298,20 +298,20 @@ export default function ProfilePage() {
                 {/* YouTube */}
                 <SocialVerificationDialog
                   platform="youtube"
-                  icon={<Youtube className="w-4 h-4 text-red-500" />}
+                  icon={<Youtube className="w-4 h-4 text-red-400" />}
                   platformName="YouTube"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/20 transition-colors cursor-pointer">
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-red-600/10 rounded-full flex items-center justify-center">
-                        <Youtube className="w-4 h-4 text-red-500" />
+                      <div className="w-8 h-8 bg-red-500/10 rounded-full flex items-center justify-center">
+                        <Youtube className="w-4 h-4 text-red-400" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium text-white text-sm">YouTube</h3>
+                        <h3 className="font-medium text-foreground text-sm">YouTube</h3>
                         <p className="text-xs text-muted-foreground">Not verified</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted">
+                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60">
                       Verify
                     </Button>
                   </div>
@@ -320,20 +320,20 @@ export default function ProfilePage() {
                 {/* Instagram */}
                 <SocialVerificationDialog
                   platform="instagram"
-                  icon={<Instagram className="w-4 h-4 text-pink-500" />}
+                  icon={<Instagram className="w-4 h-4 text-purple-400" />}
                   platformName="Instagram"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/20 transition-colors cursor-pointer">
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full flex items-center justify-center">
-                        <Instagram className="w-4 h-4 text-pink-500" />
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500/8 to-pink-500/8 rounded-full flex items-center justify-center">
+                        <Instagram className="w-4 h-4 text-purple-400" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium text-white text-sm">Instagram</h3>
+                        <h3 className="font-medium text-foreground text-sm">Instagram</h3>
                         <p className="text-xs text-muted-foreground">Not verified</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted">
+                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60">
                       Verify
                     </Button>
                   </div>
@@ -342,20 +342,20 @@ export default function ProfilePage() {
                 {/* TikTok */}
                 <SocialVerificationDialog
                   platform="tiktok"
-                  icon={<Music className="w-4 h-4 text-white" />}
+                  icon={<Music className="w-4 h-4 text-slate-300" />}
                   platformName="TikTok"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/20 transition-colors cursor-pointer">
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center">
-                        <Music className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 bg-slate-500/10 rounded-full flex items-center justify-center">
+                        <Music className="w-4 h-4 text-slate-300" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium text-white text-sm">TikTok</h3>
+                        <h3 className="font-medium text-foreground text-sm">TikTok</h3>
                         <p className="text-xs text-muted-foreground">Not verified</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted">
+                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60">
                       Verify
                     </Button>
                   </div>
@@ -364,20 +364,20 @@ export default function ProfilePage() {
                 {/* X (Twitter) */}
                 <SocialVerificationDialog
                   platform="twitter"
-                  icon={<span className="text-white font-bold text-sm">𝕏</span>}
+                  icon={<span className="text-slate-300 font-bold text-sm">𝕏</span>}
                   platformName="X (Twitter)"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/20 transition-colors cursor-pointer">
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">𝕏</span>
+                      <div className="w-8 h-8 bg-slate-500/10 rounded-full flex items-center justify-center">
+                        <span className="text-slate-300 font-bold text-sm">𝕏</span>
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium text-white text-sm">X (Twitter)</h3>
+                        <h3 className="font-medium text-foreground text-sm">X (Twitter)</h3>
                         <p className="text-xs text-muted-foreground">Not verified</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted">
+                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60">
                       Verify
                     </Button>
                   </div>
@@ -392,8 +392,8 @@ export default function ProfilePage() {
         {connectedAccounts.length > 0 && (
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-500" />
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
                 Connected Accounts
               </CardTitle>
             </CardHeader>
@@ -403,32 +403,32 @@ export default function ProfilePage() {
                   <div key={account.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
                     <div className="flex items-center gap-3">
                       {account.platform === 'DISCORD' && (
-                        <div className="w-8 h-8 bg-indigo-600/10 rounded-full flex items-center justify-center">
-                          <MessageCircle className="w-4 h-4 text-indigo-500" />
+                        <div className="w-8 h-8 bg-indigo-500/10 rounded-full flex items-center justify-center">
+                          <MessageCircle className="w-4 h-4 text-indigo-400" />
                         </div>
                       )}
                       {account.platform === 'INSTAGRAM' && (
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full flex items-center justify-center">
-                          <Instagram className="w-4 h-4 text-pink-500" />
+                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500/8 to-pink-500/8 rounded-full flex items-center justify-center">
+                          <Instagram className="w-4 h-4 text-purple-400" />
                         </div>
                       )}
                       {account.platform === 'YOUTUBE' && (
-                        <div className="w-8 h-8 bg-red-600/10 rounded-full flex items-center justify-center">
-                          <Youtube className="w-4 h-4 text-red-500" />
+                        <div className="w-8 h-8 bg-red-500/10 rounded-full flex items-center justify-center">
+                          <Youtube className="w-4 h-4 text-red-400" />
                         </div>
                       )}
                       {account.platform === 'TIKTOK' && (
-                        <div className="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center">
-                          <Music className="w-4 h-4 text-white" />
+                        <div className="w-8 h-8 bg-slate-500/10 rounded-full flex items-center justify-center">
+                          <Music className="w-4 h-4 text-slate-300" />
                         </div>
                       )}
                       {account.platform === 'TWITTER' && (
-                        <div className="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">𝕏</span>
+                        <div className="w-8 h-8 bg-slate-500/10 rounded-full flex items-center justify-center">
+                          <span className="text-slate-300 font-bold text-sm">𝕏</span>
                         </div>
                       )}
                       <div>
-                        <p className="font-medium text-white text-sm">
+                        <p className="font-medium text-foreground text-sm">
                           {account.displayName || account.platform.charAt(0) + account.platform.slice(1).toLowerCase()}
                         </p>
                         <p className="text-xs text-muted-foreground">
@@ -445,7 +445,7 @@ export default function ProfilePage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteAccount(account.id, account.canDelete, account)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -463,7 +463,7 @@ export default function ProfilePage() {
         {/* Account Statistics */}
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white">Account Statistics</CardTitle>
+            <CardTitle className="text-foreground">Account Statistics</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

@@ -76,7 +76,7 @@ function Sidebar({ className }: { className?: string }) {
         <Link href="/" className="flex items-center space-x-4 hover:opacity-80 transition-opacity">
           <SwiviLogo size={36} />
           <div>
-            <h1 className="text-white font-light text-lg">Swivi Clippers</h1>
+            <h1 className="text-foreground font-light text-lg">Swivi Clippers</h1>
             {isDemoMode && (
               <p className="text-muted-foreground text-xs">
                 Demo Mode - Explore Features
@@ -92,12 +92,12 @@ function Sidebar({ className }: { className?: string }) {
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-white transition-colors group"
+            className="flex items-center space-x-3 px-3 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 group"
           >
-            <item.icon className="w-5 h-5" />
-            <span className="font-medium">{item.label}</span>
+            <item.icon className="w-5 h-5 transition-colors duration-200 group-hover:text-primary" />
+            <span className="font-medium text-sm tracking-wide">{item.label}</span>
             {item.badge && (
-              <span className="ml-auto bg-foreground text-white text-xs px-2 py-1 rounded-full">
+              <span className="ml-auto bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
                 {item.badge}
               </span>
             )}
@@ -110,12 +110,12 @@ function Sidebar({ className }: { className?: string }) {
         <div className="flex items-center space-x-3 mb-3">
           <Avatar className="w-8 h-8">
             <AvatarImage src={activeSession?.user?.image || ""} />
-            <AvatarFallback className="bg-foreground text-white">
+            <AvatarFallback className="bg-foreground text-primary-foreground">
               {activeSession?.user?.name?.[0] || "U"}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate">
+            <p className="text-foreground text-sm font-medium truncate">
               {activeSession?.user?.name || "Clipper"}
             </p>
             <p className="text-muted-foreground text-xs truncate">
@@ -128,7 +128,7 @@ function Sidebar({ className }: { className?: string }) {
           onClick={handleSignOut}
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-muted-foreground hover:text-white hover:bg-muted"
+          className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
         >
           <LogOut className="w-4 h-4 mr-2" />
           Sign Out
@@ -146,7 +146,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="h-screen bg-black flex overflow-hidden">
+    <div className="h-screen bg-background flex overflow-hidden">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block w-64 h-full">
         <Sidebar />
@@ -165,11 +165,11 @@ export default function DashboardLayout({
         <div className="lg:hidden flex items-center justify-between p-4 border-b border-border flex-shrink-0">
           <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <SwiviLogo size={32} />
-            <h1 className="text-white font-light">Swivi Clippers</h1>
+            <h1 className="text-foreground font-light">Swivi Clippers</h1>
           </Link>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white">
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
                 <Menu className="w-6 h-6" />
               </Button>
             </SheetTrigger>
@@ -201,7 +201,7 @@ export default function DashboardLayout({
               © {new Date().getFullYear()} Swivi. All rights reserved.
             </div>
             <Link href="/clippers/dashboard/support">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-white">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                 <HelpCircle className="w-4 h-4 mr-2" />
                 Support
               </Button>

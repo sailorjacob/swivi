@@ -31,7 +31,7 @@ export default function ClippersLayout({
     >
       <AuthProvider>
         <QueryProvider>
-          <div className="min-h-screen bg-black text-white">
+          <div className="min-h-screen bg-background text-foreground">
             <ClippersThemeEnforcer>
               {children}
             </ClippersThemeEnforcer>

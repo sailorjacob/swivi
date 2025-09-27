@@ -263,7 +263,7 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
 
         {step === 2 && code && (
           <div className="space-y-4">
-            <Card className="bg-green-900/20 border-green-700/50">
+            <Card className="bg-green-500/10 border-green-500/20">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle className="w-4 h-4 text-green-400" />
@@ -271,14 +271,14 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
                 </div>
 
                 <div className="flex items-center gap-2 mb-3">
-                  <code className="bg-muted px-3 py-1 rounded text-lg font-mono text-white">
+                  <code className="bg-muted/50 px-3 py-1 rounded text-lg font-mono text-foreground">
                     {code}
                   </code>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => copyToClipboard(code)}
-                    className="border-border text-muted-foreground hover:bg-muted"
+                    className="border-border/50 text-muted-foreground hover:bg-muted/30 hover:text-foreground"
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
@@ -291,7 +291,7 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
             </Card>
 
             <div className="space-y-3">
-              <h4 className="font-medium text-white">Add code to your {platformName} profile:</h4>
+              <h4 className="font-medium text-foreground">Add code to your {platformName} profile:</h4>
 
               <div className="space-y-2 text-sm">
                 <div className="flex gap-2">
@@ -312,12 +312,12 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
                 </div>
               </div>
 
-              <div className="bg-amber-900/20 border border-amber-700/50 rounded p-3 text-sm">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded p-3 text-sm">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertCircle className="w-4 h-4 text-amber-400" />
                   <span className="font-medium text-amber-400">Important:</span>
                 </div>
-                <ul className="text-amber-100 space-y-1 text-xs">
+                <ul className="text-muted-foreground space-y-1 text-xs">
                   <li>• Make sure your profile is public (not private)</li>
                   <li>• Add the code exactly as shown above</li>
                   <li>• Save your changes before clicking verify</li>
@@ -358,8 +358,8 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
 
         {step === 3 && (
           <div className="text-center space-y-4">
-            <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle className="w-8 h-8 text-green-400" />
             </div>
             <h3 className="text-lg font-medium text-green-400">Account Verified!</h3>
             <p className="text-muted-foreground text-sm">
