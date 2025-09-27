@@ -12,17 +12,59 @@ export async function POST(request: NextRequest) {
 
     const { platform, username, code } = await request.json()
 
-    if (!platform || !username || !code) {
+    if (!platform || !username) {
       return NextResponse.json({
-        error: "Missing required fields: platform, username, code"
+        error: "Missing required fields: platform, username"
       }, { status: 400 })
     }
 
     const logs: string[] = []
     logs.push(`🤖 Starting browserql verification for @${username} on ${platform}`)
-    logs.push(`🔑 Looking for code: ${code}`)
+    logs.push(`🔑 Provided code: ${code || 'none (will use database code)'}`)
 
-    // Redirect to our main verify endpoint which uses working Apify integration
+    // Determine which code to use for verification
+    let verificationCode = code // Use provided code if available
+
+    if (!verificationCode) {
+      // If no code provided, find the latest unverified code from database
+      const platformMap: Record<string, string> = {
+        instagram: 'INSTAGRAM',
+        youtube: 'YOUTUBE',
+        tiktok: 'TIKTOK',
+        twitter: 'TWITTER'
+      }
+      const platformEnum = platformMap[platform.toLowerCase()]
+
+      const verification = await prisma.socialVerification.findFirst({
+        where: {
+          userId: session.user.id,
+          platform: platformEnum as any,
+          verified: false,
+          expiresAt: {
+            gt: new Date()
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      })
+
+      if (!verification) {
+        logs.push(`❌ No pending verification found for ${platform}`)
+        return NextResponse.json({
+          success: false,
+          error: "No pending verification found. Please generate a new code first.",
+          logs
+        }, { status: 404 })
+      }
+
+      verificationCode = verification.code
+      logs.push(`✅ Using database verification code: ${verificationCode}`)
+    } else {
+      logs.push(`✅ Using provided verification code: ${verificationCode}`)
+    }
+
+    // Now call our main verify endpoint (it will find the verification code from database)
     try {
       const verifyResponse = await fetch(`${request.nextUrl.origin}/api/social-verification/verify`, {
         method: 'POST',
