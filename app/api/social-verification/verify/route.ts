@@ -27,15 +27,148 @@ async function checkCodeInBio(platform: string, username: string, code: string):
   }
 }
 
-// Instagram bio checking via web scraping with enhanced anti-bot measures
+// Instagram bio checking via Apify (professional scraping service)
 async function checkInstagramBio(username: string, code: string): Promise<boolean> {
   try {
+    const APIFY_API_KEY = process.env.APIFY_API_KEY
+    if (!APIFY_API_KEY) {
+      console.error('❌ APIFY_API_KEY not configured - falling back to manual scraping')
+      return await checkInstagramBioManual(username, code)
+    }
+
+    console.log(`🔍 Checking Instagram profile via Apify: @${username}`)
+
+    // Step 1: Start the Instagram scraper run
+    const runResponse = await fetch('https://api.apify.com/v2/acts/apify~instagram-profile-scraper/runs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${APIFY_API_KEY}`
+      },
+      body: JSON.stringify({
+        "profileUrl": `https://www.instagram.com/${username}/`,
+        "resultsPerPage": 1,
+        "shouldDownloadCovers": false,
+        "shouldDownloadSlideshowImages": false,
+        "shouldDownloadVideos": false
+      })
+    })
+
+    if (!runResponse.ok) {
+      console.error(`❌ Apify run creation failed: ${runResponse.status} ${runResponse.statusText}`)
+      if (runResponse.status === 401) {
+        console.log('❌ Invalid Apify API key - falling back to manual scraping')
+        return await checkInstagramBioManual(username, code)
+      }
+      return false
+    }
+
+    const runData = await runResponse.json()
+    const runId = runData.data.id
+    const datasetId = runData.data.defaultDatasetId
+
+    console.log(`✅ Apify run started: ${runId}`)
+
+    // Step 2: Wait for the run to complete (with timeout)
+    const maxWaitTime = 60000 // 60 seconds
+    const checkInterval = 2000 // 2 seconds
+    let elapsed = 0
+
+    while (elapsed < maxWaitTime) {
+      await new Promise(resolve => setTimeout(resolve, checkInterval))
+      elapsed += checkInterval
+
+      const statusResponse = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+        headers: {
+          'Authorization': `Bearer ${APIFY_API_KEY}`
+        }
+      })
+
+      if (!statusResponse.ok) {
+        console.error(`❌ Failed to check run status: ${statusResponse.status}`)
+        break
+      }
+
+      const statusData = await statusResponse.json()
+      const runStatus = statusData.data.status
+
+      console.log(`🔄 Run status: ${runStatus} (${Math.round(elapsed/1000)}s)`)
+
+      if (runStatus === 'SUCCEEDED') {
+        // Step 3: Get the results from the dataset
+        const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
+          headers: {
+            'Authorization': `Bearer ${APIFY_API_KEY}`
+          }
+        })
+
+        if (!resultsResponse.ok) {
+          console.error(`❌ Failed to get results: ${resultsResponse.status}`)
+          return false
+        }
+
+        const resultsData = await resultsResponse.json()
+
+        if (!resultsData || resultsData.length === 0) {
+          console.error(`❌ No profile data returned from Apify for: ${username}`)
+          return false
+        }
+
+        const profile = resultsData[0]
+        const bio = profile.biography || profile.bio || profile.description || ''
+
+        if (!bio) {
+          console.error(`❌ No bio found in Apify data for: ${username}`)
+          console.log(`Profile data keys:`, Object.keys(profile))
+          return false
+        }
+
+        // Decode Unicode escape sequences
+        const decodedBio = bio.replace(/\\u[\dA-F]{4}/gi, (match) => {
+          return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
+        })
+
+        console.log(`📝 Bio extracted via Apify: "${decodedBio.substring(0, 100)}${decodedBio.length > 100 ? '...' : ''}"`)
+        console.log(`🔍 Looking for code: "${code}"`)
+
+        const codeFound = decodedBio.includes(code)
+        console.log(`Instagram bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+
+        if (!codeFound) {
+          console.log(`Bio content: "${decodedBio}"`)
+          console.log(`Expected code: "${code}"`)
+        }
+
+        return codeFound
+
+      } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
+        console.error(`❌ Apify run failed with status: ${runStatus}`)
+        break
+      }
+
+      // Continue waiting if still running
+    }
+
+    console.error(`❌ Apify run timed out after ${maxWaitTime/1000} seconds`)
+    return false
+
+  } catch (error) {
+    console.error(`❌ Apify Instagram bio check failed for ${username}:`, error)
+    // Fallback to manual scraping on error
+    console.log('🔄 Falling back to manual scraping...')
+    return await checkInstagramBioManual(username, code)
+  }
+}
+
+// Fallback manual scraping function
+async function checkInstagramBioManual(username: string, code: string): Promise<boolean> {
+  try {
     const url = `https://www.instagram.com/${username}/`
-    console.log(`🔍 Checking Instagram profile: ${url}`)
-    
+    console.log(`🔍 Manual fallback - Checking Instagram profile: ${url}`)
+
     // Add randomized delay to avoid rate limiting
     await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000))
-    
+
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -56,60 +189,60 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
       // Add timeout to prevent hanging
       signal: AbortSignal.timeout(15000)
     })
-    
+
     if (!response.ok) {
       console.error(`Instagram profile not accessible: ${username} - Status: ${response.status}`)
-      
+
       if (response.status === 429) {
         console.log(`Rate limited - Instagram is blocking our requests`)
         return false
       }
-      
+
       if (response.status === 404) {
         console.log(`Profile not found: ${username}`)
         return false
       }
-      
+
       if (response.status === 403) {
         console.log(`Access forbidden for profile: ${username} - may be private or restricted`)
         return false
       }
-      
+
       return false
     }
-    
+
     const html = await response.text()
     console.log(`✅ Successfully fetched Instagram page (${html.length} characters)`)
-    
+
     // Enhanced patterns for extracting bio/description
     const patterns = [
       // New Instagram GraphQL patterns (2024)
       /"biography":"([^"]*(?:\\.[^"]*)*)"/,
       /"description":"([^"]*(?:\\.[^"]*)*)"/,
       /"bio":"([^"]*(?:\\.[^"]*)*)"/,
-      
+
       // Legacy patterns
       /biography['"]:[\s]*['"]([^'"]*)['"]/,
       /description['"]:[\s]*['"]([^'"]*)['"]/,
-      
+
       // JSON-LD schema.org patterns
       /@type['"]:[\s]*['"]Person['"][\s\S]*?description['"]:[\s]*['"]([^'"]*)['"]/,
-      
+
       // Meta tag patterns
       /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"]/,
       /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"]/,
-      
+
       // Script tag patterns for shared data
       /window\._sharedData[\s]*=[\s]*{[\s\S]*?biography['"]:[\s]*['"]([^'"]*)['"]/,
       /"ProfilePage"[\s\S]*?biography['"]:[\s]*['"]([^'"]*)['"]/,
-      
+
       // Direct text patterns (fallback)
       /biography[\s]*:[\s]*([^,}\]]+)/,
     ]
-    
+
     let bio = ''
     let patternUsed = -1
-    
+
     for (let i = 0; i < patterns.length; i++) {
       const match = html.match(patterns[i])
       if (match && match[1] && match[1].trim()) {
@@ -119,31 +252,31 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
         break
       }
     }
-    
+
     if (!bio) {
       console.error(`❌ Could not extract Instagram bio for: ${username} (tried ${patterns.length} patterns)`)
-      
+
       // Check for common blocking indicators
       if (html.includes('This Account is Private') || html.includes('private')) {
         console.log(`❌ Account appears to be private: ${username}`)
         return false
       }
-      
+
       if (html.includes('User not found') || html.includes('Page Not Found')) {
         console.log(`❌ Account does not exist: ${username}`)
         return false
       }
-      
+
       if (html.includes('challenge') || html.includes('checkpoint')) {
         console.log(`❌ Instagram is challenging our request - may need different approach`)
         return false
       }
-      
+
       // Log a snippet of the HTML for debugging
       console.log(`HTML snippet (first 500 chars): ${html.substring(0, 500)}`)
       return false
     }
-    
+
     // Decode Unicode escape sequences and HTML entities
     let decodedBio = bio
       .replace(/\\u[\dA-F]{4}/gi, (match) => {
@@ -157,24 +290,24 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
-    
+
     console.log(`📝 Bio extracted (pattern ${patternUsed + 1}): "${decodedBio.substring(0, 100)}${decodedBio.length > 100 ? '...' : ''}"`)
     console.log(`🔍 Looking for code: "${code}"`)
-    
+
     // Case-insensitive search for better matching
     const codeFound = decodedBio.toLowerCase().includes(code.toLowerCase())
     console.log(`Instagram bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
-    
+
     if (!codeFound) {
       console.log(`Bio content: "${decodedBio}"`)
       console.log(`Expected code: "${code}"`)
     }
-    
+
     return codeFound
-    
+
   } catch (error) {
-    console.error(`❌ Instagram bio check failed for ${username}:`, error)
-    
+    console.error(`❌ Manual Instagram bio check failed for ${username}:`, error)
+
     // If timeout or network error, log specific error type
     if (error instanceof Error) {
       if (error.name === 'TimeoutError') {
@@ -183,7 +316,7 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
         console.log(`🔄 Network error for ${username}`)
       }
     }
-    
+
     return false
   }
 }

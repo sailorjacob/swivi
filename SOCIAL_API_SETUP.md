@@ -50,14 +50,60 @@ curl -X POST https://www.swivimedia.com/api/social-verification/verify-api \
 
 ## 📸 Instagram API Setup
 
-### Current Status: ❌ Requires Business Review
+### Option 1: ✅ Apify (Recommended)
+Apify provides professional Instagram scraping services that handle anti-bot measures and rate limiting.
+
+#### Step 1: Create Apify Account
+1. Go to [apify.com](https://apify.com)
+2. Sign up for a free account
+3. Go to your [Apify Console](https://console.apify.com)
+
+#### Step 2: Get API Token
+1. In your Apify Console, go to "Settings" → "Integrations"
+2. Copy your "Personal API token"
+3. Add to environment variables:
+```bash
+APIFY_API_KEY=your_apify_token_here
+```
+
+#### Step 3: Test
+```bash
+# Test the verification endpoint
+curl -X POST https://www.swivimedia.com/api/social-verification/verify \
+  -H "Content-Type: application/json" \
+  -d '{"platform": "instagram", "username": "instagram"}'
+
+# Or test the scraper directly
+node test-apify-instagram.js instagram
+```
+
+### Option 2: Meta Business API (Advanced)
 Instagram requires Meta Business API approval for bio access. This involves:
 1. Business verification with Meta
 2. App review process (2-4 weeks)
 3. Legitimate business use case
 
-### Alternative: Manual verification for Instagram
-Use the manual verification endpoint for Instagram until API approval.
+### Alternative: Manual verification fallback
+If Apify fails, the system falls back to enhanced manual scraping.
+
+## 🔧 How Apify Integration Works
+
+### API Flow:
+1. **Start Run**: POST to `/v2/acts/apify~instagram-profile-scraper/runs`
+2. **Monitor Status**: Poll `/v2/actor-runs/{runId}` until completion
+3. **Get Results**: Fetch from `/v2/datasets/{datasetId}/items`
+4. **Extract Bio**: Parse profile data for biography field
+5. **Verify Code**: Check if verification code exists in bio
+
+### Error Handling:
+- **401 Unauthorized**: Invalid API key → fallback to manual scraping
+- **Run Failed**: Apify scraper fails → fallback to manual scraping
+- **Timeout**: Run takes too long → fallback to manual scraping
+- **No Bio Found**: Profile exists but no bio → return false
+
+### Rate Limits:
+- **Apify API**: 1,000 requests/month (free tier)
+- **Fallback**: Manual scraping with delays and anti-detection measures
 
 ## 🎵 TikTok API Setup
 
@@ -92,10 +138,13 @@ Add these to your Vercel environment variables:
 # Twitter API
 TWITTER_BEARER_TOKEN=your_twitter_bearer_token
 
-# YouTube API  
+# YouTube API
 YOUTUBE_API_KEY=your_youtube_api_key
 
-# Optional: Instagram (when approved)
+# Apify (for Instagram scraping)
+APIFY_API_KEY=your_apify_api_token
+
+# Optional: Instagram Business API (when approved)
 INSTAGRAM_ACCESS_TOKEN=your_instagram_token
 
 # Optional: TikTok (if available)
@@ -112,15 +161,17 @@ TIKTOK_CLIENT_KEY=your_tiktok_key
 
 - **Twitter**: 300 requests per 15 minutes
 - **YouTube**: 10,000 units per day (1 verification = ~2 units)
-- **Instagram**: Varies by app review approval
+- **Apify (Instagram)**: 1,000 requests per month (free tier)
+- **Instagram Business API**: Varies by app review approval
 - **TikTok**: Limited availability
 
 ## Best Practices
 
-1. **Start with Twitter API** - easiest to get approved
+1. **Start with Apify + Twitter API** - Apify handles Instagram reliably, Twitter is easiest
 2. **Use test mode** for development
-3. **Manual verification fallback** for unsupported platforms
+3. **Automatic fallback system** - Apify → Manual scraping → Error
 4. **Cache API responses** to avoid rate limits
 5. **Graceful degradation** when APIs are down
+6. **Monitor Apify usage** - free tier has monthly limits
 
-This approach matches how Discord, Whop, and other professional platforms handle social verification! 🎯
+This hybrid approach combines professional scraping (Apify) with official APIs for maximum reliability! 🎯
