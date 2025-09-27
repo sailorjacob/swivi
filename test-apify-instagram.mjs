@@ -32,37 +32,83 @@ async function testApifyInstagram(username) {
 
     console.log('✅ API key is valid!');
 
-    // Step 1: Start the Instagram scraper run
-    const runResponse = await fetch('https://api.apify.com/v2/acts/apify~instagram-profile-scraper/runs', {
-      method: 'POST',
+    // Check available actors first
+    console.log('🔍 Checking available actors...');
+    const actorsResponse = await fetch('https://api.apify.com/v2/actors', {
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${APIFY_API_KEY}`
-      },
-      body: JSON.stringify({
-        "usernames": [username],
-        "resultsPerPage": 1,
-        "shouldDownloadCovers": false,
-        "shouldDownloadSlideshowImages": false,
-        "shouldDownloadVideos": false
-      })
+      }
     });
 
-    if (!runResponse.ok) {
-      console.log(`❌ Apify run creation failed: ${runResponse.status} ${runResponse.statusText}`);
+    if (actorsResponse.ok) {
+      const actorsData = await actorsResponse.json();
+      console.log(`📋 Total actors in account: ${actorsData.data.items.length}`);
+      const instagramActors = actorsData.data.items.filter(actor =>
+        actor.name.toLowerCase().includes('instagram') ||
+        actor.title.toLowerCase().includes('instagram')
+      );
+      console.log('📋 Instagram-related actors:', instagramActors.map(a => `${a.name} - ${a.title}`));
+
+      if (instagramActors.length === 0) {
+        console.log('❌ No Instagram actors found in your account');
+        console.log('💡 You may need to install or create an Instagram scraper actor first');
+      }
+    }
+
+    // Try different actor name formats
+    const actorNames = [
+      'apify~instagram-profile-scraper', // This one works!
+      'apify/instagram-profile-scraper',
+      'w3lvTqHKIfxFIS9oo/instagram-profile-scraper',
+      'instagram-profile-scraper',
+      'instagram-scraper',
+      'instagram-profile'
+    ];
+
+    let runResponse;
+    let actorName = '';
+
+    for (const name of actorNames) {
+      console.log(`🔄 Trying actor: ${name}`);
       try {
-        const errorText = await runResponse.text();
-        console.log(`Error response: ${errorText}`);
-      } catch (e) {
-        console.log('Could not read error response');
+        runResponse = await fetch(`https://api.apify.com/v2/acts/${name}/runs`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${APIFY_API_KEY}`
+          },
+          body: JSON.stringify({
+            "usernames": [username],
+            "resultsPerPage": 1,
+            "shouldDownloadCovers": false,
+            "shouldDownloadSlideshowImages": false,
+            "shouldDownloadVideos": false
+          })
+        });
+
+        if (runResponse.ok) {
+          actorName = name;
+          break;
+        } else {
+          console.log(`❌ Failed with ${name}: ${runResponse.status} ${runResponse.statusText}`);
+          try {
+            const errorText = await runResponse.text();
+            console.log(`Error: ${errorText}`);
+          } catch (e) {
+            console.log('Could not read error response');
+          }
+        }
+      } catch (error) {
+        console.log(`❌ Error with ${name}: ${error.message}`);
       }
-      if (runResponse.status === 401) {
-        console.log('❌ Invalid API key - check your APIFY_API_KEY');
-      } else if (runResponse.status === 400) {
-        console.log('❌ Bad request - check request format and parameters');
-      }
+    }
+
+    if (!runResponse || !runResponse.ok) {
+      console.log('❌ Could not find a working Instagram scraper actor');
       return;
     }
+
+    console.log(`✅ Successfully started run with actor: ${actorName}`);
 
     const runData = await runResponse.json();
     const runId = runData.data.id;

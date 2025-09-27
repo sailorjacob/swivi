@@ -39,7 +39,7 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
     console.log(`🔍 Checking Instagram profile via Apify: @${username}`)
 
     // Step 1: Start the Instagram scraper run
-    const runResponse = await fetch('https://api.apify.com/v2/acts/apify~instagram-profile-scraper/runs', {
+    const runResponse = await fetch('https://api.apify.com/v2/acts/apify/instagram-profile-scraper/runs', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

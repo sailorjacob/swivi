@@ -53,6 +53,8 @@ curl -X POST https://www.swivimedia.com/api/social-verification/verify-api \
 ### Option 1: ✅ Apify (Recommended)
 Apify provides professional Instagram scraping services that handle anti-bot measures and rate limiting.
 
+**Actor Used**: `apify~instagram-profile-scraper` - Optimized for profile data only (no image downloads)
+
 #### Step 1: Create Apify Account
 1. Go to [apify.com](https://apify.com)
 2. Sign up for a free account
@@ -104,6 +106,8 @@ If Apify fails, the system falls back to enhanced manual scraping.
 3. **Get Results**: Fetch from `/v2/datasets/{datasetId}/items`
 4. **Extract Bio**: Parse profile data for biography field
 5. **Verify Code**: Check if verification code exists in bio
+
+**Why this actor?** It only scrapes profile data (bio, followers, etc.) without downloading images, making it fast and cost-effective.
 
 ### Error Handling:
 - **401 Unauthorized**: Invalid API key → fallback to manual scraping
