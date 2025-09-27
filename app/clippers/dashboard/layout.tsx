@@ -36,8 +36,8 @@ interface NavItem {
 }
 
   const navItems: NavItem[] = [
-    { label: "Dashboard", href: "/clippers/dashboard", icon: Home },
     { label: "Campaigns", href: "/clippers/dashboard/campaigns", icon: Target },
+    { label: "Dashboard", href: "/clippers/dashboard", icon: Home },
     { label: "Profile", href: "/clippers/dashboard/profile", icon: User },
     // Analytics temporarily hidden for platform cleanup
     // { label: "Analytics", href: "/clippers/dashboard/analytics", icon: BarChart3 },

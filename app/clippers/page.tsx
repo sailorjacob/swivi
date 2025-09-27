@@ -17,8 +17,8 @@ export default function ClippersPage() {
     }
     
     if (status === "authenticated" && session) {
-      console.log("✅ User authenticated, redirecting to dashboard")
-      router.push("/clippers/dashboard")
+      console.log("✅ User authenticated, redirecting to campaigns")
+      router.push("/clippers/dashboard/campaigns")
     } else {
       console.log("❌ User not authenticated, redirecting to signup")
       router.push("/clippers/signup")

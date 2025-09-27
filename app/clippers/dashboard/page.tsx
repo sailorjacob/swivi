@@ -96,7 +96,7 @@ function StatCard({ stat }: { stat: typeof stats[0] }) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
-            <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
+            <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
             <p className="text-sm mt-1 text-muted-foreground">
               {stat.change}
             </p>
@@ -144,7 +144,7 @@ function RecentClipCard({ clip }: { clip: typeof recentClips[0] }) {
           <span className="text-muted-foreground text-sm">{clip.submittedAt}</span>
         </div>
 
-        <h4 className="text-white font-medium mb-1">{clip.title}</h4>
+        <h4 className="text-foreground font-medium mb-1">{clip.title}</h4>
         <p className="text-muted-foreground text-sm mb-3">{clip.campaign}</p>
 
         <div className="flex items-center justify-between text-sm">
@@ -176,7 +176,7 @@ function CampaignCard({ campaign, onSubmitClip }: { campaign: typeof activeCampa
                 unoptimized
               />
             )}
-            <h4 className="text-white font-medium">{campaign.title}</h4>
+            <h4 className="text-foreground font-medium">{campaign.title}</h4>
           </div>
           <Badge variant="outline" className="text-muted-foreground border-muted-foreground">
             {campaign.deadline}
@@ -188,7 +188,7 @@ function CampaignCard({ campaign, onSubmitClip }: { campaign: typeof activeCampa
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Budget Progress</span>
-            <span className="text-white">${campaign.spent}/${campaign.budget}</span>
+            <span className="text-foreground">${campaign.spent}/${campaign.budget}</span>
           </div>
           <Progress value={campaign.progress} className="h-2" />
           <p className="text-foreground text-sm font-medium">{campaign.payout}</p>
@@ -252,9 +252,9 @@ export default function DashboardPage() {
   // Show loading state while checking authentication
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
@@ -270,7 +270,7 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-light text-white mb-2">Dashboard</h1>
+        <h1 className="text-3xl font-light text-foreground mb-2">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back! Here's your clipping overview.</p>
       </div>
 
@@ -286,7 +286,7 @@ export default function DashboardPage() {
         {/* Recent Clips */}
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-medium text-white">Recent Clips</h2>
+            <h2 className="text-xl font-medium text-foreground">Recent Clips</h2>
             <Link href="/clippers/dashboard/profile">
               <Button variant="outline" size="sm" className="border-border text-muted-foreground hover:bg-muted">
                 View All
@@ -302,7 +302,7 @@ export default function DashboardPage() {
             ) : (
               <div className="text-center py-12">
                 <Play className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">No clips submitted yet</h3>
+                <h3 className="text-lg font-medium text-foreground mb-2">No clips submitted yet</h3>
                 <p className="text-muted-foreground mb-6">
                   Start earning by submitting clips to active campaigns
                 </p>
@@ -319,7 +319,7 @@ export default function DashboardPage() {
         {/* Active Campaigns - Hidden */}
         {/* <div>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-medium text-white">Active Campaigns</h2>
+            <h2 className="text-xl font-medium text-foreground">Active Campaigns</h2>
             <Link href="/clippers/dashboard/campaigns">
               <Button variant="outline" size="sm" className="border-border text-muted-foreground hover:bg-muted">
                 View All
