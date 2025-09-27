@@ -39,7 +39,7 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
     console.log(`🔍 Checking Instagram profile via Apify: @${username}`)
 
     // Step 1: Start the Instagram scraper run
-    const runResponse = await fetch('https://api.apify.com/v2/acts/apify/instagram-profile-scraper/runs', {
+    const runResponse = await fetch('https://api.apify.com/v2/acts/apify~instagram-profile-scraper/runs', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
         }
 
         // Decode Unicode escape sequences
-        const decodedBio = bio.replace(/\\u[\dA-F]{4}/gi, (match) => {
+        const decodedBio = bio.replace(/\\u[\dA-F]{4}/gi, (match: string) => {
           return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
         })
 
@@ -279,7 +279,7 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
 
     // Decode Unicode escape sequences and HTML entities
     let decodedBio = bio
-      .replace(/\\u[\dA-F]{4}/gi, (match) => {
+      .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
         return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
       })
       .replace(/\\n/g, ' ')
@@ -399,7 +399,7 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
         
         // Decode entities
         const decodedDescription = description
-          .replace(/\\u[\dA-F]{4}/gi, (match) => {
+          .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
             return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
           })
           .replace(/\\n/g, ' ')
@@ -517,7 +517,7 @@ async function checkTikTokBio(username: string, code: string): Promise<boolean> 
     
     // Decode entities
     const decodedBio = bio
-      .replace(/\\u[\dA-F]{4}/gi, (match) => {
+      .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
         return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
       })
       .replace(/\\n/g, ' ')
@@ -624,7 +624,7 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
         
         // Decode entities
         const decodedBio = bio
-          .replace(/\\u[\dA-F]{4}/gi, (match) => {
+          .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
             return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
           })
           .replace(/\\n/g, ' ')
