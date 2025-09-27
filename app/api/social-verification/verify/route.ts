@@ -189,7 +189,7 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
       // Add timeout to prevent hanging
       signal: AbortSignal.timeout(15000)
     })
-
+    
     if (!response.ok) {
       console.error(`Instagram profile not accessible: ${username} - Status: ${response.status}`)
 
@@ -210,7 +210,7 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
 
       return false
     }
-
+    
     const html = await response.text()
     console.log(`✅ Successfully fetched Instagram page (${html.length} characters)`)
 
@@ -276,12 +276,12 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
       console.log(`HTML snippet (first 500 chars): ${html.substring(0, 500)}`)
       return false
     }
-
+    
     // Decode Unicode escape sequences and HTML entities
     let decodedBio = bio
       .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
-        return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
-      })
+      return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
+    })
       .replace(/\\n/g, ' ')
       .replace(/\\t/g, ' ')
       .replace(/\\"/g, '"')
@@ -304,7 +304,7 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
     }
 
     return codeFound
-
+    
   } catch (error) {
     console.error(`❌ Manual Instagram bio check failed for ${username}:`, error)
 
@@ -360,7 +360,7 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
           continue
         }
         
-        const html = await response.text()
+          const html = await response.text()
         console.log(`✅ Successfully fetched YouTube page (${html.length} characters)`)
         
         // Enhanced patterns for YouTube description extraction
@@ -555,8 +555,8 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
         // Add randomized delay
         await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000))
         
-        const response = await fetch(url, {
-          headers: {
+    const response = await fetch(url, {
+      headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9',
@@ -567,14 +567,14 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
             'Sec-Fetch-Site': 'none'
           },
           signal: AbortSignal.timeout(15000)
-        })
-        
-        if (!response.ok) {
+    })
+    
+    if (!response.ok) {
           console.log(`Twitter/X URL ${url} returned ${response.status}`)
           continue
-        }
-        
-        const html = await response.text()
+    }
+    
+    const html = await response.text()
         console.log(`✅ Successfully fetched Twitter/X page (${html.length} characters)`)
         
         // Enhanced patterns for Twitter/X bio extraction (updated for 2025 X.com structure)
@@ -775,14 +775,14 @@ export async function POST(request: NextRequest) {
       if (existingAccount) {
         // Only update if not already verified, or update non-critical fields
         if (!existingAccount.verified) {
-          await prisma.socialAccount.update({
-            where: { id: existingAccount.id },
-            data: {
-              displayName: displayName || platformName,
-              verified: true,
-              verifiedAt: new Date()
-            }
-          })
+        await prisma.socialAccount.update({
+          where: { id: existingAccount.id },
+          data: {
+            displayName: displayName || platformName,
+            verified: true,
+            verifiedAt: new Date()
+          }
+        })
         } else {
           // Account already verified - just update display name if provided
           if (displayName && displayName !== existingAccount.displayName) {
