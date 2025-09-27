@@ -28,6 +28,11 @@ export async function POST(request: NextRequest) {
     let profileUrl = ""
     let bioSelectors: string[] = []
     
+    // Set a timeout for the entire operation
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Verification timeout after 90 seconds')), 90000)
+    })
+    
     // Configure platform-specific settings
     switch (platform.toLowerCase()) {
       case 'twitter':
@@ -101,8 +106,11 @@ export async function POST(request: NextRequest) {
     logs.push(`📍 Profile URL: ${profileUrl}`)
     logs.push(`🎯 Bio selectors: ${bioSelectors.length} patterns`)
 
-    // Extract bio content using Browserless scrape API
-    const result = await client.scrapeProfile(profileUrl, bioSelectors)
+    // Extract bio content using Browserless scrape API with timeout
+    const result = await Promise.race([
+      client.scrapeProfile(profileUrl, bioSelectors),
+      timeoutPromise
+    ]) as any
     
     // Add scrape logs to our logs
     logs.push(...result.logs)

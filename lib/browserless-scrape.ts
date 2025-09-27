@@ -65,8 +65,8 @@ export class BrowserlessScrapeClient {
       url,
       elements,
       gotoOptions: {
-        waitUntil: 'networkidle2', // Wait for content to load
-        timeout: 30000
+        waitUntil: 'domcontentloaded', // Faster than networkidle2
+        timeout: 45000 // Increased timeout for 504 errors
       },
     }
 

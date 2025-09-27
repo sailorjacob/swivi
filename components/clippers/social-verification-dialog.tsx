@@ -130,7 +130,19 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
       }
     } catch (error) {
       console.error('Error verifying account:', error)
-      toast.error('Failed to verify account')
+      
+      // Handle specific error types
+      if (error instanceof Error) {
+        if (error.message.includes('504') || error.message.includes('timeout')) {
+          toast.error('Verification timed out. Social media sites may be blocking automated access. Please try again later.')
+        } else if (error.message.includes('listener indicated an asynchronous response')) {
+          toast.error('Browser extension interference detected. Please disable extensions and try again.')
+        } else {
+          toast.error('Failed to verify account. Please try again.')
+        }
+      } else {
+        toast.error('Failed to verify account. Please try again.')
+      }
     } finally {
       setIsVerifying(false)
     }
