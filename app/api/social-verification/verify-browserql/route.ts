@@ -4,6 +4,272 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 // Import the working scraping functions directly
+
+// YouTube channel description checking via Apify (pratikdani/youtube-profile-scraper)
+async function checkYouTubeBio(username: string, code: string): Promise<boolean> {
+  try {
+    const APIFY_API_KEY = process.env.APIFY_API_KEY
+    if (!APIFY_API_KEY) {
+      console.error('❌ APIFY_API_KEY not configured for YouTube')
+      return false
+    }
+
+    console.log(`🔍 Checking YouTube channel via Apify: @${username}`)
+
+    // Use pratikdani/youtube-profile-scraper
+    const runResponse = await fetch('https://api.apify.com/v2/acts/pratikdani~youtube-profile-scraper/runs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${APIFY_API_KEY}`
+      },
+      body: JSON.stringify({
+        "url": `https://www.youtube.com/@${username}`
+      })
+    })
+
+    if (!runResponse.ok) {
+      console.error(`❌ YouTube Apify run failed: ${runResponse.status}`)
+      return false
+    }
+
+    const runData = await runResponse.json()
+    const runId = runData.data.id
+    const datasetId = runData.data.defaultDatasetId
+
+    // Wait for completion (shorter timeout for YouTube)
+    const maxWaitTime = 30000
+    const checkInterval = 2000
+    let elapsed = 0
+
+    while (elapsed < maxWaitTime) {
+      await new Promise(resolve => setTimeout(resolve, checkInterval))
+      elapsed += checkInterval
+
+      const statusResponse = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+        headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+      })
+
+      if (!statusResponse.ok) break
+
+      const statusData = await statusResponse.json()
+      const runStatus = statusData.data.status
+
+      if (runStatus === 'SUCCEEDED') {
+        const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
+          headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+        })
+
+        if (!resultsResponse.ok) return false
+
+        const resultsData = await resultsResponse.json()
+        if (!resultsData || resultsData.length === 0) return false
+
+        const profile = resultsData[0]
+        const description = profile.Description || profile.description || ''
+
+        if (!description) {
+          console.error(`❌ No description found in YouTube data for: ${username}`)
+          return false
+        }
+
+        const codeFound = description.includes(code)
+        console.log(`YouTube description check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+
+        return codeFound
+
+      } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
+        console.error(`❌ YouTube Apify run failed: ${runStatus}`)
+        break
+      }
+    }
+
+    console.error(`❌ YouTube Apify run timed out`)
+    return false
+
+  } catch (error) {
+    console.error(`❌ YouTube bio check failed for ${username}:`, error)
+    return false
+  }
+}
+
+// TikTok bio checking via Apify (abe/tiktok-profile-scraper)
+async function checkTikTokBio(username: string, code: string): Promise<boolean> {
+  try {
+    const APIFY_API_KEY = process.env.APIFY_API_KEY
+    if (!APIFY_API_KEY) {
+      console.error('❌ APIFY_API_KEY not configured for TikTok')
+      return false
+    }
+
+    console.log(`🔍 Checking TikTok profile via Apify: @${username}`)
+
+    // Use abe/tiktok-profile-scraper
+    const runResponse = await fetch('https://api.apify.com/v2/acts/abe~tiktok-profile-scraper/runs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${APIFY_API_KEY}`
+      },
+      body: JSON.stringify({
+        "usernames": [username],
+        "tiktokSource": "user"
+      })
+    })
+
+    if (!runResponse.ok) {
+      console.error(`❌ TikTok Apify run failed: ${runResponse.status}`)
+      return false
+    }
+
+    const runData = await runResponse.json()
+    const runId = runData.data.id
+    const datasetId = runData.data.defaultDatasetId
+
+    // Wait for completion
+    const maxWaitTime = 30000
+    const checkInterval = 2000
+    let elapsed = 0
+
+    while (elapsed < maxWaitTime) {
+      await new Promise(resolve => setTimeout(resolve, checkInterval))
+      elapsed += checkInterval
+
+      const statusResponse = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+        headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+      })
+
+      if (!statusResponse.ok) break
+
+      const statusData = await statusResponse.json()
+      const runStatus = statusData.data.status
+
+      if (runStatus === 'SUCCEEDED') {
+        const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
+          headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+        })
+
+        if (!resultsResponse.ok) return false
+
+        const resultsData = await resultsResponse.json()
+        if (!resultsData || resultsData.length === 0) return false
+
+        const profile = resultsData[0]
+        const bio = profile.bio || profile.description || profile.tagline || ''
+
+        if (!bio) {
+          console.error(`❌ No bio found in TikTok data for: ${username}`)
+          return false
+        }
+
+        const codeFound = bio.includes(code)
+        console.log(`TikTok bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+
+        return codeFound
+
+      } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
+        console.error(`❌ TikTok Apify run failed: ${runStatus}`)
+        break
+      }
+    }
+
+    console.error(`❌ TikTok Apify run timed out`)
+    return false
+
+  } catch (error) {
+    console.error(`❌ TikTok bio check failed for ${username}:`, error)
+    return false
+  }
+}
+
+// Twitter/X bio checking via Apify (fastcrawler/twitter-user-profile-fast-cheapest-scraper-2025)
+async function checkTwitterBio(username: string, code: string): Promise<boolean> {
+  try {
+    const APIFY_API_KEY = process.env.APIFY_API_KEY
+    if (!APIFY_API_KEY) {
+      console.error('❌ APIFY_API_KEY not configured for Twitter/X')
+      return false
+    }
+
+    console.log(`🔍 Checking Twitter/X profile via Apify: @${username}`)
+
+    // Use fastcrawler/twitter-user-profile-fast-cheapest-scraper-2025
+    const runResponse = await fetch('https://api.apify.com/v2/acts/fastcrawler~twitter-user-profile-fast-cheapest-scraper-2025/runs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${APIFY_API_KEY}`
+      },
+      body: JSON.stringify({
+        "queryUser": [username]
+      })
+    })
+
+    if (!runResponse.ok) {
+      console.error(`❌ Twitter Apify run failed: ${runResponse.status}`)
+      return false
+    }
+
+    const runData = await runResponse.json()
+    const runId = runData.data.id
+    const datasetId = runData.data.defaultDatasetId
+
+    // Wait for completion
+    const maxWaitTime = 30000
+    const checkInterval = 2000
+    let elapsed = 0
+
+    while (elapsed < maxWaitTime) {
+      await new Promise(resolve => setTimeout(resolve, checkInterval))
+      elapsed += checkInterval
+
+      const statusResponse = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+        headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+      })
+
+      if (!statusResponse.ok) break
+
+      const statusData = await statusResponse.json()
+      const runStatus = statusData.data.status
+
+      if (runStatus === 'SUCCEEDED') {
+        const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
+          headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+        })
+
+        if (!resultsResponse.ok) return false
+
+        const resultsData = await resultsResponse.json()
+        if (!resultsData || resultsData.length === 0) return false
+
+        const profile = resultsData[0]
+        const description = profile.description || profile.bio || ''
+
+        if (!description) {
+          console.error(`❌ No description found in Twitter data for: ${username}`)
+          return false
+        }
+
+        const codeFound = description.includes(code)
+        console.log(`Twitter bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+
+        return codeFound
+
+      } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
+        console.error(`❌ Twitter Apify run failed: ${runStatus}`)
+        break
+      }
+    }
+
+    console.error(`❌ Twitter Apify run timed out`)
+    return false
+
+  } catch (error) {
+    console.error(`❌ Twitter bio check failed for ${username}:`, error)
+    return false
+  }
+}
+
 async function checkInstagramBio(username: string, code: string): Promise<boolean> {
   try {
     const APIFY_API_KEY = process.env.APIFY_API_KEY
@@ -343,6 +609,31 @@ export async function POST(request: NextRequest) {
         codeFound = await checkInstagramBio(cleanUsername, verificationCode)
         if (codeFound) {
           bio = verificationCode // We know it contains the code since verification succeeded
+        }
+        break
+
+      case 'youtube':
+        logs.push(`📺 Checking YouTube bio via Apify for @${cleanUsername}`)
+        codeFound = await checkYouTubeBio(cleanUsername, verificationCode)
+        if (codeFound) {
+          bio = verificationCode
+        }
+        break
+
+      case 'twitter':
+      case 'x':
+        logs.push(`🐦 Checking Twitter bio via Apify for @${cleanUsername}`)
+        codeFound = await checkTwitterBio(cleanUsername, verificationCode)
+        if (codeFound) {
+          bio = verificationCode
+        }
+        break
+
+      case 'tiktok':
+        logs.push(`🎵 Checking TikTok bio via Apify for @${cleanUsername}`)
+        codeFound = await checkTikTokBio(cleanUsername, verificationCode)
+        if (codeFound) {
+          bio = verificationCode
         }
         break
 

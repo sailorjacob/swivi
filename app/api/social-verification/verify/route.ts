@@ -322,340 +322,267 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
 }
 
 // YouTube channel description checking with enhanced anti-bot measures
+// YouTube channel description checking via Apify (pratikdani/youtube-profile-scraper)
 async function checkYouTubeBio(username: string, code: string): Promise<boolean> {
   try {
-    console.log(`🔍 Checking YouTube channel: @${username}`)
-    
-    // Try multiple channel URL formats
-    const urls = [
-      `https://www.youtube.com/@${username}`,
-      `https://www.youtube.com/c/${username}`,
-      `https://www.youtube.com/user/${username}`,
-      `https://www.youtube.com/channel/${username}`
-    ]
-    
-    // Add randomized delay
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000))
-    
-    for (const url of urls) {
-      try {
-        console.log(`🔍 Trying YouTube URL: ${url}`)
-        
-        const response = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Cache-Control': 'no-cache',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none'
-          },
-          signal: AbortSignal.timeout(15000)
+    const APIFY_API_KEY = process.env.APIFY_API_KEY
+    if (!APIFY_API_KEY) {
+      console.error('❌ APIFY_API_KEY not configured for YouTube')
+      return false
+    }
+
+    console.log(`🔍 Checking YouTube channel via Apify: @${username}`)
+
+    // Use pratikdani/youtube-profile-scraper
+    const runResponse = await fetch('https://api.apify.com/v2/acts/pratikdani~youtube-profile-scraper/runs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${APIFY_API_KEY}`
+      },
+      body: JSON.stringify({
+        "url": `https://www.youtube.com/@${username}`
+      })
+    })
+
+    if (!runResponse.ok) {
+      console.error(`❌ YouTube Apify run failed: ${runResponse.status}`)
+      return false
+    }
+
+    const runData = await runResponse.json()
+    const runId = runData.data.id
+    const datasetId = runData.data.defaultDatasetId
+
+    // Wait for completion (shorter timeout for YouTube)
+    const maxWaitTime = 30000
+    const checkInterval = 2000
+    let elapsed = 0
+
+    while (elapsed < maxWaitTime) {
+      await new Promise(resolve => setTimeout(resolve, checkInterval))
+      elapsed += checkInterval
+
+      const statusResponse = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+        headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+      })
+
+      if (!statusResponse.ok) break
+
+      const statusData = await statusResponse.json()
+      const runStatus = statusData.data.status
+
+      if (runStatus === 'SUCCEEDED') {
+        const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
+          headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
         })
-        
-        if (!response.ok) {
-          console.log(`YouTube URL ${url} returned ${response.status}`)
-          continue
-        }
-        
-          const html = await response.text()
-        console.log(`✅ Successfully fetched YouTube page (${html.length} characters)`)
-        
-        // Enhanced patterns for YouTube description extraction
-        const patterns = [
-          // New YouTube structure patterns
-          /"description":{"simpleText":"([^"]*(?:\\.[^"]*)*)"/,
-          /"description":"([^"]*(?:\\.[^"]*)*)"/,
-          // Alternative patterns
-          /description['"]:[\s]*['"]([^'"]*)['"],/,
-          // Meta tag patterns
-          /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-          /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-          // JSON-LD patterns
-          /@type['"]:[\s]*['"]VideoObject['"][\s\S]*?description['"]:[\s]*['"]([^'"]*)['"],/,
-          // Fallback patterns
-          /channelMetadataRenderer[\s\S]*?description['"]:[\s]*['"]([^'"]*)['"],/
-        ]
-        
-        let description = ''
-        let patternUsed = -1
-        
-        for (let i = 0; i < patterns.length; i++) {
-          const match = html.match(patterns[i])
-          if (match && match[1] && match[1].trim()) {
-            description = match[1].trim()
-            patternUsed = i
-            console.log(`📝 Found YouTube description using pattern ${i + 1}: "${description.substring(0, 100)}${description.length > 100 ? '...' : ''}"`)
-            break
-          }
-        }
-        
+
+        if (!resultsResponse.ok) return false
+
+        const resultsData = await resultsResponse.json()
+        if (!resultsData || resultsData.length === 0) return false
+
+        const profile = resultsData[0]
+        const description = profile.Description || profile.description || ''
+
         if (!description) {
-          console.log(`❌ No description found for YouTube channel: ${username}`)
-          continue
+          console.error(`❌ No description found in YouTube data for: ${username}`)
+          return false
         }
-        
-        // Decode entities
-        const decodedDescription = description
-          .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
-            return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
-          })
-          .replace(/\\n/g, ' ')
-          .replace(/\\t/g, ' ')
-          .replace(/\\"/g, '"')
-          .replace(/\\'/g, "'")
-          .replace(/&quot;/g, '"')
-          .replace(/&amp;/g, '&')
-        
-        console.log(`📝 YouTube description: "${decodedDescription}"`)
-        console.log(`🔍 Looking for code: "${code}"`)
-        
-        // Case-insensitive search
-        const codeFound = decodedDescription.toLowerCase().includes(code.toLowerCase())
+
+        const codeFound = description.includes(code)
         console.log(`YouTube description check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
-        
-        if (codeFound) {
-          return true
-        }
-        
-      } catch (error) {
-        console.log(`Failed to check YouTube URL: ${url} - ${error}`)
-        continue
+
+        return codeFound
+
+      } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
+        console.error(`❌ YouTube Apify run failed: ${runStatus}`)
+        break
       }
     }
-    
-    console.error(`❌ Could not find verification code in YouTube channel: ${username}`)
+
+    console.error(`❌ YouTube Apify run timed out`)
     return false
-    
+
   } catch (error) {
     console.error(`❌ YouTube bio check failed for ${username}:`, error)
     return false
   }
 }
 
-// TikTok bio checking with enhanced anti-bot measures
+// TikTok bio checking via Apify (abe/tiktok-profile-scraper)
 async function checkTikTokBio(username: string, code: string): Promise<boolean> {
   try {
-    const url = `https://www.tiktok.com/@${username}`
-    console.log(`🔍 Checking TikTok profile: ${url}`)
-    
-    // Add randomized delay
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000))
-    
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Cache-Control': 'no-cache',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none'
-      },
-      signal: AbortSignal.timeout(15000)
-    })
-    
-    if (!response.ok) {
-      console.error(`TikTok profile not accessible: ${username} - Status: ${response.status}`)
-      
-      if (response.status === 429) {
-        console.log(`Rate limited - TikTok is blocking our requests`)
-      } else if (response.status === 404) {
-        console.log(`TikTok profile not found: ${username}`)
-      }
-      
+    const APIFY_API_KEY = process.env.APIFY_API_KEY
+    if (!APIFY_API_KEY) {
+      console.error('❌ APIFY_API_KEY not configured for TikTok')
       return false
     }
-    
-    const html = await response.text()
-    console.log(`✅ Successfully fetched TikTok page (${html.length} characters)`)
-    
-    // Enhanced patterns for TikTok bio extraction
-    const patterns = [
-      // TikTok structure patterns
-      /"desc":"([^"]*(?:\\.[^"]*)*)"/,
-      /"description":"([^"]*(?:\\.[^"]*)*)"/,
-      /"bio":"([^"]*(?:\\.[^"]*)*)"/,
-      // Alternative patterns
-      /description['"]:[\s]*['"]([^'"]*)['"],/,
-      /bio['"]:[\s]*['"]([^'"]*)['"],/,
-      // Meta tag patterns
-      /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-      /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
-      // JSON-LD patterns
-      /@type['"]:[\s]*['"]Person['"][\s\S]*?description['"]:[\s]*['"]([^'"]*)['"],/
-    ]
-    
-    let bio = ''
-    let patternUsed = -1
-    
-    for (let i = 0; i < patterns.length; i++) {
-      const match = html.match(patterns[i])
-      if (match && match[1] && match[1].trim()) {
-        bio = match[1].trim()
-        patternUsed = i
-        console.log(`📝 Found TikTok bio using pattern ${i + 1}: "${bio.substring(0, 100)}${bio.length > 100 ? '...' : ''}"`)
+
+    console.log(`🔍 Checking TikTok profile via Apify: @${username}`)
+
+    // Use abe/tiktok-profile-scraper
+    const runResponse = await fetch('https://api.apify.com/v2/acts/abe~tiktok-profile-scraper/runs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${APIFY_API_KEY}`
+      },
+      body: JSON.stringify({
+        "usernames": [username],
+        "tiktokSource": "user"
+      })
+    })
+
+    if (!runResponse.ok) {
+      console.error(`❌ TikTok Apify run failed: ${runResponse.status}`)
+      return false
+    }
+
+    const runData = await runResponse.json()
+    const runId = runData.data.id
+    const datasetId = runData.data.defaultDatasetId
+
+    // Wait for completion
+    const maxWaitTime = 30000
+    const checkInterval = 2000
+    let elapsed = 0
+
+    while (elapsed < maxWaitTime) {
+      await new Promise(resolve => setTimeout(resolve, checkInterval))
+      elapsed += checkInterval
+
+      const statusResponse = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+        headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+      })
+
+      if (!statusResponse.ok) break
+
+      const statusData = await statusResponse.json()
+      const runStatus = statusData.data.status
+
+      if (runStatus === 'SUCCEEDED') {
+        const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
+          headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+        })
+
+        if (!resultsResponse.ok) return false
+
+        const resultsData = await resultsResponse.json()
+        if (!resultsData || resultsData.length === 0) return false
+
+        const profile = resultsData[0]
+        const bio = profile.bio || profile.description || profile.tagline || ''
+
+        if (!bio) {
+          console.error(`❌ No bio found in TikTok data for: ${username}`)
+          return false
+        }
+
+        const codeFound = bio.includes(code)
+        console.log(`TikTok bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+
+        return codeFound
+
+      } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
+        console.error(`❌ TikTok Apify run failed: ${runStatus}`)
         break
       }
     }
-    
-    if (!bio) {
-      console.error(`❌ Could not extract TikTok bio for: ${username}`)
-      
-      // Check for common issues
-      if (html.includes('private') || html.includes('Private account')) {
-        console.log(`❌ TikTok account appears to be private: ${username}`)
-      } else if (html.includes('not found') || html.includes('User not found')) {
-        console.log(`❌ TikTok account does not exist: ${username}`)
-      }
-      
-      return false
-    }
-    
-    // Decode entities
-    const decodedBio = bio
-      .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
-        return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
-      })
-      .replace(/\\n/g, ' ')
-      .replace(/\\t/g, ' ')
-      .replace(/\\"/g, '"')
-      .replace(/\\'/g, "'")
-      .replace(/&quot;/g, '"')
-      .replace(/&amp;/g, '&')
-    
-    console.log(`📝 TikTok bio: "${decodedBio}"`)
-    console.log(`🔍 Looking for code: "${code}"`)
-    
-    // Case-insensitive search
-    const codeFound = decodedBio.toLowerCase().includes(code.toLowerCase())
-    console.log(`TikTok bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
-    
-    return codeFound
-    
+
+    console.error(`❌ TikTok Apify run timed out`)
+    return false
+
   } catch (error) {
     console.error(`❌ TikTok bio check failed for ${username}:`, error)
     return false
   }
 }
 
-// Twitter/X bio checking with enhanced anti-bot measures
+// Twitter/X bio checking via Apify (fastcrawler/twitter-user-profile-fast-cheapest-scraper-2025)
 async function checkTwitterBio(username: string, code: string): Promise<boolean> {
   try {
-    // Try both twitter.com and x.com
-    const urls = [`https://twitter.com/${username}`, `https://x.com/${username}`]
-    
-    for (const url of urls) {
-      try {
-        console.log(`🔍 Checking Twitter/X profile: ${url}`)
-        
-        // Add randomized delay
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000))
-        
-    const response = await fetch(url, {
-      headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Cache-Control': 'no-cache',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none'
-          },
-          signal: AbortSignal.timeout(15000)
-    })
-    
-    if (!response.ok) {
-          console.log(`Twitter/X URL ${url} returned ${response.status}`)
-          continue
+    const APIFY_API_KEY = process.env.APIFY_API_KEY
+    if (!APIFY_API_KEY) {
+      console.error('❌ APIFY_API_KEY not configured for Twitter/X')
+      return false
     }
-    
-    const html = await response.text()
-        console.log(`✅ Successfully fetched Twitter/X page (${html.length} characters)`)
-        
-        // Enhanced patterns for Twitter/X bio extraction (updated for 2025 X.com structure)
-        const patterns = [
-          // Modern X.com JSON patterns
-          /"description":"([^"]*(?:\\.[^"]*)*)"/g,
-          /"legacy":\{[^}]*"description":"([^"]*(?:\\.[^"]*)*)"/g,
-          /"entities":\{[^}]*"description":\{[^}]*"urls":\[[^\]]*\][^}]*\}[^}]*"description":"([^"]*)"/g,
-          // Legacy Twitter patterns
-          /"bio":"([^"]*(?:\\.[^"]*)*)"/g,
-          // Meta tag patterns (more specific for X.com)
-          /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
-          /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
-          /<meta\s+property=['"]twitter:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/gi,
-          // X.com specific JSON-LD
-          /"@type"\s*:\s*"Person"[^}]*"description"\s*:\s*"([^"]*)"/gi,
-          // Fallback patterns
-          /description['"]\s*:\s*['"]([^'"]*)['"],?/gi,
-          // Very broad patterns as last resort
-          /"([^"]*(?:swivi|verification|code|SWIVI|VERIFICATION|CODE)[^"]*)"/gi
-        ]
-        
-        let bio = ''
-        let patternUsed = -1
-        
-        for (let i = 0; i < patterns.length; i++) {
-          const matches = html.match(patterns[i])
-          if (matches) {
-            // For global patterns, we might get multiple matches - try all of them
-            for (const match of matches) {
-              const exec = patterns[i].exec(html)
-              if (exec && exec[1] && exec[1].trim()) {
-                bio = exec[1].trim()
-                patternUsed = i
-                console.log(`📝 Found Twitter/X bio using pattern ${i + 1}: "${bio.substring(0, 100)}${bio.length > 100 ? '...' : ''}"`)
-                break
-              }
-            }
-            if (bio) break
-          }
+
+    console.log(`🔍 Checking Twitter/X profile via Apify: @${username}`)
+
+    // Use fastcrawler/twitter-user-profile-fast-cheapest-scraper-2025
+    const runResponse = await fetch('https://api.apify.com/v2/acts/fastcrawler~twitter-user-profile-fast-cheapest-scraper-2025/runs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${APIFY_API_KEY}`
+      },
+      body: JSON.stringify({
+        "queryUser": [username]
+      })
+    })
+
+    if (!runResponse.ok) {
+      console.error(`❌ Twitter Apify run failed: ${runResponse.status}`)
+      return false
+    }
+
+    const runData = await runResponse.json()
+    const runId = runData.data.id
+    const datasetId = runData.data.defaultDatasetId
+
+    // Wait for completion
+    const maxWaitTime = 30000
+    const checkInterval = 2000
+    let elapsed = 0
+
+    while (elapsed < maxWaitTime) {
+      await new Promise(resolve => setTimeout(resolve, checkInterval))
+      elapsed += checkInterval
+
+      const statusResponse = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+        headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+      })
+
+      if (!statusResponse.ok) break
+
+      const statusData = await statusResponse.json()
+      const runStatus = statusData.data.status
+
+      if (runStatus === 'SUCCEEDED') {
+        const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
+          headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+        })
+
+        if (!resultsResponse.ok) return false
+
+        const resultsData = await resultsResponse.json()
+        if (!resultsData || resultsData.length === 0) return false
+
+        const profile = resultsData[0]
+        const description = profile.description || profile.bio || ''
+
+        if (!description) {
+          console.error(`❌ No description found in Twitter data for: ${username}`)
+          return false
         }
-        
-        if (!bio) {
-          console.log(`❌ No bio found for Twitter/X profile: ${username}`)
-          continue
-        }
-        
-        // Decode entities
-        const decodedBio = bio
-          .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
-            return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
-          })
-          .replace(/\\n/g, ' ')
-          .replace(/\\t/g, ' ')
-          .replace(/\\"/g, '"')
-          .replace(/\\'/g, "'")
-          .replace(/&quot;/g, '"')
-          .replace(/&amp;/g, '&')
-        
-        console.log(`📝 Twitter/X bio: "${decodedBio}"`)
-        console.log(`🔍 Looking for code: "${code}"`)
-        
-        // Case-insensitive search
-        const codeFound = decodedBio.toLowerCase().includes(code.toLowerCase())
-        console.log(`Twitter/X bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
-        
-        if (codeFound) {
-          return true
-        }
-        
-      } catch (error) {
-        console.log(`Failed to check Twitter/X URL: ${url} - ${error}`)
-        continue
+
+        const codeFound = description.includes(code)
+        console.log(`Twitter bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+
+        return codeFound
+
+      } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
+        console.error(`❌ Twitter Apify run failed: ${runStatus}`)
+        break
       }
     }
-    
-    console.error(`❌ Could not find verification code in Twitter/X profile: ${username}`)
+
+    console.error(`❌ Twitter Apify run timed out`)
     return false
-    
+
   } catch (error) {
-    console.error(`❌ Twitter/X bio check failed for ${username}:`, error)
+    console.error(`❌ Twitter bio check failed for ${username}:`, error)
     return false
   }
 }
