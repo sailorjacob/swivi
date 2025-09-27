@@ -46,7 +46,7 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
         'Authorization': `Bearer ${APIFY_API_KEY}`
       },
       body: JSON.stringify({
-        "profileUrl": `https://www.instagram.com/${username}/`,
+        "usernames": [username],
         "resultsPerPage": 1,
         "shouldDownloadCovers": false,
         "shouldDownloadSlideshowImages": false,

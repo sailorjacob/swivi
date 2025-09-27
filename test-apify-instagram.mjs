@@ -1,4 +1,8 @@
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 async function testApifyInstagram(username) {
   try {
@@ -11,6 +15,22 @@ async function testApifyInstagram(username) {
     }
 
     console.log(`🔍 Testing Apify Instagram scraping for @${username}...`);
+    console.log(`🔑 Using API key: ${APIFY_API_KEY.substring(0, 20)}...`);
+
+    // First, test if the API key is valid by checking user info
+    console.log('🔍 Testing API key validity...');
+    const testResponse = await fetch('https://api.apify.com/v2/users/me', {
+      headers: {
+        'Authorization': `Bearer ${APIFY_API_KEY}`
+      }
+    });
+
+    if (!testResponse.ok) {
+      console.log(`❌ API key test failed: ${testResponse.status} ${testResponse.statusText}`);
+      return;
+    }
+
+    console.log('✅ API key is valid!');
 
     // Step 1: Start the Instagram scraper run
     const runResponse = await fetch('https://api.apify.com/v2/acts/apify~instagram-profile-scraper/runs', {
@@ -20,7 +40,7 @@ async function testApifyInstagram(username) {
         'Authorization': `Bearer ${APIFY_API_KEY}`
       },
       body: JSON.stringify({
-        "profileUrl": `https://www.instagram.com/${username}/`,
+        "usernames": [username],
         "resultsPerPage": 1,
         "shouldDownloadCovers": false,
         "shouldDownloadSlideshowImages": false,
@@ -30,8 +50,16 @@ async function testApifyInstagram(username) {
 
     if (!runResponse.ok) {
       console.log(`❌ Apify run creation failed: ${runResponse.status} ${runResponse.statusText}`);
+      try {
+        const errorText = await runResponse.text();
+        console.log(`Error response: ${errorText}`);
+      } catch (e) {
+        console.log('Could not read error response');
+      }
       if (runResponse.status === 401) {
         console.log('❌ Invalid API key - check your APIFY_API_KEY');
+      } else if (runResponse.status === 400) {
+        console.log('❌ Bad request - check request format and parameters');
       }
       return;
     }
