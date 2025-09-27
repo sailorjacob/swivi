@@ -354,8 +354,8 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
     const runId = runData.data.id
     const datasetId = runData.data.defaultDatasetId
 
-    // Wait for completion (shorter timeout for YouTube)
-    const maxWaitTime = 30000
+    // Wait for completion (longer timeout for YouTube as it takes more time)
+    const maxWaitTime = 60000 // 60 seconds for YouTube
     const checkInterval = 2000
     let elapsed = 0
 
@@ -443,8 +443,8 @@ async function checkTikTokBio(username: string, code: string): Promise<boolean> 
     const runId = runData.data.id
     const datasetId = runData.data.defaultDatasetId
 
-    // Wait for completion
-    const maxWaitTime = 30000
+    // Wait for completion (longer timeout for TikTok)
+    const maxWaitTime = 60000 // 60 seconds for TikTok
     const checkInterval = 2000
     let elapsed = 0
 
@@ -531,8 +531,8 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
     const runId = runData.data.id
     const datasetId = runData.data.defaultDatasetId
 
-    // Wait for completion
-    const maxWaitTime = 30000
+    // Wait for completion (longer timeout for Twitter)
+    const maxWaitTime = 90000 // 90 seconds for Twitter
     const checkInterval = 2000
     let elapsed = 0
 

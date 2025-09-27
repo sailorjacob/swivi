@@ -37,8 +37,8 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
     const runId = runData.data.id
     const datasetId = runData.data.defaultDatasetId
 
-    // Wait for completion (shorter timeout for YouTube)
-    const maxWaitTime = 30000
+    // Wait for completion (longer timeout for YouTube as it takes more time)
+    const maxWaitTime = 60000 // 60 seconds for YouTube
     const checkInterval = 2000
     let elapsed = 0
 
@@ -126,8 +126,8 @@ async function checkTikTokBio(username: string, code: string): Promise<boolean> 
     const runId = runData.data.id
     const datasetId = runData.data.defaultDatasetId
 
-    // Wait for completion
-    const maxWaitTime = 30000
+    // Wait for completion (longer timeout for TikTok)
+    const maxWaitTime = 60000 // 60 seconds for TikTok
     const checkInterval = 2000
     let elapsed = 0
 
@@ -214,8 +214,8 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
     const runId = runData.data.id
     const datasetId = runData.data.defaultDatasetId
 
-    // Wait for completion
-    const maxWaitTime = 30000
+    // Wait for completion (longer timeout for Twitter)
+    const maxWaitTime = 90000 // 90 seconds for Twitter
     const checkInterval = 2000
     let elapsed = 0
 
@@ -545,7 +545,7 @@ export async function POST(request: NextRequest) {
     const { platform, username, code } = await request.json()
 
     if (!platform || !username) {
-      return NextResponse.json({
+      return NextResponse.json({ 
         error: "Missing required fields: platform, username"
       }, { status: 400 })
     }
@@ -628,7 +628,7 @@ export async function POST(request: NextRequest) {
           bio = verificationCode
         }
         break
-
+        
       case 'tiktok':
         logs.push(`🎵 Checking TikTok bio via Apify for @${cleanUsername}`)
         codeFound = await checkTikTokBio(cleanUsername, verificationCode)
@@ -636,10 +636,10 @@ export async function POST(request: NextRequest) {
           bio = verificationCode
         }
         break
-
+        
       default:
         logs.push(`❌ Unsupported platform: ${platform}`)
-        return NextResponse.json({
+        return NextResponse.json({ 
           success: false,
           error: `Unsupported platform: ${platform}`,
           logs
@@ -650,7 +650,7 @@ export async function POST(request: NextRequest) {
 
     if (codeFound) {
       logs.push(`🎯 Code found! Saving to database...`)
-
+      
       // Mark verification as verified
       const platformMap: Record<string, string> = {
         instagram: 'INSTAGRAM',
@@ -667,8 +667,8 @@ export async function POST(request: NextRequest) {
           code: verificationCode,
           verified: false
         },
-        data: {
-          verified: true,
+          data: {
+            verified: true,
           verifiedAt: new Date()
         }
       })
@@ -681,16 +681,16 @@ export async function POST(request: NextRequest) {
           username: cleanUsername
         }
       })
-
+      
       if (existingAccount) {
         // Update existing account
-        await prisma.socialAccount.update({
-          where: { id: existingAccount.id },
-          data: {
-            verified: true,
-            verifiedAt: new Date()
-          }
-        })
+          await prisma.socialAccount.update({
+            where: { id: existingAccount.id },
+            data: {
+              verified: true,
+              verifiedAt: new Date()
+            }
+          })
         logs.push(`🔄 Updated existing account for @${cleanUsername}`)
       } else {
         // Create new account
