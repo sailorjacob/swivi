@@ -170,7 +170,7 @@ export default function CampaignsPage() {
                   )}
                   {campaign.status === "launching" && (
                     <div className="absolute top-3 left-3 z-10">
-                      <Badge variant="outline" className="text-muted-foreground border-muted-foreground text-xs px-2 py-1">
+                      <Badge className="bg-amber-500/20 text-amber-200 border-amber-500/30 text-xs px-2 py-1 font-medium">
                         LAUNCHING SOON
                       </Badge>
                     </div>

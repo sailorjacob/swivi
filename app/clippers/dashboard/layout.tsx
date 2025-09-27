@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useSession, signOut } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -47,6 +47,7 @@ interface NavItem {
 function Sidebar({ className }: { className?: string }) {
   const { data: session } = useSession()
   const router = useRouter()
+  const pathname = usePathname()
 
   // Demo mode mock session
   const isDemoMode = process.env.NODE_ENV === "development"
@@ -69,6 +70,13 @@ function Sidebar({ className }: { className?: string }) {
     await signOut({ callbackUrl: "/clippers/login" })
   }
 
+  const isActive = (href: string) => {
+    if (href === "/clippers/dashboard") {
+      return pathname === "/clippers/dashboard"
+    }
+    return pathname.startsWith(href)
+  }
+
   return (
     <div className={cn("flex flex-col h-full bg-card border-r border-border", className)}>
       {/* Logo */}
@@ -88,21 +96,32 @@ function Sidebar({ className }: { className?: string }) {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="flex items-center space-x-3 px-3 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 group"
-          >
-            <item.icon className="w-5 h-5 transition-colors duration-200 group-hover:text-primary" />
-            <span className="font-medium text-sm tracking-wide">{item.label}</span>
-            {item.badge && (
-              <span className="ml-auto bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
-                {item.badge}
-              </span>
-            )}
-          </Link>
-        ))}
+        {navItems.map((item) => {
+          const active = isActive(item.href)
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group",
+                active
+                  ? "bg-primary/10 text-primary border border-primary/20"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              <item.icon className={cn(
+                "w-5 h-5 transition-colors duration-200",
+                active ? "text-primary" : "group-hover:text-primary"
+              )} />
+              <span className="font-medium text-sm tracking-wide">{item.label}</span>
+              {item.badge && (
+                <span className="ml-auto bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
+                  {item.badge}
+                </span>
+              )}
+            </Link>
+          )
+        })}
       </nav>
 
       {/* User Profile */}
