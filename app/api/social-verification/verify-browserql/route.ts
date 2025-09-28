@@ -16,75 +16,108 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
 
     console.log(`🔍 Checking YouTube channel via Apify: @${username}`)
 
-    // Use pratikdani/youtube-profile-scraper
-    const runResponse = await fetch('https://api.apify.com/v2/acts/pratikdani~youtube-profile-scraper/runs', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${APIFY_API_KEY}`
-      },
-      body: JSON.stringify({
-        "url": `https://www.youtube.com/@${username}`
-      })
-    })
+    // Try multiple YouTube URL formats
+    const youtubeUrls = [
+      `https://www.youtube.com/@${username}`,
+      `https://www.youtube.com/c/${username}`,
+      `https://www.youtube.com/channel/${username}`,
+      `https://www.youtube.com/user/${username}`
+    ]
 
-    if (!runResponse.ok) {
-      console.error(`❌ YouTube Apify run failed: ${runResponse.status}`)
-      return false
-    }
+    for (const url of youtubeUrls) {
+      try {
+        console.log(`🔄 Trying YouTube URL: ${url}`)
 
-    const runData = await runResponse.json()
-    const runId = runData.data.id
-    const datasetId = runData.data.defaultDatasetId
-
-    // Wait for completion (longer timeout for YouTube as it takes more time)
-    const maxWaitTime = 60000 // 60 seconds for YouTube
-    const checkInterval = 2000
-    let elapsed = 0
-
-    while (elapsed < maxWaitTime) {
-      await new Promise(resolve => setTimeout(resolve, checkInterval))
-      elapsed += checkInterval
-
-      const statusResponse = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
-        headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
-      })
-
-      if (!statusResponse.ok) break
-
-      const statusData = await statusResponse.json()
-      const runStatus = statusData.data.status
-
-      if (runStatus === 'SUCCEEDED') {
-        const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
-          headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+        // Use pratikdani/youtube-profile-scraper
+        const runResponse = await fetch('https://api.apify.com/v2/acts/pratikdani~youtube-profile-scraper/runs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${APIFY_API_KEY}`
+          },
+          body: JSON.stringify({
+            "url": url
+          })
         })
 
-        if (!resultsResponse.ok) return false
-
-        const resultsData = await resultsResponse.json()
-        if (!resultsData || resultsData.length === 0) return false
-
-        const profile = resultsData[0]
-        const description = profile.Description || profile.description || ''
-
-        if (!description) {
-          console.error(`❌ No description found in YouTube data for: ${username}`)
-          return false
+        if (!runResponse.ok) {
+          console.log(`❌ YouTube Apify run failed for ${url}: ${runResponse.status}`)
+          continue
         }
 
-        const codeFound = description.includes(code)
-        console.log(`YouTube description check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+        const runData = await runResponse.json()
+        const runId = runData.data.id
+        const datasetId = runData.data.defaultDatasetId
 
-        return codeFound
+        console.log(`✅ YouTube Apify run started: ${runId}`)
 
-      } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
-        console.error(`❌ YouTube Apify run failed: ${runStatus}`)
-        break
+        // Wait for completion (longer timeout for YouTube)
+        const maxWaitTime = 60000 // 60 seconds for YouTube
+        const checkInterval = 2000
+        let elapsed = 0
+
+        while (elapsed < maxWaitTime) {
+          await new Promise(resolve => setTimeout(resolve, checkInterval))
+          elapsed += checkInterval
+
+          const statusResponse = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+            headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+          })
+
+          if (!statusResponse.ok) break
+
+          const statusData = await statusResponse.json()
+          const runStatus = statusData.data.status
+
+          console.log(`🔄 YouTube status: ${runStatus} (${Math.round(elapsed/1000)}s)`)
+
+          if (runStatus === 'SUCCEEDED') {
+            const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
+              headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+            })
+
+            if (!resultsResponse.ok) {
+              console.log(`❌ Failed to get YouTube results for ${url}`)
+              break
+            }
+
+            const resultsData = await resultsResponse.json()
+            if (!resultsData || resultsData.length === 0) {
+              console.log(`❌ No YouTube profile data returned for ${url}`)
+              break
+            }
+
+            const profile = resultsData[0]
+            const description = profile.Description || profile.description || ''
+
+            if (!description) {
+              console.error(`❌ No description found in YouTube data for: ${username} (${url})`)
+              break
+            }
+
+            console.log(`✅ Found YouTube channel: ${profile.name || profile.handle}`)
+            console.log(`📝 Description: "${description.substring(0, 100)}${description.length > 100 ? '...' : ''}"`)
+
+            const codeFound = description.includes(code)
+            console.log(`YouTube description check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+
+            return codeFound
+
+          } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
+            console.error(`❌ YouTube Apify run failed for ${url}: ${runStatus}`)
+            break
+          }
+        }
+
+        console.error(`❌ YouTube Apify run timed out for ${url}`)
+
+      } catch (error) {
+        console.log(`❌ Error with YouTube URL ${url}: ${error}`)
+        continue
       }
     }
 
-    console.error(`❌ YouTube Apify run timed out`)
+    console.error(`❌ Could not find YouTube channel: ${username}`)
     return false
 
   } catch (error) {
@@ -201,18 +234,25 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
         'Authorization': `Bearer ${APIFY_API_KEY}`
       },
       body: JSON.stringify({
-        "queryUser": [username]
+        "queryUser": [username],
+        "shouldIncludeUserById": true,
+        "shouldIncludeUserByScreenName": true,
+        "maxItems": 1
       })
     })
 
     if (!runResponse.ok) {
       console.error(`❌ Twitter Apify run failed: ${runResponse.status}`)
+      const errorText = await runResponse.text()
+      console.log(`❌ Twitter run creation error: ${errorText}`)
       return false
     }
 
     const runData = await runResponse.json()
     const runId = runData.data.id
     const datasetId = runData.data.defaultDatasetId
+
+    console.log(`✅ Twitter Apify run started: ${runId}`)
 
     // Wait for completion (longer timeout for Twitter)
     const maxWaitTime = 90000 // 90 seconds for Twitter
@@ -227,33 +267,56 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
         headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
       })
 
-      if (!statusResponse.ok) break
+      if (!statusResponse.ok) {
+        console.error(`❌ Failed to check Twitter run status: ${statusResponse.status}`)
+        break
+      }
 
       const statusData = await statusResponse.json()
       const runStatus = statusData.data.status
 
+      console.log(`🔄 Twitter status: ${runStatus} (${Math.round(elapsed/1000)}s)`)
+
       if (runStatus === 'SUCCEEDED') {
-        const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
+        const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=10`, {
           headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
         })
 
-        if (!resultsResponse.ok) return false
-
-        const resultsData = await resultsResponse.json()
-        if (!resultsData || resultsData.length === 0) return false
-
-        const profile = resultsData[0]
-        const description = profile.description || profile.bio || ''
-
-        if (!description) {
-          console.error(`❌ No description found in Twitter data for: ${username}`)
+        if (!resultsResponse.ok) {
+          console.error(`❌ Failed to get Twitter results: ${resultsResponse.status}`)
           return false
         }
 
-        const codeFound = description.includes(code)
-        console.log(`Twitter bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+        const resultsData = await resultsResponse.json()
+        if (!resultsData || resultsData.length === 0) {
+          console.error(`❌ No Twitter profile data returned for: ${username}`)
+          return false
+        }
 
-        return codeFound
+        // Check multiple profiles if returned (sometimes multiple users match)
+        for (const profile of resultsData) {
+          const usernameMatch = profile.username === username || profile.screenName === username
+          if (usernameMatch) {
+            const description = profile.description || profile.bio || ''
+            console.log(`✅ Found matching Twitter profile: @${profile.username}`)
+            console.log(`📝 Description: "${description}"`)
+
+            if (!description) {
+              console.error(`❌ No description found in Twitter data for: ${username}`)
+              continue
+            }
+
+            const codeFound = description.includes(code)
+            console.log(`Twitter bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+
+            if (codeFound) {
+              return true
+            }
+          }
+        }
+
+        console.error(`❌ No matching Twitter profile found for: ${username}`)
+        return false
 
       } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
         console.error(`❌ Twitter Apify run failed: ${runStatus}`)
