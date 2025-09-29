@@ -66,7 +66,7 @@ export default function ProfilePage() {
           const userData = await profileResponse.json()
           setUser(userData)
           setProfileData({
-            name: userData.name || "",
+            name: (userData.name && userData.name !== ";Updated name;" && userData.name.trim() !== "") ? userData.name : (session?.user?.name || ""),
             bio: userData.bio || "",
             website: userData.website || ""
           })
@@ -392,7 +392,7 @@ export default function ProfilePage() {
           <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-foreground flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-400" />
+                <CheckCircle className="w-5 h-5 text-muted-foreground" />
                 Connected Accounts
               </CardTitle>
             </CardHeader>
@@ -428,17 +428,17 @@ export default function ProfilePage() {
                       )}
                       <div>
                         <p className="font-medium text-muted-foreground text-sm">
-                          {account.platform === 'DISCORD' && 'Discord account'}
-                          {account.platform === 'INSTAGRAM' && 'Instagram account'}
-                          {account.platform === 'YOUTUBE' && 'YouTube account'}
-                          {account.platform === 'TIKTOK' && 'TikTok account'}
-                          {account.platform === 'TWITTER' && 'X (Twitter) account'}
+                          {account.platform === 'DISCORD' && 'Discord'}
+                          {account.platform === 'INSTAGRAM' && 'Instagram'}
+                          {account.platform === 'YOUTUBE' && 'YouTube'}
+                          {account.platform === 'TIKTOK' && 'TikTok'}
+                          {account.platform === 'TWITTER' && 'X'}
                         </p>
                         <p className="text-xs text-foreground">
                           {account.isOAuth ? account.username : `@${account.username}`}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          ✓ {account.isOAuth ? 'Connected' : 'Verified'}
+                          <span className="text-green-400">✓</span> {account.isOAuth ? 'Connected' : 'Verified'}
                         </p>
                       </div>
                     </div>
