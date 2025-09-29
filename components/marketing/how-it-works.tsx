@@ -29,7 +29,38 @@ export function HowItWorks() {
           </p>
         </div>
 
-        <div className="space-y-16">
+        {/* Desktop Layout: Text left, Image right */}
+        <div className="hidden md:flex gap-16 items-start">
+          <div className="flex-1">
+            <div className="space-y-16">
+              {steps.map((step, index) => (
+                <div key={step.number} className="flex gap-8 items-start">
+                  <div className="flex-shrink-0">
+                    <span className="text-3xl font-light text-muted-foreground">
+                      {step.number}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-normal text-lg mb-2">{step.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex-shrink-0 w-80">
+            <img
+              src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/howitworks.png"
+              alt="How It Works"
+              className="w-full h-auto rounded-lg"
+            />
+          </div>
+        </div>
+
+        {/* Mobile Layout: Single column */}
+        <div className="md:hidden space-y-16">
           {steps.map((step, index) => (
             <div key={step.number} className="flex gap-8 items-start">
               <div className="flex-shrink-0">

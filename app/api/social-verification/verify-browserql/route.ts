@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 
 // Import the working scraping functions directly
 
+
 // YouTube channel description checking via Apify (pratikdani/youtube-profile-scraper)
 async function checkYouTubeBio(username: string, code: string): Promise<boolean> {
   try {
@@ -16,108 +17,75 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
 
     console.log(`🔍 Checking YouTube channel via Apify: @${username}`)
 
-    // Try multiple YouTube URL formats
-    const youtubeUrls = [
-      `https://www.youtube.com/@${username}`,
-      `https://www.youtube.com/c/${username}`,
-      `https://www.youtube.com/channel/${username}`,
-      `https://www.youtube.com/user/${username}`
-    ]
+    // Use pratikdani/youtube-profile-scraper
+    const runResponse = await fetch('https://api.apify.com/v2/acts/pratikdani~youtube-profile-scraper/runs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${APIFY_API_KEY}`
+      },
+      body: JSON.stringify({
+        "url": `https://www.youtube.com/@${username}`
+      })
+    })
 
-    for (const url of youtubeUrls) {
-      try {
-        console.log(`🔄 Trying YouTube URL: ${url}`)
+    if (!runResponse.ok) {
+      console.error(`❌ YouTube Apify run failed: ${runResponse.status}`)
+      return false
+    }
 
-        // Use pratikdani/youtube-profile-scraper
-        const runResponse = await fetch('https://api.apify.com/v2/acts/pratikdani~youtube-profile-scraper/runs', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${APIFY_API_KEY}`
-          },
-          body: JSON.stringify({
-            "url": url
-          })
+    const runData = await runResponse.json()
+    const runId = runData.data.id
+    const datasetId = runData.data.defaultDatasetId
+
+    // Wait for completion (longer timeout for YouTube as it takes more time)
+    const maxWaitTime = 60000 // 60 seconds for YouTube
+    const checkInterval = 2000
+    let elapsed = 0
+
+    while (elapsed < maxWaitTime) {
+      await new Promise(resolve => setTimeout(resolve, checkInterval))
+      elapsed += checkInterval
+
+      const statusResponse = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+        headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
+      })
+
+      if (!statusResponse.ok) break
+
+      const statusData = await statusResponse.json()
+      const runStatus = statusData.data.status
+
+      if (runStatus === 'SUCCEEDED') {
+        const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
+          headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
         })
 
-        if (!runResponse.ok) {
-          console.log(`❌ YouTube Apify run failed for ${url}: ${runResponse.status}`)
-          continue
+        if (!resultsResponse.ok) return false
+
+        const resultsData = await resultsResponse.json()
+        if (!resultsData || resultsData.length === 0) return false
+
+        const profile = resultsData[0]
+        const description = profile.Description || profile.description || ''
+
+        if (!description) {
+          console.error(`❌ No description found in YouTube data for: ${username}`)
+          return false
         }
 
-        const runData = await runResponse.json()
-        const runId = runData.data.id
-        const datasetId = runData.data.defaultDatasetId
+        const codeFound = description.includes(code)
+        console.log(`YouTube description check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
 
-        console.log(`✅ YouTube Apify run started: ${runId}`)
+        return codeFound
 
-        // Wait for completion (longer timeout for YouTube)
-        const maxWaitTime = 60000 // 60 seconds for YouTube
-        const checkInterval = 2000
-        let elapsed = 0
-
-        while (elapsed < maxWaitTime) {
-          await new Promise(resolve => setTimeout(resolve, checkInterval))
-          elapsed += checkInterval
-
-          const statusResponse = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
-            headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
-          })
-
-          if (!statusResponse.ok) break
-
-          const statusData = await statusResponse.json()
-          const runStatus = statusData.data.status
-
-          console.log(`🔄 YouTube status: ${runStatus} (${Math.round(elapsed/1000)}s)`)
-
-          if (runStatus === 'SUCCEEDED') {
-            const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=1`, {
-              headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
-            })
-
-            if (!resultsResponse.ok) {
-              console.log(`❌ Failed to get YouTube results for ${url}`)
-              break
-            }
-
-            const resultsData = await resultsResponse.json()
-            if (!resultsData || resultsData.length === 0) {
-              console.log(`❌ No YouTube profile data returned for ${url}`)
-              break
-            }
-
-            const profile = resultsData[0]
-            const description = profile.Description || profile.description || ''
-
-            if (!description) {
-              console.error(`❌ No description found in YouTube data for: ${username} (${url})`)
-              break
-            }
-
-            console.log(`✅ Found YouTube channel: ${profile.name || profile.handle}`)
-            console.log(`📝 Description: "${description.substring(0, 100)}${description.length > 100 ? '...' : ''}"`)
-
-            const codeFound = description.includes(code)
-            console.log(`YouTube description check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
-
-            return codeFound
-
-          } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
-            console.error(`❌ YouTube Apify run failed for ${url}: ${runStatus}`)
-            break
-          }
-        }
-
-        console.error(`❌ YouTube Apify run timed out for ${url}`)
-
-      } catch (error) {
-        console.log(`❌ Error with YouTube URL ${url}: ${error}`)
-        continue
+      } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
+        console.error(`❌ YouTube Apify run failed: ${runStatus}`)
+        break
       }
     }
 
-    console.error(`❌ Could not find YouTube channel: ${username}`)
+    console.error(`❌ YouTube Apify run timed out`)
     return false
 
   } catch (error) {
@@ -243,16 +211,12 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
 
     if (!runResponse.ok) {
       console.error(`❌ Twitter Apify run failed: ${runResponse.status}`)
-      const errorText = await runResponse.text()
-      console.log(`❌ Twitter run creation error: ${errorText}`)
       return false
     }
 
     const runData = await runResponse.json()
     const runId = runData.data.id
     const datasetId = runData.data.defaultDatasetId
-
-    console.log(`✅ Twitter Apify run started: ${runId}`)
 
     // Wait for completion (longer timeout for Twitter)
     const maxWaitTime = 90000 // 90 seconds for Twitter
@@ -267,31 +231,20 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
         headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
       })
 
-      if (!statusResponse.ok) {
-        console.error(`❌ Failed to check Twitter run status: ${statusResponse.status}`)
-        break
-      }
+      if (!statusResponse.ok) break
 
       const statusData = await statusResponse.json()
       const runStatus = statusData.data.status
-
-      console.log(`🔄 Twitter status: ${runStatus} (${Math.round(elapsed/1000)}s)`)
 
       if (runStatus === 'SUCCEEDED') {
         const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=10`, {
           headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
         })
 
-        if (!resultsResponse.ok) {
-          console.error(`❌ Failed to get Twitter results: ${resultsResponse.status}`)
-          return false
-        }
+        if (!resultsResponse.ok) return false
 
         const resultsData = await resultsResponse.json()
-        if (!resultsData || resultsData.length === 0) {
-          console.error(`❌ No Twitter profile data returned for: ${username}`)
-          return false
-        }
+        if (!resultsData || resultsData.length === 0) return false
 
         // Check multiple profiles if returned (sometimes multiple users match)
         for (const profile of resultsData) {
@@ -299,7 +252,6 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
           if (usernameMatch) {
             const description = profile.description || profile.bio || ''
             console.log(`✅ Found matching Twitter profile: @${profile.username}`)
-            console.log(`📝 Description: "${description}"`)
 
             if (!description) {
               console.error(`❌ No description found in Twitter data for: ${username}`)
@@ -662,6 +614,98 @@ export async function POST(request: NextRequest) {
     // Clean username (remove @ if present)
     const cleanUsername = username.replace('@', '')
 
+    // Clean up any duplicate or expired verification records for this user/platform
+    try {
+      const platformMap: Record<string, string> = {
+        instagram: 'INSTAGRAM',
+        youtube: 'YOUTUBE',
+        tiktok: 'TIKTOK',
+        twitter: 'TWITTER'
+      }
+      const platformEnum = platformMap[platform.toLowerCase()]
+
+      // Delete expired verifications
+      const expiredDeleted = await prisma.socialVerification.deleteMany({
+        where: {
+          userId: session.user.id,
+          platform: platformEnum as any,
+          expiresAt: {
+            lt: new Date()
+          }
+        }
+      })
+
+      if (expiredDeleted.count > 0) {
+        logs.push(`🧹 Cleaned up ${expiredDeleted.count} expired verification(s)`)
+      }
+
+      // Delete duplicate unverified verifications (keep only the most recent)
+      const allVerifications = await prisma.socialVerification.findMany({
+        where: {
+          userId: session.user.id,
+          platform: platformEnum as any,
+          verified: false,
+          expiresAt: {
+            gt: new Date()
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      })
+
+      if (allVerifications.length > 1) {
+        const toDelete = allVerifications.slice(1) // Keep only the most recent
+        for (const verification of toDelete) {
+          await prisma.socialVerification.delete({
+            where: { id: verification.id }
+          })
+        }
+        logs.push(`🧹 Cleaned up ${toDelete.length} duplicate verification(s)`)
+      }
+    } catch (cleanupError) {
+      logs.push(`⚠️ Could not clean up verifications: ${cleanupError}`)
+      // Don't fail the whole process for cleanup issues
+    }
+
+    // Check if this profile is already verified for this user
+    try {
+      const platformMap: Record<string, string> = {
+        instagram: 'INSTAGRAM',
+        youtube: 'YOUTUBE',
+        tiktok: 'TIKTOK',
+        twitter: 'TWITTER'
+      }
+      const platformEnum = platformMap[platform.toLowerCase()]
+
+      const existingAccount = await prisma.socialAccount.findFirst({
+        where: {
+          userId: session.user.id,
+          platform: platformEnum as any,
+          username: {
+            equals: cleanUsername,
+            mode: 'insensitive'
+          }
+        }
+      })
+
+      if (existingAccount && existingAccount.verified) {
+        logs.push(`✅ Profile @${cleanUsername} is already verified`)
+        return NextResponse.json({
+          success: true,
+          verified: true,
+          message: `✅ Profile @${cleanUsername} is already verified for ${platform}`,
+          logs,
+          platform: platform,
+          username: cleanUsername,
+          existing: true
+        })
+      }
+    } catch (checkError) {
+      logs.push(`⚠️ Could not check existing accounts: ${checkError}`)
+      // Continue with verification even if check fails
+    }
+
     // Check the bio using our Apify integration
     let codeFound = false
     let bio = ""
@@ -691,7 +735,7 @@ export async function POST(request: NextRequest) {
           bio = verificationCode
         }
         break
-        
+
       case 'tiktok':
         logs.push(`🎵 Checking TikTok bio via Apify for @${cleanUsername}`)
         codeFound = await checkTikTokBio(cleanUsername, verificationCode)
@@ -699,21 +743,13 @@ export async function POST(request: NextRequest) {
           bio = verificationCode
         }
         break
-        
-      default:
-        logs.push(`❌ Unsupported platform: ${platform}`)
-        return NextResponse.json({ 
-          success: false,
-          error: `Unsupported platform: ${platform}`,
-          logs
-        }, { status: 400 })
     }
 
     logs.push(`🔍 Code search result: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
 
     if (codeFound) {
       logs.push(`🎯 Code found! Saving to database...`)
-      
+
       // Mark verification as verified
       const platformMap: Record<string, string> = {
         instagram: 'INSTAGRAM',
@@ -723,30 +759,40 @@ export async function POST(request: NextRequest) {
       }
       const platformEnum = platformMap[platform.toLowerCase()]
 
-      await prisma.socialVerification.updateMany({
-        where: {
-          userId: session.user.id,
-          platform: platformEnum as any,
-          code: verificationCode,
-          verified: false
-        },
+      try {
+        await prisma.socialVerification.updateMany({
+          where: {
+            userId: session.user.id,
+            platform: platformEnum as any,
+            code: verificationCode,
+            verified: false
+          },
           data: {
             verified: true,
-          verifiedAt: new Date()
-        }
-      })
+            verifiedAt: new Date()
+          }
+        })
+        logs.push(`✅ Updated verification record to verified`)
+      } catch (verificationError) {
+        logs.push(`❌ Failed to update verification record: ${verificationError instanceof Error ? verificationError.message : String(verificationError)}`)
+        // Don't fail the whole process for this
+      }
 
-      // Check if account already exists
+      // Check if account already exists (case-insensitive username matching)
       const existingAccount = await prisma.socialAccount.findFirst({
         where: {
           userId: session.user.id,
           platform: platformEnum as any,
-          username: cleanUsername
+          username: {
+            equals: cleanUsername,
+            mode: 'insensitive'
+          }
         }
       })
-      
-      if (existingAccount) {
-        // Update existing account
+
+      try {
+        if (existingAccount) {
+          // Update existing account
           await prisma.socialAccount.update({
             where: { id: existingAccount.id },
             data: {
@@ -754,21 +800,25 @@ export async function POST(request: NextRequest) {
               verifiedAt: new Date()
             }
           })
-        logs.push(`🔄 Updated existing account for @${cleanUsername}`)
-      } else {
-        // Create new account
-        await prisma.socialAccount.create({
-          data: {
-            userId: session.user.id,
-            platform: platformEnum as any,
-            username: cleanUsername,
-            displayName: `@${cleanUsername}`,
-            platformId: `${platform}_${cleanUsername}_${Date.now()}`,
-            verified: true,
-            verifiedAt: new Date()
-          }
-        })
-        logs.push(`✨ Created new account for @${cleanUsername}`)
+          logs.push(`🔄 Updated existing account for @${cleanUsername}`)
+        } else {
+          // Create new account
+          await prisma.socialAccount.create({
+            data: {
+              userId: session.user.id,
+              platform: platformEnum as any,
+              username: cleanUsername,
+              displayName: `@${cleanUsername}`,
+              platformId: `${platform}_${cleanUsername}_${Date.now()}`,
+              verified: true,
+              verifiedAt: new Date()
+            }
+          })
+          logs.push(`✨ Created new account for @${cleanUsername}`)
+        }
+      } catch (accountError) {
+        logs.push(`❌ Failed to save social account: ${accountError instanceof Error ? accountError.message : String(accountError)}`)
+        // Don't fail the whole process for this
       }
 
       logs.push(`✅ Verification saved to database`)
@@ -783,6 +833,12 @@ export async function POST(request: NextRequest) {
         username: cleanUsername
       })
     } else {
+      logs.push(`❌ Verification failed - code not found in bio`)
+      logs.push(`📋 Final logs summary:`)
+      logs.forEach((log, index) => {
+        logs.push(`  ${index + 1}. ${log}`)
+      })
+
       return NextResponse.json({
         success: false,
         verified: false,
@@ -791,7 +847,11 @@ export async function POST(request: NextRequest) {
         logs,
         bio: bio.substring(0, 500),
         platform: platform,
-        username: cleanUsername
+        username: cleanUsername,
+        debugInfo: {
+          codeSearched: verificationCode,
+          timestamp: new Date().toISOString()
+        }
       }, { status: 400 })
     }
 

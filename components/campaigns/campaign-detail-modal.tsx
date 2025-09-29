@@ -12,25 +12,34 @@ interface CampaignDetailModalProps {
   campaign: {
     id: string
     title: string
-    client: string
-    industry: string
+    creator: string
     description: string
     budget: number
-    budgetSpent: number
-    viewGoal: number
-    viewsGenerated: number
-    duration: string
-    timeRemaining: string
-    payoutStructure: string
-    platforms: string[]
+    spent: number
+    minPayout: number
+    maxPayout: number
+    deadline: string
+    status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
+    targetPlatforms: string[]
     requirements: string[]
-    status: "active" | "ending-soon" | "launching-soon"
-    participants: number
+    createdAt: string
+    _count: {
+      submissions: number
+    }
+    // Additional computed fields for UI
+    industry?: string
+    viewGoal?: number
+    viewsGenerated?: number
+    duration?: string
+    timeRemaining?: string
+    payoutStructure?: string
+    participants?: number
     maxParticipants?: number
-    difficulty: "beginner" | "intermediate" | "advanced"
-    estimatedEarnings: { min: number; max: number }
+    featured?: boolean
+    difficulty?: "beginner" | "intermediate" | "advanced"
+    estimatedEarnings?: { min: number; max: number }
     exampleContent?: string
-    tags: string[]
+    tags?: string[]
     clientLogo?: string
   }
   isOpen: boolean
@@ -74,7 +83,7 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                         <div className="flex-shrink-0">
                           <Image
                             src={campaign.clientLogo}
-                            alt={campaign.client}
+                            alt={campaign.creator}
                             width={32}
                             height={32}
                             className="rounded-md object-cover ring-1 ring-border"
@@ -83,7 +92,7 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                         </div>
                       )}
                       <p className="text-muted-foreground">
-                        {campaign.client} • {campaign.industry}
+                        {campaign.creator} • Entertainment
                       </p>
                     </div>
                   </div>
@@ -123,7 +132,7 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">View Goal:</span>
                         <span className="text-sm font-medium text-white">
-                          {(campaign.viewGoal / 1000000).toFixed(1)}M views
+                          {campaign.viewGoal ? `${(campaign.viewGoal / 1000000).toFixed(1)}M views` : "TBD"}
                         </span>
                       </div>
                     </div>
@@ -139,7 +148,7 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Potential Earnings:</span>
                         <span className="text-sm font-medium text-white">
-                          ${campaign.estimatedEarnings.min}-${campaign.estimatedEarnings.max}
+                          {campaign.estimatedEarnings ? `$${campaign.estimatedEarnings.min}-$${campaign.estimatedEarnings.max}` : "TBD"}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -159,24 +168,26 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
                     <div>
                       <div className="flex justify-between text-sm mb-1">
                         <span className="text-muted-foreground">Budget Spent</span>
-                        <span className="text-white">${campaign.budgetSpent.toLocaleString()} / ${campaign.budget.toLocaleString()}</span>
+                        <span className="text-white">${campaign.spent.toLocaleString()} / ${campaign.budget.toLocaleString()}</span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div 
                           className="bg-foreground h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${getProgressPercentage(campaign.budgetSpent, campaign.budget)}%` }}
+                          style={{ width: `${getProgressPercentage(campaign.spent, campaign.budget)}%` }}
                         />
                       </div>
                     </div>
                     <div>
                       <div className="flex justify-between text-sm mb-1">
                         <span className="text-muted-foreground">Views Generated</span>
-                        <span className="text-white">{(campaign.viewsGenerated / 1000000).toFixed(1)}M / {(campaign.viewGoal / 1000000).toFixed(1)}M</span>
+                        <span className="text-white">
+                          {campaign.viewsGenerated ? `${(campaign.viewsGenerated / 1000000).toFixed(1)}M` : "0"} / {campaign.viewGoal ? `${(campaign.viewGoal / 1000000).toFixed(1)}M` : "TBD"}
+                        </span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div 
                           className="bg-foreground h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${getProgressPercentage(campaign.viewsGenerated, campaign.viewGoal)}%` }}
+                          style={{ width: `${getProgressPercentage(campaign.viewsGenerated || 0, campaign.viewGoal || 1)}%` }}
                         />
                       </div>
                     </div>
@@ -199,11 +210,11 @@ export function CampaignDetailModal({ campaign, isOpen, onClose }: CampaignDetai
 
                 {/* Actions */}
                 <div className="flex gap-3 pt-4 border-t border-border">
-                  <Button 
+                  <Button
                     className="flex-1"
-                    disabled={campaign.status === "launching-soon"}
+                    disabled={campaign.status === "DRAFT"}
                   >
-                    {campaign.status === "launching-soon" ? "Coming Soon" : "Join Campaign"}
+                    {campaign.status === "DRAFT" ? "Coming Soon" : "Join Campaign"}
                   </Button>
                   {campaign.exampleContent && (
                     <Button variant="outline" asChild>

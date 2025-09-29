@@ -110,6 +110,28 @@ export async function POST(request: NextRequest) {
       console.log(`🔄 Deleted ${deletedCount.count} existing verification(s) for ${username} on ${platform}`)
     }
 
+    if (existingVerification && !force) {
+      return NextResponse.json({
+        code: existingVerification.code,
+        expiresAt: existingVerification.expiresAt,
+        platform: existingVerification.platform,
+        username: username,
+        existing: true
+      })
+    }
+
+    // Delete ALL existing unverified verifications for this user/platform if regenerating
+    if (force || existingVerification) {
+      const deletedCount = await prisma.socialVerification.deleteMany({
+        where: {
+          userId: session.user.id,
+          platform: platformEnum as any,
+          verified: false
+        }
+      })
+      console.log(`🔄 Deleted ${deletedCount.count} existing verification(s) for ${username} on ${platform}`)
+    }
+
     // Generate new code
     const code = generateVerificationCode()
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours

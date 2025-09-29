@@ -294,92 +294,88 @@ export default function ProfilePage() {
                 Connect your accounts to participate in campaigns
               </p>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 {/* YouTube */}
                 <SocialVerificationDialog
                   platform="youtube"
-                  icon={<Youtube className="w-4 h-4 text-red-400" />}
+                  icon={<Youtube className="w-5 h-5 text-red-400" />}
                   platformName="YouTube"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-red-500/10 rounded-full flex items-center justify-center">
-                        <Youtube className="w-4 h-4 text-red-400" />
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60 group">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-10 h-10 bg-red-500/10 rounded-full flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
+                        <Youtube className="w-5 h-5 text-red-400" />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-foreground text-sm">YouTube</h3>
-                        <p className="text-xs text-muted-foreground">Not verified</p>
+                      <div className="text-center">
+                        <h3 className="font-medium text-foreground text-sm hidden sm:block">YouTube</h3>
+                        <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 mt-1">
+                          Verify
+                        </Button>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60">
-                      Verify
-                    </Button>
                   </div>
                 </SocialVerificationDialog>
 
                 {/* Instagram */}
                 <SocialVerificationDialog
                   platform="instagram"
-                  icon={<Instagram className="w-4 h-4 text-purple-400" />}
+                  icon={<Instagram className="w-5 h-5 text-purple-400" />}
                   platformName="Instagram"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500/8 to-pink-500/8 rounded-full flex items-center justify-center">
-                        <Instagram className="w-4 h-4 text-purple-400" />
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60 group">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500/8 to-pink-500/8 rounded-full flex items-center justify-center group-hover:from-purple-500/12 group-hover:to-pink-500/12 transition-all">
+                        <Instagram className="w-5 h-5 text-purple-400" />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-foreground text-sm">Instagram</h3>
-                        <p className="text-xs text-muted-foreground">Not verified</p>
+                      <div className="text-center">
+                        <h3 className="font-medium text-foreground text-sm hidden sm:block">Instagram</h3>
+                        <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 mt-1">
+                          Verify
+                        </Button>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60">
-                      Verify
-                    </Button>
                   </div>
                 </SocialVerificationDialog>
 
                 {/* TikTok */}
                 <SocialVerificationDialog
                   platform="tiktok"
-                  icon={<Music className="w-4 h-4 text-slate-300" />}
+                  icon={<Music className="w-5 h-5 text-slate-300" />}
                   platformName="TikTok"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-slate-500/10 rounded-full flex items-center justify-center">
-                        <Music className="w-4 h-4 text-slate-300" />
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60 group">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-500/10 rounded-full flex items-center justify-center group-hover:bg-slate-500/20 transition-colors">
+                        <Music className="w-5 h-5 text-slate-300" />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-foreground text-sm">TikTok</h3>
-                        <p className="text-xs text-muted-foreground">Not verified</p>
+                      <div className="text-center">
+                        <h3 className="font-medium text-foreground text-sm hidden sm:block">TikTok</h3>
+                        <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 mt-1">
+                          Verify
+                        </Button>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60">
-                      Verify
-                    </Button>
                   </div>
                 </SocialVerificationDialog>
 
                 {/* X (Twitter) */}
                 <SocialVerificationDialog
                   platform="twitter"
-                  icon={<span className="text-slate-300 font-bold text-sm">𝕏</span>}
+                  icon={<span className="text-slate-300 font-bold text-lg">𝕏</span>}
                   platformName="X (Twitter)"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-slate-500/10 rounded-full flex items-center justify-center">
-                        <span className="text-slate-300 font-bold text-sm">𝕏</span>
+                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60 group">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-500/10 rounded-full flex items-center justify-center group-hover:bg-slate-500/20 transition-colors">
+                        <span className="text-slate-300 font-bold text-lg">𝕏</span>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-foreground text-sm">X (Twitter)</h3>
-                        <p className="text-xs text-muted-foreground">Not verified</p>
+                      <div className="text-center">
+                        <h3 className="font-medium text-foreground text-sm hidden sm:block">X (Twitter)</h3>
+                        <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 mt-1">
+                          Verify
+                        </Button>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60">
-                      Verify
-                    </Button>
                   </div>
                 </SocialVerificationDialog>
               </div>

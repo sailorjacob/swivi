@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Clock, DollarSign, Users, TrendingUp, Eye, Filter, Search, Play, ExternalLink, Calendar, Target, Globe } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,191 +10,138 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CampaignDetailModal } from "./campaign-detail-modal"
 import Link from "next/link"
 import Image from "next/image"
+import { toast } from "sonner"
 
 interface LiveCampaign {
   id: string
   title: string
-  client: string
-  industry: string
   description: string
+  creator: string
   budget: number
-  budgetSpent: number
-  viewGoal: number
-  viewsGenerated: number
-  duration: string
-  timeRemaining: string
-  payoutStructure: string
-  platforms: string[]
+  spent: number
+  minPayout: number
+  maxPayout: number
+  deadline: string
+  status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
+  targetPlatforms: string[]
   requirements: string[]
-  status: "active" | "ending-soon" | "launching-soon"
-  participants: number
+  createdAt: string
+  _count: {
+    submissions: number
+  }
+  // Additional computed fields for UI
+  industry?: string
+  viewGoal?: number
+  viewsGenerated?: number
+  duration?: string
+  timeRemaining?: string
+  payoutStructure?: string
+  participants?: number
   maxParticipants?: number
-  featured: boolean
-  difficulty: "beginner" | "intermediate" | "advanced"
-  estimatedEarnings: { min: number; max: number }
+  featured?: boolean
+  difficulty?: "beginner" | "intermediate" | "advanced"
+  estimatedEarnings?: { min: number; max: number }
   exampleContent?: string
-  tags: string[]
+  tags?: string[]
   clientLogo?: string
 }
 
-const liveCampaigns: LiveCampaign[] = [
-  {
-    id: "campaign-1",
-    title: "Owning Manhattan Netflix Series",
-    client: "Owning Manhattan",
-    industry: "Entertainment/TV",
-    description: "Create viral clips showcasing the luxury real estate and drama from Netflix's hit series Owning Manhattan. Focus on the most engaging moments and character interactions.",
-    budget: 3000,
-    budgetSpent: 750,
-    viewGoal: 3000000,
-    viewsGenerated: 850000,
-    duration: "10 days",
-    timeRemaining: "6 days",
-    payoutStructure: "$1.25 per 1K views",
-    platforms: ["TikTok", "YouTube Shorts", "Instagram Reels"],
-    requirements: [
-      "Netflix series content focus",
-      "0.5% minimum engagement rate",
-      "10+ seconds duration",
-      "Include #OwningManhattan hashtag"
-    ],
-    status: "active",
-    participants: 32,
-    maxParticipants: 75,
-    featured: true,
-    difficulty: "beginner",
-    estimatedEarnings: { min: 30, max: 120 },
-    exampleContent: "https://www.instagram.com/reel/DOKGK_ciO-9/",
-    tags: ["Netflix", "Reality TV", "Luxury", "Trending"],
-    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
-  },
-  {
-    id: "campaign-2", 
-    title: "Sportz Playz Betting Campaign",
-    client: "Sportz Playz",
-    industry: "Sports/Gaming",
-    description: "Create engaging sports betting content and highlights. Focus on game predictions, betting tips, and exciting sports moments that drive engagement.",
-    budget: 2500,
-    budgetSpent: 1200,
-    viewGoal: 2500000,
-    viewsGenerated: 1600000,
-    duration: "12 days",
-    timeRemaining: "3 days",
-    payoutStructure: "$1.50 per 1K views",
-    platforms: ["Instagram Reels", "TikTok", "YouTube Shorts"],
-    requirements: [
-      "Sports/betting content focus",
-      "0.5% minimum engagement rate",
-      "8+ seconds duration",
-      "Include #SportzPlayz hashtag"
-    ],
-    status: "ending-soon",
-    participants: 28,
-    maxParticipants: 60,
-    featured: false,
-    difficulty: "intermediate",
-    estimatedEarnings: { min: 25, max: 150 },
-    tags: ["Sports", "Betting", "High-Engagement"],
-    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png"
-  },
-  {
-    id: "campaign-3",
-    title: "Rod Khleif Real Estate Content",
-    client: "Rod Khleif",
-    industry: "Real Estate/Education",
-    description: "Create educational content around real estate investing, property management, and wealth building strategies from renowned real estate expert Rod Khleif.",
-    budget: 4000,
-    budgetSpent: 0,
-    viewGoal: 4000000,
-    viewsGenerated: 0,
-    duration: "14 days",
-    timeRemaining: "Launches in 2 days",
-    payoutStructure: "$1.75 per 1K views",
-    platforms: ["YouTube Shorts", "TikTok", "Instagram Reels"],
-    requirements: [
-      "Real estate education focus",
-      "0.5% minimum engagement rate",
-      "15+ seconds duration",
-      "Educational and informative"
-    ],
-    status: "launching-soon",
-    participants: 0,
-    maxParticipants: 100,
-    featured: true,
-    difficulty: "intermediate",
-    estimatedEarnings: { min: 40, max: 200 },
-    tags: ["Real Estate", "Education", "Finance", "High-Payout"],
-    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/rodkhlief.avif"
-  },
-  {
-    id: "campaign-4",
-    title: "Shvfty Streaming Highlights",
-    client: "Shvfty",
-    industry: "Gaming/Streaming",
-    description: "Create viral moments from Twitch streams featuring epic gameplay, funny reactions, and community interactions. Perfect for gaming content creators.",
-    budget: 2000,
-    budgetSpent: 500,
-    viewGoal: 2200000,
-    viewsGenerated: 650000,
-    duration: "10 days",
-    timeRemaining: "7 days",
-    payoutStructure: "$1.20 per 1K views",
-    platforms: ["TikTok", "YouTube Shorts", "Instagram Reels"],
-    requirements: [
-      "Gaming/streaming content focus",
-      "0.5% minimum engagement rate",
-      "8+ seconds duration",
-      "Include #Shvfty hashtag"
-    ],
-    status: "active",
-    participants: 18,
-    maxParticipants: 50,
-    featured: false,
-    difficulty: "beginner",
-    estimatedEarnings: { min: 15, max: 85 },
-    tags: ["Gaming", "Streaming", "Highlights", "Community"],
-    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/shvty.jpeg"
-  }
-]
-
-const campaignStats = [
-  {
-    icon: Target,
-    label: "Active Activations",
-    value: "4",
-    description: "Available now"
-  },
-  {
-    icon: Users,
-    label: "Total Participants",
-    value: "78+",
-    description: "Clippers earning"
-  },
-  {
-    icon: DollarSign,
-    label: "Live Budgets",
-    value: "$11.5K",
-    description: "Available payouts"
-  },
-  {
-    icon: TrendingUp,
-    label: "Views Generated",
-    value: "3.7M",
-    description: "This week"
-  }
-]
-
-
 export function LiveCampaigns() {
+  const [campaigns, setCampaigns] = useState<LiveCampaign[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedDifficulty, setSelectedDifficulty] = useState("all")
   const [selectedCampaign, setSelectedCampaign] = useState<LiveCampaign | null>(null)
 
+  // Fetch campaigns from API
+  const fetchCampaigns = async () => {
+    try {
+      const params = new URLSearchParams()
+      if (selectedStatus !== "all") {
+        params.append("status", selectedStatus.toUpperCase())
+      }
+
+      const response = await fetch(`/api/campaigns?${params}`)
+      if (response.ok) {
+        const data = await response.json()
+        setCampaigns(data)
+      }
+    } catch (error) {
+      console.error("Error fetching campaigns:", error)
+      toast.error("Failed to fetch campaigns")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchCampaigns()
+  }, [selectedStatus])
+
+  // Transform API data to UI format
+  const transformCampaignForUI = (campaign: any): LiveCampaign => {
+    const now = new Date()
+    const deadline = new Date(campaign.deadline)
+    const daysUntilDeadline = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+
+    return {
+      ...campaign,
+      // Map API fields to UI fields
+      creator: campaign.creator,
+      budgetSpent: campaign.spent,
+      viewGoal: campaign.budget * 1000, // Estimate based on budget
+      viewsGenerated: 0, // This would come from aggregated view tracking
+      duration: `${Math.max(1, daysUntilDeadline)} days`,
+      timeRemaining: daysUntilDeadline > 0 ? `${daysUntilDeadline} days` : "Ended",
+      payoutStructure: `$${(campaign.minPayout + campaign.maxPayout) / 2} avg per 1K views`,
+      participants: campaign._count.submissions,
+      maxParticipants: Math.floor(campaign.budget / campaign.minPayout),
+      featured: campaign.status === "ACTIVE",
+      difficulty: campaign.requirements.length > 3 ? "advanced" : "beginner",
+      estimatedEarnings: {
+        min: campaign.minPayout * 10,
+        max: campaign.maxPayout * 50
+      },
+      tags: campaign.targetPlatforms,
+      status: campaign.status === "ACTIVE" ? "active" :
+              campaign.status === "COMPLETED" ? "completed" : "paused"
+    }
+  }
+
+  const liveCampaigns = campaigns.map(transformCampaignForUI)
+
+  // Calculate real stats
+  const campaignStats = [
+    {
+      icon: Target,
+      label: "Active Activations",
+      value: campaigns.filter(c => c.status === "ACTIVE").length.toString(),
+      description: "Available now"
+    },
+    {
+      icon: Users,
+      label: "Total Participants",
+      value: campaigns.reduce((sum, c) => sum + c._count.submissions, 0).toString() + "+",
+      description: "Clippers earning"
+    },
+    {
+      icon: DollarSign,
+      label: "Live Budgets",
+      value: `$${(campaigns.reduce((sum, c) => sum + c.budget, 0) / 1000).toFixed(1)}K`,
+      description: "Available payouts"
+    },
+    {
+      icon: TrendingUp,
+      label: "Views Generated",
+      value: "Live", // This would be calculated from view tracking
+      description: "Real-time tracking"
+    }
+  ]
+
   const filteredCampaigns = liveCampaigns.filter(campaign => {
     const matchesSearch = campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         campaign.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         campaign.industry.toLowerCase().includes(searchTerm.toLowerCase())
+                         (campaign.creator && campaign.creator.toLowerCase().includes(searchTerm.toLowerCase()))
     const matchesStatus = selectedStatus === "all" || campaign.status === selectedStatus
     const matchesDifficulty = selectedDifficulty === "all" || campaign.difficulty === selectedDifficulty
     return matchesSearch && matchesStatus && matchesDifficulty
@@ -223,6 +170,21 @@ export function LiveCampaigns() {
 
   const getProgressPercentage = (spent: number, total: number) => {
     return Math.min((spent / total) * 100, 100)
+  }
+
+  // Helper function to get budget spent (for backward compatibility)
+  const getBudgetSpent = (campaign: LiveCampaign) => {
+    return campaign.spent || 0
+  }
+
+  if (loading) {
+    return (
+      <div className="w-full">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Loading campaigns...</div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -301,8 +263,8 @@ export function LiveCampaigns() {
                         {campaign.clientLogo && (
                           <div className="flex-shrink-0">
                             <Image
-                              src={campaign.clientLogo}
-                              alt={campaign.client}
+                              src={campaign.clientLogo || ""}
+                              alt={campaign.creator}
                               width={28}
                               height={28}
                               className="rounded-md object-cover ring-1 ring-black/10"
@@ -311,7 +273,7 @@ export function LiveCampaigns() {
                           </div>
                         )}
                         <p className="text-sm text-muted-foreground">
-                          {campaign.client} • {campaign.industry}
+                          {campaign.creator} • Entertainment
                         </p>
                       </div>
                     </div>
@@ -325,12 +287,12 @@ export function LiveCampaigns() {
                   <div className="mb-4">
                     <div className="flex justify-between text-xs text-muted-foreground mb-1">
                       <span>Budget Progress</span>
-                      <span>${campaign.budgetSpent.toLocaleString()} / ${campaign.budget.toLocaleString()}</span>
+                      <span>${campaign.spent.toLocaleString()} / ${campaign.budget.toLocaleString()}</span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-foreground h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${getProgressPercentage(campaign.budgetSpent, campaign.budget)}%` }}
+                        style={{ width: `${getProgressPercentage(getBudgetSpent(campaign), campaign.budget)}%` }}
                       />
                     </div>
                   </div>
@@ -359,7 +321,7 @@ export function LiveCampaigns() {
                       <div className="flex justify-between">
                         <span className="text-xs text-muted-foreground">Potential:</span>
                         <span className="text-xs font-medium">
-                          ${campaign.estimatedEarnings.min}-${campaign.estimatedEarnings.max}
+                          {campaign.estimatedEarnings ? `$${campaign.estimatedEarnings.min}-$${campaign.estimatedEarnings.max}` : "TBD"}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -369,7 +331,7 @@ export function LiveCampaigns() {
                       <div className="flex justify-between">
                         <span className="text-xs text-muted-foreground">Views Goal:</span>
                         <span className="text-xs font-medium">
-                          {(campaign.viewGoal / 1000000).toFixed(1)}M
+                          {campaign.viewGoal ? `${(campaign.viewGoal / 1000000).toFixed(1)}M` : "TBD"}
                         </span>
                       </div>
                     </div>
@@ -379,12 +341,12 @@ export function LiveCampaigns() {
 
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="flex-1"
-                      disabled={campaign.status === "launching-soon"}
+                      disabled={campaign.status === "DRAFT"}
                     >
-                      {campaign.status === "launching-soon" ? "Coming Soon" : "Join Campaign"}
+                      {campaign.status === "DRAFT" ? "Coming Soon" : "Join Campaign"}
                     </Button>
                     <Button 
                       size="sm" 
