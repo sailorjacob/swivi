@@ -37,6 +37,7 @@ export default function HomePage() {
       <BottomBackground
         src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/3422.png"
         alt="Swivi Background Branding"
+        triggerScroll={60}
       />
     </DarkThemeWrapper>
   )
