@@ -58,20 +58,6 @@ const features = [
 const campaigns = [
   {
     id: 1,
-    title: "Ed Sheeran Pizza Review",
-    description: "Caleb Simpson's viral collaboration with Ed Sheeran showcasing authentic brand partnerships that resonate with millions.",
-    highlights: [
-      { value: "2.5M+", label: "Views Generated" },
-      { value: "85K+", label: "Engagements" },
-      { value: "4.2%", label: "Engagement Rate" },
-      { value: "12+", label: "Platforms" }
-    ],
-    image: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif",
-    link: "#",
-    linkText: "View Case Study"
-  },
-  {
-    id: 2,
     title: "Zeussy Clips",
     description: "Join our exclusive community of content creators and earn $1,000 for every 1M views generated.",
     highlights: [
@@ -88,59 +74,28 @@ const campaigns = [
 
 const images = [
   {
-    src: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/Caleb%20Simpson%20x%20Ed%20Sheeran%20Pizza%20Review.jpg",
-    alt: "Ed Sheeran Campaign"
-  },
-  {
     src: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png",
     alt: "Zeussy Campaign"
   }
 ]
 
 const ImageSwitcher = () => {
-  const [currentIndex, setCurrentIndex] = useState(0)
-
-  const nextImage = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length)
-  }
-
   return (
     <div className="relative w-full max-w-md aspect-[4/3]">
-      {images.map((image, index) => {
-        const isActive = index === currentIndex
-        const offset = images.length - 1 - index // Reverse order for stacking
-
-        return (
-          <motion.div
-            key={index}
-            className={`absolute rounded-2xl overflow-hidden shadow-lg cursor-pointer ${
-              isActive ? 'z-10' : 'z-0'
-            }`}
-            onClick={nextImage}
-            initial={{ opacity: 0, scale: 0.8, y: 50 }}
-            animate={{
-              opacity: isActive ? 1 : 0.6,
-              scale: isActive ? 1 : 0.85,
-              x: isActive ? 0 : offset * -8, // Offset non-active cards to the left
-              y: isActive ? 0 : offset * 8,  // Offset non-active cards down
-              zIndex: isActive ? 10 : 5 - offset
-            }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            style={{
-              width: isActive ? '100%' : '90%',
-              height: isActive ? '100%' : '90%'
-            }}
-          >
-            <Image
-              src={image.src}
-              alt={image.alt}
-              fill
-              className="object-cover"
-              priority={index === 0}
-            />
-          </motion.div>
-        )
-      })}
+      <motion.div
+        className="absolute rounded-2xl overflow-hidden shadow-lg"
+        initial={{ opacity: 0, scale: 0.8, y: 50 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
+      >
+        <Image
+          src={images[0].src}
+          alt={images[0].alt}
+          fill
+          className="object-cover"
+          priority
+        />
+      </motion.div>
     </div>
   )
 }
