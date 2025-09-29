@@ -44,7 +44,7 @@ export function BottomBackground({
   return (
     <div
       className={`
-        fixed bottom-60 left-0 right-0 z-0
+        fixed bottom-12 left-0 right-0 z-0
         transition-all duration-1500 ease-out
         ${animate ? (isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none") : "opacity-100"}
         ${className}
@@ -57,7 +57,7 @@ export function BottomBackground({
           alt={alt}
           width={400}
           height={400}
-          className="absolute bottom-30 left-1/2 transform -translate-x-1/2 w-auto h-auto max-w-sm object-cover object-bottom"
+          className="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-auto h-auto max-w-sm object-cover object-bottom"
           style={{
             filter: "brightness(0.8) contrast(1.1)",
           }}
