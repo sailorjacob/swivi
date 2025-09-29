@@ -60,7 +60,20 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email
         token.name = user.name
 
-        // Don't set default role here - it will be fetched from database in session callback
+        // Fetch current role from database and set it in token
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { role: true }
+          })
+          if (dbUser) {
+            token.role = dbUser.role
+          }
+        } catch (error) {
+          console.error("Failed to fetch role for JWT token:", error)
+          // Keep existing role or set default
+          token.role = token.role || "CLIPPER"
+        }
       }
 
       if (account) {
@@ -73,30 +86,21 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string
+        session.user.role = token.role as string
         session.accessToken = token.accessToken as string
 
-        // Always fetch current role from database to ensure it's up to date
+        // Update session name from database if available and valid
         try {
           const user = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { name: true, role: true }
+            select: { name: true }
           })
 
-          if (user) {
-            session.user.role = user.role
-
-            // Update session name from database if available and valid
-            if (user.name && user.name !== ";Updated name;" && user.name.trim() !== "") {
-              session.user.name = user.name
-            }
-          } else {
-            // Fallback to token role if user not found
-            session.user.role = token.role as string
+          if (user?.name && user.name !== ";Updated name;" && user.name.trim() !== "") {
+            session.user.name = user.name
           }
         } catch (error) {
-          console.error("Failed to update session role/name from database:", error)
-          // Fallback to token role if database query fails
-          session.user.role = token.role as string
+          console.error("Failed to update session name from database:", error)
         }
       }
       return session
