@@ -51,7 +51,7 @@ export function BottomBackground({
         ${className}
       `}
       style={{
-        transform: 'translateY(-200px)', // Position higher, between CTA and footer logo
+        transform: 'translateY(-280px)', // Position much higher to avoid dark bar effect
       }}
     >
       <div className="relative w-full h-32 overflow-hidden">
@@ -63,13 +63,13 @@ export function BottomBackground({
           height={400}
           className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-auto h-auto max-w-sm object-cover object-bottom"
           style={{
-            filter: "brightness(0.8) contrast(1.1)",
+            filter: "brightness(0.9) contrast(1.05)",
           }}
           unoptimized
         />
 
-        {/* Gradient overlay to fade into background */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+        {/* Gradient overlay to fade into background - much lighter */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-background/10 to-transparent" />
       </div>
     </div>
   )
