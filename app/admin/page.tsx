@@ -8,6 +8,8 @@ import { BarChart3, Users, Target, DollarSign, Settings, Shield, Activity, Loade
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import Image from "next/image"
+import { cn } from "@/lib/utils"
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
@@ -61,12 +63,29 @@ export default function AdminDashboard() {
     totalEarnings: 0
   }
 
+  const renderNavIcon = (icon: React.ComponentType<{ className?: string }> | string, className?: string) => {
+    if (typeof icon === 'string') {
+      return (
+        <Image
+          src={icon}
+          alt="nav icon"
+          width={32}
+          height={32}
+          className={cn("rounded", className)}
+          unoptimized
+        />
+      )
+    }
+    const IconComponent = icon
+    return <IconComponent className={className} />
+  }
+
   const quickActions = [
     {
       title: "Manage Campaigns",
       description: "Create and edit brand campaigns",
       href: "/admin/campaigns",
-      icon: Target,
+      icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png",
       color: "bg-muted border border-border"
     },
     {
@@ -87,7 +106,7 @@ export default function AdminDashboard() {
       title: "User Management",
       description: "Manage users and permissions",
       href: "/admin/users",
-      icon: Users,
+      icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/342.png",
       color: "bg-muted border border-border"
     }
   ]
@@ -199,7 +218,7 @@ export default function AdminDashboard() {
                   <CardContent className="p-6">
                     <div className="flex items-center mb-3">
                       <div className={`p-2 rounded-lg ${action.color}`}>
-                        <action.icon className="h-6 w-6 text-foreground" />
+                        {renderNavIcon(action.icon, "h-6 w-6 text-foreground")}
                       </div>
                     </div>
                     <h3 className="font-medium mb-1">{action.title}</h3>
@@ -211,55 +230,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Platform Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Total Campaigns</span>
-                  <span className="font-medium">{stats.totalCampaigns}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Total Submissions</span>
-                  <span className="font-medium">{stats.totalSubmissions}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Platform Health</span>
-                  <span className="font-medium text-green-600">Excellent</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm">View tracking system updated</span>
-                  <span className="text-xs text-muted-foreground ml-auto">2 min ago</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm">New campaign created</span>
-                  <span className="text-xs text-muted-foreground ml-auto">1 hour ago</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span className="text-sm">5 submissions approved</span>
-                  <span className="text-xs text-muted-foreground ml-auto">3 hours ago</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Footer */}
         <div className="mt-8 text-center">

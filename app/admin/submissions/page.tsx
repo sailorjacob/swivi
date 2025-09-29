@@ -260,7 +260,14 @@ export default function AdminSubmissionsPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-light mb-2">Submission Management</h1>
+            <div className="flex items-center gap-4 mb-2">
+              <Link href="/admin">
+                <Button variant="outline" size="sm">
+                  ← Back to Admin
+                </Button>
+              </Link>
+              <h1 className="text-3xl font-light">Submission Management</h1>
+            </div>
             <p className="text-muted-foreground">
               Review and manage clipper submissions
             </p>
