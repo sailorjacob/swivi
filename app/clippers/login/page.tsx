@@ -111,30 +111,28 @@ export default function ClippersLoginPage() {
                 <span className="font-medium">Continue with Discord</span>
               </Button>
 
-                     {/* Google OAuth temporarily disabled until app verification
-                     <div className="relative">
-                       <div className="absolute inset-0 flex items-center">
-                         <div className="w-full border-t border-border"></div>
-                       </div>
-                       <div className="relative flex justify-center text-sm">
-                         <span className="px-2 bg-card text-muted-foreground">or</span>
-                       </div>
-                     </div>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-card text-muted-foreground">or</span>
+                </div>
+              </div>
 
-                     <Button
-                       onClick={() => handleSignIn("google")}
-                       disabled={isLoading !== null}
-                       variant="outline"
-                       className="w-full border-gray-600 text-muted-foreground hover:bg-muted hover:text-white h-12 transition-all duration-200 group hover:shadow-sm"
-                     >
-                       {isLoading === "google" ? (
-                         <Loader2 className="w-5 h-5 animate-spin mr-3" />
-                       ) : (
-                         <GoogleIcon className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
-                       )}
-                       <span className="font-medium">Continue with Google</span>
-                     </Button>
-                     */}
+              <Button
+                onClick={() => handleSignIn("google")}
+                disabled={isLoading !== null}
+                variant="outline"
+                className="w-full border-gray-600 text-muted-foreground hover:bg-muted hover:text-white h-12 transition-all duration-200 group hover:shadow-sm"
+              >
+                {isLoading === "google" ? (
+                  <Loader2 className="w-5 h-5 animate-spin mr-3" />
+                ) : (
+                  <GoogleIcon className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
+                )}
+                <span className="font-medium">Continue with Google</span>
+              </Button>
 
               <div className="text-center mt-6 pt-4 border-t border-border/50">
                 <p className="text-sm text-muted-foreground mb-2">

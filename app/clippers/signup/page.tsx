@@ -90,7 +90,6 @@ export default function SignupPage() {
                 <span className="font-medium">Continue with Discord</span>
               </Button>
 
-              {/* Google OAuth temporarily disabled until app verification
               <Button
                 onClick={() => handleOAuthSignup("google")}
                 disabled={isLoading !== null}
@@ -104,7 +103,6 @@ export default function SignupPage() {
                 )}
                 <span className="font-medium">Continue with Google</span>
               </Button>
-              */}
 
 
               <div className="text-center pt-4 border-t border-border/50">

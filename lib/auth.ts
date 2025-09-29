@@ -15,13 +15,12 @@ export const authOptions: NextAuthOptions = {
         clientSecret: env.DISCORD_CLIENT_SECRET,
       })
     ] : []),
-    // Temporarily disabled until Google app verification is complete
-    // ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? [
-    //   GoogleProvider({
-    //     clientId: env.GOOGLE_CLIENT_ID,
-    //     clientSecret: env.GOOGLE_CLIENT_SECRET,
-    //   })
-    // ] : []),
+    ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? [
+      GoogleProvider({
+        clientId: env.GOOGLE_CLIENT_ID,
+        clientSecret: env.GOOGLE_CLIENT_SECRET,
+      })
+    ] : []),
   ],
   pages: {
     signIn: "/clippers/login",
