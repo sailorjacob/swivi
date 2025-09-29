@@ -10,6 +10,7 @@ import { ClickAnimation } from "@/components/ui/click-animation"
 import { SessionDebug } from "@/components/debug/session-debug"
 
 import { cn } from "@/lib/utils"
+import { FloatingBranding } from "@/components/ui/floating-branding"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -96,6 +97,21 @@ export default function RootLayout({
               <ClickAnimation />
               {children}
               <SessionDebug />
+
+              {/* Floating Branding Elements */}
+              <FloatingBranding
+                src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png"
+                alt="Swivi Branding"
+                position="top-left"
+                size="sm"
+              />
+              <FloatingBranding
+                src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/342.png"
+                alt="Swivi Branding"
+                position="bottom-right"
+                size="sm"
+              />
+
               <Toaster
                 position="bottom-right"
                 toastOptions={{

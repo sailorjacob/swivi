@@ -1,9 +1,10 @@
 import Link from "next/link"
 import Image from "next/image"
+import { BottomBackground } from "@/components/ui/bottom-background"
 
 export function Footer() {
   return (
-    <footer className="border-t border-black/10 mt-auto">
+    <footer className="border-t border-black/10 mt-auto relative">
       <div className="max-width-wrapper section-padding py-12 md:py-16">
         <div className="flex flex-col items-center text-center space-y-6">
           {/* Logo and tagline */}
@@ -30,6 +31,13 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Footer Bottom Background Branding */}
+      <BottomBackground
+        src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/233.png"
+        alt="Swivi Footer Branding"
+        animate={false}
+      />
     </footer>
   )
 } 
