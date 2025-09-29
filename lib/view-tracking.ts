@@ -262,7 +262,7 @@ export class ViewTrackingService {
       const totalViews = submissions.reduce((sum, submission) => {
         const latestTracking = submission.clip?.viewTracking
           .sort((a, b) => b.date.getTime() - a.date.getTime())[0]
-        return sum + (latestTracking?.views || 0)
+        return sum + Number(latestTracking?.views || 0)
       }, 0)
 
       const totalSubmissions = submissions.length
@@ -276,14 +276,14 @@ export class ViewTrackingService {
       let maxViews = 0
 
       for (const submission of submissions) {
-        const latestTracking = submission.viewTracking
-          .sort((a, b) => b.date.getTime() - a.date.getTime())[0]
+        const latestTracking = submission.clip?.viewTracking
+          ?.sort((a, b) => b.date.getTime() - a.date.getTime())[0]
 
-        if (latestTracking && latestTracking.views > maxViews) {
-          maxViews = latestTracking.views
+        if (latestTracking && Number(latestTracking.views) > maxViews) {
+          maxViews = Number(latestTracking.views)
           topPerformingSubmission = {
             url: submission.clipUrl,
-            views: latestTracking.views,
+            views: Number(latestTracking.views),
             userId: submission.userId
           }
         }
@@ -337,7 +337,7 @@ export class ViewTrackingService {
         throw new Error(`User not found: ${userId}`)
       }
 
-      const totalViews = user.totalViews
+      const totalViews = Number(user.totalViews)
       const totalEarnings = Number(user.totalEarnings)
       const activeSubmissions = user.submissions.length
       const campaignsParticipated = new Set(user.submissions.map(s => s.campaignId)).size

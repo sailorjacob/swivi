@@ -20,6 +20,7 @@ interface Submission {
   platform: string
   status: "PENDING" | "APPROVED" | "REJECTED" | "PAID"
   payout?: number
+  paidAt?: string
   rejectionReason?: string
   createdAt: string
   updatedAt: string
@@ -42,6 +43,12 @@ interface Submission {
     title?: string
     description?: string
     views: number
+    viewTracking?: Array<{
+      id: string
+      views: number
+      date: string
+      platform: string
+    }>
   } | null
   viewTracking: Array<{
     id: string
