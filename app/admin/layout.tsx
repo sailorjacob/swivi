@@ -148,9 +148,9 @@ function AdminNav({ className }: { className?: string }) {
           <Image
             src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png"
             alt="Swivi Branding"
-            width={40}
-            height={40}
-            className="rounded opacity-80 hover:opacity-100 transition-opacity"
+            width={80}
+            height={80}
+            className="rounded opacity-90"
             unoptimized
           />
         </div>

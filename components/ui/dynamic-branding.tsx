@@ -115,9 +115,10 @@ const pageBranding: Record<string, BrandingConfig[]> = {
 export function DynamicBranding() {
   const pathname = usePathname()
 
-  // Skip branding on clipper platform pages to avoid overlap with navigation
+  // Skip branding on clipper platform pages and admin pages to avoid overlap with navigation
   const isClipperPage = pathname.startsWith('/clippers')
-  if (isClipperPage) {
+  const isAdminPage = pathname.startsWith('/admin')
+  if (isClipperPage || isAdminPage) {
     return null
   }
 

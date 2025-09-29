@@ -13,15 +13,15 @@ const updateCampaignSchema = z.object({
   minPayout: z.number().positive("Minimum payout must be positive").optional(),
   maxPayout: z.number().positive("Maximum payout must be positive").optional(),
   deadline: z.string().transform((str) => new Date(str)).optional(),
-  startDate: z.string().transform((str) => new Date(str)).optional(),
+  startDate: z.string().transform((str) => str ? new Date(str) : undefined).optional(),
   status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER", "FACEBOOK"])).optional(),
   requirements: z.array(z.string()).optional(),
   featuredImage: z.string().optional(),
-  category: z.string().optional(),
-  difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
-  maxParticipants: z.number().positive().optional(),
-  tags: z.array(z.string()).optional(),
+  // category: z.string().optional(), // Commented out - not in DB
+  // difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(), // Commented out - not in DB
+  // maxParticipants: z.number().positive().optional(), // Commented out - not in DB
+  // tags: z.array(z.string()).optional(), // Commented out - not in DB
 })
 
 export async function GET(
@@ -113,10 +113,32 @@ export async function PUT(
       return NextResponse.json({ error: "Campaign not found" }, { status: 404 })
     }
 
-    // Update the campaign
+    // Update the campaign - only include fields that exist in the database
+    const updateData: any = {}
+    if (validatedData.title !== undefined) updateData.title = validatedData.title
+    if (validatedData.description !== undefined) updateData.description = validatedData.description
+    if (validatedData.creator !== undefined) updateData.creator = validatedData.creator
+    if (validatedData.budget !== undefined) updateData.budget = validatedData.budget
+    if (validatedData.spent !== undefined) updateData.spent = validatedData.spent
+    if (validatedData.minPayout !== undefined) updateData.minPayout = validatedData.minPayout
+    if (validatedData.maxPayout !== undefined) updateData.maxPayout = validatedData.maxPayout
+    if (validatedData.deadline !== undefined) updateData.deadline = validatedData.deadline
+    if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate
+    if (validatedData.status !== undefined) updateData.status = validatedData.status
+    if (validatedData.targetPlatforms !== undefined) updateData.targetPlatforms = validatedData.targetPlatforms
+    if (validatedData.requirements !== undefined) updateData.requirements = validatedData.requirements
+    if (validatedData.featuredImage !== undefined) updateData.featuredImage = validatedData.featuredImage
+
+    // Note: The following fields are commented out because they don't exist in the current database
+    // When the database is migrated to add these columns, uncomment them:
+    // if (validatedData.category !== undefined) updateData.category = validatedData.category
+    // if (validatedData.difficulty !== undefined) updateData.difficulty = validatedData.difficulty
+    // if (validatedData.maxParticipants !== undefined) updateData.maxParticipants = validatedData.maxParticipants
+    // if (validatedData.tags !== undefined) updateData.tags = validatedData.tags
+
     const campaign = await prisma.campaign.update({
       where: { id: params.id },
-      data: validatedData,
+      data: updateData,
       include: {
         _count: {
           select: {

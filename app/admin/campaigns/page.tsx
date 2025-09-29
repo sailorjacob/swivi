@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -89,11 +88,7 @@ export default function AdminCampaignsPage() {
     targetPlatforms: [] as string[],
     requirements: [] as string[],
     status: "DRAFT" as Campaign["status"],
-    featuredImageFile: null as File | null,
-    category: "",
-    difficulty: "beginner" as "beginner" | "intermediate" | "advanced",
-    maxParticipants: "",
-    tags: [] as string[]
+    featuredImageFile: null as File | null
   })
 
   // Fetch campaigns
@@ -168,17 +163,11 @@ export default function AdminCampaignsPage() {
           minPayout: parseFloat(formData.minPayout),
           maxPayout: parseFloat(formData.maxPayout),
           deadline: formData.deadline,
+          startDate: formData.startDate || undefined,
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
-          // Note: The following fields are not sent because they don't exist in the current database
-          // When the database is migrated to add these columns, uncomment them:
-          // featuredImage: featuredImageUrl,
-          // category: formData.category,
-          // difficulty: formData.difficulty,
-          // maxParticipants: parseInt(formData.maxParticipants) || undefined,
-          // tags: formData.tags,
-          // startDate: formData.startDate || undefined,
+          featuredImage: featuredImageUrl,
         })
       })
 
@@ -227,8 +216,18 @@ export default function AdminCampaignsPage() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          ...formData,
-          featuredImage: featuredImageUrl
+          title: formData.title,
+          description: formData.description,
+          creator: formData.creator,
+          budget: parseFloat(formData.budget),
+          minPayout: parseFloat(formData.minPayout),
+          maxPayout: parseFloat(formData.maxPayout),
+          deadline: formData.deadline,
+          startDate: formData.startDate || undefined,
+          targetPlatforms: formData.targetPlatforms,
+          requirements: formData.requirements,
+          status: formData.status,
+          featuredImage: featuredImageUrl,
         })
       })
 
@@ -283,10 +282,6 @@ export default function AdminCampaignsPage() {
       requirements: campaign.requirements,
       status: campaign.status,
       featuredImageFile: null, // For editing, we don't pre-populate the file, just allow re-upload
-      category: campaign.category || "",
-      difficulty: (campaign.difficulty as "beginner" | "intermediate" | "advanced") || "beginner",
-      maxParticipants: campaign.maxParticipants?.toString() || "",
-      tags: campaign.tags || []
     })
     setShowEditDialog(true)
   }
@@ -305,11 +300,7 @@ export default function AdminCampaignsPage() {
       targetPlatforms: [],
       requirements: [],
       status: "DRAFT",
-      featuredImageFile: null,
-      category: "",
-      difficulty: "beginner",
-      maxParticipants: "",
-      tags: []
+      featuredImageFile: null
     })
     setSelectedCampaign(null)
   }
@@ -365,26 +356,28 @@ export default function AdminCampaignsPage() {
               Create and manage brand activation campaigns
             </p>
           </div>
-          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Campaign
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Create New Campaign</DialogTitle>
-              </DialogHeader>
+          <Button onClick={() => setShowCreateDialog(!showCreateDialog)}>
+            <Plus className="h-4 w-4 mr-2" />
+            {showCreateDialog ? "Cancel" : "Create Campaign"}
+          </Button>
+        </div>
+
+        {/* Campaign Creation Form */}
+        {showCreateDialog && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Create New Campaign</CardTitle>
+            </CardHeader>
+            <CardContent>
               <CampaignForm
                 formData={formData}
                 setFormData={setFormData}
                 onSubmit={handleCreateCampaign}
                 onCancel={() => setShowCreateDialog(false)}
               />
-            </DialogContent>
-          </Dialog>
-        </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -587,21 +580,23 @@ export default function AdminCampaignsPage() {
           </Dialog>
         )}
 
-        {/* Edit Campaign Dialog */}
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Edit Campaign</DialogTitle>
-            </DialogHeader>
-            <CampaignForm
-              formData={formData}
-              setFormData={setFormData}
-              onSubmit={handleUpdateCampaign}
-              onCancel={() => setShowEditDialog(false)}
-              isEdit={true}
-            />
-          </DialogContent>
-        </Dialog>
+        {/* Edit Campaign Form */}
+        {showEditDialog && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Edit Campaign</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CampaignForm
+                formData={formData}
+                setFormData={setFormData}
+                onSubmit={handleUpdateCampaign}
+                onCancel={() => setShowEditDialog(false)}
+                isEdit={true}
+              />
+            </CardContent>
+          </Card>
+        )}
       </motion.div>
     </div>
   )
@@ -713,31 +708,6 @@ function CampaignForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="maxParticipants">Max Participants</Label>
-            <Input
-              id="maxParticipants"
-              type="number"
-              value={formData.maxParticipants}
-              onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
-              placeholder="100 (optional)"
-            />
-          </div>
-          <div>
-            <Label htmlFor="difficulty">Difficulty Level</Label>
-            <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="beginner">Beginner</SelectItem>
-                <SelectItem value="intermediate">Intermediate</SelectItem>
-                <SelectItem value="advanced">Advanced</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
       </div>
 
       {/* Timeline */}
@@ -803,25 +773,6 @@ function CampaignForm({
           />
         </div>
 
-        <div className="mb-4">
-          <Label htmlFor="category">Category</Label>
-          <Input
-            id="category"
-            value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            placeholder="e.g., Fitness, Fashion, Tech, Gaming"
-          />
-        </div>
-
-        <div className="mb-4">
-          <Label htmlFor="tags">Tags (comma-separated)</Label>
-          <Input
-            id="tags"
-            value={formData.tags.join(', ')}
-            onChange={(e) => setFormData({ ...formData, tags: e.target.value.split(',').map(t => t.trim()).filter(t => t) })}
-            placeholder="fitness, workout, motivation, health"
-          />
-        </div>
       </div>
 
       {/* Settings */}

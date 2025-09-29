@@ -15,10 +15,6 @@ const createCampaignSchema = z.object({
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER", "FACEBOOK"])),
   requirements: z.array(z.string()).optional().default([]),
   featuredImage: z.string().optional(),
-  category: z.string().optional(),
-  difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
-  maxParticipants: z.number().positive().optional(),
-  tags: z.array(z.string()).optional().default([]),
 })
 
 export async function GET(request: NextRequest) {
@@ -56,11 +52,11 @@ export async function GET(request: NextRequest) {
         minPayout: true,
         maxPayout: true,
         deadline: true,
-        // startDate: true, // Commented out - column doesn't exist in DB
+        startDate: true,
         status: true,
         targetPlatforms: true,
         requirements: true,
-        // featuredImage: true, // Commented out - column doesn't exist in DB
+        featuredImage: true,
         // category: true, // Commented out - column doesn't exist in DB
         // difficulty: true, // Commented out - column doesn't exist in DB
         // maxParticipants: true, // Commented out - column doesn't exist in DB
@@ -116,14 +112,9 @@ export async function POST(request: NextRequest) {
       status: "ACTIVE"
     }
 
-    // Note: The following fields are commented out because they don't exist in the current database
-    // When the database is migrated to add these columns, uncomment them:
-    // if (validatedData.featuredImage) campaignData.featuredImage = validatedData.featuredImage
-    // if (validatedData.category) campaignData.category = validatedData.category
-    // if (validatedData.difficulty) campaignData.difficulty = validatedData.difficulty
-    // if (validatedData.maxParticipants) campaignData.maxParticipants = validatedData.maxParticipants
-    // if (validatedData.tags && validatedData.tags.length > 0) campaignData.tags = validatedData.tags
-    // if (validatedData.startDate) campaignData.startDate = validatedData.startDate
+    // Add optional fields if provided
+    if (validatedData.featuredImage) campaignData.featuredImage = validatedData.featuredImage
+    if (validatedData.startDate) campaignData.startDate = validatedData.startDate
 
     const campaign = await prisma.campaign.create({
       data: campaignData,

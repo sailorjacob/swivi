@@ -85,7 +85,7 @@ export default function AdminDashboard() {
       title: "Manage Campaigns",
       description: "Create and edit brand campaigns",
       href: "/admin/campaigns",
-      icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png",
+      icon: Target,
       color: "bg-muted border border-border"
     },
     {
