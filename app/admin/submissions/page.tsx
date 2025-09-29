@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Check, X, Eye, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign } from "lucide-react"
+import { Check, X, Eye, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -91,6 +91,7 @@ const payoutStatusOptions = [
 export default function AdminSubmissionsPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null)
   const [showDetailDialog, setShowDetailDialog] = useState(false)
   const [showRejectDialog, setShowRejectDialog] = useState(false)
@@ -115,6 +116,7 @@ export default function AdminSubmissionsPage() {
   const fetchSubmissions = async () => {
     try {
       setLoading(true)
+      setError(null)
       const params = new URLSearchParams({
         limit: pagination.limit.toString(),
         offset: pagination.offset.toString()
@@ -141,10 +143,12 @@ export default function AdminSubmissionsPage() {
         const data = await response.json()
         setSubmissions(data.submissions)
         setPagination(data.pagination)
+      } else {
+        setError("Failed to load submissions")
       }
     } catch (error) {
       console.error("Error fetching submissions:", error)
-      toast.error("Failed to fetch submissions")
+      setError("Failed to load submissions")
     } finally {
       setLoading(false)
     }
@@ -224,11 +228,16 @@ export default function AdminSubmissionsPage() {
     .filter(s => s.status === "PAID" && s.payout)
     .reduce((sum, s) => sum + (s.payout || 0), 0)
 
-  if (loading) {
+  if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Loading submissions...</div>
+          <div className="text-center">
+            <p className="text-lg text-red-600 mb-4">{error}</p>
+            <Button onClick={fetchSubmissions} variant="outline">
+              Try Again
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -236,6 +245,13 @@ export default function AdminSubmissionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Subtle loading indicator */}
+      {loading && (
+        <div className="fixed top-4 right-4 z-50">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -34,7 +34,6 @@ const roleOptions = [
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedRole, setSelectedRole] = useState("all")
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
@@ -55,8 +54,6 @@ export default function AdminUsersPage() {
     } catch (error) {
       console.error("Error fetching users:", error)
       toast.error("Failed to fetch users")
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -143,15 +140,6 @@ export default function AdminUsersPage() {
   const creatorCount = users.filter(u => u.role === "CREATOR").length
   const clipperCount = users.filter(u => u.role === "CLIPPER").length
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Loading users...</div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">

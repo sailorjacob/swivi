@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Clock, DollarSign, Users, TrendingUp, Eye, Filter, Search, Play, ExternalLink, Calendar, Target, Globe } from "lucide-react"
+import { Clock, DollarSign, Users, TrendingUp, Eye, Filter, Search, Play, ExternalLink, Calendar, Target, Globe, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -49,6 +49,7 @@ interface LiveCampaign {
 export function LiveCampaigns() {
   const [campaigns, setCampaigns] = useState<LiveCampaign[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedDifficulty, setSelectedDifficulty] = useState("all")
@@ -57,6 +58,8 @@ export function LiveCampaigns() {
   // Fetch campaigns from API
   const fetchCampaigns = async () => {
     try {
+      setLoading(true)
+      setError(null)
       const params = new URLSearchParams()
       if (selectedStatus !== "all") {
         params.append("status", selectedStatus.toUpperCase())
@@ -66,10 +69,12 @@ export function LiveCampaigns() {
       if (response.ok) {
         const data = await response.json()
         setCampaigns(data)
+      } else {
+        setError("Failed to load campaigns")
       }
     } catch (error) {
       console.error("Error fetching campaigns:", error)
-      toast.error("Failed to fetch campaigns")
+      setError("Failed to load campaigns")
     } finally {
       setLoading(false)
     }
@@ -177,11 +182,16 @@ export function LiveCampaigns() {
     return campaign.spent || 0
   }
 
-  if (loading) {
+  if (error) {
     return (
       <div className="w-full">
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Loading campaigns...</div>
+          <div className="text-center">
+            <p className="text-lg text-red-600 mb-4">{error}</p>
+            <Button onClick={fetchCampaigns} variant="outline">
+              Try Again
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -189,6 +199,13 @@ export function LiveCampaigns() {
 
   return (
     <div className="w-full">
+      {/* Subtle loading indicator */}
+      {loading && (
+        <div className="fixed top-4 right-4 z-50">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
       {/* Header */}
       <motion.div
         variants={containerVariants}

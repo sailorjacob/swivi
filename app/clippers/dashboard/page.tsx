@@ -13,7 +13,8 @@ import {
   Eye,
   Play,
   Trophy,
-  ExternalLink
+  ExternalLink,
+  Loader2
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -53,6 +54,7 @@ export default function ClipperDashboard() {
   const [recentClips, setRecentClips] = useState<RecentClip[]>([])
   const [activeCampaigns, setActiveCampaigns] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showSubmissionModal, setShowSubmissionModal] = useState(false)
 
 
@@ -69,15 +71,20 @@ export default function ClipperDashboard() {
 
   const fetchDashboardData = async () => {
     try {
+      setLoading(true)
+      setError(null)
       const response = await fetch("/api/clippers/dashboard")
       if (response.ok) {
         const data = await response.json()
         setStats(data.stats)
         setRecentClips(data.recentClips)
         setActiveCampaigns(data.activeCampaigns)
+      } else {
+        setError("Failed to load dashboard data")
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
+      setError("Failed to load dashboard data")
     } finally {
       setLoading(false)
     }
@@ -93,11 +100,17 @@ export default function ClipperDashboard() {
     }
   }
 
-  if (loading) {
+
+  if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Loading your dashboard...</div>
+          <div className="text-center">
+            <p className="text-lg text-red-600 mb-4">{error}</p>
+            <Button onClick={fetchDashboardData} variant="outline">
+              Try Again
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -105,6 +118,13 @@ export default function ClipperDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Subtle loading indicator */}
+      {loading && (
+        <div className="fixed top-4 right-4 z-50">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
       <div className="mb-8">
         <h1 className="text-3xl font-light mb-2">Dashboard</h1>
         <p className="text-muted-foreground">

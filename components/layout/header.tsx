@@ -89,11 +89,7 @@ export function Header() {
           </Link>
           
           {/* Platform Access Button */}
-          {status === "loading" ? (
-            <div className="text-sm font-normal border border-border px-6 py-3 rounded-full bg-transparent text-muted-foreground">
-              Loading...
-            </div>
-          ) : session ? (
+          {session ? (
             <Link
               href={session.user?.role === "ADMIN" ? "/admin" : "/clippers/dashboard"}
               className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
@@ -173,11 +169,7 @@ export function Header() {
             </Link>
             
             {/* Mobile Platform Access Buttons */}
-            {status === "loading" ? (
-              <div className="block mt-2 text-sm font-normal border border-border px-6 py-3 rounded-full bg-transparent text-muted-foreground text-center">
-                Loading...
-              </div>
-            ) : session ? (
+            {session ? (
               <Link
                 href={session.user?.role === "ADMIN" ? "/admin" : "/clippers/dashboard"}
                 className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"

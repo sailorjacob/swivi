@@ -71,7 +71,6 @@ const statusOptions = [
 
 export default function AdminCampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
-  const [loading, setLoading] = useState(true)
   const [analytics, setAnalytics] = useState<any>(null)
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -287,15 +286,6 @@ export default function AdminCampaignsPage() {
     totalEarnings: 0
   }
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Loading campaigns...</div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">

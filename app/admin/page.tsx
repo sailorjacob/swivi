@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { BarChart3, Users, Target, DollarSign, Settings, Shield, Activity } from "lucide-react"
+import { BarChart3, Users, Target, DollarSign, Settings, Shield, Activity, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const router = useRouter()
   const [analytics, setAnalytics] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === "loading") return
@@ -33,27 +34,23 @@ export default function AdminDashboard() {
 
   const fetchAnalytics = async () => {
     try {
+      setLoading(true)
+      setError(null)
       const response = await fetch("/api/admin/analytics/aggregate")
       if (response.ok) {
         const data = await response.json()
         setAnalytics(data)
+      } else {
+        setError("Failed to load dashboard data")
       }
     } catch (error) {
       console.error("Error fetching analytics:", error)
+      setError("Failed to load dashboard data")
     } finally {
       setLoading(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Loading admin dashboard...</div>
-        </div>
-      </div>
-    )
-  }
 
   const stats = analytics?.overview || {
     totalUsers: 0,
@@ -95,8 +92,30 @@ export default function AdminDashboard() {
     }
   ]
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-lg text-red-600 mb-4">{error}</p>
+            <Button onClick={fetchAnalytics} variant="outline">
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Subtle loading indicator */}
+      {loading && (
+        <div className="fixed top-4 right-4 z-50">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
