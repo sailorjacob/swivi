@@ -45,11 +45,14 @@ export function BottomBackground({
   return (
     <div
       className={`
-        fixed bottom-0 left-0 right-0 z-10 m-0 p-0
+        fixed bottom-0 left-0 right-0 z-0 m-0 p-0
         transition-all duration-1500 ease-out
         ${animate ? (isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none") : "opacity-100"}
         ${className}
       `}
+      style={{
+        transform: 'translateY(-120px)', // Position above footer
+      }}
     >
       <div className="relative w-full h-32 overflow-hidden">
         {/* Main image that sprouts from bottom */}
