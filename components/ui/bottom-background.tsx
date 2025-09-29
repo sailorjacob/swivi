@@ -41,8 +41,14 @@ export function BottomBackground({
           width={400}
           height={400}
           className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-auto h-auto max-w-md object-cover object-bottom"
+          style={{
+            filter: "brightness(0.8) contrast(1.1)",
+          }}
           unoptimized
         />
+
+        {/* Gradient overlay to fade into background */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
       </div>
     </div>
   )
