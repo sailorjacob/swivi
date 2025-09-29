@@ -12,14 +12,13 @@ const createCampaignSchema = z.object({
   minPayout: z.number().positive("Minimum payout must be positive"),
   maxPayout: z.number().positive("Maximum payout must be positive"),
   deadline: z.string().transform((str) => new Date(str)),
-  startDate: z.string().transform((str) => new Date(str)).optional(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER", "FACEBOOK"])),
   requirements: z.array(z.string()).optional().default([]),
-  featuredImage: z.string().optional(),
-  category: z.string().optional(),
-  difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
-  maxParticipants: z.number().positive().optional(),
-  tags: z.array(z.string()).optional().default([]),
+  // featuredImage: z.string().optional(), // Commented out - not in DB
+  // category: z.string().optional(), // Commented out - not in DB
+  // difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(), // Commented out - not in DB
+  // maxParticipants: z.number().positive().optional(), // Commented out - not in DB
+  // tags: z.array(z.string()).optional().default([]), // Commented out - not in DB
 })
 
 export async function GET(request: NextRequest) {
@@ -47,7 +46,27 @@ export async function GET(request: NextRequest) {
       orderBy: {
         createdAt: "desc"
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        creator: true,
+        budget: true,
+        spent: true,
+        minPayout: true,
+        maxPayout: true,
+        deadline: true,
+        // startDate: true, // Commented out - not in DB
+        status: true,
+        targetPlatforms: true,
+        requirements: true,
+        // featuredImage: true, // Commented out - not in DB
+        // category: true, // Commented out - not in DB
+        // difficulty: true, // Commented out - not in DB
+        // maxParticipants: true, // Commented out - not in DB
+        // tags: true, // Commented out - not in DB
+        createdAt: true,
+        updatedAt: true,
         _count: {
           select: {
             submissions: true
@@ -84,25 +103,26 @@ export async function POST(request: NextRequest) {
     const validatedData = createCampaignSchema.parse(body)
 
     // Create the campaign
+    const campaignData: any = {
+      title: validatedData.title,
+      description: validatedData.description,
+      creator: validatedData.creator,
+      budget: validatedData.budget,
+      minPayout: validatedData.minPayout,
+      maxPayout: validatedData.maxPayout,
+      deadline: validatedData.deadline,
+      targetPlatforms: validatedData.targetPlatforms,
+      requirements: validatedData.requirements,
+      // featuredImage: validatedData.featuredImage, // Commented out - not in DB
+      // category: validatedData.category, // Commented out - not in DB
+      // difficulty: validatedData.difficulty, // Commented out - not in DB
+      // maxParticipants: validatedData.maxParticipants, // Commented out - not in DB
+      // tags: validatedData.tags, // Commented out - not in DB
+      status: "ACTIVE"
+    }
+
     const campaign = await prisma.campaign.create({
-      data: {
-        title: validatedData.title,
-        description: validatedData.description,
-        creator: validatedData.creator,
-        budget: validatedData.budget,
-        minPayout: validatedData.minPayout,
-        maxPayout: validatedData.maxPayout,
-        deadline: validatedData.deadline,
-        startDate: validatedData.startDate,
-        targetPlatforms: validatedData.targetPlatforms,
-        requirements: validatedData.requirements,
-        featuredImage: validatedData.featuredImage,
-        category: validatedData.category,
-        difficulty: validatedData.difficulty,
-        maxParticipants: validatedData.maxParticipants,
-        tags: validatedData.tags,
-        status: "ACTIVE"
-      },
+      data: campaignData,
       include: {
         _count: {
           select: {
