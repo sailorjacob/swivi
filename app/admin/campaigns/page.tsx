@@ -15,6 +15,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
+import { FileUpload } from "@/components/ui/file-upload"
+import { uploadFile, STORAGE_BUCKETS } from "@/lib/supabase"
 
 interface Campaign {
   id: string
@@ -87,7 +89,7 @@ export default function AdminCampaignsPage() {
     targetPlatforms: [] as string[],
     requirements: [] as string[],
     status: "DRAFT" as Campaign["status"],
-    featuredImage: "",
+    featuredImageFile: null as File | null,
     category: "",
     difficulty: "beginner" as "beginner" | "intermediate" | "advanced",
     maxParticipants: "",
@@ -134,6 +136,25 @@ export default function AdminCampaignsPage() {
   // Create campaign
   const handleCreateCampaign = async () => {
     try {
+      let featuredImageUrl = ""
+
+      // Upload featured image if provided
+      if (formData.featuredImageFile) {
+        const fileName = `campaign-${Date.now()}-${formData.featuredImageFile.name}`
+        const { url, error } = await uploadFile(
+          STORAGE_BUCKETS.CAMPAIGN_ASSETS,
+          fileName,
+          formData.featuredImageFile
+        )
+
+        if (error) {
+          toast.error(`Failed to upload image: ${error}`)
+          return
+        }
+
+        featuredImageUrl = url || ""
+      }
+
       const response = await fetch("/api/campaigns", {
         method: "POST",
         headers: {
@@ -141,6 +162,7 @@ export default function AdminCampaignsPage() {
         },
         body: JSON.stringify({
           ...formData,
+          featuredImage: featuredImageUrl,
           budget: parseFloat(formData.budget),
           minPayout: parseFloat(formData.minPayout),
           maxPayout: parseFloat(formData.maxPayout),
@@ -168,12 +190,34 @@ export default function AdminCampaignsPage() {
     if (!selectedCampaign) return
 
     try {
+      let featuredImageUrl = selectedCampaign.featuredImage || ""
+
+      // Upload new featured image if provided
+      if (formData.featuredImageFile) {
+        const fileName = `campaign-${Date.now()}-${formData.featuredImageFile.name}`
+        const { url, error } = await uploadFile(
+          STORAGE_BUCKETS.CAMPAIGN_ASSETS,
+          fileName,
+          formData.featuredImageFile
+        )
+
+        if (error) {
+          toast.error(`Failed to upload image: ${error}`)
+          return
+        }
+
+        featuredImageUrl = url || ""
+      }
+
       const response = await fetch(`/api/admin/campaigns/${selectedCampaign.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          featuredImage: featuredImageUrl
+        })
       })
 
       if (response.ok) {
@@ -226,7 +270,7 @@ export default function AdminCampaignsPage() {
       targetPlatforms: campaign.targetPlatforms,
       requirements: campaign.requirements,
       status: campaign.status,
-      featuredImage: campaign.featuredImage || "",
+      featuredImageFile: null, // For editing, we don't pre-populate the file, just allow re-upload
       category: campaign.category || "",
       difficulty: (campaign.difficulty as "beginner" | "intermediate" | "advanced") || "beginner",
       maxParticipants: campaign.maxParticipants?.toString() || "",
@@ -249,7 +293,7 @@ export default function AdminCampaignsPage() {
       targetPlatforms: [],
       requirements: [],
       status: "DRAFT",
-      featuredImage: "",
+      featuredImageFile: null,
       category: "",
       difficulty: "beginner",
       maxParticipants: "",
@@ -606,12 +650,12 @@ function CampaignForm({
         </div>
 
         <div className="mb-4">
-          <Label htmlFor="featuredImage">Featured Image URL</Label>
-          <Input
-            id="featuredImage"
-            value={formData.featuredImage}
-            onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
-            placeholder="https://example.com/campaign-image.jpg"
+          <FileUpload
+            label="Featured Image"
+            accept="image/*"
+            maxSize={10}
+            onFileChange={(file) => setFormData({ ...formData, featuredImageFile: file })}
+            uploadedFile={formData.featuredImageFile}
           />
         </div>
       </div>
