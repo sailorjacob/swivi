@@ -10,7 +10,7 @@ import { ClickAnimation } from "@/components/ui/click-animation"
 import { SessionDebug } from "@/components/debug/session-debug"
 
 import { cn } from "@/lib/utils"
-import { FloatingBranding } from "@/components/ui/floating-branding"
+import { DynamicBranding } from "@/components/ui/dynamic-branding"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -98,21 +98,8 @@ export default function RootLayout({
               {children}
               <SessionDebug />
 
-              {/* Floating Branding Elements - Randomized positioning */}
-              <FloatingBranding
-                src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png"
-                alt="Swivi Branding"
-                randomPosition={true}
-                randomDelay={true}
-                size="sm"
-              />
-              <FloatingBranding
-                src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/342.png"
-                alt="Swivi Branding"
-                randomPosition={true}
-                randomDelay={true}
-                size="sm"
-              />
+              {/* Dynamic Page-Based Branding */}
+              <DynamicBranding />
 
               <Toaster
                 position="bottom-right"

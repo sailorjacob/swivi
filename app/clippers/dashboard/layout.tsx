@@ -28,6 +28,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
+import { FloatingBranding } from "@/components/ui/floating-branding"
 
 interface NavItem {
   label: string
@@ -217,7 +218,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative">
           <AnimatePresence mode="wait">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -229,6 +230,17 @@ export default function DashboardLayout({
               {children}
             </motion.div>
           </AnimatePresence>
+
+          {/* Subtle corner branding elements */}
+          <FloatingBranding
+            src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/3422.png"
+            alt="Dashboard Branding"
+            position="bottom-left"
+            size="sm"
+            animate={true}
+            randomPosition={false}
+            randomDelay={false}
+          />
         </main>
 
         {/* Footer */}
