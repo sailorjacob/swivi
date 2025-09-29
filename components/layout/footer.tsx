@@ -36,7 +36,7 @@ export function Footer() {
         <div
           className="absolute bottom-0 left-0 right-0 z-0 m-0 p-0"
           style={{
-            transform: 'translateY(40px)', // Position below footer content
+            transform: 'translateY(80px)', // Position below footer content with more space
           }}
         >
           <div className="relative w-full h-32 overflow-hidden">
