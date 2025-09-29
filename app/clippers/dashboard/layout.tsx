@@ -52,9 +52,9 @@ interface NavItem {
         <Image
           src={icon}
           alt="nav icon"
-          width={40}
-          height={40}
-          className={cn("w-10 h-10 rounded", className)}
+          width={32}
+          height={32}
+          className={cn("rounded", className)}
           unoptimized
         />
       )
@@ -122,16 +122,18 @@ function Sidebar({ className }: { className?: string }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group",
+                "flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group relative",
                 active
                   ? "bg-primary/10 text-primary border border-primary/20"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              {renderNavIcon(item.icon, cn(
-                "transition-all duration-200",
-                active ? "opacity-100" : "opacity-70 group-hover:opacity-100"
-              ))}
+              <div className="relative w-5 h-5 flex-shrink-0">
+                {renderNavIcon(item.icon, cn(
+                  "transition-all duration-200 w-8 h-8 -ml-1.5 -mt-1.5",
+                  active ? "opacity-100" : "opacity-70 group-hover:opacity-100"
+                ))}
+              </div>
               <span className="font-medium text-sm tracking-wide">{item.label}</span>
               {item.badge && (
                 <span className="ml-auto bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
