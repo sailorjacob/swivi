@@ -94,12 +94,29 @@ export function Header() {
               Loading...
             </div>
           ) : session ? (
-            <Link
-              href="/clippers/dashboard"
-              className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
-            >
-              Dashboard
-            </Link>
+            session.user?.role === "ADMIN" ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/admin"
+                  className="text-sm font-normal border border-foreground px-4 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
+                >
+                  Admin
+                </Link>
+                <Link
+                  href="/clippers/dashboard"
+                  className="text-sm font-normal border border-border px-4 py-3 rounded-full bg-transparent text-muted-foreground hover:text-foreground transition-all duration-300"
+                >
+                  Clipper
+                </Link>
+              </div>
+            ) : (
+              <Link
+                href="/clippers/dashboard"
+                className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
+              >
+                Dashboard
+              </Link>
+            )
           ) : (
             <>
               <Link
@@ -178,13 +195,32 @@ export function Header() {
                 Loading...
               </div>
             ) : session ? (
-              <Link
-                href="/clippers/dashboard"
-                className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
+              session.user?.role === "ADMIN" ? (
+                <div className="flex flex-col gap-2 mt-2">
+                  <Link
+                    href="/admin"
+                    className="text-sm font-normal border border-foreground px-4 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                  <Link
+                    href="/clippers/dashboard"
+                    className="text-sm font-normal border border-border px-4 py-3 rounded-full bg-transparent text-muted-foreground hover:text-foreground transition-all duration-300 text-center"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Clipper Dashboard
+                  </Link>
+                </div>
+              ) : (
+                <Link
+                  href="/clippers/dashboard"
+                  className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )
             ) : (
               <>
                 <Link
