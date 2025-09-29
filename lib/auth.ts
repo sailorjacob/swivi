@@ -59,36 +59,44 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.email = user.email
         token.name = user.name
-        
-        // Set default role for new users
-        token.role = "CLIPPER"
+
+        // Don't set default role here - it will be fetched from database in session callback
       }
-      
+
       if (account) {
         token.accessToken = account.access_token
         token.provider = account.provider
       }
-      
+
       return token
     },
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string
-        session.user.role = token.role as string
         session.accessToken = token.accessToken as string
 
-        // Update session name from database if available and valid
+        // Always fetch current role from database to ensure it's up to date
         try {
           const user = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { name: true }
+            select: { name: true, role: true }
           })
 
-          if (user?.name && user.name !== ";Updated name;" && user.name.trim() !== "") {
-            session.user.name = user.name
+          if (user) {
+            session.user.role = user.role
+
+            // Update session name from database if available and valid
+            if (user.name && user.name !== ";Updated name;" && user.name.trim() !== "") {
+              session.user.name = user.name
+            }
+          } else {
+            // Fallback to token role if user not found
+            session.user.role = token.role as string
           }
         } catch (error) {
-          console.error("Failed to update session name from database:", error)
+          console.error("Failed to update session role/name from database:", error)
+          // Fallback to token role if database query fails
+          session.user.role = token.role as string
         }
       }
       return session
