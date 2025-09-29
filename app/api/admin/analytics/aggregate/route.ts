@@ -62,10 +62,40 @@ export async function GET(request: NextRequest) {
       })
     ])
 
+    // Get top performing campaigns
+    const topCampaigns = await prisma.campaign.findMany({
+      take: 10,
+      orderBy: {
+        spent: "desc"
+      },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        budget: true,
+        spent: true,
+        _count: {
+          select: {
+            submissions: true
+          }
+        }
+      }
+    })
+
+    // Get platform breakdown
+    const platformBreakdown = await prisma.clipSubmission.groupBy({
+      by: ['platform'],
+      _count: {
+        platform: true
+      }
+    })
+
     const platformStats: {
       overview: any
       campaignDetails?: any
       userDetails?: any
+      topCampaigns: any[]
+      platformBreakdown: Record<string, number>
     } = {
       overview: {
         totalUsers,
@@ -73,9 +103,46 @@ export async function GET(request: NextRequest) {
         totalSubmissions,
         activeCampaigns,
         totalViews: totalViews._sum.totalViews || 0,
-        totalEarnings: Number(totalEarnings._sum.totalEarnings || 0)
-      }
+        totalEarnings: Number(totalEarnings._sum.totalEarnings || 0),
+        pendingSubmissions: 0, // We'll calculate these from submissions
+        approvedSubmissions: 0,
+        paidSubmissions: 0
+      },
+      topCampaigns: topCampaigns.map(campaign => ({
+        id: campaign.id,
+        title: campaign.title,
+        status: campaign.status,
+        submissions: campaign._count.submissions,
+        views: 0, // Would need to calculate from submissions
+        earnings: campaign.spent
+      })),
+      platformBreakdown: platformBreakdown.reduce((acc, item) => {
+        acc[item.platform] = item._count.platform
+        return acc
+      }, {} as Record<string, number>)
     }
+
+    // Calculate submission status counts
+    const submissionStatuses = await prisma.clipSubmission.groupBy({
+      by: ['status'],
+      _count: {
+        status: true
+      }
+    })
+
+    submissionStatuses.forEach(item => {
+      switch (item.status) {
+        case 'PENDING':
+          platformStats.overview.pendingSubmissions = item._count.status
+          break
+        case 'APPROVED':
+          platformStats.overview.approvedSubmissions = item._count.status
+          break
+        case 'PAID':
+          platformStats.overview.paidSubmissions = item._count.status
+          break
+      }
+    })
 
     // If specific campaign requested, get detailed stats
     if (campaignId) {
@@ -109,8 +176,10 @@ export async function GET(request: NextRequest) {
       })
 
       const totalCampaignViews = campaignSubmissions.reduce((sum, submission) => {
-        const latestTracking = submission.clip?.viewTracking[0]
-        return sum + Number(latestTracking?.views || 0)
+        if (submission.clip?.viewTracking && submission.clip.viewTracking.length > 0) {
+          return sum + Number(submission.clip.viewTracking[0]?.views || 0)
+        }
+        return sum
       }, 0)
 
       const totalCampaignEarnings = campaignSubmissions
@@ -118,6 +187,7 @@ export async function GET(request: NextRequest) {
         .reduce((sum, s) => sum + Number(s.payout || 0), 0)
 
       const topPerformers = campaignSubmissions
+        .filter(submission => submission.clip?.viewTracking && submission.clip.viewTracking.length > 0)
         .map(submission => ({
           userId: submission.user.id,
           userName: submission.user.name || submission.user.email || 'Unknown',
@@ -172,8 +242,10 @@ export async function GET(request: NextRequest) {
 
       if (userStats) {
         const totalUserViews = userStats.submissions.reduce((sum, submission) => {
-          const latestTracking = submission.clip?.viewTracking[0]
-          return sum + Number(latestTracking?.views || 0)
+          if (submission.clip?.viewTracking && submission.clip.viewTracking.length > 0) {
+            return sum + Number(submission.clip.viewTracking[0]?.views || 0)
+          }
+          return sum
         }, 0)
 
         const totalUserEarnings = userStats.submissions
@@ -181,6 +253,7 @@ export async function GET(request: NextRequest) {
           .reduce((sum, s) => sum + Number(s.payout || 0), 0)
 
         const recentSubmissions = userStats.submissions
+          .filter(submission => submission.clip?.viewTracking && submission.clip.viewTracking.length > 0)
           .map(submission => ({
             campaignTitle: submission.campaign.title,
             platform: submission.platform,

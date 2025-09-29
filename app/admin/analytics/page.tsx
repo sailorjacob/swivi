@@ -138,7 +138,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Overview Cards */}
-        {analytics && (
+        {analytics?.overview && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <Card>
@@ -171,7 +171,7 @@ export default function AdminAnalyticsPage() {
                     <Activity className="h-8 w-8 text-muted-foreground" />
                     <div className="ml-4">
                       <p className="text-sm font-medium text-muted-foreground">Total Views</p>
-                      <p className="text-2xl font-semibold">{Number(analytics.overview.totalViews).toLocaleString()}</p>
+                      <p className="text-2xl font-semibold">{Number(analytics.overview.totalViews || 0).toLocaleString()}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -183,7 +183,7 @@ export default function AdminAnalyticsPage() {
                     <DollarSign className="h-8 w-8 text-muted-foreground" />
                     <div className="ml-4">
                       <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
-                      <p className="text-2xl font-semibold">${analytics.overview.totalEarnings.toFixed(2)}</p>
+                      <p className="text-2xl font-semibold">${Number(analytics.overview.totalEarnings || 0).toFixed(2)}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -208,19 +208,19 @@ export default function AdminAnalyticsPage() {
                       <div className="space-y-4">
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Pending Review</span>
-                          <span className="font-medium">{analytics.overview.pendingSubmissions}</span>
+                          <span className="font-medium">{analytics.overview.pendingSubmissions || 0}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Approved</span>
-                          <span className="font-medium">{analytics.overview.approvedSubmissions}</span>
+                          <span className="font-medium">{analytics.overview.approvedSubmissions || 0}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Paid</span>
-                          <span className="font-medium">{analytics.overview.paidSubmissions}</span>
+                          <span className="font-medium">{analytics.overview.paidSubmissions || 0}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Total Submissions</span>
-                          <span className="font-medium">{analytics.overview.totalSubmissions}</span>
+                          <span className="font-medium">{analytics.overview.totalSubmissions || 0}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -234,17 +234,17 @@ export default function AdminAnalyticsPage() {
                       <div className="space-y-4">
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Total Campaigns</span>
-                          <span className="font-medium">{analytics.overview.totalCampaigns}</span>
+                          <span className="font-medium">{analytics.overview.totalCampaigns || 0}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Active Campaigns</span>
-                          <span className="font-medium text-green-600">{analytics.overview.activeCampaigns}</span>
+                          <span className="font-medium text-green-600">{analytics.overview.activeCampaigns || 0}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Conversion Rate</span>
                           <span className="font-medium">
-                            {analytics.overview.totalSubmissions > 0
-                              ? ((analytics.overview.approvedSubmissions / analytics.overview.totalSubmissions) * 100).toFixed(1)
+                            {(analytics.overview.totalSubmissions || 0) > 0
+                              ? (((analytics.overview.approvedSubmissions || 0) / (analytics.overview.totalSubmissions || 1)) * 100).toFixed(1)
                               : 0}%
                           </span>
                         </div>
@@ -261,21 +261,27 @@ export default function AdminAnalyticsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {analytics.topCampaigns.map((campaign) => (
-                        <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="flex-1">
-                            <h3 className="font-medium">{campaign.title}</h3>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                              <span>Submissions: {campaign.submissions}</span>
-                              <span>Views: {campaign.views.toLocaleString()}</span>
-                              <span>Earnings: ${campaign.earnings.toFixed(2)}</span>
+                      {analytics?.topCampaigns && analytics.topCampaigns.length > 0 ? (
+                        analytics.topCampaigns.map((campaign) => (
+                          <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex-1">
+                              <h3 className="font-medium">{campaign.title}</h3>
+                              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                                <span>Submissions: {campaign.submissions}</span>
+                                <span>Views: {campaign.views.toLocaleString()}</span>
+                                <span>Earnings: ${campaign.earnings.toFixed(2)}</span>
+                              </div>
                             </div>
+                            <Badge variant={campaign.status === "ACTIVE" ? "default" : "secondary"}>
+                              {campaign.status}
+                            </Badge>
                           </div>
-                          <Badge variant={campaign.status === "ACTIVE" ? "default" : "secondary"}>
-                            {campaign.status}
-                          </Badge>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-muted-foreground">No campaign data available</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -288,12 +294,18 @@ export default function AdminAnalyticsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {Object.entries(analytics.platformBreakdown).map(([platform, count]) => (
-                        <div key={platform} className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">{platform}</span>
-                          <span className="font-medium">{count}</span>
+                      {analytics?.platformBreakdown && Object.keys(analytics.platformBreakdown).length > 0 ? (
+                        Object.entries(analytics.platformBreakdown).map(([platform, count]) => (
+                          <div key={platform} className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">{platform}</span>
+                            <span className="font-medium">{count}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-muted-foreground">No platform data available</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </CardContent>
                 </Card>
