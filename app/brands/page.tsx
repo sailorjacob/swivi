@@ -88,7 +88,7 @@ const campaigns = [
 
 const images = [
   {
-    src: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif",
+    src: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/Caleb%20Simpson%20x%20Ed%20Sheeran%20Pizza%20Review.jpg",
     alt: "Ed Sheeran Campaign"
   },
   {
