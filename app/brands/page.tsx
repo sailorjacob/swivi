@@ -1,12 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, TrendingUp, DollarSign, Users, BarChart3 } from "lucide-react"
+import { ArrowRight, TrendingUp, DollarSign, Users, BarChart3, ChevronLeft, ChevronRight } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { DarkThemeWrapper } from "../layout-wrapper"
 import Image from "next/image"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import { useState } from "react"
 
 const stats = [
   {
@@ -53,6 +54,188 @@ const features = [
     description: "Choose from various campaign types and pricing models to match your brand's goals and budget."
   }
 ]
+
+const campaigns = [
+  {
+    id: 1,
+    title: "Ed Sheeran Pizza Review",
+    description: "Caleb Simpson's viral collaboration with Ed Sheeran showcasing authentic brand partnerships that resonate with millions.",
+    highlights: [
+      { value: "2.5M+", label: "Views Generated" },
+      { value: "85K+", label: "Engagements" },
+      { value: "4.2%", label: "Engagement Rate" },
+      { value: "12+", label: "Platforms" }
+    ],
+    image: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/Caleb%20Simpson%20x%20Ed%20Sheeran%20Pizza%20Review.jpg",
+    link: "#",
+    linkText: "View Case Study"
+  },
+  {
+    id: 2,
+    title: "Zeussy Clips",
+    description: "Join our exclusive community of content creators and earn $1,000 for every 1M views generated.",
+    highlights: [
+      { value: "$1K", label: "Per 1M Views" },
+      { value: "15+", label: "Active Clippers" },
+      { value: "24/7", label: "Support" },
+      { value: "100%", label: "Satisfaction" }
+    ],
+    image: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/swivi/swivi39.png",
+    link: "https://whop.com/zeussy/",
+    linkText: "Learn More"
+  },
+]
+
+const CampaignCardStack = () => {
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  const nextCard = () => {
+    setCurrentIndex((prev) => (prev + 1) % campaigns.length)
+  }
+
+  const prevCard = () => {
+    setCurrentIndex((prev) => (prev - 1 + campaigns.length) % campaigns.length)
+  }
+
+  const goToCard = (index: number) => {
+    setCurrentIndex(index)
+  }
+
+  return (
+    <div className="relative">
+      {/* Navigation Dots */}
+      <div className="flex justify-center mb-8 space-x-2">
+        {campaigns.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => goToCard(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              index === currentIndex ? 'bg-primary w-8' : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Card Stack */}
+      <div className="relative h-[500px] flex items-center justify-center">
+        <AnimatePresence mode="wait">
+          {campaigns.map((campaign, index) => {
+            const isActive = index === currentIndex
+            const isPrevious = index === (currentIndex - 1 + campaigns.length) % campaigns.length
+            const isNext = index === (currentIndex + 1) % campaigns.length
+
+            let zIndex = 0
+            let scale = 0.9
+            let opacity = 0.3
+            let y = 0
+
+            if (isActive) {
+              zIndex = 30
+              scale = 1
+              opacity = 1
+              y = 0
+            } else if (isPrevious || isNext) {
+              zIndex = 20
+              scale = 0.95
+              opacity = 0.7
+              y = isPrevious ? -20 : 20
+            } else {
+              zIndex = 10
+              scale = 0.9
+              opacity = 0.3
+              y = index < currentIndex ? -40 : 40
+            }
+
+            return (
+              <motion.div
+                key={campaign.id}
+                initial={{ opacity: 0, scale: 0.8, y: 50 }}
+                animate={{
+                  opacity,
+                  scale,
+                  y,
+                  zIndex
+                }}
+                exit={{ opacity: 0, scale: 0.8, y: -50 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+                className={`absolute inset-0 w-full max-w-4xl mx-auto ${
+                  isActive ? 'pointer-events-auto' : 'pointer-events-none'
+                }`}
+              >
+                <div className="grid md:grid-cols-2 gap-12 items-center h-full">
+                  {/* Content Side */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: isActive ? 1 : 0.5, x: isActive ? 0 : -20 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="space-y-6"
+                  >
+                    <h3 className="text-2xl md:text-3xl font-normal">{campaign.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {campaign.description}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {campaign.highlights.map((highlight, idx) => (
+                        <div key={idx} className="bg-black/5 rounded-xl p-4">
+                          <div className="text-2xl font-light mb-1">{highlight.value}</div>
+                          <div className="text-xs text-muted-foreground">{highlight.label}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Link
+                      href={campaign.link}
+                      target={campaign.link.startsWith('http') ? "_blank" : "_self"}
+                      rel={campaign.link.startsWith('http') ? "noopener noreferrer" : ""}
+                      className="inline-flex items-center text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
+                    >
+                      {campaign.linkText}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </motion.div>
+
+                  {/* Image Side */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: isActive ? 1 : 0.5, x: isActive ? 0 : 20 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="flex justify-center lg:justify-end"
+                  >
+                    <div className="relative w-full max-w-md aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
+                      <Image
+                        src={campaign.image}
+                        alt={campaign.title}
+                        fill
+                        className="object-cover"
+                        priority={isActive}
+                      />
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
+      </div>
+
+      {/* Navigation Arrows */}
+      <button
+        onClick={prevCard}
+        className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/80 backdrop-blur-sm border border-black/10 flex items-center justify-center hover:bg-background/90 transition-all duration-300"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+
+      <button
+        onClick={nextCard}
+        className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/80 backdrop-blur-sm border border-black/10 flex items-center justify-center hover:bg-background/90 transition-all duration-300"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
+    </div>
+  )
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -149,8 +332,8 @@ const BrandsPage = () => {
                   className="flex justify-center lg:justify-end"
                 >
                   <Image
-                    src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/swivi/swivi39.png"
-                    alt="Swivi Brand Campaign"
+                    src="https://www.swivimedia.com/brands"
+                    alt="Swivi Media Brand Campaign"
                     width={400}
                     height={300}
                     className="rounded-lg shadow-lg"
@@ -191,86 +374,20 @@ const BrandsPage = () => {
           </div>
         </section>
 
-        {/* Featured Campaign - Zeussy */}
+        {/* Featured Campaigns - Stackable Cards */}
         <section className="py-20 md:py-32 border-t border-black/5">
           <div className="max-width-wrapper section-padding">
             <div className="mb-16">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
-                Featured Campaign
+                Featured Campaigns
               </h2>
               <p className="text-muted-foreground max-w-2xl">
-                See how we helped Zeussy scale their content and reach millions of viewers.
+                See how we've helped brands create viral content that drives real engagement and growth.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
-                className="space-y-6"
-              >
-                <h3 className="text-2xl font-normal">Zeussy Clips</h3>
-                <p className="text-muted-foreground">
-                  Join our exclusive community of content creators and earn $1,000 for every 1M views generated. 
-                  Perfect for digital trendsetters and ambitious go-getters looking to turn their content knowledge 
-                  into a profitable side hustle.
-                </p>
-                <ul className="space-y-3">
-                  <li className="flex items-center text-sm">
-                    <span className="mr-2">•</span>
-                    No specialized gear required
-                  </li>
-                  <li className="flex items-center text-sm">
-                    <span className="mr-2">•</span>
-                    Work flexibly from any location
-                  </li>
-                  <li className="flex items-center text-sm">
-                    <span className="mr-2">•</span>
-                    Instant payouts for approved clips
-                  </li>
-                </ul>
-                <Link
-                  href="https://whop.com/zeussy/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
-                >
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
-                className="bg-black/5 rounded-2xl p-8"
-              >
-                <div className="space-y-4">
-                  <h4 className="font-normal">Campaign Highlights</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-background p-4 rounded-xl">
-                      <div className="text-2xl font-light mb-1">$1K</div>
-                      <div className="text-xs text-muted-foreground">Per 1M Views</div>
-                    </div>
-                    <div className="bg-background p-4 rounded-xl">
-                      <div className="text-2xl font-light mb-1">15+</div>
-                      <div className="text-xs text-muted-foreground">Active Clippers</div>
-                    </div>
-                    <div className="bg-background p-4 rounded-xl">
-                      <div className="text-2xl font-light mb-1">24/7</div>
-                      <div className="text-xs text-muted-foreground">Support</div>
-                    </div>
-                    <div className="bg-background p-4 rounded-xl">
-                      <div className="text-2xl font-light mb-1">100%</div>
-                      <div className="text-xs text-muted-foreground">Satisfaction</div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
+            <div className="relative">
+              <CampaignCardStack />
             </div>
           </div>
         </section>

@@ -25,7 +25,7 @@ const testimonials: Testimonial[] = [
     name: "Sarah Johnson",
     role: "Content Creator",
     company: "@sarahcreates",
-    content: "Swivimedia helped me go from 10K to 100K followers in just 3 months. Their viral content strategy is unmatched!",
+    content: "Swivi Media helped me go from 10K to 100K followers in just 3 months. Their viral content strategy is unmatched!",
     rating: 5,
     image: "/testimonials/sarah.jpg",
     verified: true
@@ -35,7 +35,7 @@ const testimonials: Testimonial[] = [
     name: "Mike Chen",
     role: "Brand Manager",
     company: "TechStart Inc.",
-    content: "The ROI we've seen from working with Swivimedia is incredible. Our engagement rates have increased by 400%.",
+    content: "The ROI we've seen from working with Swivi Media is incredible. Our engagement rates have increased by 400%.",
     rating: 5,
     image: "/testimonials/mike.jpg",
     verified: true
@@ -55,7 +55,7 @@ const testimonials: Testimonial[] = [
     name: "David Park",
     role: "CEO",
     company: "Fashion Forward",
-    content: "Our brand went viral multiple times after implementing Swivimedia's strategies. Sales increased by 250%.",
+    content: "Our brand went viral multiple times after implementing Swivi Media's strategies. Sales increased by 250%.",
     rating: 5,
     image: "/testimonials/david.jpg",
     verified: true

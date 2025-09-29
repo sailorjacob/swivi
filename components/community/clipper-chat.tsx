@@ -290,7 +290,7 @@ export function ClipperChat() {
               Want to join the full community experience?
             </p>
             <Button size="lg">
-              Join Swivimedia Pro
+              Join Swivi Media Pro
             </Button>
           </motion.div>
         </motion.div>

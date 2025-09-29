@@ -76,7 +76,7 @@ export default function AboutPage() {
                 className="mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light leading-tight text-center"
               >
                 About{" "}
-                <span className="font-normal">Swivimedia</span>
+                <span className="font-normal">Swivi Media</span>
               </motion.h1>
 
               <motion.p
@@ -172,7 +172,7 @@ export default function AboutPage() {
               <Card className="mt-12 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
                 <CardContent className="p-8">
                   <div className="text-center">
-                    <h3 className="text-xl font-medium mb-4">How Swivimedia Changes the Game</h3>
+                    <h3 className="text-xl font-medium mb-4">How Swivi Media Changes the Game</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
                       <div>
                         <h4 className="font-medium mb-2 text-muted-foreground">Traditional Advertising</h4>

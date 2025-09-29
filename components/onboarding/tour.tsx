@@ -17,7 +17,7 @@ interface TourStep {
 const tourSteps: TourStep[] = [
   {
     id: "welcome",
-    title: "Welcome to Swivimedia! 👋",
+    title: "Welcome to Swivi Media! 👋",
     description: "Let's take a quick tour to help you get started with viral content creation.",
   },
   {
@@ -61,7 +61,7 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
 
   useEffect(() => {
     // Check if user has seen the tour
-    const tourSeen = localStorage.getItem("swivimedia-tour-completed")
+    const tourSeen = localStorage.getItem("swivi-media-tour-completed")
     if (!tourSeen) {
       setIsActive(true)
     } else {
@@ -89,7 +89,7 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
 
   const completeTour = () => {
     setIsActive(false)
-    localStorage.setItem("swivimedia-tour-completed", "true")
+    localStorage.setItem("swivi-media-tour-completed", "true")
     onComplete?.()
   }
 
