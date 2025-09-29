@@ -95,6 +95,21 @@ export default function AdminAnalyticsPage() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-lg text-red-600 mb-4">{error}</p>
+            <Button onClick={fetchAnalytics} variant="outline">
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       {loading && (
@@ -138,7 +153,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Overview Cards */}
-        {analytics?.overview && (
+        {analytics && analytics.overview && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <Card>
@@ -147,7 +162,7 @@ export default function AdminAnalyticsPage() {
                     <Users className="h-8 w-8 text-muted-foreground" />
                     <div className="ml-4">
                       <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-                      <p className="text-2xl font-semibold">{analytics.overview.totalUsers}</p>
+                      <p className="text-2xl font-semibold">{analytics.overview.totalUsers || 0}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -159,7 +174,7 @@ export default function AdminAnalyticsPage() {
                     <Target className="h-8 w-8 text-muted-foreground" />
                     <div className="ml-4">
                       <p className="text-sm font-medium text-muted-foreground">Active Campaigns</p>
-                      <p className="text-2xl font-semibold">{analytics.overview.activeCampaigns}</p>
+                      <p className="text-2xl font-semibold">{analytics.overview.activeCampaigns || 0}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -190,13 +205,14 @@ export default function AdminAnalyticsPage() {
               </Card>
             </div>
 
-            <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-                <TabsTrigger value="platforms">Platforms</TabsTrigger>
-                <TabsTrigger value="payouts">Payouts</TabsTrigger>
-              </TabsList>
+            {analytics && (
+              <Tabs defaultValue="overview" className="space-y-6">
+                <TabsList>
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+                  <TabsTrigger value="platforms">Platforms</TabsTrigger>
+                  <TabsTrigger value="payouts">Payouts</TabsTrigger>
+                </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -318,23 +334,32 @@ export default function AdminAnalyticsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Total Paid Out</span>
-                        <span className="font-medium">${analytics.payoutStats.totalPaid.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Pending Payouts</span>
-                        <span className="font-medium">${analytics.payoutStats.pendingPayouts.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Average Payout</span>
-                        <span className="font-medium">${analytics.payoutStats.averagePayout.toFixed(2)}</span>
-                      </div>
+                      {analytics.payoutStats ? (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Total Paid Out</span>
+                            <span className="font-medium">${(analytics.payoutStats.totalPaid || 0).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Pending Payouts</span>
+                            <span className="font-medium">${(analytics.payoutStats.pendingPayouts || 0).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Average Payout</span>
+                            <span className="font-medium">${(analytics.payoutStats.averagePayout || 0).toFixed(2)}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-muted-foreground">No payout data available</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
-            </Tabs>
+              </Tabs>
+            )}
           </>
         )}
       </motion.div>

@@ -90,12 +90,28 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    // Get payout statistics
+    const paidSubmissions = await prisma.clipSubmission.aggregate({
+      where: { status: 'PAID' },
+      _sum: { payout: true },
+      _count: true
+    })
+
+    const pendingSubmissions = await prisma.clipSubmission.count({
+      where: { status: 'APPROVED' }
+    })
+
     const platformStats: {
       overview: any
       campaignDetails?: any
       userDetails?: any
       topCampaigns: any[]
       platformBreakdown: Record<string, number>
+      payoutStats: {
+        totalPaid: number
+        pendingPayouts: number
+        averagePayout: number
+      }
     } = {
       overview: {
         totalUsers,
@@ -119,7 +135,12 @@ export async function GET(request: NextRequest) {
       platformBreakdown: platformBreakdown.reduce((acc, item) => {
         acc[item.platform] = item._count.platform
         return acc
-      }, {} as Record<string, number>)
+      }, {} as Record<string, number>),
+      payoutStats: {
+        totalPaid: Number(paidSubmissions._sum.payout || 0),
+        pendingPayouts: pendingSubmissions * 0, // For now, assuming no pending payouts
+        averagePayout: paidSubmissions._count > 0 ? Number(paidSubmissions._sum.payout || 0) / paidSubmissions._count : 0
+      }
     }
 
     // Calculate submission status counts
