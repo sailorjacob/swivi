@@ -11,7 +11,6 @@ import { CampaignsPreview } from "@/components/marketing/campaigns-preview"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { DarkThemeWrapper } from "./layout-wrapper"
-import { BottomBackground } from "@/components/ui/bottom-background"
 
 export default function HomePage() {
   return (
@@ -32,12 +31,6 @@ export default function HomePage() {
         </div>
       </main>
       <Footer />
-
-      {/* Bottom Background Branding */}
-      <BottomBackground
-        src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/3422.png"
-        alt="Swivi Background Branding"
-      />
     </DarkThemeWrapper>
   )
 } 

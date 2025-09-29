@@ -32,6 +32,30 @@ export function Footer() {
         </div>
       </div>
 
+      {/* Bottom Background - positioned within footer */}
+      <div className="relative">
+        <div
+          className="absolute bottom-0 left-0 right-0 z-0 m-0 p-0"
+          style={{
+            transform: 'translateY(0px)', // Position at bottom of footer
+          }}
+        >
+          <div className="relative w-full h-32 overflow-hidden">
+            <Image
+              src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/3422.png"
+              alt="Swivi Background Branding"
+              width={400}
+              height={400}
+              className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-auto h-auto max-w-sm object-cover object-bottom"
+              style={{
+                filter: "brightness(0.9) contrast(1.05)",
+              }}
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-background/10 to-transparent" />
+          </div>
+        </div>
+      </div>
     </footer>
   )
 } 
