@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { motion } from "framer-motion"
 import { Check, X, Eye, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
