@@ -19,7 +19,9 @@ import {
   Music,
   CheckCircle,
   Trash2,
-  MessageCircle
+  MessageCircle,
+  Wallet,
+  Mail
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { SocialVerificationDialog } from "../../../../components/clippers/social-verification-dialog"
@@ -37,6 +39,7 @@ interface UserProfile {
   totalEarnings: number
   totalViews: number
   createdAt: string
+  updatedAt?: string
 }
 
 export default function ProfilePage() {
@@ -50,7 +53,9 @@ export default function ProfilePage() {
   const [profileData, setProfileData] = useState({
     name: "",
     bio: "",
-    website: ""
+    website: "",
+    walletAddress: "",
+    paypalEmail: ""
   })
 
   // Load user profile data and verified accounts
@@ -67,7 +72,9 @@ export default function ProfilePage() {
           setProfileData({
             name: userData.name || "",
             bio: userData.bio || "",
-            website: userData.website || ""
+            website: userData.website || "",
+            walletAddress: userData.walletAddress || "",
+            paypalEmail: userData.paypalEmail || ""
           })
         }
 
@@ -102,7 +109,11 @@ export default function ProfilePage() {
         },
         body: JSON.stringify({
           type: "profile",
-          ...profileData
+          name: profileData.name,
+          bio: profileData.bio,
+          website: profileData.website,
+          walletAddress: profileData.walletAddress,
+          paypalEmail: profileData.paypalEmail
         })
       })
 
@@ -278,6 +289,51 @@ export default function ProfilePage() {
                   )}
                 </Button>
               </form>
+            </CardContent>
+          </Card>
+
+          {/* Payout Settings */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <Wallet className="w-5 h-5" />
+                Payout Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="wallet">Ethereum Address for USDC</Label>
+                  <div className="relative mt-1">
+                    <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="wallet"
+                      placeholder="0x742d35Cc6635C0532925a3b8D951D9C9..."
+                      value={profileData.walletAddress}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, walletAddress: e.target.value }))}
+                      className="pl-10 font-mono text-sm"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Enter your Ethereum address for USDC payments
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="paypal">PayPal Email</Label>
+                  <div className="relative mt-1">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="paypal"
+                      type="email"
+                      placeholder="yourname@gmail.com"
+                      value={profileData.paypalEmail}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, paypalEmail: e.target.value }))}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
