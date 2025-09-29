@@ -46,7 +46,27 @@ export async function GET(
 
     const campaign = await prisma.campaign.findUnique({
       where: { id: params.id },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        creator: true,
+        budget: true,
+        spent: true,
+        minPayout: true,
+        maxPayout: true,
+        deadline: true,
+        // startDate: true, // Commented out - not in DB
+        status: true,
+        targetPlatforms: true,
+        requirements: true,
+        // featuredImage: true, // Commented out - not in DB
+        // category: true, // Commented out - not in DB
+        // difficulty: true, // Commented out - not in DB
+        // maxParticipants: true, // Commented out - not in DB
+        // tags: true, // Commented out - not in DB
+        createdAt: true,
+        updatedAt: true,
         submissions: {
           include: {
             user: {
@@ -123,11 +143,11 @@ export async function PUT(
     if (validatedData.minPayout !== undefined) updateData.minPayout = validatedData.minPayout
     if (validatedData.maxPayout !== undefined) updateData.maxPayout = validatedData.maxPayout
     if (validatedData.deadline !== undefined) updateData.deadline = validatedData.deadline
-    if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate
+    // if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate  // Commented out - not in DB
     if (validatedData.status !== undefined) updateData.status = validatedData.status
     if (validatedData.targetPlatforms !== undefined) updateData.targetPlatforms = validatedData.targetPlatforms
     if (validatedData.requirements !== undefined) updateData.requirements = validatedData.requirements
-    if (validatedData.featuredImage !== undefined) updateData.featuredImage = validatedData.featuredImage
+    // if (validatedData.featuredImage !== undefined) updateData.featuredImage = validatedData.featuredImage  // Commented out - not in DB
 
     // Note: The following fields are commented out because they don't exist in the current database
     // When the database is migrated to add these columns, uncomment them:

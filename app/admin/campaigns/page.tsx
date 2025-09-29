@@ -163,11 +163,13 @@ export default function AdminCampaignsPage() {
           minPayout: parseFloat(formData.minPayout),
           maxPayout: parseFloat(formData.maxPayout),
           deadline: formData.deadline,
-          startDate: formData.startDate || undefined,
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
-          featuredImage: featuredImageUrl,
+          // Note: The following fields are commented out because they don't exist in the current database
+          // When the database is migrated to add these columns, uncomment them:
+          // startDate: formData.startDate || undefined,
+          // featuredImage: featuredImageUrl,
         })
       })
 
@@ -223,11 +225,13 @@ export default function AdminCampaignsPage() {
           minPayout: parseFloat(formData.minPayout),
           maxPayout: parseFloat(formData.maxPayout),
           deadline: formData.deadline,
-          startDate: formData.startDate || undefined,
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
-          featuredImage: featuredImageUrl,
+          // Note: The following fields are commented out because they don't exist in the current database
+          // When the database is migrated to add these columns, uncomment them:
+          // startDate: formData.startDate || undefined,
+          // featuredImage: featuredImageUrl,
         })
       })
 

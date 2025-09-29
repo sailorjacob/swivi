@@ -52,11 +52,11 @@ export async function GET(request: NextRequest) {
         minPayout: true,
         maxPayout: true,
         deadline: true,
-        startDate: true,
+        // startDate: true, // Commented out - column doesn't exist in DB
         status: true,
         targetPlatforms: true,
         requirements: true,
-        featuredImage: true,
+        // featuredImage: true, // Commented out - column doesn't exist in DB
         // category: true, // Commented out - column doesn't exist in DB
         // difficulty: true, // Commented out - column doesn't exist in DB
         // maxParticipants: true, // Commented out - column doesn't exist in DB
@@ -74,7 +74,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(campaigns)
   } catch (error) {
     console.error("Error fetching campaigns:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace')
+    return NextResponse.json({ error: "Internal server error", details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
   }
 }
 
@@ -112,9 +113,10 @@ export async function POST(request: NextRequest) {
       status: "ACTIVE"
     }
 
-    // Add optional fields if provided
-    if (validatedData.featuredImage) campaignData.featuredImage = validatedData.featuredImage
-    if (validatedData.startDate) campaignData.startDate = validatedData.startDate
+    // Note: The following fields are commented out because they don't exist in the current database
+    // When the database is migrated to add these columns, uncomment them:
+    // if (validatedData.featuredImage) campaignData.featuredImage = validatedData.featuredImage
+    // if (validatedData.startDate) campaignData.startDate = validatedData.startDate
 
     const campaign = await prisma.campaign.create({
       data: campaignData,
