@@ -128,7 +128,7 @@ function Sidebar({ className }: { className?: string }) {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <div className="relative w-8 h-8 flex-shrink-0 scale-150 group-hover:scale-200 transition-transform duration-200 ease-out">
+              <div className="relative w-8 h-8 flex-shrink-0 scale-125 group-hover:scale-150 transition-transform duration-200 ease-out">
                 {renderNavIcon(item.icon, cn(
                   "transition-all duration-200 w-full h-full",
                   active ? "opacity-100" : "opacity-70 group-hover:opacity-100"
