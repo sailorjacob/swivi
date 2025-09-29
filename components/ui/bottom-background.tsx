@@ -14,12 +14,9 @@ export function BottomBackground({
   return (
     <div
       className={`
-        fixed bottom-0 left-0 right-0 z-0 m-0 p-0
+        absolute bottom-0 left-0 right-0 z-0 m-0 p-0
         ${className}
       `}
-      style={{
-        transform: 'translateY(-280px)', // Position in footer area
-      }}
     >
       <div className="relative w-full h-32 overflow-hidden">
         {/* Main image that appears at bottom */}
