@@ -65,6 +65,7 @@ const statusOptions = [
 export default function AdminCampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
+  const [analytics, setAnalytics] = useState<any>(null)
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
@@ -79,9 +80,11 @@ export default function AdminCampaignsPage() {
     startDate: "",
     targetPlatforms: [] as string[],
     requirements: [] as string[],
-    status: "ACTIVE" as Campaign["status"],
-    featured: false,
-    imageUrl: "",
+    status: "DRAFT" as Campaign["status"],
+    featuredImage: "",
+    category: "",
+    difficulty: "beginner" as "beginner" | "intermediate" | "advanced",
+    maxParticipants: "",
     tags: [] as string[]
   })
 
@@ -96,13 +99,30 @@ export default function AdminCampaignsPage() {
     } catch (error) {
       console.error("Error fetching campaigns:", error)
       toast.error("Failed to fetch campaigns")
-    } finally {
-      setLoading(false)
+    }
+  }
+
+  // Fetch analytics
+  const fetchAnalytics = async () => {
+    try {
+      const response = await fetch("/api/admin/analytics/aggregate")
+      if (response.ok) {
+        const data = await response.json()
+        setAnalytics(data)
+      }
+    } catch (error) {
+      console.error("Error fetching analytics:", error)
     }
   }
 
   useEffect(() => {
     fetchCampaigns()
+    fetchAnalytics()
+
+    // Set up interval to refresh analytics every 30 seconds
+    const interval = setInterval(fetchAnalytics, 30000)
+
+    return () => clearInterval(interval)
   }, [])
 
   // Create campaign
@@ -117,7 +137,8 @@ export default function AdminCampaignsPage() {
           ...formData,
           budget: parseFloat(formData.budget),
           minPayout: parseFloat(formData.minPayout),
-          maxPayout: parseFloat(formData.maxPayout)
+          maxPayout: parseFloat(formData.maxPayout),
+          maxParticipants: parseInt(formData.maxParticipants) || undefined
         })
       })
 
@@ -195,9 +216,15 @@ export default function AdminCampaignsPage() {
       minPayout: campaign.minPayout.toString(),
       maxPayout: campaign.maxPayout.toString(),
       deadline: new Date(campaign.deadline).toISOString().slice(0, 16),
+      startDate: campaign.startDate ? new Date(campaign.startDate).toISOString().slice(0, 16) : "",
       targetPlatforms: campaign.targetPlatforms,
       requirements: campaign.requirements,
-      status: campaign.status
+      status: campaign.status,
+      featuredImage: campaign.featuredImage || "",
+      category: campaign.category || "",
+      difficulty: (campaign.difficulty as "beginner" | "intermediate" | "advanced") || "beginner",
+      maxParticipants: campaign.maxParticipants?.toString() || "",
+      tags: campaign.tags || []
     })
     setShowEditDialog(true)
   }
@@ -215,9 +242,11 @@ export default function AdminCampaignsPage() {
       startDate: "",
       targetPlatforms: [],
       requirements: [],
-      status: "ACTIVE",
-      featured: false,
-      imageUrl: "",
+      status: "DRAFT",
+      featuredImage: "",
+      category: "",
+      difficulty: "beginner",
+      maxParticipants: "",
       tags: []
     })
     setSelectedCampaign(null)
@@ -240,6 +269,16 @@ export default function AdminCampaignsPage() {
   const totalSpent = campaigns.reduce((sum, c) => sum + c.spent, 0)
   const totalSubmissions = campaigns.reduce((sum, c) => sum + c._count.submissions, 0)
   const activeCampaigns = campaigns.filter(c => c.status === "ACTIVE").length
+
+  // Use analytics data if available
+  const platformStats = analytics?.overview || {
+    totalUsers: 0,
+    totalCampaigns: campaigns.length,
+    totalSubmissions,
+    activeCampaigns,
+    totalViews: 0,
+    totalEarnings: 0
+  }
 
   if (loading) {
     return (
@@ -295,19 +334,7 @@ export default function AdminCampaignsPage() {
                 <Target className="h-8 w-8 text-muted-foreground" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">Active Campaigns</p>
-                  <p className="text-2xl font-semibold">{activeCampaigns}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <DollarSign className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Total Budget</p>
-                  <p className="text-2xl font-semibold">${totalBudget.toLocaleString()}</p>
+                  <p className="text-2xl font-semibold">{platformStats.activeCampaigns}</p>
                 </div>
               </div>
             </CardContent>
@@ -318,8 +345,8 @@ export default function AdminCampaignsPage() {
               <div className="flex items-center">
                 <Users className="h-8 w-8 text-muted-foreground" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Total Submissions</p>
-                  <p className="text-2xl font-semibold">{totalSubmissions}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+                  <p className="text-2xl font-semibold">{platformStats.totalUsers}</p>
                 </div>
               </div>
             </CardContent>
@@ -330,8 +357,20 @@ export default function AdminCampaignsPage() {
               <div className="flex items-center">
                 <TrendingUp className="h-8 w-8 text-muted-foreground" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Budget Spent</p>
-                  <p className="text-2xl font-semibold">${totalSpent.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Views</p>
+                  <p className="text-2xl font-semibold">{Number(platformStats.totalViews).toLocaleString()}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <DollarSign className="h-8 w-8 text-muted-foreground" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
+                  <p className="text-2xl font-semibold">${platformStats.totalEarnings.toFixed(2)}</p>
                 </div>
               </div>
             </CardContent>
@@ -523,124 +562,231 @@ function CampaignForm({
   isEdit?: boolean
 }) {
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="Campaign title"
-          />
-        </div>
-        <div>
-          <Label htmlFor="creator">Creator</Label>
-          <Input
-            id="creator"
-            value={formData.creator}
-            onChange={(e) => setFormData({ ...formData, creator: e.target.value })}
-            placeholder="Brand or creator name"
-          />
-        </div>
-      </div>
-
+    <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+      {/* Basic Information */}
       <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Campaign description"
-          rows={3}
-        />
-      </div>
+        <h3 className="text-lg font-medium mb-4">Campaign Information</h3>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <Label htmlFor="title">Campaign Title *</Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="e.g., Summer Fitness Challenge"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="creator">Brand/Creator Name *</Label>
+            <Input
+              id="creator"
+              value={formData.creator}
+              onChange={(e) => setFormData({ ...formData, creator: e.target.value })}
+              placeholder="e.g., Nike, Your Brand Name"
+              required
+            />
+          </div>
+        </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <Label htmlFor="budget">Budget ($)</Label>
-          <Input
-            id="budget"
-            type="number"
-            value={formData.budget}
-            onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-            placeholder="1000"
+        <div className="mb-4">
+          <Label htmlFor="description">Campaign Description *</Label>
+          <Textarea
+            id="description"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Describe your campaign, goals, and what content creators should focus on..."
+            rows={4}
+            required
           />
         </div>
-        <div>
-          <Label htmlFor="minPayout">Min Payout ($)</Label>
-          <Input
-            id="minPayout"
-            type="number"
-            step="0.01"
-            value={formData.minPayout}
-            onChange={(e) => setFormData({ ...formData, minPayout: e.target.value })}
-            placeholder="0.50"
-          />
-        </div>
-        <div>
-          <Label htmlFor="maxPayout">Max Payout ($)</Label>
-          <Input
-            id="maxPayout"
-            type="number"
-            step="0.01"
-            value={formData.maxPayout}
-            onChange={(e) => setFormData({ ...formData, maxPayout: e.target.value })}
-            placeholder="5.00"
-          />
-        </div>
-      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="deadline">Deadline</Label>
+        <div className="mb-4">
+          <Label htmlFor="featuredImage">Featured Image URL</Label>
           <Input
-            id="deadline"
-            type="datetime-local"
-            value={formData.deadline}
-            onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+            id="featuredImage"
+            value={formData.featuredImage}
+            onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
+            placeholder="https://example.com/campaign-image.jpg"
           />
-        </div>
-        <div>
-          <Label htmlFor="status">Status</Label>
-          <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
+      {/* Budget & Payouts */}
       <div>
-        <Label>Target Platforms</Label>
-        <div className="grid grid-cols-3 gap-2 mt-2">
-          {platformOptions.map((platform) => (
-            <label key={platform.value} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={formData.targetPlatforms.includes(platform.value)}
-                onChange={(e) => {
-                  const platforms = e.target.checked
-                    ? [...formData.targetPlatforms, platform.value]
-                    : formData.targetPlatforms.filter((p: string) => p !== platform.value)
-                  setFormData({ ...formData, targetPlatforms: platforms })
-                }}
-                className="rounded"
-              />
-              <span className="text-sm">{platform.label}</span>
-            </label>
-          ))}
+        <h3 className="text-lg font-medium mb-4">Budget & Payouts</h3>
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <div>
+            <Label htmlFor="budget">Total Budget ($) *</Label>
+            <Input
+              id="budget"
+              type="number"
+              value={formData.budget}
+              onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+              placeholder="5000"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="minPayout">Min Payout per 1K Views ($) *</Label>
+            <Input
+              id="minPayout"
+              type="number"
+              step="0.01"
+              value={formData.minPayout}
+              onChange={(e) => setFormData({ ...formData, minPayout: e.target.value })}
+              placeholder="0.50"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="maxPayout">Max Payout per 1K Views ($) *</Label>
+            <Input
+              id="maxPayout"
+              type="number"
+              step="0.01"
+              value={formData.maxPayout}
+              onChange={(e) => setFormData({ ...formData, maxPayout: e.target.value })}
+              placeholder="5.00"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="maxParticipants">Max Participants</Label>
+            <Input
+              id="maxParticipants"
+              type="number"
+              value={formData.maxParticipants}
+              onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
+              placeholder="100 (optional)"
+            />
+          </div>
+          <div>
+            <Label htmlFor="difficulty">Difficulty Level</Label>
+            <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="beginner">Beginner</SelectItem>
+                <SelectItem value="intermediate">Intermediate</SelectItem>
+                <SelectItem value="advanced">Advanced</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
-      <div className="flex justify-end space-x-2">
+      {/* Timeline */}
+      <div>
+        <h3 className="text-lg font-medium mb-4">Timeline</h3>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <Label htmlFor="startDate">Start Date</Label>
+            <Input
+              id="startDate"
+              type="datetime-local"
+              value={formData.startDate}
+              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+            />
+          </div>
+          <div>
+            <Label htmlFor="deadline">End Date *</Label>
+            <Input
+              id="deadline"
+              type="datetime-local"
+              value={formData.deadline}
+              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Platforms & Requirements */}
+      <div>
+        <h3 className="text-lg font-medium mb-4">Platforms & Requirements</h3>
+
+        <div className="mb-4">
+          <Label>Accepted Platforms *</Label>
+          <div className="grid grid-cols-3 gap-2 mt-2">
+            {platformOptions.map((platform) => (
+              <label key={platform.value} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={formData.targetPlatforms.includes(platform.value)}
+                  onChange={(e) => {
+                    const platforms = e.target.checked
+                      ? [...formData.targetPlatforms, platform.value]
+                      : formData.targetPlatforms.filter((p: string) => p !== platform.value)
+                    setFormData({ ...formData, targetPlatforms: platforms })
+                  }}
+                  className="rounded"
+                />
+                <span className="text-sm">{platform.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <Label htmlFor="requirements">Content Requirements</Label>
+          <Textarea
+            id="requirements"
+            value={formData.requirements.join('\n')}
+            onChange={(e) => setFormData({ ...formData, requirements: e.target.value.split('\n').filter(r => r.trim()) })}
+            placeholder="Enter each requirement on a new line&#10;e.g.&#10;Must include brand hashtag&#10;Minimum 10 seconds duration&#10;Show product clearly"
+            rows={4}
+          />
+        </div>
+
+        <div className="mb-4">
+          <Label htmlFor="category">Category</Label>
+          <Input
+            id="category"
+            value={formData.category}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            placeholder="e.g., Fitness, Fashion, Tech, Gaming"
+          />
+        </div>
+
+        <div className="mb-4">
+          <Label htmlFor="tags">Tags (comma-separated)</Label>
+          <Input
+            id="tags"
+            value={formData.tags.join(', ')}
+            onChange={(e) => setFormData({ ...formData, tags: e.target.value.split(',').map(t => t.trim()).filter(t => t) })}
+            placeholder="fitness, workout, motivation, health"
+          />
+        </div>
+      </div>
+
+      {/* Settings */}
+      <div>
+        <h3 className="text-lg font-medium mb-4">Settings</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="status">Campaign Status</Label>
+            <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="DRAFT">Draft</SelectItem>
+                <SelectItem value="ACTIVE">Active</SelectItem>
+                <SelectItem value="PAUSED">Paused</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
+                <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end space-x-2 pt-4 border-t">
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>

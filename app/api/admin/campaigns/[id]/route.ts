@@ -13,9 +13,15 @@ const updateCampaignSchema = z.object({
   minPayout: z.number().positive("Minimum payout must be positive").optional(),
   maxPayout: z.number().positive("Maximum payout must be positive").optional(),
   deadline: z.string().transform((str) => new Date(str)).optional(),
+  startDate: z.string().transform((str) => new Date(str)).optional(),
   status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER", "FACEBOOK"])).optional(),
   requirements: z.array(z.string()).optional(),
+  featuredImage: z.string().optional(),
+  category: z.string().optional(),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
+  maxParticipants: z.number().positive().optional(),
+  tags: z.array(z.string()).optional(),
 })
 
 export async function GET(

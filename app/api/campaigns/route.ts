@@ -12,8 +12,14 @@ const createCampaignSchema = z.object({
   minPayout: z.number().positive("Minimum payout must be positive"),
   maxPayout: z.number().positive("Maximum payout must be positive"),
   deadline: z.string().transform((str) => new Date(str)),
+  startDate: z.string().transform((str) => new Date(str)).optional(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER", "FACEBOOK"])),
   requirements: z.array(z.string()).optional().default([]),
+  featuredImage: z.string().optional(),
+  category: z.string().optional(),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
+  maxParticipants: z.number().positive().optional(),
+  tags: z.array(z.string()).optional().default([]),
 })
 
 export async function GET(request: NextRequest) {
@@ -87,8 +93,14 @@ export async function POST(request: NextRequest) {
         minPayout: validatedData.minPayout,
         maxPayout: validatedData.maxPayout,
         deadline: validatedData.deadline,
+        startDate: validatedData.startDate,
         targetPlatforms: validatedData.targetPlatforms,
         requirements: validatedData.requirements,
+        featuredImage: validatedData.featuredImage,
+        category: validatedData.category,
+        difficulty: validatedData.difficulty,
+        maxParticipants: validatedData.maxParticipants,
+        tags: validatedData.tags,
         status: "ACTIVE"
       },
       include: {

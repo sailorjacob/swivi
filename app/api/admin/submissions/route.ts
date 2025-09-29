@@ -24,12 +24,14 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status")
     const campaignId = searchParams.get("campaignId")
     const platform = searchParams.get("platform")
+    const dateRange = searchParams.get("dateRange")
+    const payoutStatus = searchParams.get("payoutStatus")
     const limit = parseInt(searchParams.get("limit") || "50")
     const offset = parseInt(searchParams.get("offset") || "0")
 
     const where: any = {}
 
-    if (status) {
+    if (status && status !== "all") {
       where.status = status.toUpperCase()
     }
 
@@ -37,8 +39,41 @@ export async function GET(request: NextRequest) {
       where.campaignId = campaignId
     }
 
-    if (platform) {
+    if (platform && platform !== "all") {
       where.platform = platform.toUpperCase()
+    }
+
+    // Date range filtering
+    if (dateRange && dateRange !== "all") {
+      const now = new Date()
+      let startDate: Date
+
+      switch (dateRange) {
+        case "today":
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+          break
+        case "week":
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+          break
+        case "month":
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+          break
+        default:
+          startDate = new Date(0)
+      }
+
+      where.createdAt = {
+        gte: startDate
+      }
+    }
+
+    // Payout status filtering
+    if (payoutStatus && payoutStatus !== "all") {
+      if (payoutStatus === "paid") {
+        where.paidAt = { not: null }
+      } else if (payoutStatus === "unpaid") {
+        where.paidAt = null
+      }
     }
 
     const submissions = await prisma.clipSubmission.findMany({

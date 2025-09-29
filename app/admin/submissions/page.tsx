@@ -68,6 +68,19 @@ const platformOptions = [
   { value: "FACEBOOK", label: "Facebook" }
 ]
 
+const dateRangeOptions = [
+  { value: "all", label: "All Time" },
+  { value: "today", label: "Today" },
+  { value: "week", label: "This Week" },
+  { value: "month", label: "This Month" }
+]
+
+const payoutStatusOptions = [
+  { value: "all", label: "All Payouts" },
+  { value: "paid", label: "Paid" },
+  { value: "unpaid", label: "Unpaid" }
+]
+
 export default function AdminSubmissionsPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [loading, setLoading] = useState(true)
@@ -80,7 +93,9 @@ export default function AdminSubmissionsPage() {
     status: "all",
     platform: "all",
     campaignId: "",
-    search: ""
+    search: "",
+    dateRange: "all",
+    payoutStatus: "all"
   })
   const [pagination, setPagination] = useState({
     total: 0,
@@ -103,6 +118,12 @@ export default function AdminSubmissionsPage() {
       }
       if (filters.platform !== "all") {
         params.append("platform", filters.platform)
+      }
+      if (filters.dateRange !== "all") {
+        params.append("dateRange", filters.dateRange)
+      }
+      if (filters.payoutStatus !== "all") {
+        params.append("payoutStatus", filters.payoutStatus)
       }
       if (filters.campaignId) {
         params.append("campaignId", filters.campaignId)
@@ -323,6 +344,38 @@ export default function AdminSubmissionsPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="min-w-[150px]">
+                <Label>Date Range</Label>
+                <Select value={filters.dateRange} onValueChange={(value) => setFilters({ ...filters, dateRange: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dateRangeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="min-w-[150px]">
+                <Label>Payout Status</Label>
+                <Select value={filters.payoutStatus} onValueChange={(value) => setFilters({ ...filters, payoutStatus: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {payoutStatusOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -456,15 +509,19 @@ export default function AdminSubmissionsPage() {
               <DialogHeader>
                 <DialogTitle>Submission Details</DialogTitle>
               </DialogHeader>
-              <div className="space-y-6">
+                <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium">User</Label>
                     <p className="text-sm">{selectedSubmission.user.name || selectedSubmission.user.email}</p>
+                    <p className="text-xs text-muted-foreground">Total Views: {selectedSubmission.user.totalViews.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">Total Earnings: ${selectedSubmission.user.totalEarnings.toFixed(2)}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium">Campaign</Label>
                     <p className="text-sm">{selectedSubmission.campaign.title}</p>
+                    <p className="text-xs text-muted-foreground">Budget: ${selectedSubmission.campaign.budget.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">Spent: ${selectedSubmission.campaign.spent.toLocaleString()}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium">Platform</Label>
@@ -476,6 +533,11 @@ export default function AdminSubmissionsPage() {
                       {selectedSubmission.status}
                     </Badge>
                   </div>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Submitted Date</Label>
+                  <p className="text-sm">{new Date(selectedSubmission.createdAt).toLocaleDateString()}</p>
                 </div>
 
                 <div>
@@ -507,14 +569,34 @@ export default function AdminSubmissionsPage() {
                 <div>
                   <Label className="text-sm font-medium">View Tracking History</Label>
                   <div className="space-y-2 mt-2">
-                    {selectedSubmission.viewTracking.map((tracking) => (
-                      <div key={tracking.id} className="flex justify-between text-sm p-2 bg-muted rounded">
-                        <span>{new Date(tracking.date).toLocaleDateString()}</span>
-                        <span>{tracking.views.toLocaleString()} views</span>
-                      </div>
-                    ))}
+                    {selectedSubmission.clip?.viewTracking && selectedSubmission.clip.viewTracking.length > 0 ? (
+                      selectedSubmission.clip.viewTracking.map((tracking) => (
+                        <div key={tracking.id} className="flex justify-between text-sm p-2 bg-muted rounded">
+                          <span>{new Date(tracking.date).toLocaleDateString()}</span>
+                          <span>{Number(tracking.views).toLocaleString()} views</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No view tracking data available</p>
+                    )}
                   </div>
                 </div>
+
+                {selectedSubmission.payout && (
+                  <div>
+                    <Label className="text-sm font-medium">Payout Information</Label>
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded">
+                      <p className="text-sm text-green-800">
+                        <strong>Payout Amount:</strong> ${selectedSubmission.payout.toFixed(2)}
+                      </p>
+                      {selectedSubmission.paidAt && (
+                        <p className="text-sm text-green-800">
+                          <strong>Paid On:</strong> {new Date(selectedSubmission.paidAt).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {selectedSubmission.status === "APPROVED" && (
                   <div className="flex gap-2">
