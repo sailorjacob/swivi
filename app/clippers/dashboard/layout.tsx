@@ -27,22 +27,40 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 
 interface NavItem {
   label: string
   href: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: React.ComponentType<{ className?: string }> | string
   badge?: string
 }
 
   const navItems: NavItem[] = [
-    { label: "Campaigns", href: "/clippers/dashboard/campaigns", icon: Target },
-    { label: "Dashboard", href: "/clippers/dashboard", icon: Home },
-    { label: "Profile", href: "/clippers/dashboard/profile", icon: User },
+    { label: "Campaigns", href: "/clippers/dashboard/campaigns", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png" },
+    { label: "Dashboard", href: "/clippers/dashboard", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/3422.png" },
+    { label: "Profile", href: "/clippers/dashboard/profile", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/342.png" },
     // Analytics temporarily hidden for platform cleanup
     // { label: "Analytics", href: "/clippers/dashboard/analytics", icon: BarChart3 },
-    { label: "Payouts", href: "/clippers/dashboard/payouts", icon: DollarSign },
+    { label: "Payouts", href: "/clippers/dashboard/payouts", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/233.png" },
   ]
+
+  const renderNavIcon = (icon: React.ComponentType<{ className?: string }> | string, className?: string) => {
+    if (typeof icon === 'string') {
+      return (
+        <Image
+          src={icon}
+          alt="nav icon"
+          width={20}
+          height={20}
+          className={cn("w-5 h-5 rounded", className)}
+          unoptimized
+        />
+      )
+    }
+    const IconComponent = icon
+    return <IconComponent className={className} />
+  }
 
 function Sidebar({ className }: { className?: string }) {
   const { data: session } = useSession()
@@ -109,10 +127,10 @@ function Sidebar({ className }: { className?: string }) {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <item.icon className={cn(
-                "w-5 h-5 transition-colors duration-200",
-                active ? "text-primary" : "group-hover:text-primary"
-              )} />
+              {renderNavIcon(item.icon, cn(
+                "transition-all duration-200",
+                active ? "opacity-100" : "opacity-70 group-hover:opacity-100"
+              ))}
               <span className="font-medium text-sm tracking-wide">{item.label}</span>
               {item.badge && (
                 <span className="ml-auto bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">

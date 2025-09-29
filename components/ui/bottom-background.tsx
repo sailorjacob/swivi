@@ -8,20 +8,35 @@ interface BottomBackgroundProps {
   alt: string
   className?: string
   animate?: boolean
+  triggerScroll?: number // Percentage of page height to trigger (default 50%)
 }
 
 export function BottomBackground({
   src,
   alt,
   className = "",
-  animate = true
+  animate = true,
+  triggerScroll = 50
 }: BottomBackgroundProps) {
   const [isVisible, setIsVisible] = useState(false)
+  const [hasTriggered, setHasTriggered] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 500)
-    return () => clearTimeout(timer)
-  }, [])
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const windowHeight = window.innerHeight
+      const docHeight = document.documentElement.offsetHeight
+      const scrollPercent = (scrollTop / (docHeight - windowHeight)) * 100
+
+      if (scrollPercent >= triggerScroll && !hasTriggered) {
+        setHasTriggered(true)
+        setTimeout(() => setIsVisible(true), 300) // Small delay after trigger
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [triggerScroll, hasTriggered])
 
   return (
     <div

@@ -98,17 +98,19 @@ export default function RootLayout({
               {children}
               <SessionDebug />
 
-              {/* Floating Branding Elements */}
+              {/* Floating Branding Elements - Randomized positioning */}
               <FloatingBranding
                 src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png"
                 alt="Swivi Branding"
-                position="top-left"
+                randomPosition={true}
+                randomDelay={true}
                 size="sm"
               />
               <FloatingBranding
                 src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/342.png"
                 alt="Swivi Branding"
-                position="bottom-right"
+                randomPosition={true}
+                randomDelay={true}
                 size="sm"
               />
 
