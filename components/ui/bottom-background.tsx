@@ -31,20 +31,21 @@ export function BottomBackground({
       if (scrollPercent >= triggerScroll && !hasTriggered) {
         setHasTriggered(true)
         setTimeout(() => setIsVisible(true), 300) // Small delay after trigger
+      } else if (scrollPercent < triggerScroll && hasTriggered && isVisible) {
+        // Hide when scrolling back up above threshold
+        setIsVisible(false)
+        setHasTriggered(false)
       }
     }
 
-    // Only add scroll listener if not triggered yet
-    if (!hasTriggered) {
-      window.addEventListener('scroll', handleScroll, { passive: true })
-      return () => window.removeEventListener('scroll', handleScroll)
-    }
-  }, [triggerScroll, hasTriggered])
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [triggerScroll, hasTriggered, isVisible])
 
   return (
     <div
       className={`
-        fixed bottom-0 left-0 right-0 z-0
+        fixed bottom-0 left-0 right-0 z-0 m-0 p-0
         transition-all duration-1500 ease-out
         ${animate ? (isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none") : "opacity-100"}
         ${className}

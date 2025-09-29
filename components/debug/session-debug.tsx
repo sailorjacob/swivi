@@ -1,7 +1,7 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -15,7 +15,27 @@ import { Badge } from "@/components/ui/badge"
 export function SessionDebug() {
   const { data: session, status, update } = useSession()
   const [isVisible, setIsVisible] = useState(false)
-  
+  const [userProfile, setUserProfile] = useState<any>(null)
+
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (session?.user?.id) {
+        try {
+          const response = await fetch("/api/user/profile")
+          if (response.ok) {
+            const profileData = await response.json()
+            setUserProfile(profileData)
+          }
+        } catch (error) {
+          console.error("Failed to fetch user profile:", error)
+        }
+      }
+    }
+
+    fetchUserProfile()
+  }, [session])
+
   // Only show in development
   if (process.env.NODE_ENV !== "development") {
     return null
@@ -66,11 +86,25 @@ export function SessionDebug() {
           {session && (
             <div className="space-y-2 text-xs">
               <div>
-                <span className="text-muted-foreground">User:</span>
+                <span className="text-muted-foreground">Session Name:</span>
                 <div className="text-white ml-2">
                   {session.user?.name || "No name"}
                 </div>
+                <div className="text-xs text-muted-foreground ml-2">
+                  (From Discord OAuth)
+                </div>
               </div>
+              {userProfile && (
+                <div>
+                  <span className="text-muted-foreground">Database Name:</span>
+                  <div className="text-white ml-2">
+                    {userProfile.name || "No name in database"}
+                  </div>
+                  <div className="text-xs text-muted-foreground ml-2">
+                    (From user profile)
+                  </div>
+                </div>
+              )}
               <div>
                 <span className="text-muted-foreground">Email:</span>
                 <div className="text-white ml-2">

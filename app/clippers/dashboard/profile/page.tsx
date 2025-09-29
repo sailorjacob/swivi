@@ -199,12 +199,22 @@ export default function ProfilePage() {
               <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <div className="flex items-center gap-4 mb-6">
                   <Avatar className="w-16 h-16">
-                    <AvatarImage 
-                      src={user?.image || session?.user?.image || ""} 
-                      alt={user?.name || "Profile"}
+                    <AvatarImage
+                      src={user?.image || session?.user?.image || ""}
+                      alt={(() => {
+                        const displayName = (user?.name && user.name !== ";Updated name;" && user.name.trim() !== "")
+                          ? user.name
+                          : (session?.user?.name || "Profile")
+                        return displayName
+                      })()}
                     />
                     <AvatarFallback className="bg-foreground text-white text-xl">
-                      {user?.name?.[0] || session?.user?.name?.[0] || user?.email?.[0] || session?.user?.email?.[0] || "U"}
+                      {(() => {
+                        const displayName = (user?.name && user.name !== ";Updated name;" && user.name.trim() !== "")
+                          ? user.name
+                          : (session?.user?.name || user?.email || session?.user?.email || "U")
+                        return displayName[0]?.toUpperCase() || "U"
+                      })()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">

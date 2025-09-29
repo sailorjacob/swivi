@@ -77,6 +77,20 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         session.user.role = token.role as string
         session.accessToken = token.accessToken as string
+
+        // Update session name from database if available and valid
+        try {
+          const user = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { name: true }
+          })
+
+          if (user?.name && user.name !== ";Updated name;" && user.name.trim() !== "") {
+            session.user.name = user.name
+          }
+        } catch (error) {
+          console.error("Failed to update session name from database:", error)
+        }
       }
       return session
     },
