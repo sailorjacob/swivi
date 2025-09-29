@@ -55,8 +55,6 @@ export default function ClipperDashboard() {
   const [loading, setLoading] = useState(true)
   const [showSubmissionModal, setShowSubmissionModal] = useState(false)
 
-  // Check if current user is an admin
-  const isAdmin = session?.user?.role === "ADMIN"
 
   useEffect(() => {
     if (status === "loading") return
@@ -108,28 +106,10 @@ export default function ClipperDashboard() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-light mb-2">Clipper Dashboard</h1>
-            <p className="text-muted-foreground">
-              Welcome back, {session?.user?.name || session?.user?.email}
-            </p>
-          </div>
-          {isAdmin && (
-            <div className="flex items-center gap-3">
-              <Link href="/clippers/dashboard">
-                <Button variant="default" size="sm" disabled>
-                  Clipper Dashboard
-                </Button>
-              </Link>
-              <Link href="/admin">
-                <Button variant="outline" size="sm">
-                  Admin Dashboard
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
+        <h1 className="text-3xl font-light mb-2">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Welcome back, {session?.user?.name || session?.user?.email}
+        </p>
       </div>
 
       {/* Stats Cards */}

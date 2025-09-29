@@ -261,12 +261,12 @@ export default function AdminCampaignsPage() {
   // Get status badge color
   const getStatusColor = (status: Campaign["status"]) => {
     switch (status) {
-      case "ACTIVE": return "bg-green-100 text-green-800"
-      case "DRAFT": return "bg-gray-100 text-gray-800"
-      case "PAUSED": return "bg-yellow-100 text-yellow-800"
-      case "COMPLETED": return "bg-blue-100 text-blue-800"
-      case "CANCELLED": return "bg-red-100 text-red-800"
-      default: return "bg-gray-100 text-gray-800"
+      case "ACTIVE": return "bg-muted border border-border text-foreground"
+      case "DRAFT": return "bg-muted border border-border text-foreground"
+      case "PAUSED": return "bg-muted border border-border text-foreground"
+      case "COMPLETED": return "bg-muted border border-border text-foreground"
+      case "CANCELLED": return "bg-muted border border-border text-foreground"
+      default: return "bg-muted border border-border text-foreground"
     }
   }
 
@@ -306,7 +306,14 @@ export default function AdminCampaignsPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-light mb-2">Campaign Management</h1>
+            <div className="flex items-center gap-4 mb-2">
+              <Link href="/admin">
+                <Button variant="outline" size="sm">
+                  ← Back to Admin
+                </Button>
+              </Link>
+              <h1 className="text-3xl font-light">Campaign Management</h1>
+            </div>
             <p className="text-muted-foreground">
               Create and manage brand activation campaigns
             </p>

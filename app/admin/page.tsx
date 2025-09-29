@@ -70,28 +70,28 @@ export default function AdminDashboard() {
       description: "Create and edit brand campaigns",
       href: "/admin/campaigns",
       icon: Target,
-      color: "bg-blue-500"
+      color: "bg-muted border border-border"
     },
     {
       title: "Review Submissions",
       description: "Approve or reject clipper submissions",
       href: "/admin/submissions",
       icon: Shield,
-      color: "bg-green-500"
+      color: "bg-muted border border-border"
     },
     {
       title: "View Analytics",
       description: "Platform performance and insights",
       href: "/admin/analytics",
       icon: BarChart3,
-      color: "bg-purple-500"
+      color: "bg-muted border border-border"
     },
     {
       title: "User Management",
       description: "Manage users and permissions",
       href: "/admin/users",
       icon: Users,
-      color: "bg-orange-500"
+      color: "bg-muted border border-border"
     }
   ]
 
@@ -102,26 +102,19 @@ export default function AdminDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Header with Navigation */}
+        {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4 mb-4">
+            <Link href="/clippers/dashboard">
+              <Button variant="outline" size="sm">
+                ← Back to Dashboard
+              </Button>
+            </Link>
             <div>
               <h1 className="text-3xl font-light mb-2">Admin Dashboard</h1>
               <p className="text-muted-foreground">
                 Welcome back, {session?.user?.name || session?.user?.email}
               </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link href="/clippers/dashboard">
-                <Button variant="outline" size="sm">
-                  Clipper Dashboard
-                </Button>
-              </Link>
-              <Link href="/admin">
-                <Button variant="default" size="sm" disabled>
-                  Admin Dashboard
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
@@ -187,7 +180,7 @@ export default function AdminDashboard() {
                   <CardContent className="p-6">
                     <div className="flex items-center mb-3">
                       <div className={`p-2 rounded-lg ${action.color}`}>
-                        <action.icon className="h-6 w-6 text-white" />
+                        <action.icon className="h-6 w-6 text-foreground" />
                       </div>
                     </div>
                     <h3 className="font-medium mb-1">{action.title}</h3>

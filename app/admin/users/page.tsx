@@ -114,10 +114,10 @@ export default function AdminUsersPage() {
   // Get role badge color
   const getRoleColor = (role: string) => {
     switch (role) {
-      case "ADMIN": return "bg-red-100 text-red-800"
-      case "CREATOR": return "bg-purple-100 text-purple-800"
-      case "CLIPPER": return "bg-blue-100 text-blue-800"
-      default: return "bg-gray-100 text-gray-800"
+      case "ADMIN": return "bg-muted border border-border text-foreground"
+      case "CREATOR": return "bg-muted border border-border text-foreground"
+      case "CLIPPER": return "bg-muted border border-border text-foreground"
+      default: return "bg-muted border border-border text-foreground"
     }
   }
 
@@ -162,7 +162,14 @@ export default function AdminUsersPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-light mb-2">User Management</h1>
+            <div className="flex items-center gap-4 mb-2">
+              <Link href="/admin">
+                <Button variant="outline" size="sm">
+                  ← Back to Admin
+                </Button>
+              </Link>
+              <h1 className="text-3xl font-light">User Management</h1>
+            </div>
             <p className="text-muted-foreground">
               Manage user roles and permissions
             </p>
@@ -174,7 +181,7 @@ export default function AdminUsersPage() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Crown className="h-8 w-8 text-red-500" />
+                <Crown className="h-8 w-8 text-muted-foreground" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">Admins</p>
                   <p className="text-2xl font-semibold">{adminCount}</p>
@@ -186,7 +193,7 @@ export default function AdminUsersPage() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Shield className="h-8 w-8 text-purple-500" />
+                <Shield className="h-8 w-8 text-muted-foreground" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">Creators</p>
                   <p className="text-2xl font-semibold">{creatorCount}</p>
@@ -198,7 +205,7 @@ export default function AdminUsersPage() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Users className="h-8 w-8 text-blue-500" />
+                <Users className="h-8 w-8 text-muted-foreground" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">Clippers</p>
                   <p className="text-2xl font-semibold">{clipperCount}</p>
