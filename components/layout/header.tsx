@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { Menu, X, ChevronDown } from "lucide-react"
 
@@ -25,7 +25,27 @@ const navigation = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [currentRole, setCurrentRole] = useState<string | null>(null)
   const { data: session, status } = useSession()
+
+  // Fetch current role from database when session is available
+  useEffect(() => {
+    if (session?.user?.id && status === "authenticated") {
+      fetchCurrentRole()
+    }
+  }, [session, status])
+
+  const fetchCurrentRole = async () => {
+    try {
+      const response = await fetch(`/api/user/role`)
+      if (response.ok) {
+        const data = await response.json()
+        setCurrentRole(data.role)
+      }
+    } catch (error) {
+      console.error("Failed to fetch current role:", error)
+    }
+  }
 
   return (
     <header className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-sm border-b border-black/5">
@@ -94,7 +114,7 @@ export function Header() {
               Loading...
             </div>
           ) : session ? (
-            session.user?.role === "ADMIN" ? (
+            currentRole === "ADMIN" ? (
               <div className="flex items-center gap-2">
                 <Link
                   href="/admin"
@@ -195,7 +215,7 @@ export function Header() {
                 Loading...
               </div>
             ) : session ? (
-              session.user?.role === "ADMIN" ? (
+              currentRole === "ADMIN" ? (
                 <div className="flex flex-col gap-2 mt-2">
                   <Link
                     href="/admin"

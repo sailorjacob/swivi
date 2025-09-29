@@ -106,30 +106,41 @@ const ImageSwitcher = () => {
 
   return (
     <div className="relative w-full max-w-md aspect-[4/3]">
-      {images.map((image, index) => (
-        <motion.div
-          key={index}
-          className={`absolute inset-0 rounded-2xl overflow-hidden shadow-lg cursor-pointer ${
-            index === currentIndex ? 'z-10' : 'z-0'
-          }`}
-          onClick={nextImage}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{
-            opacity: index === currentIndex ? 1 : 0.7,
-            scale: index === currentIndex ? 1 : 0.9,
-            zIndex: index === currentIndex ? 10 : 5
-          }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-        >
-          <Image
-            src={image.src}
-            alt={image.alt}
-            fill
-            className="object-cover"
-            priority={index === 0}
-          />
-        </motion.div>
-      ))}
+      {images.map((image, index) => {
+        const isActive = index === currentIndex
+        const offset = images.length - 1 - index // Reverse order for stacking
+
+        return (
+          <motion.div
+            key={index}
+            className={`absolute rounded-2xl overflow-hidden shadow-lg cursor-pointer ${
+              isActive ? 'z-10' : 'z-0'
+            }`}
+            onClick={nextImage}
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            animate={{
+              opacity: isActive ? 1 : 0.6,
+              scale: isActive ? 1 : 0.85,
+              x: isActive ? 0 : offset * -8, // Offset non-active cards to the left
+              y: isActive ? 0 : offset * 8,  // Offset non-active cards down
+              zIndex: isActive ? 10 : 5 - offset
+            }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            style={{
+              width: isActive ? '100%' : '90%',
+              height: isActive ? '100%' : '90%'
+            }}
+          >
+            <Image
+              src={image.src}
+              alt={image.alt}
+              fill
+              className="object-cover"
+              priority={index === 0}
+            />
+          </motion.div>
+        )
+      })}
     </div>
   )
 }
