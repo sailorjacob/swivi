@@ -146,8 +146,8 @@ export default function BrandsPage() {
                   className="relative w-full md:w-auto"
                 >
                   <Image
-                    src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/swivi/swivi39.png"
-                    alt="Swivi Brand Campaign"
+                    src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/Caleb%20Simpson%20x%20Ed%20Sheeran%20Pizza%20Review.jpg"
+                    alt="Caleb Simpson x Ed Sheeran Pizza Review Campaign"
                     width={400}
                     height={300}
                     className="rounded-lg shadow-lg"
