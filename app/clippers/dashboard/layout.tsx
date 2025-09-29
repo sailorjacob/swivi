@@ -129,11 +129,11 @@ function Sidebar({ className }: { className?: string }) {
               )}
             >
               <div className={cn(
-                "relative w-8 h-8 flex-shrink-0 transition-transform duration-200 ease-out",
-                active ? "scale-110" : "scale-100 group-hover:scale-110"
+                "relative flex-shrink-0 transition-transform duration-200 ease-out",
+                active ? "scale-150" : "scale-100 group-hover:scale-150"
               )}>
                 {renderNavIcon(item.icon, cn(
-                  "transition-all duration-200 w-full h-full",
+                  "transition-all duration-200 w-5 h-5",
                   "opacity-100"
                 ))}
               </div>
