@@ -32,12 +32,6 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Footer Bottom Background Branding */}
-      <BottomBackground
-        src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/233.png"
-        alt="Swivi Footer Branding"
-        animate={false}
-      />
     </footer>
   )
 } 

@@ -52,9 +52,9 @@ interface NavItem {
         <Image
           src={icon}
           alt="nav icon"
-          width={32}
-          height={32}
-          className={cn("w-8 h-8 rounded", className)}
+          width={40}
+          height={40}
+          className={cn("w-10 h-10 rounded", className)}
           unoptimized
         />
       )
