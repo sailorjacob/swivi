@@ -28,7 +28,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
-import { FloatingBranding } from "@/components/ui/floating-branding"
 
 interface NavItem {
   label: string
@@ -52,15 +51,15 @@ interface NavItem {
         <Image
           src={icon}
           alt="nav icon"
-          width={20}
-          height={20}
-          className={cn("w-5 h-5 rounded", className)}
+          width={32}
+          height={32}
+          className={cn("w-8 h-8 rounded", className)}
           unoptimized
         />
       )
     }
     const IconComponent = icon
-    return <IconComponent className={className} />
+    return <IconComponent className={cn("w-6 h-6", className)} />
   }
 
 function Sidebar({ className }: { className?: string }) {
@@ -231,16 +230,7 @@ export default function DashboardLayout({
             </motion.div>
           </AnimatePresence>
 
-          {/* Subtle corner branding elements */}
-          <FloatingBranding
-            src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/3422.png"
-            alt="Dashboard Branding"
-            position="bottom-left"
-            size="sm"
-            animate={true}
-            randomPosition={false}
-            randomDelay={false}
-          />
+          {/* Branding removed to avoid overlap with navigation */}
         </main>
 
         {/* Footer */}

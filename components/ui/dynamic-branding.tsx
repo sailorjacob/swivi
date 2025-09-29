@@ -116,14 +116,18 @@ export function DynamicBranding() {
   const pathname = usePathname()
 
   const brandingConfigs = useMemo(() => {
+    // Don't show floating branding on clipper platform pages
+    const pathSegments = pathname.split('/').filter(Boolean)
+    if (pathSegments[0] === 'clippers') {
+      return []
+    }
+
     // Check for exact matches first
     if (pageBranding[pathname]) {
       return pageBranding[pathname]
     }
 
     // Check for dynamic routes (like /case-studies/owning-manhattan)
-    const pathSegments = pathname.split('/').filter(Boolean)
-
     if (pathSegments[0] === 'case-studies' && pathSegments.length > 1) {
       return pageBranding['/case-studies'] || []
     }
