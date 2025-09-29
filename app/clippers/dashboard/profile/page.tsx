@@ -19,9 +19,7 @@ import {
   Music,
   CheckCircle,
   Trash2,
-  MessageCircle,
-  Wallet,
-  Mail
+  MessageCircle
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { SocialVerificationDialog } from "../../../../components/clippers/social-verification-dialog"
@@ -53,9 +51,7 @@ export default function ProfilePage() {
   const [profileData, setProfileData] = useState({
     name: "",
     bio: "",
-    website: "",
-    walletAddress: "",
-    paypalEmail: ""
+    website: ""
   })
 
   // Load user profile data and verified accounts
@@ -72,9 +68,7 @@ export default function ProfilePage() {
           setProfileData({
             name: userData.name || "",
             bio: userData.bio || "",
-            website: userData.website || "",
-            walletAddress: userData.walletAddress || "",
-            paypalEmail: userData.paypalEmail || ""
+            website: userData.website || ""
           })
         }
 
@@ -111,9 +105,7 @@ export default function ProfilePage() {
           type: "profile",
           name: profileData.name,
           bio: profileData.bio,
-          website: profileData.website,
-          walletAddress: profileData.walletAddress,
-          paypalEmail: profileData.paypalEmail
+          website: profileData.website
         })
       })
 
@@ -292,51 +284,6 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Payout Settings */}
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-foreground flex items-center gap-2">
-                <Wallet className="w-5 h-5" />
-                Payout Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="wallet">Ethereum Address for USDC</Label>
-                  <div className="relative mt-1">
-                    <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="wallet"
-                      placeholder="0x742d35Cc6635C0532925a3b8D951D9C9..."
-                      value={profileData.walletAddress}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, walletAddress: e.target.value }))}
-                      className="pl-10 font-mono text-sm"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Enter your Ethereum address for USDC payments
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="paypal">PayPal Email</Label>
-                  <div className="relative mt-1">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="paypal"
-                      type="email"
-                      placeholder="yourname@gmail.com"
-                      value={profileData.paypalEmail}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, paypalEmail: e.target.value }))}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Social Media Connections */}
           <Card className="bg-card border-border">
             <CardHeader>
@@ -455,38 +402,42 @@ export default function ProfilePage() {
                   <div key={account.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
                     <div className="flex items-center gap-3">
                       {account.platform === 'DISCORD' && (
-                        <div className="w-8 h-8 bg-indigo-500/10 rounded-full flex items-center justify-center">
-                          <MessageCircle className="w-4 h-4 text-indigo-400" />
+                        <div className="w-8 h-8 bg-muted/30 rounded-full flex items-center justify-center">
+                          <MessageCircle className="w-4 h-4 text-muted-foreground" />
                         </div>
                       )}
                       {account.platform === 'INSTAGRAM' && (
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500/8 to-pink-500/8 rounded-full flex items-center justify-center">
-                          <Instagram className="w-4 h-4 text-purple-400" />
+                        <div className="w-8 h-8 bg-muted/30 rounded-full flex items-center justify-center">
+                          <Instagram className="w-4 h-4 text-muted-foreground" />
                         </div>
                       )}
                       {account.platform === 'YOUTUBE' && (
-                        <div className="w-8 h-8 bg-red-500/10 rounded-full flex items-center justify-center">
-                          <Youtube className="w-4 h-4 text-red-400" />
+                        <div className="w-8 h-8 bg-muted/30 rounded-full flex items-center justify-center">
+                          <Youtube className="w-4 h-4 text-muted-foreground" />
                         </div>
                       )}
                       {account.platform === 'TIKTOK' && (
-                        <div className="w-8 h-8 bg-slate-500/10 rounded-full flex items-center justify-center">
-                          <Music className="w-4 h-4 text-slate-300" />
+                        <div className="w-8 h-8 bg-muted/30 rounded-full flex items-center justify-center">
+                          <Music className="w-4 h-4 text-muted-foreground" />
                         </div>
                       )}
                       {account.platform === 'TWITTER' && (
-                        <div className="w-8 h-8 bg-slate-500/10 rounded-full flex items-center justify-center">
-                          <span className="text-slate-300 font-bold text-sm">𝕏</span>
+                        <div className="w-8 h-8 bg-muted/30 rounded-full flex items-center justify-center">
+                          <span className="text-muted-foreground font-bold text-sm">𝕏</span>
                         </div>
                       )}
                       <div>
-                        <p className="font-medium text-foreground text-sm">
-                          {account.displayName || account.platform.charAt(0) + account.platform.slice(1).toLowerCase()}
+                        <p className="font-medium text-muted-foreground text-sm">
+                          {account.platform === 'DISCORD' && 'Discord account'}
+                          {account.platform === 'INSTAGRAM' && 'Instagram account'}
+                          {account.platform === 'YOUTUBE' && 'YouTube account'}
+                          {account.platform === 'TIKTOK' && 'TikTok account'}
+                          {account.platform === 'TWITTER' && 'X (Twitter) account'}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-foreground">
                           {account.isOAuth ? account.username : `@${account.username}`}
                         </p>
-                        <p className="text-xs text-green-400">
+                        <p className="text-xs text-muted-foreground">
                           ✓ {account.isOAuth ? 'Connected' : 'Verified'}
                         </p>
                       </div>

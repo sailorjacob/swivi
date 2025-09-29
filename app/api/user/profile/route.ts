@@ -7,7 +7,7 @@ import { z } from "zod"
 
 const updateProfileSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name too long"),
-  bio: z.string().max(500, "Bio too long").optional(),
+  bio: z.string().max(500, "Bio too long").optional().or(z.literal("")),
   website: z.string().url("Invalid website URL").optional().or(z.literal("")),
 })
 
@@ -91,10 +91,10 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Invalid update type" }, { status: 400 })
     }
 
-    // Clean up empty strings
+    // Clean up empty strings and undefined values
     const cleanedData: any = {}
     for (const [key, value] of Object.entries(validatedData)) {
-      if (value === "") {
+      if (value === "" || value === undefined) {
         cleanedData[key] = null
       } else {
         cleanedData[key] = value
