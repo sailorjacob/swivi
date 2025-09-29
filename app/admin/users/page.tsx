@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Search, UserCheck, UserX, Shield, Users, Crown, Eye } from "lucide-react"
@@ -39,7 +39,7 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
   // Fetch users
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const params = new URLSearchParams()
       if (selectedRole !== "all") {
@@ -55,11 +55,11 @@ export default function AdminUsersPage() {
       console.error("Error fetching users:", error)
       toast.error("Failed to fetch users")
     }
-  }
+  }, [selectedRole])
 
   useEffect(() => {
     fetchUsers()
-  }, [selectedRole])
+  }, [fetchUsers])
 
   // Promote user to admin
   const promoteToAdmin = async (userId: string) => {

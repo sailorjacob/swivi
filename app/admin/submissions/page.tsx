@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Check, X, Eye, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2 } from "lucide-react"
@@ -114,7 +114,7 @@ export default function AdminSubmissionsPage() {
   })
 
   // Fetch submissions
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -153,11 +153,11 @@ export default function AdminSubmissionsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters, pagination.limit, pagination.offset])
 
   useEffect(() => {
     fetchSubmissions()
-  }, [filters, pagination.offset])
+  }, [fetchSubmissions])
 
   // Update submission status
   const updateSubmissionStatus = async (submissionId: string, status: Submission["status"], reason?: string, payout?: number) => {
