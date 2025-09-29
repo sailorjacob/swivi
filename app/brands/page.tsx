@@ -66,7 +66,7 @@ const campaigns = [
       { value: "4.2%", label: "Engagement Rate" },
       { value: "12+", label: "Platforms" }
     ],
-    image: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/Caleb%20Simpson%20x%20Ed%20Sheeran%20Pizza%20Review.jpg",
+    image: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif",
     link: "#",
     linkText: "View Case Study"
   },
@@ -80,11 +80,59 @@ const campaigns = [
       { value: "24/7", label: "Support" },
       { value: "100%", label: "Satisfaction" }
     ],
-    image: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/swivi/swivi39.png",
+    image: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png",
     link: "https://whop.com/zeussy/",
     linkText: "Learn More"
   },
 ]
+
+const images = [
+  {
+    src: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif",
+    alt: "Ed Sheeran Campaign"
+  },
+  {
+    src: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png",
+    alt: "Zeussy Campaign"
+  }
+]
+
+const ImageSwitcher = () => {
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  const nextImage = () => {
+    setCurrentIndex((prev) => (prev + 1) % images.length)
+  }
+
+  return (
+    <div className="relative w-full max-w-md aspect-[4/3]">
+      {images.map((image, index) => (
+        <motion.div
+          key={index}
+          className={`absolute inset-0 rounded-2xl overflow-hidden shadow-lg cursor-pointer ${
+            index === currentIndex ? 'z-10' : 'z-0'
+          }`}
+          onClick={nextImage}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{
+            opacity: index === currentIndex ? 1 : 0.7,
+            scale: index === currentIndex ? 1 : 0.9,
+            zIndex: index === currentIndex ? 10 : 5
+          }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+        >
+          <Image
+            src={image.src}
+            alt={image.alt}
+            fill
+            className="object-cover"
+            priority={index === 0}
+          />
+        </motion.div>
+      ))}
+    </div>
+  )
+}
 
 const CampaignCardStack = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -121,40 +169,16 @@ const CampaignCardStack = () => {
         <AnimatePresence mode="wait">
           {campaigns.map((campaign, index) => {
             const isActive = index === currentIndex
-            const isPrevious = index === (currentIndex - 1 + campaigns.length) % campaigns.length
-            const isNext = index === (currentIndex + 1) % campaigns.length
-
-            let zIndex = 0
-            let scale = 0.9
-            let opacity = 0.3
-            let y = 0
-
-            if (isActive) {
-              zIndex = 30
-              scale = 1
-              opacity = 1
-              y = 0
-            } else if (isPrevious || isNext) {
-              zIndex = 20
-              scale = 0.95
-              opacity = 0.7
-              y = isPrevious ? -20 : 20
-            } else {
-              zIndex = 10
-              scale = 0.9
-              opacity = 0.3
-              y = index < currentIndex ? -40 : 40
-            }
 
             return (
               <motion.div
                 key={campaign.id}
                 initial={{ opacity: 0, scale: 0.8, y: 50 }}
                 animate={{
-                  opacity,
-                  scale,
-                  y,
-                  zIndex
+                  opacity: isActive ? 1 : 0,
+                  scale: isActive ? 1 : 0.9,
+                  y: isActive ? 0 : 20,
+                  zIndex: isActive ? 30 : 10
                 }}
                 exit={{ opacity: 0, scale: 0.8, y: -50 }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -163,42 +187,44 @@ const CampaignCardStack = () => {
                 }`}
               >
                 <div className="grid md:grid-cols-2 gap-12 items-center h-full">
-                  {/* Content Side */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: isActive ? 1 : 0.5, x: isActive ? 0 : -20 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    className="space-y-6"
-                  >
-                    <h3 className="text-2xl md:text-3xl font-normal">{campaign.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {campaign.description}
-                    </p>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      {campaign.highlights.map((highlight, idx) => (
-                        <div key={idx} className="bg-black/5 rounded-xl p-4">
-                          <div className="text-2xl font-light mb-1">{highlight.value}</div>
-                          <div className="text-xs text-muted-foreground">{highlight.label}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <Link
-                      href={campaign.link}
-                      target={campaign.link.startsWith('http') ? "_blank" : "_self"}
-                      rel={campaign.link.startsWith('http') ? "noopener noreferrer" : ""}
-                      className="inline-flex items-center text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
+                  {/* Content Side - Only show when active */}
+                  {isActive && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                      className="space-y-6"
                     >
-                      {campaign.linkText}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </motion.div>
+                      <h3 className="text-2xl md:text-3xl font-normal">{campaign.title}</h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {campaign.description}
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        {campaign.highlights.map((highlight, idx) => (
+                          <div key={idx} className="bg-black/5 rounded-xl p-4">
+                            <div className="text-2xl font-light mb-1">{highlight.value}</div>
+                            <div className="text-xs text-muted-foreground">{highlight.label}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <Link
+                        href={campaign.link}
+                        target={campaign.link.startsWith('http') ? "_blank" : "_self"}
+                        rel={campaign.link.startsWith('http') ? "noopener noreferrer" : ""}
+                        className="inline-flex items-center text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
+                      >
+                        {campaign.linkText}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </motion.div>
+                  )}
 
                   {/* Image Side */}
                   <motion.div
                     initial={{ opacity: 0, x: 50 }}
-                    animate={{ opacity: isActive ? 1 : 0.5, x: isActive ? 0 : 20 }}
+                    animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="flex justify-center lg:justify-end"
                   >
@@ -331,14 +357,7 @@ const BrandsPage = () => {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="flex justify-center lg:justify-end"
                 >
-                  <Image
-                    src="https://www.swivimedia.com/brands"
-                    alt="Swivi Media Brand Campaign"
-                    width={400}
-                    height={300}
-                    className="rounded-lg shadow-lg"
-                    priority
-                  />
+                  <ImageSwitcher />
                 </motion.div>
               </div>
             </motion.div>
@@ -429,10 +448,10 @@ const BrandsPage = () => {
                 Ready to Scale Your Brand?
               </h2>
               <p className="text-muted-foreground mb-8">
-                Book a call with our team to discuss how we can help you create 
+                Book a call with our team to discuss how we can help you create
                 viral content that drives real results.
               </p>
-              
+
               <Link
                 href="https://calendly.com/bykevingeorge/30min?month=2025-05"
                 target="_blank"
@@ -449,6 +468,7 @@ const BrandsPage = () => {
             </div>
           </div>
         </section>
+
       </main>
       <Footer />
     </DarkThemeWrapper>
