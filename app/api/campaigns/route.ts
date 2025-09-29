@@ -14,11 +14,11 @@ const createCampaignSchema = z.object({
   deadline: z.string().transform((str) => new Date(str)),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER", "FACEBOOK"])),
   requirements: z.array(z.string()).optional().default([]),
-  // featuredImage: z.string().optional(), // Commented out - not in DB
-  // category: z.string().optional(), // Commented out - not in DB
-  // difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(), // Commented out - not in DB
-  // maxParticipants: z.number().positive().optional(), // Commented out - not in DB
-  // tags: z.array(z.string()).optional().default([]), // Commented out - not in DB
+  featuredImage: z.string().optional(),
+  category: z.string().optional(),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
+  maxParticipants: z.number().positive().optional(),
+  tags: z.array(z.string()).optional().default([]),
 })
 
 export async function GET(request: NextRequest) {
@@ -56,15 +56,15 @@ export async function GET(request: NextRequest) {
         minPayout: true,
         maxPayout: true,
         deadline: true,
-        // startDate: true, // Commented out - not in DB
+        // startDate: true, // Commented out - column doesn't exist in DB
         status: true,
         targetPlatforms: true,
         requirements: true,
-        // featuredImage: true, // Commented out - not in DB
-        // category: true, // Commented out - not in DB
-        // difficulty: true, // Commented out - not in DB
-        // maxParticipants: true, // Commented out - not in DB
-        // tags: true, // Commented out - not in DB
+        // featuredImage: true, // Commented out - column doesn't exist in DB
+        // category: true, // Commented out - column doesn't exist in DB
+        // difficulty: true, // Commented out - column doesn't exist in DB
+        // maxParticipants: true, // Commented out - column doesn't exist in DB
+        // tags: true, // Commented out - column doesn't exist in DB
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -113,13 +113,17 @@ export async function POST(request: NextRequest) {
       deadline: validatedData.deadline,
       targetPlatforms: validatedData.targetPlatforms,
       requirements: validatedData.requirements,
-      // featuredImage: validatedData.featuredImage, // Commented out - not in DB
-      // category: validatedData.category, // Commented out - not in DB
-      // difficulty: validatedData.difficulty, // Commented out - not in DB
-      // maxParticipants: validatedData.maxParticipants, // Commented out - not in DB
-      // tags: validatedData.tags, // Commented out - not in DB
       status: "ACTIVE"
     }
+
+    // Note: The following fields are commented out because they don't exist in the current database
+    // When the database is migrated to add these columns, uncomment them:
+    // if (validatedData.featuredImage) campaignData.featuredImage = validatedData.featuredImage
+    // if (validatedData.category) campaignData.category = validatedData.category
+    // if (validatedData.difficulty) campaignData.difficulty = validatedData.difficulty
+    // if (validatedData.maxParticipants) campaignData.maxParticipants = validatedData.maxParticipants
+    // if (validatedData.tags && validatedData.tags.length > 0) campaignData.tags = validatedData.tags
+    // if (validatedData.startDate) campaignData.startDate = validatedData.startDate
 
     const campaign = await prisma.campaign.create({
       data: campaignData,

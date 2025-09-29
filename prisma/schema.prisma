@@ -121,15 +121,15 @@ model Campaign {
   minPayout       Decimal          @db.Decimal(10, 2) @map("min_payout")
   maxPayout       Decimal          @db.Decimal(10, 2) @map("max_payout")
   deadline        DateTime
-  // startDate       DateTime?        @map("start_date")  // Commented out - not in DB
+  startDate       DateTime?        @map("start_date")
   status          CampaignStatus   @default(ACTIVE)
   requirements    String[]         @default([])
   targetPlatforms SocialPlatform[] @default([])
-  // featuredImage   String?          @map("featured_image")  // Commented out - not in DB
-  // category        String?  // Commented out - not in DB
-  // difficulty      String?          // "beginner", "intermediate", "advanced"  // Commented out - not in DB
-  // maxParticipants Int?             @map("max_participants")  // Commented out - not in DB
-  // tags            String[]         @default([])  // Commented out - not in DB
+  featuredImage   String?          @map("featured_image")
+  category        String?
+  difficulty      String?          // "beginner", "intermediate", "advanced"
+  maxParticipants Int?             @map("max_participants")
+  tags            String[]         @default([])
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
 

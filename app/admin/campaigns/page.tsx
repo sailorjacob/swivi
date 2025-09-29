@@ -161,12 +161,24 @@ export default function AdminCampaignsPage() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          ...formData,
-          featuredImage: featuredImageUrl,
+          title: formData.title,
+          description: formData.description,
+          creator: formData.creator,
           budget: parseFloat(formData.budget),
           minPayout: parseFloat(formData.minPayout),
           maxPayout: parseFloat(formData.maxPayout),
-          maxParticipants: parseInt(formData.maxParticipants) || undefined
+          deadline: formData.deadline,
+          targetPlatforms: formData.targetPlatforms,
+          requirements: formData.requirements,
+          status: formData.status,
+          // Note: The following fields are not sent because they don't exist in the current database
+          // When the database is migrated to add these columns, uncomment them:
+          // featuredImage: featuredImageUrl,
+          // category: formData.category,
+          // difficulty: formData.difficulty,
+          // maxParticipants: parseInt(formData.maxParticipants) || undefined,
+          // tags: formData.tags,
+          // startDate: formData.startDate || undefined,
         })
       })
 

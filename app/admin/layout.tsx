@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -15,6 +15,7 @@ import {
   Menu
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
 import { cn } from "@/lib/utils"
@@ -30,7 +31,7 @@ const navItems: NavItem[] = [
   {
     label: "Manage Campaigns",
     href: "/admin/campaigns",
-    icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png"
+    icon: Target
   },
   {
     label: "Review Submissions",
@@ -45,7 +46,7 @@ const navItems: NavItem[] = [
   {
     label: "User Management",
     href: "/admin/users",
-    icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/342.png"
+    icon: Users
   }
 ]
 
@@ -70,6 +71,27 @@ function AdminNav({ className }: { className?: string }) {
   const { data: session } = useSession()
   const router = useRouter()
   const pathname = usePathname()
+
+  // Demo mode mock session for development
+  const isDemoMode = process.env.NODE_ENV === "development"
+  const mockSession = isDemoMode ? {
+    user: {
+      name: "Demo Admin",
+      email: "admin@swivi.com",
+      image: null
+    }
+  } : null
+
+  const activeSession = session || mockSession
+
+  const handleSignOut = async () => {
+    if (isDemoMode) {
+      // In demo mode, just redirect to admin landing page
+      router.push("/admin")
+      return
+    }
+    await signOut({ callbackUrl: "/admin" })
+  }
 
   const isActive = (href: string) => {
     if (href === "/admin") {
@@ -119,6 +141,50 @@ function AdminNav({ className }: { className?: string }) {
           )
         })}
       </nav>
+
+      {/* Branding Image */}
+      <div className="px-4 pb-2">
+        <div className="flex justify-center">
+          <Image
+            src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png"
+            alt="Swivi Branding"
+            width={40}
+            height={40}
+            className="rounded opacity-80 hover:opacity-100 transition-opacity"
+            unoptimized
+          />
+        </div>
+      </div>
+
+      {/* User Profile */}
+      <div className="p-4 border-t border-border">
+        <div className="flex items-center space-x-3 mb-3">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={activeSession?.user?.image || ""} />
+            <AvatarFallback className="bg-foreground text-primary-foreground">
+              {activeSession?.user?.name?.[0] || "A"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-foreground text-sm font-medium truncate">
+              {activeSession?.user?.name || "Admin"}
+            </p>
+            <p className="text-muted-foreground text-xs truncate">
+              {activeSession?.user?.email || ""}
+            </p>
+          </div>
+        </div>
+
+        <Button
+          onClick={handleSignOut}
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          Sign Out
+        </Button>
+      </div>
     </div>
   )
 }
