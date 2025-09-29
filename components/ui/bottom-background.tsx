@@ -51,7 +51,7 @@ export function BottomBackground({
         ${className}
       `}
       style={{
-        transform: 'translateY(-120px)', // Position above footer
+        transform: 'translateY(-200px)', // Position higher, between CTA and footer logo
       }}
     >
       <div className="relative w-full h-32 overflow-hidden">
