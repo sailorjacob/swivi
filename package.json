@@ -18,7 +18,8 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx scripts/setup.ts",
     "setup": "npm run prisma:migrate && npm run prisma:seed",
-    "build:production": "npm run build:db && npm run prisma:migrate:deploy && npm run build:next"
+    "build:production": "npm run build:db && npm run prisma:migrate:deploy && npm run build:next",
+    "promote-admin": "node scripts/promote-to-admin.js"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.18",

@@ -12,7 +12,8 @@ import {
   AlertCircle,
   Eye,
   Play,
-  Trophy
+  Trophy,
+  ExternalLink
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -22,330 +23,237 @@ import Link from "next/link"
 import Image from "next/image"
 import { ClipSubmissionModal } from "@/components/clippers/clip-submission-modal"
 
-// Real stats - will be populated from user's actual data
-const stats = [
-  {
-    title: "Total Earned",
-    value: "$0.00",
-    change: "Start earning from approved clips",
-    changeType: "neutral" as const,
-    icon: DollarSign,
-    color: "text-foreground"
-  },
-  {
-    title: "Active Campaigns",
-    value: "2",
-    change: "Available to join",
-    changeType: "neutral" as const,
-    icon: Target,
-    color: "text-muted-foreground"
-  },
-  {
-    title: "Clips Submitted",
-    value: "0",
-    change: "Submit your first clip",
-    changeType: "neutral" as const,
-    icon: Play,
-    color: "text-muted-foreground"
-  },
-  {
-    title: "Total Views",
-    value: "0",
-    change: "Grow your audience",
-    changeType: "neutral" as const,
-    icon: Eye,
-    color: "text-muted-foreground"
-  }
-]
-
-// User's recent clips - will be loaded from database
-const recentClips: any[] = []
-
-// Real active campaigns from the campaigns page
-const activeCampaigns = [
-  {
-    id: "campaign-1",
-    title: "Owning Manhattan Netflix Series",
-    creator: "Owning Manhattan",
-    budget: 3000,
-    spent: 750,
-    deadline: "6 days left",
-    payout: "$1.25 per 1K views",
-    progress: 25,
-    image: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
-  },
-  {
-    id: "campaign-2",
-    title: "Sportz Playz Betting Campaign",
-    creator: "Sportz Playz", 
-    budget: 2500,
-    spent: 1200,
-    deadline: "3 days left",
-    payout: "$1.50 per 1K views",
-    progress: 48,
-    image: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png"
-  }
-]
-
-function StatCard({ stat }: { stat: typeof stats[0] }) {
-  const Icon = stat.icon
-
-  return (
-    <Card className="bg-card border-border">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
-            <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
-            <p className="text-sm mt-1 text-muted-foreground">
-              {stat.change}
-            </p>
-          </div>
-          <div className="p-3 rounded-lg bg-muted">
-            <Icon className="w-6 h-6 text-muted-foreground" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
+// Types for real data
+interface DashboardStats {
+  title: string
+  value: string
+  change: string
+  changeType: "positive" | "neutral"
+  icon: string
+  color: string
 }
 
-function RecentClipCard({ clip }: { clip: typeof recentClips[0] }) {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved': return 'text-foreground bg-muted border-muted-foreground'
-      case 'pending': return 'text-muted-foreground bg-background border-muted-foreground'
-      case 'rejected': return 'text-muted-foreground bg-muted border-border'
-      default: return 'text-muted-foreground bg-background border-border'
-    }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'approved': return CheckCircle
-      case 'pending': return Clock
-      case 'rejected': return AlertCircle
-      default: return Clock
-    }
-  }
-
-  const StatusIcon = getStatusIcon(clip.status)
-
-  return (
-    <Card className="bg-card border-border">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-2">
-            <StatusIcon className={`w-4 h-4 ${getStatusColor(clip.status).split(' ')[0]}`} />
-            <Badge variant="outline" className={getStatusColor(clip.status)}>
-              {clip.status}
-            </Badge>
-          </div>
-          <span className="text-muted-foreground text-sm">{clip.submittedAt}</span>
-        </div>
-
-        <h4 className="text-foreground font-medium mb-1">{clip.title}</h4>
-        <p className="text-muted-foreground text-sm mb-3">{clip.campaign}</p>
-
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">
-            {clip.views > 0 ? `${clip.views.toLocaleString()} views` : 'Under review'}
-          </span>
-          {clip.earnings > 0 && (
-            <span className="text-foreground font-medium">${clip.earnings}</span>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  )
+interface RecentClip {
+  id: string
+  title: string
+  campaign: string
+  status: string
+  submittedAt: string
+  views: number
+  earnings: number
+  clipUrl: string
+  platform: string
 }
 
-function CampaignCard({ campaign, onSubmitClip }: { campaign: typeof activeCampaigns[0]; onSubmitClip: (campaign: typeof activeCampaigns[0]) => void }) {
-  return (
-    <Card className="bg-card border-border">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            {campaign.image && (
-              <Image
-                src={campaign.image}
-                alt={campaign.creator}
-                width={32}
-                height={32}
-                className="rounded-md object-cover ring-1 ring-border"
-                unoptimized
-              />
-            )}
-            <h4 className="text-foreground font-medium">{campaign.title}</h4>
-          </div>
-          <Badge variant="outline" className="text-muted-foreground border-muted-foreground">
-            {campaign.deadline}
-          </Badge>
-        </div>
-
-        <p className="text-muted-foreground text-sm mb-4">{campaign.creator}</p>
-
-        <div className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Budget Progress</span>
-            <span className="text-foreground">${campaign.spent}/${campaign.budget}</span>
-          </div>
-          <Progress value={campaign.progress} className="h-2" />
-          <p className="text-foreground text-sm font-medium">{campaign.payout}</p>
-        </div>
-
-        <Button 
-          className="w-full mt-4"
-          onClick={() => onSubmitClip(campaign)}
-        >
-          Submit Clip
-        </Button>
-      </CardContent>
-    </Card>
-  )
-}
-
-export default function DashboardPage() {
-  const [submissionModalOpen, setSubmissionModalOpen] = useState(false)
-  const [selectedCampaignForSubmission, setSelectedCampaignForSubmission] = useState<typeof activeCampaigns[0] | null>(null)
+export default function ClipperDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
-  useEffect(() => {
-    console.log("🔍 Dashboard session check:", { status, session })
-    
-    if (status === "loading") {
-      console.log("⏳ Session loading...")
-      return
-    }
-    
-    // Add a small delay to allow OAuth callback to complete
-    if (status === "unauthenticated") {
-      // Check if we're coming from an OAuth callback
-      const urlParams = new URLSearchParams(window.location.search)
-      const isCallback = urlParams.has('callbackUrl') || window.location.hash.includes('access_token')
-      
-      if (isCallback) {
-        console.log("🔄 OAuth callback detected, waiting for session...")
-        // Give OAuth callback time to complete
-        setTimeout(() => {
-          window.location.reload()
-        }, 1500)
-        return
-      }
-      
-      console.log("❌ Not authenticated, redirecting to login")
-      router.replace("/clippers/login")
-      return
-    }
-    
-    if (session) {
-      console.log("✅ User authenticated:", session.user)
-    }
-  }, [status, session, router])
+  const [stats, setStats] = useState<DashboardStats[]>([])
+  const [recentClips, setRecentClips] = useState<RecentClip[]>([])
+  const [activeCampaigns, setActiveCampaigns] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [showSubmissionModal, setShowSubmissionModal] = useState(false)
 
-  const handleSubmitClip = (campaign: typeof activeCampaigns[0]) => {
-    setSelectedCampaignForSubmission(campaign)
-    setSubmissionModalOpen(true)
+  useEffect(() => {
+    if (status === "loading") return
+
+    if (!session) {
+      router.push("/clippers/login")
+      return
+    }
+
+    fetchDashboardData()
+  }, [session, status, router])
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch("/api/clippers/dashboard")
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data.stats)
+        setRecentClips(data.recentClips)
+        setActiveCampaigns(data.activeCampaigns)
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // Show loading state while checking authentication
-  if (status === "loading") {
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case "DollarSign": return DollarSign
+      case "Target": return Target
+      case "Play": return Play
+      case "Eye": return Eye
+      default: return DollarSign
+    }
+  }
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Loading your dashboard...</div>
         </div>
       </div>
     )
   }
 
-  // Don't render anything if not authenticated (redirect will happen)
-  if (status === "unauthenticated") {
-    return null
-  }
-
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-light text-foreground mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back! Here's your clipping overview.</p>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-light mb-2">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Welcome back, {session?.user?.name || session?.user?.email}
+        </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <StatCard key={stat.title} stat={stat} />
-        ))}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {stats.map((stat, index) => {
+          const Icon = getIcon(stat.icon)
+          return (
+            <Card key={index} className="bg-card border-border">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
+                    <p className="text-sm mt-1 text-muted-foreground">
+                      {stat.change}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted">
+                    <Icon className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 gap-8">
-        {/* Recent Clips */}
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-medium text-foreground">Recent Clips</h2>
-            <Link href="/clippers/dashboard/profile">
-              <Button variant="outline" size="sm" className="border-border text-muted-foreground hover:bg-muted">
-                View All
-              </Button>
-            </Link>
-          </div>
-
-          <div className="space-y-4">
-            {recentClips.length > 0 ? (
-              recentClips.map((clip) => (
-                <RecentClipCard key={clip.id} clip={clip} />
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <Play className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">No clips submitted yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  Start earning by submitting clips to active campaigns
-                </p>
-                <Link href="/clippers/dashboard/campaigns">
-                  <Button>
-                    Browse Campaigns
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </div>
+      {/* Recent Clips Section */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-medium">Recent Clips</h2>
+          {/* Removed "View All" button as requested */}
         </div>
 
-        {/* Active Campaigns - Hidden */}
-        {/* <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-medium text-foreground">Active Campaigns</h2>
-            <Link href="/clippers/dashboard/campaigns">
-              <Button variant="outline" size="sm" className="border-border text-muted-foreground hover:bg-muted">
-                View All
-              </Button>
-            </Link>
-          </div>
-
+        {recentClips.length > 0 ? (
           <div className="space-y-4">
-            {activeCampaigns.map((campaign) => (
-              <CampaignCard key={campaign.id} campaign={campaign} onSubmitClip={handleSubmitClip} />
+            {recentClips.map((clip) => (
+              <Card key={clip.id} className="bg-card border-border">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <Badge
+                        variant="outline"
+                        className={`capitalize ${
+                          clip.status === 'approved' ? 'border-green-500 text-green-700 bg-green-50' :
+                          clip.status === 'pending' ? 'border-yellow-500 text-yellow-700 bg-yellow-50' :
+                          clip.status === 'rejected' ? 'border-red-500 text-red-700 bg-red-50' :
+                          'border-gray-500 text-gray-700 bg-gray-50'
+                        }`}
+                      >
+                        {clip.status}
+                      </Badge>
+                      <span className="text-muted-foreground text-sm">{clip.platform}</span>
+                    </div>
+                    <span className="text-muted-foreground text-sm">{clip.submittedAt}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className="text-foreground font-medium mb-1">{clip.title}</h4>
+                      <p className="text-muted-foreground text-sm mb-2">{clip.campaign}</p>
+                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                        <span>{clip.views.toLocaleString()} views</span>
+                        {clip.earnings > 0 && (
+                          <span>${clip.earnings.toFixed(2)} earned</span>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(clip.clipUrl, '_blank')}
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div> */}
+        ) : (
+          <Card className="bg-card border-border">
+            <CardContent className="p-8 text-center">
+              <Play className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-medium mb-2">No clips submitted yet</h3>
+              <p className="text-muted-foreground mb-4">
+                Start earning by submitting clips to active campaigns
+              </p>
+              <Button onClick={() => setShowSubmissionModal(true)}>
+                Submit Your First Clip
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
+      {/* Active Campaigns Section */}
+      <div className="mb-8">
+        <h2 className="text-xl font-medium mb-6">Active Campaigns ({activeCampaigns})</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Link href="/clippers/campaigns">
+            <Card className="bg-card border-border hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium">Browse Campaigns</h3>
+                  <Target className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground mb-4">
+                  Discover active campaigns and start earning from your content
+                </p>
+                <Button variant="outline" className="w-full">
+                  View All Campaigns
+                </Button>
+              </CardContent>
+            </Card>
+          </Link>
 
-      {/* Submission Modal */}
+          <div onClick={() => setShowSubmissionModal(true)} className="cursor-pointer">
+            <Card className="bg-card border-border hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium">Submit Clip</h3>
+                  <Play className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground mb-4">
+                  Submit your content to active campaigns and start earning
+                </p>
+                <Button className="w-full">
+                  Submit Content
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Clip Submission Modal */}
       <ClipSubmissionModal
-        open={submissionModalOpen}
-        onOpenChange={setSubmissionModalOpen}
-        campaign={selectedCampaignForSubmission ? {
-          id: selectedCampaignForSubmission.id,
-          title: selectedCampaignForSubmission.title,
-          creator: selectedCampaignForSubmission.creator,
-          payout: selectedCampaignForSubmission.payout
-        } : undefined}
+        open={showSubmissionModal}
+        onOpenChange={(open) => {
+          setShowSubmissionModal(open)
+          if (!open) {
+            fetchDashboardData() // Refresh data after submission
+          }
+        }}
       />
     </div>
   )
