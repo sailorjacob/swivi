@@ -8,48 +8,28 @@ interface BottomBackgroundProps {
   alt: string
   className?: string
   animate?: boolean
-  triggerScroll?: number // Percentage of page height to trigger (default 50%)
 }
 
 export function BottomBackground({
   src,
   alt,
   className = "",
-  animate = true,
-  triggerScroll = 50
+  animate = true
 }: BottomBackgroundProps) {
   const [isVisible, setIsVisible] = useState(false)
-  const [hasTriggered, setHasTriggered] = useState(false)
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-      const windowHeight = window.innerHeight
-      const docHeight = document.documentElement.offsetHeight
-      const scrollPercent = (scrollTop / (docHeight - windowHeight)) * 100
-
-      if (scrollPercent >= triggerScroll && !hasTriggered) {
-        setHasTriggered(true)
-        setTimeout(() => setIsVisible(true), 300) // Small delay after trigger
-      }
-    }
-
-    // Only add scroll listener if not triggered yet
-    if (!hasTriggered) {
-      window.addEventListener('scroll', handleScroll, { passive: true })
-      return () => window.removeEventListener('scroll', handleScroll)
-    }
-  }, [triggerScroll, hasTriggered])
-
-  // Always start hidden - only show when triggered and visible
-  const shouldShow = hasTriggered && isVisible
+    // Simple delay to let page load, then show
+    const timer = setTimeout(() => setIsVisible(true), 2000)
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
     <div
       className={`
         fixed bottom-0 left-0 right-0 z-0
-        transition-all duration-1500 ease-out
-        ${animate ? (shouldShow ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none") : shouldShow ? "opacity-100" : "opacity-0 pointer-events-none"}
+        transition-all duration-1000 ease-out
+        ${animate ? (isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8") : "opacity-100"}
         ${className}
       `}
     >
