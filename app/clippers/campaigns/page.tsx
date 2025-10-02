@@ -80,6 +80,26 @@ function CampaignsPage() {
     setModalOpen(true)
   }
 
+  // Transform API campaign data to match CampaignDetailModal interface
+  const transformCampaignForModal = (campaign: Campaign) => {
+    return {
+      id: campaign.id,
+      title: campaign.title,
+      creator: campaign.creator,
+      description: campaign.description,
+      image: "", // We don't have image in current schema
+      pool: Number(campaign.budget),
+      spent: Number(campaign.spent),
+      cpm: (Number(campaign.minPayout) + Number(campaign.maxPayout)) / 2, // Average payout per 1K views
+      platforms: campaign.targetPlatforms,
+      totalSubmissions: campaign._count.submissions,
+      totalViews: 0, // We don't track total views in current schema
+      status: campaign.status,
+      requirements: campaign.requirements,
+      contentSources: [] // We don't have content sources in current schema
+    }
+  }
+
   const getProgressPercentage = (spent: number, budget: number) => {
     return budget > 0 ? (spent / budget) * 100 : 0
   }
@@ -225,7 +245,7 @@ function CampaignsPage() {
 
       {/* Campaign Detail Modal */}
       <CampaignDetailModal
-        campaign={selectedCampaign}
+        campaign={selectedCampaign ? transformCampaignForModal(selectedCampaign) : null}
         open={modalOpen}
         onOpenChange={setModalOpen}
       />
