@@ -26,9 +26,9 @@ interface Campaign {
   creator: string
   budget: number
   spent: number
-  minPayout: number
-  maxPayout: number
+  payoutRate: number
   deadline: string
+  startDate?: string
   status: string
   targetPlatforms: string[]
   requirements: string[]
@@ -90,7 +90,7 @@ function CampaignsPage() {
       image: "", // We don't have image in current schema
       pool: Number(campaign.budget),
       spent: Number(campaign.spent),
-      cpm: (Number(campaign.minPayout) + Number(campaign.maxPayout)) / 2, // Average payout per 1K views
+      cpm: Number(campaign.payoutRate), // Payout rate per 1K views
       platforms: campaign.targetPlatforms,
       totalSubmissions: campaign._count.submissions,
       totalViews: 0, // We don't track total views in current schema
@@ -185,7 +185,7 @@ function CampaignsPage() {
                       <TrendingUp className="w-4 h-4 text-green-500" />
                       <span className="text-sm text-muted-foreground">Rate per 1000 Views</span>
                       <span className="text-lg font-bold text-green-500 ml-auto">
-                        ${campaign.minPayout} - ${campaign.maxPayout}
+                        ${campaign.payoutRate} per 1K views
                       </span>
                     </div>
 

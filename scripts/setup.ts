@@ -13,9 +13,9 @@ async function main() {
         description: "Create engaging TikTok content featuring our new product launch. Must include trending music and showcase product features.",
         creator: "Nike",
         budget: 50000,
-        minPayout: 100,
-        maxPayout: 1000,
+        payoutRate: 500, // Average payout rate per 1k views
         deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        startDate: new Date(), // Starts immediately
         status: "ACTIVE",
         requirements: [
           "Minimum 10k views",
@@ -30,9 +30,9 @@ async function main() {
         description: "Short-form content showcasing gaming setup with our gaming chair. Focus on comfort and ergonomics.",
         creator: "HermanMiller Gaming",
         budget: 25000,
-        minPayout: 75,
-        maxPayout: 500,
+        payoutRate: 300, // Average payout rate per 1k views
         deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000), // 21 days
+        startDate: new Date(), // Starts immediately
         status: "ACTIVE",
         requirements: [
           "Gaming content only",
@@ -47,9 +47,9 @@ async function main() {
         description: "Showcase our new protein powder in creative cooking/fitness content. Must be authentic and engaging.",
         creator: "OptimumNutrition",
         budget: 15000,
-        minPayout: 50,
-        maxPayout: 300,
+        payoutRate: 175, // Average payout rate per 1k views
         deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
+        startDate: new Date(), // Starts immediately
         status: "ACTIVE",
         requirements: [
           "Fitness or cooking theme",
@@ -64,9 +64,9 @@ async function main() {
         description: "Quick tech reviews and unboxings of our latest smartphone. Focus on key features and daily use cases.",
         creator: "Samsung Mobile",
         budget: 40000,
-        minPayout: 200,
-        maxPayout: 800,
+        payoutRate: 500, // Average payout rate per 1k views
         deadline: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), // 45 days
+        startDate: new Date(), // Starts immediately
         status: "ACTIVE",
         requirements: [
           "Tech review format",
