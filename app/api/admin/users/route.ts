@@ -8,7 +8,12 @@ export async function GET(request: NextRequest) {
     console.log("🔍 Admin users API called")
 
     const session = await getServerSession(authOptions)
-    console.log("Session:", session?.user?.id ? "authenticated" : "not authenticated")
+    console.log("Session details:", {
+      userId: session?.user?.id,
+      userEmail: session?.user?.email,
+      userRole: session?.user?.role,
+      hasSession: !!session
+    })
 
     if (!session?.user?.id) {
       console.log("❌ No session found")
@@ -37,7 +42,10 @@ export async function GET(request: NextRequest) {
     const where: any = {}
 
     if (role && role !== "all") {
+      console.log("🔍 Filtering by role:", role)
       where.role = role
+    } else {
+      console.log("🔍 Fetching all users")
     }
 
     console.log("🔍 Executing database query...")
