@@ -20,8 +20,8 @@ export default withAuth(
       return NextResponse.next()
     }
 
-    // Check admin routes
-    if (pathname.startsWith('/admin')) {
+    // Check admin page routes (but not API routes)
+    if (pathname.startsWith('/admin') && !pathname.startsWith('/api/')) {
       if (!token) {
         console.log(`🚫 Admin route access denied - not authenticated: ${pathname}`)
         return NextResponse.redirect(new URL('/clippers/login?error=AccessDenied', req.url))
@@ -55,7 +55,12 @@ export default withAuth(
           return true
         }
 
-        // Allow access to protected routes only if authenticated
+        // Allow access to protected routes only if authenticated (but not API routes)
+        if (pathname.startsWith('/api/')) {
+          console.log(`🔗 API route - allowing without auth check: ${pathname}`)
+          return true
+        }
+
         const isAuthorized = !!token
         console.log(`🔐 Authorization check for ${pathname}: ${isAuthorized ? 'GRANTED' : 'DENIED'}`)
 
@@ -68,8 +73,9 @@ export default withAuth(
 export const config = {
   matcher: [
     "/clippers/dashboard/:path*",
-    "/api/clippers/:path*",
     "/admin/:path*",
-    "/api/admin/:path*",
+    // API routes handle their own authentication
+    // "/api/clippers/:path*",
+    // "/api/admin/:path*",
   ],
 }

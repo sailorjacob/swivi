@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Search, UserCheck, UserX, Shield, Users, Crown, Eye } from "lucide-react"
+import { Search, UserCheck, UserX, Shield, Users, Crown, Eye, RefreshCw } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -34,6 +34,7 @@ const roleOptions = [
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedRole, setSelectedRole] = useState("all")
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
@@ -41,6 +42,7 @@ export default function AdminUsersPage() {
   // Fetch users
   const fetchUsers = useCallback(async () => {
     try {
+      setLoading(true)
       const params = new URLSearchParams()
       if (selectedRole !== "all") {
         params.append("role", selectedRole)
@@ -49,17 +51,32 @@ export default function AdminUsersPage() {
       const response = await fetch(`/api/admin/users?${params}`)
       if (response.ok) {
         const data = await response.json()
-        setUsers(data.users)
+        console.log("Users data:", data)
+        setUsers(data.users || [])
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        console.error("API Error:", response.status, errorData)
+        toast.error(`Failed to fetch users: ${errorData.error || 'Unknown error'}`)
+        setUsers([])
       }
     } catch (error) {
       console.error("Error fetching users:", error)
       toast.error("Failed to fetch users")
+      setUsers([])
+    } finally {
+      setLoading(false)
     }
   }, [selectedRole])
 
   useEffect(() => {
     fetchUsers()
   }, [fetchUsers])
+
+  // Handle role filter change
+  const handleRoleChange = (newRole: string) => {
+    setSelectedRole(newRole)
+    setSearchTerm("") // Clear search when changing role filter
+  }
 
   // Promote user to admin
   const promoteToAdmin = async (userId: string) => {
@@ -221,7 +238,7 @@ export default function AdminUsersPage() {
               </div>
 
               <div className="min-w-[150px]">
-                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <Select value={selectedRole} onValueChange={handleRoleChange}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -234,6 +251,16 @@ export default function AdminUsersPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchUsers}
+                disabled={loading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -244,8 +271,14 @@ export default function AdminUsersPage() {
             <CardTitle>All Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {filteredUsers.map((user) => {
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <span className="ml-2 text-muted-foreground">Loading users...</span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredUsers.map((user) => {
                 const RoleIcon = getRoleIcon(user.role)
                 return (
                   <div
@@ -324,10 +357,11 @@ export default function AdminUsersPage() {
                     </div>
                   </div>
                 )
-              })}
-            </div>
+                })}
+              </div>
+            )}
 
-            {filteredUsers.length === 0 && (
+            {!loading && filteredUsers.length === 0 && (
               <div className="text-center py-8">
                 <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-lg font-medium mb-2">No users found</h3>

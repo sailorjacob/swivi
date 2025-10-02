@@ -8,26 +8,33 @@ const globalForPrisma = globalThis as unknown as {
 // Database URL configuration for Supabase
 const getDatabaseUrl = () => {
   const env = validateEnvironment()
-  
-  // Add pgBouncer parameters for Supabase pooling compatibility
+
+  // For Supabase, use connection parameters that work better with prepared statements
   const url = new URL(env.DATABASE_URL)
   url.searchParams.set('pgbouncer', 'true')
   url.searchParams.set('connection_limit', '1')
-  
+  url.searchParams.set('connect_timeout', '10')
+  url.searchParams.set('application_name', 'swivi-app')
+
   return url.toString()
 }
 
 // Enhanced Prisma configuration for production-ready development
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' 
-    ? ['error', 'warn'] 
+  log: process.env.NODE_ENV === 'development'
+    ? ['error', 'warn']
     : ['error'],
   datasources: {
     db: {
       url: getDatabaseUrl(),
     },
   },
-  errorFormat: 'minimal'
+  errorFormat: 'minimal',
+  // Disable prepared statements to avoid conflicts
+  transactionOptions: {
+    maxWait: 20000, // 20 seconds
+    timeout: 15000, // 15 seconds
+  }
 })
 
 // Only cache in development to prevent memory leaks
