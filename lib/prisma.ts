@@ -20,22 +20,40 @@ const getDatabaseUrl = () => {
 }
 
 // Enhanced Prisma configuration for production-ready development
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development'
-    ? ['error', 'warn']
-    : ['error'],
-  datasources: {
-    db: {
-      url: getDatabaseUrl(),
-    },
-  },
-  errorFormat: 'minimal',
-  // Production-optimized settings
-  transactionOptions: {
-    maxWait: process.env.NODE_ENV === 'production' ? 10000 : 20000, // 10 seconds in production
-    timeout: process.env.NODE_ENV === 'production' ? 8000 : 15000, // 8 seconds in production
+const createPrismaClient = () => {
+  try {
+    return new PrismaClient({
+      log: process.env.NODE_ENV === 'development'
+        ? ['error', 'warn']
+        : ['error'],
+      datasources: {
+        db: {
+          url: getDatabaseUrl(),
+        },
+      },
+      errorFormat: 'minimal',
+      // Production-optimized settings
+      transactionOptions: {
+        maxWait: process.env.NODE_ENV === 'production' ? 10000 : 20000, // 10 seconds in production
+        timeout: process.env.NODE_ENV === 'production' ? 8000 : 15000, // 8 seconds in production
+      }
+    })
+  } catch (error) {
+    console.warn('Failed to create Prisma client during build, using fallback configuration:', error)
+    // Return a Prisma client with fallback configuration for build time
+    return new PrismaClient({
+      log: ['error'],
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/db'
+        }
+      },
+      errorFormat: 'minimal'
+    })
   }
-})
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
 // Only cache in development to prevent memory leaks
 if (process.env.NODE_ENV !== 'production') {
