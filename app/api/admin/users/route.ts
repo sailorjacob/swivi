@@ -24,29 +24,32 @@ export async function GET(request: NextRequest) {
       session = await getServerSession(authOptions)
     } catch (sessionError) {
       console.error("❌ Session error:", sessionError)
-      console.error("Session error stack:", sessionError.stack)
+
+      // Type guard to check if error has expected properties
+      const error = sessionError as Error & { message?: string; stack?: string }
+      console.error("Session error stack:", error.stack)
 
       // Check for specific error types
-      if (sessionError.message?.includes('cookie') || sessionError.message?.includes('parse')) {
+      if (error.message?.includes('cookie') || error.message?.includes('parse')) {
         console.error("❌ Cookie/session parsing error - malformed request")
         return NextResponse.json({
           error: "Invalid session format",
-          details: process.env.NODE_ENV === 'development' ? sessionError.message : undefined
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
         }, { status: 400 })
       }
 
-      if (sessionError.message?.includes('JWT') || sessionError.message?.includes('token')) {
+      if (error.message?.includes('JWT') || error.message?.includes('token')) {
         console.error("❌ JWT token error - invalid or expired token")
         return NextResponse.json({
           error: "Invalid authentication token",
-          details: process.env.NODE_ENV === 'development' ? sessionError.message : undefined
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
         }, { status: 401 })
       }
 
       // Generic session error
       return NextResponse.json({
         error: "Session processing error",
-        details: process.env.NODE_ENV === 'development' ? sessionError.message : undefined
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
       }, { status: 500 })
     }
 
@@ -72,9 +75,12 @@ export async function GET(request: NextRequest) {
       })
     } catch (dbError) {
       console.error("❌ Database error during user lookup:", dbError)
+
+      // Type guard for database error
+      const error = dbError as Error & { message?: string; code?: string }
       return NextResponse.json({
         error: "Database error",
-        details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
       }, { status: 500 })
     }
 
@@ -133,9 +139,12 @@ export async function GET(request: NextRequest) {
       console.log("✅ Total count:", total)
     } catch (queryError) {
       console.error("❌ Database query error:", queryError)
+
+      // Type guard for query error
+      const error = queryError as Error & { message?: string; code?: string }
       return NextResponse.json({
         error: "Database query error",
-        details: process.env.NODE_ENV === 'development' ? queryError.message : undefined
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
       }, { status: 500 })
     }
 
