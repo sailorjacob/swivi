@@ -446,8 +446,8 @@ export default function AdminUsersPage() {
                         </p>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span>Joined: {new Date(user.createdAt).toLocaleDateString()}</span>
-                          <span>Views: {user.totalViews.toLocaleString()}</span>
-                          <span>Earnings: ${user.totalEarnings.toFixed(2)}</span>
+                          <span>Views: {(user.totalViews || 0).toLocaleString()}</span>
+                          <span>Earnings: ${(user.totalEarnings || 0).toFixed(2)}</span>
                           <span>Submissions: {user._count?.submissions || 0}</span>
                         </div>
                       </div>
@@ -578,11 +578,11 @@ export default function AdminUsersPage() {
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <label className="text-sm font-medium">Total Views</label>
-                      <p className="text-lg font-semibold">{selectedUser.totalViews.toLocaleString()}</p>
+                      <p className="text-lg font-semibold">{(selectedUser.totalViews || 0).toLocaleString()}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium">Total Earnings</label>
-                      <p className="text-lg font-semibold">${selectedUser.totalEarnings.toFixed(2)}</p>
+                      <p className="text-lg font-semibold">${(selectedUser.totalEarnings || 0).toFixed(2)}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium">Submissions</label>

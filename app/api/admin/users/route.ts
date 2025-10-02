@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
       const testQuery = await prisma.user.count()
       console.log("✅ Database connection test passed, found", testQuery, "users")
 
-      // Execute main query with simplified select to avoid potential issues
+      // Execute main query with complete select including stats
       console.log("🔍 Executing main users query...")
       users = await prisma.user.findMany({
         where,
@@ -133,7 +133,15 @@ export async function GET(request: NextRequest) {
           name: true,
           email: true,
           role: true,
-          createdAt: true
+          createdAt: true,
+          totalViews: true,
+          totalEarnings: true,
+          // Include submissions count
+          _count: {
+            select: {
+              submissions: true
+            }
+          }
         },
         orderBy: {
           createdAt: "desc"
@@ -142,6 +150,13 @@ export async function GET(request: NextRequest) {
         skip: offset
       })
       console.log("✅ Users fetched:", users.length)
+
+      // Convert Decimal and BigInt to regular numbers for JSON serialization
+      const processedUsers = users.map(user => ({
+        ...user,
+        totalViews: Number(user.totalViews),
+        totalEarnings: Number(user.totalEarnings),
+      }))
 
       // Get total count
       total = await prisma.user.count({ where })
@@ -158,7 +173,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      users,
+      users: processedUsers,
       pagination: {
         total,
         limit,
