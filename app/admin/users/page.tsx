@@ -88,12 +88,15 @@ export default function AdminUsersPage() {
     } catch (error) {
       console.error("❌ Network error fetching users:", error)
 
+      // Type guard for error object
+      const err = error as Error & { name?: string; message?: string }
+
       // Handle different types of errors
-      if (error.name === 'AbortError') {
+      if (err.name === 'AbortError') {
         console.error("❌ Request timeout - API took too long to respond")
         toast.error("Request timeout - please try refreshing")
       } else {
-        console.error("❌ Network error:", error.message)
+        console.error("❌ Network error:", err.message || 'Unknown error')
         toast.error("Network error - please check your connection and try refreshing")
       }
 
