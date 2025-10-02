@@ -6,8 +6,19 @@ import { prisma } from "@/lib/prisma"
 export async function GET(request: NextRequest) {
   try {
     console.log("🔍 Admin users API called")
+    console.log("Request headers:", Object.fromEntries(request.headers.entries()))
 
-    const session = await getServerSession(authOptions)
+    let session
+    try {
+      session = await getServerSession(authOptions)
+    } catch (sessionError) {
+      console.error("❌ Session error:", sessionError)
+      return NextResponse.json({
+        error: "Session error",
+        details: process.env.NODE_ENV === 'development' ? sessionError.message : undefined
+      }, { status: 500 })
+    }
+
     console.log("Session details:", {
       userId: session?.user?.id,
       userEmail: session?.user?.email,
@@ -22,9 +33,20 @@ export async function GET(request: NextRequest) {
 
     // Check if user is admin
     console.log("🔍 Checking admin status for user:", session.user.id)
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
-    })
+
+    let user
+    try {
+      user = await prisma.user.findUnique({
+        where: { id: session.user.id }
+      })
+    } catch (dbError) {
+      console.error("❌ Database error during user lookup:", dbError)
+      return NextResponse.json({
+        error: "Database error",
+        details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+      }, { status: 500 })
+    }
+
     console.log("User found:", user ? "yes" : "no", "Role:", user?.role)
 
     if (!user || user.role !== "ADMIN") {
@@ -49,32 +71,42 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("🔍 Executing database query...")
-    const users = await prisma.user.findMany({
-      where,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-        totalViews: true,
-        totalEarnings: true,
-        _count: {
-          select: {
-            submissions: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: "desc"
-      },
-      take: limit,
-      skip: offset
-    })
-    console.log("✅ Users fetched:", users.length)
 
-    const total = await prisma.user.count({ where })
-    console.log("✅ Total count:", total)
+    let users, total
+    try {
+      users = await prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          totalViews: true,
+          totalEarnings: true,
+          _count: {
+            select: {
+              submissions: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: "desc"
+        },
+        take: limit,
+        skip: offset
+      })
+      console.log("✅ Users fetched:", users.length)
+
+      total = await prisma.user.count({ where })
+      console.log("✅ Total count:", total)
+    } catch (queryError) {
+      console.error("❌ Database query error:", queryError)
+      return NextResponse.json({
+        error: "Database query error",
+        details: process.env.NODE_ENV === 'development' ? queryError.message : undefined
+      }, { status: 500 })
+    }
 
     return NextResponse.json({
       users,
