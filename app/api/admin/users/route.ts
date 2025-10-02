@@ -6,15 +6,46 @@ import { prisma } from "@/lib/prisma"
 export async function GET(request: NextRequest) {
   try {
     console.log("🔍 Admin users API called")
-    console.log("Request headers:", Object.fromEntries(request.headers.entries()))
+    console.log("Request URL:", request.url)
+    console.log("Request method:", request.method)
+
+    // Log request headers for debugging
+    const headers = Object.fromEntries(request.headers.entries())
+    console.log("Request headers:", {
+      'user-agent': headers['user-agent']?.substring(0, 100) + '...',
+      'cookie': headers['cookie']?.substring(0, 100) + '...',
+      'authorization': headers['authorization'] ? '[PRESENT]' : '[NOT PRESENT]',
+      'content-type': headers['content-type']
+    })
 
     let session
     try {
+      // Try to get session with error handling
       session = await getServerSession(authOptions)
     } catch (sessionError) {
       console.error("❌ Session error:", sessionError)
+      console.error("Session error stack:", sessionError.stack)
+
+      // Check for specific error types
+      if (sessionError.message?.includes('cookie') || sessionError.message?.includes('parse')) {
+        console.error("❌ Cookie/session parsing error - malformed request")
+        return NextResponse.json({
+          error: "Invalid session format",
+          details: process.env.NODE_ENV === 'development' ? sessionError.message : undefined
+        }, { status: 400 })
+      }
+
+      if (sessionError.message?.includes('JWT') || sessionError.message?.includes('token')) {
+        console.error("❌ JWT token error - invalid or expired token")
+        return NextResponse.json({
+          error: "Invalid authentication token",
+          details: process.env.NODE_ENV === 'development' ? sessionError.message : undefined
+        }, { status: 401 })
+      }
+
+      // Generic session error
       return NextResponse.json({
-        error: "Session error",
+        error: "Session processing error",
         details: process.env.NODE_ENV === 'development' ? sessionError.message : undefined
       }, { status: 500 })
     }
