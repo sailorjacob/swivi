@@ -135,9 +135,12 @@ export default function AdminUsersPage() {
       if (err.name === 'AbortError') {
         console.error("❌ Request timeout - API took too long to respond")
         toast.error("Request timeout - please try refreshing")
+      } else if (err.message?.includes('fetch')) {
+        console.error("❌ Network connectivity issue")
+        toast.error("Network error - please check your connection and try again")
       } else {
-        console.error("❌ Network error:", err.message || 'Unknown error')
-        toast.error("Network error - please check your connection and try refreshing")
+        console.error("❌ General error:", err.message || 'Unknown error')
+        toast.error("Failed to load users - please try refreshing")
       }
 
       setUsers([])
@@ -278,6 +281,14 @@ export default function AdminUsersPage() {
             <p className="text-muted-foreground">
               Manage user roles and permissions
             </p>
+            {/* Debug info for development */}
+            {process.env.NODE_ENV === "development" && (
+              <div className="mt-2 text-xs text-muted-foreground">
+                <p>Session: {session ? "authenticated" : "not authenticated"}</p>
+                <p>Role: {session?.user?.role || "none"}</p>
+                <p>Users loaded: {users.length}</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -494,21 +505,26 @@ export default function AdminUsersPage() {
             {!loading && filteredUsers.length === 0 && users.length === 0 && (
               <div className="text-center py-8">
                 <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-medium mb-2">No users loaded</h3>
+                <h3 className="text-lg font-medium mb-2">No users found</h3>
                 <p className="text-muted-foreground mb-4">
-                  This might be due to authentication issues or the users list is empty.
+                  {session?.user?.role === "ADMIN"
+                    ? "No users are registered in the system yet, or there may be an authentication issue."
+                    : "You don't have permission to view user management."
+                  }
                 </p>
                 <div className="flex gap-2 justify-center">
                   <Button onClick={fetchUsers} variant="outline">
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Retry Loading
                   </Button>
-                  <Button
-                    onClick={() => window.location.href = "/clippers/login"}
-                    variant="outline"
-                  >
-                    Sign In Again
-                  </Button>
+                  {session?.user?.role !== "ADMIN" && (
+                    <Button
+                      onClick={() => window.location.href = "/clippers/login"}
+                      variant="outline"
+                    >
+                      Sign In as Admin
+                    </Button>
+                  )}
                 </div>
               </div>
             )}

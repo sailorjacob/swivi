@@ -126,10 +126,22 @@ export default function ClipperDashboard() {
       )}
 
       <div className="mb-8">
-        <h1 className="text-3xl font-light mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back, {session?.user?.name || session?.user?.email}
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-light mb-2">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Welcome back, {session?.user?.name || session?.user?.email}
+            </p>
+          </div>
+          {/* Admin Link - Only show for admin users */}
+          {session?.user?.role === "ADMIN" && (
+            <Link href="/admin">
+              <Button variant="outline" size="sm">
+                Admin Dashboard
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Stats Cards */}
