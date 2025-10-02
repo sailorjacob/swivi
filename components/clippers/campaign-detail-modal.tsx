@@ -128,9 +128,12 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
               </Badge>
             </div>
             <img
-              src={campaign.image}
+              src={campaign.image || "/placeholder-campaign.jpg"}
               alt={campaign.title}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = "/placeholder-campaign.jpg"
+              }}
             />
             <div className="absolute inset-0 bg-black/40 flex items-end">
               <div className="p-6">
@@ -153,15 +156,15 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-muted/30 rounded-lg p-4">
               <div className="text-sm text-muted-foreground mb-1">Pool Budget</div>
-              <div className="text-xl font-medium text-white">${campaign.budget.toLocaleString()}</div>
+              <div className="text-xl font-medium text-white">${campaign.pool.toLocaleString()}</div>
             </div>
             <div className="bg-muted/30 rounded-lg p-4">
               <div className="text-sm text-muted-foreground mb-1">Rate per 1K views</div>
-              <div className="text-xl font-medium text-white">${campaign.minPayout}-${campaign.maxPayout}</div>
+              <div className="text-xl font-medium text-white">${campaign.cpm}</div>
             </div>
             <div className="bg-muted/30 rounded-lg p-4">
               <div className="text-sm text-muted-foreground mb-1">Submissions</div>
-              <div className="text-xl font-medium text-white">{campaign._count.submissions}</div>
+              <div className="text-xl font-medium text-white">{campaign.totalSubmissions}</div>
             </div>
             <div className="bg-muted/30 rounded-lg p-4">
               <div className="text-sm text-muted-foreground mb-1">Status</div>
