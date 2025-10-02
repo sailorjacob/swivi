@@ -161,6 +161,16 @@ export async function GET(request: NextRequest) {
       // Get total count
       total = await prisma.user.count({ where })
       console.log("✅ Total count:", total)
+
+      return NextResponse.json({
+        users: processedUsers,
+        pagination: {
+          total,
+          limit,
+          offset,
+          hasMore: offset + limit < total
+        }
+      })
     } catch (queryError) {
       console.error("❌ Database query error:", queryError)
 
@@ -171,16 +181,6 @@ export async function GET(request: NextRequest) {
         details: process.env.NODE_ENV === 'development' ? error.message : undefined
       }, { status: 500 })
     }
-
-    return NextResponse.json({
-      users: processedUsers,
-      pagination: {
-        total,
-        limit,
-        offset,
-        hasMore: offset + limit < total
-      }
-    })
   } catch (error) {
     console.error("❌ Error fetching users:", error)
     console.error("Error details:", {
