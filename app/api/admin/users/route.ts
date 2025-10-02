@@ -8,7 +8,12 @@ export async function GET(request: NextRequest) {
     console.log("🔍 Admin users API called")
 
     const session = await getServerSession(authOptions)
-    console.log("Session:", session?.user?.id ? "authenticated" : "not authenticated")
+    console.log("Session details:", {
+      userId: session?.user?.id,
+      userEmail: session?.user?.email,
+      userRole: session?.user?.role,
+      hasSession: !!session
+    })
 
     if (!session?.user?.id) {
       console.log("❌ No session found")
@@ -37,7 +42,10 @@ export async function GET(request: NextRequest) {
     const where: any = {}
 
     if (role && role !== "all") {
+      console.log("🔍 Filtering by role:", role)
       where.role = role
+    } else {
+      console.log("🔍 Fetching all users")
     }
 
     console.log("🔍 Executing database query...")
@@ -82,10 +90,20 @@ export async function GET(request: NextRequest) {
     console.error("Error details:", {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
-      name: error instanceof Error ? error.name : undefined
+      name: error instanceof Error ? error.name : undefined,
+      code: error && typeof error === 'object' && 'code' in error ? error.code : undefined
     })
+
+    // Check for specific database errors
+    const isDatabaseError = error instanceof Error && (
+      error.message.includes('connect') ||
+      error.message.includes('ECONNREFUSED') ||
+      error.message.includes('timeout') ||
+      error.message.includes('prisma')
+    )
+
     return NextResponse.json({
-      error: "Internal server error",
+      error: isDatabaseError ? "Database connection error" : "Internal server error",
       details: process.env.NODE_ENV === 'development' ? error instanceof Error ? error.message : 'Unknown error' : undefined
     }, { status: 500 })
   }

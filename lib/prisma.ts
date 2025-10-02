@@ -30,10 +30,10 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
     },
   },
   errorFormat: 'minimal',
-  // Disable prepared statements to avoid conflicts
+  // Production-optimized settings
   transactionOptions: {
-    maxWait: 20000, // 20 seconds
-    timeout: 15000, // 15 seconds
+    maxWait: process.env.NODE_ENV === 'production' ? 10000 : 20000, // 10 seconds in production
+    timeout: process.env.NODE_ENV === 'production' ? 8000 : 15000, // 8 seconds in production
   }
 })
 

@@ -49,31 +49,36 @@ export default function AdminUsersPage() {
       }
 
       const response = await fetch(`/api/admin/users?${params}`)
+      console.log("API Response status:", response.status, response.statusText)
+
       if (response.ok) {
         const data = await response.json()
-        console.log("Users data:", data)
+        console.log("✅ Users data received:", data)
+        console.log("Number of users:", data.users?.length || 0)
         setUsers(data.users || [])
       } else {
         const errorData = await response.json().catch(() => ({}))
-        console.error("API Error:", response.status, errorData)
+        console.error("❌ API Error:", response.status, errorData)
         toast.error(`Failed to fetch users: ${errorData.error || 'Unknown error'}`)
         setUsers([])
       }
     } catch (error) {
-      console.error("Error fetching users:", error)
-      toast.error("Failed to fetch users")
+      console.error("❌ Network error fetching users:", error)
+      toast.error("Network error - please check your connection and try refreshing")
       setUsers([])
     } finally {
       setLoading(false)
     }
-  }, [selectedRole])
+  }, [])
 
   useEffect(() => {
+    console.log("🔄 Initial fetch users")
     fetchUsers()
   }, [fetchUsers])
 
   // Handle role filter change
   const handleRoleChange = (newRole: string) => {
+    console.log("🔄 Role filter changed to:", newRole)
     setSelectedRole(newRole)
     setSearchTerm("") // Clear search when changing role filter
   }
@@ -152,10 +157,11 @@ export default function AdminUsersPage() {
     return matchesSearch
   })
 
-  // Calculate stats
+  // Calculate stats - only calculate when users are loaded
   const adminCount = users.filter(u => u.role === "ADMIN").length
   const creatorCount = users.filter(u => u.role === "CREATOR").length
   const clipperCount = users.filter(u => u.role === "CLIPPER").length
+  const totalCount = users.length
 
 
   return (
@@ -183,7 +189,19 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Users className="h-8 w-8 text-muted-foreground" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+                  <p className="text-2xl font-semibold">{totalCount}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -361,10 +379,24 @@ export default function AdminUsersPage() {
               </div>
             )}
 
-            {!loading && filteredUsers.length === 0 && (
+            {!loading && filteredUsers.length === 0 && users.length === 0 && (
               <div className="text-center py-8">
                 <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-medium mb-2">No users found</h3>
+                <h3 className="text-lg font-medium mb-2">No users loaded</h3>
+                <p className="text-muted-foreground mb-4">
+                  This might be due to authentication issues. Please ensure you&apos;re logged in as an admin.
+                </p>
+                <Button onClick={fetchUsers} variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry Loading
+                </Button>
+              </div>
+            )}
+
+            {!loading && filteredUsers.length === 0 && users.length > 0 && (
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-medium mb-2">No users match your search</h3>
                 <p className="text-muted-foreground">
                   Try adjusting your filters or search terms.
                 </p>
