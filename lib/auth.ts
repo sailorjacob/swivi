@@ -33,26 +33,15 @@ export const authOptions: NextAuthOptions = {
         name: user.name,
         accountId: account?.providerAccountId
       })
-      
-      try {
-        // Validate required fields
-        if (!user.email) {
-          console.error("❌ No email provided by OAuth provider")
-          return false
-        }
-        
-        // Allow OAuth sign in (PrismaAdapter will handle user creation)
-        if (account?.provider === "discord" || account?.provider === "google") {
-          console.log("✅ OAuth provider accepted:", account.provider)
-          return true
-        }
-        
-        console.log("⚠️ Unknown provider:", account?.provider)
-        return false
-      } catch (error) {
-        console.error("❌ SignIn callback error:", error)
-        return false
+
+      // Allow Discord and Google OAuth sign in
+      if (account?.provider === "discord" || account?.provider === "google") {
+        console.log("✅ OAuth provider accepted:", account.provider)
+        return true
       }
+
+      console.log("⚠️ Unknown provider:", account?.provider)
+      return false
     },
     async jwt({ token, user, account }) {
       if (user) {
