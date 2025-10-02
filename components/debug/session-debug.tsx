@@ -36,6 +36,18 @@ export function SessionDebug() {
     fetchUserProfile()
   }, [session])
 
+  // Auto-refresh session every 5 minutes to prevent expiration
+  useEffect(() => {
+    if (session && status === "authenticated") {
+      const interval = setInterval(async () => {
+        console.log("🔄 Auto-refreshing session...")
+        await update()
+      }, 5 * 60 * 1000) // 5 minutes
+
+      return () => clearInterval(interval)
+    }
+  }, [session, status, update])
+
   // Only show in development
   if (process.env.NODE_ENV !== "development") {
     return null

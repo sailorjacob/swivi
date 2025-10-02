@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Search, UserCheck, UserX, Shield, Users, Crown, Eye, RefreshCw } from "lucide-react"
@@ -33,6 +35,8 @@ const roleOptions = [
 ]
 
 export default function AdminUsersPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [slowLoading, setSlowLoading] = useState(false)
@@ -40,8 +44,41 @@ export default function AdminUsersPage() {
   const [selectedRole, setSelectedRole] = useState("all")
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
+  // Check authentication status
+  useEffect(() => {
+    if (status === "loading") return // Still loading
+
+    if (status === "unauthenticated" || !session) {
+      console.log("❌ User not authenticated, redirecting to login")
+      router.push("/clippers/login?error=AccessDenied")
+      return
+    }
+
+    if (session.user?.role !== "ADMIN") {
+      console.log("❌ User is not admin, redirecting to dashboard")
+      router.push("/clippers/dashboard?error=AdminAccessRequired")
+      return
+    }
+
+    console.log("✅ User authenticated as admin:", session.user.email)
+  }, [session, status, router])
+
+  // Fetch users when authenticated and role is admin
+  useEffect(() => {
+    if (status === "authenticated" && session && session.user?.role === "ADMIN") {
+      console.log("🚀 User is authenticated as admin, fetching users...")
+      fetchUsers()
+    }
+  }, [status, session, fetchUsers])
+
   // Fetch users
   const fetchUsers = useCallback(async () => {
+    // Only fetch if user is authenticated and is admin
+    if (status !== "authenticated" || !session || session.user?.role !== "ADMIN") {
+      console.log("⏳ Waiting for authentication before fetching users...")
+      return
+    }
+
     try {
       setLoading(true)
       setSlowLoading(false)
@@ -73,6 +110,17 @@ export default function AdminUsersPage() {
         console.log("✅ Users data received:", data)
         console.log("Number of users:", data.users?.length || 0)
         setUsers(data.users || [])
+      } else if (response.status === 401) {
+        console.error("❌ Authentication error - redirecting to login")
+        toast.error("Authentication expired. Please sign in again.")
+        // Force redirect to login page
+        window.location.href = "/clippers/login?error=SessionExpired"
+        return
+      } else if (response.status === 403) {
+        console.error("❌ Admin access denied")
+        toast.error("Admin access required")
+        window.location.href = "/clippers/dashboard?error=AdminAccessRequired"
+        return
       } else {
         let errorData
         try {
@@ -105,7 +153,7 @@ export default function AdminUsersPage() {
       setLoading(false)
       setSlowLoading(false)
     }
-  }, [selectedRole])
+  }, [selectedRole, session, status])
 
   // Handle role filter change
   const handleRoleChange = (newRole: string) => {
@@ -194,6 +242,20 @@ export default function AdminUsersPage() {
   const clipperCount = users.filter(u => u.role === "CLIPPER").length
   const totalCount = users.length
 
+
+  // Show loading while checking authentication
+  if (status === "loading" || (status === "authenticated" && !session)) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Checking authentication...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -434,12 +496,20 @@ export default function AdminUsersPage() {
                 <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-lg font-medium mb-2">No users loaded</h3>
                 <p className="text-muted-foreground mb-4">
-                  This might be due to authentication issues. Please ensure you&apos;re logged in as an admin.
+                  This might be due to authentication issues or the users list is empty.
                 </p>
-                <Button onClick={fetchUsers} variant="outline">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Retry Loading
-                </Button>
+                <div className="flex gap-2 justify-center">
+                  <Button onClick={fetchUsers} variant="outline">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Retry Loading
+                  </Button>
+                  <Button
+                    onClick={() => window.location.href = "/clippers/login"}
+                    variant="outline"
+                  >
+                    Sign In Again
+                  </Button>
+                </div>
               </div>
             )}
 

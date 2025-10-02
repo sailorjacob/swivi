@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     console.log("🔍 Admin users API called")
     console.log("Request URL:", request.url)
     console.log("Request method:", request.method)
+    console.log("Timestamp:", new Date().toISOString())
 
     // Log request headers for debugging
     const headers = Object.fromEntries(request.headers.entries())
@@ -61,8 +62,11 @@ export async function GET(request: NextRequest) {
     })
 
     if (!session?.user?.id) {
-      console.log("❌ No session found")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      console.log("❌ No session found - user not authenticated")
+      return NextResponse.json({
+        error: "Authentication required",
+        details: "Please sign in to access admin features"
+      }, { status: 401 })
     }
 
     // Check if user is admin
@@ -87,8 +91,11 @@ export async function GET(request: NextRequest) {
     console.log("User found:", user ? "yes" : "no", "Role:", user?.role)
 
     if (!user || user.role !== "ADMIN") {
-      console.log("❌ Admin access denied")
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
+      console.log("❌ Admin access denied - user role:", user?.role || "undefined")
+      return NextResponse.json({
+        error: "Admin access required",
+        details: `Current role: ${user?.role || "unknown"}. Admin privileges required.`
+      }, { status: 403 })
     }
 
     const { searchParams } = new URL(request.url)
