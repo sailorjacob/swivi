@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Plus, Edit, Trash2, Eye, Users, DollarSign, TrendingUp, Calendar, Target } from "lucide-react"
+import { Plus, Edit, Trash2, Eye, Users, DollarSign, TrendingUp, Calendar, Target, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,8 +15,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
-import { FileUpload } from "@/components/ui/file-upload"
-import { uploadFile, STORAGE_BUCKETS } from "@/lib/supabase"
 
 interface Campaign {
   id: string
@@ -77,6 +75,7 @@ export default function AdminCampaignsPage() {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -85,12 +84,11 @@ export default function AdminCampaignsPage() {
     minPayout: "",
     maxPayout: "",
     deadline: "",
-    startDate: "",
     targetPlatforms: [] as string[],
     requirements: [] as string[],
-    status: "DRAFT" as Campaign["status"],
-    featuredImageFile: null as File | null
+    status: "DRAFT" as Campaign["status"]
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Fetch campaigns
   const fetchCampaigns = async () => {
@@ -131,26 +129,8 @@ export default function AdminCampaignsPage() {
 
   // Create campaign
   const handleCreateCampaign = async () => {
+    setIsSubmitting(true)
     try {
-      let featuredImageUrl = ""
-
-      // Upload featured image if provided
-      if (formData.featuredImageFile) {
-        const fileName = `campaign-${Date.now()}-${formData.featuredImageFile.name}`
-        const { url, error } = await uploadFile(
-          STORAGE_BUCKETS.CAMPAIGN_ASSETS,
-          fileName,
-          formData.featuredImageFile
-        )
-
-        if (error) {
-          toast.error(`Failed to upload image: ${error}`)
-          return
-        }
-
-        featuredImageUrl = url || ""
-      }
-
       const response = await fetch("/api/campaigns", {
         method: "POST",
         headers: {
@@ -167,18 +147,17 @@ export default function AdminCampaignsPage() {
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
-          // Note: The following fields are commented out because they don't exist in the current database
-          // When the database is migrated to add these columns, uncomment them:
-          // startDate: formData.startDate || undefined,
-          // featuredImage: featuredImageUrl,
         })
       })
 
       if (response.ok) {
-        toast.success("Campaign created successfully")
-        setShowCreateDialog(false)
-        resetForm()
-        fetchCampaigns()
+        toast.success("Campaign created successfully!")
+        // Show success state briefly before closing
+        setTimeout(() => {
+          setShowCreateDialog(false)
+          resetForm()
+          fetchCampaigns()
+        }, 1500)
       } else {
         const error = await response.json()
         toast.error(error.error || "Failed to create campaign")
@@ -186,6 +165,8 @@ export default function AdminCampaignsPage() {
     } catch (error) {
       console.error("Error creating campaign:", error)
       toast.error("Failed to create campaign")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -193,26 +174,8 @@ export default function AdminCampaignsPage() {
   const handleUpdateCampaign = async () => {
     if (!selectedCampaign) return
 
+    setIsUpdating(true)
     try {
-      let featuredImageUrl = selectedCampaign.featuredImage || ""
-
-      // Upload new featured image if provided
-      if (formData.featuredImageFile) {
-        const fileName = `campaign-${Date.now()}-${formData.featuredImageFile.name}`
-        const { url, error } = await uploadFile(
-          STORAGE_BUCKETS.CAMPAIGN_ASSETS,
-          fileName,
-          formData.featuredImageFile
-        )
-
-        if (error) {
-          toast.error(`Failed to upload image: ${error}`)
-          return
-        }
-
-        featuredImageUrl = url || ""
-      }
-
       const response = await fetch(`/api/admin/campaigns/${selectedCampaign.id}`, {
         method: "PUT",
         headers: {
@@ -229,18 +192,17 @@ export default function AdminCampaignsPage() {
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
-          // Note: The following fields are commented out because they don't exist in the current database
-          // When the database is migrated to add these columns, uncomment them:
-          // startDate: formData.startDate || undefined,
-          // featuredImage: featuredImageUrl,
         })
       })
 
       if (response.ok) {
-        toast.success("Campaign updated successfully")
-        setShowEditDialog(false)
-        resetForm()
-        fetchCampaigns()
+        toast.success("Campaign updated successfully!")
+        // Show success state briefly before closing
+        setTimeout(() => {
+          setShowEditDialog(false)
+          resetForm()
+          fetchCampaigns()
+        }, 1500)
       } else {
         const error = await response.json()
         toast.error(error.error || "Failed to update campaign")
@@ -248,6 +210,8 @@ export default function AdminCampaignsPage() {
     } catch (error) {
       console.error("Error updating campaign:", error)
       toast.error("Failed to update campaign")
+    } finally {
+      setIsUpdating(false)
     }
   }
 
@@ -282,11 +246,9 @@ export default function AdminCampaignsPage() {
       minPayout: campaign.minPayout.toString(),
       maxPayout: campaign.maxPayout.toString(),
       deadline: new Date(campaign.deadline).toISOString().slice(0, 16),
-      startDate: campaign.startDate ? new Date(campaign.startDate).toISOString().slice(0, 16) : "",
       targetPlatforms: campaign.targetPlatforms,
       requirements: campaign.requirements,
       status: campaign.status,
-      featuredImageFile: null, // For editing, we don't pre-populate the file, just allow re-upload
     })
     setShowEditDialog(true)
   }
@@ -301,11 +263,9 @@ export default function AdminCampaignsPage() {
       minPayout: "",
       maxPayout: "",
       deadline: "",
-      startDate: "",
       targetPlatforms: [],
       requirements: [],
-      status: "DRAFT",
-      featuredImageFile: null
+      status: "DRAFT"
     })
     setSelectedCampaign(null)
   }
@@ -379,6 +339,7 @@ export default function AdminCampaignsPage() {
                 setFormData={setFormData}
                 onSubmit={handleCreateCampaign}
                 onCancel={() => setShowCreateDialog(false)}
+                isSubmitting={isSubmitting}
               />
             </CardContent>
           </Card>
@@ -489,7 +450,7 @@ export default function AdminCampaignsPage() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete "{campaign.title}"? This action cannot be undone.
+                            Are you sure you want to delete &quot;{campaign.title}&quot;? This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -598,6 +559,7 @@ export default function AdminCampaignsPage() {
                 onSubmit={handleUpdateCampaign}
                 onCancel={() => setShowEditDialog(false)}
                 isEdit={true}
+                isSubmitting={isUpdating}
               />
             </CardContent>
           </Card>
@@ -613,13 +575,15 @@ function CampaignForm({
   setFormData,
   onSubmit,
   onCancel,
-  isEdit = false
+  isEdit = false,
+  isSubmitting = false
 }: {
   formData: any
   setFormData: (data: any) => void
   onSubmit: () => void
   onCancel: () => void
   isEdit?: boolean
+  isSubmitting?: boolean
 }) {
   return (
     <div className="space-y-6 max-h-[70vh] overflow-y-auto">
@@ -635,6 +599,7 @@ function CampaignForm({
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="e.g., Summer Fitness Challenge"
               required
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -645,6 +610,7 @@ function CampaignForm({
               onChange={(e) => setFormData({ ...formData, creator: e.target.value })}
               placeholder="e.g., Nike, Your Brand Name"
               required
+              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -658,18 +624,10 @@ function CampaignForm({
             placeholder="Describe your campaign, goals, and what content creators should focus on..."
             rows={4}
             required
+            disabled={isSubmitting}
           />
         </div>
 
-        <div className="mb-4">
-          <FileUpload
-            label="Featured Image"
-            accept="image/*"
-            maxSize={10}
-            onFileChange={(file) => setFormData({ ...formData, featuredImageFile: file })}
-            uploadedFile={formData.featuredImageFile}
-          />
-        </div>
       </div>
 
       {/* Budget & Payouts */}
@@ -685,6 +643,7 @@ function CampaignForm({
               onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
               placeholder="5000"
               required
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -697,6 +656,7 @@ function CampaignForm({
               onChange={(e) => setFormData({ ...formData, minPayout: e.target.value })}
               placeholder="0.50"
               required
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -709,6 +669,7 @@ function CampaignForm({
               onChange={(e) => setFormData({ ...formData, maxPayout: e.target.value })}
               placeholder="5.00"
               required
+              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -718,26 +679,16 @@ function CampaignForm({
       {/* Timeline */}
       <div>
         <h3 className="text-lg font-medium mb-4">Timeline</h3>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <Label htmlFor="startDate">Start Date</Label>
-            <Input
-              id="startDate"
-              type="datetime-local"
-              value={formData.startDate}
-              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="deadline">End Date *</Label>
-            <Input
-              id="deadline"
-              type="datetime-local"
-              value={formData.deadline}
-              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-              required
-            />
-          </div>
+        <div className="mb-4">
+          <Label htmlFor="deadline">End Date *</Label>
+          <Input
+            id="deadline"
+            type="datetime-local"
+            value={formData.deadline}
+            onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+            required
+            disabled={isSubmitting}
+          />
         </div>
       </div>
 
@@ -760,6 +711,7 @@ function CampaignForm({
                     setFormData({ ...formData, targetPlatforms: platforms })
                   }}
                   className="rounded"
+                  disabled={isSubmitting}
                 />
                 <span className="text-sm">{platform.label}</span>
               </label>
@@ -775,6 +727,7 @@ function CampaignForm({
             onChange={(e) => setFormData({ ...formData, requirements: e.target.value.split('\n').filter(r => r.trim()) })}
             placeholder="Enter each requirement on a new line&#10;e.g.&#10;Must include brand hashtag&#10;Minimum 10 seconds duration&#10;Show product clearly"
             rows={4}
+            disabled={isSubmitting}
           />
         </div>
 
@@ -786,7 +739,7 @@ function CampaignForm({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="status">Campaign Status</Label>
-            <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+            <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })} disabled={isSubmitting}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -803,11 +756,18 @@ function CampaignForm({
       </div>
 
       <div className="flex justify-end space-x-2 pt-4 border-t">
-        <Button variant="outline" onClick={onCancel}>
+        <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>
-        <Button onClick={onSubmit}>
-          {isEdit ? "Update" : "Create"} Campaign
+        <Button onClick={onSubmit} disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {isEdit ? "Updating..." : "Creating..."}
+            </>
+          ) : (
+            <>{isEdit ? "Update" : "Create"} Campaign</>
+          )}
         </Button>
       </div>
     </div>

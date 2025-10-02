@@ -1,94 +1,42 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CampaignDetailModal } from "@/components/clippers/campaign-detail-modal"
-import { 
-  TrendingUp, 
-  DollarSign, 
-  Users, 
+import {
+  TrendingUp,
+  DollarSign,
+  Users,
   Clock,
   Instagram,
   Youtube,
   Twitter,
-  Music
+  Music,
+  Loader2
 } from "lucide-react"
 
-// Mock campaigns data
-const campaigns = [
-  {
-    id: "1",
-    title: "Olivia Dean Clipping",
-    creator: "PromoteFun",
-    description: "Creators will help bring Olivia Dean's music and personality into TikTok feeds by posting short clips from her music videos, live performances, and interviews.",
-    image: "/olivia-dean.jpg", // You'll need to add these images
-    pool: 4000,
-    spent: 3040,
-    cpm: 2.0,
-    platforms: ["tiktok", "instagram"],
-    totalSubmissions: 0,
-    totalViews: 0,
-    status: "live",
-    requirements: [
-      "Use provided content sources as base material",
-      "Focus on emotional moments and strong vocals",
-      "Keep edits natural and engaging",
-      "Highlight Olivia Dean's unique sound and style"
-    ],
-    contentSources: [
-      "Lady Lazy - Music Video",
-      "Nice To Each Other - Music Video", 
-      "Echo - Live Performance",
-      "The Hardest Part - Interview"
-    ]
-  },
-  {
-    id: "2", 
-    title: "SinParty Logo Campaign New",
-    creator: "PromoteFun",
-    description: "Showcase the new SinParty logo in creative and engaging content across social platforms.",
-    image: "/sinparty-logo.jpg",
-    pool: 5000,
-    spent: 0,
-    cpm: 0.04,
-    platforms: ["instagram", "tiktok", "twitter"],
-    totalSubmissions: 0,
-    totalViews: 0,
-    status: "live",
-    requirements: [
-      "Feature logo prominently",
-      "Creative integration",
-      "High engagement content",
-      "Brand-appropriate style"
-    ],
-    contentSources: []
-  },
-  {
-    id: "3",
-    title: "Giggles Meme Campaign", 
-    creator: "PromoteFun",
-    description: "Create viral meme content featuring Giggles brand in a fun and authentic way.",
-    image: "/giggles-meme.jpg", 
-    pool: 4000,
-    spent: 0,
-    cpm: 2.0,
-    platforms: ["tiktok", "instagram"],
-    totalSubmissions: 0,
-    totalViews: 0,
-    status: "live",
-    requirements: [
-      "Meme-style content",
-      "Authentic humor",
-      "Brand integration",
-      "Viral potential"
-    ],
-    contentSources: []
+interface Campaign {
+  id: string
+  title: string
+  description: string
+  creator: string
+  budget: number
+  spent: number
+  minPayout: number
+  maxPayout: number
+  deadline: string
+  status: string
+  targetPlatforms: string[]
+  requirements: string[]
+  createdAt: string
+  _count: {
+    submissions: number
   }
-]
+}
 
 const platformIcons = {
   tiktok: Music,
@@ -98,16 +46,42 @@ const platformIcons = {
 }
 
 function CampaignsPage() {
-  const [selectedCampaign, setSelectedCampaign] = useState<typeof campaigns[0] | null>(null)
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
 
-  const handleJoinCampaign = (campaign: typeof campaigns[0]) => {
+  useEffect(() => {
+    fetchCampaigns()
+  }, [])
+
+  const fetchCampaigns = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fetch("/api/clippers/campaigns")
+      if (response.ok) {
+        const data = await response.json()
+        setCampaigns(data)
+      } else {
+        setError("Failed to load campaigns")
+      }
+    } catch (error) {
+      console.error("Error fetching campaigns:", error)
+      setError("Failed to load campaigns")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleJoinCampaign = (campaign: Campaign) => {
     setSelectedCampaign(campaign)
     setModalOpen(true)
   }
 
-  const getProgressPercentage = (spent: number, pool: number) => {
-    return pool > 0 ? (spent / pool) * 100 : 0
+  const getProgressPercentage = (spent: number, budget: number) => {
+    return budget > 0 ? (spent / budget) * 100 : 0
   }
 
   const formatCurrency = (amount: number) => {
@@ -117,6 +91,35 @@ function CampaignsPage() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <p className="text-lg text-red-600 mb-4">{error}</p>
+              <Button onClick={fetchCampaigns} variant="outline">
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -130,7 +133,7 @@ function CampaignsPage() {
                 <CardContent className="p-0">
                   {/* Campaign Image */}
                   <div className="relative h-48 bg-muted rounded-t-lg overflow-hidden">
-                    {campaign.status === "live" && (
+                    {campaign.status === "ACTIVE" && (
                       <div className="absolute top-3 left-3 z-10">
                         <Badge className="bg-green-500 text-white text-xs px-2 py-1">
                           🔴 LIVE
@@ -162,7 +165,7 @@ function CampaignsPage() {
                       <TrendingUp className="w-4 h-4 text-green-500" />
                       <span className="text-sm text-muted-foreground">Rate per 1000 Views</span>
                       <span className="text-lg font-bold text-green-500 ml-auto">
-                        ${campaign.cpm}
+                        ${campaign.minPayout} - ${campaign.maxPayout}
                       </span>
                     </div>
 
@@ -170,11 +173,11 @@ function CampaignsPage() {
                     <div className="flex items-center gap-2 mb-4">
                       <span className="text-sm text-muted-foreground">Accepted Platforms</span>
                       <div className="flex gap-2 ml-auto">
-                        {campaign.platforms.map((platform) => {
-                          const Icon = platformIcons[platform as keyof typeof platformIcons]
+                        {campaign.targetPlatforms.map((platform) => {
+                          const Icon = platformIcons[platform.toLowerCase() as keyof typeof platformIcons]
                           return (
                             <div key={platform} className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
-                              <Icon className="w-4 h-4 text-muted-foreground" />
+                              {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
                             </div>
                           )
                         })}
@@ -189,17 +192,17 @@ function CampaignsPage() {
                           <span className="text-sm text-muted-foreground">Pool</span>
                         </div>
                         <span className="text-lg font-bold text-blue-500">
-                          {formatCurrency(campaign.pool)}
+                          {formatCurrency(campaign.budget)}
                         </span>
                       </div>
-                      
+
                       <div className="space-y-2">
-                        <Progress 
-                          value={getProgressPercentage(campaign.spent, campaign.pool)} 
+                        <Progress
+                          value={getProgressPercentage(campaign.spent, campaign.budget)}
                           className="h-2"
                         />
                         <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{getProgressPercentage(campaign.spent, campaign.pool).toFixed(0)}%</span>
+                          <span>{getProgressPercentage(campaign.spent, campaign.budget).toFixed(0)}%</span>
                           <span>100%</span>
                         </div>
                       </div>

@@ -13,7 +13,6 @@ const updateCampaignSchema = z.object({
   minPayout: z.number().positive("Minimum payout must be positive").optional(),
   maxPayout: z.number().positive("Maximum payout must be positive").optional(),
   deadline: z.string().transform((str) => new Date(str)).optional(),
-  startDate: z.string().transform((str) => str ? new Date(str) : undefined).optional(),
   status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER", "FACEBOOK"])).optional(),
   requirements: z.array(z.string()).optional(),
@@ -143,7 +142,6 @@ export async function PUT(
     if (validatedData.minPayout !== undefined) updateData.minPayout = validatedData.minPayout
     if (validatedData.maxPayout !== undefined) updateData.maxPayout = validatedData.maxPayout
     if (validatedData.deadline !== undefined) updateData.deadline = validatedData.deadline
-    // if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate  // Commented out - not in DB
     if (validatedData.status !== undefined) updateData.status = validatedData.status
     if (validatedData.targetPlatforms !== undefined) updateData.targetPlatforms = validatedData.targetPlatforms
     if (validatedData.requirements !== undefined) updateData.requirements = validatedData.requirements

@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
         orderBy: {
           createdAt: "desc"
         },
-        take: limit,
+        take: Math.min(limit, 100), // Limit to 100 to prevent timeouts
         skip: offset
       })
       console.log("✅ Users fetched:", users.length)
