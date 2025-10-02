@@ -4,12 +4,12 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
-  try {
-    console.log("🔍 Admin users API called")
-    console.log("Request URL:", request.url)
-    console.log("Request method:", request.method)
-    console.log("Timestamp:", new Date().toISOString())
+  console.log("🔍 Admin users API called - START")
+  console.log("Request URL:", request.url)
+  console.log("Request method:", request.method)
+  console.log("Timestamp:", new Date().toISOString())
 
+  try {
     // Log request headers for debugging
     const headers = Object.fromEntries(request.headers.entries())
     console.log("Request headers:", {
@@ -19,38 +19,40 @@ export async function GET(request: NextRequest) {
       'content-type': headers['content-type']
     })
 
+    // Try to get session - this is where the error might be occurring
+    console.log("🔍 Attempting to get session...")
     let session
     try {
-      // Try to get session with error handling
       session = await getServerSession(authOptions)
+      console.log("✅ Session retrieved successfully")
     } catch (sessionError) {
       console.error("❌ Session error:", sessionError)
-
-      // Type guard to check if error has expected properties
-      const error = sessionError as Error & { message?: string; stack?: string }
-      console.error("Session error stack:", error.stack)
+      console.error("Session error stack:", sessionError instanceof Error ? sessionError.stack : 'No stack')
 
       // Check for specific error types
-      if (error.message?.includes('cookie') || error.message?.includes('parse')) {
-        console.error("❌ Cookie/session parsing error - malformed request")
-        return NextResponse.json({
-          error: "Invalid session format",
-          details: process.env.NODE_ENV === 'development' ? error.message : undefined
-        }, { status: 400 })
-      }
+      if (sessionError instanceof Error) {
+        if (sessionError.message?.includes('cookie') || sessionError.message?.includes('parse')) {
+          console.error("❌ Cookie/session parsing error")
+          return NextResponse.json({
+            error: "Invalid session format",
+            details: process.env.NODE_ENV === 'development' ? sessionError.message : undefined
+          }, { status: 400 })
+        }
 
-      if (error.message?.includes('JWT') || error.message?.includes('token')) {
-        console.error("❌ JWT token error - invalid or expired token")
-        return NextResponse.json({
-          error: "Invalid authentication token",
-          details: process.env.NODE_ENV === 'development' ? error.message : undefined
-        }, { status: 401 })
+        if (sessionError.message?.includes('JWT') || sessionError.message?.includes('token')) {
+          console.error("❌ JWT token error")
+          return NextResponse.json({
+            error: "Invalid authentication token",
+            details: process.env.NODE_ENV === 'development' ? sessionError.message : undefined
+          }, { status: 401 })
+        }
       }
 
       // Generic session error
+      console.error("❌ Returning 500 for session error")
       return NextResponse.json({
         error: "Session processing error",
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        details: process.env.NODE_ENV === 'development' ? (sessionError instanceof Error ? sessionError.message : 'Unknown error') : undefined
       }, { status: 500 })
     }
 
@@ -75,16 +77,15 @@ export async function GET(request: NextRequest) {
     let user
     try {
       user = await prisma.user.findUnique({
-        where: { id: session.user.id }
+        where: { id: session.user.id },
+        select: { id: true, role: true }
       })
+      console.log("✅ User lookup successful")
     } catch (dbError) {
       console.error("❌ Database error during user lookup:", dbError)
-
-      // Type guard for database error
-      const error = dbError as Error & { message?: string; code?: string }
       return NextResponse.json({
-        error: "Database error",
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error: "Database error during user lookup",
+        details: process.env.NODE_ENV === 'development' ? (dbError instanceof Error ? dbError.message : 'Unknown error') : undefined
       }, { status: 500 })
     }
 
@@ -105,11 +106,11 @@ export async function GET(request: NextRequest) {
 
     console.log("🔍 Query params:", { role, limit, offset })
 
+    // Build where clause for filtering
     const where: any = {}
-
     if (role && role !== "all") {
       console.log("🔍 Filtering by role:", role)
-      where.role = role
+      where.role = role.toUpperCase() // Ensure role is uppercase to match enum
     } else {
       console.log("🔍 Fetching all users")
     }
@@ -118,6 +119,13 @@ export async function GET(request: NextRequest) {
 
     let users, total
     try {
+      // Test database connection first
+      console.log("🔍 Testing database connection...")
+      const testQuery = await prisma.user.count()
+      console.log("✅ Database connection test passed, found", testQuery, "users")
+
+      // Execute main query with simplified select to avoid potential issues
+      console.log("🔍 Executing main users query...")
       users = await prisma.user.findMany({
         where,
         select: {
@@ -125,23 +133,17 @@ export async function GET(request: NextRequest) {
           name: true,
           email: true,
           role: true,
-          createdAt: true,
-          totalViews: true,
-          totalEarnings: true,
-          _count: {
-            select: {
-              submissions: true
-            }
-          }
+          createdAt: true
         },
         orderBy: {
           createdAt: "desc"
         },
-        take: Math.min(limit, 100), // Limit to 100 to prevent timeouts
+        take: Math.min(limit, 50), // Reduce limit to avoid timeouts
         skip: offset
       })
       console.log("✅ Users fetched:", users.length)
 
+      // Get total count
       total = await prisma.user.count({ where })
       console.log("✅ Total count:", total)
     } catch (queryError) {
