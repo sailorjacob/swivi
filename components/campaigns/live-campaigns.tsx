@@ -19,9 +19,9 @@ interface LiveCampaign {
   creator: string
   budget: number
   spent: number
-  minPayout: number
-  maxPayout: number
+  payoutRate: number
   deadline: string
+  startDate?: string
   status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
   targetPlatforms: string[]
   requirements: string[]
@@ -99,14 +99,14 @@ export function LiveCampaigns() {
       viewsGenerated: 0, // This would come from aggregated view tracking
       duration: `${Math.max(1, daysUntilDeadline)} days`,
       timeRemaining: daysUntilDeadline > 0 ? `${daysUntilDeadline} days` : "Ended",
-      payoutStructure: `$${(campaign.minPayout + campaign.maxPayout) / 2} avg per 1K views`,
+      payoutStructure: `$${campaign.payoutRate} per 1K views`,
       participants: campaign._count.submissions,
-      maxParticipants: Math.floor(campaign.budget / campaign.minPayout),
+      maxParticipants: Math.floor(campaign.budget / campaign.payoutRate),
       featured: campaign.status === "ACTIVE",
       difficulty: campaign.requirements.length > 3 ? "advanced" : "beginner",
       estimatedEarnings: {
-        min: campaign.minPayout * 10,
-        max: campaign.maxPayout * 50
+        min: campaign.payoutRate * 10,
+        max: campaign.payoutRate * 50
       },
       tags: campaign.targetPlatforms,
       status: campaign.status === "ACTIVE" ? "active" :

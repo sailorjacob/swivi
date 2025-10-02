@@ -20,9 +20,9 @@ export type CampaignCreateData = {
   description: string
   creator: string
   budget: number
-  minPayout: number
-  maxPayout: number
+  payoutRate: number
   deadline: Date
+  startDate?: Date
   requirements?: string[]
   targetPlatforms?: SocialPlatform[]
 }
@@ -109,12 +109,8 @@ export async function createCampaign(data: CampaignCreateData) {
       throw new Error('Missing required campaign fields')
     }
 
-    if (data.budget <= 0 || data.minPayout <= 0 || data.maxPayout <= 0) {
-      throw new Error('Budget and payout amounts must be positive')
-    }
-
-    if (data.minPayout > data.maxPayout) {
-      throw new Error('Minimum payout cannot exceed maximum payout')
+    if (data.budget <= 0 || data.payoutRate <= 0) {
+      throw new Error('Budget and payout rate must be positive')
     }
 
     return await prisma.campaign.create({
@@ -123,9 +119,9 @@ export async function createCampaign(data: CampaignCreateData) {
         description: data.description,
         creator: data.creator,
         budget: new Prisma.Decimal(data.budget),
-        minPayout: new Prisma.Decimal(data.minPayout),
-        maxPayout: new Prisma.Decimal(data.maxPayout),
+        payoutRate: new Prisma.Decimal(data.payoutRate),
         deadline: data.deadline,
+        startDate: data.startDate,
         requirements: data.requirements || [],
         targetPlatforms: data.targetPlatforms || [] as SocialPlatform[],
         status: 'ACTIVE'

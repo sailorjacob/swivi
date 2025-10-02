@@ -29,9 +29,9 @@ interface Campaign {
   creator: string
   budget: number
   spent: number
-  minPayout: number
-  maxPayout: number
+  payoutRate: number
   deadline: string
+  startDate?: string
   status: string
   targetPlatforms: string[]
   requirements: string[]
@@ -93,7 +93,7 @@ export default function CampaignsPage() {
       image: "", // We don't have image in current schema
       pool: Number(campaign.budget),
       spent: Number(campaign.spent),
-      cpm: (Number(campaign.minPayout) + Number(campaign.maxPayout)) / 2, // Average payout per 1K views
+      cpm: Number(campaign.payoutRate), // Payout rate per 1K views
       platforms: campaign.targetPlatforms,
       totalSubmissions: campaign._count.submissions,
       totalViews: 0, // We don't track total views in current schema
@@ -215,7 +215,7 @@ export default function CampaignsPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <DollarSign className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">${campaign.minPayout}-${campaign.maxPayout} per 1K views</span>
+                        <span className="text-sm text-muted-foreground">${campaign.payoutRate} per 1K views</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-muted-foreground" />
