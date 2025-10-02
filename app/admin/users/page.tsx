@@ -35,6 +35,7 @@ const roleOptions = [
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
+  const [slowLoading, setSlowLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedRole, setSelectedRole] = useState("all")
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
@@ -43,12 +44,28 @@ export default function AdminUsersPage() {
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true)
+      setSlowLoading(false)
+
+      // Set slow loading indicator after 3 seconds
+      const slowLoadingTimeout = setTimeout(() => {
+        setSlowLoading(true)
+      }, 3000)
+
       const params = new URLSearchParams()
       if (selectedRole !== "all") {
         params.append("role", selectedRole)
       }
 
-      const response = await fetch(`/api/admin/users?${params}`)
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+
+      const response = await fetch(`/api/admin/users?${params}`, {
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+      clearTimeout(slowLoadingTimeout)
+
       console.log("API Response status:", response.status, response.statusText)
 
       if (response.ok) {
@@ -57,17 +74,33 @@ export default function AdminUsersPage() {
         console.log("Number of users:", data.users?.length || 0)
         setUsers(data.users || [])
       } else {
-        const errorData = await response.json().catch(() => ({}))
+        let errorData
+        try {
+          errorData = await response.json()
+        } catch (parseError) {
+          console.error("❌ Failed to parse error response:", parseError)
+          errorData = {}
+        }
         console.error("❌ API Error:", response.status, errorData)
         toast.error(`Failed to fetch users: ${errorData.error || 'Unknown error'}`)
         setUsers([])
       }
     } catch (error) {
       console.error("❌ Network error fetching users:", error)
-      toast.error("Network error - please check your connection and try refreshing")
+
+      // Handle different types of errors
+      if (error.name === 'AbortError') {
+        console.error("❌ Request timeout - API took too long to respond")
+        toast.error("Request timeout - please try refreshing")
+      } else {
+        console.error("❌ Network error:", error.message)
+        toast.error("Network error - please check your connection and try refreshing")
+      }
+
       setUsers([])
     } finally {
       setLoading(false)
+      setSlowLoading(false)
     }
   }, [selectedRole])
 
@@ -285,9 +318,28 @@ export default function AdminUsersPage() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="flex items-center justify-center py-8">
+              <div className="flex flex-col items-center justify-center py-8 space-y-4">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <span className="ml-2 text-muted-foreground">Loading users...</span>
+                <span className="text-muted-foreground">
+                  {slowLoading ? "Still loading users... This might take a moment." : "Loading users..."}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchUsers}
+                    disabled={loading}
+                  >
+                    Retry
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.location.reload()}
+                  >
+                    Refresh Page
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
