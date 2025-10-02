@@ -63,15 +63,7 @@ export default function AdminUsersPage() {
     console.log("✅ User authenticated as admin:", session.user.email)
   }, [session, status, router])
 
-  // Fetch users when authenticated and role is admin
-  useEffect(() => {
-    if (status === "authenticated" && session && session.user?.role === "ADMIN") {
-      console.log("🚀 User is authenticated as admin, fetching users...")
-      fetchUsers()
-    }
-  }, [status, session, fetchUsers])
-
-  // Fetch users
+  // Fetch users function
   const fetchUsers = useCallback(async () => {
     // Only fetch if user is authenticated and is admin
     if (status !== "authenticated" || !session || session.user?.role !== "ADMIN") {
@@ -153,7 +145,15 @@ export default function AdminUsersPage() {
       setLoading(false)
       setSlowLoading(false)
     }
-  }, [selectedRole, session, status])
+  }, [status, session, selectedRole])
+
+  // Fetch users when authenticated and role is admin
+  useEffect(() => {
+    if (status === "authenticated" && session && session.user?.role === "ADMIN") {
+      console.log("🚀 User is authenticated as admin, fetching users...")
+      fetchUsers()
+    }
+  }, [status, session, fetchUsers])
 
   // Handle role filter change
   const handleRoleChange = (newRole: string) => {
