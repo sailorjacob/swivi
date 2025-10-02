@@ -9,10 +9,10 @@ const createCampaignSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
   creator: z.string().min(1, "Creator name is required"),
   budget: z.number().positive("Budget must be positive"),
-  minPayout: z.number().positive("Minimum payout must be positive"),
-  maxPayout: z.number().positive("Maximum payout must be positive"),
+  payoutRate: z.number().positive("Payout rate must be positive"),
   deadline: z.string().transform((str) => new Date(str)),
-  targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER", "FACEBOOK"])),
+  startDate: z.string().transform((str) => str ? new Date(str) : null).nullable(),
+  targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])),
   requirements: z.array(z.string()).optional().default([]),
   featuredImage: z.string().optional(),
 })
@@ -49,10 +49,9 @@ export async function GET(request: NextRequest) {
         creator: true,
         budget: true,
         spent: true,
-        minPayout: true,
-        maxPayout: true,
+        payoutRate: true,
         deadline: true,
-        // startDate: true, // Commented out - column doesn't exist in DB
+        startDate: true,
         status: true,
         targetPlatforms: true,
         requirements: true,
@@ -105,18 +104,16 @@ export async function POST(request: NextRequest) {
       description: validatedData.description,
       creator: validatedData.creator,
       budget: validatedData.budget,
-      minPayout: validatedData.minPayout,
-      maxPayout: validatedData.maxPayout,
+      payoutRate: validatedData.payoutRate,
       deadline: validatedData.deadline,
       targetPlatforms: validatedData.targetPlatforms,
       requirements: validatedData.requirements,
       status: "ACTIVE"
     }
 
-    // Note: The following fields are commented out because they don't exist in the current database
-    // When the database is migrated to add these columns, uncomment them:
-    // if (validatedData.featuredImage) campaignData.featuredImage = validatedData.featuredImage
-    // if (validatedData.startDate) campaignData.startDate = validatedData.startDate
+    // Add optional fields if provided
+    if (validatedData.startDate) campaignData.startDate = validatedData.startDate
+    if (validatedData.featuredImage) campaignData.featuredImage = validatedData.featuredImage
 
     const campaign = await prisma.campaign.create({
       data: campaignData,

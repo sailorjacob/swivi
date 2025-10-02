@@ -47,32 +47,32 @@ model User {
   email         String?   @unique
   emailVerified DateTime? @map("email_verified")
   image         String?
-  password      String?   // For email/password auth
+  password      String? // For email/password auth
   role          UserRole  @default(CLIPPER)
-  
+
   // Clipper Profile
-  bio           String?   @db.Text
+  bio           String?  @db.Text
   website       String?
   location      String?
-  verified      Boolean   @default(false)
-  walletAddress String?   @map("wallet_address") // USDC wallet
-  paypalEmail   String?   @map("paypal_email")
-  totalEarnings Decimal   @default(0) @db.Decimal(10, 2)
-  totalViews    BigInt    @default(0)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  verified      Boolean  @default(false)
+  walletAddress String?  @map("wallet_address") // USDC wallet
+  paypalEmail   String?  @map("paypal_email")
+  totalEarnings Decimal  @default(0) @db.Decimal(10, 2)
+  totalViews    BigInt   @default(0)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   // Relations
-  accounts          Account[]
-  sessions          Session[]
-  socialAccounts    SocialAccount[]
+  accounts            Account[]
+  sessions            Session[]
+  socialAccounts      SocialAccount[]
   socialVerifications SocialVerification[]
-  clips             Clip[]
-  submissions       ClipSubmission[]
-  payouts           Payout[]
-  referrals         Referral[] @relation("ReferredBy")
-  referredUsers     Referral[] @relation("Referrer")
-  viewTracking      ViewTracking[]
+  clips               Clip[]
+  submissions         ClipSubmission[]
+  payouts             Payout[]
+  referrals           Referral[]           @relation("ReferredBy")
+  referredUsers       Referral[]           @relation("Referrer")
+  viewTracking        ViewTracking[]
 
   @@map("users")
 }
@@ -88,21 +88,21 @@ model VerificationToken {
 
 // Social Accounts
 model SocialAccount {
-  id           String            @id @default(cuid())
-  userId       String            @map("user_id")
+  id           String         @id @default(cuid())
+  userId       String         @map("user_id")
   platform     SocialPlatform
   username     String
-  displayName  String?           @map("display_name") // e.g., "Main", "Personal", "Business"
-  platformId   String            @map("platform_id")
-  followers    Int               @default(0)
-  verified     Boolean           @default(false)
-  verifiedAt   DateTime?         @map("verified_at")
-  connected    Boolean           @default(true)
-  accessToken  String?           @map("access_token") @db.Text
-  refreshToken String?           @map("refresh_token") @db.Text
-  expiresAt    DateTime?         @map("expires_at")
-  createdAt    DateTime          @default(now()) @map("created_at")
-  updatedAt    DateTime          @updatedAt @map("updated_at")
+  displayName  String?        @map("display_name") // e.g., "Main", "Personal", "Business"
+  platformId   String         @map("platform_id")
+  followers    Int            @default(0)
+  verified     Boolean        @default(false)
+  verifiedAt   DateTime?      @map("verified_at")
+  connected    Boolean        @default(true)
+  accessToken  String?        @map("access_token") @db.Text
+  refreshToken String?        @map("refresh_token") @db.Text
+  expiresAt    DateTime?      @map("expires_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -118,10 +118,9 @@ model Campaign {
   creator         String
   budget          Decimal          @db.Decimal(10, 2)
   spent           Decimal          @default(0) @db.Decimal(10, 2)
-  minPayout       Decimal          @db.Decimal(10, 2) @map("min_payout")
-  maxPayout       Decimal          @db.Decimal(10, 2) @map("max_payout")
+  payoutRate      Decimal          @map("payout_rate") @db.Decimal(10, 2) // Flat rate per 1k views
   deadline        DateTime
-  // startDate       DateTime?        @map("start_date")  // Commented out - not in DB
+  startDate       DateTime?        @map("start_date")
   status          CampaignStatus   @default(ACTIVE)
   requirements    String[]         @default([])
   targetPlatforms SocialPlatform[] @default([])
@@ -163,43 +162,43 @@ model Clip {
 }
 
 model ClipSubmission {
-  id               String           @id @default(cuid())
-  userId           String           @map("user_id")
-  campaignId       String           @map("campaign_id")
-  clipId           String?          @map("clip_id")
-  clipUrl          String           @map("clip_url")
-  platform         SocialPlatform
-  mediaFileUrl     String?          @map("media_file_url")
-  status           SubmissionStatus @default(PENDING)
-  rejectionReason  String?          @map("rejection_reason") @db.Text
-  payout           Decimal?         @db.Decimal(10, 2)
-  paidAt           DateTime?        @map("paid_at")
-  createdAt        DateTime         @default(now()) @map("created_at")
-  updatedAt        DateTime         @updatedAt @map("updated_at")
+  id              String           @id @default(cuid())
+  userId          String           @map("user_id")
+  campaignId      String           @map("campaign_id")
+  clipId          String?          @map("clip_id")
+  clipUrl         String           @map("clip_url")
+  platform        SocialPlatform
+  mediaFileUrl    String?          @map("media_file_url")
+  status          SubmissionStatus @default(PENDING)
+  rejectionReason String?          @map("rejection_reason") @db.Text
+  payout          Decimal?         @db.Decimal(10, 2)
+  paidAt          DateTime?        @map("paid_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  campaign Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  clip     Clip?     @relation(fields: [clipId], references: [id])
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  clip     Clip?    @relation(fields: [clipId], references: [id])
 
   @@map("clip_submissions")
 }
 
 // Payouts
 model Payout {
-  id            String        @id @default(cuid())
-  userId        String        @map("user_id")
-  amount        Decimal       @db.Decimal(10, 2)
-  currency      String        @default("USD")
+  id            String       @id @default(cuid())
+  userId        String       @map("user_id")
+  amount        Decimal      @db.Decimal(10, 2)
+  currency      String       @default("USD")
   method        PayoutMethod
-  status        PayoutStatus  @default(PENDING)
-  paypalEmail   String?       @map("paypal_email")
-  bankDetails   Json?         @map("bank_details")
-  transactionId String?       @map("transaction_id")
-  fee           Decimal       @default(0) @db.Decimal(10, 2)
-  netAmount     Decimal       @db.Decimal(10, 2) @map("net_amount")
-  processedAt   DateTime?     @map("processed_at")
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
+  status        PayoutStatus @default(PENDING)
+  paypalEmail   String?      @map("paypal_email")
+  bankDetails   Json?        @map("bank_details")
+  transactionId String?      @map("transaction_id")
+  fee           Decimal      @default(0) @db.Decimal(10, 2)
+  netAmount     Decimal      @map("net_amount") @db.Decimal(10, 2)
+  processedAt   DateTime?    @map("processed_at")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -208,13 +207,13 @@ model Payout {
 
 // View Tracking
 model ViewTracking {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  clipId    String   @map("clip_id")
+  id        String         @id @default(cuid())
+  userId    String         @map("user_id")
+  clipId    String         @map("clip_id")
   views     BigInt
-  date      DateTime @db.Date
+  date      DateTime       @db.Date
   platform  SocialPlatform
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime       @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   clip Clip @relation(fields: [clipId], references: [id], onDelete: Cascade)
@@ -225,15 +224,15 @@ model ViewTracking {
 
 // Referrals
 model Referral {
-  id          String        @id @default(cuid())
-  referrerId  String        @map("referrer_id")
-  referredId  String        @map("referred_id")
-  bonus       Decimal       @default(0) @db.Decimal(10, 2)
-  status      ReferralStatus @default(PENDING)
-  createdAt   DateTime      @default(now()) @map("created_at")
+  id         String         @id @default(cuid())
+  referrerId String         @map("referrer_id")
+  referredId String         @map("referred_id")
+  bonus      Decimal        @default(0) @db.Decimal(10, 2)
+  status     ReferralStatus @default(PENDING)
+  createdAt  DateTime       @default(now()) @map("created_at")
 
-  referrer  User @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
-  referred  User @relation("ReferredBy", fields: [referredId], references: [id], onDelete: Cascade)
+  referrer User @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred User @relation("ReferredBy", fields: [referredId], references: [id], onDelete: Cascade)
 
   @@unique([referrerId, referredId])
   @@map("referrals")
@@ -297,15 +296,15 @@ enum ReferralStatus {
 }
 
 model SocialVerification {
-  id         String          @id @default(cuid())
-  userId     String          @map("user_id")
+  id         String         @id @default(cuid())
+  userId     String         @map("user_id")
   platform   SocialPlatform
-  code       String          // 6-character verification code
-  verified   Boolean         @default(false)
-  verifiedAt DateTime?       @map("verified_at")
-  expiresAt  DateTime        @map("expires_at")
-  createdAt  DateTime        @default(now()) @map("created_at")
-  updatedAt  DateTime        @updatedAt @map("updated_at")
+  code       String // 6-character verification code
+  verified   Boolean        @default(false)
+  verifiedAt DateTime?      @map("verified_at")
+  expiresAt  DateTime       @map("expires_at")
+  createdAt  DateTime       @default(now()) @map("created_at")
+  updatedAt  DateTime       @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

@@ -10,11 +10,11 @@ const updateCampaignSchema = z.object({
   creator: z.string().min(1, "Creator name is required").optional(),
   budget: z.number().positive("Budget must be positive").optional(),
   spent: z.number().min(0, "Spent amount cannot be negative").optional(),
-  minPayout: z.number().positive("Minimum payout must be positive").optional(),
-  maxPayout: z.number().positive("Maximum payout must be positive").optional(),
+  payoutRate: z.number().positive("Payout rate must be positive").optional(),
   deadline: z.string().transform((str) => new Date(str)).optional(),
+  startDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
   status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
-  targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER", "FACEBOOK"])).optional(),
+  targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])).optional(),
   requirements: z.array(z.string()).optional(),
   featuredImage: z.string().optional(),
   // category: z.string().optional(), // Commented out - not in DB
@@ -52,10 +52,9 @@ export async function GET(
         creator: true,
         budget: true,
         spent: true,
-        minPayout: true,
-        maxPayout: true,
+        payoutRate: true,
         deadline: true,
-        // startDate: true, // Commented out - not in DB
+        startDate: true,
         status: true,
         targetPlatforms: true,
         requirements: true,
@@ -139,9 +138,9 @@ export async function PUT(
     if (validatedData.creator !== undefined) updateData.creator = validatedData.creator
     if (validatedData.budget !== undefined) updateData.budget = validatedData.budget
     if (validatedData.spent !== undefined) updateData.spent = validatedData.spent
-    if (validatedData.minPayout !== undefined) updateData.minPayout = validatedData.minPayout
-    if (validatedData.maxPayout !== undefined) updateData.maxPayout = validatedData.maxPayout
+    if (validatedData.payoutRate !== undefined) updateData.payoutRate = validatedData.payoutRate
     if (validatedData.deadline !== undefined) updateData.deadline = validatedData.deadline
+    if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate
     if (validatedData.status !== undefined) updateData.status = validatedData.status
     if (validatedData.targetPlatforms !== undefined) updateData.targetPlatforms = validatedData.targetPlatforms
     if (validatedData.requirements !== undefined) updateData.requirements = validatedData.requirements

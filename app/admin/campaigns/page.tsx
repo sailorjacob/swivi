@@ -23,8 +23,7 @@ interface Campaign {
   creator: string
   budget: number
   spent: number
-  minPayout: number
-  maxPayout: number
+  payoutRate: number
   deadline: string
   startDate?: string
   status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
@@ -57,8 +56,7 @@ const platformOptions = [
   { value: "TIKTOK", label: "TikTok" },
   { value: "YOUTUBE", label: "YouTube" },
   { value: "INSTAGRAM", label: "Instagram" },
-  { value: "TWITTER", label: "Twitter" },
-  { value: "FACEBOOK", label: "Facebook" }
+  { value: "TWITTER", label: "Twitter" }
 ]
 
 const statusOptions = [
@@ -81,9 +79,9 @@ export default function AdminCampaignsPage() {
     description: "",
     creator: "",
     budget: "",
-    minPayout: "",
-    maxPayout: "",
+    payoutRate: "",
     deadline: "",
+    startDate: "",
     targetPlatforms: [] as string[],
     requirements: [] as string[],
     status: "DRAFT" as Campaign["status"]
@@ -141,9 +139,9 @@ export default function AdminCampaignsPage() {
           description: formData.description,
           creator: formData.creator,
           budget: parseFloat(formData.budget),
-          minPayout: parseFloat(formData.minPayout),
-          maxPayout: parseFloat(formData.maxPayout),
+          payoutRate: parseFloat(formData.payoutRate),
           deadline: formData.deadline,
+          startDate: formData.startDate || null,
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
@@ -186,9 +184,9 @@ export default function AdminCampaignsPage() {
           description: formData.description,
           creator: formData.creator,
           budget: parseFloat(formData.budget),
-          minPayout: parseFloat(formData.minPayout),
-          maxPayout: parseFloat(formData.maxPayout),
+          payoutRate: parseFloat(formData.payoutRate),
           deadline: formData.deadline,
+          startDate: formData.startDate || null,
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
@@ -243,9 +241,9 @@ export default function AdminCampaignsPage() {
       description: campaign.description,
       creator: campaign.creator,
       budget: campaign.budget.toString(),
-      minPayout: campaign.minPayout.toString(),
-      maxPayout: campaign.maxPayout.toString(),
+      payoutRate: campaign.payoutRate.toString(),
       deadline: new Date(campaign.deadline).toISOString().slice(0, 16),
+      startDate: campaign.startDate ? new Date(campaign.startDate).toISOString().slice(0, 16) : "",
       targetPlatforms: campaign.targetPlatforms,
       requirements: campaign.requirements,
       status: campaign.status,
@@ -260,9 +258,9 @@ export default function AdminCampaignsPage() {
       description: "",
       creator: "",
       budget: "",
-      minPayout: "",
-      maxPayout: "",
+      payoutRate: "",
       deadline: "",
+      startDate: "",
       targetPlatforms: [],
       requirements: [],
       status: "DRAFT"
@@ -633,7 +631,7 @@ function CampaignForm({
       {/* Budget & Payouts */}
       <div>
         <h3 className="text-lg font-medium mb-4">Budget & Payouts</h3>
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <Label htmlFor="budget">Total Budget ($) *</Label>
             <Input
@@ -647,27 +645,14 @@ function CampaignForm({
             />
           </div>
           <div>
-            <Label htmlFor="minPayout">Min Payout per 1K Views ($) *</Label>
+            <Label htmlFor="payoutRate">Payout Rate per 1K Views ($) *</Label>
             <Input
-              id="minPayout"
+              id="payoutRate"
               type="number"
               step="0.01"
-              value={formData.minPayout}
-              onChange={(e) => setFormData({ ...formData, minPayout: e.target.value })}
-              placeholder="0.50"
-              required
-              disabled={isSubmitting}
-            />
-          </div>
-          <div>
-            <Label htmlFor="maxPayout">Max Payout per 1K Views ($) *</Label>
-            <Input
-              id="maxPayout"
-              type="number"
-              step="0.01"
-              value={formData.maxPayout}
-              onChange={(e) => setFormData({ ...formData, maxPayout: e.target.value })}
-              placeholder="5.00"
+              value={formData.payoutRate}
+              onChange={(e) => setFormData({ ...formData, payoutRate: e.target.value })}
+              placeholder="2.50"
               required
               disabled={isSubmitting}
             />
@@ -679,16 +664,28 @@ function CampaignForm({
       {/* Timeline */}
       <div>
         <h3 className="text-lg font-medium mb-4">Timeline</h3>
-        <div className="mb-4">
-          <Label htmlFor="deadline">End Date *</Label>
-          <Input
-            id="deadline"
-            type="datetime-local"
-            value={formData.deadline}
-            onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-            required
-            disabled={isSubmitting}
-          />
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <Label htmlFor="startDate">Start Date</Label>
+            <Input
+              id="startDate"
+              type="datetime-local"
+              value={formData.startDate}
+              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div>
+            <Label htmlFor="deadline">End Date *</Label>
+            <Input
+              id="deadline"
+              type="datetime-local"
+              value={formData.deadline}
+              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+              required
+              disabled={isSubmitting}
+            />
+          </div>
         </div>
       </div>
 
@@ -746,9 +743,6 @@ function CampaignForm({
               <SelectContent>
                 <SelectItem value="DRAFT">Draft</SelectItem>
                 <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="PAUSED">Paused</SelectItem>
-                <SelectItem value="COMPLETED">Completed</SelectItem>
-                <SelectItem value="CANCELLED">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
