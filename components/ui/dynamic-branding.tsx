@@ -118,11 +118,13 @@ export function DynamicBranding() {
   // Skip branding on clipper platform pages and admin pages to avoid overlap with navigation
   const isClipperPage = pathname.startsWith('/clippers')
   const isAdminPage = pathname.startsWith('/admin')
-  if (isClipperPage || isAdminPage) {
-    return null
-  }
 
   const brandingConfigs = useMemo(() => {
+    // Skip branding on clipper platform pages and admin pages
+    if (isClipperPage || isAdminPage) {
+      return null
+    }
+
     // Check for exact matches first
     if (pageBranding[pathname]) {
       return pageBranding[pathname]
@@ -144,7 +146,8 @@ export function DynamicBranding() {
     return pageBranding['/'] || []
   }, [pathname])
 
-  if (brandingConfigs.length === 0) {
+  // Skip rendering if no branding configs or if on clipper/admin pages
+  if (!brandingConfigs || brandingConfigs.length === 0 || isClipperPage || isAdminPage) {
     return null
   }
 
