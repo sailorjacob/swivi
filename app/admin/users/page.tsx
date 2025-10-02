@@ -72,7 +72,11 @@ export default function AdminUsersPage() {
   }, [])
 
   useEffect(() => {
+<<<<<<< HEAD
     console.log("🔄 Initial fetch users")
+=======
+    console.log("🔄 Fetching users with role filter:", selectedRole)
+>>>>>>> e1029130eaaa5df2ee803d3c4079343ed60eebab
     fetchUsers()
   }, [fetchUsers])
 
