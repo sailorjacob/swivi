@@ -9,12 +9,18 @@ const globalForPrisma = globalThis as unknown as {
 const getDatabaseUrl = () => {
   const env = validateEnvironment()
 
-  // For Supabase, use the raw DATABASE_URL without modifications
-  // Any connection parameters in the URL might be causing pool issues
+  // For Supabase Pro, use the raw DATABASE_URL but ensure no connection limits
   console.log('🔍 DATABASE_URL length:', env.DATABASE_URL.length)
-  console.log('🔍 DATABASE_URL has query params:', env.DATABASE_URL.includes('?'))
+  console.log('🔍 DATABASE_URL preview:', env.DATABASE_URL.substring(0, 50) + '...')
 
-  // Return the raw URL without modification to avoid connection pool issues
+  // Check if URL has any query parameters that might cause issues
+  if (env.DATABASE_URL.includes('?')) {
+    console.log('⚠️ DATABASE_URL contains query parameters - this might cause connection issues')
+    const url = new URL(env.DATABASE_URL)
+    console.log('🔍 Query parameters:', Array.from(url.searchParams.entries()))
+  }
+
+  // Return the raw URL - any modifications should be handled at the Vercel level
   return env.DATABASE_URL
 }
 
