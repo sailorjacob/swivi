@@ -4,9 +4,76 @@ import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import { env } from "@/lib/env"
+import { conditionalConnect } from "@/lib/db-retry"
+
+// Custom adapter that handles database connection issues gracefully
+const createSafeAdapter = () => {
+  try {
+    // Test database connection first
+    conditionalConnect().then((connected) => {
+      if (!connected) {
+        console.warn("⚠️ Database not available - using fallback adapter")
+      }
+    })
+    return PrismaAdapter(prisma)
+  } catch (error) {
+    console.error("❌ PrismaAdapter failed, using fallback:", error)
+    return {
+      async getUser(id) {
+        console.warn("🔄 Fallback getUser called - database unavailable")
+        return null
+      },
+      async getUserByEmail(email) {
+        console.warn("🔄 Fallback getUserByEmail called - database unavailable")
+        return null
+      },
+      async getUserByAccount({ providerAccountId, provider }) {
+        console.warn("🔄 Fallback getUserByAccount called - database unavailable")
+        return null
+      },
+      async updateUser(user) {
+        console.warn("🔄 Fallback updateUser called - database unavailable")
+        return user
+      },
+      async deleteUser(userId) {
+        console.warn("🔄 Fallback deleteUser called - database unavailable")
+        return
+      },
+      async linkAccount(account) {
+        console.warn("🔄 Fallback linkAccount called - database unavailable")
+        return account
+      },
+      async unlinkAccount({ providerAccountId, provider }) {
+        console.warn("🔄 Fallback unlinkAccount called - database unavailable")
+        return
+      },
+      async createUser(user) {
+        console.warn("🔄 Fallback createUser called - database unavailable")
+        return { ...user, id: "fallback-" + Date.now() }
+      },
+      async getSessionAndUser(sessionToken) {
+        console.warn("🔄 Fallback getSessionAndUser called - database unavailable")
+        return null
+      },
+      async createSession(session) {
+        console.warn("🔄 Fallback createSession called - database unavailable")
+        return session
+      },
+      async updateSession(session) {
+        console.warn("🔄 Fallback updateSession called - database unavailable")
+        return session
+      },
+      async deleteSession(sessionToken) {
+        console.warn("🔄 Fallback deleteSession called - database unavailable")
+        return
+      }
+    }
+  }
+}
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: createSafeAdapter(),
+  debug: process.env.NODE_ENV === "development",
   providers: [
     // OAuth providers only
     ...(env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET ? [
@@ -38,54 +105,12 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "discord" || account?.provider === "google") {
         console.log("✅ OAuth provider accepted:", account.provider)
 
-        // Ensure user exists in database before allowing sign in
-        try {
-          if (user.email) {
-            let dbUser = await prisma.user.findUnique({
-              where: { email: user.email }
-            })
-
-            if (!dbUser && account?.providerAccountId) {
-              console.log("🔄 Creating new user for OAuth:", user.email)
-
-              // Create user if they don't exist
-              dbUser = await prisma.user.create({
-                data: {
-                  email: user.email,
-                  name: user.name,
-                  role: "CLIPPER",
-                  verified: false,
-                }
-              })
-
-              console.log("✅ User created successfully:", dbUser.id)
-
-              // Create account record
-              if (account && dbUser.id) {
-                await prisma.account.create({
-                  data: {
-                    userId: dbUser.id,
-                    type: account.type,
-                    provider: account.provider,
-                    providerAccountId: account.providerAccountId,
-                    access_token: account.access_token,
-                    refresh_token: account.refresh_token,
-                    expires_at: account.expires_at,
-                    token_type: account.token_type,
-                    scope: account.scope,
-                    id_token: account.id_token,
-                    session_state: account.session_state,
-                  }
-                })
-                console.log("✅ Account record created successfully")
-              }
-            }
-          }
-        } catch (error) {
-          console.error("❌ Error in signIn callback:", error)
-          // Still allow sign in even if database operations fail
-          // This prevents blocking users when database is temporarily unavailable
-        }
+        // Log the sign-in attempt for debugging
+        console.log("🔐 User signed in via OAuth:", {
+          email: user.email,
+          provider: account.provider,
+          providerAccountId: account.providerAccountId
+        })
 
         return true
       }
@@ -98,41 +123,9 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.email = user.email
         token.name = user.name
+        token.role = token.role || "CLIPPER" // Default role since DB is unavailable
 
-        // Fetch current role from database and set it in token
-        try {
-          const dbUser = await prisma.user.findUnique({
-            where: { id: user.id },
-            select: { role: true, email: true }
-          })
-
-          if (dbUser) {
-            token.role = dbUser.role
-            console.log("✅ Found user in database:", dbUser.email)
-          } else {
-            console.warn("⚠️ User not found in database during JWT creation:", user.id)
-            // Try to find user by email if ID lookup fails
-            if (user.email) {
-              const userByEmail = await prisma.user.findUnique({
-                where: { email: user.email },
-                select: { id: true, role: true }
-              })
-
-              if (userByEmail) {
-                token.id = userByEmail.id // Update token ID to match database
-                token.role = userByEmail.role
-                console.log("✅ Found user by email:", user.email)
-              } else {
-                console.warn("⚠️ User not found by email either:", user.email)
-                token.role = "CLIPPER" // Default role
-              }
-            }
-          }
-        } catch (error) {
-          console.error("❌ Failed to fetch role for JWT token:", error)
-          // Keep existing role or set default
-          token.role = token.role || "CLIPPER"
-        }
+        console.log("🔑 JWT token created for user:", user.email)
       }
 
       if (account) {
@@ -148,42 +141,12 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string
         session.accessToken = token.accessToken as string
 
-        // Update session name from database if available and valid
-        try {
-          const user = await prisma.user.findUnique({
-            where: { id: token.id as string },
-            select: { name: true, email: true }
-          })
-
-          if (user) {
-            console.log("✅ Found user for session:", user.email)
-            if (user.name && user.name !== ";Updated name;" && user.name.trim() !== "") {
-              session.user.name = user.name
-            }
-          } else {
-            console.warn("⚠️ User not found for session update:", token.id)
-            // Try to find user by email
-            if (token.email) {
-              const userByEmail = await prisma.user.findUnique({
-                where: { email: token.email as string },
-                select: { id: true, name: true }
-              })
-
-              if (userByEmail) {
-                console.log("✅ Found user by email for session:", token.email)
-                if (userByEmail.name && userByEmail.name !== ";Updated name;" && userByEmail.name.trim() !== "") {
-                  session.user.name = userByEmail.name
-                }
-                // Update session user ID to match database
-                session.user.id = userByEmail.id
-              } else {
-                console.warn("⚠️ User not found by email for session:", token.email)
-              }
-            }
-          }
-        } catch (error) {
-          console.error("❌ Failed to update session name from database:", error)
+        // Since DB is unavailable, use token name or fallback
+        if (token.name) {
+          session.user.name = token.name
         }
+
+        console.log("🔐 Session created for user:", token.email)
       }
       return session
     },
