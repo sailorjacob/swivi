@@ -9,14 +9,13 @@ const globalForPrisma = globalThis as unknown as {
 const getDatabaseUrl = () => {
   const env = validateEnvironment()
 
-  // For Supabase, use connection parameters that work better with prepared statements
-  const url = new URL(env.DATABASE_URL)
-  // Remove restrictive connection limits that cause timeouts
-  url.searchParams.set('connect_timeout', '20')
-  url.searchParams.set('application_name', 'swivi-app')
-  // Let Supabase handle connection pooling instead of forcing pgbouncer
+  // For Supabase, use the raw DATABASE_URL without modifications
+  // Any connection parameters in the URL might be causing pool issues
+  console.log('🔍 DATABASE_URL length:', env.DATABASE_URL.length)
+  console.log('🔍 DATABASE_URL has query params:', env.DATABASE_URL.includes('?'))
 
-  return url.toString()
+  // Return the raw URL without modification to avoid connection pool issues
+  return env.DATABASE_URL
 }
 
 // Enhanced Prisma configuration for production-ready development
@@ -34,8 +33,8 @@ const createPrismaClient = () => {
       errorFormat: 'minimal',
       // Production-optimized settings with better connection handling
       transactionOptions: {
-        maxWait: process.env.NODE_ENV === 'production' ? 20000 : 30000, // 20 seconds in production
-        timeout: process.env.NODE_ENV === 'production' ? 15000 : 20000, // 15 seconds in production
+        maxWait: process.env.NODE_ENV === 'production' ? 30000 : 45000, // 30 seconds in production
+        timeout: process.env.NODE_ENV === 'production' ? 25000 : 30000, // 25 seconds in production
       }
     })
   } catch (error) {
