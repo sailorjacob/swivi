@@ -37,6 +37,56 @@ export const authOptions: NextAuthOptions = {
       // Allow Discord and Google OAuth sign in
       if (account?.provider === "discord" || account?.provider === "google") {
         console.log("✅ OAuth provider accepted:", account.provider)
+
+        // Ensure user exists in database before allowing sign in
+        try {
+          if (user.email) {
+            let dbUser = await prisma.user.findUnique({
+              where: { email: user.email }
+            })
+
+            if (!dbUser && account?.providerAccountId) {
+              console.log("🔄 Creating new user for OAuth:", user.email)
+
+              // Create user if they don't exist
+              dbUser = await prisma.user.create({
+                data: {
+                  email: user.email,
+                  name: user.name,
+                  role: "CLIPPER",
+                  verified: false,
+                }
+              })
+
+              console.log("✅ User created successfully:", dbUser.id)
+
+              // Create account record
+              if (account && dbUser.id) {
+                await prisma.account.create({
+                  data: {
+                    userId: dbUser.id,
+                    type: account.type,
+                    provider: account.provider,
+                    providerAccountId: account.providerAccountId,
+                    access_token: account.access_token,
+                    refresh_token: account.refresh_token,
+                    expires_at: account.expires_at,
+                    token_type: account.token_type,
+                    scope: account.scope,
+                    id_token: account.id_token,
+                    session_state: account.session_state,
+                  }
+                })
+                console.log("✅ Account record created successfully")
+              }
+            }
+          }
+        } catch (error) {
+          console.error("❌ Error in signIn callback:", error)
+          // Still allow sign in even if database operations fail
+          // This prevents blocking users when database is temporarily unavailable
+        }
+
         return true
       }
 
@@ -53,13 +103,33 @@ export const authOptions: NextAuthOptions = {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: user.id },
-            select: { role: true }
+            select: { role: true, email: true }
           })
+
           if (dbUser) {
             token.role = dbUser.role
+            console.log("✅ Found user in database:", dbUser.email)
+          } else {
+            console.warn("⚠️ User not found in database during JWT creation:", user.id)
+            // Try to find user by email if ID lookup fails
+            if (user.email) {
+              const userByEmail = await prisma.user.findUnique({
+                where: { email: user.email },
+                select: { id: true, role: true }
+              })
+
+              if (userByEmail) {
+                token.id = userByEmail.id // Update token ID to match database
+                token.role = userByEmail.role
+                console.log("✅ Found user by email:", user.email)
+              } else {
+                console.warn("⚠️ User not found by email either:", user.email)
+                token.role = "CLIPPER" // Default role
+              }
+            }
           }
         } catch (error) {
-          console.error("Failed to fetch role for JWT token:", error)
+          console.error("❌ Failed to fetch role for JWT token:", error)
           // Keep existing role or set default
           token.role = token.role || "CLIPPER"
         }
@@ -82,14 +152,37 @@ export const authOptions: NextAuthOptions = {
         try {
           const user = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { name: true }
+            select: { name: true, email: true }
           })
 
-          if (user?.name && user.name !== ";Updated name;" && user.name.trim() !== "") {
-            session.user.name = user.name
+          if (user) {
+            console.log("✅ Found user for session:", user.email)
+            if (user.name && user.name !== ";Updated name;" && user.name.trim() !== "") {
+              session.user.name = user.name
+            }
+          } else {
+            console.warn("⚠️ User not found for session update:", token.id)
+            // Try to find user by email
+            if (token.email) {
+              const userByEmail = await prisma.user.findUnique({
+                where: { email: token.email as string },
+                select: { id: true, name: true }
+              })
+
+              if (userByEmail) {
+                console.log("✅ Found user by email for session:", token.email)
+                if (userByEmail.name && userByEmail.name !== ";Updated name;" && userByEmail.name.trim() !== "") {
+                  session.user.name = userByEmail.name
+                }
+                // Update session user ID to match database
+                session.user.id = userByEmail.id
+              } else {
+                console.warn("⚠️ User not found by email for session:", token.email)
+              }
+            }
           }
         } catch (error) {
-          console.error("Failed to update session name from database:", error)
+          console.error("❌ Failed to update session name from database:", error)
         }
       }
       return session
