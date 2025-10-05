@@ -145,10 +145,10 @@ export const authOptions: NextAuthOptions = {
   adapter: createSafeAdapter(),
   debug: process.env.NODE_ENV === "development",
 
-  // Test if auth configuration is loading
+  // Enhanced logging and debugging
   events: {
     async signIn(message) {
-      console.log("🚨 NEXTAUTH SIGNIN EVENT TRIGGERED:", {
+      console.log("🚨 NEXTAUTH SIGNIN EVENT:", {
         user: message.user?.email,
         account: message.account?.provider,
         isNewUser: message.isNewUser
@@ -156,7 +156,6 @@ export const authOptions: NextAuthOptions = {
     }
   },
 
-  // Add some basic logging to verify auth config loads
   logger: {
     error(code, metadata) {
       console.error("🚨 NEXTAUTH ERROR:", code, metadata)
@@ -168,6 +167,8 @@ export const authOptions: NextAuthOptions = {
       console.debug("🚨 NEXTAUTH DEBUG:", code, metadata)
     }
   },
+  },
+
   providers: [
     // OAuth providers only
     ...(env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET ? [
