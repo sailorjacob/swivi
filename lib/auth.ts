@@ -201,9 +201,10 @@ export const authOptions: NextAuthOptions = {
         accountId: account?.providerAccountId
       })
 
-      // Temporarily return false to test if callback is called
-      console.log("🚨 SIGNIN CALLBACK: Testing if this appears in logs")
-      return false
+      // Test if callback is called - log and continue with normal flow
+      console.log("🚨 SIGNIN CALLBACK: This should appear in logs")
+
+      // Continue with normal OAuth flow
 
       // Allow Discord and Google OAuth sign in
       if (account?.provider === "discord" || account?.provider === "google") {
