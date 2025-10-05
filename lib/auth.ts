@@ -208,8 +208,13 @@ export const authOptions: NextAuthOptions = {
         try {
           // Check if user exists by email
           console.log("🔍 Checking for existing user with email:", user.email)
+          if (!user.email) {
+            console.error("❌ No email provided by OAuth provider")
+            return false
+          }
+
           let existingUser = await prisma.user.findUnique({
-            where: { email: user.email! },
+            where: { email: user.email },
             include: { accounts: true }
           }) as any
 
@@ -220,7 +225,7 @@ export const authOptions: NextAuthOptions = {
             existingUser = await prisma.user.create({
               data: {
                 name: user.name || "Discord User",
-                email: user.email!,
+                email: user.email,
                 image: user.image || null,
                 emailVerified: new Date(),
                 verified: true, // Since OAuth provides verified email
