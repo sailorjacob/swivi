@@ -1,7 +1,5 @@
-// Very basic test to see if this file loads at all
-console.log("🚨 AUTH.TS FILE IS LOADING - TEST 1")
-console.log("🚨 Testing basic JavaScript execution")
-console.log("🚨 Current timestamp:", new Date().toISOString())
+// Test if this file loads by throwing an error that should appear in Vercel logs
+throw new Error("🚨 AUTH.TS FILE IS LOADING - THIS SHOULD APPEAR IN VERCEL LOGS")
 
 import { NextAuthOptions } from "next-auth"
 import DiscordProvider from "next-auth/providers/discord"
