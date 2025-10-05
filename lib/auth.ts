@@ -159,10 +159,12 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
+      // Simple test to verify callback is being called
+      console.log("🚨 SIGNIN CALLBACK TRIGGERED - THIS SHOULD APPEAR IN VERCEL LOGS")
       console.log("🔍 OAuth signIn callback triggered:", {
         provider: account?.provider,
-        email: user.email,
-        name: user.name,
+        email: user?.email,
+        name: user?.name,
         accountId: account?.providerAccountId
       })
 
