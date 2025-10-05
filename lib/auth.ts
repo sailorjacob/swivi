@@ -182,6 +182,7 @@ export const authOptions: NextAuthOptions = {
         },
         token: "https://discord.com/api/oauth2/token",
         userinfo: "https://discord.com/api/users/@me",
+        checks: ["state"],
       })
     ] : []),
     ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? [
@@ -212,6 +213,19 @@ export const authOptions: NextAuthOptions = {
       // Allow Discord and Google OAuth sign in
       if (account?.provider === "discord" || account?.provider === "google") {
         console.log("✅ OAuth provider accepted:", account.provider)
+        console.log("🔍 Account details:", {
+          provider: account.provider,
+          providerAccountId: account.providerAccountId,
+          accessToken: account.access_token ? "present" : "missing",
+          scope: account.scope
+        })
+
+        // Debug: Check if this is the initial authorization request
+        if (!account.access_token) {
+          console.log("🔍 This is an authorization request - should redirect to Discord")
+        } else {
+          console.log("🔍 This is a token exchange - OAuth callback completed")
+        }
 
         try {
           // Check if user exists by email
