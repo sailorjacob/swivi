@@ -1,3 +1,6 @@
+// Very basic test to see if this file loads at all
+console.log("🚨 AUTH.TS FILE IS LOADING")
+
 import { NextAuthOptions } from "next-auth"
 import DiscordProvider from "next-auth/providers/discord"
 import GoogleProvider from "next-auth/providers/google"
@@ -9,6 +12,7 @@ import type { Adapter } from "next-auth/adapters"
 
 // Custom adapter that handles database connection issues gracefully
 const createSafeAdapter = () => {
+  console.log("🚨 CREATING SAFE ADAPTER")
   try {
     // Test database connection first
     conditionalConnect().then((connected) => {
@@ -136,6 +140,7 @@ const createSafeAdapter = () => {
   }
 }
 
+console.log("🚨 CREATING AUTH OPTIONS")
 export const authOptions: NextAuthOptions = {
   adapter: createSafeAdapter(),
   debug: process.env.NODE_ENV === "development",
