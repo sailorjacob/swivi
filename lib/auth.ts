@@ -178,6 +178,7 @@ export const authOptions: NextAuthOptions = {
           url: "https://discord.com/api/oauth2/authorize",
           params: {
             scope: "identify email",
+            response_type: "code",
           },
         },
         token: "https://discord.com/api/oauth2/token",
