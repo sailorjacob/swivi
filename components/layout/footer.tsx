@@ -24,9 +24,20 @@ export function Footer() {
 
           {/* Copyright */}
           <div className="pt-6 border-t border-black/5 w-full">
-            <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} Swivi. All rights reserved.
-            </p>
+            <div className="flex flex-col items-center space-y-2">
+              <p className="text-xs text-muted-foreground">
+                © {new Date().getFullYear()} Swivi. All rights reserved.
+              </p>
+              <div className="flex items-center space-x-4 text-xs">
+                <Link href="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Privacy Policy
+                </Link>
+                <span className="text-muted-foreground">•</span>
+                <Link href="/terms-of-service" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Terms of Service
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
