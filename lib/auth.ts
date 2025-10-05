@@ -1,5 +1,10 @@
-// Test if this file loads by throwing an error that should appear in Vercel logs
-throw new Error("🚨 AUTH.TS FILE IS LOADING - THIS SHOULD APPEAR IN VERCEL LOGS")
+// Test if this file loads - throw error that should definitely appear in logs
+if (process.env.NODE_ENV === "development") {
+  console.log("🚨 AUTH.TS FILE IS LOADING - DEVELOPMENT TEST")
+} else {
+  // In production, throw error to make sure it appears in Vercel logs
+  throw new Error("🚨 AUTH.TS FILE IS LOADING - PRODUCTION TEST")
+}
 
 import { NextAuthOptions } from "next-auth"
 import DiscordProvider from "next-auth/providers/discord"
@@ -188,14 +193,17 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Simple test to verify callback is being called
-      console.log("🚨 SIGNIN CALLBACK TRIGGERED - THIS SHOULD APPEAR IN VERCEL LOGS")
+      console.log("🚨 SIGNIN CALLBACK TRIGGERED - DEVELOPMENT TEST")
       console.log("🔍 OAuth signIn callback triggered:", {
         provider: account?.provider,
         email: user?.email,
         name: user?.name,
         accountId: account?.providerAccountId
       })
+
+      // Temporarily return false to test if callback is called
+      console.log("🚨 SIGNIN CALLBACK: Testing if this appears in logs")
+      return false
 
       // Allow Discord and Google OAuth sign in
       if (account?.provider === "discord" || account?.provider === "google") {
