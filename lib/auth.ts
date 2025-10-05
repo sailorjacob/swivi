@@ -145,6 +145,38 @@ export const authOptions: NextAuthOptions = {
   adapter: createSafeAdapter(),
   debug: process.env.NODE_ENV === "development",
 
+  // Add debugging for Discord provider initialization
+  providers: [
+    // OAuth providers only
+    ...(env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET ? [
+      (() => {
+        console.log("🚨 INITIALIZING DISCORD PROVIDER")
+        console.log("🚨 DISCORD_CLIENT_ID:", env.DISCORD_CLIENT_ID ? "present" : "missing")
+        console.log("🚨 DISCORD_CLIENT_SECRET:", env.DISCORD_CLIENT_SECRET ? "present" : "missing")
+        return DiscordProvider({
+          clientId: env.DISCORD_CLIENT_ID,
+          clientSecret: env.DISCORD_CLIENT_SECRET,
+          authorization: {
+            url: "https://discord.com/api/oauth2/authorize",
+            params: {
+              scope: "identify email",
+              response_type: "code",
+            },
+          },
+          token: "https://discord.com/api/oauth2/token",
+          userinfo: "https://discord.com/api/users/@me",
+          checks: ["state"],
+        })
+      })()
+    ] : []),
+    ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? [
+      GoogleProvider({
+        clientId: env.GOOGLE_CLIENT_ID,
+        clientSecret: env.GOOGLE_CLIENT_SECRET,
+      })
+    ] : []),
+  ],
+
   // Enhanced logging and debugging
   events: {
     async signIn(message) {
