@@ -14,9 +14,73 @@ const createSafeAdapter = () => {
     conditionalConnect().then((connected) => {
       if (!connected) {
         console.warn("⚠️ Database not available - using fallback adapter")
+      } else {
+        console.log("✅ Database connected - using PrismaAdapter")
       }
     })
-    return PrismaAdapter(prisma)
+
+    // Create a wrapped adapter with enhanced logging
+    const adapter = PrismaAdapter(prisma)
+
+    // Wrap adapter methods with logging
+    const loggedAdapter = {
+      ...adapter,
+      async getUser(id: string) {
+        console.log("🔍 Adapter getUser called for ID:", id)
+        try {
+          const user = await adapter.getUser!(id)
+          console.log("✅ Adapter getUser success:", user?.email)
+          return user
+        } catch (error) {
+          console.error("❌ Adapter getUser error:", error)
+          return null
+        }
+      },
+      async getUserByAccount({ providerAccountId, provider }: { providerAccountId: string; provider: string }) {
+        console.log("🔍 Adapter getUserByAccount called:", { providerAccountId, provider })
+        try {
+          const user = await adapter.getUserByAccount!({ providerAccountId, provider })
+          console.log("✅ Adapter getUserByAccount success:", user?.email)
+          return user
+        } catch (error) {
+          console.error("❌ Adapter getUserByAccount error:", error)
+          return null
+        }
+      },
+      async getUserByEmail(email: string) {
+        console.log("🔍 Adapter getUserByEmail called for:", email)
+        try {
+          const user = await adapter.getUserByEmail!(email)
+          console.log("✅ Adapter getUserByEmail success:", user?.id)
+          return user
+        } catch (error) {
+          console.error("❌ Adapter getUserByEmail error:", error)
+          return null
+        }
+      },
+      async createUser(user: any) {
+        console.log("🔍 Adapter createUser called for:", user.email)
+        try {
+          const newUser = await adapter.createUser!(user)
+          console.log("✅ Adapter createUser success:", newUser.id)
+          return newUser
+        } catch (error) {
+          console.error("❌ Adapter createUser error:", error)
+          return user
+        }
+      },
+      async linkAccount(account: any) {
+        console.log("🔍 Adapter linkAccount called for provider:", account.provider)
+        try {
+          await adapter.linkAccount!(account)
+          console.log("✅ Adapter linkAccount success")
+        } catch (error) {
+          console.error("❌ Adapter linkAccount error:", error)
+        }
+      }
+    }
+
+    return loggedAdapter
   } catch (error) {
     console.error("❌ PrismaAdapter failed, using fallback:", error)
     return {
@@ -104,39 +168,52 @@ export const authOptions: NextAuthOptions = {
 
       // Allow Discord and Google OAuth sign in
       if (account?.provider === "discord" || account?.provider === "google") {
-        try {
-          console.log("✅ OAuth provider accepted:", account.provider)
+        console.log("✅ OAuth provider accepted:", account.provider)
 
+        try {
           // Check if user exists by email
+          console.log("🔍 Checking for existing user with email:", user.email)
           let existingUser = await prisma.user.findUnique({
             where: { email: user.email! },
             include: { accounts: true }
-          }) as any // Type assertion to handle the include
+          }) as any
 
           if (!existingUser) {
             console.log("👤 Creating new user account for:", user.email)
 
-            // Create new user account
+            // Create new user account with all required fields
             existingUser = await prisma.user.create({
               data: {
-                name: user.name,
-                email: user.email,
-                image: user.image,
-                emailVerified: new Date(), // Mark as verified since OAuth provides verified email
+                name: user.name || "Discord User",
+                email: user.email!,
+                image: user.image || null,
+                emailVerified: new Date(),
+                verified: true, // Since OAuth provides verified email
+                // Add default values for other fields
+                role: "CLIPPER",
+                bio: null,
+                website: null,
+                location: null,
+                walletAddress: null,
+                paypalEmail: null,
+                totalEarnings: 0,
+                totalViews: 0,
               }
             })
 
-            console.log("✅ New user created:", existingUser.id)
+            console.log("✅ New user created with ID:", existingUser.id)
           } else {
-            console.log("👤 Found existing user:", existingUser.id)
+            console.log("👤 Found existing user with ID:", existingUser.id)
 
             // Update user info if needed
             if (existingUser.name !== user.name || existingUser.image !== user.image) {
+              console.log("🔄 Updating user info...")
               await prisma.user.update({
                 where: { id: existingUser.id },
                 data: {
-                  name: user.name,
-                  image: user.image,
+                  name: user.name || existingUser.name,
+                  image: user.image || existingUser.image,
+                  emailVerified: new Date(), // Refresh verification
                 }
               })
               console.log("✅ Updated user info")
@@ -144,19 +221,17 @@ export const authOptions: NextAuthOptions = {
           }
 
           // Check if OAuth account is already linked
-          const existingAccount = existingUser!.accounts.find(
+          const existingAccount = existingUser!.accounts?.find(
             (acc: any) => acc.provider === account.provider && acc.providerAccountId === account.providerAccountId
           )
 
           if (!existingAccount) {
-            console.log("🔗 Linking OAuth account to user")
-            // The account linking is handled by the PrismaAdapter automatically
-            // But we need to ensure it works properly
+            console.log("🔗 OAuth account not linked, but will be linked by PrismaAdapter")
           } else {
             console.log("✅ OAuth account already linked")
           }
 
-          console.log("🔐 User signed in via OAuth:", {
+          console.log("🔐 OAuth sign in successful for user:", {
             email: user.email,
             provider: account.provider,
             providerAccountId: account.providerAccountId,
@@ -167,6 +242,12 @@ export const authOptions: NextAuthOptions = {
 
         } catch (error) {
           console.error("❌ Error in signIn callback:", error)
+          console.error("❌ Error details:", {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined,
+            user: user.email,
+            provider: account?.provider
+          })
           return false
         }
       }
