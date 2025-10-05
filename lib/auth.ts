@@ -1,10 +1,5 @@
-// Test if this file loads - throw error that should definitely appear in logs
-if (process.env.NODE_ENV === "development") {
-  console.log("🚨 AUTH.TS FILE IS LOADING - DEVELOPMENT TEST")
-} else {
-  // In production, throw error to make sure it appears in Vercel logs
-  throw new Error("🚨 AUTH.TS FILE IS LOADING - PRODUCTION TEST")
-}
+// Test if this file loads - logging for debugging
+console.log("🚨 AUTH.TS FILE IS LOADING - DEBUG TEST")
 
 import { NextAuthOptions } from "next-auth"
 import DiscordProvider from "next-auth/providers/discord"
