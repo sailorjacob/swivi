@@ -1,5 +1,7 @@
 // Very basic test to see if this file loads at all
-console.log("🚨 AUTH.TS FILE IS LOADING")
+console.log("🚨 AUTH.TS FILE IS LOADING - TEST 1")
+console.log("🚨 Testing basic JavaScript execution")
+console.log("🚨 Current timestamp:", new Date().toISOString())
 
 import { NextAuthOptions } from "next-auth"
 import DiscordProvider from "next-auth/providers/discord"
