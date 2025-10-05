@@ -167,7 +167,6 @@ export const authOptions: NextAuthOptions = {
       console.debug("🚨 NEXTAUTH DEBUG:", code, metadata)
     }
   },
-  },
 
   providers: [
     // OAuth providers only
