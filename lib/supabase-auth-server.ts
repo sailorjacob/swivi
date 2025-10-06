@@ -1,62 +1,67 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
+import type { SupabaseUser, SupabaseSession } from './supabase-auth'
 
-// Create Supabase client with service role key for server-side operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-/**
- * Server-side authentication helper for API routes
- * Returns authenticated user or throws error
- */
-export async function getAuthenticatedUser(request: NextRequest) {
-  // Get authorization header
-  const authHeader = request.headers.get('authorization')
-  if (!authHeader) {
-    throw new Error('No authorization header provided')
-  }
+// Server-side Supabase client for API routes
+export const createSupabaseServerClient = () => {
+  const cookieStore = cookies()
 
-  // Extract JWT token from Bearer header
-  const token = authHeader.replace('Bearer ', '')
-  if (!token) {
-    throw new Error('No token provided')
-  }
-
-  // Verify the JWT token with Supabase
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-
-  if (authError || !user) {
-    throw new Error('Authentication failed: Invalid or expired token')
-  }
-
-  return user
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value
+      },
+      set(name: string, value: string, options: any) {
+        cookieStore.set({ name, value, ...options })
+      },
+      remove(name: string, options: any) {
+        cookieStore.set({ name, value: '', ...options })
+      },
+    },
+  })
 }
 
-/**
- * Check if user is admin
- */
-export async function requireAdmin(request: NextRequest) {
-  const user = await getAuthenticatedUser(request)
-
-  // Import prisma here to avoid circular imports
-  const { prisma } = await import('@/lib/prisma')
-
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { id: true, role: true }
-  })
-
-  if (!dbUser || dbUser.role !== "ADMIN") {
-    throw new Error(`Admin access required. Current role: ${dbUser?.role || "unknown"}`)
+// Server-side session helper for API routes
+export const getServerSession = async (): Promise<{ session: SupabaseSession | null; error: any }> => {
+  try {
+    const supabase = createSupabaseServerClient()
+    const { data: { session }, error } = await supabase.auth.getSession()
+    return { session: session as SupabaseSession, error }
+  } catch (error) {
+    return { session: null, error }
   }
+}
 
-  return { user, dbUser }
+// Enhanced server-side user data with role from your database
+export const getServerUserWithRole = async (): Promise<{ user: SupabaseUser | null; error: any }> => {
+  try {
+    const supabase = createSupabaseServerClient()
+    const { data: { user }, error } = await supabase.auth.getUser()
+
+    if (user && !error) {
+      try {
+        // Fetch additional user data from your users table
+        const { data: userData } = await supabase
+          .from('users')
+          .select('role, verified')
+          .eq('id', user.id)
+          .single()
+
+        if (userData) {
+          ;(user as SupabaseUser).role = userData.role || 'CLIPPER'
+          ;(user as SupabaseUser).verified = userData.verified || false
+        }
+      } catch (dbError) {
+        console.warn('Could not fetch user role:', dbError)
+        ;(user as SupabaseUser).role = 'CLIPPER'
+      }
+    }
+
+    return { user: user as SupabaseUser, error }
+  } catch (error) {
+    return { user: null, error }
+  }
 }
