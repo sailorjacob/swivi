@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DiscordIcon } from "@/components/ui/icons/discord-icon"
 import { GoogleIcon } from "@/components/ui/icons/google-icon"
-import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
+import { SwiviLogo, BackgroundGraphics } from "@/components/ui/icons/swivi-logo"
 import { Loader2, ArrowLeft, Zap, Users, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import toast from "react-hot-toast"
@@ -55,7 +55,9 @@ export default function ClippersLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black relative">
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      <BackgroundGraphics />
+
       {/* Back to main site - Fixed at top */}
       <div className="absolute top-6 left-6 z-10">
         <Link
