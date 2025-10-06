@@ -1,5 +1,7 @@
 "use client"
 
+// Force this page to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
 import Link from "next/link"
 import { Link2 } from "lucide-react"
 import { Card, CardContent } from "../../../../components/ui/card"

@@ -1,3 +1,6 @@
+// Force this page to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { MusicMarketplace } from "@/components/music-hub/music-marketplace"
 import { ArtistSubmission } from "@/components/music-hub/artist-submission"
 import { ClipperDashboard } from "@/components/music-hub/clipper-dashboard"

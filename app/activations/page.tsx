@@ -1,5 +1,8 @@
 "use client"
 
+// Force this page to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { LiveCampaigns } from "@/components/campaigns/live-campaigns"

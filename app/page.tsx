@@ -1,4 +1,6 @@
 import { Hero } from "@/components/marketing/hero"
+// Force this page to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
 import { CreatorViewsCalculator } from "@/components/marketing/creator-views-calculator"
 import { MusicHubPreview } from "@/components/marketing/music-hub-preview"
 import { Testimonials } from "@/components/marketing/testimonials"

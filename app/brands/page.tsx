@@ -1,5 +1,8 @@
 "use client"
 
+// Force this page to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import Link from "next/link"
 import { motion, easeOut } from "framer-motion"
 import { ArrowRight, TrendingUp, DollarSign, Users, BarChart3 } from "lucide-react"

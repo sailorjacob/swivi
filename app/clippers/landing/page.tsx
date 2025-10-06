@@ -1,5 +1,7 @@
 "use client"
 
+// Force this page to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

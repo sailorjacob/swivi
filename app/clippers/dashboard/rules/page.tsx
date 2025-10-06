@@ -1,5 +1,7 @@
 "use client"
 
+// Force this page to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
 import {
   Shield,
   AlertTriangle,
