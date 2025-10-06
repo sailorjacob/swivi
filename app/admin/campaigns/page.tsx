@@ -1,5 +1,8 @@
 "use client"
 
+// Force this page to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
