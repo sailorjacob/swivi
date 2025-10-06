@@ -50,16 +50,16 @@ export async function POST(request: NextRequest) {
     const validatedData = createPayoutSchema.parse(body)
 
     // Get user's current earnings
-    const user = await prisma.user.findUnique({
+    const userData = await prisma.user.findUnique({
       where: { id: user.id },
       select: { totalEarnings: true }
     })
 
-    if (!user) {
+    if (!userData) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    const availableBalance = Number(user.totalEarnings)
+    const availableBalance = Number(userData.totalEarnings)
     
     if (validatedData.amount > availableBalance) {
       return NextResponse.json({ 

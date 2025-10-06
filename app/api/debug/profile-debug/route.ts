@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 import { serializeUser } from "@/lib/bigint-utils"
 
@@ -19,27 +18,28 @@ export async function GET(request: NextRequest) {
       console.log("🔍 Profile Debug: Getting session...")
       result.step = "getting_session"
       
-      const session = await getServerSession(authOptions)
+      const { user, error } = await getServerUserWithRole()
       result.debug_info.session_check = {
-        exists: !!session,
-        user_id: session?.user?.id || null,
-        user_email: session?.user?.email || null,
-        user_name: session?.user?.name || null
+        exists: !!user,
+        user_id: user?.id || null,
+        user_email: user?.email || null,
+        user_name: user?.user_metadata?.full_name || null,
+        role: user?.role || null
       }
 
-      if (!session) {
-        result.error = "No session found"
-        result.step = "session_missing"
+      if (!user) {
+        result.error = "No user found"
+        result.step = "user_missing"
         return NextResponse.json(result, { status: 401 })
       }
 
-      if (!session.user?.id) {
-        result.error = "Session exists but no user ID"
+      if (!user?.id) {
+        result.error = "User exists but no user ID"
         result.step = "invalid_session"
         return NextResponse.json(result, { status: 401 })
       }
 
-      console.log("✅ Profile Debug: Session valid for user", session.user.id)
+      console.log("✅ Profile Debug: User valid for user", user.id)
       result.step = "session_valid"
 
       // Step 2: Test database query
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         result.step = "querying_database"
         
         const userRaw = await prisma.user.findUnique({
-          where: { id: session.user.id },
+          where: { id: user.id },
           select: {
             id: true,
             name: true,

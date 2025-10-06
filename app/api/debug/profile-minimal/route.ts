@@ -1,32 +1,31 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 
 export async function GET() {
   try {
     console.log("🔍 Minimal Profile Debug: Starting...")
-    
-    // Step 1: Test session
-    console.log("Step 1: Getting session...")
-    const session = await getServerSession(authOptions)
-    
-    if (!session) {
-      console.log("❌ No session found")
-      return NextResponse.json({ 
-        error: "No session",
-        step: "session_check",
-        authOptions_exists: !!authOptions
+
+    // Step 1: Test user
+    console.log("Step 1: Getting user...")
+    const { user, error } = await getServerUserWithRole()
+
+    if (!user) {
+      console.log("❌ No user found")
+      return NextResponse.json({
+        error: "No user",
+        step: "user_check",
+        user_exists: !!user
       }, { status: 401 })
     }
     
-    console.log("✅ Session found:", { userId: session.user?.id, email: session.user?.email })
-    
-    if (!session.user?.id) {
+    console.log("✅ User found:", { userId: user?.id, email: user?.email })
+
+    if (!user?.id) {
       console.log("❌ Session has no user ID")
-      return NextResponse.json({ 
-        error: "Session has no user ID",
+      return NextResponse.json({
+        error: "User has no user ID",
         step: "user_id_check",
-        session_user: session.user
+        user: user
       }, { status: 401 })
     }
     
