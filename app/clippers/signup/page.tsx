@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { useAuth } from "@/lib/supabase-auth-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DiscordIcon } from "@/components/ui/icons/discord-icon"
@@ -14,21 +14,22 @@ import { motion } from "framer-motion"
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState<string | null>(null)
+  const { signIn } = useAuth()
 
-  const handleOAuthSignup = async (provider: string) => {
+  const handleOAuthSignup = async (provider: "discord" | "google") => {
     setIsLoading(provider)
     try {
       console.log(`🚀 Starting ${provider} signup...`)
-      
-      // Use redirect: true for more reliable authentication flow
-      const result = await signIn(provider, {
-        callbackUrl: "/clippers/dashboard",
-        redirect: true,
-      })
-      
-      // This code should not execute since redirect: true will navigate away
-      console.log("📊 SignUp result (unexpected):", result)
-      
+
+      const { error } = await signIn(provider)
+
+      if (error) {
+        console.error("💥 OAuth signup error:", error)
+        toast.error("An error occurred during signup. Please try again.")
+        setIsLoading(null)
+      }
+      // Supabase handles the redirect automatically
+
     } catch (error) {
       console.error("💥 OAuth signup error:", error)
       toast.error("An error occurred during signup. Please try again.")

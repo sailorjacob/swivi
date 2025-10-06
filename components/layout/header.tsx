@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
-import { useSession } from "next-auth/react"
+import { useSession } from "@/lib/supabase-auth-provider"
 import { Menu, X, ChevronDown } from "lucide-react"
 
 const navigation = [

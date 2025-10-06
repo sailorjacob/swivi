@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { signIn, useSession } from "next-auth/react"
+import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,45 +12,38 @@ import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
 import { Loader2, ArrowLeft, Zap, Users, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import toast from "react-hot-toast"
+import { useAuth } from "@/lib/supabase-auth-provider"
 
 export default function ClippersLoginPage() {
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const router = useRouter()
   const { data: session, status } = useSession()
+  const { signIn } = useAuth()
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (status === "loading") return
-    
+
     if (session) {
       console.log("🔄 User already authenticated, redirecting to dashboard")
       router.push("/clippers/dashboard")
     }
   }, [session, status, router])
 
-  const handleSignIn = async (provider: string) => {
+  const handleSignIn = async (provider: "discord" | "google") => {
     setIsLoading(provider)
     try {
       console.log(`🚀 Starting ${provider} authentication...`)
-      
-      // Use redirect: false to handle the response properly
-      const result = await signIn(provider, {
-        callbackUrl: "/clippers/dashboard",
-        redirect: false,
-      })
-      
-      console.log("📊 SignIn result:", result)
-      
-      if (result?.error) {
-        console.error("❌ SignIn error:", result.error)
+
+      const { error } = await signIn(provider)
+
+      if (error) {
+        console.error("❌ SignIn error:", error)
         toast.error("Authentication failed. Please try again.")
         setIsLoading(null)
-      } else if (result?.ok) {
-        console.log("✅ SignIn successful, redirecting to dashboard...")
-        // Manually redirect to ensure proper navigation
-        router.push("/clippers/dashboard")
       }
-      
+      // Supabase handles the redirect automatically
+
     } catch (error) {
       console.error("💥 OAuth login error:", error)
       toast.error("An error occurred during sign in. Please try again.")
