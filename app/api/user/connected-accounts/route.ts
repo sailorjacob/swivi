@@ -1,34 +1,25 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   try {
     console.log("🔍 Connected Accounts API: Getting session...")
-    const session = await getServerSession(authOptions)
+    const { user, error } = await getServerUserWithRole()
 
-    if (!session) {
-      console.log("❌ Connected Accounts API: No session found")
+    if (!user?.id || error) {
+      console.log("❌ Connected Accounts API: No session found", error)
       return NextResponse.json(
         { error: "No session found" },
         { status: 401 }
       )
     }
 
-    if (!session.user?.id) {
-      console.log("❌ Connected Accounts API: Session found but no user ID", session.user)
-      return NextResponse.json(
-        { error: "Invalid session - no user ID" },
-        { status: 401 }
-      )
-    }
-    
-    console.log("✅ Connected Accounts API: Valid session for user", session.user.id)
+    console.log("✅ Connected Accounts API: Valid session for user", user.id)
 
     // Get user with their OAuth accounts
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+    const userData = await prisma.user.findUnique({
+      where: { id: user.id },
       include: {
         accounts: {
           select: {
@@ -56,7 +47,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    if (!user) {
+    if (!userData) {
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
@@ -67,21 +58,21 @@ export async function GET(request: NextRequest) {
     const connectedAccounts = []
 
     // Add OAuth accounts (Discord, Google)
-    for (const account of user.accounts) {
+    for (const account of userData.accounts) {
       connectedAccounts.push({
         id: `oauth_${account.provider}_${account.providerAccountId}`,
         type: 'oauth',
         platform: account.provider.toUpperCase(),
-        username: user.email || 'Connected',
+        username: userData.email || 'Connected',
         displayName: account.provider.charAt(0).toUpperCase() + account.provider.slice(1) + ' Account',
         isOAuth: true,
         canDelete: false, // OAuth accounts cannot be deleted from here
-        verifiedAt: user.createdAt
+        verifiedAt: userData.createdAt
       })
     }
 
     // Add verified social accounts
-    for (const account of user.socialAccounts) {
+    for (const account of userData.socialAccounts) {
       connectedAccounts.push({
         id: account.id,
         type: 'social',

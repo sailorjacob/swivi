@@ -1,8 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
-import type { User, Session } from '@supabase/supabase-js'
+import { createClient, createServerClient } from '@supabase/supabase-js'
+import type { User, Session, NextRequest } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -11,6 +13,25 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true
   }
 })
+
+// Server-side Supabase client for API routes
+export const createSupabaseServerClient = () => {
+  const cookieStore = cookies()
+
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value
+      },
+      set(name: string, value: string, options: any) {
+        cookieStore.set({ name, value, ...options })
+      },
+      remove(name: string, options: any) {
+        cookieStore.set({ name, value: '', ...options })
+      },
+    },
+  })
+}
 
 // Types for compatibility with NextAuth.js patterns
 export interface SupabaseUser extends User {
@@ -80,6 +101,17 @@ export const getSession = async (): Promise<{ session: SupabaseSession | null; e
   return { session: session as SupabaseSession, error }
 }
 
+// Server-side session helper for API routes
+export const getServerSession = async (): Promise<{ session: SupabaseSession | null; error: any }> => {
+  try {
+    const supabase = createSupabaseServerClient()
+    const { data: { session }, error } = await supabase.auth.getSession()
+    return { session: session as SupabaseSession, error }
+  } catch (error) {
+    return { session: null, error }
+  }
+}
+
 // Enhanced user data with role from your database
 export const getUserWithRole = async (): Promise<{ user: SupabaseUser | null; error: any }> => {
   const { user, error } = await getUser()
@@ -104,4 +136,35 @@ export const getUserWithRole = async (): Promise<{ user: SupabaseUser | null; er
   }
 
   return { user, error }
+}
+
+// Enhanced server-side user data with role from your database
+export const getServerUserWithRole = async (): Promise<{ user: SupabaseUser | null; error: any }> => {
+  try {
+    const supabase = createSupabaseServerClient()
+    const { data: { user }, error } = await supabase.auth.getUser()
+
+    if (user && !error) {
+      try {
+        // Fetch additional user data from your users table
+        const { data: userData } = await supabase
+          .from('users')
+          .select('role, verified')
+          .eq('id', user.id)
+          .single()
+
+        if (userData) {
+          (user as SupabaseUser).role = userData.role || 'CLIPPER'
+          ;(user as SupabaseUser).verified = userData.verified || false
+        }
+      } catch (dbError) {
+        console.warn('Could not fetch user role:', dbError)
+        ;(user as SupabaseUser).role = 'CLIPPER'
+      }
+    }
+
+    return { user: user as SupabaseUser, error }
+  } catch (error) {
+    return { user: null, error }
+  }
 }
