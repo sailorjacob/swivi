@@ -23,7 +23,7 @@ interface User {
   totalViews: number
   totalEarnings: number
   _count?: {
-    submissions: number
+    clip_submissions: number
   }
 }
 

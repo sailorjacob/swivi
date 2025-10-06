@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
           // Include submissions count
           _count: {
             select: {
-              submissions: true
+              clip_submissions: true
             }
           }
         },
