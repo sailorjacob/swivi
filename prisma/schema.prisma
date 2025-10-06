@@ -38,6 +38,7 @@ model Session {
 
 model User {
   id                                    String               @id @default(cuid())
+  supabaseAuthId                        String?              @unique @map("supabase_auth_id")
   name                                  String?
   email                                 String?              @unique @map("email")
   image                                 String?

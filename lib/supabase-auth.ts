@@ -86,16 +86,20 @@ export const getUserWithRole = async (): Promise<{ user: SupabaseUser | null; er
 
   if (user && !error) {
     try {
-      // Fetch additional user data from your users table
+      // Fetch additional user data from your users table using supabaseAuthId
       const { data: userData } = await supabase
         .from('users')
-        .select('role, verified')
-        .eq('id', user.id)
+        .select('id, role, verified, name, image, email')
+        .eq('supabaseAuthId', user.id)
         .single()
 
       if (userData) {
         user.role = userData.role || 'CLIPPER'
         user.verified = userData.verified || false
+        // Update user object with database info
+        if (userData.name) user.user_metadata.full_name = userData.name
+        if (userData.image) user.user_metadata.avatar_url = userData.image
+        if (userData.email) user.email = userData.email
       }
     } catch (dbError) {
       console.warn('Could not fetch user role:', dbError)
