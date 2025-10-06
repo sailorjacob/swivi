@@ -20,12 +20,23 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let isMounted = true
+
     // Get initial session
     const getInitialSession = async () => {
-      const { session } = await getUserWithRole()
-      setSession(session)
-      setUser(session?.user || null)
-      setLoading(false)
+      try {
+        const { session: initialSession } = await getUserWithRole()
+        if (isMounted) {
+          setSession(initialSession)
+          setUser(initialSession?.user || null)
+          setLoading(false)
+        }
+      } catch (error) {
+        console.error('Error getting initial session:', error)
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
     }
 
     getInitialSession()
@@ -35,20 +46,30 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email)
 
-        if (session?.user) {
-          // Get enhanced user data with role
-          const { user: enhancedUser } = await getUserWithRole()
-          setUser(enhancedUser)
-        } else {
-          setUser(null)
-        }
+        if (!isMounted) return
 
-        setSession(session as SupabaseSession)
-        setLoading(false)
+        try {
+          if (session?.user) {
+            // Get enhanced user data with role
+            const { user: enhancedUser } = await getUserWithRole()
+            setUser(enhancedUser)
+          } else {
+            setUser(null)
+          }
+
+          setSession(session as SupabaseSession)
+          setLoading(false)
+        } catch (error) {
+          console.error('Error in auth state change:', error)
+          setLoading(false)
+        }
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signIn = async (provider: 'discord' | 'google') => {
@@ -98,10 +119,28 @@ export function useAuth() {
 
 // Compatibility hook for NextAuth.js patterns
 export function useSession() {
-  const { user, session, loading } = useAuth()
+  try {
+    const context = useContext(AuthContext)
+    if (context === undefined) {
+      // Context not available yet, return loading state
+      return {
+        data: null,
+        status: 'loading' as const
+      }
+    }
 
-  return {
-    data: session ? { user } : null,
-    status: loading ? 'loading' : session ? 'authenticated' : 'unauthenticated'
+    const { user, session, loading } = context
+
+    return {
+      data: session ? { user } : null,
+      status: loading ? 'loading' : session ? 'authenticated' : 'unauthenticated'
+    }
+  } catch (error) {
+    // Handle any errors during context access
+    console.warn('useSession error:', error)
+    return {
+      data: null,
+      status: 'loading' as const
+    }
   }
 }
