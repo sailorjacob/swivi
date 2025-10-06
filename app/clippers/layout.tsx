@@ -1,5 +1,8 @@
 "use client"
 
+// Force this layout to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { useEffect } from "react"
 import { useTheme } from "next-themes"
 import { ThemeProvider } from "@/components/providers/theme-provider"

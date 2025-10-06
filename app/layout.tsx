@@ -1,3 +1,6 @@
+// Force this layout to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/react"
