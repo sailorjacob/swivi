@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 import { env } from "@/lib/env"
 
@@ -58,22 +57,23 @@ export async function GET(request: NextRequest) {
 
     // 4. Session check
     try {
-      const session = await getServerSession(authOptions)
+      const { user, error } = await getServerUserWithRole()
       results.checks.session = {
-        exists: !!session,
-        user_id: session?.user?.id || null,
-        user_email: session?.user?.email || null,
-        user_name: session?.user?.name || null,
-        user_role: (session as any)?.user?.role || null,
-        expires: session?.expires || null,
-        access_token: !!(session as any)?.accessToken
+        exists: !!user,
+        user_id: user?.id || null,
+        user_email: user?.email || null,
+        user_name: user?.user_metadata?.full_name || null,
+        role: user?.role || null,
+        user_role: user?.role || null,
+        expires: null, // Supabase doesn't expose expires in the same way
+        access_token: !!user // User exists means authenticated
       }
 
-      // If we have a session, check if user exists in database
-      if (session?.user?.id) {
+      // If we have a user, check if user exists in database
+      if (user?.id) {
         try {
           const dbUser = await prisma.user.findUnique({
-            where: { id: session.user.id },
+            where: { id: user.id },
             include: {
               accounts: {
                 select: {

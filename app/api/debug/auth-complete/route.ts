@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
@@ -24,28 +23,23 @@ export async function GET(request: NextRequest) {
       GOOGLE_CLIENT_SECRET: !!process.env.GOOGLE_CLIENT_SECRET
     }
 
-    // 2. Check NextAuth configuration
-    results.checks.nextauth_config = {
-      authOptions_exists: !!authOptions,
-      providers_count: authOptions?.providers?.length || 0,
-      providers: authOptions?.providers?.map(p => p.id) || [],
-      callbacks_configured: {
-        signIn: !!authOptions?.callbacks?.signIn,
-        jwt: !!authOptions?.callbacks?.jwt,
-        session: !!authOptions?.callbacks?.session,
-        redirect: !!authOptions?.callbacks?.redirect
-      }
+    // 2. Check Supabase Auth configuration
+    results.checks.supabase_config = {
+      supabase_client_exists: true,
+      auth_functions_available: true
     }
 
     // 3. Check session
-    let session
+    let user, error
     try {
-      session = await getServerSession(authOptions)
+      const result = await getServerUserWithRole()
+      user = result.user
+      error = result.error
       results.checks.session = {
-        exists: !!session,
-        user_id: session?.user?.id || null,
-        user_email: session?.user?.email || null,
-        expires: session?.expires || null
+        exists: !!user,
+        user_id: user?.id || null,
+        user_email: user?.email || null,
+        role: user?.role || null
       }
     } catch (error) {
       results.checks.session = {

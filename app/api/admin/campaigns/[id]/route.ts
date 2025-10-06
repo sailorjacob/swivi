@@ -38,7 +38,7 @@ export async function GET(
       where: { id: user.id }
     })
 
-    if (!userData || userData.role !== "ADMIN") {
+    if (!currentUserData || currentUserData.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 
@@ -110,11 +110,11 @@ export async function PUT(
     }
 
     // Check if user is admin
-    const user = await prisma.user.findUnique({
+    const currentUserData = await prisma.user.findUnique({
       where: { id: user.id }
     })
 
-    if (!userData || userData.role !== "ADMIN") {
+    if (!currentUserData || currentUserData.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 
@@ -187,11 +187,11 @@ export async function DELETE(
     }
 
     // Check if user is admin
-    const user = await prisma.user.findUnique({
+    const currentUserData = await prisma.user.findUnique({
       where: { id: user.id }
     })
 
-    if (!userData || userData.role !== "ADMIN") {
+    if (!currentUserData || currentUserData.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 

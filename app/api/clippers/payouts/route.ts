@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -17,15 +16,15 @@ const createPayoutSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
+    const { user, error } = await getServerUserWithRole()
+
+    if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const payouts = await prisma.payout.findMany({
       where: {
-        userId: session.user.id
+        userId: user.id
       },
       orderBy: {
         createdAt: "desc"
@@ -41,9 +40,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
+    const { user, error } = await getServerUserWithRole()
+
+    if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -52,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     // Get user's current earnings
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: user.id },
       select: { totalEarnings: true }
     })
 
@@ -77,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     const payout = await prisma.payout.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         amount: validatedData.amount,
         method: validatedData.method,
         paypalEmail: validatedData.paypalEmail,
@@ -90,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     // Update user's total earnings
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: user.id },
       data: {
         totalEarnings: {
           decrement: validatedData.amount
