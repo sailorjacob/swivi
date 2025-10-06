@@ -175,7 +175,7 @@ export async function GET(request: NextRequest) {
           }
         },
         include: {
-          user: {
+          users: {
             select: {
               id: true,
               name: true,
@@ -210,8 +210,8 @@ export async function GET(request: NextRequest) {
       const topPerformers = campaignSubmissions
         .filter(submission => submission.clip?.viewTracking && submission.clip.viewTracking.length > 0)
         .map(submission => ({
-          userId: submission.user.id,
-          userName: submission.user.name || submission.user.email || 'Unknown',
+          userId: submission.users.id,
+          userName: submission.users.name || submission.users.email || 'Unknown',
           views: Number(submission.clip?.viewTracking[0]?.views || 0),
           earnings: Number(submission.payout || 0),
           submissionId: submission.id

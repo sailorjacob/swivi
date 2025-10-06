@@ -50,7 +50,7 @@ export class ViewTrackingService {
         include: {
           campaign: true,
           clip: true,
-          user: true
+          users: true
         }
       })
 
@@ -126,7 +126,7 @@ export class ViewTrackingService {
         where: { id: submissionId },
         include: {
           clip: true,
-          user: true
+          users: true
         }
       })
 
@@ -255,7 +255,8 @@ export class ViewTrackingService {
             include: {
               viewTracking: true
             }
-          }
+          },
+          users: true
         }
       })
 

@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         },
         include: {
           campaign: true,
-          user: {
+          users: {
             select: {
               id: true,
               name: true,

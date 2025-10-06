@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
     const submissions = await prisma.clipSubmission.findMany({
       where,
       include: {
-        user: {
+        users: {
           select: {
             id: true,
             name: true,

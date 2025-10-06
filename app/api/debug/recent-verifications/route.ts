@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         verified: a.verified,
         verifiedAt: a.verifiedAt,
         createdAt: a.createdAt,
-        userEmail: a.user.email
+        userEmail: a.users.email
       })),
       summary: {
         verificationCount: recentVerifications.length,
