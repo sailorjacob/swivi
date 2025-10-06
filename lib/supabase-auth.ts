@@ -27,7 +27,7 @@ export const signInWithDiscord = async () => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'discord',
     options: {
-      redirectTo: `${window.location.origin}/clippers/dashboard`
+      redirectTo: `https://www.swivimedia.com/clippers/dashboard`
     }
   })
   return { data, error }
@@ -37,7 +37,7 @@ export const signInWithGoogle = async () => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/clippers/dashboard`
+      redirectTo: `https://www.swivimedia.com/clippers/dashboard`
     }
   })
   return { data, error }

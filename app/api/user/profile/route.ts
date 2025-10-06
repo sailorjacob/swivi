@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getAuthenticatedUser } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 import { serializeUser } from "@/lib/bigint-utils"
 import { z } from "zod"
@@ -16,25 +15,25 @@ const updatePayoutSchema = z.object({
   paypalEmail: z.string().email("Invalid email").optional().or(z.literal("")),
 })
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    console.log("🔍 Profile API: Getting session...")
-    const session = await getServerSession(authOptions)
-    
-    if (!session) {
-      console.log("❌ Profile API: No session found")
-      return NextResponse.json({ error: "No session found" }, { status: 401 })
-    }
-    
-    if (!session.user?.id) {
-      console.log("❌ Profile API: Session found but no user ID", session.user)
-      return NextResponse.json({ error: "Invalid session - no user ID" }, { status: 401 })
-    }
-    
-    console.log("✅ Profile API: Valid session for user", session.user.id)
+    console.log("🔍 Profile API: Getting authenticated user...")
+    const user = await getAuthenticatedUser(request)
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+    if (!user) {
+      console.log("❌ Profile API: No authenticated user")
+      return NextResponse.json({ error: "No authenticated user" }, { status: 401 })
+    }
+
+    if (!user.id) {
+      console.log("❌ Profile API: User found but no user ID", user)
+      return NextResponse.json({ error: "Invalid user - no user ID" }, { status: 401 })
+    }
+    
+    console.log("✅ Profile API: Valid session for user", user.id)
+
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
       select: {
         id: true,
         name: true,
@@ -73,9 +72,9 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
+    const user = await getAuthenticatedUser(request)
+
+    if (!user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -102,7 +101,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: user.id },
       data: cleanedData,
       select: {
         id: true,
