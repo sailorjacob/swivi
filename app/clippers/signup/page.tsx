@@ -1,5 +1,8 @@
 "use client"
 
+// Force this page to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { useState } from "react"
 import { useAuth } from "@/lib/supabase-auth-provider"
 import { Button } from "@/components/ui/button"
