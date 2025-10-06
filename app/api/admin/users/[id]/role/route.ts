@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -13,18 +12,18 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    const { user, error } = await getServerUserWithRole()
 
-    if (!session?.user?.id) {
+    if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user is admin
-    const adminUser = await prisma.user.findUnique({
-      where: { id: session.user.id }
+    // Check if current user is admin
+    const currentUserData = await prisma.user.findUnique({
+      where: { id: user.id }
     })
 
-    if (!adminUser || adminUser.role !== "ADMIN") {
+    if (!currentUserData || currentUserData.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 
@@ -32,7 +31,7 @@ export async function PUT(
     const validatedData = updateRoleSchema.parse(body)
 
     // Prevent admin from demoting themselves
-    if (params.id === session.user.id && validatedData.role !== "ADMIN") {
+    if (params.id === user.id && validatedData.role !== "ADMIN") {
       return NextResponse.json({ error: "Cannot demote yourself from admin" }, { status: 400 })
     }
 

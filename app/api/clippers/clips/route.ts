@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -13,15 +12,15 @@ const createClipSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
+    const { user, error } = await getServerUserWithRole()
+
+    if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const clips = await prisma.clip.findMany({
       where: {
-        userId: session.user.id
+        userId: user.id
       },
       orderBy: {
         createdAt: "desc"
@@ -44,9 +43,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
+    const { user, error } = await getServerUserWithRole()
+
+    if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -55,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     const clip = await prisma.clip.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         url: validatedData.url,
         platform: validatedData.platform,
         title: validatedData.title,
