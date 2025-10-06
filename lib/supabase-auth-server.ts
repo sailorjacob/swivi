@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { SupabaseUser, SupabaseSession } from './supabase-auth'
 
@@ -9,45 +9,30 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 export const createSupabaseServerClient = () => {
   const cookieStore = cookies()
 
-  return createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      getSession: async () => {
-        const accessToken = cookieStore.get('sb-access-token')?.value
-        const refreshToken = cookieStore.get('sb-refresh-token')?.value
-        if (accessToken && refreshToken) {
-          return {
-            data: {
-              session: {
-                access_token: accessToken,
-                refresh_token: refreshToken,
-                user: null, // We'll get this from getUser()
-              }
-            },
-            error: null
-          }
-        }
-        return { data: { session: null }, error: null }
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value
       },
-      setSession: async (session) => {
-        if (session) {
-          cookieStore.set('sb-access-token', session.access_token, {
-            path: '/',
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax'
-          })
-          cookieStore.set('sb-refresh-token', session.refresh_token, {
-            path: '/',
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax'
-          })
-        } else {
-          cookieStore.set('sb-access-token', '', { path: '/', maxAge: 0 })
-          cookieStore.set('sb-refresh-token', '', { path: '/', maxAge: 0 })
+      set(name: string, value: string, options: any) {
+        try {
+          cookieStore.set({ name, value, ...options })
+        } catch (error) {
+          // The `set` method was called from a Server Component.
+          // This can be ignored if you have middleware refreshing
+          // user sessions.
         }
-      }
-    }
+      },
+      remove(name: string, options: any) {
+        try {
+          cookieStore.set({ name, value: '', ...options })
+        } catch (error) {
+          // The `delete` method was called from a Server Component.
+          // This can be ignored if you have middleware refreshing
+          // user sessions.
+        }
+      },
+    },
   })
 }
 
@@ -144,14 +129,48 @@ async function ensureUserExists(supabaseUser: any) {
   try {
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
-    // Check if user already exists
-    const { data: existingUser } = await supabase
+    // Check if user already exists by supabaseAuthId
+    const { data: existingUser, error: selectError } = await supabase
       .from('users')
-      .select('id')
+      .select('id, name, image, email')
       .eq('supabaseAuthId', supabaseUser.id)
-      .single()
+      .maybeSingle()
+
+    if (selectError && selectError.code !== 'PGRST116') {
+      console.error('Error checking existing user:', selectError)
+      return
+    }
 
     if (existingUser) {
+      // User exists, but let's update their info if needed
+      const updateData: any = {}
+      if (supabaseUser.email && supabaseUser.email !== existingUser.email) {
+        updateData.email = supabaseUser.email
+      }
+
+      const name = supabaseUser.user_metadata?.full_name ||
+                   supabaseUser.user_metadata?.name ||
+                   supabaseUser.raw_user_meta_data?.full_name ||
+                   supabaseUser.raw_user_meta_data?.name
+      if (name && name !== existingUser.name) {
+        updateData.name = name
+      }
+
+      const image = supabaseUser.user_metadata?.avatar_url ||
+                    supabaseUser.user_metadata?.picture ||
+                    supabaseUser.raw_user_meta_data?.avatar_url ||
+                    supabaseUser.raw_user_meta_data?.picture
+      if (image && image !== existingUser.image) {
+        updateData.image = image
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        await supabase
+          .from('users')
+          .update(updateData)
+          .eq('supabaseAuthId', supabaseUser.id)
+        console.log('✅ Updated existing user info')
+      }
       return // User already exists
     }
 
@@ -171,7 +190,7 @@ async function ensureUserExists(supabaseUser: any) {
       role: 'CLIPPER' // Default role for new users
     }
 
-    console.log('Creating user in database:', userData)
+    console.log('Creating new user in database:', { email: userData.email, name: userData.name })
 
     // Create user in database
     const { error } = await supabase
