@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const { user, error } = await getServerUserWithRole()
 
-    if (!session?.user?.id) {
+    if (!user?.id || error) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
@@ -43,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Find the latest verification for this platform and user
     let verification = await prisma.socialVerification.findFirst({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         platform: platformEnum as any,
         verified: false,
         expiresAt: {
@@ -60,7 +59,7 @@ export async function POST(request: NextRequest) {
       const code = Math.random().toString(36).substring(2, 8).toUpperCase()
       verification = await prisma.socialVerification.create({
         data: {
-          userId: session.user.id,
+          userId: user.id,
           platform: platformEnum as any,
           code: code,
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
@@ -81,7 +80,7 @@ export async function POST(request: NextRequest) {
       // Create or update social account
       const existingAccount = await prisma.socialAccount.findFirst({
         where: {
-          userId: session.user.id,
+          userId: user.id,
           platform: platformEnum as any,
           username: username
         }
@@ -98,7 +97,7 @@ export async function POST(request: NextRequest) {
       } else if (!existingAccount) {
         await prisma.socialAccount.create({
           data: {
-            userId: session.user.id,
+            userId: user.id,
             platform: platformEnum as any,
             username: username,
             displayName: platform.charAt(0).toUpperCase() + platform.slice(1),

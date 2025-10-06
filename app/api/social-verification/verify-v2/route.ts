@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const { user, error } = await getServerUserWithRole()
 
-    if (!session?.user?.id) {
+    if (!user?.id || error) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
@@ -43,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Find the latest verification for this platform and user
     const verification = await prisma.socialVerification.findFirst({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         platform: platformEnum as any,
         verified: false,
         expiresAt: {
@@ -66,11 +65,11 @@ export async function POST(request: NextRequest) {
 
     // For Instagram, use alternative verification methods due to heavy anti-bot protection
     if (platform === 'instagram') {
-      return await handleInstagramVerification(verification, username, session.user.id)
+      return await handleInstagramVerification(verification, username, user.id)
     }
 
     // For other platforms, try normal scraping first, fallback to alternatives
-    return await handleStandardVerification(verification, platform, username, session.user.id)
+    return await handleStandardVerification(verification, platform, username, user.id)
 
   } catch (error) {
     console.error("Error in verification:", error)

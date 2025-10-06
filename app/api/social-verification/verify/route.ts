@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 
 
@@ -590,9 +589,9 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const { user, error } = await getServerUserWithRole()
 
-    if (!session?.user?.id) {
+    if (!user?.id || error) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
@@ -637,7 +636,7 @@ export async function POST(request: NextRequest) {
     // Find the latest unverified code for this platform and user
     const verification = await prisma.socialVerification.findFirst({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         platform: platformEnum as any,
         verified: false,
         expiresAt: {
@@ -653,7 +652,7 @@ export async function POST(request: NextRequest) {
       // Check if there are any verifications for this user/platform (even expired ones)
       const anyVerification = await prisma.socialVerification.findFirst({
         where: {
-          userId: session.user.id,
+          userId: user.id,
           platform: platformEnum as any
         },
         orderBy: {
@@ -694,7 +693,7 @@ export async function POST(request: NextRequest) {
       // Check if account already exists (since we allow multiple accounts per platform)
       const existingAccount = await prisma.socialAccount.findFirst({
         where: {
-          userId: session.user.id,
+          userId: user.id,
           platform: platformEnum as any,
           username: username
         }
@@ -727,7 +726,7 @@ export async function POST(request: NextRequest) {
         // Create new account
         await prisma.socialAccount.create({
           data: {
-            userId: session.user.id,
+            userId: user.id,
             platform: platformEnum as any,
             username: username,
             displayName: displayName || platformName,

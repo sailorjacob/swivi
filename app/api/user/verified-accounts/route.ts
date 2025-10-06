@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const { user, error } = await getServerUserWithRole()
 
-    if (!session?.user?.id) {
+    if (!user?.id || error) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
@@ -17,7 +16,7 @@ export async function GET(request: NextRequest) {
     // Get verified social accounts for the user
     const verifiedAccounts = await prisma.socialAccount.findMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         verified: true
       },
       orderBy: {
@@ -80,7 +79,7 @@ export async function DELETE(request: NextRequest) {
     // Also delete any associated verification records
     await prisma.socialVerification.deleteMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         platform: account.platform
       }
     })
