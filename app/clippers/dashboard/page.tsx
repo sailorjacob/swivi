@@ -60,6 +60,24 @@ export default function ClipperDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [showSubmissionModal, setShowSubmissionModal] = useState(false)
 
+  // Get display name with fallback logic
+  const getDisplayName = () => {
+    if (session?.user) {
+      // Try to get name from user metadata (updated from database)
+      const dbName = session.user.user_metadata?.full_name
+      if (dbName && dbName !== ";Updated name;") return dbName
+
+      // Fallback to OAuth name
+      const oauthName = session.user.user_metadata?.name ||
+                       session.user.user_metadata?.full_name
+      if (oauthName) return oauthName
+
+      // Final fallback to email
+      return session.user.email?.split('@')[0] || 'Clipper'
+    }
+    return 'Clipper'
+  }
+
 
   useEffect(() => {
     if (status === "loading") return
@@ -170,7 +188,7 @@ export default function ClipperDashboard() {
           <div>
             <h1 className="text-3xl font-light mb-2">Dashboard</h1>
             <p className="text-muted-foreground">
-              Welcome back, {session?.user?.name || session?.user?.email}
+              Welcome back, {getDisplayName()}
             </p>
           </div>
           {/* Admin Link - Only show for admin users */}

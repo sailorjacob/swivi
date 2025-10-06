@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { prisma } from '@/lib/prisma'
 import type { SupabaseUser, SupabaseSession } from './supabase-auth'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -59,11 +60,17 @@ export const getServerUserWithRole = async (): Promise<{ user: SupabaseUser | nu
         await ensureUserExists(user)
 
         // Fetch additional user data from your users table using supabaseAuthId
-        const { data: userData } = await supabase
-          .from('users')
-          .select('id, role, verified, name, image, email')
-          .eq('supabaseAuthId', user.id)
-          .single()
+        const userData = await prisma.user.findUnique({
+          where: { supabaseAuthId: user.id },
+          select: {
+            id: true,
+            role: true,
+            verified: true,
+            name: true,
+            image: true,
+            email: true
+          }
+        })
 
         if (userData) {
           ;(user as SupabaseUser).role = userData.role || 'CLIPPER'
@@ -97,11 +104,17 @@ export const getAuthenticatedUser = async (request: NextRequest): Promise<Supaba
         await ensureUserExists(user)
 
         // Fetch additional user data from your users table using supabaseAuthId
-        const { data: userData } = await supabase
-          .from('users')
-          .select('id, role, verified, name, image, email')
-          .eq('supabaseAuthId', user.id)
-          .single()
+        const userData = await prisma.user.findUnique({
+          where: { supabaseAuthId: user.id },
+          select: {
+            id: true,
+            role: true,
+            verified: true,
+            name: true,
+            image: true,
+            email: true
+          }
+        })
 
         if (userData) {
           ;(user as SupabaseUser).role = userData.role || 'CLIPPER'
@@ -127,19 +140,11 @@ export const getAuthenticatedUser = async (request: NextRequest): Promise<Supaba
 // Helper function to ensure user exists in our database
 async function ensureUserExists(supabaseUser: any) {
   try {
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-
     // Check if user already exists by supabaseAuthId
-    const { data: existingUser, error: selectError } = await supabase
-      .from('users')
-      .select('id, name, image, email')
-      .eq('supabaseAuthId', supabaseUser.id)
-      .maybeSingle()
-
-    if (selectError && selectError.code !== 'PGRST116') {
-      console.error('Error checking existing user:', selectError)
-      return
-    }
+    const existingUser = await prisma.user.findUnique({
+      where: { supabaseAuthId: supabaseUser.id },
+      select: { id: true, name: true, image: true, email: true }
+    })
 
     if (existingUser) {
       // User exists, but let's update their info if needed
@@ -151,7 +156,9 @@ async function ensureUserExists(supabaseUser: any) {
       const name = supabaseUser.user_metadata?.full_name ||
                    supabaseUser.user_metadata?.name ||
                    supabaseUser.raw_user_meta_data?.full_name ||
-                   supabaseUser.raw_user_meta_data?.name
+                   supabaseUser.raw_user_meta_data?.name ||
+                   supabaseUser.email?.split('@')[0] || // Fallback to email prefix
+                   'New User' // Final fallback
       if (name && name !== existingUser.name) {
         updateData.name = name
       }
@@ -165,27 +172,33 @@ async function ensureUserExists(supabaseUser: any) {
       }
 
       if (Object.keys(updateData).length > 0) {
-        await supabase
-          .from('users')
-          .update(updateData)
-          .eq('supabaseAuthId', supabaseUser.id)
+        await prisma.user.update({
+          where: { supabaseAuthId: supabaseUser.id },
+          data: updateData
+        })
         console.log('✅ Updated existing user info')
       }
       return // User already exists
     }
 
     // Extract user data from Supabase Auth user object
+    const name = supabaseUser.user_metadata?.full_name ||
+                 supabaseUser.user_metadata?.name ||
+                 supabaseUser.raw_user_meta_data?.full_name ||
+                 supabaseUser.raw_user_meta_data?.name ||
+                 supabaseUser.email?.split('@')[0] || // Fallback to email prefix
+                 'New User' // Final fallback
+
+    const image = supabaseUser.user_metadata?.avatar_url ||
+                  supabaseUser.user_metadata?.picture ||
+                  supabaseUser.raw_user_meta_data?.avatar_url ||
+                  supabaseUser.raw_user_meta_data?.picture
+
     const userData = {
       supabaseAuthId: supabaseUser.id,
       email: supabaseUser.email,
-      name: supabaseUser.user_metadata?.full_name ||
-            supabaseUser.user_metadata?.name ||
-            supabaseUser.raw_user_meta_data?.full_name ||
-            supabaseUser.raw_user_meta_data?.name,
-      image: supabaseUser.user_metadata?.avatar_url ||
-             supabaseUser.user_metadata?.picture ||
-             supabaseUser.raw_user_meta_data?.avatar_url ||
-             supabaseUser.raw_user_meta_data?.picture,
+      name: name,
+      image: image || null,
       verified: supabaseUser.email_confirmed_at ? true : false,
       role: 'CLIPPER' // Default role for new users
     }
@@ -193,15 +206,11 @@ async function ensureUserExists(supabaseUser: any) {
     console.log('Creating new user in database:', { email: userData.email, name: userData.name })
 
     // Create user in database
-    const { error } = await supabase
-      .from('users')
-      .insert(userData)
+    const newUser = await prisma.user.create({
+      data: userData
+    })
 
-    if (error) {
-      console.error('Error creating user:', error)
-    } else {
-      console.log('✅ User created successfully')
-    }
+    console.log('✅ User created successfully:', newUser.id)
   } catch (error) {
     console.error('Error in ensureUserExists:', error)
   }
