@@ -448,7 +448,7 @@ export default function AdminUsersPage() {
                           <span>Joined: {new Date(user.createdAt).toLocaleDateString()}</span>
                           <span>Views: {(user.totalViews || 0).toLocaleString()}</span>
                           <span>Earnings: ${(user.totalEarnings || 0).toFixed(2)}</span>
-                          <span>Submissions: {user._count?.submissions || 0}</span>
+                          <span>Submissions: {user._count?.clip_submissions || 0}</span>
                         </div>
                       </div>
                     </div>
@@ -586,7 +586,7 @@ export default function AdminUsersPage() {
                     </div>
                     <div>
                       <label className="text-sm font-medium">Submissions</label>
-                      <p className="text-lg font-semibold">{selectedUser._count?.submissions || 0}</p>
+                      <p className="text-lg font-semibold">{selectedUser._count?.clip_submissions || 0}</p>
                     </div>
                   </div>
                 </div>

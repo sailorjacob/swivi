@@ -233,7 +233,7 @@ export async function GET(request: NextRequest) {
       const userStats = await prisma.user.findUnique({
         where: { id: userId },
         include: {
-          submissions: {
+          clip_submissions: {
             where: {
               status: {
                 in: ['APPROVED', 'PAID']
@@ -262,18 +262,18 @@ export async function GET(request: NextRequest) {
       })
 
       if (userStats) {
-        const totalUserViews = userStats.submissions.reduce((sum, submission) => {
+        const totalUserViews = userStats.clip_submissions.reduce((sum, submission) => {
           if (submission.clip?.viewTracking && submission.clip.viewTracking.length > 0) {
             return sum + Number(submission.clip.viewTracking[0]?.views || 0)
           }
           return sum
         }, 0)
 
-        const totalUserEarnings = userStats.submissions
+        const totalUserEarnings = userStats.clip_submissions
           .filter(s => s.status === 'PAID' && s.payout)
           .reduce((sum, s) => sum + Number(s.payout || 0), 0)
 
-        const recentSubmissions = userStats.submissions
+        const recentSubmissions = userStats.clip_submissions
           .filter(submission => submission.clip?.viewTracking && submission.clip.viewTracking.length > 0)
           .map(submission => ({
             campaignTitle: submission.campaign.title,
@@ -291,7 +291,7 @@ export async function GET(request: NextRequest) {
           email: userStats.email,
           totalViews: userStats.totalViews,
           totalEarnings: Number(userStats.totalEarnings),
-          activeSubmissions: userStats.submissions.length,
+          activeSubmissions: userStats.clip_submissions.length,
           recentSubmissions
         }
       }

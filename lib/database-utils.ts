@@ -144,7 +144,7 @@ export async function getUserStats(userId: string) {
         _count: {
           select: {
             clips: true,
-            submissions: true,
+            clip_submissions: true,
             socialAccounts: {
               where: { verified: true }
             }
@@ -162,7 +162,7 @@ export async function getUserStats(userId: string) {
       totalViews: Number(user.totalViews),
       verified: user.verified,
       clipCount: user._count.clips,
-      submissionCount: user._count.submissions,
+      submissionCount: user._count.clip_submissions,
       verifiedAccountsCount: user._count.socialAccounts
     }
   })
