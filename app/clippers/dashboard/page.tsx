@@ -77,17 +77,31 @@ export default function ClipperDashboard() {
       setLoading(true)
       setError(null)
       const response = await fetch("/api/clippers/dashboard")
+
       if (response.ok) {
         const data = await response.json()
         setStats(data.stats)
         setRecentClips(data.recentClips)
         setActiveCampaigns(data.activeCampaigns)
+      } else if (response.status === 401) {
+        // Authentication error - redirect to login
+        router.push("/clippers/login?message=Please log in to access your dashboard")
+        return
+      } else if (response.status === 404) {
+        setError("Your account was not found. Please contact support.")
+      } else if (response.status >= 500) {
+        setError("Server error. Please try again in a few moments.")
       } else {
-        setError("Failed to load dashboard data")
+        const errorData = await response.json().catch(() => ({}))
+        setError(errorData.error || "Failed to load dashboard data")
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
-      setError("Failed to load dashboard data")
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        setError("Network error. Please check your internet connection and try again.")
+      } else {
+        setError("Failed to load dashboard data. Please try again.")
+      }
     } finally {
       setLoading(false)
     }
@@ -107,12 +121,35 @@ export default function ClipperDashboard() {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <p className="text-lg text-red-600 mb-4">{error}</p>
-            <Button onClick={fetchDashboardData} variant="outline">
-              Try Again
-            </Button>
+        <div className="flex items-center justify-center min-h-64">
+          <div className="text-center max-w-md">
+            <div className="mb-6">
+              <AlertCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
+              <h2 className="text-xl font-semibold text-foreground mb-2">Unable to Load Dashboard</h2>
+              <p className="text-muted-foreground">{error}</p>
+            </div>
+
+            <div className="space-y-3">
+              <Button onClick={fetchDashboardData} variant="outline" className="w-full">
+                Try Again
+              </Button>
+
+              {error.includes("log in") ? (
+                <Button asChild className="w-full">
+                  <Link href="/clippers/login">Sign In</Link>
+                </Button>
+              ) : (
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/clippers/support">Contact Support</Link>
+                </Button>
+              )}
+            </div>
+
+            <div className="mt-6 p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                <strong>New to Swivi?</strong> Connect your social accounts and start earning from your content!
+              </p>
+            </div>
           </div>
         </div>
       </div>

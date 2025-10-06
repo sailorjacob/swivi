@@ -73,6 +73,16 @@ export default function ProfilePage() {
             bio: userData.bio || "",
             website: userData.website || ""
           })
+        } else if (profileResponse.status === 401) {
+          toast.error("Please log in to view your profile")
+          return
+        } else if (profileResponse.status === 404) {
+          toast.error("Profile not found. Please contact support.")
+          return
+        } else {
+          const errorData = await profileResponse.json().catch(() => ({}))
+          toast.error(errorData.error || "Failed to load profile data")
+          return
         }
 
         // Load all connected accounts (OAuth + verified social)
@@ -80,10 +90,21 @@ export default function ProfilePage() {
         if (accountsResponse.ok) {
           const accountsData = await accountsResponse.json()
           setConnectedAccounts(accountsData)
+        } else if (accountsResponse.status === 401) {
+          toast.error("Please log in to view connected accounts")
+        } else if (accountsResponse.status >= 500) {
+          toast.error("Server error loading accounts. Please try again.")
+        } else {
+          console.warn("Failed to load connected accounts:", accountsResponse.status)
+          // Don't show error toast for accounts failing, it's not critical
         }
       } catch (error) {
         console.error("Error loading profile:", error)
-        toast.error("Failed to load profile")
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+          toast.error("Network error. Please check your internet connection.")
+        } else {
+          toast.error("Failed to load profile. Please try refreshing the page.")
+        }
       } finally {
         setIsLoading(false)
       }

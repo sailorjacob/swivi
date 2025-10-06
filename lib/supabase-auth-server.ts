@@ -69,3 +69,39 @@ export const getServerUserWithRole = async (): Promise<{ user: SupabaseUser | nu
     return { user: null, error }
   }
 }
+
+// Get authenticated user from request (for API routes that need request object)
+export const getAuthenticatedUser = async (request: NextRequest): Promise<SupabaseUser | null> => {
+  try {
+    const supabase = createSupabaseServerClient()
+    const { data: { user }, error } = await supabase.auth.getUser()
+
+    if (user && !error) {
+      try {
+        // Fetch additional user data from your users table using supabaseAuthId
+        const { data: userData } = await supabase
+          .from('users')
+          .select('id, role, verified, name, image, email')
+          .eq('supabaseAuthId', user.id)
+          .single()
+
+        if (userData) {
+          ;(user as SupabaseUser).role = userData.role || 'CLIPPER'
+          ;(user as SupabaseUser).verified = userData.verified || false
+          // Update user object with database info
+          if (userData.name) user.user_metadata = { ...user.user_metadata, full_name: userData.name }
+          if (userData.image) user.user_metadata = { ...user.user_metadata, avatar_url: userData.image }
+          if (userData.email) user.email = userData.email
+        }
+      } catch (dbError) {
+        console.warn('Could not fetch user role:', dbError)
+        ;(user as SupabaseUser).role = 'CLIPPER'
+      }
+      return user as SupabaseUser
+    }
+    return null
+  } catch (error) {
+    console.error('Error getting authenticated user:', error)
+    return null
+  }
+}

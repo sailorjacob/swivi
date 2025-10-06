@@ -56,12 +56,12 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     // Convert BigInt fields to strings for JSON serialization
-    const serializedUser = serializeUser(user)
+    const serializedUser = serializeUser(dbUser)
 
     return NextResponse.json(serializedUser)
   } catch (error) {

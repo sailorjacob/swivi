@@ -114,9 +114,9 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const { user, error } = await getServerUserWithRole()
 
-    if (!session?.user?.id) {
+    if (!user?.id || error) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
@@ -145,7 +145,7 @@ export async function DELETE(request: NextRequest) {
     const account = await prisma.socialAccount.findFirst({
       where: {
         id: accountId,
-        userId: session.user.id
+        userId: user.id
       }
     })
 
@@ -165,7 +165,7 @@ export async function DELETE(request: NextRequest) {
     // Only delete verification records, don't affect other usernames on same platform
     await prisma.socialVerification.deleteMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         platform: account.platform,
         // Note: We could add username matching here if we stored it in verification
       }
