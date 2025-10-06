@@ -140,48 +140,94 @@ export const getAuthenticatedUser = async (request: NextRequest): Promise<Supaba
 // Helper function to ensure user exists in our database
 async function ensureUserExists(supabaseUser: any) {
   try {
-    // Check if user already exists by supabaseAuthId
-    const existingUser = await prisma.user.findUnique({
+    // First, try to find user by supabaseAuthId (for users who logged in before)
+    let existingUser = await prisma.user.findUnique({
       where: { supabaseAuthId: supabaseUser.id },
-      select: { id: true, name: true, image: true, email: true }
+      select: { id: true, name: true, image: true, email: true, supabaseAuthId: true }
     })
 
     if (existingUser) {
-      // User exists, but let's update their info if needed
-      const updateData: any = {}
-      if (supabaseUser.email && supabaseUser.email !== existingUser.email) {
-        updateData.email = supabaseUser.email
-      }
-
-      const name = supabaseUser.user_metadata?.full_name ||
-                   supabaseUser.user_metadata?.name ||
-                   supabaseUser.raw_user_meta_data?.full_name ||
-                   supabaseUser.raw_user_meta_data?.name ||
-                   supabaseUser.email?.split('@')[0] || // Fallback to email prefix
-                   'New User' // Final fallback
-      if (name && name !== existingUser.name) {
-        updateData.name = name
-      }
-
-      const image = supabaseUser.user_metadata?.avatar_url ||
-                    supabaseUser.user_metadata?.picture ||
-                    supabaseUser.raw_user_meta_data?.avatar_url ||
-                    supabaseUser.raw_user_meta_data?.picture
-      if (image && image !== existingUser.image) {
-        updateData.image = image
-      }
-
-      if (Object.keys(updateData).length > 0) {
-        await prisma.user.update({
-          where: { supabaseAuthId: supabaseUser.id },
-          data: updateData
-        })
-        console.log('✅ Updated existing user info')
-      }
-      return // User already exists
+      // User exists with supabaseAuthId, update their info if needed
+      await updateExistingUser(supabaseUser, existingUser)
+      return
     }
 
-    // Extract user data from Supabase Auth user object
+    // If not found by supabaseAuthId, try to find by email (for existing users without supabaseAuthId)
+    if (supabaseUser.email) {
+      existingUser = await prisma.user.findUnique({
+        where: { email: supabaseUser.email },
+        select: { id: true, name: true, image: true, email: true, supabaseAuthId: true }
+      })
+
+      if (existingUser) {
+        // Found user by email, update them with supabaseAuthId
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: { supabaseAuthId: supabaseUser.id }
+        })
+        console.log('✅ Linked existing user with supabaseAuthId:', existingUser.id)
+        await updateExistingUser(supabaseUser, existingUser)
+        return
+      }
+    }
+
+    // User doesn't exist, create new one
+    await createNewUser(supabaseUser)
+  } catch (error) {
+    console.error('Error in ensureUserExists:', error)
+  }
+}
+
+// Helper to update existing user info
+async function updateExistingUser(supabaseUser: any, existingUser: any) {
+  try {
+    const updateData: any = {}
+
+    // Update email if changed
+    if (supabaseUser.email && supabaseUser.email !== existingUser.email) {
+      updateData.email = supabaseUser.email
+    }
+
+    // Extract and update name
+    const name = supabaseUser.user_metadata?.full_name ||
+                 supabaseUser.user_metadata?.name ||
+                 supabaseUser.raw_user_meta_data?.full_name ||
+                 supabaseUser.raw_user_meta_data?.name ||
+                 supabaseUser.email?.split('@')[0] || // Fallback to email prefix
+                 'New User' // Final fallback
+    if (name && name !== existingUser.name) {
+      updateData.name = name
+    }
+
+    // Extract and update image
+    const image = supabaseUser.user_metadata?.avatar_url ||
+                  supabaseUser.user_metadata?.picture ||
+                  supabaseUser.raw_user_meta_data?.avatar_url ||
+                  supabaseUser.raw_user_meta_data?.picture
+    if (image && image !== existingUser.image) {
+      updateData.image = image
+    }
+
+    // Update verification status
+    if (supabaseUser.email_confirmed_at && !existingUser.verified) {
+      updateData.verified = true
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: updateData
+      })
+      console.log('✅ Updated existing user info for:', existingUser.email)
+    }
+  } catch (error) {
+    console.error('Error updating existing user:', error)
+  }
+}
+
+// Helper to create new user
+async function createNewUser(supabaseUser: any) {
+  try {
     const name = supabaseUser.user_metadata?.full_name ||
                  supabaseUser.user_metadata?.name ||
                  supabaseUser.raw_user_meta_data?.full_name ||
@@ -205,13 +251,12 @@ async function ensureUserExists(supabaseUser: any) {
 
     console.log('Creating new user in database:', { email: userData.email, name: userData.name })
 
-    // Create user in database
     const newUser = await prisma.user.create({
       data: userData
     })
 
     console.log('✅ User created successfully:', newUser.id)
   } catch (error) {
-    console.error('Error in ensureUserExists:', error)
+    console.error('Error creating new user:', error)
   }
 }
