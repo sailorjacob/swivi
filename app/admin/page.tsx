@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
+import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { BarChart3, Users, Target, DollarSign, Settings, Shield, Activity, Loader2 } from "lucide-react"

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 
 // Force this page to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
-import { useSession } from "next-auth/react"
+import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import {
   DollarSign,

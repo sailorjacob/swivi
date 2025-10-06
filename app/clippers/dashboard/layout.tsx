@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useSession, signOut } from "next-auth/react"
+import { useSession } from "@/lib/supabase-auth-provider"
+import { useAuth } from "@/lib/supabase-auth-provider"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
@@ -65,6 +66,7 @@ interface NavItem {
 
 function Sidebar({ className }: { className?: string }) {
   const { data: session } = useSession()
+  const { logout } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
 
@@ -86,7 +88,8 @@ function Sidebar({ className }: { className?: string }) {
       router.push("/clippers")
       return
     }
-    await signOut({ callbackUrl: "/clippers/login" })
+    await logout()
+    router.push("/clippers/login")
   }
 
   const isActive = (href: string) => {

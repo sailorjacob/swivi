@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useSession, signOut } from "next-auth/react"
+import { useSession } from "@/lib/supabase-auth-provider"
+import { useAuth } from "@/lib/supabase-auth-provider"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -69,6 +70,7 @@ const renderNavIcon = (icon: React.ComponentType<{ className?: string }> | strin
 
 function AdminNav({ className }: { className?: string }) {
   const { data: session } = useSession()
+  const { logout } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
 
@@ -90,7 +92,8 @@ function AdminNav({ className }: { className?: string }) {
       router.push("/admin")
       return
     }
-    await signOut({ callbackUrl: "/admin" })
+    await logout()
+    router.push("/admin")
   }
 
   const isActive = (href: string) => {

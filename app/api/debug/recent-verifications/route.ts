@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       },
       take: 10,
       include: {
-        user: {
+        users: {
           select: {
             email: true,
             name: true
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       },
       take: 10,
       include: {
-        user: {
+        users: {
           select: {
             email: true,
             name: true
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
         verified: v.verified,
         verifiedAt: v.verifiedAt,
         createdAt: v.createdAt,
-        userEmail: v.user.email
+        userEmail: v.users.email
       })),
       recentSocialAccounts: recentSocialAccounts.map(a => ({
         id: a.id,
