@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { requireAdmin } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
@@ -10,94 +9,9 @@ export async function GET(request: NextRequest) {
   console.log("Timestamp:", new Date().toISOString())
 
   try {
-    // Log request headers for debugging
-    const headers = Object.fromEntries(request.headers.entries())
-    console.log("Request headers:", {
-      'user-agent': headers['user-agent']?.substring(0, 100) + '...',
-      'cookie': headers['cookie']?.substring(0, 100) + '...',
-      'authorization': headers['authorization'] ? '[PRESENT]' : '[NOT PRESENT]',
-      'content-type': headers['content-type']
-    })
-
-    // Try to get session - this is where the error might be occurring
-    console.log("🔍 Attempting to get session...")
-    let session
-    try {
-      session = await getServerSession(authOptions)
-      console.log("✅ Session retrieved successfully")
-    } catch (sessionError) {
-      console.error("❌ Session error:", sessionError)
-      console.error("Session error stack:", sessionError instanceof Error ? sessionError.stack : 'No stack')
-
-      // Check for specific error types
-      if (sessionError instanceof Error) {
-        if (sessionError.message?.includes('cookie') || sessionError.message?.includes('parse')) {
-          console.error("❌ Cookie/session parsing error")
-          return NextResponse.json({
-            error: "Invalid session format",
-            details: process.env.NODE_ENV === 'development' ? sessionError.message : undefined
-          }, { status: 400 })
-        }
-
-        if (sessionError.message?.includes('JWT') || sessionError.message?.includes('token')) {
-          console.error("❌ JWT token error")
-          return NextResponse.json({
-            error: "Invalid authentication token",
-            details: process.env.NODE_ENV === 'development' ? sessionError.message : undefined
-          }, { status: 401 })
-        }
-      }
-
-      // Generic session error
-      console.error("❌ Returning 500 for session error")
-      return NextResponse.json({
-        error: "Session processing error",
-        details: process.env.NODE_ENV === 'development' ? (sessionError instanceof Error ? sessionError.message : 'Unknown error') : undefined
-      }, { status: 500 })
-    }
-
-    console.log("Session details:", {
-      userId: session?.user?.id,
-      userEmail: session?.user?.email,
-      userRole: session?.user?.role,
-      hasSession: !!session
-    })
-
-    if (!session?.user?.id) {
-      console.log("❌ No session found - user not authenticated")
-      return NextResponse.json({
-        error: "Authentication required",
-        details: "Please sign in to access admin features"
-      }, { status: 401 })
-    }
-
-    // Check if user is admin
-    console.log("🔍 Checking admin status for user:", session.user.id)
-
-    let user
-    try {
-      user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { id: true, role: true }
-      })
-      console.log("✅ User lookup successful")
-    } catch (dbError) {
-      console.error("❌ Database error during user lookup:", dbError)
-      return NextResponse.json({
-        error: "Database error during user lookup",
-        details: process.env.NODE_ENV === 'development' ? (dbError instanceof Error ? dbError.message : 'Unknown error') : undefined
-      }, { status: 500 })
-    }
-
-    console.log("User found:", user ? "yes" : "no", "Role:", user?.role)
-
-    if (!user || user.role !== "ADMIN") {
-      console.log("❌ Admin access denied - user role:", user?.role || "undefined")
-      return NextResponse.json({
-        error: "Admin access required",
-        details: `Current role: ${user?.role || "unknown"}. Admin privileges required.`
-      }, { status: 403 })
-    }
+    // Authenticate and check admin status
+    const { user, dbUser } = await requireAdmin(request)
+    console.log("✅ Admin authenticated:", user.email, "Role:", dbUser.role)
 
     const { searchParams } = new URL(request.url)
     const role = searchParams.get("role")

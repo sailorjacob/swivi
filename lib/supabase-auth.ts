@@ -43,6 +43,28 @@ export const signInWithGoogle = async () => {
   return { data, error }
 }
 
+// Alternative sign-in functions that always redirect to production URL
+// Use these for production deployments
+export const signInWithDiscordProduction = async () => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'discord',
+    options: {
+      redirectTo: `https://www.swivimedia.com/clippers/dashboard`
+    }
+  })
+  return { data, error }
+}
+
+export const signInWithGoogleProduction = async () => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `https://www.swivimedia.com/clippers/dashboard`
+    }
+  })
+  return { data, error }
+}
+
 export const signOut = async () => {
   const { error } = await supabase.auth.signOut()
   return { error }
