@@ -1,6 +1,6 @@
 "use client"
 
-import { useSession } from "next-auth/react"
+import { useSession } from "@/lib/supabase-auth-provider"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,14 +13,14 @@ import { Badge } from "@/components/ui/badge"
  * Shows current session state, status, and allows manual refresh.
  */
 export function SessionDebug() {
-  const { data: session, status, update } = useSession()
+  const { data: session, status } = useSession()
   const [isVisible, setIsVisible] = useState(false)
   const [userProfile, setUserProfile] = useState<any>(null)
 
   // Fetch user profile data
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (session?.user?.id) {
+      if (session?.user) {
         try {
           const response = await fetch("/api/user/profile")
           if (response.ok) {
@@ -36,17 +36,8 @@ export function SessionDebug() {
     fetchUserProfile()
   }, [session])
 
-  // Auto-refresh session every 5 minutes to prevent expiration
-  useEffect(() => {
-    if (session && status === "authenticated") {
-      const interval = setInterval(async () => {
-        console.log("🔄 Auto-refreshing session...")
-        await update()
-      }, 5 * 60 * 1000) // 5 minutes
-
-      return () => clearInterval(interval)
-    }
-  }, [session, status, update])
+  // Supabase Auth handles session refresh automatically
+  // No need for manual refresh intervals
 
   // Only show in development
   if (process.env.NODE_ENV !== "development") {
@@ -100,10 +91,10 @@ export function SessionDebug() {
               <div>
                 <span className="text-muted-foreground">Session Name:</span>
                 <div className="text-white ml-2">
-                  {session.user?.name || "No name"}
+                  {session.user?.name || session.user?.email?.split('@')[0] || "No name"}
                 </div>
                 <div className="text-xs text-muted-foreground ml-2">
-                  (From Discord OAuth)
+                  (From Supabase Auth)
                 </div>
               </div>
               {userProfile && (
@@ -123,6 +114,12 @@ export function SessionDebug() {
                   {session.user?.email || "No email"}
                 </div>
               </div>
+              <div>
+                <span className="text-muted-foreground">User ID:</span>
+                <div className="text-white ml-2 text-xs break-all">
+                  {session.user?.id || "No ID"}
+                </div>
+              </div>
               {session.user?.role && (
                 <div>
                   <span className="text-muted-foreground">Role:</span>
@@ -139,14 +136,6 @@ export function SessionDebug() {
           )}
           
           <div className="flex gap-2">
-            <Button
-              onClick={() => update()}
-              size="sm"
-              variant="outline"
-              className="text-xs"
-            >
-              Refresh
-            </Button>
             <Button
               onClick={() => console.log("Session:", session, "Status:", status)}
               size="sm"
