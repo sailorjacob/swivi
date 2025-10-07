@@ -26,42 +26,30 @@ export interface SupabaseSession extends Session {
 
 // Auth helper functions
 export const signInWithDiscord = async () => {
+  // Use environment-aware redirect URL
+  const redirectTo = process.env.NODE_ENV === 'production'
+    ? `https://www.swivimedia.com/clippers/dashboard`
+    : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/clippers/dashboard`
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'discord',
     options: {
-      redirectTo: `https://www.swivimedia.com/clippers/dashboard`
+      redirectTo
     }
   })
   return { data, error }
 }
 
 export const signInWithGoogle = async () => {
+  // Use environment-aware redirect URL
+  const redirectTo = process.env.NODE_ENV === 'production'
+    ? `https://www.swivimedia.com/clippers/dashboard`
+    : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/clippers/dashboard`
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `https://www.swivimedia.com/clippers/dashboard`
-    }
-  })
-  return { data, error }
-}
-
-// Alternative sign-in functions that always redirect to production URL
-// Use these for production deployments
-export const signInWithDiscordProduction = async () => {
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'discord',
-    options: {
-      redirectTo: `https://www.swivimedia.com/clippers/dashboard`
-    }
-  })
-  return { data, error }
-}
-
-export const signInWithGoogleProduction = async () => {
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `https://www.swivimedia.com/clippers/dashboard`
+      redirectTo
     }
   })
   return { data, error }

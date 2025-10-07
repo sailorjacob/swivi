@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getAuthenticatedUser } from "@/lib/supabase-auth-server"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 import { serializeUser } from "@/lib/bigint-utils"
 import { z } from "zod"

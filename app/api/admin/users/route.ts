@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
           // Include submissions count
           _count: {
             select: {
-              clip_submissions: true
+              clipSubmissions: true
             }
           }
         },

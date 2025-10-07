@@ -261,18 +261,18 @@ export async function GET(request: NextRequest) {
       })
 
       if (userStats) {
-        const totalUserViews = userStats.clip_submissions.reduce((sum, submission) => {
+        const totalUserViews = userStats.clipSubmissions.reduce((sum, submission) => {
           if (submission.clip?.viewTracking && submission.clip.viewTracking.length > 0) {
             return sum + Number(submission.clip.viewTracking[0]?.views || 0)
           }
           return sum
         }, 0)
 
-        const totalUserEarnings = userStats.clip_submissions
+        const totalUserEarnings = userStats.clipSubmissions
           .filter(s => s.status === 'PAID' && s.payout)
           .reduce((sum, s) => sum + Number(s.payout || 0), 0)
 
-        const recentSubmissions = userStats.clip_submissions
+        const recentSubmissions = userStats.clipSubmissions
           .filter(submission => submission.clip?.viewTracking && submission.clip.viewTracking.length > 0)
           .map(submission => ({
             campaignTitle: submission.campaign.title,
@@ -290,7 +290,7 @@ export async function GET(request: NextRequest) {
           email: userStats.email,
           totalViews: userStats.totalViews,
           totalEarnings: Number(userStats.totalEarnings),
-          activeSubmissions: userStats.clip_submissions.length,
+          activeSubmissions: userStats.clipSubmissions.length,
           recentSubmissions
         }
       }

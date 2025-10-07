@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import type { SupabaseUser, SupabaseSession } from './supabase-auth'
+import { NextRequest } from 'next/server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -132,7 +133,22 @@ export const getServerUserWithRole = async (request?: NextRequest): Promise<{ us
 // Get authenticated user from request (for API routes that need request object)
 export const getAuthenticatedUser = async (request: NextRequest): Promise<SupabaseUser | null> => {
   try {
-    const supabase = createSupabaseServerClient()
+    const cookieStore = {
+      get(name: string) {
+        return request.cookies.get(name)?.value
+      },
+      set(name: string, value: string, options: any) {
+        // In API routes, we can't set cookies, but this is just for reading
+      },
+      remove(name: string, options: any) {
+        // In API routes, we can't remove cookies, but this is just for reading
+      },
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: cookieStore,
+    })
+
     const { data: { user }, error } = await supabase.auth.getUser()
 
     if (user && !error) {
