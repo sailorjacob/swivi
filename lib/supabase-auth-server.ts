@@ -17,7 +17,7 @@ export const createSupabaseServerClient = () => {
       },
       set(name: string, value: string, options: any) {
         try {
-          cookieStore.set({ name, value, ...options })
+        cookieStore.set({ name, value, ...options })
         } catch (error) {
           // The `set` method was called from a Server Component.
           // This can be ignored if you have middleware refreshing
@@ -26,7 +26,7 @@ export const createSupabaseServerClient = () => {
       },
       remove(name: string, options: any) {
         try {
-          cookieStore.set({ name, value: '', ...options })
+        cookieStore.set({ name, value: '', ...options })
         } catch (error) {
           // The `delete` method was called from a Server Component.
           // This can be ignored if you have middleware refreshing
@@ -59,29 +59,44 @@ export const getServerUserWithRole = async (): Promise<{ user: SupabaseUser | nu
         // Check if user exists in our database, create if not
         await ensureUserExists(user)
 
-        // Fetch additional user data from your users table using supabaseAuthId
-        const userData = await prisma.user.findUnique({
-          where: { supabaseAuthId: user.id },
-          select: {
-            id: true,
-            role: true,
-            verified: true,
-            name: true,
-            image: true,
-            email: true
-          }
-        })
+        // Only try to fetch from database if DATABASE_URL is available
+        if (process.env.DATABASE_URL) {
+          try {
+            const userData = await prisma.user.findUnique({
+              where: { supabaseAuthId: user.id },
+              select: {
+                id: true,
+                role: true,
+                verified: true,
+                name: true,
+                image: true,
+                email: true
+              }
+            })
 
-        if (userData) {
-          ;(user as SupabaseUser).role = userData.role || 'CLIPPER'
-          ;(user as SupabaseUser).verified = userData.verified || false
-          // Update user object with database info
-          if (userData.name) user.user_metadata = { ...user.user_metadata, full_name: userData.name }
-          if (userData.image) user.user_metadata = { ...user.user_metadata, avatar_url: userData.image }
-          if (userData.email) user.email = userData.email
+            if (userData) {
+              ;(user as SupabaseUser).role = userData.role || 'CLIPPER'
+              ;(user as SupabaseUser).verified = userData.verified || false
+              // Update user object with database info
+              if (userData.name) user.user_metadata = { ...user.user_metadata, full_name: userData.name }
+              if (userData.image) user.user_metadata = { ...user.user_metadata, avatar_url: userData.image }
+              if (userData.email) user.email = userData.email
+            }
+          } catch (dbError) {
+            if (dbError.message?.includes('database') || dbError.message?.includes('connection')) {
+              console.warn('Database unavailable - using OAuth data only')
+            } else {
+              console.warn('Could not fetch user role:', dbError)
+            }
+            ;(user as SupabaseUser).role = 'CLIPPER'
+          }
+        } else {
+          // No database available - use OAuth data only
+          ;(user as SupabaseUser).role = 'CLIPPER'
+          console.log('⚠️ No DATABASE_URL - using OAuth data only')
         }
       } catch (dbError) {
-        console.warn('Could not fetch user role:', dbError)
+        console.warn('Could not process user data:', dbError)
         ;(user as SupabaseUser).role = 'CLIPPER'
       }
     }
@@ -103,29 +118,44 @@ export const getAuthenticatedUser = async (request: NextRequest): Promise<Supaba
         // Check if user exists in our database, create if not
         await ensureUserExists(user)
 
-        // Fetch additional user data from your users table using supabaseAuthId
-        const userData = await prisma.user.findUnique({
-          where: { supabaseAuthId: user.id },
-          select: {
-            id: true,
-            role: true,
-            verified: true,
-            name: true,
-            image: true,
-            email: true
-          }
-        })
+        // Only try to fetch from database if DATABASE_URL is available
+        if (process.env.DATABASE_URL) {
+          try {
+            const userData = await prisma.user.findUnique({
+              where: { supabaseAuthId: user.id },
+              select: {
+                id: true,
+                role: true,
+                verified: true,
+                name: true,
+                image: true,
+                email: true
+              }
+            })
 
-        if (userData) {
-          ;(user as SupabaseUser).role = userData.role || 'CLIPPER'
-          ;(user as SupabaseUser).verified = userData.verified || false
-          // Update user object with database info
-          if (userData.name) user.user_metadata = { ...user.user_metadata, full_name: userData.name }
-          if (userData.image) user.user_metadata = { ...user.user_metadata, avatar_url: userData.image }
-          if (userData.email) user.email = userData.email
+            if (userData) {
+              ;(user as SupabaseUser).role = userData.role || 'CLIPPER'
+              ;(user as SupabaseUser).verified = userData.verified || false
+              // Update user object with database info
+              if (userData.name) user.user_metadata = { ...user.user_metadata, full_name: userData.name }
+              if (userData.image) user.user_metadata = { ...user.user_metadata, avatar_url: userData.image }
+              if (userData.email) user.email = userData.email
+            }
+          } catch (dbError) {
+            if (dbError.message?.includes('database') || dbError.message?.includes('connection')) {
+              console.warn('Database unavailable - using OAuth data only')
+            } else {
+              console.warn('Could not fetch user role:', dbError)
+            }
+            ;(user as SupabaseUser).role = 'CLIPPER'
+          }
+        } else {
+          // No database available - use OAuth data only
+          ;(user as SupabaseUser).role = 'CLIPPER'
+          console.log('⚠️ No DATABASE_URL - using OAuth data only')
         }
       } catch (dbError) {
-        console.warn('Could not fetch user role:', dbError)
+        console.warn('Could not process user data:', dbError)
         ;(user as SupabaseUser).role = 'CLIPPER'
       }
       return user as SupabaseUser
@@ -140,6 +170,12 @@ export const getAuthenticatedUser = async (request: NextRequest): Promise<Supaba
 // Helper function to ensure user exists in our database
 async function ensureUserExists(supabaseUser: any) {
   try {
+    // Skip database operations if DATABASE_URL is not available (development mode)
+    if (!process.env.DATABASE_URL) {
+      console.log('⚠️ DATABASE_URL not set - skipping database operations')
+      return
+    }
+
     // First, try to find user by supabaseAuthId (for users who logged in before)
     let existingUser = await prisma.user.findUnique({
       where: { supabaseAuthId: supabaseUser.id },
@@ -175,6 +211,10 @@ async function ensureUserExists(supabaseUser: any) {
     await createNewUser(supabaseUser)
   } catch (error) {
     console.error('Error in ensureUserExists:', error)
+    // Don't fail authentication if database is unavailable
+    if (error.message?.includes('database') || error.message?.includes('connection')) {
+      console.log('⚠️ Database unavailable - allowing authentication to continue')
+    }
   }
 }
 
