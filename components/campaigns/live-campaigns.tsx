@@ -100,7 +100,7 @@ export function LiveCampaigns() {
       duration: `${Math.max(1, daysUntilDeadline)} days`,
       timeRemaining: daysUntilDeadline > 0 ? `${daysUntilDeadline} days` : "Ended",
       payoutStructure: `$${campaign.payoutRate} per 1K views`,
-      participants: campaign._count.submissions,
+      participants: campaign._count.clipSubmissions,
       maxParticipants: Math.floor(campaign.budget / campaign.payoutRate),
       featured: campaign.status === "ACTIVE",
       difficulty: campaign.requirements.length > 3 ? "advanced" : "beginner",
@@ -127,7 +127,7 @@ export function LiveCampaigns() {
     {
       icon: Users,
       label: "Total Participants",
-      value: campaigns.reduce((sum, c) => sum + c._count.submissions, 0).toString() + "+",
+      value: campaigns.reduce((sum, c) => sum + c._count.clipSubmissions, 0).toString() + "+",
       description: "Clippers earning"
     },
     {

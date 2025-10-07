@@ -94,7 +94,7 @@ function CampaignsPage() {
       spent: Number(campaign.spent),
       cpm: Number(campaign.payoutRate), // Payout rate per 1K views
       platforms: campaign.targetPlatforms,
-      totalSubmissions: campaign._count.submissions,
+      totalSubmissions: campaign._count.clipSubmissions,
       totalViews: 0, // We don't track total views in current schema
       status: campaign.status,
       requirements: campaign.requirements,

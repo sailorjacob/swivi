@@ -286,7 +286,7 @@ export default function AdminCampaignsPage() {
   // Calculate campaign stats
   const totalBudget = campaigns.reduce((sum, c) => sum + c.budget, 0)
   const totalSpent = campaigns.reduce((sum, c) => sum + c.spent, 0)
-  const totalSubmissions = campaigns.reduce((sum, c) => sum + c._count.submissions, 0)
+  const totalSubmissions = campaigns.reduce((sum, c) => sum + c._count.clipSubmissions, 0)
   const activeCampaigns = campaigns.filter(c => c.status === "ACTIVE").length
 
   // Use analytics data if available
@@ -422,7 +422,7 @@ export default function AdminCampaignsPage() {
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span>Budget: ${campaign.budget.toLocaleString()}</span>
                       <span>Spent: ${campaign.spent.toLocaleString()}</span>
-                      <span>Submissions: {campaign._count.submissions}</span>
+                      <span>Submissions: {campaign._count.clipSubmissions}</span>
                       <span>Deadline: {new Date(campaign.deadline).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -501,7 +501,7 @@ export default function AdminCampaignsPage() {
                       <span className="font-medium">Deadline:</span> {new Date(selectedCampaign.deadline).toLocaleDateString()}
                     </div>
                     <div>
-                      <span className="font-medium">Submissions:</span> {selectedCampaign._count.submissions}
+                      <span className="font-medium">Submissions:</span> {selectedCampaign._count.clipSubmissions}
                     </div>
                   </div>
                 </div>
