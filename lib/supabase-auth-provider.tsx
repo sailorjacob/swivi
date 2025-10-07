@@ -35,7 +35,10 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           if (initialUser && !error) {
             console.log('✅ Initial session found:', initialUser.email)
 
-            // Fetch enhanced user data from API
+            // Set session first
+            setSession({ user: initialUser } as SupabaseSession)
+
+            // Try to fetch enhanced user data from API (don't fail if it doesn't work)
             try {
               const response = await fetch('/api/user/profile')
               if (response.ok) {
@@ -51,15 +54,15 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
                   email_confirmed_at: initialUser.email_confirmed_at
                 }
                 setUser(enhancedUser)
+                console.log('✅ Enhanced user data loaded from database')
               } else {
+                console.log('ℹ️ Using session data only (API not available)')
                 setUser(initialUser)
               }
             } catch (error) {
-              console.error('Error fetching user profile:', error)
+              console.warn('⚠️ Could not fetch enhanced user data:', error.message)
               setUser(initialUser)
             }
-
-            setSession({ user: initialUser } as SupabaseSession)
           } else {
             console.log('❌ No initial session found or error:', error?.message)
             setSession(null)
@@ -98,7 +101,10 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           if (session?.user) {
             console.log('✅ Valid session found in auth change:', session.user.email)
 
-            // Fetch enhanced user data from API
+            // Set session first
+            setSession(session as SupabaseSession)
+
+            // Try to fetch enhanced user data from API (don't fail if it doesn't work)
             try {
               const response = await fetch('/api/user/profile')
               if (response.ok) {
@@ -114,16 +120,17 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
                   email_confirmed_at: session.user.email_confirmed_at
                 }
                 setUser(enhancedUser)
+                console.log('✅ Enhanced user data loaded from database')
               } else {
                 // Use session data if API fails
+                console.log('ℹ️ Using session data only (API not available)')
                 setUser(session.user as SupabaseUser)
               }
             } catch (error) {
-              console.error('Error fetching user profile:', error)
+              console.warn('⚠️ Could not fetch enhanced user data:', error.message)
+              // Use session data if API fails
               setUser(session.user as SupabaseUser)
             }
-
-            setSession(session as SupabaseSession)
           } else {
             console.log('❌ No session in auth change')
             setUser(null)

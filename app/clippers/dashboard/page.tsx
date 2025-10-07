@@ -89,12 +89,12 @@ export default function ClipperDashboard() {
       return
     }
 
-    if (status === "authenticated" && session) {
+    if (status === "authenticated" && session && session.user) {
       console.log('✅ User authenticated, fetching dashboard data')
       // Add a small delay to prevent race conditions
       setTimeout(() => {
         fetchDashboardData()
-      }, 100)
+      }, 200) // Increased delay for more stability
     }
   }, [session, status, router])
 

@@ -63,62 +63,64 @@ export default function ProfilePage() {
     const loadProfile = async () => {
       if (!session?.user?.id || isFetchingProfile) return
 
-      try {
-        setIsFetchingProfile(true)
-        // Load profile data
-        const profileResponse = await fetch("/api/user/profile")
-        if (profileResponse.ok) {
-          const userData = await profileResponse.json()
-          setUser(userData)
+      // Add a small delay to ensure auth state is stable
+      setTimeout(async () => {
+        if (!session?.user?.id) return // Check again after delay
 
-          // Use database data if available, otherwise fall back to session data
-          const displayName = userData.name && userData.name.trim() !== "" ? userData.name :
-                             session?.user?.user_metadata?.full_name ||
-                             session?.user?.user_metadata?.name ||
-                             session?.user?.email?.split('@')[0] ||
-                             'Clipper'
+        try {
+          setIsFetchingProfile(true)
+          // Load profile data
+          const profileResponse = await fetch("/api/user/profile")
+          if (profileResponse.ok) {
+            const userData = await profileResponse.json()
+            setUser(userData)
 
-          setProfileData({
-            name: displayName,
-            bio: userData.bio || "",
-            website: userData.website || ""
-          })
-        } else if (profileResponse.status === 401) {
-          toast.error("Please log in to view your profile")
-          return
-        } else if (profileResponse.status === 404) {
-          toast.error("Profile not found. Please contact support.")
-          return
-        } else {
-          const errorData = await profileResponse.json().catch(() => ({}))
-          toast.error(errorData.error || "Failed to load profile data")
-          return
-        }
+            // Use database data if available, otherwise fall back to session data
+            const displayName = userData.name && userData.name.trim() !== "" ? userData.name :
+                               session?.user?.user_metadata?.full_name ||
+                               session?.user?.user_metadata?.name ||
+                               session?.user?.email?.split('@')[0] ||
+                               'Clipper'
 
-        // Load all connected accounts (OAuth + verified social)
-        const accountsResponse = await fetch("/api/user/connected-accounts")
-        if (accountsResponse.ok) {
-          const accountsData = await accountsResponse.json()
-          setConnectedAccounts(accountsData)
-        } else if (accountsResponse.status === 401) {
-          toast.error("Please log in to view connected accounts")
-        } else if (accountsResponse.status >= 500) {
-          toast.error("Server error loading accounts. Please try again.")
-        } else {
-          console.warn("Failed to load connected accounts:", accountsResponse.status)
-          // Don't show error toast for accounts failing, it's not critical
+            setProfileData({
+              name: displayName,
+              bio: userData.bio || "",
+              website: userData.website || ""
+            })
+
+            // Load all connected accounts (OAuth + verified social)
+            const accountsResponse = await fetch("/api/user/connected-accounts")
+            if (accountsResponse.ok) {
+              const accountsData = await accountsResponse.json()
+              setConnectedAccounts(accountsData)
+            } else if (accountsResponse.status === 401) {
+              toast.error("Please log in to view connected accounts")
+            } else if (accountsResponse.status >= 500) {
+              toast.error("Server error loading accounts. Please try again.")
+            } else {
+              console.warn("Failed to load connected accounts:", accountsResponse.status)
+              // Don't show error toast for accounts failing, it's not critical
+            }
+          } else if (profileResponse.status === 401) {
+            toast.error("Please log in to view your profile")
+          } else if (profileResponse.status === 404) {
+            toast.error("Profile not found. Please contact support.")
+          } else {
+            const errorData = await profileResponse.json().catch(() => ({}))
+            toast.error(errorData.error || "Failed to load profile data")
+          }
+        } catch (error) {
+          console.error("Error loading profile:", error)
+          if (error instanceof TypeError && error.message.includes('fetch')) {
+            toast.error("Network error. Please check your internet connection.")
+          } else {
+            toast.error("Failed to load profile. Please try refreshing the page.")
+          }
+        } finally {
+          setIsLoading(false)
+          setIsFetchingProfile(false)
         }
-      } catch (error) {
-        console.error("Error loading profile:", error)
-        if (error instanceof TypeError && error.message.includes('fetch')) {
-          toast.error("Network error. Please check your internet connection.")
-        } else {
-          toast.error("Failed to load profile. Please try refreshing the page.")
-        }
-      } finally {
-        setIsLoading(false)
-        setIsFetchingProfile(false)
-      }
+      }, 200) // 200ms delay to ensure auth state is stable
     }
 
     loadProfile()

@@ -7,6 +7,12 @@ export async function GET(request: NextRequest) {
     const { user, error } = await getServerUserWithRole(request)
 
     if (!user || error) {
+      console.log('❌ Dashboard auth failed:', {
+        hasUser: !!user,
+        userId: user?.id,
+        error: error?.message,
+        timestamp: new Date().toISOString()
+      })
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
