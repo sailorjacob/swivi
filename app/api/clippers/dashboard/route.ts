@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const userId = user.id
 
     // Get user's real stats
-    const userData = await prisma.user.findUnique({
+    let userData = await prisma.user.findUnique({
       where: { supabaseAuthId: userId },
       select: {
         totalViews: true,
@@ -48,6 +48,43 @@ export async function GET(request: NextRequest) {
         }
       }
     })
+
+    // If user doesn't exist in database, create them
+    if (!userData) {
+      console.log("⚠️ User not found in database, creating...")
+
+      try {
+        const newUserData = {
+          supabaseAuthId: userId,
+          email: user.email,
+          name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'New User',
+          image: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+          verified: user.email_confirmed_at ? true : false,
+          role: 'CLIPPER'
+        }
+
+        await prisma.user.create({
+          data: newUserData
+        })
+
+        console.log("✅ User created successfully")
+
+        // Return empty stats for new user
+        userData = {
+          totalViews: 0,
+          totalEarnings: 0,
+          clipSubmissions: []
+        }
+      } catch (createError) {
+        console.error("❌ Failed to create user:", createError)
+        // Return empty stats if creation fails
+        userData = {
+          totalViews: 0,
+          totalEarnings: 0,
+          clipSubmissions: []
+        }
+      }
+    }
 
     if (!userData) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })

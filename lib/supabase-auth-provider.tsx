@@ -34,8 +34,32 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         if (isMounted) {
           if (initialUser && !error) {
             console.log('✅ Initial session found:', initialUser.email)
+
+            // Fetch enhanced user data from API
+            try {
+              const response = await fetch('/api/user/profile')
+              if (response.ok) {
+                const userData = await response.json()
+                // Merge session user with database user data
+                const enhancedUser = {
+                  ...initialUser,
+                  ...userData,
+                  // Ensure we keep the session data as primary
+                  id: initialUser.id,
+                  email: initialUser.email,
+                  user_metadata: initialUser.user_metadata,
+                  email_confirmed_at: initialUser.email_confirmed_at
+                }
+                setUser(enhancedUser)
+              } else {
+                setUser(initialUser)
+              }
+            } catch (error) {
+              console.error('Error fetching user profile:', error)
+              setUser(initialUser)
+            }
+
             setSession({ user: initialUser } as SupabaseSession)
-            setUser(initialUser)
           } else {
             console.log('❌ No initial session found or error:', error?.message)
             setSession(null)
@@ -73,9 +97,32 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
           if (session?.user) {
             console.log('✅ Valid session found in auth change:', session.user.email)
-            // Get enhanced user data with role
-            const { user: enhancedUser } = await getUserWithRole()
-            setUser(enhancedUser)
+
+            // Fetch enhanced user data from API
+            try {
+              const response = await fetch('/api/user/profile')
+              if (response.ok) {
+                const userData = await response.json()
+                // Merge session user with database user data
+                const enhancedUser = {
+                  ...session.user,
+                  ...userData,
+                  // Ensure we keep the session data as primary
+                  id: session.user.id,
+                  email: session.user.email,
+                  user_metadata: session.user.user_metadata,
+                  email_confirmed_at: session.user.email_confirmed_at
+                }
+                setUser(enhancedUser)
+              } else {
+                // Use session data if API fails
+                setUser(session.user as SupabaseUser)
+              }
+            } catch (error) {
+              console.error('Error fetching user profile:', error)
+              setUser(session.user as SupabaseUser)
+            }
+
             setSession(session as SupabaseSession)
           } else {
             console.log('❌ No session in auth change')

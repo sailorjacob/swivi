@@ -57,7 +57,65 @@ export async function GET(request: NextRequest) {
     })
 
     if (!dbUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+      // User doesn't exist in database, try to create them
+      console.log("⚠️ User not found in database, attempting to create...")
+
+      try {
+        // Try to create the user in our database
+        const newUserData = {
+          supabaseAuthId: user.id,
+          email: user.email,
+          name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'New User',
+          image: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+          verified: user.email_confirmed_at ? true : false,
+          role: 'CLIPPER'
+        }
+
+        const newUser = await prisma.user.create({
+          data: newUserData,
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            bio: true,
+            website: true,
+            walletAddress: true,
+            paypalEmail: true,
+            image: true,
+            verified: true,
+            totalEarnings: true,
+            totalViews: true,
+            createdAt: true,
+            accounts: {
+              select: {
+                provider: true,
+                providerAccountId: true,
+              }
+            }
+          }
+        })
+
+        console.log("✅ User created successfully:", newUser.id)
+        return NextResponse.json(newUser)
+      } catch (createError) {
+        console.error("❌ Failed to create user:", createError)
+        // Return minimal user data from session if creation fails
+        return NextResponse.json({
+          id: user.id,
+          name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'New User',
+          email: user.email,
+          bio: null,
+          website: null,
+          walletAddress: null,
+          paypalEmail: null,
+          image: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+          verified: user.email_confirmed_at ? true : false,
+          totalEarnings: 0,
+          totalViews: 0,
+          createdAt: new Date().toISOString(),
+          accounts: []
+        })
+      }
     }
 
     // Convert BigInt fields to strings for JSON serialization
