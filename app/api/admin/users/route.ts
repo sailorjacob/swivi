@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireAdmin } from "@/lib/supabase-auth-server"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
@@ -10,7 +10,24 @@ export async function GET(request: NextRequest) {
 
   try {
     // Authenticate and check admin status
-    const { user, dbUser } = await requireAdmin(request)
+    const { user, error } = await getServerUserWithRole(request)
+
+    if (!user?.id || error) {
+      console.log("❌ Admin authentication failed:", error?.message)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Check if user is admin
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id },
+      select: { role: true }
+    })
+
+    if (!dbUser || dbUser.role !== "ADMIN") {
+      console.log("❌ Admin access required")
+      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
+    }
+
     console.log("✅ Admin authenticated:", user.email, "Role:", dbUser.role)
 
     const { searchParams } = new URL(request.url)

@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
         spent: true,
         _count: {
           select: {
-            submissions: true
+            clipSubmissions: true
           }
         }
       }
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
         id: campaign.id,
         title: campaign.title,
         status: campaign.status,
-        submissions: campaign._count.submissions,
+        submissions: campaign._count.clipSubmissions,
         views: 0, // Would need to calculate from submissions
         earnings: campaign.spent
       })),
@@ -230,9 +230,9 @@ export async function GET(request: NextRequest) {
     // If specific user requested, get user stats
     if (userId) {
       const userStats = await prisma.user.findUnique({
-        where: { id: userId },
+        where: { supabaseAuthId: userId },
         include: {
-          clip_submissions: {
+          clipSubmissions: {
             where: {
               status: {
                 in: ['APPROVED', 'PAID']

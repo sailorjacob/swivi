@@ -14,11 +14,11 @@ export async function GET(request: NextRequest) {
 
     // Get user's real stats
     const userData = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { supabaseAuthId: userId },
       select: {
         totalViews: true,
         totalEarnings: true,
-        submissions: {
+        clipSubmissions: {
           select: {
             id: true,
             status: true,
@@ -59,12 +59,12 @@ export async function GET(request: NextRequest) {
     })
 
     // Calculate real stats
-    const totalSubmissions = userData.submissions.length
-    const approvedSubmissions = userData.submissions.filter(s => s.status === "APPROVED" || s.status === "PAID").length
-    const pendingSubmissions = userData.submissions.filter(s => s.status === "PENDING").length
+    const totalSubmissions = userData.clipSubmissions.length
+    const approvedSubmissions = userData.clipSubmissions.filter(s => s.status === "APPROVED" || s.status === "PAID").length
+    const pendingSubmissions = userData.clipSubmissions.filter(s => s.status === "PENDING").length
 
     // Get recent clips with proper data structure
-    const recentClips = userData.submissions.map(submission => {
+    const recentClips = userData.clipSubmissions.map(submission => {
       const latestTracking = submission.clip?.viewTracking[0]
       return {
         id: submission.id,

@@ -18,15 +18,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Get the internal user ID from the database using supabaseAuthId
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id },
+      select: { id: true }
+    })
+
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
     const clips = await prisma.clip.findMany({
       where: {
-        userId: user.id
+        userId: dbUser.id
       },
       orderBy: {
         createdAt: "desc"
       },
       include: {
-        submissions: {
+        clipSubmissions: {
           include: {
             campaign: true
           }
@@ -49,12 +59,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Get the internal user ID from the database using supabaseAuthId
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id },
+      select: { id: true }
+    })
+
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
     const body = await request.json()
     const validatedData = createClipSchema.parse(body)
 
     const clip = await prisma.clip.create({
       data: {
-        userId: user.id,
+        userId: dbUser.id,
         url: validatedData.url,
         platform: validatedData.platform,
         title: validatedData.title,

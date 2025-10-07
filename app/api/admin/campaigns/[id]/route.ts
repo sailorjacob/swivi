@@ -64,7 +64,7 @@ export async function GET(
         // tags: true, // Commented out - not in DB
         createdAt: true,
         updatedAt: true,
-        submissions: {
+        clipSubmissions: {
           include: {
             user: {
               select: {
@@ -81,7 +81,7 @@ export async function GET(
         },
         _count: {
           select: {
-            submissions: true
+            clipSubmissions: true
           }
         }
       }
@@ -158,7 +158,7 @@ export async function PUT(
       include: {
         _count: {
           select: {
-            submissions: true
+            clipSubmissions: true
           }
         }
       }
