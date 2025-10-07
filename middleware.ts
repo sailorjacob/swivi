@@ -25,6 +25,8 @@ export default async function middleware(req) {
   // The middleware doesn't need to pre-authenticate API routes since they handle auth internally
   if (pathname.startsWith('/api/')) {
     console.log(`🔄 API route detected: ${pathname} - letting route handle authentication`)
+    console.log(`🔍 Request headers:`, Object.fromEntries(req.headers.entries()))
+    console.log(`🍪 Request cookies:`, req.cookies)
   }
 
   console.log(`✅ Allowing access to: ${pathname}`)

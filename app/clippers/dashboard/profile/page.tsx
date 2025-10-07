@@ -49,6 +49,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [connectedAccounts, setConnectedAccounts] = useState<any[]>([])
+  const [isFetchingProfile, setIsFetchingProfile] = useState(false)
 
   // Form data
   const [profileData, setProfileData] = useState({
@@ -60,9 +61,10 @@ export default function ProfilePage() {
   // Load user profile data and verified accounts
   useEffect(() => {
     const loadProfile = async () => {
-      if (!session?.user?.id) return
+      if (!session?.user?.id || isFetchingProfile) return
 
       try {
+        setIsFetchingProfile(true)
         // Load profile data
         const profileResponse = await fetch("/api/user/profile")
         if (profileResponse.ok) {
@@ -115,6 +117,7 @@ export default function ProfilePage() {
         }
       } finally {
         setIsLoading(false)
+        setIsFetchingProfile(false)
       }
     }
 

@@ -59,6 +59,7 @@ export default function ClipperDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showSubmissionModal, setShowSubmissionModal] = useState(false)
+  const [isFetching, setIsFetching] = useState(false)
 
   // Get display name with fallback logic
   const getDisplayName = () => {
@@ -90,12 +91,18 @@ export default function ClipperDashboard() {
 
     if (status === "authenticated" && session) {
       console.log('✅ User authenticated, fetching dashboard data')
-      fetchDashboardData()
+      // Add a small delay to prevent race conditions
+      setTimeout(() => {
+        fetchDashboardData()
+      }, 100)
     }
   }, [session, status, router])
 
   const fetchDashboardData = async () => {
+    if (isFetching) return // Prevent multiple concurrent requests
+
     try {
+      setIsFetching(true)
       setLoading(true)
       setError(null)
       console.log('📊 Fetching dashboard data...')
@@ -108,6 +115,7 @@ export default function ClipperDashboard() {
         setStats(data.stats)
         setRecentClips(data.recentClips)
         setActiveCampaigns(data.activeCampaigns)
+        setIsFetching(false)
       } else if (response.status === 401) {
         console.log('❌ Authentication failed, redirecting to login')
         // Authentication error - redirect to login
@@ -133,6 +141,7 @@ export default function ClipperDashboard() {
       }
     } finally {
       setLoading(false)
+      setIsFetching(false)
     }
   }
 

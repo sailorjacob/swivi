@@ -4,9 +4,10 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   try {
-    const { user, error } = await getServerUserWithRole(request)
+    const { user, error } = await getServerUserWithRole(request, '/api/clippers/dashboard')
 
-    if (!user?.id || error) {
+    if (!user || error) {
+      console.log('❌ Dashboard auth failed:', { user: !!user, error: error?.message })
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -63,17 +64,56 @@ export async function GET(request: NextRequest) {
           role: 'CLIPPER'
         }
 
-        await prisma.user.create({
+        const createdUser = await prisma.user.create({
           data: newUserData
         })
 
         console.log("✅ User created successfully")
 
-        // Return empty stats for new user
-        userData = {
-          totalViews: 0,
-          totalEarnings: 0,
-          clipSubmissions: []
+        // Fetch the newly created user data
+        userData = await prisma.user.findUnique({
+          where: { supabaseAuthId: userId },
+          select: {
+            totalViews: true,
+            totalEarnings: true,
+            clipSubmissions: {
+              select: {
+                id: true,
+                status: true,
+                payout: true,
+                clipUrl: true,
+                platform: true,
+                createdAt: true,
+                campaign: {
+                  select: {
+                    title: true,
+                    creator: true
+                  }
+                },
+                clip: {
+                  select: {
+                    id: true,
+                    title: true,
+                    viewTracking: {
+                      orderBy: { date: "desc" },
+                      take: 1
+                    }
+                  }
+                }
+              },
+              orderBy: { createdAt: "desc" },
+              take: 10
+            }
+          }
+        })
+
+        if (!userData) {
+          // Fallback if fetch fails
+          userData = {
+            totalViews: 0,
+            totalEarnings: 0,
+            clipSubmissions: []
+          }
         }
       } catch (createError) {
         console.error("❌ Failed to create user:", createError)

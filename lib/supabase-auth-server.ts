@@ -50,7 +50,7 @@ export const getServerSession = async (): Promise<{ session: SupabaseSession | n
 }
 
 // Enhanced server-side user data with role from your database
-export const getServerUserWithRole = async (request?: NextRequest): Promise<{ user: SupabaseUser | null; error: any }> => {
+export const getServerUserWithRole = async (request?: NextRequest, pathname?: string): Promise<{ user: SupabaseUser | null; error: any }> => {
   try {
     let supabase
 
@@ -71,12 +71,21 @@ export const getServerUserWithRole = async (request?: NextRequest): Promise<{ us
       supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
         cookies: cookieStore,
       })
+
+      console.log(`🍪 API route cookies:`, Object.fromEntries(cookieStore.get ? Object.keys(cookieStore).map(k => [k, 'present']) : 'no cookie store'))
     } else {
       // Use the standard server client for non-request contexts
       supabase = createSupabaseServerClient()
     }
 
     const { data: { user }, error } = await supabase.auth.getUser()
+
+    console.log(`🔐 Auth check for ${pathname || 'unknown'}:`, {
+      hasUser: !!user,
+      userId: user?.id,
+      error: error?.message,
+      cookieStore: request ? 'has request' : 'no request'
+    })
 
     if (user && !error) {
       try {
