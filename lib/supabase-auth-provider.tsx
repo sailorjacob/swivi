@@ -28,15 +28,26 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const { session: initialSession } = await getUserWithRole()
+        console.log('🔍 Getting initial session...')
+        const { user: initialUser, error } = await getUserWithRole()
+
         if (isMounted) {
-          setSession(initialSession)
-          setUser(initialSession?.user || null)
+          if (initialUser && !error) {
+            console.log('✅ Initial session found:', initialUser.email)
+            setSession({ user: initialUser } as SupabaseSession)
+            setUser(initialUser)
+          } else {
+            console.log('❌ No initial session found or error:', error?.message)
+            setSession(null)
+            setUser(null)
+          }
           setLoading(false)
         }
       } catch (error) {
-        console.error('Error getting initial session:', error)
+        console.error('❌ Error getting initial session:', error)
         if (isMounted) {
+          setSession(null)
+          setUser(null)
           setLoading(false)
         }
       }
@@ -47,26 +58,36 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email)
+        console.log('🔄 Auth state changed:', event, session?.user?.email)
 
         if (!isMounted) return
 
         try {
-          if (session?.user) {
-            // Get enhanced user data with role
-            const { user: enhancedUser } = await getUserWithRole()
-
-            // User creation is now handled automatically in server-side auth functions
-
-            setUser(enhancedUser)
-          } else {
+          if (event === 'SIGNED_OUT') {
+            console.log('🚪 User signed out')
             setUser(null)
+            setSession(null)
+            setLoading(false)
+            return
           }
 
-          setSession(session as SupabaseSession)
+          if (session?.user) {
+            console.log('✅ Valid session found in auth change:', session.user.email)
+            // Get enhanced user data with role
+            const { user: enhancedUser } = await getUserWithRole()
+            setUser(enhancedUser)
+            setSession(session as SupabaseSession)
+          } else {
+            console.log('❌ No session in auth change')
+            setUser(null)
+            setSession(null)
+          }
+
           setLoading(false)
         } catch (error) {
-          console.error('Error in auth state change:', error)
+          console.error('❌ Error in auth state change:', error)
+          setUser(null)
+          setSession(null)
           setLoading(false)
         }
       }
@@ -125,28 +146,19 @@ export function useAuth() {
 
 // Compatibility hook for NextAuth.js patterns
 export function useSession() {
-  try {
-    const context = useContext(AuthContext)
-    if (context === undefined) {
-      // Context not available yet, return loading state
-      return {
-        data: null,
-        status: 'loading' as const
-      }
-    }
-
-    const { user, session, loading } = context
-
-    return {
-      data: session ? { user } : null,
-      status: loading ? 'loading' : session ? 'authenticated' : 'unauthenticated'
-    }
-  } catch (error) {
-    // Handle any errors during context access
-    console.warn('useSession error:', error)
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    // Context not available yet, return loading state
     return {
       data: null,
       status: 'loading' as const
     }
+  }
+
+  const { user, session, loading } = context
+
+  return {
+    data: session ? { user } : null,
+    status: loading ? 'loading' : session ? 'authenticated' : 'unauthenticated'
   }
 }

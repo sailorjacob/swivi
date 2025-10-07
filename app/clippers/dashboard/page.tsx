@@ -82,39 +82,50 @@ export default function ClipperDashboard() {
   useEffect(() => {
     if (status === "loading") return
 
-    if (!session) {
+    if (status === "unauthenticated" || !session) {
+      console.log('🚪 No session found, redirecting to login')
       router.push("/clippers/login")
       return
     }
 
-    fetchDashboardData()
+    if (status === "authenticated" && session) {
+      console.log('✅ User authenticated, fetching dashboard data')
+      fetchDashboardData()
+    }
   }, [session, status, router])
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
       setError(null)
+      console.log('📊 Fetching dashboard data...')
+
       const response = await fetch("/api/clippers/dashboard")
 
       if (response.ok) {
         const data = await response.json()
+        console.log('✅ Dashboard data loaded successfully')
         setStats(data.stats)
         setRecentClips(data.recentClips)
         setActiveCampaigns(data.activeCampaigns)
       } else if (response.status === 401) {
+        console.log('❌ Authentication failed, redirecting to login')
         // Authentication error - redirect to login
         router.push("/clippers/login?message=Please log in to access your dashboard")
         return
       } else if (response.status === 404) {
+        console.log('❌ User not found')
         setError("Your account was not found. Please contact support.")
       } else if (response.status >= 500) {
+        console.log('❌ Server error:', response.status)
         setError("Server error. Please try again in a few moments.")
       } else {
         const errorData = await response.json().catch(() => ({}))
+        console.log('❌ Dashboard API error:', errorData.error)
         setError(errorData.error || "Failed to load dashboard data")
       }
     } catch (error) {
-      console.error("Error fetching dashboard data:", error)
+      console.error("❌ Error fetching dashboard data:", error)
       if (error instanceof TypeError && error.message.includes('fetch')) {
         setError("Network error. Please check your internet connection and try again.")
       } else {
