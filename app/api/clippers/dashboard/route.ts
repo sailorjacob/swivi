@@ -4,10 +4,9 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   try {
-    const { user, error } = await getServerUserWithRole(request, '/api/clippers/dashboard')
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user || error) {
-      console.log('❌ Dashboard auth failed:', { user: !!user, error: error?.message })
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

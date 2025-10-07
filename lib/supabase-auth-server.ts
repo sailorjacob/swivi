@@ -7,7 +7,7 @@ import { NextRequest } from 'next/server'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Server-side Supabase client for API routes
+// Clean server-side Supabase client for API routes
 export const createSupabaseServerClient = () => {
   const cookieStore = cookies()
 
@@ -49,8 +49,8 @@ export const getServerSession = async (): Promise<{ session: SupabaseSession | n
   }
 }
 
-// Enhanced server-side user data with role from your database
-export const getServerUserWithRole = async (request?: NextRequest, pathname?: string): Promise<{ user: SupabaseUser | null; error: any }> => {
+// Clean server-side user authentication for API routes
+export const getServerUserWithRole = async (request?: NextRequest): Promise<{ user: SupabaseUser | null; error: any }> => {
   try {
     let supabase
 
@@ -71,8 +71,6 @@ export const getServerUserWithRole = async (request?: NextRequest, pathname?: st
       supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
         cookies: cookieStore,
       })
-
-      console.log(`🍪 API route cookies:`, Object.fromEntries(cookieStore.get ? Object.keys(cookieStore).map(k => [k, 'present']) : 'no cookie store'))
     } else {
       // Use the standard server client for non-request contexts
       supabase = createSupabaseServerClient()
@@ -80,60 +78,61 @@ export const getServerUserWithRole = async (request?: NextRequest, pathname?: st
 
     const { data: { user }, error } = await supabase.auth.getUser()
 
-    console.log(`🔐 Auth check for ${pathname || 'unknown'}:`, {
-      hasUser: !!user,
-      userId: user?.id,
-      error: error?.message,
-      cookieStore: request ? 'has request' : 'no request'
-    })
-
     if (user && !error) {
       try {
-        // Check if user exists in our database, create if not
+        // Ensure user exists in our database
         await ensureUserExists(user)
 
-        // Try to fetch from database - handle connection failures gracefully
-        try {
-          const userData = await prisma.user.findUnique({
-            where: { supabaseAuthId: user.id },
-            select: {
-              id: true,
-              role: true,
-              verified: true,
-              name: true,
-              image: true,
-              email: true
-            }
-          })
-
-          if (userData) {
-            ;(user as SupabaseUser).role = userData.role || 'CLIPPER'
-            ;(user as SupabaseUser).verified = userData.verified || false
-            // Update user object with database info
-            if (userData.name) user.user_metadata = { ...user.user_metadata, full_name: userData.name }
-            if (userData.image) user.user_metadata = { ...user.user_metadata, avatar_url: userData.image }
-            if (userData.email) user.email = userData.email
-          } else {
-            // No database record found - use OAuth data only
-            ;(user as SupabaseUser).role = 'CLIPPER'
-            console.log('ℹ️ No database record found for user - using OAuth data only')
+        // Fetch enhanced user data from database
+        const userData = await prisma.user.findUnique({
+          where: { supabaseAuthId: user.id },
+          select: {
+            id: true,
+            role: true,
+            verified: true,
+            name: true,
+            image: true,
+            email: true,
+            bio: true,
+            website: true,
+            walletAddress: true,
+            paypalEmail: true,
+            totalEarnings: true,
+            totalViews: true
           }
-        } catch (dbError) {
-          if (dbError.message?.includes('database') || dbError.message?.includes('connection') || dbError.message?.includes("Can't reach database server")) {
-            console.warn('Database unavailable - using OAuth data only')
-            ;(user as SupabaseUser).role = 'CLIPPER'
-          } else {
-            console.warn('Could not fetch user role:', dbError)
-            ;(user as SupabaseUser).role = 'CLIPPER'
+        })
+
+        if (userData) {
+          // Merge Supabase Auth user with database data
+          return {
+            user: {
+              ...user,
+              ...userData,
+              // Ensure we keep the auth data as primary
+              id: user.id,
+              email: user.email,
+              user_metadata: user.user_metadata,
+              email_confirmed_at: user.email_confirmed_at
+            } as SupabaseUser,
+            error: null
           }
         }
       } catch (dbError) {
-        console.warn('Could not process user data:', dbError)
-        ;(user as SupabaseUser).role = 'CLIPPER'
+        console.warn('Database unavailable - using OAuth data only:', dbError.message)
+      }
+
+      // Fallback to basic user data if database fails
+      return {
+        user: {
+          ...user,
+          role: 'CLIPPER',
+          verified: user.email_confirmed_at ? true : false
+        } as SupabaseUser,
+        error: null
       }
     }
 
-    return { user: user as SupabaseUser, error }
+    return { user: null, error }
   } catch (error) {
     return { user: null, error }
   }
@@ -383,9 +382,10 @@ async function createNewUser(supabaseUser: any) {
       throw dbError
     }
   } catch (error) {
-    console.error('Error creating new user:', error)
-    if (error.message?.includes('database') || error.message?.includes('connection') || error.message?.includes("Can't reach database server")) {
-      console.log('⚠️ Database unavailable for user creation - allowing authentication to continue')
+    console.error('❌ Error ensuring user exists:', error)
+    // Don't fail authentication if database is unavailable
+    if (error.message?.includes('database') || error.message?.includes('connection')) {
+      console.log('⚠️ Database unavailable - allowing authentication to continue')
     }
   }
 }
