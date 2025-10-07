@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     // Get user info
     const userData = await prisma.user.findUnique({
-      where: { id: user.id },
+      where: { supabaseAuthId: user.id },
       select: {
         id: true,
         email: true,

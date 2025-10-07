@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     console.log("✅ Profile API: Valid session for user", user.id)
 
     const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
+      where: { supabaseAuthId: user.id },
       select: {
         id: true,
         name: true,
@@ -101,7 +101,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: user.id },
+      where: { supabaseAuthId: user.id },
       data: cleanedData,
       select: {
         id: true,

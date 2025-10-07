@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
     // Check if user is admin
     const userData = await prisma.user.findUnique({
-      where: { id: user.id }
+      where: { supabaseAuthId: user.id }
     })
 
     if (!userData || userData.role !== "ADMIN") {

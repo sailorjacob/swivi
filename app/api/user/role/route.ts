@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     }
 
     const userData = await prisma.user.findUnique({
-      where: { id: user.id },
+      where: { supabaseAuthId: user.id },
       select: { role: true }
     })
 

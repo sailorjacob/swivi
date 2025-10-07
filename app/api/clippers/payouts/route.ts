@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     // Get user's current earnings
     const userData = await prisma.user.findUnique({
-      where: { id: user.id },
+      where: { supabaseAuthId: user.id },
       select: { totalEarnings: true }
     })
 
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     // Update user's total earnings
     await prisma.user.update({
-      where: { id: user.id },
+      where: { supabaseAuthId: user.id },
       data: {
         totalEarnings: {
           decrement: validatedData.amount

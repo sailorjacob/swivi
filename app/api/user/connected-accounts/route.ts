@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     // Get user with their OAuth accounts
     const userData = await prisma.user.findUnique({
-      where: { id: user.id },
+      where: { supabaseAuthId: user.id },
       include: {
         accounts: {
           select: {

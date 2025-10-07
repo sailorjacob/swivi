@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       if (user?.id) {
         try {
           const dbUser = await prisma.user.findUnique({
-            where: { id: user.id },
+            where: { supabaseAuthId: user.id },
             include: {
               accounts: {
                 select: {

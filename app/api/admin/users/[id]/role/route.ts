@@ -20,7 +20,7 @@ export async function PUT(
 
     // Check if current user is admin
     const currentUserData = await prisma.user.findUnique({
-      where: { id: user.id }
+      where: { supabaseAuthId: user.id }
     })
 
     if (!currentUserData || currentUserData.role !== "ADMIN") {

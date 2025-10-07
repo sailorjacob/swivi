@@ -83,30 +83,15 @@ export const getSession = async (): Promise<{ session: SupabaseSession | null; e
 }
 
 // Enhanced user data with role from your database
+// Note: Client-side role fetching is now handled by API routes
+// This function just returns the basic user data
 export const getUserWithRole = async (): Promise<{ user: SupabaseUser | null; error: any }> => {
   const { user, error } = await getUser()
 
   if (user && !error) {
-    try {
-      // Fetch additional user data from your users table using supabaseAuthId
-      const { data: userData } = await supabase
-        .from('users')
-        .select('id, role, verified, name, image, email')
-        .eq('supabaseAuthId', user.id)
-        .single()
-
-      if (userData) {
-        user.role = userData.role || 'CLIPPER'
-        user.verified = userData.verified || false
-        // Update user object with database info
-        if (userData.name) user.user_metadata.full_name = userData.name
-        if (userData.image) user.user_metadata.avatar_url = userData.image
-        if (userData.email) user.email = userData.email
-      }
-    } catch (dbError) {
-      console.warn('Could not fetch user role:', dbError)
-      user.role = 'CLIPPER'
-    }
+    // Set default role - API routes will provide enhanced data
+    user.role = 'CLIPPER'
+    user.verified = user.email_confirmed_at ? true : false
   }
 
   return { user, error }

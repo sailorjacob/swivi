@@ -35,7 +35,7 @@ export async function GET(
 
     // Check if user is admin
     const userData = await prisma.user.findUnique({
-      where: { id: user.id }
+      where: { supabaseAuthId: user.id }
     })
 
     if (!currentUserData || currentUserData.role !== "ADMIN") {
@@ -111,7 +111,7 @@ export async function PUT(
 
     // Check if user is admin
     const currentUserData = await prisma.user.findUnique({
-      where: { id: user.id }
+      where: { supabaseAuthId: user.id }
     })
 
     if (!currentUserData || currentUserData.role !== "ADMIN") {
@@ -188,7 +188,7 @@ export async function DELETE(
 
     // Check if user is admin
     const currentUserData = await prisma.user.findUnique({
-      where: { id: user.id }
+      where: { supabaseAuthId: user.id }
     })
 
     if (!currentUserData || currentUserData.role !== "ADMIN") {

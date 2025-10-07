@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         result.step = "querying_database"
         
         const userRaw = await prisma.user.findUnique({
-          where: { id: user.id },
+          where: { supabaseAuthId: user.id },
           select: {
             id: true,
             name: true,
