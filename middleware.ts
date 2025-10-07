@@ -21,37 +21,10 @@ export default async function middleware(req) {
     return NextResponse.next()
   }
 
-  // Check if this is an API route that needs authentication
+  // For API routes, let them handle their own authentication
+  // The middleware doesn't need to pre-authenticate API routes since they handle auth internally
   if (pathname.startsWith('/api/')) {
-    try {
-      // Create a server client to check authentication
-      const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-        cookies: {
-          get(name: string) {
-            return req.cookies.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            // In middleware, we can't set cookies, but this is just for reading
-          },
-          remove(name: string, options: any) {
-            // In middleware, we can't remove cookies, but this is just for reading
-          },
-        },
-      })
-
-      // Check if user is authenticated
-      const { data: { session }, error } = await supabase.auth.getSession()
-
-      if (error || !session) {
-        console.log(`❌ API authentication failed for: ${pathname}`)
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-      }
-
-      console.log(`✅ API authenticated for user: ${session.user.email}`)
-    } catch (error) {
-      console.error('Middleware auth check error:', error)
-      return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-    }
+    console.log(`🔄 API route detected: ${pathname} - letting route handle authentication`)
   }
 
   console.log(`✅ Allowing access to: ${pathname}`)

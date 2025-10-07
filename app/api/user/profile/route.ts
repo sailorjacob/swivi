@@ -18,10 +18,10 @@ const updatePayoutSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     console.log("🔍 Profile API: Getting authenticated user...")
-    const user = await getAuthenticatedUser(request)
+    const { user, error } = await getServerUserWithRole(request)
 
-    if (!user) {
-      console.log("❌ Profile API: No authenticated user")
+    if (!user || error) {
+      console.log("❌ Profile API: No authenticated user or error:", error?.message)
       return NextResponse.json({ error: "No authenticated user" }, { status: 401 })
     }
 
@@ -72,9 +72,9 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const user = await getAuthenticatedUser(request)
+    const { user, error } = await getServerUserWithRole(request)
 
-    if (!user?.id) {
+    if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
