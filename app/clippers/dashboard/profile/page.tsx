@@ -71,19 +71,8 @@ export default function ProfilePage() {
         try {
           setIsFetchingProfile(true)
           // Load profile data
-          // Get the current session to include access token
-          const { data: { session } } = await supabase.auth.getSession()
-
-          const headers: HeadersInit = {}
-
-          // Include authorization header if we have a session
-          if (session?.access_token) {
-            headers['Authorization'] = `Bearer ${session.access_token}`
-          }
-
           const profileResponse = await fetch("/api/user/profile", {
-            credentials: "include",
-            headers
+            credentials: "include"
           })
           if (profileResponse.ok) {
             const userData = await profileResponse.json()
@@ -103,19 +92,8 @@ export default function ProfilePage() {
             })
 
             // Load all connected accounts (OAuth + verified social)
-            // Get the current session to include access token
-            const { data: { session } } = await supabase.auth.getSession()
-
-            const headers: HeadersInit = {}
-
-            // Include authorization header if we have a session
-            if (session?.access_token) {
-              headers['Authorization'] = `Bearer ${session.access_token}`
-            }
-
             const accountsResponse = await fetch("/api/user/connected-accounts", {
-              credentials: "include",
-              headers
+              credentials: "include"
             })
             if (accountsResponse.ok) {
               const accountsData = await accountsResponse.json()
@@ -160,22 +138,12 @@ export default function ProfilePage() {
     setIsSaving(true)
 
     try {
-      // Get the current session to include access token
-      const { data: { session } } = await supabase.auth.getSession()
-
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      }
-
-      // Include authorization header if we have a session
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`
-      }
-
       const response = await fetch("/api/user/profile", {
         method: "PUT",
         credentials: "include",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           type: "profile",
           name: profileData.name,
@@ -215,38 +183,16 @@ export default function ProfilePage() {
     }
 
     try {
-      // Get the current session to include access token
-      const { data: { session } } = await supabase.auth.getSession()
-
-      const headers: HeadersInit = {}
-
-      // Include authorization header if we have a session
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`
-      }
-
       const response = await fetch(`/api/user/connected-accounts?id=${accountId}`, {
         method: "DELETE",
         credentials: "include",
-        headers,
       })
 
       if (response.ok) {
         toast.success("Account deleted successfully")
         // Refresh the connected accounts list
-        // Get the current session to include access token
-        const { data: { session } } = await supabase.auth.getSession()
-
-        const headers: HeadersInit = {}
-
-        // Include authorization header if we have a session
-        if (session?.access_token) {
-          headers['Authorization'] = `Bearer ${session.access_token}`
-        }
-
         const accountsResponse = await fetch("/api/user/connected-accounts", {
-          credentials: "include",
-          headers
+          credentials: "include"
         })
         if (accountsResponse.ok) {
           const accountsData = await accountsResponse.json()

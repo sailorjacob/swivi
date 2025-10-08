@@ -50,19 +50,8 @@ export default function PayoutsPage() {
       if (!session?.user?.id) return
       
       try {
-        // Get the current session to include access token
-        const { data: { session } } = await supabase.auth.getSession()
-
-        const headers: HeadersInit = {}
-
-        // Include authorization header if we have a session
-        if (session?.access_token) {
-          headers['Authorization'] = `Bearer ${session.access_token}`
-        }
-
         const response = await fetch("/api/user/profile", {
-          credentials: "include",
-          headers
+          credentials: "include"
         })
         if (response.ok) {
           const userData = await response.json()
@@ -123,22 +112,12 @@ export default function PayoutsPage() {
     setPayoutSaving(true)
     
     try {
-      // Get the current session to include access token
-      const { data: { session } } = await supabase.auth.getSession()
-
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      }
-
-      // Include authorization header if we have a session
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`
-      }
-
       const response = await fetch("/api/user/profile", {
         method: "PUT",
         credentials: "include",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           type: "payout",
           ...payoutData

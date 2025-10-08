@@ -46,22 +46,12 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
 
     setIsGenerating(true)
     try {
-      // Get the current session to include access token
-      const { data: { session } } = await supabase.auth.getSession()
-
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      }
-
-      // Include authorization header if we have a session
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`
-      }
-
       const response = await fetch('/api/social-verification/generate', {
         method: 'POST',
         credentials: 'include',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           platform,
           username: username.trim(),
@@ -104,22 +94,12 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
 
     setIsVerifying(true)
     try {
-      // Get the current session to include access token
-      const { data: { session } } = await supabase.auth.getSession()
-
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      }
-
-      // Include authorization header if we have a session
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`
-      }
-
       const response = await fetch('/api/social-verification/verify-browserql', {
         method: 'POST',
         credentials: 'include',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           platform,
           username: username.trim(),

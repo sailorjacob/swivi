@@ -75,13 +75,12 @@ export const getServerSession = async (request?: NextRequest): Promise<{ session
 // Clean server-side user authentication for API routes
 export const getServerUserWithRole = async (request?: NextRequest): Promise<{ user: SupabaseUser | null; error: any }> => {
   try {
-    // Check for Authorization header first
+    // Check for Authorization header first (from client-side requests)
     const authHeader = request?.headers.get('authorization')
     let supabase
 
     if (authHeader?.startsWith('Bearer ')) {
-      // If Authorization header is present, create client without cookies
-      // and set the access token manually
+      // If Authorization header is present, create client with the token
       const accessToken = authHeader.substring(7) // Remove 'Bearer ' prefix
       supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
         auth: {
@@ -103,11 +102,19 @@ export const getServerUserWithRole = async (request?: NextRequest): Promise<{ us
         refresh_token: '' // We don't have refresh token from header
       })
     } else {
-      // Fall back to cookie-based authentication
+      // Fall back to cookie-based authentication (for SSR/server-side requests)
       supabase = createSupabaseServerClient(request)
     }
 
     const { data: { user }, error } = await supabase.auth.getUser()
+
+    // If no user found and no error, try to get user from session
+    if (!user && !error) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError) {
+        console.warn('Session error:', sessionError.message)
+      }
+    }
 
     if (user && !error) {
       try {
