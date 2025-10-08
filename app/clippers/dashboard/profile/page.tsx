@@ -70,7 +70,9 @@ export default function ProfilePage() {
         try {
           setIsFetchingProfile(true)
           // Load profile data
-          const profileResponse = await fetch("/api/user/profile")
+          const profileResponse = await fetch("/api/user/profile", {
+            credentials: "include"
+          })
           if (profileResponse.ok) {
             const userData = await profileResponse.json()
             setUser(userData)
@@ -89,7 +91,9 @@ export default function ProfilePage() {
             })
 
             // Load all connected accounts (OAuth + verified social)
-            const accountsResponse = await fetch("/api/user/connected-accounts")
+            const accountsResponse = await fetch("/api/user/connected-accounts", {
+              credentials: "include"
+            })
             if (accountsResponse.ok) {
               const accountsData = await accountsResponse.json()
               setConnectedAccounts(accountsData)
@@ -135,6 +139,7 @@ export default function ProfilePage() {
     try {
       const response = await fetch("/api/user/profile", {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -179,12 +184,15 @@ export default function ProfilePage() {
     try {
       const response = await fetch(`/api/user/connected-accounts?id=${accountId}`, {
         method: "DELETE",
+        credentials: "include",
       })
 
       if (response.ok) {
         toast.success("Account deleted successfully")
         // Refresh the connected accounts list
-        const accountsResponse = await fetch("/api/user/connected-accounts")
+        const accountsResponse = await fetch("/api/user/connected-accounts", {
+          credentials: "include"
+        })
         if (accountsResponse.ok) {
           const accountsData = await accountsResponse.json()
           setConnectedAccounts(accountsData)

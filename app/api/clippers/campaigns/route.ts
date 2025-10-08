@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if user is authenticated
+    const { user, error } = await getServerUserWithRole(request)
+
+    if (!user || error) {
+      console.log("❌ Campaigns API: No authenticated user or error:", {
+        hasUser: !!user,
+        userId: user?.id,
+        error: error?.message,
+        timestamp: new Date().toISOString()
+      })
+      return NextResponse.json({ error: "No authenticated user" }, { status: 401 })
+    }
+
+    console.log("✅ Campaigns API: Valid session for user", user.id)
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
     const platform = searchParams.get("platform")
@@ -49,6 +65,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    console.log(`📊 Returning ${campaigns.length} campaigns for user ${user.id}`)
     return NextResponse.json(campaigns)
   } catch (error) {
     console.error("Error fetching campaigns:", error)

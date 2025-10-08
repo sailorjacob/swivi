@@ -12,6 +12,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
     flowType: 'pkce',
     debug: false
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'swivi-app',
+    },
   }
 })
 
@@ -74,7 +79,9 @@ export const getUserWithRole = async (): Promise<{ user: SupabaseUser | null; er
   if (user && !error) {
     // Fetch enhanced data from our API
     try {
-      const response = await fetch('/api/user/profile')
+      const response = await fetch('/api/user/profile', {
+        credentials: 'include'
+      })
       if (response.ok) {
         const userData = await response.json()
         // Merge Supabase Auth user with database data

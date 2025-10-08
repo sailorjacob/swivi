@@ -49,7 +49,9 @@ export default function PayoutsPage() {
       if (!session?.user?.id) return
       
       try {
-        const response = await fetch("/api/user/profile")
+        const response = await fetch("/api/user/profile", {
+          credentials: "include"
+        })
         if (response.ok) {
           const userData = await response.json()
           setUser(userData)
@@ -111,6 +113,7 @@ export default function PayoutsPage() {
     try {
       const response = await fetch("/api/user/profile", {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

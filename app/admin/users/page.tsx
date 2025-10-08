@@ -106,10 +106,9 @@ export default function AdminUsersPage() {
         console.log("Number of users:", data.users?.length || 0)
         setUsers(data.users || [])
       } else if (response.status === 401) {
-        console.error("❌ Authentication error - redirecting to login")
-        toast.error("Authentication expired. Please sign in again.")
-        // Force redirect to login page
-        window.location.href = "/clippers/login?error=SessionExpired"
+        console.error("❌ Authentication error - showing error instead of redirecting")
+        toast.error("Authentication failed. Please refresh the page or sign in again.")
+        setError("Authentication failed. Please try refreshing the page or signing in again.")
         return
       } else if (response.status === 403) {
         console.error("❌ Admin access denied")

@@ -5,23 +5,22 @@
 
 export interface EnvConfig {
   DATABASE_URL: string
-  NEXTAUTH_SECRET: string
-  DISCORD_CLIENT_ID?: string
-  DISCORD_CLIENT_SECRET?: string
-  GOOGLE_CLIENT_ID?: string
-  GOOGLE_CLIENT_SECRET?: string
+  NEXT_PUBLIC_SUPABASE_URL: string
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: string
+  SUPABASE_SERVICE_ROLE_KEY?: string
   NODE_ENV: string
 }
 
 export function validateEnvironment(): EnvConfig {
   const required = [
     'DATABASE_URL',
-    'NEXTAUTH_SECRET'
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY'
   ]
 
   // Additional requirements for production
   if (process.env.NODE_ENV === 'production') {
-    required.push('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'NEXTAUTH_URL')
+    required.push('SUPABASE_SERVICE_ROLE_KEY')
   }
 
   const missing = required.filter(key => !process.env[key])
@@ -54,27 +53,23 @@ export function validateEnvironment(): EnvConfig {
     }
   }
 
-  // Validate NEXTAUTH_SECRET length for security
-  const secret = process.env.NEXTAUTH_SECRET
-  if (secret && secret.length < 32) {
-    console.warn('⚠️  NEXTAUTH_SECRET should be at least 32 characters for security')
+  // Validate Supabase URL format
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (supabaseUrl && !supabaseUrl.startsWith('https://')) {
+    console.warn('⚠️  NEXT_PUBLIC_SUPABASE_URL should use HTTPS')
   }
 
-  // Validate production URLs
-  if (process.env.NODE_ENV === 'production') {
-    const nextAuthUrl = process.env.NEXTAUTH_URL
-    if (nextAuthUrl && !nextAuthUrl.startsWith('https://')) {
-      console.warn('⚠️  NEXTAUTH_URL should use HTTPS in production')
-    }
+  // Validate Supabase anon key exists and looks valid
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (supabaseAnonKey && supabaseAnonKey.length < 100) {
+    console.warn('⚠️  NEXT_PUBLIC_SUPABASE_ANON_KEY appears to be too short')
   }
 
   return {
     DATABASE_URL: dbUrl || '',
-    NEXTAUTH_SECRET: secret || '',
-    DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
-    DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    NEXT_PUBLIC_SUPABASE_URL: supabaseUrl || '',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnonKey || '',
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     NODE_ENV: process.env.NODE_ENV || 'development'
   }
 }

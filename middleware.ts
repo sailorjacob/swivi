@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server"
-import { createServerClient } from '@supabase/ssr'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -14,6 +13,7 @@ export default async function middleware(req) {
   // Check if this is an OAuth callback in progress (Supabase Auth)
   const isOAuthCallback = searchParams.has('code') ||
                          searchParams.has('state') ||
+                         pathname.includes('/auth/v1/callback') ||
                          req.headers.get('referer')?.includes('/auth/v1/callback')
 
   if (isOAuthCallback) {
@@ -21,12 +21,40 @@ export default async function middleware(req) {
     return NextResponse.next()
   }
 
+  // Check for Supabase auth cookies
+  const accessToken = req.cookies.get('sb-access-token')?.value
+  const refreshToken = req.cookies.get('sb-refresh-token')?.value
+  const hasAuthCookies = accessToken && refreshToken
+
+  // Protected routes that require authentication
+  const protectedPaths = [
+    '/admin',
+    '/clippers/dashboard',
+    '/api/user',
+    '/api/clippers',
+    '/api/admin'
+  ]
+
+  const isProtectedPath = protectedPaths.some(path =>
+    pathname.startsWith(path) || pathname.includes(path)
+  )
+
+  if (isProtectedPath && !hasAuthCookies) {
+    console.log(`🚨 Protected route ${pathname} accessed without authentication - redirecting to login`)
+
+    // For API routes, return 401 instead of redirect
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // For page routes, redirect to login
+    const loginUrl = new URL('/clippers/signup', req.url)
+    return NextResponse.redirect(loginUrl)
+  }
+
   // For API routes, let them handle their own authentication
-  // The middleware doesn't need to pre-authenticate API routes since they handle auth internally
   if (pathname.startsWith('/api/')) {
     console.log(`🔄 API route detected: ${pathname} - letting route handle authentication`)
-    console.log(`🔍 Request headers:`, Object.fromEntries(req.headers.entries()))
-    console.log(`🍪 Request cookies:`, req.cookies)
   }
 
   console.log(`✅ Allowing access to: ${pathname}`)

@@ -2,23 +2,14 @@
 export const env = {
   // Database
   DATABASE_URL: process.env.DATABASE_URL || "",
-  
-  // Authentication
-  NEXTAUTH_URL: process.env.NEXTAUTH_URL || "http://localhost:3000",
-  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || "fallback-secret-for-dev",
-  
-  // OAuth Providers (optional during build)
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
-  DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID || "",
-  DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET || "",
-  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || "",
-  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || "",
-  
-  // Supabase
+
+  // Supabase Auth (required)
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+
+  // OAuth Providers (handled by Supabase Auth)
+  // Note: Discord OAuth is configured in Supabase Dashboard, not here
   
   // Cloudinary (optional)
   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "",
@@ -46,13 +37,14 @@ export const env = {
 export function validateEnv() {
   const required = {
     DATABASE_URL: env.DATABASE_URL,
-    NEXTAUTH_SECRET: env.NEXTAUTH_SECRET,
+    NEXT_PUBLIC_SUPABASE_URL: env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   }
-  
+
   const missing = Object.entries(required)
     .filter(([_, value]) => !value)
     .map(([key]) => key)
-  
+
   if (missing.length > 0) {
     console.warn(`Missing environment variables: ${missing.join(", ")}`)
     // Don't throw during build, just warn
@@ -60,7 +52,7 @@ export function validateEnv() {
       console.error("❌ Critical environment variables missing in production!")
     }
   }
-  
+
   return missing.length === 0
 }
 

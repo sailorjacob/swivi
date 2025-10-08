@@ -63,7 +63,9 @@ export default function CampaignsPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch("/api/clippers/campaigns")
+      const response = await fetch("/api/clippers/campaigns", {
+        credentials: "include"
+      })
       if (response.ok) {
         const data = await response.json()
         setCampaigns(data)

@@ -47,6 +47,7 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
     try {
       const response = await fetch('/api/social-verification/generate', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -94,6 +95,7 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
     try {
       const response = await fetch('/api/social-verification/verify-browserql', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },

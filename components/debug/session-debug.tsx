@@ -22,7 +22,9 @@ export function SessionDebug() {
     const fetchUserProfile = async () => {
       if (session?.user) {
         try {
-          const response = await fetch("/api/user/profile")
+          const response = await fetch("/api/user/profile", {
+            credentials: "include"
+          })
           if (response.ok) {
             const profileData = await response.json()
             setUserProfile(profileData)

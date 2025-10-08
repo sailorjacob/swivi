@@ -17,8 +17,9 @@ export async function GET() {
       environment,
       vercel_region: process.env.VERCEL_REGION || "unknown",
       has_database_url: !!process.env.DATABASE_URL,
-      has_nextauth_secret: !!process.env.NEXTAUTH_SECRET,
-      has_nextauth_url: !!process.env.NEXTAUTH_URL
+      has_supabase_url: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      has_supabase_anon_key: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      has_supabase_service_key: !!process.env.SUPABASE_SERVICE_ROLE_KEY
     })
     
   } catch (error) {

@@ -56,6 +56,7 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
 
       const response = await fetch("/api/clippers/submissions", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

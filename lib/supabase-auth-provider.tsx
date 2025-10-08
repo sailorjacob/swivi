@@ -40,7 +40,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
             // Try to fetch enhanced user data from API (don't fail if it doesn't work)
             try {
-              const response = await fetch('/api/user/profile')
+              const response = await fetch('/api/user/profile', {
+                credentials: 'include'
+              })
               if (response.ok) {
                 const userData = await response.json()
                 // Merge session user with database user data
@@ -106,7 +108,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
             // Try to fetch enhanced user data from API (don't fail if it doesn't work)
             try {
-              const response = await fetch('/api/user/profile')
+              const response = await fetch('/api/user/profile', {
+                credentials: 'include'
+              })
               if (response.ok) {
                 const userData = await response.json()
                 // Merge session user with database user data

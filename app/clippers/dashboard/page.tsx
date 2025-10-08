@@ -107,7 +107,9 @@ export default function ClipperDashboard() {
       setError(null)
       console.log('📊 Fetching dashboard data...')
 
-      const response = await fetch("/api/clippers/dashboard")
+      const response = await fetch("/api/clippers/dashboard", {
+        credentials: "include"
+      })
 
       if (response.ok) {
         const data = await response.json()
@@ -117,10 +119,10 @@ export default function ClipperDashboard() {
         setActiveCampaigns(data.activeCampaigns)
         setIsFetching(false)
       } else if (response.status === 401) {
-        console.log('❌ Authentication failed, redirecting to login')
-        // Authentication error - redirect to login
-        router.push("/clippers/login?message=Please log in to access your dashboard")
-        return
+        console.log('❌ Authentication failed - showing error instead of redirecting')
+        // Authentication error - show error but don't redirect to avoid auth loop
+        setError("Authentication failed. Please try refreshing the page or logging in again.")
+        setIsFetching(false)
       } else if (response.status === 404) {
         console.log('❌ User not found')
         setError("Your account was not found. Please contact support.")

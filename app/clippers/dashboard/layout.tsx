@@ -3,7 +3,7 @@
 // Force this layout to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useAuth } from "@/lib/supabase-auth-provider"
 import { useRouter, usePathname } from "next/navigation"
@@ -193,6 +193,32 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === "loading") return
+
+    if (status === "unauthenticated" || !session?.user) {
+      console.log("❌ Dashboard: No authenticated user, redirecting to signup")
+      router.push("/clippers/signup")
+      return
+    }
+
+    console.log("✅ Dashboard: Valid session found for", session.user.email)
+  }, [status, session, router])
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
+      </div>
+    )
+  }
+
+  if (status === "unauthenticated" || !session?.user) {
+    return null // Will redirect in useEffect
+  }
 
   return (
     <div className="h-screen bg-background flex overflow-hidden">

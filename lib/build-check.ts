@@ -16,8 +16,8 @@ console.log(`🚀 Vercel build: ${isVercel ? "YES" : "NO"}`)
 // Check critical environment variables
 const criticalEnvVars = [
   "DATABASE_URL",
-  "NEXTAUTH_SECRET",
-  "NEXTAUTH_URL"
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "NEXT_PUBLIC_SUPABASE_ANON_KEY"
 ]
 
 const missingVars = criticalEnvVars.filter(varName => !process.env[varName])

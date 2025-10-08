@@ -8,8 +8,19 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 // Clean server-side Supabase client for API routes
-export const createSupabaseServerClient = () => {
-  const cookieStore = cookies()
+export const createSupabaseServerClient = (request?: NextRequest) => {
+  // If we have a request, use its cookies, otherwise use Next.js cookies
+  const cookieStore = request ? {
+    get(name: string) {
+      return request.cookies.get(name)?.value
+    },
+    set(name: string, value: string, options: any) {
+      // In API routes, we can't set cookies, but this is just for reading
+    },
+    remove(name: string, options: any) {
+      // In API routes, we can't remove cookies, but this is just for reading
+    },
+  } : cookies()
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -18,7 +29,10 @@ export const createSupabaseServerClient = () => {
       },
       set(name: string, value: string, options: any) {
         try {
-          cookieStore.set({ name, value, ...options })
+          if (!request) {
+            // Only set cookies if not in API route context
+            cookieStore.set({ name, value, ...options })
+          }
         } catch (error) {
           // The `set` method was called from a Server Component.
           // This can be ignored if you have middleware refreshing
@@ -27,7 +41,10 @@ export const createSupabaseServerClient = () => {
       },
       remove(name: string, options: any) {
         try {
-          cookieStore.set({ name, value: '', ...options })
+          if (!request) {
+            // Only remove cookies if not in API route context
+            cookieStore.set({ name, value: '', ...options })
+          }
         } catch (error) {
           // The `delete` method was called from a Server Component.
           // This can be ignored if you have middleware refreshing
@@ -39,9 +56,9 @@ export const createSupabaseServerClient = () => {
 }
 
 // Server-side session helper for API routes
-export const getServerSession = async (): Promise<{ session: SupabaseSession | null; error: any }> => {
+export const getServerSession = async (request?: NextRequest): Promise<{ session: SupabaseSession | null; error: any }> => {
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = createSupabaseServerClient(request)
     const { data: { session }, error } = await supabase.auth.getSession()
     return { session: session as SupabaseSession, error }
   } catch (error) {
@@ -52,29 +69,8 @@ export const getServerSession = async (): Promise<{ session: SupabaseSession | n
 // Clean server-side user authentication for API routes
 export const getServerUserWithRole = async (request?: NextRequest): Promise<{ user: SupabaseUser | null; error: any }> => {
   try {
-    let supabase
-
-    if (request) {
-      // Create a server client with request context for API routes
-      const cookieStore = {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: any) {
-          // In API routes, we can't set cookies, but this is just for reading
-        },
-        remove(name: string, options: any) {
-          // In API routes, we can't remove cookies, but this is just for reading
-        },
-      }
-
-      supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-        cookies: cookieStore,
-      })
-    } else {
-      // Use the standard server client for non-request contexts
-      supabase = createSupabaseServerClient()
-    }
+    // Use the enhanced createSupabaseServerClient that handles both contexts
+    const supabase = createSupabaseServerClient(request)
 
     const { data: { user }, error } = await supabase.auth.getUser()
 
@@ -141,21 +137,8 @@ export const getServerUserWithRole = async (request?: NextRequest): Promise<{ us
 // Get authenticated user from request (for API routes that need request object)
 export const getAuthenticatedUser = async (request: NextRequest): Promise<SupabaseUser | null> => {
   try {
-    const cookieStore = {
-      get(name: string) {
-        return request.cookies.get(name)?.value
-      },
-      set(name: string, value: string, options: any) {
-        // In API routes, we can't set cookies, but this is just for reading
-      },
-      remove(name: string, options: any) {
-        // In API routes, we can't remove cookies, but this is just for reading
-      },
-    }
-
-    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-      cookies: cookieStore,
-    })
+    // Use the enhanced createSupabaseServerClient that properly handles request context
+    const supabase = createSupabaseServerClient(request)
 
     const { data: { user }, error } = await supabase.auth.getUser()
 
