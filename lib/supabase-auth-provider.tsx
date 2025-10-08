@@ -40,8 +40,21 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
             // Try to fetch enhanced user data from API (don't fail if it doesn't work)
             try {
+              // Get the current session to include access token
+              const { data: { session } } = await supabase.auth.getSession()
+
+              const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+              }
+
+              // Include authorization header if we have a session
+              if (session?.access_token) {
+                headers['Authorization'] = `Bearer ${session.access_token}`
+              }
+
               const response = await fetch('/api/user/profile', {
-                credentials: 'include'
+                credentials: 'include',
+                headers
               })
               if (response.ok) {
                 const userData = await response.json()
@@ -108,8 +121,18 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
             // Try to fetch enhanced user data from API (don't fail if it doesn't work)
             try {
+              const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+              }
+
+              // Include authorization header if we have a session
+              if (session?.access_token) {
+                headers['Authorization'] = `Bearer ${session.access_token}`
+              }
+
               const response = await fetch('/api/user/profile', {
-                credentials: 'include'
+                credentials: 'include',
+                headers
               })
               if (response.ok) {
                 const userData = await response.json()

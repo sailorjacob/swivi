@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { supabase } from "@/lib/supabase-auth"
 import { motion } from "framer-motion"
 import { Card, CardContent } from "../../../../components/ui/card"
 import { Badge } from "../../../../components/ui/badge"
@@ -63,8 +64,19 @@ export default function CampaignsPage() {
     try {
       setLoading(true)
       setError(null)
+      // Get the current session to include access token
+      const { data: { session } } = await supabase.auth.getSession()
+
+      const headers: HeadersInit = {}
+
+      // Include authorization header if we have a session
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+
       const response = await fetch("/api/clippers/campaigns", {
-        credentials: "include"
+        credentials: "include",
+        headers
       })
       if (response.ok) {
         const data = await response.json()

@@ -52,6 +52,12 @@ export const createSupabaseServerClient = (request?: NextRequest) => {
         }
       },
     },
+    auth: {
+      flowType: 'pkce',
+      autoRefreshToken: true,
+      detectSessionInUrl: false,
+      persistSession: true
+    }
   })
 }
 
@@ -69,8 +75,37 @@ export const getServerSession = async (request?: NextRequest): Promise<{ session
 // Clean server-side user authentication for API routes
 export const getServerUserWithRole = async (request?: NextRequest): Promise<{ user: SupabaseUser | null; error: any }> => {
   try {
-    // Use the enhanced createSupabaseServerClient that handles both contexts
-    const supabase = createSupabaseServerClient(request)
+    // Check for Authorization header first
+    const authHeader = request?.headers.get('authorization')
+    let supabase
+
+    if (authHeader?.startsWith('Bearer ')) {
+      // If Authorization header is present, create client without cookies
+      // and set the access token manually
+      const accessToken = authHeader.substring(7) // Remove 'Bearer ' prefix
+      supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          flowType: 'pkce',
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+          persistSession: false
+        },
+        global: {
+          headers: {
+            Authorization: authHeader
+          }
+        }
+      })
+
+      // Set the session using the access token
+      await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: '' // We don't have refresh token from header
+      })
+    } else {
+      // Fall back to cookie-based authentication
+      supabase = createSupabaseServerClient(request)
+    }
 
     const { data: { user }, error } = await supabase.auth.getUser()
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { supabase } from "@/lib/supabase-auth"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -54,12 +55,22 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
         mediaFileUrl: uploadedFile ? "pending_upload" : undefined,
       }
 
+      // Get the current session to include access token
+      const { data: { session } } = await supabase.auth.getSession()
+
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      }
+
+      // Include authorization header if we have a session
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+
       const response = await fetch("/api/clippers/submissions", {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(submissionData),
       })
 

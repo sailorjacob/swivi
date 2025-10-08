@@ -6,6 +6,7 @@ import { useState, useEffect } from "react"
 export const dynamic = 'force-dynamic'
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase-auth"
 import {
   DollarSign,
   TrendingUp,
@@ -107,8 +108,19 @@ export default function ClipperDashboard() {
       setError(null)
       console.log('📊 Fetching dashboard data...')
 
+      // Get the current session to include access token
+      const { data: { session } } = await supabase.auth.getSession()
+
+      const headers: HeadersInit = {}
+
+      // Include authorization header if we have a session
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+
       const response = await fetch("/api/clippers/dashboard", {
-        credentials: "include"
+        credentials: "include",
+        headers
       })
 
       if (response.ok) {

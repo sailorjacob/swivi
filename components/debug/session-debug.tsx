@@ -1,6 +1,7 @@
 "use client"
 
 import { useSession } from "@/lib/supabase-auth-provider"
+import { supabase } from "@/lib/supabase-auth"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -22,8 +23,19 @@ export function SessionDebug() {
     const fetchUserProfile = async () => {
       if (session?.user) {
         try {
+          // Get the current session to include access token
+          const { data: { session } } = await supabase.auth.getSession()
+
+          const headers: HeadersInit = {}
+
+          // Include authorization header if we have a session
+          if (session?.access_token) {
+            headers['Authorization'] = `Bearer ${session.access_token}`
+          }
+
           const response = await fetch("/api/user/profile", {
-            credentials: "include"
+            credentials: "include",
+            headers
           })
           if (response.ok) {
             const profileData = await response.json()
