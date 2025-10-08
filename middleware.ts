@@ -21,40 +21,35 @@ export default async function middleware(req) {
     return NextResponse.next()
   }
 
-  // Check for Supabase auth cookies
-  const accessToken = req.cookies.get('sb-access-token')?.value
-  const refreshToken = req.cookies.get('sb-refresh-token')?.value
-  const hasAuthCookies = accessToken && refreshToken
+  // Skip API routes entirely - let them handle their own authentication
+  if (pathname.startsWith('/api/')) {
+    console.log(`🔄 API route detected: ${pathname} - letting route handle authentication`)
+    return NextResponse.next()
+  }
 
-  // Protected routes that require authentication
+  // Check for Supabase auth cookies (more flexible approach)
+  const hasAuthCookies = Array.from(req.cookies.keys()).some(key =>
+    key.startsWith('sb-') ||
+    key.includes('supabase') ||
+    key.includes('auth-token')
+  )
+
+  // Protected routes that require authentication (pages only)
   const protectedPaths = [
     '/admin',
-    '/clippers/dashboard',
-    '/api/user',
-    '/api/clippers',
-    '/api/admin'
+    '/clippers/dashboard'
   ]
 
   const isProtectedPath = protectedPaths.some(path =>
-    pathname.startsWith(path) || pathname.includes(path)
+    pathname.startsWith(path)
   )
 
   if (isProtectedPath && !hasAuthCookies) {
     console.log(`🚨 Protected route ${pathname} accessed without authentication - redirecting to login`)
 
-    // For API routes, return 401 instead of redirect
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     // For page routes, redirect to login
     const loginUrl = new URL('/clippers/signup', req.url)
     return NextResponse.redirect(loginUrl)
-  }
-
-  // For API routes, let them handle their own authentication
-  if (pathname.startsWith('/api/')) {
-    console.log(`🔄 API route detected: ${pathname} - letting route handle authentication`)
   }
 
   console.log(`✅ Allowing access to: ${pathname}`)
