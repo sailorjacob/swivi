@@ -158,6 +158,16 @@ export function useAuth() {
 // Alias for compatibility with dashboard components
 export function useSession() {
   const { user, session, loading } = useAuth()
+  
+  // Debug logging
+  console.log('🔍 useSession called:', {
+    loading,
+    hasSession: !!session,
+    hasUser: !!user,
+    userId: user?.id,
+    email: user?.email
+  })
+  
   return {
     data: session,
     status: loading ? "loading" : (session ? "authenticated" : "unauthenticated")

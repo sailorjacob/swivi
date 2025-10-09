@@ -32,7 +32,7 @@ export const createSupabaseServerClient = (request?: NextRequest) => {
     },
   } : cookies()
 
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
+  const supabaseClient = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       get(name: string) {
         return cookieStore.get(name)?.value
@@ -69,6 +69,19 @@ export const createSupabaseServerClient = (request?: NextRequest) => {
       persistSession: true
     }
   })
+
+  // If we have an Authorization header, set it manually
+  if (request && authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7)
+    console.log('🔑 Setting access token from Authorization header')
+    // Set the session manually using the token
+    supabaseClient.auth.setSession({
+      access_token: token,
+      refresh_token: '', // We don't have refresh token from header
+    })
+  }
+
+  return supabaseClient
 }
 
 // Server-side session helper for API routes

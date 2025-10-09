@@ -149,7 +149,14 @@ export const STORAGE_BUCKETS = {
 
 // Helper function for authenticated API calls
 export const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { session }, error } = await supabase.auth.getSession()
+  
+  console.log('🔍 authenticatedFetch session check:', {
+    hasSession: !!session,
+    hasAccessToken: !!session?.access_token,
+    error: error?.message,
+    url
+  })
   
   const headers = {
     'Content-Type': 'application/json',
@@ -159,6 +166,9 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
   // Add Authorization header if we have a session
   if (session?.access_token) {
     headers['Authorization'] = `Bearer ${session.access_token}`
+    console.log('✅ Added Authorization header for', url)
+  } else {
+    console.log('❌ No access token available for', url)
   }
 
   return fetch(url, {
