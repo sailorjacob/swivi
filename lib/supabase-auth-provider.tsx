@@ -67,6 +67,46 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           if (session?.user && !error) {
             console.log('✅ Initial session found:', session.user.email)
 
+            // Fetch user role from database to enhance session
+            try {
+              const response = await fetch('/api/user/profile', {
+                headers: {
+                  'Authorization': `Bearer ${session.access_token}`,
+                  'Content-Type': 'application/json'
+                }
+              })
+              
+              if (response.ok) {
+                const userData = await response.json()
+                console.log('✅ Enhanced session with database data:', { role: userData.role, name: userData.name })
+                
+                // Enhance the user object with database data
+                const enhancedUser = {
+                  ...session.user,
+                  role: userData.role,
+                  verified: userData.verified,
+                  name: userData.name,
+                  image: userData.image
+                } as SupabaseUser
+                
+                const enhancedSession = {
+                  ...session,
+                  user: enhancedUser
+                } as SupabaseSession
+                
+                setUser(enhancedUser)
+                setSession(enhancedSession)
+              } else {
+                console.warn('Could not fetch user profile, using basic session')
+                setUser(session.user as SupabaseUser)
+                setSession(session as SupabaseSession)
+              }
+            } catch (error) {
+              console.warn('Error fetching user profile:', error)
+              setUser(session.user as SupabaseUser)
+              setSession(session as SupabaseSession)
+            }
+
             // Debug: Send session info to server for comparison
             try {
               fetch('/api/debug/frontend-session', {
@@ -80,10 +120,6 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             } catch (e) {
               // Ignore debug errors
             }
-
-            // Set the actual session
-            setSession(session as SupabaseSession)
-            setUser(session.user as SupabaseUser)
           } else {
             console.log('❌ No initial session found or error:', error?.message)
             
