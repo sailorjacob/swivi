@@ -15,7 +15,10 @@ export async function POST(request: NextRequest) {
           error: "Not authenticated - please log in first",
           login_url: "https://www.swivimedia.com/clippers/login",
           session_status: "missing"
-        }
+        },
+        { status: 401 }
+      )
+    }
 
     // Get the database user ID
     const dbUser = await prisma.user.findUnique({

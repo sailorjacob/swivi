@@ -8,7 +8,10 @@ export async function POST(request: NextRequest) {
 
     if (!user?.id || error) {
       return NextResponse.json(
-        { error: "Not authenticated" }
+        { error: "Not authenticated" },
+        { status: 401 }
+      )
+    }
 
     // Get the database user ID
     const dbUser = await prisma.user.findUnique({
@@ -20,9 +23,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "User not found in database" },
         { status: 404 }
-      )
-    },
-        { status: 401 }
       )
     }
 
