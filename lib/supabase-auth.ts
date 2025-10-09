@@ -72,37 +72,12 @@ export const getSession = async () => {
   return supabase.auth.getSession()
 }
 
-// Get user with database-enhanced data (for client-side use)
+// Get user with basic role assignment (simplified)
 export const getUserWithRole = async (): Promise<{ user: SupabaseUser | null; error: any }> => {
   const { data: { user }, error } = await supabase.auth.getUser()
 
   if (user && !error) {
-    // Fetch enhanced data from our API
-    try {
-      const response = await fetch('/api/user/profile', {
-        credentials: 'include'
-      })
-      if (response.ok) {
-        const userData = await response.json()
-        // Merge Supabase Auth user with database data
-        return {
-          user: {
-            ...user,
-            ...userData,
-            // Ensure we keep the auth data as primary
-            id: user.id,
-            email: user.email,
-            user_metadata: user.user_metadata,
-            email_confirmed_at: user.email_confirmed_at
-          } as SupabaseUser,
-          error: null
-        }
-      }
-    } catch (fetchError) {
-      console.warn('Could not fetch enhanced user data:', fetchError)
-    }
-
-    // Fallback to basic user data
+    // Return user with basic role assignment
     return {
       user: {
         ...user,

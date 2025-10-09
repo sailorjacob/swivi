@@ -38,33 +38,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             // Set session first
             setSession({ user: initialUser } as SupabaseSession)
 
-            // Try to fetch enhanced user data from API (don't fail if it doesn't work)
-            try {
-              const response = await fetch('/api/user/profile', {
-                credentials: 'include'
-              })
-              if (response.ok) {
-                const userData = await response.json()
-                // Merge session user with database user data
-                const enhancedUser = {
-                  ...initialUser,
-                  ...userData,
-                  // Ensure we keep the session data as primary
-                  id: initialUser.id,
-                  email: initialUser.email,
-                  user_metadata: initialUser.user_metadata,
-                  email_confirmed_at: initialUser.email_confirmed_at
-                }
-                setUser(enhancedUser)
-                console.log('✅ Enhanced user data loaded from database')
-              } else {
-                console.log('ℹ️ Using session data only (API not available)')
-                setUser(initialUser)
-              }
-            } catch (error) {
-              console.warn('⚠️ Could not fetch enhanced user data:', error.message)
-              setUser(initialUser)
-            }
+            // Use session data directly - simplified approach
+            console.log('✅ Using session data for user')
+            setUser(initialUser)
           } else {
             console.log('❌ No initial session found or error:', error?.message)
             setSession(null)
@@ -106,35 +82,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             // Set session first
             setSession(session as SupabaseSession)
 
-            // Try to fetch enhanced user data from API (don't fail if it doesn't work)
-            try {
-              const response = await fetch('/api/user/profile', {
-                credentials: 'include'
-              })
-              if (response.ok) {
-                const userData = await response.json()
-                // Merge session user with database user data
-                const enhancedUser = {
-                  ...session.user,
-                  ...userData,
-                  // Ensure we keep the session data as primary
-                  id: session.user.id,
-                  email: session.user.email,
-                  user_metadata: session.user.user_metadata,
-                  email_confirmed_at: session.user.email_confirmed_at
-                }
-                setUser(enhancedUser)
-                console.log('✅ Enhanced user data loaded from database')
-              } else {
-                // Use session data if API fails
-                console.log('ℹ️ Using session data only (API not available)')
-                setUser(session.user as SupabaseUser)
-              }
-            } catch (error) {
-              console.warn('⚠️ Could not fetch enhanced user data:', error.message)
-              // Use session data if API fails
-              setUser(session.user as SupabaseUser)
-            }
+            // Use session data directly - simplified approach
+            console.log('✅ Using session data for user')
+            setUser(session.user as SupabaseUser)
           } else {
             console.log('❌ No session in auth change')
             setUser(null)
