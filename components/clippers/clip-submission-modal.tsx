@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { supabase } from "@/lib/supabase-auth"
+import { authenticatedFetch } from "@/lib/supabase-browser"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -55,12 +56,8 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
         mediaFileUrl: uploadedFile ? "pending_upload" : undefined,
       }
 
-      const response = await fetch("/api/clippers/submissions", {
+      const response = await authenticatedFetch("/api/clippers/submissions", {
         method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(submissionData),
       })
 

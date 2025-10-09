@@ -4,11 +4,24 @@ import { prisma } from "@/lib/prisma"
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
       return NextResponse.json(
-        { error: "Not authenticated" },
+        { error: "Not authenticated" }
+
+    // Get the database user ID
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id },
+      select: { id: true }
+    })
+
+    if (!dbUser) {
+      return NextResponse.json(
+        { error: "User not found in database" },
+        { status: 404 }
+      )
+    },
         { status: 401 }
       )
     }
@@ -51,7 +64,7 @@ export async function POST(request: NextRequest) {
     // Find the latest verification for this platform and user
     const verification = await prisma.socialVerification.findFirst({
       where: {
-        userId: user.id,
+        userId: dbUser.id,
         platform: platformEnum as any,
         verified: false,
         expiresAt: {
@@ -102,7 +115,7 @@ export async function POST(request: NextRequest) {
       // Check if account already exists
       const existingAccount = await prisma.socialAccount.findFirst({
         where: {
-          userId: user.id,
+          userId: dbUser.id,
           platform: platformEnum as any,
           username: username
         }
@@ -123,7 +136,7 @@ export async function POST(request: NextRequest) {
         // Create new account
         await prisma.socialAccount.create({
           data: {
-            userId: user.id,
+            userId: dbUser.id,
             platform: platformEnum as any,
             username: username,
             displayName: displayName || platformName,

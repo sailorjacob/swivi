@@ -551,9 +551,22 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
     if (!user?.id || error) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+      return NextResponse.json({ error: "Not authenticated" }
+
+    // Get the database user ID
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id },
+      select: { id: true }
+    })
+
+    if (!dbUser) {
+      return NextResponse.json(
+        { error: "User not found in database" },
+        { status: 404 }
+      )
+    }, { status: 401 })
     }
 
     const { platform, username, code } = await request.json()
@@ -583,7 +596,7 @@ export async function POST(request: NextRequest) {
 
       const verification = await prisma.socialVerification.findFirst({
         where: {
-          userId: user.id,
+          userId: dbUser.id,
           platform: platformEnum as any,
           verified: false,
           expiresAt: {
@@ -626,7 +639,7 @@ export async function POST(request: NextRequest) {
       // Delete expired verifications
       const expiredDeleted = await prisma.socialVerification.deleteMany({
         where: {
-          userId: user.id,
+          userId: dbUser.id,
           platform: platformEnum as any,
           expiresAt: {
             lt: new Date()
@@ -641,7 +654,7 @@ export async function POST(request: NextRequest) {
       // Delete duplicate unverified verifications (keep only the most recent)
       const allVerifications = await prisma.socialVerification.findMany({
         where: {
-          userId: user.id,
+          userId: dbUser.id,
           platform: platformEnum as any,
           verified: false,
           expiresAt: {
@@ -679,7 +692,7 @@ export async function POST(request: NextRequest) {
 
       const existingAccount = await prisma.socialAccount.findFirst({
         where: {
-          userId: user.id,
+          userId: dbUser.id,
           platform: platformEnum as any,
           username: {
             equals: cleanUsername,
@@ -761,7 +774,7 @@ export async function POST(request: NextRequest) {
       try {
         await prisma.socialVerification.updateMany({
           where: {
-            userId: user.id,
+            userId: dbUser.id,
             platform: platformEnum as any,
             code: verificationCode,
             verified: false
@@ -780,7 +793,7 @@ export async function POST(request: NextRequest) {
       // Check if account already exists (case-insensitive username matching)
       const existingAccount = await prisma.socialAccount.findFirst({
         where: {
-          userId: user.id,
+          userId: dbUser.id,
           platform: platformEnum as any,
           username: {
             equals: cleanUsername,
@@ -804,7 +817,7 @@ export async function POST(request: NextRequest) {
           // Create new account
           await prisma.socialAccount.create({
             data: {
-              userId: user.id,
+              userId: dbUser.id,
               platform: platformEnum as any,
               username: cleanUsername,
               displayName: `@${cleanUsername}`,

@@ -14,12 +14,25 @@ function generateVerificationCode(): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
+      )
+    }
+
+    // Get the database user ID
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id },
+      select: { id: true }
+    })
+
+    if (!dbUser) {
+      return NextResponse.json(
+        { error: "User not found in database" },
+        { status: 404 }
       )
     }
 
@@ -62,7 +75,7 @@ export async function POST(request: NextRequest) {
     // Check if user already has 5 verified accounts for this platform
     const verifiedCount = await prisma.socialAccount.count({
       where: {
-        userId: user.id,
+        userId: dbUser.id,
         platform: platformEnum as any,
         verified: true
       }
@@ -78,7 +91,7 @@ export async function POST(request: NextRequest) {
     // Check if user already has a pending verification for this platform
     const existingVerification = await prisma.socialVerification.findFirst({
       where: {
-        userId: user.id,
+        userId: dbUser.id,
         platform: platformEnum as any,
         verified: false,
         expiresAt: {
@@ -101,7 +114,7 @@ export async function POST(request: NextRequest) {
     if (force || existingVerification) {
       const deletedCount = await prisma.socialVerification.deleteMany({
         where: {
-          userId: user.id,
+          userId: dbUser.id,
           platform: platformEnum as any,
           verified: false
         }
@@ -123,7 +136,7 @@ export async function POST(request: NextRequest) {
     if (force || existingVerification) {
       const deletedCount = await prisma.socialVerification.deleteMany({
         where: {
-          userId: user.id,
+          userId: dbUser.id,
           platform: platformEnum as any,
           verified: false
         }
@@ -138,7 +151,7 @@ export async function POST(request: NextRequest) {
     // Create verification record
     const verification = await prisma.socialVerification.create({
       data: {
-        userId: user.id,
+        userId: dbUser.id,
         platform: platformEnum as any,
         code: code,
         expiresAt: expiresAt,

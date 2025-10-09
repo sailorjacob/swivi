@@ -4,11 +4,24 @@ import { prisma } from "@/lib/prisma"
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
       return NextResponse.json(
-        { error: "Not authenticated" },
+        { error: "Not authenticated" }
+
+    // Get the database user ID
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id },
+      select: { id: true }
+    })
+
+    if (!dbUser) {
+      return NextResponse.json(
+        { error: "User not found in database" },
+        { status: 404 }
+      )
+    },
         { status: 401 }
       )
     }
@@ -35,7 +48,7 @@ export async function POST(request: NextRequest) {
     // Delete all existing unverified codes for this platform
     const deletedCount = await prisma.socialVerification.deleteMany({
       where: {
-        userId: user.id,
+        userId: dbUser.id,
         platform: platformEnum as any,
         verified: false
       }

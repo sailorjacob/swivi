@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase-auth"
+import { authenticatedFetch } from "@/lib/supabase-browser"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -46,12 +47,8 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
 
     setIsGenerating(true)
     try {
-      const response = await fetch('/api/social-verification/generate', {
+      const response = await authenticatedFetch('/api/social-verification/generate', {
         method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           platform,
           username: username.trim(),
@@ -94,12 +91,8 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
 
     setIsVerifying(true)
     try {
-      const response = await fetch('/api/social-verification/verify-browserql', {
+      const response = await authenticatedFetch('/api/social-verification/verify-browserql', {
         method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           platform,
           username: username.trim(),

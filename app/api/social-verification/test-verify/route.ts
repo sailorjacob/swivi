@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     console.log("🔧 Test verification endpoint called")
 
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
       console.log("❌ No user found in test verify")
@@ -15,7 +15,20 @@ export async function POST(request: NextRequest) {
           error: "Not authenticated - please log in first",
           login_url: "https://www.swivimedia.com/clippers/login",
           session_status: "missing"
-        },
+        }
+
+    // Get the database user ID
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id },
+      select: { id: true }
+    })
+
+    if (!dbUser) {
+      return NextResponse.json(
+        { error: "User not found in database" },
+        { status: 404 }
+      )
+    },
         { status: 401 }
       )
     }
@@ -60,7 +73,7 @@ export async function POST(request: NextRequest) {
     // Find or create a verification code
     let verification = await prisma.socialVerification.findFirst({
       where: {
-        userId: user.id,
+        userId: dbUser.id,
         platform: platformEnum as any,
         verified: false,
         expiresAt: {
@@ -77,7 +90,7 @@ export async function POST(request: NextRequest) {
       const code = Math.random().toString(36).substring(2, 8).toUpperCase()
       verification = await prisma.socialVerification.create({
         data: {
-          userId: user.id,
+          userId: dbUser.id,
           platform: platformEnum as any,
           code: code,
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
@@ -100,7 +113,7 @@ export async function POST(request: NextRequest) {
       // Create or update social account
       const existingAccount = await prisma.socialAccount.findFirst({
         where: {
-          userId: user.id,
+          userId: dbUser.id,
           platform: platformEnum as any,
           username: username
         }
@@ -120,7 +133,7 @@ export async function POST(request: NextRequest) {
       } else {
         await prisma.socialAccount.create({
           data: {
-            userId: user.id,
+            userId: dbUser.id,
             platform: platformEnum as any,
             username: username,
             displayName: displayName || platformName,
