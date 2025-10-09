@@ -45,6 +45,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         console.log('🍪 Available cookies:', allCookies ? 'present' : 'none')
         console.log('🍪 Supabase cookies:', allCookies.includes('sb-') ? 'found' : 'missing')
         
+        // If we have OAuth callback parameters, wait a bit for Supabase to process them
+        if (urlHash.includes('access_token') || urlParams.has('code')) {
+          console.log('🔄 OAuth callback detected, waiting for Supabase to process...')
+          await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
+        }
+        
         // Use the actual Supabase session instead of just user
         const { data: { session }, error } = await supabase.auth.getSession()
         
