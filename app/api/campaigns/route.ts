@@ -13,7 +13,6 @@ const createCampaignSchema = z.object({
   startDate: z.string().transform((str) => str ? new Date(str) : null).nullable(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])),
   requirements: z.array(z.string()).optional().default([]),
-  featuredImage: z.string().optional(),
 })
 
 export async function GET(request: NextRequest) {
@@ -112,7 +111,6 @@ export async function POST(request: NextRequest) {
 
     // Add optional fields if provided
     if (validatedData.startDate) campaignData.startDate = validatedData.startDate
-    if (validatedData.featuredImage) campaignData.featuredImage = validatedData.featuredImage
 
     const campaign = await prisma.campaign.create({
       data: campaignData,

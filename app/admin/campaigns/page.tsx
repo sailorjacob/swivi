@@ -33,11 +33,6 @@ interface Campaign {
   status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
   targetPlatforms: string[]
   requirements: string[]
-  featuredImage?: string
-  category?: string
-  difficulty?: string
-  maxParticipants?: number
-  tags: string[]
   createdAt: string
   _count: {
     submissions: number

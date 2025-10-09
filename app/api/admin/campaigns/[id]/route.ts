@@ -15,11 +15,6 @@ const updateCampaignSchema = z.object({
   status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])).optional(),
   requirements: z.array(z.string()).optional(),
-  featuredImage: z.string().optional(),
-  // category: z.string().optional(), // Commented out - not in DB
-  // difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(), // Commented out - not in DB
-  // maxParticipants: z.number().positive().optional(), // Commented out - not in DB
-  // tags: z.array(z.string()).optional(), // Commented out - not in DB
 })
 
 export async function GET(
