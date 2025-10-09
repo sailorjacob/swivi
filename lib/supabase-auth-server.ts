@@ -17,13 +17,13 @@ export const createSupabaseServerClient = (request?: NextRequest) => {
 
   // If we have a request, use its cookies, otherwise use Next.js cookies
   const cookieStore = request ? {
-    get(name: string) {
-      const value = request.cookies.get(name)?.value
-      if (name.startsWith('sb-')) {
-        console.log(`🍪 Reading cookie ${name}:`, value ? 'present' : 'missing')
-      }
-      return value
-    },
+      get(name: string) {
+        const value = request.cookies.get(name)?.value
+        if (name.startsWith('sb-')) {
+          console.log(`🍪 Reading cookie ${name}:`, value ? `present (${value.length} chars)` : 'missing')
+        }
+        return value
+      },
     set(name: string, value: string, options: any) {
       // In API routes, we can't set cookies, but this is just for reading
     },
@@ -94,7 +94,7 @@ export const getServerUserWithRole = async (request?: NextRequest): Promise<{ us
   try {
     console.log('🔍 getServerUserWithRole called with request:', !!request)
     const supabase = createSupabaseServerClient(request)
-    const { data: { user }, error } = await supabase.auth.getUser()
+    let { data: { user }, error } = await supabase.auth.getUser()
 
     console.log('🔍 Supabase auth result:', { 
       hasUser: !!user, 
@@ -105,46 +105,6 @@ export const getServerUserWithRole = async (request?: NextRequest): Promise<{ us
 
     if (error) {
       console.warn('Auth error:', error.message)
-    }
-
-    // If no user from cookies, try Authorization header
-    if (!user && request) {
-      const authHeader = request.headers.get('authorization')
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.substring(7)
-        console.log('🔑 Attempting to verify JWT token directly')
-        
-        try {
-          // Create a new client with the token
-          const tokenClient = createServerClient(supabaseUrl, supabaseAnonKey, {
-            cookies: {
-              get: () => undefined,
-              set: () => {},
-              remove: () => {},
-            },
-            auth: {
-              flowType: 'pkce',
-              autoRefreshToken: false,
-              detectSessionInUrl: false,
-              persistSession: false
-            },
-            global: {
-              headers: {
-                Authorization: authHeader
-              }
-            }
-          })
-          
-          const { data: { user: tokenUser }, error: tokenError } = await tokenClient.auth.getUser()
-          if (tokenUser && !tokenError) {
-            console.log('✅ Successfully verified user from JWT token:', tokenUser.email)
-            user = tokenUser
-            error = null
-          }
-        } catch (tokenErr) {
-          console.log('❌ Failed to verify JWT token:', tokenErr.message)
-        }
-      }
     }
 
     if (user && !error) {

@@ -29,8 +29,22 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const getInitialSession = async () => {
       try {
         console.log('🔍 Getting initial session...')
+        
+        // Check what cookies are available
+        const allCookies = document.cookie
+        console.log('🍪 Available cookies:', allCookies ? 'present' : 'none')
+        console.log('🍪 Supabase cookies:', allCookies.includes('sb-') ? 'found' : 'missing')
+        
         // Use the actual Supabase session instead of just user
         const { data: { session }, error } = await supabase.auth.getSession()
+        
+        console.log('🔍 Session retrieval result:', {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          hasAccessToken: !!session?.access_token,
+          userEmail: session?.user?.email,
+          error: error?.message
+        })
 
         if (isMounted) {
           if (session?.user && !error) {
