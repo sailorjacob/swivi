@@ -16,6 +16,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    console.log('✅ Dashboard auth success for user:', user.id)
+    
+    // TEMPORARY: Return empty dashboard data to test authentication
+    return NextResponse.json({
+      stats: [
+        { label: "Total Views", value: "0", change: "+0%" },
+        { label: "Total Earnings", value: "$0.00", change: "+0%" },
+        { label: "Active Clips", value: "0", change: "+0%" },
+        { label: "Pending Payouts", value: "$0.00", change: "+0%" }
+      ],
+      recentClips: [],
+      activeCampaigns: 0
+    })
+
     const userId = user.id
 
     // Get user's real stats
