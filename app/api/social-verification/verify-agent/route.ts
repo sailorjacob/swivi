@@ -25,9 +25,6 @@ export async function POST(request: NextRequest) {
         { error: "User not found in database" },
         { status: 404 }
       )
-    },
-        { status: 401 }
-      )
     }
 
     const { platform, username } = await request.json()
