@@ -201,7 +201,8 @@ export default function DashboardLayout({
 
     if (status === "unauthenticated" || !session?.user) {
       console.log("❌ Dashboard: No authenticated user, redirecting to signup")
-      router.push("/clippers/signup")
+      // Use replace to prevent back button issues
+      router.replace("/clippers/signup")
       return
     }
 

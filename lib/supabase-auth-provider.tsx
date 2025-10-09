@@ -60,12 +60,18 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
     getInitialSession()
 
-    // Listen for auth changes
+    // Listen for auth changes - simplified to prevent rapid state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔄 Auth state changed:', event, session?.user?.email)
 
         if (!isMounted) return
+
+        // Prevent rapid state changes that cause glitching
+        if (loading) {
+          console.log('⏳ Still loading, ignoring auth state change')
+          return
+        }
 
         try {
           if (event === 'SIGNED_OUT') {
@@ -79,12 +85,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           if (session?.user) {
             console.log('✅ Valid session found in auth change:', session.user.email)
 
-            // Set session first
-            setSession(session as SupabaseSession)
-
-            // Use session data directly - simplified approach
-            console.log('✅ Using session data for user')
-            setUser(session.user as SupabaseUser)
+            // Only update if we don't already have a valid session
+            if (!user || user.id !== session.user.id) {
+              console.log('🔄 Updating session state for user:', session.user.email)
+              setSession(session as SupabaseSession)
+              setUser(session.user as SupabaseUser)
+            }
           } else {
             console.log('❌ No session in auth change')
             setUser(null)
@@ -94,8 +100,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           setLoading(false)
         } catch (error) {
           console.error('❌ Error in auth state change:', error)
-          setUser(null)
-          setSession(null)
+          // Don't clear user/session on error - let it be handled by retry logic
           setLoading(false)
         }
       }

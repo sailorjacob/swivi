@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server"
+
 // Simplified middleware - just handle OAuth callbacks
 export default async function middleware(req) {
   const { pathname, searchParams } = req.nextUrl
