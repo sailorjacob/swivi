@@ -161,28 +161,60 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(serializedUser)
   } catch (error) {
-    console.error("Error fetching user profile:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("❌ Profile GET: Error occurred:", error)
+    
+    // Handle database connection issues
+    if (error.message?.includes('prepared statement') || 
+        error.message?.includes('database') || 
+        error.message?.includes('connection')) {
+      console.log('❌ Profile GET: Database connection issue')
+      // Try to reset connection
+      try {
+        await prisma.$disconnect()
+        await prisma.$connect()
+        console.log('🔄 Profile GET: Database connection reset')
+      } catch (resetError) {
+        console.log('❌ Profile GET: Failed to reset connection:', resetError.message)
+      }
+    }
+    
+    console.error("❌ Profile GET: Final error:", error.message)
+    return NextResponse.json({ 
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    }, { status: 500 })
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
+    console.log('🔍 Profile PUT: Starting update request')
     const { user, error } = await getServerUserWithRole(request)
 
+    console.log('🔍 Profile PUT: Auth result:', {
+      hasUser: !!user,
+      userId: user?.id,
+      error: error?.message
+    })
+
     if (!user?.id || error) {
+      console.log('❌ Profile PUT: Authentication failed')
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const body = await request.json()
+    console.log('🔍 Profile PUT: Request body:', body)
     const { type, ...data } = body
 
     let validatedData
     if (type === "profile") {
+      console.log('🔍 Profile PUT: Validating profile data:', data)
       validatedData = updateProfileSchema.parse(data)
     } else if (type === "payout") {
+      console.log('🔍 Profile PUT: Validating payout data:', data)
       validatedData = updatePayoutSchema.parse(data)
     } else {
+      console.log('❌ Profile PUT: Invalid update type:', type)
       return NextResponse.json({ error: "Invalid update type" }, { status: 400 })
     }
 
@@ -195,6 +227,9 @@ export async function PUT(request: NextRequest) {
         cleanedData[key] = value
       }
     }
+
+    console.log('🔍 Profile PUT: Cleaned data for update:', cleanedData)
+    console.log('🔍 Profile PUT: Updating user with supabaseAuthId:', user.id)
 
     const updatedUser = await prisma.user.update({
       where: { supabaseAuthId: user.id },
@@ -213,17 +248,39 @@ export async function PUT(request: NextRequest) {
       }
     })
 
+    console.log('✅ Profile PUT: Update successful:', updatedUser.id)
     return NextResponse.json(updatedUser)
   } catch (error) {
+    console.error("❌ Profile PUT: Error occurred:", error)
+    
     if (error instanceof z.ZodError) {
+      console.log('❌ Profile PUT: Validation error:', error.errors)
       return NextResponse.json(
         { error: "Validation error", details: error.errors },
         { status: 400 }
       )
     }
     
-    console.error("Error updating user profile:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    // Handle database connection issues
+    if (error.message?.includes('prepared statement') || 
+        error.message?.includes('database') || 
+        error.message?.includes('connection')) {
+      console.log('❌ Profile PUT: Database connection issue')
+      // Try to reset connection
+      try {
+        await prisma.$disconnect()
+        await prisma.$connect()
+        console.log('🔄 Profile PUT: Database connection reset')
+      } catch (resetError) {
+        console.log('❌ Profile PUT: Failed to reset connection:', resetError.message)
+      }
+    }
+    
+    console.error("❌ Profile PUT: Final error:", error.message)
+    return NextResponse.json({ 
+      error: "Internal server error", 
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    }, { status: 500 })
   }
 }
 
