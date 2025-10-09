@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
         totalEarnings: true,
         totalViews: true,
         createdAt: true,
-        accounts: {
+        socialAccounts: {
           select: {
             provider: true,
             providerAccountId: true,
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
             totalEarnings: true,
             totalViews: true,
             createdAt: true,
-            accounts: {
+            socialAccounts: {
               select: {
                 provider: true,
                 providerAccountId: true,
@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
           totalEarnings: 0,
           totalViews: 0,
           createdAt: new Date().toISOString(),
-          accounts: []
+          socialAccounts: []
         })
       }
     }
