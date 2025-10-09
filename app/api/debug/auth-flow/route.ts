@@ -73,13 +73,6 @@ export async function GET(request: NextRequest) {
           const dbUser = await prisma.user.findUnique({
             where: { supabaseAuthId: user.id },
             include: {
-              accounts: {
-                select: {
-                  provider: true,
-                  providerAccountId: true,
-                  type: true
-                }
-              },
               socialAccounts: {
                 select: {
                   platform: true,

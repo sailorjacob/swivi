@@ -17,16 +17,10 @@ export async function GET(request: NextRequest) {
 
     console.log("✅ Connected Accounts API: Valid session for user", user.id)
 
-    // Get user with their OAuth accounts
+    // Get user with their social accounts (no OAuth accounts table exists)
     const userData = await prisma.user.findUnique({
       where: { supabaseAuthId: user.id },
       include: {
-        accounts: {
-          select: {
-            provider: true,
-            providerAccountId: true,
-          }
-        },
         socialAccounts: {
           where: {
             verified: true
@@ -57,18 +51,29 @@ export async function GET(request: NextRequest) {
     // Format the response
     const connectedAccounts = []
 
-    // Add OAuth accounts (Discord, Google)
-    for (const account of userData.accounts) {
-      connectedAccounts.push({
-        id: `oauth_${account.provider}_${account.providerAccountId}`,
-        type: 'oauth',
-        platform: account.provider.toUpperCase(),
-        username: userData.email || 'Connected',
-        displayName: account.provider.charAt(0).toUpperCase() + account.provider.slice(1) + ' Account',
-        isOAuth: true,
-        canDelete: false, // OAuth accounts cannot be deleted from here
-        verifiedAt: userData.createdAt
-      })
+    // OAuth accounts are managed by Supabase Auth, not stored in our database
+    // We can show the current OAuth connection from the user's auth data
+    if (user.user_metadata) {
+      // Determine OAuth provider from user metadata
+      let oauthProvider = 'Unknown'
+      if (user.user_metadata.iss?.includes('discord')) {
+        oauthProvider = 'Discord'
+      } else if (user.user_metadata.iss?.includes('google')) {
+        oauthProvider = 'Google'
+      }
+
+      if (oauthProvider !== 'Unknown') {
+        connectedAccounts.push({
+          id: `oauth_${oauthProvider.toLowerCase()}_${user.id}`,
+          type: 'oauth',
+          platform: oauthProvider.toUpperCase(),
+          username: userData.email || 'Connected',
+          displayName: `${oauthProvider} Account`,
+          isOAuth: true,
+          canDelete: false, // OAuth accounts cannot be deleted from here
+          verifiedAt: userData.createdAt
+        })
+      }
     }
 
     // Add verified social accounts

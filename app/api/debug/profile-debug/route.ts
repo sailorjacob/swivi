@@ -62,10 +62,11 @@ export async function GET(request: NextRequest) {
             totalEarnings: true,
             totalViews: true,
             createdAt: true,
-            accounts: {
+            socialAccounts: {
               select: {
-                provider: true,
-                providerAccountId: true,
+                platform: true,
+                username: true,
+                verified: true,
               }
             }
           }
