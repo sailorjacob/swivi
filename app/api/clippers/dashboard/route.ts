@@ -34,17 +34,17 @@ export async function GET(request: NextRequest) {
             clipUrl: true,
             platform: true,
             createdAt: true,
-            campaign: {
+            campaigns: {
               select: {
                 title: true,
                 creator: true
               }
             },
-            clip: {
+            clips: {
               select: {
                 id: true,
                 title: true,
-                viewTracking: {
+                view_tracking: {
                   orderBy: { date: "desc" },
                   take: 1
                 }
@@ -91,17 +91,17 @@ export async function GET(request: NextRequest) {
                 clipUrl: true,
                 platform: true,
                 createdAt: true,
-                campaign: {
+                campaigns: {
                   select: {
                     title: true,
                     creator: true
                   }
                 },
-                clip: {
+                clips: {
                   select: {
                     id: true,
                     title: true,
-                    viewTracking: {
+                    view_tracking: {
                       orderBy: { date: "desc" },
                       take: 1
                     }
@@ -149,11 +149,11 @@ export async function GET(request: NextRequest) {
 
     // Get recent clips with proper data structure
     const recentClips = userData.clipSubmissions.map(submission => {
-      const latestTracking = submission.clip?.viewTracking[0]
+      const latestTracking = submission.clips?.view_tracking[0]
       return {
         id: submission.id,
-        title: submission.clip?.title || submission.clipUrl,
-        campaign: submission.campaign.title,
+        title: submission.clips?.title || submission.clipUrl,
+        campaign: submission.campaigns.title,
         status: submission.status.toLowerCase(),
         submittedAt: submission.createdAt.toISOString().split('T')[0],
         views: latestTracking ? Number(latestTracking.views) : 0,
