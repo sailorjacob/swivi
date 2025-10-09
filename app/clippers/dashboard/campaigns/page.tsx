@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase, authenticatedFetch } from "@/lib/supabase-auth"
+import { supabase, authenticatedFetch } from "@/lib/supabase-browser"
 import { motion } from "framer-motion"
 import { Card, CardContent } from "../../../../components/ui/card"
 import { Badge } from "../../../../components/ui/badge"

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 export const dynamic = 'force-dynamic'
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
-import { supabase, authenticatedFetch } from "@/lib/supabase-auth"
+import { supabase, authenticatedFetch } from "@/lib/supabase-browser"
 import {
   DollarSign,
   TrendingUp,

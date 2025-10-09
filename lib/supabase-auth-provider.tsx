@@ -1,8 +1,8 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { supabase, getUserWithRole, signInWithDiscord, signInWithGoogle, signOut } from './supabase-auth'
-import type { SupabaseUser, SupabaseSession } from './supabase-auth'
+import { supabase, getUserWithRole, signInWithDiscord, signInWithGoogle, signOut } from './supabase-browser'
+import type { SupabaseUser, SupabaseSession } from './supabase-browser'
 
 // Helper function to create user in database from Supabase Auth user
 // This is now handled automatically in the server-side auth functions

@@ -5,8 +5,8 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
-import { authenticatedFetch } from "@/lib/supabase-auth"
-import { supabase } from "@/lib/supabase-auth"
+import { authenticatedFetch } from "@/lib/supabase-browser"
+import { supabase } from "@/lib/supabase-browser"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
 import { Button } from "../../../../components/ui/button"
 import { Input } from "../../../../components/ui/input"
