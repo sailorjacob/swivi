@@ -78,7 +78,13 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
               
               if (response.ok) {
                 const userData = await response.json()
-                console.log('✅ Enhanced session with database data:', { role: userData.role, name: userData.name })
+                console.log('✅ Enhanced session with database data:', { 
+                  role: userData.role, 
+                  name: userData.name,
+                  email: userData.email,
+                  hasRole: !!userData.role,
+                  roleValue: userData.role
+                })
                 
                 // Enhance the user object with database data
                 const enhancedUser = {

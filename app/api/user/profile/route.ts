@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
           id: true,
           name: true,
           email: true,
+          role: true,
           bio: true,
           website: true,
           walletAddress: true,
@@ -170,6 +171,11 @@ export async function GET(request: NextRequest) {
 
     // Convert BigInt fields to strings for JSON serialization
     const serializedUser = serializeUser(dbUser)
+    console.log("✅ Profile API: Returning user data with role:", { 
+      email: dbUser.email, 
+      role: dbUser.role, 
+      name: dbUser.name 
+    })
     return NextResponse.json(serializedUser)
   } catch (error) {
     console.error("❌ Profile GET: Error occurred:", error)
