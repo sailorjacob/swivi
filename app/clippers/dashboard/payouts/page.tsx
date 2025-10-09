@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
+import { authenticatedFetch } from "@/lib/supabase-auth"
 import { supabase } from "@/lib/supabase-auth"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
 import { Button } from "../../../../components/ui/button"
@@ -50,9 +51,7 @@ export default function PayoutsPage() {
       if (!session?.user?.id) return
       
       try {
-        const response = await fetch("/api/user/profile", {
-          credentials: "include"
-        })
+        const response = await authenticatedFetch("/api/user/profile")
         if (response.ok) {
           const userData = await response.json()
           setUser(userData)
@@ -112,12 +111,8 @@ export default function PayoutsPage() {
     setPayoutSaving(true)
     
     try {
-      const response = await fetch("/api/user/profile", {
+      const response = await authenticatedFetch("/api/user/profile", {
         method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           type: "payout",
           ...payoutData

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase-auth"
+import { supabase, authenticatedFetch } from "@/lib/supabase-auth"
 import { motion } from "framer-motion"
 import { Card, CardContent } from "../../../../components/ui/card"
 import { Badge } from "../../../../components/ui/badge"
@@ -64,9 +64,7 @@ export default function CampaignsPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch("/api/clippers/campaigns", {
-        credentials: "include"
-      })
+      const response = await authenticatedFetch("/api/clippers/campaigns")
       if (response.ok) {
         const data = await response.json()
         setCampaigns(data)

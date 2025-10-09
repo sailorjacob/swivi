@@ -135,12 +135,8 @@ export default function ProfilePage() {
     setIsSaving(true)
 
     try {
-      const response = await fetch("/api/user/profile", {
+      const response = await authenticatedFetch("/api/user/profile", {
         method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           type: "profile",
           name: profileData.name,
@@ -180,17 +176,14 @@ export default function ProfilePage() {
     }
 
     try {
-      const response = await fetch(`/api/user/connected-accounts?id=${accountId}`, {
+      const response = await authenticatedFetch(`/api/user/connected-accounts?id=${accountId}`, {
         method: "DELETE",
-        credentials: "include",
       })
 
       if (response.ok) {
         toast.success("Account deleted successfully")
         // Refresh the connected accounts list
-        const accountsResponse = await fetch("/api/user/connected-accounts", {
-          credentials: "include"
-        })
+        const accountsResponse = await authenticatedFetch("/api/user/connected-accounts")
         if (accountsResponse.ok) {
           const accountsData = await accountsResponse.json()
           setConnectedAccounts(accountsData)
