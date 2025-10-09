@@ -11,6 +11,7 @@ import { QueryProvider } from "@/components/providers/query-provider"
 import { AuthProvider } from "@/components/providers/auth-provider"
 import { ClickAnimation } from "@/components/ui/click-animation"
 import { SessionDebug } from "@/components/debug/session-debug"
+import { AuthDebug } from "@/components/debug/auth-debug"
 
 import { cn } from "@/lib/utils"
 import { DynamicBranding } from "@/components/ui/dynamic-branding"
@@ -101,6 +102,7 @@ export default function RootLayout({
               <ClickAnimation />
               {children}
               <SessionDebug />
+              <AuthDebug />
 
               {/* Dynamic Page-Based Branding */}
               <DynamicBranding />

@@ -70,15 +70,9 @@ export const createSupabaseServerClient = (request?: NextRequest) => {
     }
   })
 
-  // If we have an Authorization header, set it manually
+  // If we have an Authorization header, we'll handle it in the auth functions
   if (request && authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.substring(7)
-    console.log('🔑 Setting access token from Authorization header')
-    // Set the session manually using the token
-    supabaseClient.auth.setSession({
-      access_token: token,
-      refresh_token: '', // We don't have refresh token from header
-    })
+    console.log('🔑 Found Bearer token in Authorization header')
   }
 
   return supabaseClient
@@ -111,6 +105,46 @@ export const getServerUserWithRole = async (request?: NextRequest): Promise<{ us
 
     if (error) {
       console.warn('Auth error:', error.message)
+    }
+
+    // If no user from cookies, try Authorization header
+    if (!user && request) {
+      const authHeader = request.headers.get('authorization')
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7)
+        console.log('🔑 Attempting to verify JWT token directly')
+        
+        try {
+          // Create a new client with the token
+          const tokenClient = createServerClient(supabaseUrl, supabaseAnonKey, {
+            cookies: {
+              get: () => undefined,
+              set: () => {},
+              remove: () => {},
+            },
+            auth: {
+              flowType: 'pkce',
+              autoRefreshToken: false,
+              detectSessionInUrl: false,
+              persistSession: false
+            },
+            global: {
+              headers: {
+                Authorization: authHeader
+              }
+            }
+          })
+          
+          const { data: { user: tokenUser }, error: tokenError } = await tokenClient.auth.getUser()
+          if (tokenUser && !tokenError) {
+            console.log('✅ Successfully verified user from JWT token:', tokenUser.email)
+            user = tokenUser
+            error = null
+          }
+        } catch (tokenErr) {
+          console.log('❌ Failed to verify JWT token:', tokenErr.message)
+        }
+      }
     }
 
     if (user && !error) {
