@@ -26,27 +26,25 @@ export async function GET(request: NextRequest) {
       discord_client_id_prefix: env.DISCORD_CLIENT_ID?.substring(0, 8) + "..."
     }
 
-    // 2. NextAuth configuration check
-    results.checks.nextauth_config = {
-      auth_options_exists: !!authOptions,
-      providers_count: authOptions?.providers?.length || 0,
-      providers: authOptions?.providers?.map((p: any) => p.id) || [],
-      has_prisma_adapter: !!authOptions?.adapter,
-      session_strategy: authOptions?.session?.strategy,
-      has_discord_provider: authOptions?.providers?.some((p: any) => p.id === 'discord') || false
+    // 2. Supabase Auth configuration check
+    results.checks.supabase_auth = {
+      has_supabase_url: !!env.NEXT_PUBLIC_SUPABASE_URL,
+      has_supabase_anon_key: !!env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      has_service_role_key: !!env.SUPABASE_SERVICE_ROLE_KEY,
+      supabase_url_prefix: env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30) + "..."
     }
 
     // 3. Prisma/Database check
     try {
       const userCount = await prisma.user.count()
-      const accountCount = await prisma.account.count()
-      const sessionCount = await prisma.session.count()
+      const socialAccountCount = await prisma.socialAccount.count()
+      const verificationCount = await prisma.socialVerification.count()
       
       results.checks.database = {
         connected: true,
         user_count: userCount,
-        account_count: accountCount,
-        session_count: sessionCount
+        social_account_count: socialAccountCount,
+        verification_count: verificationCount
       }
     } catch (error) {
       results.checks.database = {
@@ -116,11 +114,11 @@ export async function GET(request: NextRequest) {
 
     // 5. Request analysis
     const cookies = request.headers.get('cookie') || ''
-    const hasNextAuthToken = cookies.includes('next-auth.session-token') || cookies.includes('__Secure-next-auth.session-token')
+    const hasSupabaseToken = cookies.includes('sb-') // Supabase auth cookies start with sb-
     
     results.checks.request = {
       has_cookies: !!cookies,
-      has_nextauth_token: hasNextAuthToken,
+      has_supabase_token: hasSupabaseToken,
       cookie_names: cookies.split(';').map(c => c.trim().split('=')[0]).filter(Boolean),
       user_agent: request.headers.get('user-agent'),
       referer: request.headers.get('referer')
@@ -128,8 +126,8 @@ export async function GET(request: NextRequest) {
 
     // 6. Overall assessment
     const hasValidConfig = results.checks.env_vars.has_database_url && 
-                          results.checks.env_vars.has_nextauth_secret &&
-                          results.checks.env_vars.has_discord_client_id
+                          results.checks.supabase_auth.has_supabase_url &&
+                          results.checks.supabase_auth.has_supabase_anon_key
     
     const hasWorkingDb = results.checks.database.connected
     const hasSession = results.checks.session.exists

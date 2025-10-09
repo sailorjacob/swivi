@@ -7,34 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  type              String
-  provider          String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  providerAccountId String  @map("provider_account_id")
-  userId            String  @map("user_id")
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@map("accounts")
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  expires      DateTime
-  sessionToken String   @unique @map("session_token")
-  userId       String   @map("user_id")
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
-}
 
 // Core user profile (Supabase Auth-based)
 model User {
@@ -61,13 +33,11 @@ model User {
   updatedAt         DateTime @default(now()) @db.Timestamp(6)
 
   // Relations
-  accounts          Account[]
   clipSubmissions   ClipSubmission[]
   clips             Clip[]
   payouts           Payout[]
   referralsGiven    Referral[] @relation("referrals_referrerIdTousers")
   referralsReceived Referral[] @relation("referrals_referredIdTousers")
-  sessions          Session[]
   socialAccounts    SocialAccount[]
   socialVerifications SocialVerification[]
   viewTracking      ViewTracking[]

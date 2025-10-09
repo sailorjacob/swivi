@@ -62,3 +62,4 @@ async function checkAuthSetup() {
 
 checkAuthSetup().catch(console.error)
 
+

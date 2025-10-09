@@ -128,9 +128,9 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   // Get manual verification status
   try {
-    const session = await getServerSession(authOptions)
+    const { user, error } = await getServerUserWithRole(request)
 
-    if (!session?.user?.id) {
+    if (!user?.id || error) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
