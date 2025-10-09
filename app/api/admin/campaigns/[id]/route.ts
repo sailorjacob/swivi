@@ -27,7 +27,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -38,7 +38,7 @@ export async function GET(
       where: { supabaseAuthId: user.id }
     })
 
-    if (!currentUserData || currentUserData.role !== "ADMIN") {
+    if (!userData || userData.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 
@@ -103,7 +103,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -180,7 +180,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

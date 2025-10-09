@@ -7,6 +7,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Plus, Edit, Trash2, Eye, Users, DollarSign, TrendingUp, Calendar, Target, Loader2 } from "lucide-react"
+import { authenticatedFetch } from "@/lib/supabase-browser"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -94,13 +95,22 @@ export default function AdminCampaignsPage() {
   // Fetch campaigns
   const fetchCampaigns = async () => {
     try {
-      const response = await fetch("/api/campaigns")
+      const response = await authenticatedFetch("/api/campaigns")
       if (response.ok) {
         const data = await response.json()
         setCampaigns(data)
+      } else if (response.status === 401) {
+        toast.error("Please log in to view campaigns")
+      } else if (response.status >= 500) {
+        console.log('🔍 Server error loading campaigns - showing empty state')
+        setCampaigns([])
+        toast.error("Server error loading campaigns. Please try again.")
+      } else {
+        toast.error("Failed to fetch campaigns")
       }
     } catch (error) {
       console.error("Error fetching campaigns:", error)
+      setCampaigns([])
       toast.error("Failed to fetch campaigns")
     }
   }
@@ -108,10 +118,14 @@ export default function AdminCampaignsPage() {
   // Fetch analytics
   const fetchAnalytics = async () => {
     try {
-      const response = await fetch("/api/admin/analytics/aggregate")
+      const response = await authenticatedFetch("/api/admin/analytics/aggregate")
       if (response.ok) {
         const data = await response.json()
         setAnalytics(data)
+      } else if (response.status === 401) {
+        console.warn("Admin analytics: Authentication required")
+      } else if (response.status >= 500) {
+        console.log('🔍 Server error loading analytics - continuing without analytics')
       }
     } catch (error) {
       console.error("Error fetching analytics:", error)
@@ -132,11 +146,8 @@ export default function AdminCampaignsPage() {
   const handleCreateCampaign = async () => {
     setIsSubmitting(true)
     try {
-      const response = await fetch("/api/campaigns", {
+      const response = await authenticatedFetch("/api/campaigns", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,
@@ -177,11 +188,8 @@ export default function AdminCampaignsPage() {
 
     setIsUpdating(true)
     try {
-      const response = await fetch(`/api/admin/campaigns/${selectedCampaign.id}`, {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${selectedCampaign.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,

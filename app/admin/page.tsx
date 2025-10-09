@@ -8,6 +8,7 @@ import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { BarChart3, Users, Target, DollarSign, Settings, Shield, Activity, Loader2 } from "lucide-react"
+import { authenticatedFetch } from "@/lib/supabase-browser"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -41,10 +42,17 @@ export default function AdminDashboard() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch("/api/admin/analytics/aggregate")
+      const response = await authenticatedFetch("/api/admin/analytics/aggregate")
       if (response.ok) {
         const data = await response.json()
         setAnalytics(data)
+      } else if (response.status === 401) {
+        setError("Authentication required")
+        router.push("/clippers/login?error=SessionExpired")
+      } else if (response.status >= 500) {
+        console.log('🔍 Server error loading admin analytics - showing empty state')
+        setAnalytics(null)
+        setError("Server temporarily unavailable")
       } else {
         setError("Failed to load dashboard data")
       }

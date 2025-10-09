@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CampaignDetailModal } from "@/components/clippers/campaign-detail-modal"
+import { authenticatedFetch } from "@/lib/supabase-browser"
 import {
   TrendingUp,
   DollarSign,
@@ -62,15 +63,22 @@ function CampaignsPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch("/api/clippers/campaigns")
+      const response = await authenticatedFetch("/api/clippers/campaigns")
       if (response.ok) {
         const data = await response.json()
         setCampaigns(data)
+      } else if (response.status === 401) {
+        setError("Please log in to view campaigns")
+      } else if (response.status >= 500) {
+        console.log('🔍 Server error loading campaigns - showing empty state')
+        setCampaigns([])
+        setError("Server temporarily unavailable")
       } else {
         setError("Failed to load campaigns")
       }
     } catch (error) {
       console.error("Error fetching campaigns:", error)
+      setCampaigns([])
       setError("Failed to load campaigns")
     } finally {
       setLoading(false)

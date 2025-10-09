@@ -5,7 +5,7 @@ import { ViewTrackingService } from "@/lib/view-tracking"
 
 export async function GET(request: NextRequest) {
   try {
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

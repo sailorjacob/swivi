@@ -14,7 +14,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -71,7 +71,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -164,7 +164,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { user, error } = await getServerUserWithRole()
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
