@@ -37,32 +37,40 @@ export async function GET(request: NextRequest) {
     
     console.log("✅ Profile API: Valid session for user", user.id)
 
-    const dbUser = await prisma.user.findUnique({
-      where: { supabaseAuthId: user.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        bio: true,
-        website: true,
-        walletAddress: true,
-        paypalEmail: true,
-        image: true,
-        verified: true,
-        totalEarnings: true,
-        totalViews: true,
-        createdAt: true,
-        socialAccounts: {
-          select: {
-            platform: true,
-            username: true,
-            displayName: true,
-            verified: true,
-            verifiedAt: true,
+    let dbUser
+    try {
+      console.log("🔍 Profile API: Querying database for user...")
+      dbUser = await prisma.user.findUnique({
+        where: { supabaseAuthId: user.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          bio: true,
+          website: true,
+          walletAddress: true,
+          paypalEmail: true,
+          image: true,
+          verified: true,
+          totalEarnings: true,
+          totalViews: true,
+          createdAt: true,
+          socialAccounts: {
+            select: {
+              platform: true,
+              username: true,
+              displayName: true,
+              verified: true,
+              verifiedAt: true,
+            }
           }
         }
-      }
-    })
+      })
+      console.log("✅ Profile API: Database query successful, user found:", !!dbUser)
+    } catch (dbError) {
+      console.error("❌ Profile API: Database query failed:", dbError)
+      throw dbError
+    }
 
     if (!dbUser) {
       // User doesn't exist in database, try to create them
@@ -237,22 +245,29 @@ export async function PUT(request: NextRequest) {
     console.log('🔍 Profile PUT: Cleaned data for update:', cleanedData)
     console.log('🔍 Profile PUT: Updating user with supabaseAuthId:', user.id)
 
-    const updatedUser = await prisma.user.update({
-      where: { supabaseAuthId: user.id },
-      data: cleanedData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        bio: true,
-        website: true,
-        walletAddress: true,
-        paypalEmail: true,
-        image: true,
-        verified: true,
-        updatedAt: true,
-      }
-    })
+    let updatedUser
+    try {
+      updatedUser = await prisma.user.update({
+        where: { supabaseAuthId: user.id },
+        data: cleanedData,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          bio: true,
+          website: true,
+          walletAddress: true,
+          paypalEmail: true,
+          image: true,
+          verified: true,
+          updatedAt: true,
+        }
+      })
+      console.log('✅ Profile PUT: Database update successful')
+    } catch (updateError) {
+      console.error('❌ Profile PUT: Database update failed:', updateError)
+      throw updateError
+    }
 
     console.log('✅ Profile PUT: Update successful:', updatedUser.id)
     return NextResponse.json(updatedUser)
