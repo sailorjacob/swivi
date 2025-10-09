@@ -15,50 +15,45 @@ export const createSupabaseServerClient = (request?: NextRequest) => {
     console.log('🔑 Found Authorization header:', authHeader.substring(0, 20) + '...')
   }
 
-  // If we have a request, use its cookies, otherwise use Next.js cookies
-  const cookieStore = request ? {
-      get(name: string) {
-        const value = request.cookies.get(name)?.value
-        if (name.startsWith('sb-')) {
-          console.log(`🍪 Reading cookie ${name}:`, value ? `present (${value.length} chars)` : 'missing')
-        }
-        return value
-      },
-    set(name: string, value: string, options: any) {
-      // In API routes, we can't set cookies, but this is just for reading
-    },
-    remove(name: string, options: any) {
-      // In API routes, we can't remove cookies, but this is just for reading
-    },
-  } : cookies()
-
   const supabaseClient = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       get(name: string) {
-        return cookieStore.get(name)?.value
+        if (request) {
+          const value = request.cookies.get(name)?.value
+          if (name.startsWith('sb-')) {
+            console.log(`🍪 Reading cookie ${name}:`, value ? `present (${value.length} chars)` : 'missing')
+          }
+          return value
+        } else {
+          // Use Next.js cookies() for non-request contexts
+          const cookieStore = cookies()
+          const value = cookieStore.get(name)?.value
+          if (name.startsWith('sb-')) {
+            console.log(`🍪 Reading cookie ${name}:`, value ? `present (${value.length} chars)` : 'missing')
+          }
+          return value
+        }
       },
       set(name: string, value: string, options: any) {
-        try {
-          if (!request) {
-            // Only set cookies if not in API route context
+        if (!request) {
+          // Only set cookies if not in API route context (Server Components)
+          try {
+            const cookieStore = cookies()
             cookieStore.set({ name, value, ...options })
+          } catch (error) {
+            // Ignore errors in API routes
           }
-        } catch (error) {
-          // The `set` method was called from a Server Component.
-          // This can be ignored if you have middleware refreshing
-          // user sessions.
         }
       },
       remove(name: string, options: any) {
-        try {
-          if (!request) {
-            // Only remove cookies if not in API route context
+        if (!request) {
+          // Only remove cookies if not in API route context (Server Components)
+          try {
+            const cookieStore = cookies()
             cookieStore.set({ name, value: '', ...options })
+          } catch (error) {
+            // Ignore errors in API routes
           }
-        } catch (error) {
-          // The `delete` method was called from a Server Component.
-          // This can be ignored if you have middleware refreshing
-          // user sessions.
         }
       },
     },
