@@ -18,16 +18,6 @@ const updatePayoutSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     console.log("🔍 Profile API: Getting authenticated user...")
-    
-    // Reset database connection to avoid prepared statement conflicts
-    try {
-      await prisma.$disconnect()
-      await prisma.$connect()
-      console.log("🔄 Profile API: Database connection reset")
-    } catch (resetError) {
-      console.warn("⚠️ Profile API: Could not reset connection:", resetError.message)
-    }
-    
     const { user, error } = await getServerUserWithRole(request)
 
     if (!user || error) {
@@ -205,16 +195,6 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     console.log('🔍 Profile PUT: Starting update request')
-    
-    // Reset database connection to avoid prepared statement conflicts
-    try {
-      await prisma.$disconnect()
-      await prisma.$connect()
-      console.log("🔄 Profile PUT: Database connection reset")
-    } catch (resetError) {
-      console.warn("⚠️ Profile PUT: Could not reset connection:", resetError.message)
-    }
-    
     const { user, error } = await getServerUserWithRole(request)
 
     console.log('🔍 Profile PUT: Auth result:', {
