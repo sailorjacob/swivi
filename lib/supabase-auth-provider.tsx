@@ -30,6 +30,16 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       try {
         console.log('🔍 Getting initial session...')
         
+        // Check for OAuth callback parameters in URL
+        const urlParams = new URLSearchParams(window.location.search)
+        const urlHash = window.location.hash
+        console.log('🔍 URL check:', {
+          hasSearchParams: urlParams.toString().length > 0,
+          hasHash: urlHash.length > 0,
+          searchParams: urlParams.toString(),
+          hash: urlHash
+        })
+        
         // Check what cookies are available
         const allCookies = document.cookie
         console.log('🍪 Available cookies:', allCookies ? 'present' : 'none')

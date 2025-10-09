@@ -11,9 +11,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
-    debug: process.env.NODE_ENV === 'development',
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    storageKey: 'sb-auth-token'
+    debug: process.env.NODE_ENV === 'development'
   },
   global: {
     headers: {
@@ -41,8 +39,8 @@ export interface SupabaseSession extends Session {
 // Clean OAuth login functions
 export const signInWithDiscord = async () => {
   const redirectTo = process.env.NODE_ENV === 'production'
-    ? `https://www.swivimedia.com/auth/callback`
-    : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+    ? `https://www.swivimedia.com/clippers/dashboard`
+    : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/clippers/dashboard`
 
   return supabase.auth.signInWithOAuth({
     provider: 'discord',
@@ -52,8 +50,8 @@ export const signInWithDiscord = async () => {
 
 export const signInWithGoogle = async () => {
   const redirectTo = process.env.NODE_ENV === 'production'
-    ? `https://www.swivimedia.com/auth/callback`
-    : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+    ? `https://www.swivimedia.com/clippers/dashboard`
+    : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/clippers/dashboard`
 
   return supabase.auth.signInWithOAuth({
     provider: 'google',
