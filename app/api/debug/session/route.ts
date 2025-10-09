@@ -1,41 +1,49 @@
-import { NextResponse } from "next/server"
-import { getServerUserWithRole } from "@/lib/supabase-auth-server"
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerUserWithRole } from '@/lib/supabase-auth-server'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    console.log("🔍 Debug: Checking user...")
-
-    const { user, error } = await getServerUserWithRole()
-
-    if (!user) {
-      return NextResponse.json({
-        error: "No user found",
-        status: "no_user",
-        user_exists: !!user,
-        timestamp: new Date().toISOString()
-      }, { status: 401 })
-    }
+    console.log('🔍 Debug session endpoint called')
     
-    console.log("✅ User found:", user?.id)
+    // Check what cookies are available
+    const cookies = request.cookies.getAll()
+    const supabaseCookies = cookies.filter(c => c.name.startsWith('sb-'))
+    
+    console.log('🍪 All cookies:', cookies.map(c => c.name))
+    console.log('🍪 Supabase cookies:', supabaseCookies.map(c => c.name))
+    
+    // Check Authorization header
+    const authHeader = request.headers.get('authorization')
+    console.log('🔑 Authorization header:', authHeader ? 'present' : 'missing')
+    
+    // Try to get user
+    const { user, error } = await getServerUserWithRole(request)
+    
+    console.log('👤 User result:', {
+      hasUser: !!user,
+      userId: user?.id,
+      email: user?.email,
+      error: error?.message
+    })
     
     return NextResponse.json({
-      status: "success",
-      user: {
-        userId: user?.id,
-        email: user?.email,
-        name: user?.user_metadata?.full_name,
-        role: user?.role
-      },
-      timestamp: new Date().toISOString()
+      success: true,
+      debug: {
+        cookieCount: cookies.length,
+        supabaseCookieCount: supabaseCookies.length,
+        supabaseCookieNames: supabaseCookies.map(c => c.name),
+        hasAuthHeader: !!authHeader,
+        hasUser: !!user,
+        userEmail: user?.email,
+        error: error?.message
+      }
     })
     
   } catch (error) {
-    console.error("❌ Session debug failed:", error)
-    
+    console.error('❌ Debug session error:', error)
     return NextResponse.json({
-      error: "Session check failed",
-      details: error instanceof Error ? error.message : String(error),
-      status: "session_error"
+      success: false,
+      error: error.message
     }, { status: 500 })
   }
 }

@@ -66,11 +66,40 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           if (session?.user && !error) {
             console.log('✅ Initial session found:', session.user.email)
 
+            // Debug: Send session info to server for comparison
+            try {
+              fetch('/api/debug/frontend-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  hasSession: true,
+                  sessionData: session
+                })
+              }).catch(e => console.log('Debug endpoint error:', e.message))
+            } catch (e) {
+              // Ignore debug errors
+            }
+
             // Set the actual session
             setSession(session as SupabaseSession)
             setUser(session.user as SupabaseUser)
           } else {
             console.log('❌ No initial session found or error:', error?.message)
+            
+            // Debug: Send no-session info to server
+            try {
+              fetch('/api/debug/frontend-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  hasSession: false,
+                  sessionData: null
+                })
+              }).catch(e => console.log('Debug endpoint error:', e.message))
+            } catch (e) {
+              // Ignore debug errors
+            }
+            
             setSession(null)
             setUser(null)
           }
