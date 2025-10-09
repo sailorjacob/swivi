@@ -92,12 +92,12 @@ function AdminNav({ className }: { className?: string }) {
 
   const handleSignOut = async () => {
     if (isDemoMode) {
-      // In demo mode, just redirect to admin landing page
-      router.push("/admin")
+      // In demo mode, just redirect to homepage
+      router.push("/")
       return
     }
     await logout()
-    router.push("/admin")
+    router.push("/")
   }
 
   const isActive = (href: string) => {

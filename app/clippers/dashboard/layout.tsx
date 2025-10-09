@@ -132,12 +132,12 @@ function Sidebar({ className }: { className?: string }) {
 
   const handleSignOut = async () => {
     if (isDemoMode) {
-      // In demo mode, just redirect to clipper landing page
-      router.push("/clippers")
+      // In demo mode, just redirect to homepage
+      router.push("/")
       return
     }
     await logout()
-    router.push("/clippers/login")
+    router.push("/")
   }
 
   const isActive = (href: string) => {
@@ -247,9 +247,9 @@ export default function DashboardLayout({
     if (status === "loading") return
 
     if (status === "unauthenticated" || !session?.user) {
-      console.log("❌ Dashboard: No authenticated user, redirecting to signup")
+      console.log("❌ Dashboard: No authenticated user, redirecting to login")
       // Use replace to prevent back button issues
-      router.replace("/clippers/signup")
+      router.replace("/clippers/login")
       return
     }
 

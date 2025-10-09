@@ -29,9 +29,9 @@ export default function ClippersPage() {
       setIsRedirecting(true)
       router.replace("/clippers/dashboard/campaigns")
     } else {
-      console.log("❌ User not authenticated, redirecting to signup")
+      console.log("❌ User not authenticated, redirecting to login")
       setIsRedirecting(true)
-      router.replace("/clippers/signup")
+      router.replace("/clippers/login")
     }
   }, [status, session, router, isRedirecting])
 

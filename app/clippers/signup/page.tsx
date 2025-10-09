@@ -3,8 +3,10 @@
 // Force this page to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/supabase-auth-provider"
+import { useSession } from "@/lib/supabase-auth-provider"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DiscordIcon } from "@/components/ui/icons/discord-icon"
@@ -17,7 +19,19 @@ import { motion } from "framer-motion"
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState<string | null>(null)
+  const router = useRouter()
+  const { data: session, status } = useSession()
   const { signIn } = useAuth()
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (status === "loading") return
+
+    if (session) {
+      console.log("🔄 User already authenticated, redirecting to dashboard")
+      router.push("/clippers/dashboard")
+    }
+  }, [session, status, router])
 
   const handleOAuthSignup = async (provider: "discord" | "google") => {
     setIsLoading(provider)
