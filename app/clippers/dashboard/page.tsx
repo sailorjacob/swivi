@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 export const dynamic = 'force-dynamic'
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase-auth"
+import { supabase, authenticatedFetch } from "@/lib/supabase-auth"
 import {
   DollarSign,
   TrendingUp,
@@ -107,9 +107,7 @@ export default function ClipperDashboard() {
       setError(null)
       console.log('📊 Fetching dashboard data...')
 
-      const response = await fetch("/api/clippers/dashboard", {
-        credentials: "include"
-      })
+      const response = await authenticatedFetch("/api/clippers/dashboard")
 
       if (response.ok) {
         const data = await response.json()

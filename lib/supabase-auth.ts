@@ -146,3 +146,24 @@ export const STORAGE_BUCKETS = {
   AVATARS: 'avatars',
   CAMPAIGN_ASSETS: 'campaign-assets',
 } as const
+
+// Helper function for authenticated API calls
+export const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
+  const { data: { session } } = await supabase.auth.getSession()
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  }
+
+  // Add Authorization header if we have a session
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+    credentials: 'include', // Still include cookies for compatibility
+  })
+}

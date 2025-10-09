@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
+import { authenticatedFetch } from "@/lib/supabase-auth"
 import { supabase } from "@/lib/supabase-auth"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
 import { Button } from "../../../../components/ui/button"
@@ -71,9 +72,7 @@ export default function ProfilePage() {
         try {
           setIsFetchingProfile(true)
           // Load profile data
-          const profileResponse = await fetch("/api/user/profile", {
-            credentials: "include"
-          })
+          const profileResponse = await authenticatedFetch("/api/user/profile")
           if (profileResponse.ok) {
             const userData = await profileResponse.json()
             setUser(userData)
@@ -92,9 +91,7 @@ export default function ProfilePage() {
             })
 
             // Load all connected accounts (OAuth + verified social)
-            const accountsResponse = await fetch("/api/user/connected-accounts", {
-              credentials: "include"
-            })
+            const accountsResponse = await authenticatedFetch("/api/user/connected-accounts")
             if (accountsResponse.ok) {
               const accountsData = await accountsResponse.json()
               setConnectedAccounts(accountsData)

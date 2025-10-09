@@ -29,18 +29,16 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const getInitialSession = async () => {
       try {
         console.log('🔍 Getting initial session...')
-        const { user: initialUser, error } = await getUserWithRole()
+        // Use the actual Supabase session instead of just user
+        const { data: { session }, error } = await supabase.auth.getSession()
 
         if (isMounted) {
-          if (initialUser && !error) {
-            console.log('✅ Initial session found:', initialUser.email)
+          if (session?.user && !error) {
+            console.log('✅ Initial session found:', session.user.email)
 
-            // Set session first
-            setSession({ user: initialUser } as SupabaseSession)
-
-            // Use session data directly - simplified approach
-            console.log('✅ Using session data for user')
-            setUser(initialUser)
+            // Set the actual session
+            setSession(session as SupabaseSession)
+            setUser(session.user as SupabaseUser)
           } else {
             console.log('❌ No initial session found or error:', error?.message)
             setSession(null)

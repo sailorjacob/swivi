@@ -9,10 +9,20 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 // Clean server-side Supabase client for API routes
 export const createSupabaseServerClient = (request?: NextRequest) => {
+  // Check for Authorization header
+  const authHeader = request?.headers.get('authorization')
+  if (authHeader) {
+    console.log('🔑 Found Authorization header:', authHeader.substring(0, 20) + '...')
+  }
+
   // If we have a request, use its cookies, otherwise use Next.js cookies
   const cookieStore = request ? {
     get(name: string) {
-      return request.cookies.get(name)?.value
+      const value = request.cookies.get(name)?.value
+      if (name.startsWith('sb-')) {
+        console.log(`🍪 Reading cookie ${name}:`, value ? 'present' : 'missing')
+      }
+      return value
     },
     set(name: string, value: string, options: any) {
       // In API routes, we can't set cookies, but this is just for reading
@@ -75,8 +85,16 @@ export const getServerSession = async (request?: NextRequest): Promise<{ session
 // Simple server-side user authentication for API routes
 export const getServerUserWithRole = async (request?: NextRequest): Promise<{ user: SupabaseUser | null; error: any }> => {
   try {
+    console.log('🔍 getServerUserWithRole called with request:', !!request)
     const supabase = createSupabaseServerClient(request)
     const { data: { user }, error } = await supabase.auth.getUser()
+
+    console.log('🔍 Supabase auth result:', { 
+      hasUser: !!user, 
+      userId: user?.id, 
+      email: user?.email,
+      error: error?.message 
+    })
 
     if (error) {
       console.warn('Auth error:', error.message)
