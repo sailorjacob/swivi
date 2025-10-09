@@ -4,14 +4,52 @@ import type { User, Session } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Clean Supabase Auth client
+// Clean Supabase Auth client with cookie storage
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
-    debug: process.env.NODE_ENV === 'development'
+    debug: process.env.NODE_ENV === 'development',
+    storage: {
+      getItem: (key: string) => {
+        if (typeof window === 'undefined') return null
+        // Try cookies first, then localStorage
+        const cookieValue = document.cookie
+          .split('; ')
+          .find(row => row.startsWith(`${key}=`))
+          ?.split('=')[1]
+        
+        if (cookieValue) {
+          try {
+            return JSON.parse(decodeURIComponent(cookieValue))
+          } catch {
+            return cookieValue
+          }
+        }
+        
+        // Fallback to localStorage
+        return window.localStorage.getItem(key)
+      },
+      setItem: (key: string, value: string) => {
+        if (typeof window === 'undefined') return
+        
+        // Set both cookie and localStorage
+        const expires = new Date()
+        expires.setTime(expires.getTime() + (7 * 24 * 60 * 60 * 1000)) // 7 days
+        
+        document.cookie = `${key}=${encodeURIComponent(value)}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`
+        window.localStorage.setItem(key, value)
+      },
+      removeItem: (key: string) => {
+        if (typeof window === 'undefined') return
+        
+        // Remove both cookie and localStorage
+        document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+        window.localStorage.removeItem(key)
+      }
+    }
   },
   global: {
     headers: {
