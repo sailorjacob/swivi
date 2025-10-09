@@ -204,6 +204,53 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error("Error fetching dashboard data:", error)
+    
+    // If it's a database connection issue, return empty state instead of error
+    if (error.message?.includes('prepared statement') || 
+        error.message?.includes('database') || 
+        error.message?.includes('connection')) {
+      console.log('🔍 Database connection issue - returning empty state for new user')
+      
+      return NextResponse.json({
+        stats: [
+          {
+            title: "Total Earned",
+            value: "$0.00",
+            change: "Start earning from approved clips",
+            changeType: "neutral",
+            icon: "DollarSign",
+            color: "text-foreground"
+          },
+          {
+            title: "Active Campaigns",
+            value: "0",
+            change: "Available to join",
+            changeType: "neutral",
+            icon: "Target",
+            color: "text-muted-foreground"
+          },
+          {
+            title: "Clips Submitted",
+            value: "0",
+            change: "Submit your first clip",
+            changeType: "neutral",
+            icon: "Play",
+            color: "text-muted-foreground"
+          },
+          {
+            title: "Total Views",
+            value: "0",
+            change: "Grow your audience",
+            changeType: "neutral",
+            icon: "Eye",
+            color: "text-muted-foreground"
+          }
+        ],
+        recentClips: [],
+        activeCampaigns: 0
+      })
+    }
+    
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

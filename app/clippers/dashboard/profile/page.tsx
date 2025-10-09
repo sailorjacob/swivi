@@ -103,6 +103,30 @@ export default function ProfilePage() {
             toast.error("Please log in to view your profile")
           } else if (profileResponse.status === 404) {
             toast.error("Profile not found. Please contact support.")
+          } else if (profileResponse.status >= 500) {
+            // For server errors, try to show basic profile info from session
+            console.log('🔍 Server error loading profile - using session data')
+            const fallbackProfile = {
+              id: session?.user?.id || '',
+              name: session?.user?.name || session?.user?.email?.split('@')[0] || 'User',
+              email: session?.user?.email || '',
+              bio: null,
+              website: null,
+              walletAddress: null,
+              paypalEmail: null,
+              image: session?.user?.image || null,
+              verified: session?.user?.verified || false,
+              totalEarnings: 0,
+              totalViews: 0,
+              createdAt: new Date().toISOString()
+            }
+            setUser(fallbackProfile)
+            setProfileData({
+              name: fallbackProfile.name,
+              bio: "",
+              website: ""
+            })
+            toast.error("Some profile data couldn't be loaded. You can still update your profile.")
           } else {
             const errorData = await profileResponse.json().catch(() => ({}))
             toast.error(errorData.error || "Failed to load profile data")

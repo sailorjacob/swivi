@@ -68,6 +68,10 @@ export default function CampaignsPage() {
       if (response.ok) {
         const data = await response.json()
         setCampaigns(data)
+      } else if (response.status >= 500) {
+        // For server errors, show empty state instead of error for better UX
+        console.log('🔍 Server error loading campaigns - showing empty state')
+        setCampaigns([])
       } else {
         setError("Failed to load campaigns")
       }
@@ -150,9 +154,22 @@ export default function CampaignsPage() {
         </p>
       </div>
 
-      {/* Campaigns Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {campaigns.map((campaign) => {
+      {/* Empty State */}
+      {campaigns.length === 0 ? (
+        <div className="text-center py-12">
+          <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-xl font-medium text-foreground mb-2">No Active Campaigns</h3>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            There are currently no active campaigns available. New campaigns are launched regularly, so check back soon!
+          </p>
+          <Button onClick={fetchCampaigns} variant="outline">
+            Refresh Campaigns
+          </Button>
+        </div>
+      ) : (
+        /* Campaigns Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {campaigns.map((campaign) => {
           // Calculate progress percentage
           const progress = getProgressPercentage(campaign.spent, campaign.budget)
           const isActive = campaign.status === "ACTIVE"
@@ -279,7 +296,8 @@ export default function CampaignsPage() {
           </motion.div>
           )
         })}
-      </div>
+        </div>
+      )}
 
       {/* Campaign Detail Modal */}
       <CampaignDetailModal
