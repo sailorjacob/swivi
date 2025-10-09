@@ -37,26 +37,140 @@ export async function GET(request: NextRequest) {
     
     console.log("✅ Profile API: Valid session for user", user.id)
 
-    // TEMPORARY: Skip database query to isolate the issue
-    console.log("🔍 Profile API: Returning auth user data directly (bypassing database)")
-    
-    const fallbackUser = {
-      id: user.id,
-      name: user.name || 'No name set',
-      email: user.email,
-      bio: 'Database query temporarily disabled',
-      website: null,
-      walletAddress: null,
-      paypalEmail: null,
-      image: user.image || null,
-      verified: user.verified || false,
-      totalEarnings: 0,
-      totalViews: 0,
-      createdAt: new Date().toISOString(),
-      socialAccounts: []
+    let dbUser
+    try {
+      console.log("🔍 Profile API: Querying database for user...")
+      dbUser = await prisma.user.findUnique({
+        where: { supabaseAuthId: user.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          bio: true,
+          website: true,
+          walletAddress: true,
+          paypalEmail: true,
+          image: true,
+          verified: true,
+          totalEarnings: true,
+          totalViews: true,
+          createdAt: true,
+          socialAccounts: {
+            select: {
+              platform: true,
+              username: true,
+              displayName: true,
+              verified: true,
+              verifiedAt: true,
+            }
+          }
+        }
+      })
+      console.log("✅ Profile API: Database query successful, user found:", !!dbUser)
+    } catch (dbError) {
+      console.error("❌ Profile API: Database query failed:", dbError)
+      throw dbError
     }
-    
-    return NextResponse.json(fallbackUser)
+
+    if (!dbUser) {
+      // User doesn't exist in database, try to create them
+      console.log("⚠️ User not found in database, attempting to create...")
+
+      try {
+        const oauthName = user.user_metadata?.full_name ||
+                         user.user_metadata?.name ||
+                         user.user_metadata?.custom_claims?.global_name ||
+                         user.raw_user_meta_data?.full_name ||
+                         user.raw_user_meta_data?.name ||
+                         user.email?.split('@')[0] || 
+                         'New User'
+
+        const oauthImage = user.user_metadata?.avatar_url ||
+                          user.user_metadata?.picture ||
+                          user.raw_user_meta_data?.avatar_url ||
+                          user.raw_user_meta_data?.picture
+
+        const newUserData = {
+          supabaseAuthId: user.id,
+          email: user.email,
+          name: oauthName,
+          image: oauthImage || null,
+          verified: user.email_confirmed_at ? true : false,
+          role: 'CLIPPER'
+        }
+
+        console.log('🔍 Creating user in profile API with OAuth data:', {
+          email: user.email,
+          extractedName: oauthName,
+          extractedImage: oauthImage
+        })
+
+        const newUser = await prisma.user.create({
+          data: newUserData,
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            bio: true,
+            website: true,
+            walletAddress: true,
+            paypalEmail: true,
+            image: true,
+            verified: true,
+            totalEarnings: true,
+            totalViews: true,
+            createdAt: true,
+            socialAccounts: {
+              select: {
+                platform: true,
+                username: true,
+                displayName: true,
+                verified: true,
+                verifiedAt: true,
+              }
+            }
+          }
+        })
+
+        console.log("✅ User created successfully:", newUser.id)
+        return NextResponse.json(serializeUser(newUser))
+      } catch (createError) {
+        console.error("❌ Failed to create user:", createError)
+        // Return minimal user data from session if creation fails
+        const fallbackName = user.user_metadata?.full_name ||
+                             user.user_metadata?.name ||
+                             user.user_metadata?.custom_claims?.global_name ||
+                             user.raw_user_meta_data?.full_name ||
+                             user.raw_user_meta_data?.name ||
+                             user.email?.split('@')[0] || 
+                             'New User'
+
+        const fallbackImage = user.user_metadata?.avatar_url ||
+                             user.user_metadata?.picture ||
+                             user.raw_user_meta_data?.avatar_url ||
+                             user.raw_user_meta_data?.picture
+
+        return NextResponse.json({
+          id: user.id,
+          name: fallbackName,
+          email: user.email,
+          bio: null,
+          website: null,
+          walletAddress: null,
+          paypalEmail: null,
+          image: fallbackImage || null,
+          verified: user.email_confirmed_at ? true : false,
+          totalEarnings: 0,
+          totalViews: 0,
+          createdAt: new Date().toISOString(),
+          socialAccounts: []
+        })
+      }
+    }
+
+    // Convert BigInt fields to strings for JSON serialization
+    const serializedUser = serializeUser(dbUser)
+    return NextResponse.json(serializedUser)
   } catch (error) {
     console.error("❌ Profile GET: Error occurred:", error)
     
