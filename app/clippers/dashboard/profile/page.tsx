@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from "react"
-import { useSession, useAuth } from "@/lib/supabase-auth-provider"
+import { useSession } from "@/lib/supabase-auth-provider"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { supabase } from "@/lib/supabase-browser"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
@@ -47,7 +47,6 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const { data: session } = useSession()
-  const { refreshUser } = useAuth()
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -171,13 +170,8 @@ export default function ProfilePage() {
         const updatedUser = await response.json()
         setUser(prev => prev ? { ...prev, ...updatedUser } : null)
         
-        // Refresh the user data to update sidebar and other components
-        try {
-          await refreshUser()
-          console.log('✅ User data refreshed after profile update')
-        } catch (refreshError) {
-          console.warn('⚠️ Could not refresh user data:', refreshError)
-        }
+        // TODO: Add user data refresh after we fix the API issues
+        console.log('✅ Profile updated - refresh mechanism temporarily disabled')
         
         toast.success("Profile updated successfully!")
       } else {
