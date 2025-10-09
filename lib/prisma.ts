@@ -9,19 +9,25 @@ const globalForPrisma = globalThis as unknown as {
 const getDatabaseUrl = () => {
   const env = validateEnvironment()
 
-  // For Supabase Pro, use the raw DATABASE_URL but ensure no connection limits
+  // For Supabase with connection pooling, we need to disable prepared statements
   console.log('🔍 DATABASE_URL length:', env.DATABASE_URL.length)
   console.log('🔍 DATABASE_URL preview:', env.DATABASE_URL.substring(0, 50) + '...')
 
-  // Check if URL has any query parameters that might cause issues
-  if (env.DATABASE_URL.includes('?')) {
-    console.log('⚠️ DATABASE_URL contains query parameters - this might cause connection issues')
-    const url = new URL(env.DATABASE_URL)
-    console.log('🔍 Query parameters:', Array.from(url.searchParams.entries()))
-  }
-
-  // Return the raw URL - any modifications should be handled at the Vercel level
-  return env.DATABASE_URL
+  // Parse the URL and add pgbouncer-compatible parameters
+  const url = new URL(env.DATABASE_URL)
+  
+  // Critical: Disable prepared statements for Supabase connection pooling
+  url.searchParams.set('pgbouncer', 'true')
+  url.searchParams.set('prepared_statements', 'false')
+  
+  // Additional connection pooling optimizations
+  url.searchParams.set('connection_limit', '1')
+  url.searchParams.set('pool_timeout', '0')
+  
+  const finalUrl = url.toString()
+  console.log('✅ Enhanced DATABASE_URL for Supabase pooling with prepared_statements=false')
+  
+  return finalUrl
 }
 
 // Enhanced Prisma configuration for production-ready development
