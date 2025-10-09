@@ -66,15 +66,34 @@ export async function GET(request: NextRequest) {
       console.log("⚠️ User not found in database, attempting to create...")
 
       try {
-        // Try to create the user in our database
+        // Try to create the user in our database with enhanced OAuth extraction
+        const oauthName = user.user_metadata?.full_name ||
+                         user.user_metadata?.name ||
+                         user.user_metadata?.custom_claims?.global_name ||
+                         user.raw_user_meta_data?.full_name ||
+                         user.raw_user_meta_data?.name ||
+                         user.email?.split('@')[0] || 
+                         'New User'
+
+        const oauthImage = user.user_metadata?.avatar_url ||
+                          user.user_metadata?.picture ||
+                          user.raw_user_meta_data?.avatar_url ||
+                          user.raw_user_meta_data?.picture
+
         const newUserData = {
           supabaseAuthId: user.id,
           email: user.email,
-          name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'New User',
-          image: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+          name: oauthName,
+          image: oauthImage || null,
           verified: user.email_confirmed_at ? true : false,
           role: 'CLIPPER'
         }
+
+        console.log('🔍 Creating user in profile API with OAuth data:', {
+          email: user.email,
+          extractedName: oauthName,
+          extractedImage: oauthImage
+        })
 
         const newUser = await prisma.user.create({
           data: newUserData,

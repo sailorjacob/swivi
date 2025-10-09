@@ -136,7 +136,10 @@ export const getServerUserWithRole = async (request?: NextRequest): Promise<{ us
               id: user.id,
               email: user.email,
               user_metadata: user.user_metadata,
-              email_confirmed_at: user.email_confirmed_at
+              email_confirmed_at: user.email_confirmed_at,
+              // Override with database profile data for display
+              name: userData.name,
+              image: userData.image
             } as SupabaseUser,
             error: null
           }
@@ -192,6 +195,8 @@ export const getAuthenticatedUser = async (request: NextRequest): Promise<Supaba
           if (userData) {
             ;(user as SupabaseUser).role = userData.role || 'CLIPPER'
             ;(user as SupabaseUser).verified = userData.verified || false
+            ;(user as SupabaseUser).name = userData.name
+            ;(user as SupabaseUser).image = userData.image
             // Update user object with database info
             if (userData.name) user.user_metadata = { ...user.user_metadata, full_name: userData.name }
             if (userData.image) user.user_metadata = { ...user.user_metadata, avatar_url: userData.image }
@@ -357,8 +362,10 @@ async function updateExistingUser(supabaseUser: any, existingUser: any) {
 // Helper to create new user
 async function createNewUser(supabaseUser: any) {
   try {
+    // Enhanced OAuth data extraction with better fallback logic
     const name = supabaseUser.user_metadata?.full_name ||
                  supabaseUser.user_metadata?.name ||
+                 supabaseUser.user_metadata?.custom_claims?.global_name ||
                  supabaseUser.raw_user_meta_data?.full_name ||
                  supabaseUser.raw_user_meta_data?.name ||
                  supabaseUser.email?.split('@')[0] || // Fallback to email prefix
@@ -368,6 +375,14 @@ async function createNewUser(supabaseUser: any) {
                   supabaseUser.user_metadata?.picture ||
                   supabaseUser.raw_user_meta_data?.avatar_url ||
                   supabaseUser.raw_user_meta_data?.picture
+
+    console.log('🔍 Creating user with OAuth data:', {
+      email: supabaseUser.email,
+      extractedName: name,
+      extractedImage: image,
+      userMetadata: supabaseUser.user_metadata,
+      rawUserMetadata: supabaseUser.raw_user_meta_data
+    })
 
     const userData = {
       supabaseAuthId: supabaseUser.id,

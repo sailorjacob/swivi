@@ -62,22 +62,13 @@ export default function ClipperDashboard() {
   const [showSubmissionModal, setShowSubmissionModal] = useState(false)
   const [isFetching, setIsFetching] = useState(false)
 
-  // Get display name with fallback logic
+  // Get display name with simplified fallback logic
   const getDisplayName = () => {
     if (session?.user) {
-      // Try to get name from user metadata (updated from database)
-      const dbName = session.user.user_metadata?.full_name
-      if (dbName && dbName !== ";Updated name;") return dbName
-
-      // Fallback to OAuth name
-      const oauthName = session.user.user_metadata?.name ||
-                       session.user.user_metadata?.full_name
-      if (oauthName) return oauthName
-
-      // Final fallback to email
-      return session.user.email?.split('@')[0] || 'Clipper'
+      // Use the user's name from the session, or fallback to email prefix
+      return session.user.name || session.user.email?.split('@')[0] || 'User'
     }
-    return 'Clipper'
+    return 'User'
   }
 
   useEffect(() => {

@@ -77,12 +77,8 @@ export default function ProfilePage() {
             const userData = await profileResponse.json()
             setUser(userData)
 
-            // Use database data if available, otherwise fall back to session data
-            const displayName = userData.name && userData.name.trim() !== "" ? userData.name :
-                               session?.user?.user_metadata?.full_name ||
-                               session?.user?.user_metadata?.name ||
-                               session?.user?.email?.split('@')[0] ||
-                               'Clipper'
+            // Use database data as primary source, simple fallback
+            const displayName = userData.name || session?.user?.email?.split('@')[0] || 'User'
 
             setProfileData({
               name: displayName,
