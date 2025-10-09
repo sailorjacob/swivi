@@ -311,24 +311,30 @@ async function updateExistingUser(supabaseUser: any, existingUser: any) {
       updateData.email = supabaseUser.email
     }
 
-    // Extract and update name
+    // Only update name if it's empty in database (don't overwrite user's custom name)
     const name = supabaseUser.user_metadata?.full_name ||
                  supabaseUser.user_metadata?.name ||
                  supabaseUser.raw_user_meta_data?.full_name ||
                  supabaseUser.raw_user_meta_data?.name ||
                  supabaseUser.email?.split('@')[0] || // Fallback to email prefix
                  'New User' // Final fallback
-    if (name && name !== existingUser.name) {
+    if (name && (!existingUser.name || existingUser.name === 'New User')) {
       updateData.name = name
+      console.log('📝 Setting initial name from OAuth:', name)
+    } else if (existingUser.name) {
+      console.log('✅ Preserving user\'s custom name:', existingUser.name)
     }
 
-    // Extract and update image
+    // Only update image if it's empty in database (don't overwrite user's custom image)
     const image = supabaseUser.user_metadata?.avatar_url ||
                   supabaseUser.user_metadata?.picture ||
                   supabaseUser.raw_user_meta_data?.avatar_url ||
                   supabaseUser.raw_user_meta_data?.picture
-    if (image && image !== existingUser.image) {
+    if (image && !existingUser.image) {
       updateData.image = image
+      console.log('📝 Setting initial image from OAuth:', image)
+    } else if (existingUser.image) {
+      console.log('✅ Preserving user\'s custom image')
     }
 
     // Update verification status
