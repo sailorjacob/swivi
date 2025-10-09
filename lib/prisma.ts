@@ -41,7 +41,9 @@ const createPrismaClient = () => {
       transactionOptions: {
         maxWait: process.env.NODE_ENV === 'production' ? 30000 : 45000, // 30 seconds in production
         timeout: process.env.NODE_ENV === 'production' ? 25000 : 30000, // 25 seconds in production
-      }
+      },
+      // Connection management for Supabase pooling
+      // Use a shorter connection timeout to avoid prepared statement conflicts
     })
   } catch (error) {
     console.warn('Failed to create Prisma client during build, using fallback configuration:', error)

@@ -5,6 +5,10 @@ export async function GET(request: NextRequest) {
   try {
     console.log('🔍 Checking user linking status...')
     
+    // Reset connection to avoid prepared statement conflicts
+    await prisma.$disconnect()
+    await prisma.$connect()
+    
     // Get all users from database
     const dbUsers = await prisma.user.findMany({
       select: {
@@ -83,8 +87,16 @@ export async function GET(request: NextRequest) {
       recommendations: [
         'Check DATABASE_URL environment variable',
         'Ensure database is accessible',
-        'Check Supabase database status'
+        'Check Supabase database status',
+        'Try refreshing the page to reset connection'
       ]
     }, { status: 500 })
+  } finally {
+    // Ensure connection is properly closed
+    try {
+      await prisma.$disconnect()
+    } catch (disconnectError) {
+      console.warn('Warning: Could not disconnect Prisma client:', disconnectError)
+    }
   }
 }
