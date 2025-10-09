@@ -80,7 +80,6 @@ export default function ClipperDashboard() {
     return 'Clipper'
   }
 
-
   useEffect(() => {
     if (status === "loading") return
 

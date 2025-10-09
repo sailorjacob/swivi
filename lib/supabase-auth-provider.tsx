@@ -157,21 +157,12 @@ export function useAuth() {
   return context
 }
 
-// Compatibility hook for NextAuth.js patterns
+// Alias for compatibility with dashboard components
 export function useSession() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    // Context not available yet, return loading state
-    return {
-      data: null,
-      status: 'loading' as const
-    }
-  }
-
-  const { user, session, loading } = context
-
+  const { user, session, loading } = useAuth()
   return {
-    data: session ? { user } : null,
-    status: loading ? 'loading' : session ? 'authenticated' : 'unauthenticated'
+    data: session,
+    status: loading ? "loading" : (session ? "authenticated" : "unauthenticated")
   }
 }
+
