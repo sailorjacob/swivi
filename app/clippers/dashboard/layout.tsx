@@ -7,6 +7,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useAuth } from "@/lib/supabase-auth-provider"
 import { useRouter, usePathname } from "next/navigation"
+import { authenticatedFetch } from "@/lib/supabase-browser"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -67,11 +68,18 @@ interface NavItem {
     return <IconComponent className={className} />
   }
 
+interface DatabaseUser {
+  name: string | null
+  image: string | null
+  email: string | null
+}
+
 function Sidebar({ className }: { className?: string }) {
   const { data: session } = useSession()
   const { logout } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
+  const [dbUser, setDbUser] = useState<DatabaseUser | null>(null)
 
   // Demo mode mock session
   const isDemoMode = process.env.NODE_ENV === "development"
@@ -84,6 +92,43 @@ function Sidebar({ className }: { className?: string }) {
   } : null
 
   const activeSession = session || mockSession
+
+  // Fetch database user profile for accurate navigation display
+  const fetchDbUser = async () => {
+    if (!session?.user?.id || isDemoMode) return
+    
+    try {
+      const response = await authenticatedFetch("/api/user/profile")
+      if (response.ok) {
+        const userData = await response.json()
+        setDbUser({
+          name: userData.name,
+          image: userData.image,
+          email: userData.email
+        })
+        console.log('✅ Navigation: Updated user data from database')
+      }
+    } catch (error) {
+      console.warn("Could not fetch database user for navigation:", error)
+      // Fallback to session data if database fetch fails
+      setDbUser(null)
+    }
+  }
+
+  useEffect(() => {
+    fetchDbUser()
+  }, [session?.user?.id, isDemoMode])
+
+  // Listen for profile updates (custom event)
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      console.log('🔄 Navigation: Profile updated, refreshing user data')
+      fetchDbUser()
+    }
+
+    window.addEventListener('profileUpdated', handleProfileUpdate)
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate)
+  }, [session?.user?.id, isDemoMode])
 
   const handleSignOut = async () => {
     if (isDemoMode) {
@@ -158,17 +203,19 @@ function Sidebar({ className }: { className?: string }) {
       <div className="p-4 border-t border-border">
         <div className="flex items-center space-x-3 mb-3">
           <Avatar className="w-8 h-8">
-            <AvatarImage src={activeSession?.user?.image || ""} />
+            <AvatarImage src={dbUser?.image || activeSession?.user?.image || ""} />
             <AvatarFallback className="bg-foreground text-primary-foreground">
-              {activeSession?.user?.name?.[0] || activeSession?.user?.email?.[0]?.toUpperCase() || "U"}
+              {(dbUser?.name || activeSession?.user?.name)?.[0] || 
+               (dbUser?.email || activeSession?.user?.email)?.[0]?.toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-foreground text-sm font-medium truncate">
-              {activeSession?.user?.name || activeSession?.user?.email?.split('@')[0] || "User"}
+              {dbUser?.name || activeSession?.user?.name || 
+               (dbUser?.email || activeSession?.user?.email)?.split('@')[0] || "User"}
             </p>
             <p className="text-muted-foreground text-xs truncate">
-              {activeSession?.user?.email || ""}
+              {dbUser?.email || activeSession?.user?.email || ""}
             </p>
           </div>
         </div>

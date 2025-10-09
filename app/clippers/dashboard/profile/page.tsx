@@ -170,8 +170,9 @@ export default function ProfilePage() {
         const updatedUser = await response.json()
         setUser(prev => prev ? { ...prev, ...updatedUser } : null)
         
-        // TODO: Add user data refresh after we fix the API issues
-        console.log('✅ Profile updated - refresh mechanism temporarily disabled')
+        // Notify navigation to refresh user data
+        window.dispatchEvent(new CustomEvent('profileUpdated'))
+        console.log('✅ Profile updated - navigation will refresh automatically')
         
         toast.success("Profile updated successfully!")
       } else {
