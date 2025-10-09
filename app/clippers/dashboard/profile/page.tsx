@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from "react"
-import { useSession } from "@/lib/supabase-auth-provider"
+import { useSession, useAuth } from "@/lib/supabase-auth-provider"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { supabase } from "@/lib/supabase-browser"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
@@ -47,6 +47,7 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const { data: session } = useSession()
+  const { refreshUser } = useAuth()
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -126,7 +127,8 @@ export default function ProfilePage() {
               bio: "",
               website: ""
             })
-            toast.error("Some profile data couldn't be loaded. You can still update your profile.")
+            console.log('⚠️ Server error loading profile - using session fallback')
+            // Don't show error toast since we have fallback data
           } else {
             const errorData = await profileResponse.json().catch(() => ({}))
             toast.error(errorData.error || "Failed to load profile data")
@@ -168,6 +170,15 @@ export default function ProfilePage() {
       if (response.ok) {
         const updatedUser = await response.json()
         setUser(prev => prev ? { ...prev, ...updatedUser } : null)
+        
+        // Refresh the user data to update sidebar and other components
+        try {
+          await refreshUser()
+          console.log('✅ User data refreshed after profile update')
+        } catch (refreshError) {
+          console.warn('⚠️ Could not refresh user data:', refreshError)
+        }
+        
         toast.success("Profile updated successfully!")
       } else {
         const error = await response.json()

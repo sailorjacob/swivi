@@ -13,6 +13,7 @@ interface AuthContextType {
   loading: boolean
   signIn: (provider: 'discord' | 'google') => Promise<{ error?: any }>
   logout: () => Promise<{ error?: any }>
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -195,12 +196,55 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     return { error }
   }
 
+  const refreshUser = async () => {
+    try {
+      console.log('🔄 Refreshing user data from database...')
+      const { data: { session: currentSession }, error } = await supabase.auth.getSession()
+      
+      if (currentSession?.user && !error) {
+        // Fetch fresh user data from our API which includes database profile data
+        const response = await fetch('/api/debug/profile-test', {
+          headers: {
+            'Authorization': `Bearer ${currentSession.access_token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        if (response.ok) {
+          const userData = await response.json()
+          if (userData.success && userData.user) {
+            // Update the session with fresh database data
+            const updatedUser = {
+              ...currentSession.user,
+              name: userData.user.name,
+              image: userData.user.image,
+              role: userData.user.role,
+              verified: userData.user.verified
+            } as SupabaseUser
+            
+            const updatedSession = {
+              ...currentSession,
+              user: updatedUser
+            } as SupabaseSession
+            
+            setUser(updatedUser)
+            setSession(updatedSession)
+            console.log('✅ User data refreshed successfully')
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not refresh user data:', error)
+    }
+  }
+
   const value = {
     user,
     session,
     loading,
     signIn,
-    logout
+    logout,
+    refreshUser
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
