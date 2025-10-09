@@ -41,10 +41,10 @@ export async function GET(
             totalEarnings: true
           }
         },
-        campaign: true,
-        clip: {
+        campaigns: true,
+        clips: {
           include: {
-            viewTracking: {
+            view_tracking: {
               orderBy: {
                 date: "desc"
               },
@@ -94,7 +94,7 @@ export async function PUT(
       where: { id: params.id },
       include: {
         user: true,
-        campaign: true
+        campaigns: true
       }
     })
 
@@ -120,7 +120,7 @@ export async function PUT(
             totalEarnings: true
           }
         },
-        campaign: true
+        campaigns: true
       }
     })
 

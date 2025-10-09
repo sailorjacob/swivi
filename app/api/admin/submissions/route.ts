@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
             totalEarnings: true
           }
         },
-        campaign: {
+        campaigns: {
           select: {
             id: true,
             title: true,
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
             spent: true
           }
         },
-        clip: {
+        clips: {
           include: {
             viewTracking: {
               orderBy: {

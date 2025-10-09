@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
         createdAt: "desc"
       },
       include: {
-        campaign: true,
-        clip: true
+        campaigns: true,
+        clips: true
       }
     })
 
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
         status: "PENDING"
       },
       include: {
-        campaign: true
+        campaigns: true
       }
     })
 
