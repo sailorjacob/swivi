@@ -57,8 +57,11 @@ export function AuthDebug() {
     return () => clearInterval(interval)
   }, [session, status])
 
-  // Only show in development or if there are auth issues
-  if (process.env.NODE_ENV === 'production' && session) {
+  // Always show debug panel when there are auth issues (401 errors)
+  // Hide only if we have a working session AND no errors
+  const hasAuthIssues = debugInfo.sessionError || debugInfo.userError || !debugInfo.supabaseSession
+  
+  if (process.env.NODE_ENV === 'production' && session && !hasAuthIssues) {
     return null
   }
 
