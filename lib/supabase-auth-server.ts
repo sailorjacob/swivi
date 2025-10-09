@@ -146,6 +146,15 @@ export const getServerUserWithRole = async (request?: NextRequest): Promise<{ us
         }
       } catch (dbError) {
         console.warn('Database unavailable - using OAuth data only:', dbError.message)
+        // If it's a connection pooling issue, try to reset
+        if (dbError.message?.includes('prepared statement')) {
+          try {
+            await prisma.$disconnect()
+            await prisma.$connect()
+          } catch (resetError) {
+            console.warn('Failed to reset database connection:', resetError.message)
+          }
+        }
       }
 
       // Fallback to basic user data if database fails

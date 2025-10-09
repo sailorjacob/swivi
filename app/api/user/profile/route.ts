@@ -124,15 +124,29 @@ export async function GET(request: NextRequest) {
       } catch (createError) {
         console.error("❌ Failed to create user:", createError)
         // Return minimal user data from session if creation fails
+        // Use the same OAuth extraction logic for consistency
+        const fallbackName = user.user_metadata?.full_name ||
+                             user.user_metadata?.name ||
+                             user.user_metadata?.custom_claims?.global_name ||
+                             user.raw_user_meta_data?.full_name ||
+                             user.raw_user_meta_data?.name ||
+                             user.email?.split('@')[0] || 
+                             'New User'
+
+        const fallbackImage = user.user_metadata?.avatar_url ||
+                             user.user_metadata?.picture ||
+                             user.raw_user_meta_data?.avatar_url ||
+                             user.raw_user_meta_data?.picture
+
         return NextResponse.json({
           id: user.id,
-          name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'New User',
+          name: fallbackName,
           email: user.email,
           bio: null,
           website: null,
           walletAddress: null,
           paypalEmail: null,
-          image: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+          image: fallbackImage || null,
           verified: user.email_confirmed_at ? true : false,
           totalEarnings: 0,
           totalViews: 0,

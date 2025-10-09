@@ -24,6 +24,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export interface SupabaseUser extends User {
   role?: string
   verified?: boolean
+  name?: string
+  image?: string
   bio?: string
   website?: string
   walletAddress?: string
