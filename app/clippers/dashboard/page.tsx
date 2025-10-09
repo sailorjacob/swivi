@@ -281,9 +281,15 @@ export default function ClipperDashboard() {
           {session?.user?.role === "ADMIN" && (
             <Link href="/admin">
               <Button variant="outline" size="sm">
-                Admin Dashboard
+                🛡️ Admin Dashboard
               </Button>
             </Link>
+          )}
+          {/* Debug: Show current user role */}
+          {process.env.NODE_ENV === "development" && (
+            <div className="text-xs text-muted-foreground">
+              Role: {session?.user?.role || "undefined"}
+            </div>
           )}
         </div>
       </div>

@@ -16,7 +16,8 @@ import {
   Users,
   Settings,
   LogOut,
-  Menu
+  Menu,
+  ArrowLeft
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -146,6 +147,19 @@ function AdminNav({ className }: { className?: string }) {
             </Link>
           )
         })}
+        
+        {/* Back to Clipper Dashboard */}
+        <div className="pt-4 mt-4 border-t border-border">
+          <Link
+            href="/clippers/dashboard"
+            className="flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group relative text-muted-foreground hover:bg-muted hover:text-foreground"
+          >
+            <div className="relative flex-shrink-0 transition-transform duration-200 ease-out scale-100 group-hover:scale-110">
+              <ArrowLeft className="w-5 h-5 transition-all duration-200 opacity-100" />
+            </div>
+            <span className="font-medium text-sm tracking-wide">Back to Clipper Dashboard</span>
+          </Link>
+        </div>
       </nav>
 
       {/* Branding Image */}
