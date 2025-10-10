@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
 const updateRoleSchema = z.object({
-  role: z.enum(["CLIPPER", "CREATOR", "ADMIN"])
+  role: z.enum(["CLIPPER", "ADMIN"])
 })
 
 export async function PUT(

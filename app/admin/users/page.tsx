@@ -21,7 +21,7 @@ interface User {
   id: string
   name: string | null
   email: string | null
-  role: "CLIPPER" | "CREATOR" | "ADMIN"
+  role: "CLIPPER" | "ADMIN"
   createdAt: string
   totalViews: number
   totalEarnings: number
@@ -33,7 +33,6 @@ interface User {
 const roleOptions = [
   { value: "all", label: "All Roles" },
   { value: "ADMIN", label: "Admins" },
-  { value: "CREATOR", label: "Creators" },
   { value: "CLIPPER", label: "Clippers" }
 ]
 
@@ -219,7 +218,6 @@ export default function AdminUsersPage() {
   const getRoleColor = (role: string) => {
     switch (role) {
       case "ADMIN": return "bg-muted border border-border text-foreground"
-      case "CREATOR": return "bg-muted border border-border text-foreground"
       case "CLIPPER": return "bg-muted border border-border text-foreground"
       default: return "bg-muted border border-border text-foreground"
     }
@@ -229,7 +227,6 @@ export default function AdminUsersPage() {
   const getRoleIcon = (role: string) => {
     switch (role) {
       case "ADMIN": return Crown
-      case "CREATOR": return Shield
       case "CLIPPER": return Users
       default: return Users
     }
@@ -243,7 +240,6 @@ export default function AdminUsersPage() {
 
   // Calculate stats - only calculate when users are loaded
   const adminCount = users.filter(u => u.role === "ADMIN").length
-  const creatorCount = users.filter(u => u.role === "CREATOR").length
   const clipperCount = users.filter(u => u.role === "CLIPPER").length
   const totalCount = users.length
 
@@ -320,17 +316,6 @@ export default function AdminUsersPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Shield className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Creators</p>
-                  <p className="text-2xl font-semibold">{creatorCount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           <Card>
             <CardContent className="p-6">

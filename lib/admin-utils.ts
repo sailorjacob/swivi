@@ -89,20 +89,17 @@ export class AdminUtils {
       const [
         totalUsers,
         adminUsers,
-        clipperUsers,
-        creatorUsers
+        clipperUsers
       ] = await Promise.all([
         prisma.user.count(),
         prisma.user.count({ where: { role: 'ADMIN' } }),
-        prisma.user.count({ where: { role: 'CLIPPER' } }),
-        prisma.user.count({ where: { role: 'CREATOR' } })
+        prisma.user.count({ where: { role: 'CLIPPER' } })
       ])
 
       return {
         total: totalUsers,
         admins: adminUsers,
-        clippers: clipperUsers,
-        creators: creatorUsers
+        clippers: clipperUsers
       }
     } catch (error) {
       console.error('❌ Failed to get user statistics:', error)
