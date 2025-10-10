@@ -579,6 +579,11 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
 }
 
 export async function POST(request: NextRequest) {
+  console.log('🚀 === BROWSERQL VERIFICATION ENDPOINT START ===')
+  console.log('📍 Request URL:', request.url)
+  console.log('📍 Request method:', request.method)
+  console.log('📍 Request headers:', Object.fromEntries(request.headers.entries()))
+  
   try {
     console.log('🔍 BrowserQL verification endpoint called')
     
@@ -605,15 +610,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const requestBody = await request.json()
-    console.log('🔍 Request body received:', requestBody)
+    let requestBody
+    try {
+      console.log('📥 Attempting to parse request body...')
+      requestBody = await request.json()
+      console.log('✅ Request body parsed successfully:', requestBody)
+    } catch (parseError) {
+      console.error('❌ Failed to parse request body:', parseError)
+      return NextResponse.json({ 
+        error: "Invalid JSON in request body",
+        details: parseError.message
+      }, { status: 400 })
+    }
     
     const { platform, username, code } = requestBody
+    console.log('🔍 Extracted fields:', { platform, username, hasCode: !!code, codeLength: code?.length })
 
     if (!platform || !username) {
       console.log('❌ Missing required fields:', { platform, username, hasCode: !!code })
       return NextResponse.json({ 
-        error: "Missing required fields: platform, username"
+        error: "Missing required fields: platform, username",
+        received: { platform, username, hasCode: !!code }
       }, { status: 400 })
     }
     
