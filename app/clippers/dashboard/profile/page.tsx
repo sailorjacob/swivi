@@ -573,6 +573,32 @@ export default function ProfilePage() {
                 >
                   Test Apify
                 </Button>
+                
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/debug/direct-apify-test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          username: 'elonmusk', // Use a real Twitter account for testing
+                          code: 'TEST123'
+                        }),
+                        credentials: 'include'
+                      })
+                      const data = await response.json()
+                      console.log('Direct Apify test result:', { status: response.status, data })
+                      alert(`Direct Apify: ${response.status} - Success: ${data.success}\nFirst few logs:\n${data.logs?.slice(0, 10).join('\n')}\n\n(Check console for full logs)`)
+                    } catch (error) {
+                      console.error('Direct Apify test error:', error)
+                      alert(`Direct Apify error: ${error.message}`)
+                    }
+                  }}
+                  variant="outline" 
+                  size="sm"
+                >
+                  Direct Test
+                </Button>
               </div>
             </CardContent>
           </Card>
