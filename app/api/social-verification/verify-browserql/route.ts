@@ -603,7 +603,8 @@ export async function POST(request: NextRequest) {
         instagram: 'INSTAGRAM',
         youtube: 'YOUTUBE',
         tiktok: 'TIKTOK',
-        twitter: 'TWITTER'
+        twitter: 'TWITTER',
+        x: 'TWITTER'
       }
       const platformEnum = platformMap[platform.toLowerCase()]
 
@@ -645,7 +646,8 @@ export async function POST(request: NextRequest) {
         instagram: 'INSTAGRAM',
         youtube: 'YOUTUBE',
         tiktok: 'TIKTOK',
-        twitter: 'TWITTER'
+        twitter: 'TWITTER',
+        x: 'TWITTER'
       }
       const platformEnum = platformMap[platform.toLowerCase()]
 
@@ -699,7 +701,8 @@ export async function POST(request: NextRequest) {
         instagram: 'INSTAGRAM',
         youtube: 'YOUTUBE',
         tiktok: 'TIKTOK',
-        twitter: 'TWITTER'
+        twitter: 'TWITTER',
+        x: 'TWITTER'
       }
       const platformEnum = platformMap[platform.toLowerCase()]
 
@@ -780,7 +783,8 @@ export async function POST(request: NextRequest) {
         instagram: 'INSTAGRAM',
         youtube: 'YOUTUBE',
         tiktok: 'TIKTOK',
-        twitter: 'TWITTER'
+        twitter: 'TWITTER',
+        x: 'TWITTER'
       }
       const platformEnum = platformMap[platform.toLowerCase()]
 
