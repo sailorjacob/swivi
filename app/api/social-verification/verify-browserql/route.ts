@@ -212,7 +212,7 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
     }
     console.log('📤 Apify request body:', JSON.stringify(requestBody, null, 2))
 
-    const runResponse = await fetch('https://api.apify.com/v2/acts/KyFMNUZQhQw8H8hhz/runs', {
+    const runResponse = await fetch('https://api.apify.com/v2/acts/fastcrawler~twitter-user-profile-fast-cheapest-scraper-2025/runs', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
