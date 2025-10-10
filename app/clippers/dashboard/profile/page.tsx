@@ -547,6 +547,32 @@ export default function ProfilePage() {
                 >
                   Test BrowserQL
                 </Button>
+                
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/debug/test-twitter-apify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          username: 'elonmusk', // Use a real Twitter account for testing
+                          code: 'TEST123'
+                        }),
+                        credentials: 'include'
+                      })
+                      const data = await response.json()
+                      console.log('Twitter Apify test result:', { status: response.status, data })
+                      alert(`Twitter Apify: ${response.status} - Success: ${data.success}\nLogs: ${data.logs?.join('\n')}`)
+                    } catch (error) {
+                      console.error('Twitter Apify test error:', error)
+                      alert(`Twitter Apify error: ${error.message}`)
+                    }
+                  }}
+                  variant="outline" 
+                  size="sm"
+                >
+                  Test Apify
+                </Button>
               </div>
             </CardContent>
           </Card>
