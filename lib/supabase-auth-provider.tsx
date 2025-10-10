@@ -185,12 +185,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           if (session?.user) {
             console.log('✅ Valid session found in auth change:', session.user.email)
 
-            // Only update if we don't already have a valid session
-            if (!user || user.id !== session.user.id) {
-              console.log('🔄 Updating session state for user:', session.user.email)
-              setSession(session as SupabaseSession)
-              setUser(session.user as SupabaseUser)
-            }
+            // Always update session state for consistency
+            setSession(session as SupabaseSession)
+            setUser(session.user as SupabaseUser)
           } else {
             console.log('❌ No session in auth change')
             setUser(null)
@@ -233,8 +230,11 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     if (!error) {
       setUser(null)
       setSession(null)
+      // Force re-render by updating loading state
+      setLoading(false)
+    } else {
+      setLoading(false)
     }
-    setLoading(false)
     return { error }
   }
 

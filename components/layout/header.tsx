@@ -7,16 +7,12 @@ import { useSession } from "@/lib/supabase-auth-provider"
 import { Menu, X, ChevronDown } from "lucide-react"
 
 const navigation = [
-  { 
-    name: "For Brands", 
+  {
+    name: "For Brands",
     href: "/brands",
     dropdown: [
       { name: "Case Studies", href: "/case-studies", description: "Previous campaign results" }
     ]
-  },
-  { 
-    name: "Clippers", 
-    href: "/clippers/signup",
   },
   { name: "About", href: "/about" },
   // { name: "Music Hub", href: "/music-hub" },

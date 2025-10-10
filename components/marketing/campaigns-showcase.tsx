@@ -283,75 +283,76 @@ export function CampaignsShowcase() {
               className="relative"
             >
               <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-neutral-800/60 border-neutral-700">
-                <CardHeader className="border-b border-neutral-600/30">
-                  <div className="flex items-center gap-3 mb-3">
+                <CardHeader className="border-b border-neutral-600/30 pb-6">
+                  <div className="flex items-start gap-6 mb-4">
                         {campaign.clientLogo && (
                           <div className="flex-shrink-0">
                             <Image
                               src={campaign.clientLogo}
                               alt={campaign.clientName}
-                              width={80}
-                              height={80}
+                              width={200}
+                              height={200}
                               className="rounded-lg object-cover ring-1 ring-neutral-600/30"
                               unoptimized
                             />
                           </div>
                         )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <CardTitle className="text-xl font-normal">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <CardTitle className="text-2xl font-normal">
                           {campaign.clientName}
                         </CardTitle>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-sm">
                           {campaign.clientType}
                         </Badge>
-                        <span className="text-2xl">{getPlatformIcon(campaign.contentPlatform)}</span>
+                        <span className="text-3xl">{getPlatformIcon(campaign.contentPlatform)}</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground leading-relaxed">
                         {campaign.description}
                       </p>
                     </div>
                   </div>
                 </CardHeader>
 
-                <CardContent className="p-4 sm:p-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
-                    <div className="space-y-4">
-                      <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
-                        Campaign Details
-                      </h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Budget:</span>
-                          <span className="text-sm font-medium">${campaign.budget.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Structure:</span>
-                          <span className="text-sm font-medium">{campaign.budgetStructure}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Timeline:</span>
-                          <span className="text-sm font-medium">{campaign.timeline}</span>
-                        </div>
+                <CardContent className="p-6 sm:p-8">
+                  {/* Key Metrics - Large and Prominent */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div className="text-center p-6 bg-black/20 rounded-lg">
+                      <div className="text-3xl md:text-4xl font-light text-green-600 mb-2">
+                        {campaign.roi.toLocaleString()}%
+                      </div>
+                      <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                        ROI Achieved
                       </div>
                     </div>
+                    <div className="text-center p-6 bg-black/20 rounded-lg">
+                      <div className="text-3xl md:text-4xl font-light text-blue-400 mb-2">
+                        {formatNumber(campaign.viewsGenerated)}
+                      </div>
+                      <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                        Views Generated
+                      </div>
+                    </div>
+                  </div>
 
+                  {/* Campaign Details - Simplified */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div className="space-y-4">
-                      <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
-                        Content Production
+                      <h4 className="font-medium text-muted-foreground uppercase tracking-wider text-sm">
+                        Campaign Overview
                       </h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Clips Made:</span>
-                          <span className="text-sm font-medium">{campaign.clipsDistributed}</span>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center py-2 border-b border-black/10">
+                          <span className="text-muted-foreground">Budget:</span>
+                          <span className="font-medium">${campaign.budget.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Clips Paid:</span>
-                          <span className="text-sm font-medium">{campaign.clipsPaid}</span>
+                        <div className="flex justify-between items-center py-2 border-b border-black/10">
+                          <span className="text-muted-foreground">Timeline:</span>
+                          <span className="font-medium">{campaign.timeline}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Success Rate:</span>
-                          <span className="text-sm font-medium">
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-muted-foreground">Success Rate:</span>
+                          <span className="font-medium text-green-600">
                             {Math.round((campaign.clipsPaid / campaign.clipsDistributed) * 100)}%
                           </span>
                         </div>
@@ -359,44 +360,14 @@ export function CampaignsShowcase() {
                     </div>
 
                     <div className="space-y-4">
-                      <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
-                        Performance
-                      </h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Goal:</span>
-                          <span className="text-sm font-medium">{campaign.goal}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Achieved:</span>
-                          <span className="text-sm font-medium text-green-600">
-                            {formatNumber(campaign.viewsGenerated)} views
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Efficiency:</span>
-                          <span className="text-sm font-medium">
-                            ${(campaign.budget / (campaign.viewsGenerated / 1000)).toFixed(2)}/1K views
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">ROI:</span>
-                          <span className="text-sm font-medium text-green-600">
-                            {campaign.roi.toLocaleString()}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
+                      <h4 className="font-medium text-muted-foreground uppercase tracking-wider text-sm">
                         Key Highlights
                       </h4>
-                      <div className="space-y-2">
-                        {campaign.highlights.map((highlight, idx) => (
-                          <div key={idx} className="flex items-start gap-2">
-                            <Award className="h-3 w-3 text-green-600 mt-1 flex-shrink-0" />
-                            <span className="text-xs text-muted-foreground">{highlight}</span>
+                      <div className="space-y-3">
+                        {campaign.highlights.slice(0, 3).map((highlight, idx) => (
+                          <div key={idx} className="flex items-start gap-3 p-3 bg-black/10 rounded-lg">
+                            <Award className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-muted-foreground leading-relaxed">{highlight}</span>
                           </div>
                         ))}
                       </div>
