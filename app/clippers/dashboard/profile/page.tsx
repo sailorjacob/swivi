@@ -459,6 +459,99 @@ export default function ProfilePage() {
 
         </div>
 
+        {/* Debug Section - Remove after testing */}
+        {true && (
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground">Debug Verification</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-2 flex-wrap">
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/debug/minimal-verify-test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          platform: 'twitter',
+                          username: 'test_user',
+                          code: 'ABC123'
+                        }),
+                        credentials: 'include'
+                      })
+                      const data = await response.json()
+                      console.log('Minimal test result:', { status: response.status, data })
+                      alert(`Minimal test: ${response.status} - ${JSON.stringify(data)}`)
+                    } catch (error) {
+                      console.error('Minimal test error:', error)
+                      alert(`Minimal test error: ${error.message}`)
+                    }
+                  }}
+                  variant="outline" 
+                  size="sm"
+                >
+                  Test Minimal
+                </Button>
+                
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/debug/simple-verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          platform: 'twitter',
+                          username: 'test_user',
+                          code: 'ABC123'
+                        }),
+                        credentials: 'include'
+                      })
+                      const data = await response.json()
+                      console.log('Simple verify result:', { status: response.status, data })
+                      alert(`Simple verify: ${response.status} - ${JSON.stringify(data)}`)
+                    } catch (error) {
+                      console.error('Simple verify error:', error)
+                      alert(`Simple verify error: ${error.message}`)
+                    }
+                  }}
+                  variant="outline" 
+                  size="sm"
+                >
+                  Test Simple
+                </Button>
+                
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/social-verification/verify-browserql', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          platform: 'twitter',
+                          username: 'test_user',
+                          code: 'ABC123'
+                        }),
+                        credentials: 'include'
+                      })
+                      const data = await response.json()
+                      console.log('BrowserQL result:', { status: response.status, data })
+                      alert(`BrowserQL: ${response.status} - ${JSON.stringify(data)}`)
+                    } catch (error) {
+                      console.error('BrowserQL error:', error)
+                      alert(`BrowserQL error: ${error.message}`)
+                    }
+                  }}
+                  variant="outline" 
+                  size="sm"
+                >
+                  Test BrowserQL
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Connected Accounts */}
         {connectedAccounts.length > 0 && (
           <Card className="bg-card border-border">
