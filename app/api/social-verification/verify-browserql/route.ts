@@ -184,7 +184,10 @@ async function checkTikTokBio(username: string, code: string): Promise<boolean> 
 
 // Twitter/X bio checking via Apify (fastcrawler/twitter-user-profile-fast-cheapest-scraper-2025)
 async function checkTwitterBio(username: string, code: string): Promise<boolean> {
+  console.log(`🚀 === checkTwitterBio STARTED === username: "${username}", code: "${code}"`)
+  
   try {
+    console.log('🔍 Step 1: Checking environment variables...')
     const APIFY_API_KEY = process.env.APIFY_API_KEY
     console.log('🔑 Apify API Key check:', {
       hasKey: !!APIFY_API_KEY,
@@ -804,9 +807,17 @@ export async function POST(request: NextRequest) {
       case 'twitter':
       case 'x':
         logs.push(`🐦 Checking Twitter bio via Apify for @${cleanUsername}`)
-        codeFound = await checkTwitterBio(cleanUsername, verificationCode)
-        if (codeFound) {
-          bio = verificationCode
+        try {
+          console.log(`🔍 About to call checkTwitterBio with: username="${cleanUsername}", code="${verificationCode}"`)
+          codeFound = await checkTwitterBio(cleanUsername, verificationCode)
+          console.log(`🔍 checkTwitterBio returned: ${codeFound}`)
+          if (codeFound) {
+            bio = verificationCode
+          }
+        } catch (twitterError) {
+          console.error(`❌ checkTwitterBio threw an error:`, twitterError)
+          logs.push(`❌ Twitter verification error: ${twitterError.message}`)
+          codeFound = false
         }
         break
 
