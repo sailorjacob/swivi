@@ -184,16 +184,8 @@ async function checkTikTokBio(username: string, code: string): Promise<boolean> 
 
 // Twitter/X bio checking via Apify (fastcrawler/twitter-user-profile-fast-cheapest-scraper-2025)
 async function checkTwitterBio(username: string, code: string): Promise<boolean> {
-  console.log(`🚀 === checkTwitterBio STARTED === username: "${username}", code: "${code}"`)
-  
   try {
-    console.log('🔍 Step 1: Checking environment variables...')
     const APIFY_API_KEY = process.env.APIFY_API_KEY
-    console.log('🔑 Apify API Key check:', {
-      hasKey: !!APIFY_API_KEY,
-      keyLength: APIFY_API_KEY?.length,
-      keyPreview: APIFY_API_KEY ? `${APIFY_API_KEY.substring(0, 8)}...` : 'none'
-    })
     
     if (!APIFY_API_KEY) {
       console.error('❌ APIFY_API_KEY not configured for Twitter/X')
@@ -201,7 +193,6 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
     }
 
     console.log(`🔍 Checking Twitter/X profile via Apify: @${username}`)
-    console.log(`🔍 Looking for code: "${code}"`)
 
     // Use fastcrawler/twitter-user-profile-fast-cheapest-scraper-2025
     const requestBody = {
@@ -210,7 +201,6 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
       "shouldIncludeUserByScreenName": true,
       "maxItems": 1
     }
-    console.log('📤 Apify request body:', JSON.stringify(requestBody, null, 2))
 
     const runResponse = await fetch('https://api.apify.com/v2/acts/fastcrawler~twitter-user-profile-fast-cheapest-scraper-2025/runs', {
       method: 'POST',
@@ -221,34 +211,16 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
       body: JSON.stringify(requestBody)
     })
 
-    console.log('📊 Apify run response:', {
-      status: runResponse.status,
-      statusText: runResponse.statusText,
-      ok: runResponse.ok
-    })
 
     if (!runResponse.ok) {
       const errorText = await runResponse.text()
       console.error(`❌ Twitter Apify run failed: ${runResponse.status} - ${errorText}`)
-      
-      // If actor is not rented (403), fall back to manual scraping
-      if (runResponse.status === 403 && errorText.includes('actor-is-not-rented')) {
-        console.log('🔄 Apify actor not rented, falling back to manual Twitter scraping...')
-        return await checkTwitterBioManual(username, code)
-      }
-      
       return false
     }
 
     const runData = await runResponse.json()
     const runId = runData.data.id
     const datasetId = runData.data.defaultDatasetId
-    
-    console.log(`✅ Twitter Apify run started:`, {
-      runId,
-      datasetId,
-      status: runData.data.status
-    })
 
     // Wait for completion (longer timeout for Twitter)
     const maxWaitTime = 90000 // 90 seconds for Twitter
@@ -263,18 +235,12 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
         headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
       })
 
-      if (!statusResponse.ok) {
-        console.error(`❌ Failed to check run status: ${statusResponse.status}`)
-        break
-      }
+      if (!statusResponse.ok) break
 
       const statusData = await statusResponse.json()
       const runStatus = statusData.data.status
-      
-      console.log(`🔄 Twitter run status: ${runStatus} (${Math.round(elapsed/1000)}s elapsed)`)
 
       if (runStatus === 'SUCCEEDED') {
-        console.log(`✅ Twitter run completed successfully!`)
         const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=10`, {
           headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
         })
@@ -323,149 +289,6 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
   }
 }
 
-// Fallback manual Twitter scraping function
-async function checkTwitterBioManual(username: string, code: string): Promise<boolean> {
-  try {
-    console.log(`🔍 Manual Twitter scraping for @${username}`)
-    
-    // Note: Twitter has strong anti-bot measures, so this is a basic attempt
-    // For production, you'd want to use a proper Twitter API or paid service
-    
-    const url = `https://twitter.com/${username}`
-    console.log(`📍 Checking URL: ${url}`)
-
-    // Add randomized delay to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000))
-
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
-        'Sec-Ch-Ua-Mobile': '?0',
-        'Sec-Ch-Ua-Platform': '"Windows"',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1',
-        'Upgrade-Insecure-Requests': '1',
-      },
-      signal: AbortSignal.timeout(15000)
-    })
-
-    console.log(`📊 Response status: ${response.status}`)
-
-    if (!response.ok) {
-      console.error(`Twitter profile not accessible: ${username} - Status: ${response.status}`)
-      if (response.status === 429) {
-        console.log(`Rate limited - Twitter is blocking our requests`)
-        return false
-      }
-      if (response.status === 404) {
-        console.log(`Profile not found: ${username}`)
-        return false
-      }
-      if (response.status === 403) {
-        console.log(`Access forbidden for profile: ${username} - may be private or restricted`)
-        return false
-      }
-      return false
-    }
-
-    const html = await response.text()
-    console.log(`✅ Successfully fetched Twitter page (${html.length} characters)`)
-
-    // Enhanced patterns for extracting bio/description from Twitter
-    const patterns = [
-      // Twitter bio patterns
-      /"description":"([^"]*(?:\\.[^"]*)*)"/,
-      /"bio":"([^"]*(?:\\.[^"]*)*)"/,
-      
-      // Legacy patterns
-      /description['"]:[\s]*['"]([^'"]*)['"]/,
-      /bio['"]:[\s]*['"]([^'"]*)['"]/,
-      
-      // JSON-LD schema.org patterns
-      /@type['"]:[\s]*['"]Person['"][\s\S]*?description['"]:[\s]*['"]([^'"]*)['"]/,
-      
-      // Meta tag patterns
-      /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"]/,
-      /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"]/,
-      
-      // Twitter specific patterns
-      /data-testid=['"]UserDescription['"][^>]*>([^<]*)</,
-      /<div[^>]*data-testid=['"]UserDescription['"][^>]*>([^<]*)</,
-    ]
-
-    let bio = ''
-    let patternUsed = -1
-
-    for (let i = 0; i < patterns.length; i++) {
-      const match = html.match(patterns[i])
-      if (match && match[1] && match[1].trim()) {
-        bio = match[1].trim()
-        patternUsed = i
-        console.log(`📝 Found bio using pattern ${i + 1}: "${bio.substring(0, 100)}${bio.length > 100 ? '...' : ''}"`)
-        break
-      }
-    }
-
-    if (!bio) {
-      console.error(`❌ Could not extract Twitter bio for: ${username} (tried ${patterns.length} patterns)`)
-      if (html.includes('This account is private') || html.includes('private')) {
-        console.log(`❌ Account appears to be private: ${username}`)
-        return false
-      }
-      if (html.includes('This account doesn\'t exist') || html.includes('User not found')) {
-        console.log(`❌ Account does not exist: ${username}`)
-        return false
-      }
-      if (html.includes('challenge') || html.includes('checkpoint')) {
-        console.log(`❌ Twitter is challenging our request - may need different approach`)
-        return false
-      }
-      return false
-    }
-
-    // Decode Unicode escape sequences and HTML entities
-    let decodedBio = bio
-      .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
-        return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
-      })
-      .replace(/\\n/g, ' ')
-      .replace(/\\t/g, ' ')
-      .replace(/\\"/g, '"')
-      .replace(/\\'/g, "'")
-      .replace(/&quot;/g, '"')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-
-    console.log(`📝 Bio extracted (pattern ${patternUsed + 1}): "${decodedBio.substring(0, 100)}${decodedBio.length > 100 ? '...' : ''}"`)
-    console.log(`🔍 Looking for code: "${code}"`)
-
-    // Case-insensitive search for better matching
-    const codeFound = decodedBio.toLowerCase().includes(code.toLowerCase())
-    console.log(`Twitter bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
-
-    return codeFound
-
-  } catch (error) {
-    console.error(`❌ Manual Twitter bio check failed for ${username}:`, error)
-    if (error instanceof Error) {
-      if (error.name === 'TimeoutError') {
-        console.log(`🔄 Request timed out for ${username}`)
-      } else if (error.name === 'TypeError') {
-        console.log(`🔄 Network error for ${username}`)
-      }
-    }
-    return false
-  }
-}
 
 async function checkInstagramBio(username: string, code: string): Promise<boolean> {
   try {
@@ -958,17 +781,9 @@ export async function POST(request: NextRequest) {
       case 'twitter':
       case 'x':
         logs.push(`🐦 Checking Twitter bio via Apify for @${cleanUsername}`)
-        try {
-          console.log(`🔍 About to call checkTwitterBio with: username="${cleanUsername}", code="${verificationCode}"`)
-          codeFound = await checkTwitterBio(cleanUsername, verificationCode)
-          console.log(`🔍 checkTwitterBio returned: ${codeFound}`)
-          if (codeFound) {
-            bio = verificationCode
-          }
-        } catch (twitterError) {
-          console.error(`❌ checkTwitterBio threw an error:`, twitterError)
-          logs.push(`❌ Twitter verification error: ${twitterError.message}`)
-          codeFound = false
+        codeFound = await checkTwitterBio(cleanUsername, verificationCode)
+        if (codeFound) {
+          bio = verificationCode
         }
         break
 
