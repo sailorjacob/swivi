@@ -551,8 +551,13 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔍 BrowserQL verification endpoint called')
+    
     const { user, error } = await getServerUserWithRole(request)
+    console.log('🔍 Auth result:', { hasUser: !!user, userId: user?.id, error: error?.message })
+    
     if (!user?.id || error) {
+      console.log('❌ Authentication failed:', { hasUser: !!user, error: error?.message })
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
@@ -561,21 +566,29 @@ export async function POST(request: NextRequest) {
       where: { supabaseAuthId: user.id },
       select: { id: true }
     })
+    console.log('🔍 Database user lookup:', { found: !!dbUser, dbUserId: dbUser?.id })
 
     if (!dbUser) {
+      console.log('❌ User not found in database')
       return NextResponse.json(
         { error: "User not found in database" },
         { status: 404 }
       )
     }
 
-    const { platform, username, code } = await request.json()
+    const requestBody = await request.json()
+    console.log('🔍 Request body received:', requestBody)
+    
+    const { platform, username, code } = requestBody
 
     if (!platform || !username) {
+      console.log('❌ Missing required fields:', { platform, username, hasCode: !!code })
       return NextResponse.json({ 
         error: "Missing required fields: platform, username"
       }, { status: 400 })
     }
+    
+    console.log('✅ Request validation passed:', { platform, username, hasCode: !!code })
 
     const logs: string[] = []
     logs.push(`🤖 Starting verification for @${username} on ${platform}`)
