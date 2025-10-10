@@ -25,14 +25,14 @@ export async function GET(
       where: { supabaseAuthId: user.id }
     })
 
-    if (!userData || userData.role !== "ADMIN") {
+    if (!currentUserData || currentUserData.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 
     const submission = await prisma.clipSubmission.findUnique({
       where: { id: params.id },
       include: {
-        user: {
+        users: {
           select: {
             id: true,
             name: true,
@@ -82,7 +82,7 @@ export async function PUT(
       where: { supabaseAuthId: user.id }
     })
 
-    if (!userData || userData.role !== "ADMIN") {
+    if (!currentUserData || currentUserData.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 
@@ -175,7 +175,7 @@ export async function DELETE(
       where: { supabaseAuthId: user.id }
     })
 
-    if (!userData || userData.role !== "ADMIN") {
+    if (!currentUserData || currentUserData.role !== "ADMIN") {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 

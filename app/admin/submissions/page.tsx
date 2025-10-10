@@ -421,7 +421,28 @@ export default function AdminSubmissionsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {submissions.map((submission) => (
+              {!loading && submissions.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                    <Target className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">No submissions yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Submissions will appear here once clippers start submitting content to your campaigns.
+                  </p>
+                  <div className="flex justify-center gap-2">
+                    <Button variant="outline" asChild>
+                      <Link href="/admin/campaigns">
+                        View Campaigns
+                      </Link>
+                    </Button>
+                    <Button onClick={fetchSubmissions}>
+                      Refresh
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                submissions.map((submission) => (
                 <div
                   key={submission.id}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
@@ -520,7 +541,8 @@ export default function AdminSubmissionsPage() {
                     </AlertDialog>
                   </div>
                 </div>
-              ))}
+              ))
+              )}
             </div>
 
             {pagination.hasMore && (

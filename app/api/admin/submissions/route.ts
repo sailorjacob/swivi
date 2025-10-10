@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
         },
         clips: {
           include: {
-            viewTracking: {
+            view_tracking: {
               orderBy: {
                 date: "desc"
               },

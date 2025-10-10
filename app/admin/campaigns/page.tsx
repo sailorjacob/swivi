@@ -407,7 +407,22 @@ export default function AdminCampaignsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {campaigns.map((campaign) => (
+              {campaigns.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                    <Target className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">No campaigns yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Create your first campaign to start working with content creators.
+                  </p>
+                  <Button onClick={() => setShowCreateDialog(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Campaign
+                  </Button>
+                </div>
+              ) : (
+                campaigns.map((campaign) => (
                 <div
                   key={campaign.id}
                   className="flex items-center justify-between p-4 border rounded-lg"
@@ -469,7 +484,8 @@ export default function AdminCampaignsPage() {
                     </AlertDialog>
                   </div>
                 </div>
-              ))}
+              ))
+              )}
             </div>
           </CardContent>
         </Card>
