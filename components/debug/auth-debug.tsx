@@ -57,9 +57,9 @@ export function AuthDebug() {
     return () => clearInterval(interval)
   }, [session, status])
 
-  // ALWAYS show debug panel in production until auth is fixed
+  // Debug panel temporarily disabled - set to true when needed for debugging
   // TODO: Remove this after auth issues are resolved
-  const forceShow = true
+  const forceShow = false
   
   if (!forceShow && process.env.NODE_ENV === 'production' && session) {
     return null
