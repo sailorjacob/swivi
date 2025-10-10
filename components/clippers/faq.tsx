@@ -14,7 +14,7 @@ const faqData: FAQItem[] = [
   // Getting Started
   {
     question: "How do I join Swivi Clippers?",
-    answer: "Apply through our exclusive Discord community. Get instant access to creator content and our clipper dashboard. There's no minimum follower count needed - we welcome all clippers, whether you're brand new or experienced.",
+    answer: "Apply through our platform. Get instant access to creator content and our clipper dashboard. There's no minimum follower count needed - we welcome all clippers, whether you're brand new or experienced.",
     category: "getting-started"
   },
   {
@@ -29,7 +29,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: "Can I link multiple social accounts?",
-    answer: "Yes, you can connect as many social accounts as you want in the 🔗・connect-socials channel. There's no maximum limit, so feel free to add multiple accounts.",
+    answer: "Yes, you can connect as many social accounts as you want. There's no maximum limit, so feel free to add multiple accounts.",
     category: "getting-started"
   },
 
@@ -51,7 +51,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: "How do I know how much budget is left for campaigns?",
-    answer: "You can see how much budget is left by looking at the leaderboard channel in a campaign category. It will show you what percentage of the budget is used and how much money is up for grabs.",
+    answer: "You can see how much budget is left by looking at the leaderboard. It will show you what percentage of the budget is used and how much money is up for grabs.",
     category: "campaigns"
   },
   {
@@ -88,7 +88,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: "What does \"minimum clip duration\" mean?",
-    answer: "When submitting videos for campaigns, make sure your clip is more than 7 seconds long, or else it will get denied. This is standard in all of our campaigns. If you post one below 7 seconds and it's your first time, open a ticket, and we will help you bypass it!",
+    answer: "When submitting videos for campaigns, make sure your clip is more than 7 seconds long, or else it will get denied. This is standard in all of our campaigns. If you post one below 7 seconds and it's your first time, contact support, and we will help you bypass it!",
     category: "requirements"
   },
   {
@@ -98,7 +98,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: "Is there a maximum limit to how many clips I can post?",
-    answer: "You can post up to 30 clips per day. This limit helps prevent spam and keeps our system running smoothly. Need a higher limit? Open a ticket in 🎫・get-help, and we'll help you out.",
+    answer: "You can post up to 30 clips per day. This limit helps prevent spam and keeps our system running smoothly. Need a higher limit? Contact support, and we'll help you out.",
     category: "requirements"
   },
   {
@@ -110,7 +110,7 @@ const faqData: FAQItem[] = [
   // Earnings & Payments
   {
     question: "How much can I get paid?",
-    answer: "Each campaign has different payouts. To see exactly how much you can get paid for a specific campaign, check the payouts in \"campaign details\" channel located under that campaign's category.",
+    answer: "Each campaign has different payouts. To see exactly how much you can get paid for a specific campaign, check the payouts in the campaign details.",
     category: "earnings"
   },
   {
@@ -120,12 +120,12 @@ const faqData: FAQItem[] = [
   },
   {
     question: "When do I get paid?",
-    answer: "Payments are sent within one week after the campaign finishes, often quicker. Throughout the campaign, we regularly review and approve clips. Once the campaign budget is fully spent, we finalize who gets paid and how much. You will receive a DM and Email once the payment has been sent.",
+    answer: "Payments are sent within one week after the campaign finishes, often quicker. Throughout the campaign, we regularly review and approve clips. Once the campaign budget is fully spent, we finalize who gets paid and how much. You will receive an email notification once the payment has been sent.",
     category: "earnings"
   },
   {
     question: "How do I get paid?",
-    answer: "We pay all clippers using PayPal. You initially provide your PayPal email during sign-up, but you can always update or change your payment email later in 🧬・your-account",
+    answer: "We pay all clippers using PayPal. You initially provide your PayPal email during sign-up, but you can always update or change your payment email later in your account settings",
     category: "earnings"
   },
   {
@@ -142,29 +142,29 @@ const faqData: FAQItem[] = [
   // Tracking & Analytics
   {
     question: "How are my clip views tracked?",
-    answer: "After posting clips, go into the campaign category and find the submit clips channel. Here, you can either click \"scan account\" to automatically fetch your recent clips, or manually submit the links by clicking \"submit clips.\" Make sure you submit clips regularly because we close campaigns when the budget is almost reached to avoid overspending.",
+    answer: "After posting clips, submit them through the campaign dashboard. Here, you can either click \"scan account\" to automatically fetch your recent clips, or manually submit the links by clicking \"submit clips.\" Make sure you submit clips regularly because we close campaigns when the budget is almost reached to avoid overspending.",
     category: "tracking"
   },
   {
     question: "How often do my stats update?",
-    answer: "After your clips are approved, stats automatically update every 2 hours. We also run one final update right before the campaign ends to ensure everyone gets paid accurately. If your clips haven't updated yet, make sure that it has been approved. You will receive a DM from our bot once it's been approved.",
+    answer: "After your clips are approved, stats automatically update every 2 hours. We also run one final update right before the campaign ends to ensure everyone gets paid accurately. If your clips haven't updated yet, make sure that it has been approved. You will receive a notification once it's been approved.",
     category: "tracking"
   },
   {
     question: "What does \"video under review\" mean?",
-    answer: "When your video says it's under review, it means our team is manually checking it to confirm it follows campaign guidelines. Once reviewed, it'll either get approved or rejected and you will receive a DM.",
+    answer: "When your video says it's under review, it means our team is manually checking it to confirm it follows campaign guidelines. Once reviewed, it'll either get approved or rejected and you will receive a notification.",
     category: "tracking"
   },
 
   // Account & Demographics
   {
     question: "How do I verify my account demographics?",
-    answer: "Head over to the ✅・verify-demographics channel and type /verify. You'll need to upload a screen recording clearly showing your account's demographics. Our team reviews submissions within 48 hours.",
+    answer: "Go to your account settings and use the verification feature. You'll need to upload a screen recording clearly showing your account's demographics. Our team reviews submissions within 48 hours.",
     category: "account"
   },
   {
     question: "Where do I find my demographics for my page?",
-    answer: "On Instagram, locate your \"professional dashboard\" & from there find \"audience.\" On TikTok, go to \"TikTok Studio\" \"Analytics\" \"Viewers\" then \"Locations.\" Other platforms are similar but generally your demographic information is located in your analytics. If your account is new & doesn't yet show this information, first connect your account then open a ticket with your username, niche, and proof of location, so we can manually verify you!",
+    answer: "On Instagram, locate your \"professional dashboard\" & from there find \"audience.\" On TikTok, go to \"TikTok Studio\" \"Analytics\" \"Viewers\" then \"Locations.\" Other platforms are similar but generally your demographic information is located in your analytics. If your account is new & doesn't yet show this information, first connect your account then contact support with your username, niche, and proof of location, so we can manually verify you!",
     category: "account"
   },
   {
@@ -173,20 +173,20 @@ const faqData: FAQItem[] = [
     category: "account"
   },
   {
-    question: "How do I hide my discord username from the leaderboards?",
-    answer: "First go to 🧬・your-account, then click analytics, then click hide username!",
+    question: "How do I hide my username from the leaderboards?",
+    answer: "First go to your account settings, then click analytics, then click hide username!",
     category: "account"
   },
 
   // Troubleshooting
   {
     question: "Why did my video get denied?",
-    answer: "If your clip was denied, the reason will be clearly mentioned in the bot's response. Common reasons include incorrect video length, missing hashtags, or improper sound usage.",
+    answer: "If your clip was denied, the reason will be clearly mentioned in the response. Common reasons include incorrect video length, missing hashtags, or improper sound usage.",
     category: "troubleshooting"
   },
   {
     question: "What should I do if I accidentally submitted the wrong clip or account?",
-    answer: "Go to the submit clips channel of that campaign, click \"Remove Clip,\" and paste the link to the video you want to remove.",
+    answer: "Go to the campaign dashboard, click \"Remove Clip,\" and paste the link to the video you want to remove.",
     category: "troubleshooting"
   },
   {
@@ -201,7 +201,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: "Can I delete or archive my clips after submission?",
-    answer: "Yes. To remove your clips from tracking, use the \"Remove Clip\" button in the campaign's submit clips channel. If you delete your video from the social platform directly, it will automatically disappear from our system.",
+    answer: "Yes. To remove your clips from tracking, use the \"Remove Clip\" button in the campaign dashboard. If you delete your video from the social platform directly, it will automatically disappear from our system.",
     category: "troubleshooting"
   },
   {
@@ -212,23 +212,23 @@ const faqData: FAQItem[] = [
 
   // Support & Community
   {
-    question: "How can I open a support ticket if I have questions?",
-    answer: "If you have a personal account-related question or need help, open a ticket in the 🎫・get-help channel by clicking one of the provided buttons. Allow up to 24 hours for our response. Tagging staff in chats or sending direct messages won't speed things up, as we handle tickets in order.",
+    question: "How can I get help if I have questions?",
+    answer: "If you have a personal account-related question or need help, contact our support team through the help section in your dashboard. Allow up to 24 hours for our response. You can also check our documentation or reach out via email for assistance.",
     category: "support"
   },
   {
     question: "What if I have an idea for a feature I want added?",
-    answer: "If you have an idea for something we can change or add to improve the overall experience, feel free to open a ticket and let us know! We are always open to ideas and love adding stuff for you guys. Literally anything, just let us know and we will look into making it happen!",
+    answer: "If you have an idea for something we can change or add to improve the overall experience, feel free to contact support and let us know! We are always open to ideas and love adding stuff for you guys. Literally anything, just let us know and we will look into making it happen!",
     category: "support"
   },
   {
     question: "Can we add an intro to our edits when participating in audio campaigns?",
-    answer: "Yes! Edits are amazing, and you can do intros on these. This is always welcome and will be approved. If you have issues, just open a ticket for support!",
+    answer: "Yes! Edits are amazing, and you can do intros on these. This is always welcome and will be approved. If you have issues, just contact support for assistance!",
     category: "support"
   },
   {
     question: "What's the best way to find clippers for the referral program?",
-    answer: "We have a detailed document showing exactly how to quickly find the best clippers to join the community. Other tactics include DM'ing members from other clipping servers, which works very well also!",
+    answer: "We have a detailed document showing exactly how to quickly find the best clippers to join the community. Other tactics include reaching out to content creators in similar niches, which works very well also!",
     category: "support"
   },
 
