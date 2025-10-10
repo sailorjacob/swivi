@@ -205,7 +205,6 @@ model SocialVerification {
 
 enum UserRole {
   CLIPPER
-  CREATOR
   ADMIN
 }
 
