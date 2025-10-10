@@ -186,36 +186,59 @@ async function checkTikTokBio(username: string, code: string): Promise<boolean> 
 async function checkTwitterBio(username: string, code: string): Promise<boolean> {
   try {
     const APIFY_API_KEY = process.env.APIFY_API_KEY
+    console.log('🔑 Apify API Key check:', {
+      hasKey: !!APIFY_API_KEY,
+      keyLength: APIFY_API_KEY?.length,
+      keyPreview: APIFY_API_KEY ? `${APIFY_API_KEY.substring(0, 8)}...` : 'none'
+    })
+    
     if (!APIFY_API_KEY) {
       console.error('❌ APIFY_API_KEY not configured for Twitter/X')
       return false
     }
 
     console.log(`🔍 Checking Twitter/X profile via Apify: @${username}`)
+    console.log(`🔍 Looking for code: "${code}"`)
 
     // Use fastcrawler/twitter-user-profile-fast-cheapest-scraper-2025
+    const requestBody = {
+      "queryUser": [username],
+      "shouldIncludeUserById": true,
+      "shouldIncludeUserByScreenName": true,
+      "maxItems": 1
+    }
+    console.log('📤 Apify request body:', JSON.stringify(requestBody, null, 2))
+
     const runResponse = await fetch('https://api.apify.com/v2/acts/fastcrawler~twitter-user-profile-fast-cheapest-scraper-2025/runs', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${APIFY_API_KEY}`
       },
-      body: JSON.stringify({
-        "queryUser": [username],
-        "shouldIncludeUserById": true,
-        "shouldIncludeUserByScreenName": true,
-        "maxItems": 1
-      })
+      body: JSON.stringify(requestBody)
+    })
+
+    console.log('📊 Apify run response:', {
+      status: runResponse.status,
+      statusText: runResponse.statusText,
+      ok: runResponse.ok
     })
 
     if (!runResponse.ok) {
-      console.error(`❌ Twitter Apify run failed: ${runResponse.status}`)
+      const errorText = await runResponse.text()
+      console.error(`❌ Twitter Apify run failed: ${runResponse.status} - ${errorText}`)
       return false
     }
 
     const runData = await runResponse.json()
     const runId = runData.data.id
     const datasetId = runData.data.defaultDatasetId
+    
+    console.log(`✅ Twitter Apify run started:`, {
+      runId,
+      datasetId,
+      status: runData.data.status
+    })
 
     // Wait for completion (longer timeout for Twitter)
     const maxWaitTime = 90000 // 90 seconds for Twitter
@@ -230,12 +253,18 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
         headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
       })
 
-      if (!statusResponse.ok) break
+      if (!statusResponse.ok) {
+        console.error(`❌ Failed to check run status: ${statusResponse.status}`)
+        break
+      }
 
       const statusData = await statusResponse.json()
       const runStatus = statusData.data.status
+      
+      console.log(`🔄 Twitter run status: ${runStatus} (${Math.round(elapsed/1000)}s elapsed)`)
 
       if (runStatus === 'SUCCEEDED') {
+        console.log(`✅ Twitter run completed successfully!`)
         const resultsResponse = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=10`, {
           headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
         })
