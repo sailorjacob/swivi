@@ -88,7 +88,7 @@ export default function AdminCampaignsPage() {
     startDate: "",
     targetPlatforms: [] as string[],
     requirements: [] as string[],
-    status: "DRAFT" as Campaign["status"],
+    status: "ACTIVE" as Campaign["status"],
     featuredImage: ""
   })
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
@@ -150,24 +150,31 @@ export default function AdminCampaignsPage() {
   const handleCreateCampaign = async () => {
     setIsSubmitting(true)
     try {
-      // Handle image upload first if there's a file
+      // Handle image upload first if there's a file (optional)
       let imageUrl = formData.featuredImage
       if (uploadedFile) {
-        const formDataUpload = new FormData()
-        formDataUpload.append('file', uploadedFile)
-        formDataUpload.append('bucket', 'images')
-        
-        const uploadResponse = await authenticatedFetch("/api/upload", {
-          method: "POST",
-          body: formDataUpload
-        })
-        
-        if (uploadResponse.ok) {
-          const uploadResult = await uploadResponse.json()
-          imageUrl = uploadResult.url
-        } else {
-          toast.error("Failed to upload image")
-          return
+        try {
+          const formDataUpload = new FormData()
+          formDataUpload.append('file', uploadedFile)
+          formDataUpload.append('bucket', 'images')
+          
+          const uploadResponse = await authenticatedFetch("/api/upload", {
+            method: "POST",
+            body: formDataUpload
+          })
+          
+          if (uploadResponse.ok) {
+            const uploadResult = await uploadResponse.json()
+            imageUrl = uploadResult.url
+          } else {
+            console.error('❌ Image upload failed:', uploadResponse.status)
+            toast.error("Image upload failed, but campaign will be created without image")
+            imageUrl = null // Continue without image
+          }
+        } catch (error) {
+          console.error('❌ Image upload error:', error)
+          toast.error("Image upload failed, but campaign will be created without image")
+          imageUrl = null // Continue without image
         }
       }
 
@@ -220,27 +227,33 @@ export default function AdminCampaignsPage() {
 
     setIsUpdating(true)
     try {
-      // Handle image upload first if there's a new file
+      // Handle image upload first if there's a new file (optional)
       let imageUrl = formData.featuredImage
       if (uploadedFile) {
         console.log('📸 Uploading new image:', uploadedFile.name)
-        const formDataUpload = new FormData()
-        formDataUpload.append('file', uploadedFile)
-        formDataUpload.append('bucket', 'images')
-        
-        const uploadResponse = await authenticatedFetch("/api/upload", {
-          method: "POST",
-          body: formDataUpload
-        })
-        
-        if (uploadResponse.ok) {
-          const uploadResult = await uploadResponse.json()
-          imageUrl = uploadResult.url
-          console.log('✅ Image uploaded successfully:', imageUrl)
-        } else {
-          console.error('❌ Image upload failed:', uploadResponse.status)
-          toast.error("Failed to upload image")
-          return
+        try {
+          const formDataUpload = new FormData()
+          formDataUpload.append('file', uploadedFile)
+          formDataUpload.append('bucket', 'images')
+          
+          const uploadResponse = await authenticatedFetch("/api/upload", {
+            method: "POST",
+            body: formDataUpload
+          })
+          
+          if (uploadResponse.ok) {
+            const uploadResult = await uploadResponse.json()
+            imageUrl = uploadResult.url
+            console.log('✅ Image uploaded successfully:', imageUrl)
+          } else {
+            console.error('❌ Image upload failed:', uploadResponse.status)
+            toast.error("Image upload failed, but campaign will be created without image")
+            imageUrl = null // Continue without image
+          }
+        } catch (error) {
+          console.error('❌ Image upload error:', error)
+          toast.error("Image upload failed, but campaign will be created without image")
+          imageUrl = null // Continue without image
         }
       }
 
@@ -293,6 +306,32 @@ export default function AdminCampaignsPage() {
       toast.error("Failed to update campaign")
     } finally {
       setIsUpdating(false)
+    }
+  }
+
+  // Publish/Activate campaign
+  const handlePublishCampaign = async (campaignId: string) => {
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: "ACTIVE"
+        })
+      })
+
+      if (response.ok) {
+        toast.success("Campaign published successfully!")
+        await fetchCampaigns()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to publish campaign")
+      }
+    } catch (error) {
+      console.error("Error publishing campaign:", error)
+      toast.error("Failed to publish campaign")
     }
   }
 
@@ -428,7 +467,7 @@ export default function AdminCampaignsPage() {
       startDate: "",
       targetPlatforms: [],
       requirements: [],
-      status: "DRAFT",
+      status: "ACTIVE",
       featuredImage: ""
     })
     setUploadedFile(null)
@@ -623,6 +662,16 @@ export default function AdminCampaignsPage() {
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
+                    {campaign.status === "DRAFT" && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handlePublishCampaign(campaign.id)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <span className="text-xs">Publish</span>
+                      </Button>
+                    )}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="outline" size="sm">

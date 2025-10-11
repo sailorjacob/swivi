@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
-import { supabase } from "@/lib/supabase-auth"
+import { createClient } from '@supabase/supabase-js'
+
+// Server-side Supabase client for storage
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(request: NextRequest) {
   try {
