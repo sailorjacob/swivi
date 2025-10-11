@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Check, X, Eye, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2 } from "lucide-react"
+import { Check, X, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -41,24 +41,6 @@ interface Submission {
     creator: string
     payoutRate: number
   }
-  clip?: {
-    id: string
-    title?: string
-    description?: string
-    views: number
-    viewTracking?: Array<{
-      id: string
-      views: number
-      date: string
-      platform: string
-    }>
-  } | null
-  viewTracking: Array<{
-    id: string
-    views: number
-    date: string
-    platform: string
-  }>
 }
 
 const statusOptions = [
@@ -96,7 +78,6 @@ export default function AdminSubmissionsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null)
-  const [showDetailDialog, setShowDetailDialog] = useState(false)
   const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [rejectionReason, setRejectionReason] = useState("")
   const [payoutAmount, setPayoutAmount] = useState("")
@@ -455,7 +436,8 @@ export default function AdminSubmissionsPage() {
                         {submission.platform}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        {submission.users.name || submission.users.email}
+                        {submission.users.email}
+                        {submission.users.name && ` (${submission.users.name})`}
                       </span>
                     </div>
                     <div className="mb-2">
@@ -473,16 +455,6 @@ export default function AdminSubmissionsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedSubmission(submission)
-                        setShowDetailDialog(true)
-                      }}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -556,172 +528,6 @@ export default function AdminSubmissionsPage() {
             )}
           </CardContent>
         </Card>
-
-        {/* Submission Detail Dialog */}
-        {selectedSubmission && (
-          <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Submission Details</DialogTitle>
-              </DialogHeader>
-                <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-sm font-medium">User</Label>
-                    <p className="text-sm">{selectedSubmission.user.name || selectedSubmission.user.email}</p>
-                    <p className="text-xs text-muted-foreground">Total Views: {selectedSubmission.user.totalViews.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Total Earnings: ${selectedSubmission.user.totalEarnings.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">Campaign</Label>
-                    <p className="text-sm">{selectedSubmission.campaign.title}</p>
-                    <p className="text-xs text-muted-foreground">Budget: ${selectedSubmission.campaign.budget.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Spent: ${selectedSubmission.campaign.spent.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">Platform</Label>
-                    <Badge variant="secondary">{selectedSubmission.platform}</Badge>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">Status</Label>
-                    <Badge className={getStatusColor(selectedSubmission.status)}>
-                      {selectedSubmission.status}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium">Submitted Date</Label>
-                  <p className="text-sm">{new Date(selectedSubmission.createdAt).toLocaleDateString()}</p>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium">Submission URL</Label>
-                  <div className="flex items-center gap-2">
-                    <Input value={selectedSubmission.clipUrl} readOnly />
-                    <Button size="sm" variant="outline" asChild>
-                      <a href={selectedSubmission.clipUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-
-                {selectedSubmission.payout && (
-                  <div>
-                    <Label className="text-sm font-medium">Payout Amount</Label>
-                    <p className="text-sm">${selectedSubmission.payout.toFixed(2)}</p>
-                  </div>
-                )}
-
-                {selectedSubmission.rejectionReason && (
-                  <div>
-                    <Label className="text-sm font-medium">Rejection Reason</Label>
-                    <p className="text-sm text-red-600">{selectedSubmission.rejectionReason}</p>
-                  </div>
-                )}
-
-                <div>
-                  <Label className="text-sm font-medium">View Tracking History</Label>
-                  <div className="space-y-2 mt-2">
-                    {selectedSubmission.clip?.viewTracking && selectedSubmission.clip.viewTracking.length > 0 ? (
-                      selectedSubmission.clip.viewTracking.map((tracking) => (
-                        <div key={tracking.id} className="flex justify-between text-sm p-2 bg-muted rounded">
-                          <span>{new Date(tracking.date).toLocaleDateString()}</span>
-                          <span>{Number(tracking.views).toLocaleString()} views</span>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No view tracking data available</p>
-                    )}
-                  </div>
-                </div>
-
-                {selectedSubmission.payout && (
-                  <div>
-                    <Label className="text-sm font-medium">Payout Information</Label>
-                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded">
-                      <p className="text-sm text-green-800">
-                        <strong>Payout Amount:</strong> ${selectedSubmission.payout.toFixed(2)}
-                      </p>
-                      {selectedSubmission.paidAt && (
-                        <p className="text-sm text-green-800">
-                          <strong>Paid On:</strong> {new Date(selectedSubmission.paidAt).toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {selectedSubmission.status === "APPROVED" && (
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <Label htmlFor="payout">Set Payout Amount</Label>
-                      <Input
-                        id="payout"
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={payoutAmount}
-                        onChange={(e) => setPayoutAmount(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button
-                        onClick={() => {
-                          const amount = parseFloat(payoutAmount)
-                          if (amount > 0) {
-                            updateSubmissionStatus(selectedSubmission.id, "PAID", undefined, amount)
-                          }
-                        }}
-                        disabled={!payoutAmount || parseFloat(payoutAmount) <= 0}
-                      >
-                        Mark as Paid
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-
-        {/* Reject Dialog */}
-        <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Reject Submission</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="reason">Rejection Reason</Label>
-                <Textarea
-                  id="reason"
-                  placeholder="Please provide a reason for rejection..."
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  rows={3}
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    if (selectedSubmission && rejectionReason.trim()) {
-                      updateSubmissionStatus(selectedSubmission.id, "REJECTED", rejectionReason)
-                    }
-                  }}
-                  disabled={!rejectionReason.trim()}
-                >
-                  Reject Submission
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </motion.div>
     </div>
   )

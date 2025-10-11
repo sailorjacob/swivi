@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     // Use the same approach as clipper API that works
     console.log("🔍 Fetching submissions using clipper API approach...")
-    
+
     const submissions = await prisma.clipSubmission.findMany({
       orderBy: {
         createdAt: "desc"

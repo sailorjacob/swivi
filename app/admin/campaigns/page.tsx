@@ -258,16 +258,16 @@ export default function AdminCampaignsPage() {
       }
 
       const updatePayload = {
-        title: formData.title,
-        description: formData.description,
-        creator: formData.creator,
+          title: formData.title,
+          description: formData.description,
+          creator: formData.creator,
         budget: parseFloat(formData.budget) || 0,
         payoutRate: parseFloat(formData.payoutRate) || 0,
         deadline: formData.deadline || undefined,
-        startDate: formData.startDate || null,
-        targetPlatforms: formData.targetPlatforms,
-        requirements: formData.requirements,
-        status: formData.status,
+          startDate: formData.startDate || null,
+          targetPlatforms: formData.targetPlatforms,
+          requirements: formData.requirements,
+          status: formData.status,
         featuredImage: imageUrl || null,
       }
 
@@ -290,9 +290,9 @@ export default function AdminCampaignsPage() {
         toast.success("Campaign updated successfully!")
         
         // Close dialog and refresh list
-        setShowEditDialog(false)
+          setShowEditDialog(false)
         setEditingCampaignId(null)
-        resetForm()
+          resetForm()
         await fetchCampaigns()
         
         console.log('🔄 Campaign list refreshed')
@@ -448,7 +448,7 @@ export default function AdminCampaignsPage() {
       console.log('📝 Setting form data:', formDataToSet)
       setFormData(formDataToSet)
       setUploadedFile(null) // Clear any uploaded file when editing
-      setShowEditDialog(true)
+    setShowEditDialog(true)
     } catch (error) {
       console.error('❌ Error in handleEditCampaign:', error)
       toast.error("Failed to open edit form. Please try again.")
@@ -539,15 +539,15 @@ export default function AdminCampaignsPage() {
               <CardTitle>Create New Campaign</CardTitle>
             </CardHeader>
             <CardContent>
-                <CampaignForm
-                  formData={formData}
-                  setFormData={setFormData}
-                  onSubmit={handleCreateCampaign}
-                  onCancel={() => setShowCreateDialog(false)}
-                  isSubmitting={isSubmitting}
+              <CampaignForm
+                formData={formData}
+                setFormData={setFormData}
+                onSubmit={handleCreateCampaign}
+                onCancel={() => setShowCreateDialog(false)}
+                isSubmitting={isSubmitting}
                   uploadedFile={uploadedFile}
                   setUploadedFile={setUploadedFile}
-                />
+              />
             </CardContent>
           </Card>
         )}
@@ -764,7 +764,7 @@ export default function AdminCampaignsPage() {
                     <p className="text-muted-foreground text-sm">
                       {selectedCampaign._count?.clipSubmissions || 0} submissions total
                     </p>
-                  </div>
+                        </div>
                 </div>
               </div>
             </DialogContent>
