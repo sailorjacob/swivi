@@ -57,15 +57,19 @@ export async function GET(
         createdAt: true,
         updatedAt: true,
         clipSubmissions: {
-          include: {
+          select: {
+            id: true,
+            clipUrl: true,
+            platform: true,
+            status: true,
+            createdAt: true,
             user: {
               select: {
                 id: true,
                 name: true,
                 email: true
               }
-            },
-            clip: true
+            }
           },
           orderBy: {
             createdAt: "desc"

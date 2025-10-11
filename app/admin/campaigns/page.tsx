@@ -73,6 +73,7 @@ export default function AdminCampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [analytics, setAnalytics] = useState<any>(null)
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
+  const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
@@ -209,12 +210,12 @@ export default function AdminCampaignsPage() {
 
   // Update campaign
   const handleUpdateCampaign = async () => {
-    if (!selectedCampaign) {
-      console.error('❌ No selected campaign for update')
+    if (!editingCampaignId) {
+      console.error('❌ No editing campaign ID for update')
       return
     }
 
-    console.log('🔄 Starting campaign update for:', selectedCampaign.id)
+    console.log('🔄 Starting campaign update for:', editingCampaignId)
     console.log('📝 Form data to update:', formData)
 
     setIsUpdating(true)
@@ -259,7 +260,7 @@ export default function AdminCampaignsPage() {
 
       console.log('🚀 Sending update payload:', updatePayload)
 
-      const response = await authenticatedFetch(`/api/admin/campaigns/${selectedCampaign.id}`, {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${editingCampaignId}`, {
         method: "PUT",
         headers: {
           'Content-Type': 'application/json',
@@ -275,11 +276,9 @@ export default function AdminCampaignsPage() {
         
         toast.success("Campaign updated successfully!")
         
-        // Update the selected campaign with fresh data
-        setSelectedCampaign(updatedCampaign)
-        
         // Close dialog and refresh list
         setShowEditDialog(false)
+        setEditingCampaignId(null)
         resetForm()
         await fetchCampaigns()
         
@@ -344,7 +343,8 @@ export default function AdminCampaignsPage() {
     try {
       // Ensure view dialog is closed when opening edit
       setShowViewDialog(false)
-      setSelectedCampaign(campaign)
+      // Store the campaign ID for updating
+      setEditingCampaignId(campaign.id)
       
       // Safe date formatting with extensive error handling
       const formatDateForInput = (dateValue: string | Date | undefined | null, fieldName: string) => {
@@ -433,6 +433,7 @@ export default function AdminCampaignsPage() {
     })
     setUploadedFile(null)
     setSelectedCampaign(null)
+    setEditingCampaignId(null)
   }
 
   // Get status badge color
