@@ -75,6 +75,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // First try a simple query to see if basic fields work
     const submissions = await prisma.clipSubmission.findMany({
       where,
       select: {
@@ -82,29 +83,9 @@ export async function GET(request: NextRequest) {
         clipUrl: true,
         platform: true,
         status: true,
-        rejectionReason: true,
-        payout: true,
-        paidAt: true,
         createdAt: true,
-        updatedAt: true,
-        users: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            totalViews: true,
-            totalEarnings: true
-          }
-        },
-        campaigns: {
-          select: {
-            id: true,
-            title: true,
-            creator: true,
-            budget: true,
-            spent: true
-          }
-        }
+        userId: true,
+        campaignId: true
       },
       orderBy: {
         createdAt: "desc"
@@ -113,10 +94,31 @@ export async function GET(request: NextRequest) {
       skip: offset
     })
 
+    // Get user and campaign data separately to avoid relation issues
+    const userIds = [...new Set(submissions.map(s => s.userId))]
+    const campaignIds = [...new Set(submissions.map(s => s.campaignId))]
+
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true, email: true }
+    })
+
+    const campaigns = await prisma.campaign.findMany({
+      where: { id: { in: campaignIds } },
+      select: { id: true, title: true, creator: true }
+    })
+
+    // Combine the data
+    const enrichedSubmissions = submissions.map(submission => ({
+      ...submission,
+      user: users.find(u => u.id === submission.userId),
+      campaign: campaigns.find(c => c.id === submission.campaignId)
+    }))
+
     const total = await prisma.clipSubmission.count({ where })
 
     return NextResponse.json({
-      submissions,
+      submissions: enrichedSubmissions,
       pagination: {
         total,
         limit,

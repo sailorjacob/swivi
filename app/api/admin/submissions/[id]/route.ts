@@ -45,9 +45,7 @@ export async function GET(
           select: {
             id: true,
             name: true,
-            email: true,
-            totalViews: true,
-            totalEarnings: true
+            email: true
           }
         },
         campaigns: {
@@ -123,8 +121,7 @@ export async function PUT(
           select: {
             id: true,
             name: true,
-            email: true,
-            totalEarnings: true
+            email: true
           }
         },
         campaigns: true
