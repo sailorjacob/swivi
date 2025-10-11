@@ -342,6 +342,8 @@ export default function AdminCampaignsPage() {
     console.log('🔧 Edit campaign called with:', campaign)
     
     try {
+      // Ensure view dialog is closed when opening edit
+      setShowViewDialog(false)
       setSelectedCampaign(campaign)
       
       // Safe date formatting with extensive error handling
@@ -733,11 +735,11 @@ export default function AdminCampaignsPage() {
 
         {/* View Campaign Dialog */}
         {showViewDialog && selectedCampaign && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Campaign Details</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Campaign Details</DialogTitle>
+              </DialogHeader>
               <CampaignView 
                 campaign={selectedCampaign} 
                 onClose={() => setShowViewDialog(false)}
@@ -746,8 +748,8 @@ export default function AdminCampaignsPage() {
                   handleEditCampaign(selectedCampaign)
                 }}
               />
-            </CardContent>
-          </Card>
+            </DialogContent>
+          </Dialog>
         )}
 
         {/* Edit Campaign Form */}
@@ -990,6 +992,7 @@ function CampaignForm({
         <Button 
           onClick={() => {
             console.log('🔘 Form submit button clicked')
+            console.log('📋 Current form data:', formData)
             onSubmit()
           }} 
           disabled={isSubmitting}
