@@ -33,94 +33,61 @@ export async function GET(request: NextRequest) {
 
     console.log("✅ Admin access confirmed")
 
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get("status")
-    const campaignId = searchParams.get("campaignId")
-    const platform = searchParams.get("platform")
-    const dateRange = searchParams.get("dateRange")
-    const payoutStatus = searchParams.get("payoutStatus")
-    const limit = parseInt(searchParams.get("limit") || "50")
-    const offset = parseInt(searchParams.get("offset") || "0")
-
-    const where: any = {}
-
-    if (status && status !== "all") {
-      where.status = status.toUpperCase()
-    }
-
-    if (campaignId) {
-      where.campaignId = campaignId
-    }
-
-    if (platform && platform !== "all") {
-      where.platform = platform.toUpperCase()
-    }
-
-    // Date range filtering
-    if (dateRange && dateRange !== "all") {
-      const now = new Date()
-      let startDate: Date
-
-      switch (dateRange) {
-        case "today":
-          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-          break
-        case "week":
-          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-          break
-        case "month":
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-          break
-        default:
-          startDate = new Date(0)
-      }
-
-      where.createdAt = {
-        gte: startDate
-      }
-    }
-
-    // Payout status filtering
-    if (payoutStatus && payoutStatus !== "all") {
-      if (payoutStatus === "paid") {
-        where.paidAt = { not: null }
-      } else if (payoutStatus === "unpaid") {
-        where.paidAt = null
-      }
-    }
-
-    // Test if we can even access the table
-    console.log("Testing database connection...")
+    // Skip all filtering for now - just get basic submissions
+    console.log("🔍 Fetching all submissions...")
     
-    try {
-      const testCount = await prisma.clipSubmission.count()
-      console.log("Total submissions in database:", testCount)
-    } catch (error) {
-      console.error("Error counting submissions:", error)
-      throw new Error("Database table access failed")
-    }
-
-    // Try the simplest possible query
     const submissions = await prisma.clipSubmission.findMany({
       select: {
         id: true,
         clipUrl: true,
-        createdAt: true
+        platform: true,
+        status: true,
+        createdAt: true,
+        userId: true,
+        campaignId: true
       },
-      take: 10
+      orderBy: {
+        createdAt: "desc"
+      },
+      take: 50
     })
 
-    console.log("Found submissions:", submissions.length)
+    console.log("✅ Found submissions:", submissions.length)
+
+    // Get related data separately to avoid relation issues
+    const userIds = [...new Set(submissions.map(s => s.userId))]
+    const campaignIds = [...new Set(submissions.map(s => s.campaignId))]
+
+    console.log("🔍 Fetching users and campaigns...")
+    
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true, email: true }
+    })
+
+    const campaigns = await prisma.campaign.findMany({
+      where: { id: { in: campaignIds } },
+      select: { id: true, title: true, creator: true }
+    })
+
+    console.log("✅ Found users:", users.length, "campaigns:", campaigns.length)
+
+    // Combine the data
+    const enrichedSubmissions = submissions.map(submission => ({
+      ...submission,
+      user: users.find(u => u.id === submission.userId),
+      campaign: campaigns.find(c => c.id === submission.campaignId)
+    }))
 
     const total = submissions.length
 
     return NextResponse.json({
-      submissions: submissions,
+      submissions: enrichedSubmissions,
       pagination: {
         total,
-        limit,
-        offset,
-        hasMore: offset + limit < total
+        limit: 50,
+        offset: 0,
+        hasMore: false
       }
     })
   } catch (error) {
