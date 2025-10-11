@@ -209,13 +209,20 @@ export default function AdminCampaignsPage() {
 
   // Update campaign
   const handleUpdateCampaign = async () => {
-    if (!selectedCampaign) return
+    if (!selectedCampaign) {
+      console.error('❌ No selected campaign for update')
+      return
+    }
+
+    console.log('🔄 Starting campaign update for:', selectedCampaign.id)
+    console.log('📝 Form data to update:', formData)
 
     setIsUpdating(true)
     try {
       // Handle image upload first if there's a new file
       let imageUrl = formData.featuredImage
       if (uploadedFile) {
+        console.log('📸 Uploading new image:', uploadedFile.name)
         const formDataUpload = new FormData()
         formDataUpload.append('file', uploadedFile)
         formDataUpload.append('bucket', 'images')
@@ -228,43 +235,62 @@ export default function AdminCampaignsPage() {
         if (uploadResponse.ok) {
           const uploadResult = await uploadResponse.json()
           imageUrl = uploadResult.url
+          console.log('✅ Image uploaded successfully:', imageUrl)
         } else {
+          console.error('❌ Image upload failed:', uploadResponse.status)
           toast.error("Failed to upload image")
           return
         }
       }
 
+      const updatePayload = {
+        title: formData.title,
+        description: formData.description,
+        creator: formData.creator,
+        budget: parseFloat(formData.budget),
+        payoutRate: parseFloat(formData.payoutRate),
+        deadline: formData.deadline,
+        startDate: formData.startDate || null,
+        targetPlatforms: formData.targetPlatforms,
+        requirements: formData.requirements,
+        status: formData.status,
+        featuredImage: imageUrl || null,
+      }
+
+      console.log('🚀 Sending update payload:', updatePayload)
+
       const response = await authenticatedFetch(`/api/admin/campaigns/${selectedCampaign.id}`, {
         method: "PUT",
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          creator: formData.creator,
-          budget: parseFloat(formData.budget),
-          payoutRate: parseFloat(formData.payoutRate),
-          deadline: formData.deadline,
-          startDate: formData.startDate || null,
-          targetPlatforms: formData.targetPlatforms,
-          requirements: formData.requirements,
-          status: formData.status,
-          featuredImage: imageUrl || null,
-        })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatePayload)
       })
 
+      console.log('📡 Update response status:', response.status)
+
       if (response.ok) {
+        const updatedCampaign = await response.json()
+        console.log('✅ Campaign updated successfully:', updatedCampaign)
+        
         toast.success("Campaign updated successfully!")
-        // Show success state briefly before closing
-        setTimeout(() => {
-          setShowEditDialog(false)
-          resetForm()
-          fetchCampaigns()
-        }, 1500)
+        
+        // Update the selected campaign with fresh data
+        setSelectedCampaign(updatedCampaign)
+        
+        // Close dialog and refresh list
+        setShowEditDialog(false)
+        resetForm()
+        await fetchCampaigns()
+        
+        console.log('🔄 Campaign list refreshed')
       } else {
         const error = await response.json()
+        console.error('❌ Update failed:', error)
         toast.error(error.error || "Failed to update campaign")
       }
     } catch (error) {
-      console.error("Error updating campaign:", error)
+      console.error("❌ Error updating campaign:", error)
       toast.error("Failed to update campaign")
     } finally {
       setIsUpdating(false)
@@ -961,7 +987,13 @@ function CampaignForm({
         <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>
-        <Button onClick={onSubmit} disabled={isSubmitting}>
+        <Button 
+          onClick={() => {
+            console.log('🔘 Form submit button clicked')
+            onSubmit()
+          }} 
+          disabled={isSubmitting}
+        >
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
