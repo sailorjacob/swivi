@@ -33,56 +33,47 @@ export async function GET(request: NextRequest) {
 
     console.log("✅ Admin access confirmed")
 
-    // Skip all filtering for now - just get basic submissions
-    console.log("🔍 Fetching all submissions...")
+    // Use the same approach as clipper API that works
+    console.log("🔍 Fetching submissions using clipper API approach...")
     
     const submissions = await prisma.clipSubmission.findMany({
+      orderBy: {
+        createdAt: "desc"
+      },
       select: {
         id: true,
         clipUrl: true,
         platform: true,
         status: true,
+        payout: true,
+        paidAt: true,
         createdAt: true,
-        userId: true,
-        campaignId: true
-      },
-      orderBy: {
-        createdAt: "desc"
+        rejectionReason: true,
+        users: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        campaigns: {
+          select: {
+            id: true,
+            title: true,
+            creator: true,
+            payoutRate: true
+          }
+        }
       },
       take: 50
     })
 
     console.log("✅ Found submissions:", submissions.length)
 
-    // Get related data separately to avoid relation issues
-    const userIds = [...new Set(submissions.map(s => s.userId))]
-    const campaignIds = [...new Set(submissions.map(s => s.campaignId))]
-
-    console.log("🔍 Fetching users and campaigns...")
-    
-    const users = await prisma.user.findMany({
-      where: { id: { in: userIds } },
-      select: { id: true, name: true, email: true }
-    })
-
-    const campaigns = await prisma.campaign.findMany({
-      where: { id: { in: campaignIds } },
-      select: { id: true, title: true, creator: true }
-    })
-
-    console.log("✅ Found users:", users.length, "campaigns:", campaigns.length)
-
-    // Combine the data
-    const enrichedSubmissions = submissions.map(submission => ({
-      ...submission,
-      user: users.find(u => u.id === submission.userId),
-      campaign: campaigns.find(c => c.id === submission.campaignId)
-    }))
-
     const total = submissions.length
 
     return NextResponse.json({
-      submissions: enrichedSubmissions,
+      submissions: submissions,
       pagination: {
         total,
         limit: 50,

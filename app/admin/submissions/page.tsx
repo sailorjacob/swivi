@@ -28,19 +28,16 @@ interface Submission {
   rejectionReason?: string
   createdAt: string
   updatedAt: string
-  user: {
+  users: {
     id: string
     name: string | null
     email: string | null
-    totalViews: number
-    totalEarnings: number
   }
-  campaign: {
+  campaigns: {
     id: string
     title: string
     creator: string
-    budget: number
-    spent: number
+    payoutRate: number
   }
   clip?: {
     id: string
@@ -456,11 +453,11 @@ export default function AdminSubmissionsPage() {
                         {submission.platform}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        {submission.user.name || submission.user.email}
+                        {submission.users.name || submission.users.email}
                       </span>
                     </div>
                     <div className="mb-2">
-                      <p className="font-medium">{submission.campaign.title}</p>
+                      <p className="font-medium">{submission.campaigns.title}</p>
                       <p className="text-sm text-muted-foreground truncate max-w-md">
                         {submission.clipUrl}
                       </p>
@@ -470,7 +467,7 @@ export default function AdminSubmissionsPage() {
                       {submission.payout && (
                         <span>Payout: ${submission.payout.toFixed(2)}</span>
                       )}
-                      <span>Views: {submission.user.totalViews.toLocaleString()}</span>
+                      <span>User: {submission.users.email}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
