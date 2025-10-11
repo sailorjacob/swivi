@@ -91,7 +91,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log("🔧 Campaign creation request body:", JSON.stringify(body, null, 2))
     const validatedData = createCampaignSchema.parse(body)
+    console.log("✅ Validated data:", JSON.stringify(validatedData, null, 2))
 
     // Create the campaign
     const campaignData: any = {
@@ -110,6 +112,8 @@ export async function POST(request: NextRequest) {
     if (validatedData.startDate) campaignData.startDate = validatedData.startDate
     if (validatedData.featuredImage) campaignData.featuredImage = validatedData.featuredImage
 
+    console.log("📊 Final campaign data to create:", JSON.stringify(campaignData, null, 2))
+
     const campaign = await prisma.campaign.create({
       data: campaignData,
       include: {
@@ -120,6 +124,8 @@ export async function POST(request: NextRequest) {
         }
       }
     })
+
+    console.log("🎉 Created campaign:", JSON.stringify(campaign, null, 2))
 
     return NextResponse.json(campaign, { status: 201 })
   } catch (error) {

@@ -152,6 +152,9 @@ export default function AdminCampaignsPage() {
     try {
       // Handle image upload first if there's a file (optional)
       let imageUrl = formData.featuredImage
+      console.log("🖼️ Initial imageUrl from form:", imageUrl)
+      console.log("📎 Uploaded file:", uploadedFile)
+
       if (uploadedFile) {
         try {
           const formDataUpload = new FormData()
@@ -166,6 +169,7 @@ export default function AdminCampaignsPage() {
           if (uploadResponse.ok) {
             const uploadResult = await uploadResponse.json()
             imageUrl = uploadResult.url
+            console.log('✅ Image uploaded successfully:', uploadResult.url)
           } else {
             console.error('❌ Image upload failed:', uploadResponse.status)
             toast.error("Image upload failed, but campaign will be created without image")
@@ -178,21 +182,27 @@ export default function AdminCampaignsPage() {
         }
       }
 
+      console.log("🎯 Final imageUrl to use:", imageUrl)
+
+      const requestBody = {
+        title: formData.title,
+        description: formData.description,
+        creator: formData.creator,
+        budget: parseFloat(formData.budget),
+        payoutRate: parseFloat(formData.payoutRate),
+        deadline: formData.deadline,
+        startDate: formData.startDate || null,
+        targetPlatforms: formData.targetPlatforms,
+        requirements: formData.requirements,
+        status: formData.status,
+        featuredImage: imageUrl || null,
+      }
+
+      console.log("🚀 Sending campaign creation request:", JSON.stringify(requestBody, null, 2))
+
       const response = await authenticatedFetch("/api/campaigns", {
         method: "POST",
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          creator: formData.creator,
-          budget: parseFloat(formData.budget),
-          payoutRate: parseFloat(formData.payoutRate),
-          deadline: formData.deadline,
-          startDate: formData.startDate || null,
-          targetPlatforms: formData.targetPlatforms,
-          requirements: formData.requirements,
-          status: formData.status,
-          featuredImage: imageUrl || null,
-        })
+        body: JSON.stringify(requestBody)
       })
 
       if (response.ok) {
