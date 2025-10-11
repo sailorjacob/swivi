@@ -246,6 +246,9 @@ export default function AdminCampaignsPage() {
     try {
       // Handle image upload first if there's a new file (optional)
       let imageUrl = formData.featuredImage
+      console.log('🔄 Update - Initial imageUrl from formData:', imageUrl)
+      console.log('🔄 Update - uploadedFile:', uploadedFile)
+
       if (uploadedFile) {
         console.log('📸 Uploading new image:', uploadedFile.name)
         try {
@@ -287,16 +290,22 @@ export default function AdminCampaignsPage() {
           status: formData.status,
       }
 
-      // Only include featuredImage if we have a valid URL
+      // Handle featuredImage in update payload
       if (imageUrl && imageUrl.trim() !== '') {
+        // We have a valid image URL (either existing or newly uploaded)
         updatePayload.featuredImage = imageUrl
         console.log("✅ Including featuredImage in update:", imageUrl)
       } else if (imageUrl === null) {
-        // If imageUrl is explicitly null, we want to remove the image
+        // Image upload failed or we want to explicitly remove the image
         updatePayload.featuredImage = null
         console.log("✅ Setting featuredImage to null (removing image)")
+      } else if (formData.featuredImage && formData.featuredImage.trim() !== '') {
+        // We have an existing image URL in the form data
+        updatePayload.featuredImage = formData.featuredImage
+        console.log("✅ Preserving existing featuredImage:", formData.featuredImage)
       } else {
-        console.log("❌ No image URL to update, omitting featuredImage field")
+        // No image URL at all - this shouldn't happen in normal flow
+        console.log("❌ No image URL available, omitting featuredImage field")
       }
 
       console.log('🚀 Sending update payload:', updatePayload)
@@ -474,8 +483,10 @@ export default function AdminCampaignsPage() {
       }
       
       console.log('📝 Setting form data:', formDataToSet)
+      console.log('🖼️ Current featuredImage:', campaign.featuredImage)
       setFormData(formDataToSet)
-      setUploadedFile(null) // Clear any uploaded file when editing
+      // Don't clear uploadedFile here - it should be managed by the FileUpload component
+      // setUploadedFile(null) // Clear any uploaded file when editing
     setShowEditDialog(true)
     } catch (error) {
       console.error('❌ Error in handleEditCampaign:', error)
