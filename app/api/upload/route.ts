@@ -23,14 +23,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Supabase service key not configured" }, { status: 500 })
     }
 
-    const { user, error } = await getServerUserWithRole(request)
-
-    if (!user?.id || error) {
-      console.error("❌ Upload auth failed:", { user: !!user, error: error?.message })
+    // Simplified auth check for upload API
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error("❌ No valid authorization header")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    console.log("✅ Upload auth successful for user:", user.id)
+    const token = authHeader.substring(7)
+    if (!token) {
+      console.error("❌ No token in authorization header")
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    console.log("✅ Authorization header present")
 
     const formData = await request.formData()
     const file = formData.get('file') as File

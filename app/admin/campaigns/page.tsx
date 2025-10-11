@@ -184,16 +184,54 @@ export default function AdminCampaignsPage() {
 
       console.log("🎯 Final imageUrl to use:", imageUrl)
 
+      // Validate required fields
+      if (!formData.title?.trim()) {
+        toast.error("Campaign title is required")
+        return
+      }
+
+      if (!formData.description?.trim() || formData.description.length < 10) {
+        toast.error("Description must be at least 10 characters")
+        return
+      }
+
+      if (!formData.creator?.trim()) {
+        toast.error("Creator name is required")
+        return
+      }
+
+      const budget = parseFloat(formData.budget)
+      if (isNaN(budget) || budget <= 0) {
+        toast.error("Budget must be a positive number")
+        return
+      }
+
+      const payoutRate = parseFloat(formData.payoutRate)
+      if (isNaN(payoutRate) || payoutRate <= 0) {
+        toast.error("Payout rate must be a positive number")
+        return
+      }
+
+      if (!formData.deadline) {
+        toast.error("Deadline is required")
+        return
+      }
+
+      if (!formData.targetPlatforms || formData.targetPlatforms.length === 0) {
+        toast.error("At least one platform must be selected")
+        return
+      }
+
       const requestBody: any = {
-        title: formData.title,
-        description: formData.description,
-        creator: formData.creator,
-        budget: parseFloat(formData.budget),
-        payoutRate: parseFloat(formData.payoutRate),
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        creator: formData.creator.trim(),
+        budget,
+        payoutRate,
         deadline: formData.deadline,
         startDate: formData.startDate || null,
         targetPlatforms: formData.targetPlatforms,
-        requirements: formData.requirements,
+        requirements: formData.requirements || [],
         status: formData.status,
       }
 
@@ -241,6 +279,44 @@ export default function AdminCampaignsPage() {
 
     console.log('🔄 Starting campaign update for:', editingCampaignId)
     console.log('📝 Form data to update:', formData)
+
+    // Validate required fields for update
+    if (!formData.title?.trim()) {
+      toast.error("Campaign title is required")
+      return
+    }
+
+    if (!formData.description?.trim() || formData.description.length < 10) {
+      toast.error("Description must be at least 10 characters")
+      return
+    }
+
+    if (!formData.creator?.trim()) {
+      toast.error("Creator name is required")
+      return
+    }
+
+    const budget = parseFloat(formData.budget)
+    if (isNaN(budget) || budget <= 0) {
+      toast.error("Budget must be a positive number")
+      return
+    }
+
+    const payoutRate = parseFloat(formData.payoutRate)
+    if (isNaN(payoutRate) || payoutRate <= 0) {
+      toast.error("Payout rate must be a positive number")
+      return
+    }
+
+    if (!formData.deadline) {
+      toast.error("Deadline is required")
+      return
+    }
+
+    if (!formData.targetPlatforms || formData.targetPlatforms.length === 0) {
+      toast.error("At least one platform must be selected")
+      return
+    }
 
     setIsUpdating(true)
     try {
