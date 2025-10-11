@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { createClient } from '@supabase/supabase-js'
 
 // Server-side Supabase client for storage
@@ -27,12 +26,6 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.error("❌ No valid authorization header")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const token = authHeader.substring(7)
-    if (!token) {
-      console.error("❌ No token in authorization header")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

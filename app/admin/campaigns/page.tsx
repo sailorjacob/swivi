@@ -8,6 +8,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { Plus, Edit, Trash2, Eye, Users, DollarSign, TrendingUp, Calendar, Target, Loader2 } from "lucide-react"
 import { authenticatedFetch } from "@/lib/supabase-browser"
+import { supabase } from "@/lib/supabase-auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -160,12 +161,22 @@ export default function AdminCampaignsPage() {
           const formDataUpload = new FormData()
           formDataUpload.append('file', uploadedFile)
           formDataUpload.append('bucket', 'images')
-          
-          const uploadResponse = await authenticatedFetch("/api/upload", {
+
+          // Get the current session for authorization
+          const { data: { session } } = await supabase.auth.getSession()
+
+          const uploadHeaders: Record<string, string> = {}
+
+          if (session?.access_token) {
+            uploadHeaders['Authorization'] = `Bearer ${session.access_token}`
+          }
+
+          const uploadResponse = await fetch("/api/upload", {
             method: "POST",
+            headers: uploadHeaders,
             body: formDataUpload
           })
-          
+
           if (uploadResponse.ok) {
             const uploadResult = await uploadResponse.json()
             imageUrl = uploadResult.url
@@ -331,12 +342,22 @@ export default function AdminCampaignsPage() {
           const formDataUpload = new FormData()
           formDataUpload.append('file', uploadedFile)
           formDataUpload.append('bucket', 'images')
-          
-          const uploadResponse = await authenticatedFetch("/api/upload", {
+
+          // Get the current session for authorization
+          const { data: { session } } = await supabase.auth.getSession()
+
+          const uploadHeaders: Record<string, string> = {}
+
+          if (session?.access_token) {
+            uploadHeaders['Authorization'] = `Bearer ${session.access_token}`
+          }
+
+          const uploadResponse = await fetch("/api/upload", {
             method: "POST",
+            headers: uploadHeaders,
             body: formDataUpload
           })
-          
+
           if (uploadResponse.ok) {
             const uploadResult = await uploadResponse.json()
             imageUrl = uploadResult.url
