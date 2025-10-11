@@ -75,50 +75,33 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // First try a simple query to see if basic fields work
+    // Test if we can even access the table
+    console.log("Testing database connection...")
+    
+    try {
+      const testCount = await prisma.clipSubmission.count()
+      console.log("Total submissions in database:", testCount)
+    } catch (error) {
+      console.error("Error counting submissions:", error)
+      throw new Error("Database table access failed")
+    }
+
+    // Try the simplest possible query
     const submissions = await prisma.clipSubmission.findMany({
-      where,
       select: {
         id: true,
         clipUrl: true,
-        platform: true,
-        status: true,
-        createdAt: true,
-        userId: true,
-        campaignId: true
+        createdAt: true
       },
-      orderBy: {
-        createdAt: "desc"
-      },
-      take: limit,
-      skip: offset
+      take: 10
     })
 
-    // Get user and campaign data separately to avoid relation issues
-    const userIds = [...new Set(submissions.map(s => s.userId))]
-    const campaignIds = [...new Set(submissions.map(s => s.campaignId))]
+    console.log("Found submissions:", submissions.length)
 
-    const users = await prisma.user.findMany({
-      where: { id: { in: userIds } },
-      select: { id: true, name: true, email: true }
-    })
-
-    const campaigns = await prisma.campaign.findMany({
-      where: { id: { in: campaignIds } },
-      select: { id: true, title: true, creator: true }
-    })
-
-    // Combine the data
-    const enrichedSubmissions = submissions.map(submission => ({
-      ...submission,
-      user: users.find(u => u.id === submission.userId),
-      campaign: campaigns.find(c => c.id === submission.campaignId)
-    }))
-
-    const total = await prisma.clipSubmission.count({ where })
+    const total = submissions.length
 
     return NextResponse.json({
-      submissions: enrichedSubmissions,
+      submissions: submissions,
       pagination: {
         total,
         limit,
