@@ -13,10 +13,22 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Find the User record by supabaseAuthId to get the internal ID
+    const userRecord = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id }
+    })
+
+    if (!userRecord) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      )
+    }
+
     // Get verified social accounts for the user
     const verifiedAccounts = await prisma.socialAccount.findMany({
       where: {
-        userId: user.id,
+        userId: userRecord.id,
         verified: true
       },
       orderBy: {
@@ -56,11 +68,23 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
+    // Find the User record by supabaseAuthId to get the internal ID
+    const userRecord = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id }
+    })
+
+    if (!userRecord) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      )
+    }
+
     // Check if the account belongs to the user
     const account = await prisma.socialAccount.findFirst({
       where: {
         id: accountId,
-        userId: user.id
+        userId: userRecord.id
       }
     })
 
@@ -79,7 +103,7 @@ export async function DELETE(request: NextRequest) {
     // Also delete any associated verification records
     await prisma.socialVerification.deleteMany({
       where: {
-        userId: user.id,
+        userId: userRecord.id,
         platform: account.platform
       }
     })

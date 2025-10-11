@@ -146,11 +146,23 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
+    // Find the User record by supabaseAuthId to get the internal ID
+    const userRecord = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id }
+    })
+
+    if (!userRecord) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      )
+    }
+
     // Check if the account belongs to the user
     const account = await prisma.socialAccount.findFirst({
       where: {
         id: accountId,
-        userId: user.id
+        userId: userRecord.id
       }
     })
 
@@ -170,7 +182,7 @@ export async function DELETE(request: NextRequest) {
     // Only delete verification records, don't affect other usernames on same platform
     await prisma.socialVerification.deleteMany({
       where: {
-        userId: user.id,
+        userId: userRecord.id,
         platform: account.platform,
         // Note: We could add username matching here if we stored it in verification
       }

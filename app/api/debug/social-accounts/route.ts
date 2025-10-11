@@ -10,10 +10,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
+    // Find the User record by supabaseAuthId to get the internal ID
+    const userRecord = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id }
+    })
+
+    if (!userRecord) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      )
+    }
+
     // Get all social accounts for this user
     const socialAccounts = await prisma.socialAccount.findMany({
       where: {
-        userId: user.id
+        userId: userRecord.id
       },
       orderBy: {
         createdAt: 'desc'
@@ -23,7 +35,7 @@ export async function GET(request: NextRequest) {
     // Get all verification records for this user
     const verificationRecords = await prisma.socialVerification.findMany({
       where: {
-        userId: user.id
+        userId: userRecord.id
       },
       orderBy: {
         createdAt: 'desc'
