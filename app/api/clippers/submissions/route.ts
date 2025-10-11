@@ -35,9 +35,22 @@ export async function GET(request: NextRequest) {
       orderBy: {
         createdAt: "desc"
       },
-      include: {
-        campaigns: true,
-        clips: true
+      select: {
+        id: true,
+        clipUrl: true,
+        platform: true,
+        status: true,
+        payout: true,
+        paidAt: true,
+        createdAt: true,
+        campaigns: {
+          select: {
+            id: true,
+            title: true,
+            creator: true,
+            payoutRate: true
+          }
+        }
       }
     })
 

@@ -77,7 +77,16 @@ export async function GET(request: NextRequest) {
 
     const submissions = await prisma.clipSubmission.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        clipUrl: true,
+        platform: true,
+        status: true,
+        rejectionReason: true,
+        payout: true,
+        paidAt: true,
+        createdAt: true,
+        updatedAt: true,
         users: {
           select: {
             id: true,
@@ -94,16 +103,6 @@ export async function GET(request: NextRequest) {
             creator: true,
             budget: true,
             spent: true
-          }
-        },
-        clips: {
-          include: {
-            view_tracking: {
-              orderBy: {
-                date: "desc"
-              },
-              take: 5
-            }
           }
         }
       },

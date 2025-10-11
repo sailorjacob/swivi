@@ -31,7 +31,16 @@ export async function GET(
 
     const submission = await prisma.clipSubmission.findUnique({
       where: { id: params.id },
-      include: {
+      select: {
+        id: true,
+        clipUrl: true,
+        platform: true,
+        status: true,
+        rejectionReason: true,
+        payout: true,
+        paidAt: true,
+        createdAt: true,
+        updatedAt: true,
         users: {
           select: {
             id: true,
@@ -41,15 +50,13 @@ export async function GET(
             totalEarnings: true
           }
         },
-        campaigns: true,
-        clips: {
-          include: {
-            view_tracking: {
-              orderBy: {
-                date: "desc"
-              },
-              take: 10
-            }
+        campaigns: {
+          select: {
+            id: true,
+            title: true,
+            creator: true,
+            budget: true,
+            spent: true
           }
         }
       }
@@ -73,7 +80,7 @@ export async function PUT(
   try {
     const { user, error } = await getServerUserWithRole(request)
 
-    if (!session?.user?.id) {
+    if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -93,7 +100,7 @@ export async function PUT(
     const submission = await prisma.clipSubmission.findUnique({
       where: { id: params.id },
       include: {
-        user: true,
+        users: true,
         campaigns: true
       }
     })
@@ -112,7 +119,7 @@ export async function PUT(
         paidAt: validatedData.status === "PAID" ? new Date() : null
       },
       include: {
-        user: {
+        users: {
           select: {
             id: true,
             name: true,
@@ -166,7 +173,7 @@ export async function DELETE(
   try {
     const { user, error } = await getServerUserWithRole(request)
 
-    if (!session?.user?.id) {
+    if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
