@@ -712,21 +712,9 @@ export default function AdminCampaignsPage() {
                 <div>
                   <h3 className="font-semibold mb-2">Recent Submissions</h3>
                   <div className="space-y-2">
-                    {selectedCampaign.clipSubmissions && selectedCampaign.clipSubmissions.length > 0 ? (
-                      selectedCampaign.clipSubmissions.slice(0, 5).map((submission) => (
-                        <div key={submission.id} className="flex items-center justify-between p-2 border rounded">
-                          <div>
-                            <p className="font-medium">{submission.user.name || submission.user.email}</p>
-                            <p className="text-sm text-muted-foreground">{submission.clipUrl}</p>
-                          </div>
-                          <Badge variant={submission.status === "APPROVED" ? "default" : "secondary"}>
-                            {submission.status}
-                          </Badge>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-muted-foreground text-sm">No submissions yet</p>
-                    )}
+                    <p className="text-muted-foreground text-sm">
+                      {selectedCampaign._count?.clipSubmissions || 0} submissions total
+                    </p>
                   </div>
                 </div>
               </div>

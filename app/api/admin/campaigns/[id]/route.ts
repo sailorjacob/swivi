@@ -56,25 +56,6 @@ export async function GET(
         featuredImage: true,
         createdAt: true,
         updatedAt: true,
-        clipSubmissions: {
-          select: {
-            id: true,
-            clipUrl: true,
-            platform: true,
-            status: true,
-            createdAt: true,
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true
-              }
-            }
-          },
-          orderBy: {
-            createdAt: "desc"
-          }
-        },
         _count: {
           select: {
             clipSubmissions: true
