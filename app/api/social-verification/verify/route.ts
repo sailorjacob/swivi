@@ -321,14 +321,14 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
   }
 }
 
-// YouTube channel description checking with enhanced anti-bot measures
+// YouTube channel description checking with enhanced anti-bot measures and fallback
 // YouTube channel description checking via Apify (pratikdani/youtube-profile-scraper)
 async function checkYouTubeBio(username: string, code: string): Promise<boolean> {
   try {
     const APIFY_API_KEY = process.env.APIFY_API_KEY
     if (!APIFY_API_KEY) {
-      console.error('❌ APIFY_API_KEY not configured for YouTube')
-      return false
+      console.error('❌ APIFY_API_KEY not configured for YouTube - falling back to manual scraping')
+      return await checkYouTubeBioManual(username, code)
     }
 
     console.log(`🔍 Checking YouTube channel via Apify: @${username}`)
@@ -346,8 +346,12 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
     })
 
     if (!runResponse.ok) {
-      console.error(`❌ YouTube Apify run failed: ${runResponse.status}`)
-      return false
+      console.error(`❌ YouTube Apify run failed: ${runResponse.status} - falling back to manual scraping`)
+      if (runResponse.status === 401) {
+        console.log('❌ Invalid Apify API key - falling back to manual scraping')
+        return await checkYouTubeBioManual(username, code)
+      }
+      return await checkYouTubeBioManual(username, code)
     }
 
     const runData = await runResponse.json()
@@ -377,17 +381,17 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
           headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
         })
 
-        if (!resultsResponse.ok) return false
+        if (!resultsResponse.ok) return await checkYouTubeBioManual(username, code)
 
         const resultsData = await resultsResponse.json()
-        if (!resultsData || resultsData.length === 0) return false
+        if (!resultsData || resultsData.length === 0) return await checkYouTubeBioManual(username, code)
 
         const profile = resultsData[0]
         const description = profile.Description || profile.description || ''
 
         if (!description) {
           console.error(`❌ No description found in YouTube data for: ${username}`)
-          return false
+          return await checkYouTubeBioManual(username, code)
         }
 
         const codeFound = description.includes(code)
@@ -396,16 +400,101 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
         return codeFound
 
       } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
-        console.error(`❌ YouTube Apify run failed: ${runStatus}`)
+        console.error(`❌ YouTube Apify run failed: ${runStatus} - falling back to manual scraping`)
+        return await checkYouTubeBioManual(username, code)
+      }
+    }
+
+    console.error(`❌ YouTube Apify run timed out - falling back to manual scraping`)
+    return await checkYouTubeBioManual(username, code)
+
+  } catch (error) {
+    console.error(`❌ YouTube bio check failed for ${username}:`, error)
+    return await checkYouTubeBioManual(username, code)
+  }
+}
+
+// Manual fallback scraping function for YouTube
+async function checkYouTubeBioManual(username: string, code: string): Promise<boolean> {
+  try {
+    const url = `https://www.youtube.com/@${username}`
+    console.log(`🔍 Manual fallback - Checking YouTube channel: ${url}`)
+
+    // Add randomized delay to avoid rate limiting
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000))
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+      },
+      signal: AbortSignal.timeout(15000)
+    })
+
+    if (!response.ok) {
+      console.error(`YouTube channel not accessible: ${username} - Status: ${response.status}`)
+      if (response.status === 429) {
+        console.log(`Rate limited - YouTube is blocking our requests`)
+        return false
+      }
+      if (response.status === 404) {
+        console.log(`Channel not found: ${username}`)
+        return false
+      }
+      if (response.status === 403) {
+        console.log(`Access forbidden for channel: ${username} - may be private or restricted`)
+        return false
+      }
+      return false
+    }
+
+    const html = await response.text()
+    console.log(`✅ Successfully fetched YouTube page (${html.length} characters)`)
+
+    // Extract description from YouTube channel page
+    // Look for the meta description or og:description
+    const descriptionPatterns = [
+      /<meta\s+property="og:description"\s+content="([^"]*)"/i,
+      /<meta\s+name="description"\s+content="([^"]*)"/i,
+      /"description":\s*"([^"]*(?:\\.[^"]*)*)"/i,
+      /"shortDescription":\s*"([^"]*(?:\\.[^"]*)*)"/i
+    ]
+
+    let description = ''
+
+    for (const pattern of descriptionPatterns) {
+      const match = html.match(pattern)
+      if (match && match[1]) {
+        description = match[1].replace(/\\"/g, '"')
         break
       }
     }
 
-    console.error(`❌ YouTube Apify run timed out`)
-    return false
+    if (!description) {
+      console.error(`❌ No description found in YouTube HTML for: ${username}`)
+      return false
+    }
+
+    const codeFound = description.includes(code)
+    console.log(`YouTube manual description check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+    console.log(`📝 Description preview: ${description.substring(0, 100)}...`)
+
+    return codeFound
 
   } catch (error) {
-    console.error(`❌ YouTube bio check failed for ${username}:`, error)
+    console.error(`❌ Manual YouTube bio check failed for ${username}:`, error)
     return false
   }
 }
