@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { BarChart3, TrendingUp, Users, DollarSign, Target, Calendar, Activity, Loader2 } from "lucide-react"
+import { authenticatedFetch } from "@/lib/supabase-browser"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -64,7 +65,7 @@ export default function AdminAnalyticsPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch(`/api/admin/analytics/aggregate?timeRange=${timeRange}`)
+      const response = await authenticatedFetch(`/api/admin/analytics/aggregate?timeRange=${timeRange}`)
       if (response.ok) {
         const data = await response.json()
         setAnalytics(data)
@@ -83,15 +84,13 @@ export default function AdminAnalyticsPage() {
     fetchAnalytics()
   }, [timeRange, fetchAnalytics])
 
-  if (error) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <p className="text-lg text-red-600 mb-4">{error}</p>
-            <Button onClick={fetchAnalytics} variant="outline">
-              Try Again
-            </Button>
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading analytics...</p>
           </div>
         </div>
       </div>

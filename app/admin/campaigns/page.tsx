@@ -297,17 +297,31 @@ export default function AdminCampaignsPage() {
   // Edit campaign
   const handleEditCampaign = (campaign: Campaign) => {
     setSelectedCampaign(campaign)
+    
+    // Safe date formatting with proper error handling
+    const formatDateForInput = (dateString: string | undefined | null) => {
+      if (!dateString) return ""
+      try {
+        const date = new Date(dateString)
+        if (isNaN(date.getTime())) return ""
+        return date.toISOString().slice(0, 16)
+      } catch (error) {
+        console.error("Error formatting date:", error)
+        return ""
+      }
+    }
+
     setFormData({
-      title: campaign.title,
-      description: campaign.description,
-      creator: campaign.creator,
-      budget: campaign.budget.toString(),
-      payoutRate: campaign.payoutRate.toString(),
-      deadline: new Date(campaign.deadline).toISOString().slice(0, 16),
-      startDate: campaign.startDate ? new Date(campaign.startDate).toISOString().slice(0, 16) : "",
-      targetPlatforms: campaign.targetPlatforms,
-      requirements: campaign.requirements,
-      status: campaign.status,
+      title: campaign.title || "",
+      description: campaign.description || "",
+      creator: campaign.creator || "",
+      budget: (campaign.budget || 0).toString(),
+      payoutRate: (campaign.payoutRate || 0).toString(),
+      deadline: formatDateForInput(campaign.deadline),
+      startDate: formatDateForInput(campaign.startDate),
+      targetPlatforms: campaign.targetPlatforms || [],
+      requirements: campaign.requirements || [],
+      status: campaign.status || "DRAFT",
       featuredImage: campaign.featuredImage || "",
     })
     setUploadedFile(null) // Clear any uploaded file when editing
@@ -958,7 +972,9 @@ function CampaignView({
         </div>
         <div>
           <Label className="text-sm font-medium text-muted-foreground">Deadline</Label>
-          <p className="text-sm">{new Date(campaign.deadline).toLocaleDateString()}</p>
+          <p className="text-sm">
+            {campaign.deadline ? new Date(campaign.deadline).toLocaleDateString() : "Not set"}
+          </p>
         </div>
         <div>
           <Label className="text-sm font-medium text-muted-foreground">Submissions</Label>

@@ -207,28 +207,32 @@ export default function CampaignsPage() {
                       </Badge>
                     </div>
                   )}
-                  {campaign.featuredImage ? (
-                    <div className="relative w-full h-full">
-                      <img
-                        src={campaign.featuredImage}
-                        alt={campaign.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Hide the image and show the gradient fallback
-                          e.currentTarget.style.display = 'none'
-                          const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                          if (fallback) fallback.style.display = 'flex'
-                        }}
-                      />
-                      <div className="hidden w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center absolute inset-0">
+                  <div className="relative w-full h-full">
+                    {campaign.featuredImage ? (
+                      <>
+                        <img
+                          src={campaign.featuredImage}
+                          alt={campaign.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // Hide the image and show the gradient fallback
+                            e.currentTarget.style.display = 'none'
+                            const fallback = e.currentTarget.parentElement?.querySelector('.gradient-fallback') as HTMLElement
+                            if (fallback) {
+                              fallback.style.display = 'flex'
+                            }
+                          }}
+                        />
+                        <div className="gradient-fallback hidden w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center absolute inset-0">
+                          <span className="text-white text-lg font-medium">{campaign.title}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                         <span className="text-white text-lg font-medium">{campaign.title}</span>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                      <span className="text-white text-lg font-medium">{campaign.title}</span>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
                 {/* Campaign Info */}
