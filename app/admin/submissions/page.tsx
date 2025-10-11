@@ -32,6 +32,8 @@ interface Submission {
     id: string
     name: string | null
     email: string | null
+    totalViews?: number
+    totalEarnings?: number
   }
   campaigns: {
     id: string
@@ -467,7 +469,7 @@ export default function AdminSubmissionsPage() {
                       {submission.payout && (
                         <span>Payout: ${submission.payout.toFixed(2)}</span>
                       )}
-                      <span>User: {submission.users.email}</span>
+                      <span>Views: {(submission.users.totalViews || 0).toLocaleString()}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
