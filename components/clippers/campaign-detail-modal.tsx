@@ -129,6 +129,36 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
     return pool > 0 ? (spent / pool) * 100 : 0
   }
 
+  const getPlatformPlaceholder = (platform: string) => {
+    switch (platform) {
+      case "tiktok":
+        return "https://tiktok.com/@username/video/123456789"
+      case "youtube":
+        return "https://youtube.com/shorts/ABC123def456"
+      case "instagram":
+        return "https://instagram.com/reel/ABC123def456"
+      case "twitter":
+        return "https://x.com/username/status/123456789"
+      default:
+        return "https://tiktok.com/@username/video/123456789"
+    }
+  }
+
+  const getPlatformHint = (platform: string) => {
+    switch (platform) {
+      case "tiktok":
+        return "Copy the TikTok video URL from the share button"
+      case "youtube":
+        return "Use YouTube Shorts URL (youtube.com/shorts/...)"
+      case "instagram":
+        return "Copy Instagram Reel URL from the share button"
+      case "twitter":
+        return "Copy the X (Twitter) post URL from the share button"
+      default:
+        return "Copy the video URL from the platform's share button"
+    }
+  }
+
   if (!campaign) return null
 
   return (
@@ -228,13 +258,18 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
                   <Link2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="clipUrl"
-                    placeholder="https://tiktok.com/@user/video/123"
+                    placeholder={getPlatformPlaceholder(selectedPlatform)}
                     className="pl-10"
                     {...register("clipUrl")}
                   />
                 </div>
                 {errors.clipUrl && (
                   <p className="text-red-500 text-sm mt-1">{errors.clipUrl.message}</p>
+                )}
+                {selectedPlatform && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {getPlatformHint(selectedPlatform)}
+                  </p>
                 )}
               </div>
 
