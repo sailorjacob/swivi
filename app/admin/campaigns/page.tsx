@@ -40,7 +40,7 @@ interface Campaign {
   _count: {
     clipSubmissions: number
   }
-  submissions?: Array<{
+  clipSubmissions?: Array<{
     id: string
     user: {
       id: string
@@ -99,6 +99,8 @@ export default function AdminCampaignsPage() {
       const response = await authenticatedFetch("/api/campaigns")
       if (response.ok) {
         const data = await response.json()
+        console.log('🔍 Fetched campaigns data:', data)
+        console.log('🔍 First campaign featuredImage:', data[0]?.featuredImage)
         setCampaigns(data)
       } else if (response.status === 401) {
         toast.error("Please log in to view campaigns")
@@ -289,52 +291,101 @@ export default function AdminCampaignsPage() {
     }
   }
 
-  // View campaign
-  const handleViewCampaign = (campaign: Campaign) => {
-    setSelectedCampaign(campaign)
-    setShowViewDialog(true)
+  // View campaign - fetch full details including submissions
+  const handleViewCampaign = async (campaign: Campaign) => {
+    try {
+      console.log('🔍 Fetching full campaign details for:', campaign.id)
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaign.id}`)
+      if (response.ok) {
+        const fullCampaign = await response.json()
+        console.log('🔍 Full campaign data:', fullCampaign)
+        setSelectedCampaign(fullCampaign)
+        setShowViewDialog(true)
+      } else {
+        console.error('Failed to fetch campaign details:', response.status)
+        toast.error("Failed to load campaign details")
+      }
+    } catch (error) {
+      console.error('Error fetching campaign details:', error)
+      toast.error("Failed to load campaign details")
+    }
   }
 
   // Edit campaign
   const handleEditCampaign = (campaign: Campaign) => {
-    setSelectedCampaign(campaign)
+    console.log('🔧 Edit campaign called with:', campaign)
     
-    // Safe date formatting with proper error handling
-    const formatDateForInput = (dateValue: string | Date | undefined | null) => {
-      if (!dateValue) return ""
-      try {
-        let date: Date
-        if (typeof dateValue === 'string') {
-          date = new Date(dateValue)
-        } else if (dateValue instanceof Date) {
-          date = dateValue
-        } else {
+    try {
+      setSelectedCampaign(campaign)
+      
+      // Safe date formatting with extensive error handling
+      const formatDateForInput = (dateValue: string | Date | undefined | null, fieldName: string) => {
+        console.log(`📅 Formatting ${fieldName}:`, dateValue, typeof dateValue)
+        
+        if (!dateValue) {
+          console.log(`📅 ${fieldName} is empty, returning empty string`)
           return ""
         }
         
-        if (isNaN(date.getTime())) return ""
-        return date.toISOString().slice(0, 16)
-      } catch (error) {
-        console.error("Error formatting date:", error)
-        return ""
+        try {
+          let date: Date
+          if (typeof dateValue === 'string') {
+            if (dateValue.trim() === '') {
+              console.log(`📅 ${fieldName} is empty string, returning empty`)
+              return ""
+            }
+            date = new Date(dateValue)
+          } else if (dateValue instanceof Date) {
+            date = dateValue
+          } else {
+            console.log(`📅 ${fieldName} is unexpected type:`, typeof dateValue)
+            return ""
+          }
+          
+          if (isNaN(date.getTime())) {
+            console.log(`📅 ${fieldName} is invalid date:`, dateValue)
+            return ""
+          }
+          
+          const isoString = date.toISOString()
+          console.log(`📅 ${fieldName} ISO string:`, isoString)
+          
+          if (!isoString || typeof isoString !== 'string') {
+            console.log(`📅 ${fieldName} toISOString failed`)
+            return ""
+          }
+          
+          const sliced = isoString.slice(0, 16)
+          console.log(`📅 ${fieldName} sliced:`, sliced)
+          return sliced
+        } catch (error) {
+          console.error(`📅 Error formatting ${fieldName}:`, error, 'Value:', dateValue)
+          return ""
+        }
       }
-    }
 
-    setFormData({
-      title: campaign.title || "",
-      description: campaign.description || "",
-      creator: campaign.creator || "",
-      budget: (campaign.budget || 0).toString(),
-      payoutRate: (campaign.payoutRate || 0).toString(),
-      deadline: formatDateForInput(campaign.deadline),
-      startDate: formatDateForInput(campaign.startDate),
-      targetPlatforms: campaign.targetPlatforms || [],
-      requirements: campaign.requirements || [],
-      status: campaign.status || "DRAFT",
-      featuredImage: campaign.featuredImage || "",
-    })
-    setUploadedFile(null) // Clear any uploaded file when editing
-    setShowEditDialog(true)
+      const formDataToSet = {
+        title: campaign.title || "",
+        description: campaign.description || "",
+        creator: campaign.creator || "",
+        budget: (campaign.budget || 0).toString(),
+        payoutRate: (campaign.payoutRate || 0).toString(),
+        deadline: formatDateForInput(campaign.deadline, 'deadline'),
+        startDate: formatDateForInput(campaign.startDate, 'startDate'),
+        targetPlatforms: campaign.targetPlatforms || [],
+        requirements: campaign.requirements || [],
+        status: campaign.status || "DRAFT",
+        featuredImage: campaign.featuredImage || "",
+      }
+      
+      console.log('📝 Setting form data:', formDataToSet)
+      setFormData(formDataToSet)
+      setUploadedFile(null) // Clear any uploaded file when editing
+      setShowEditDialog(true)
+    } catch (error) {
+      console.error('❌ Error in handleEditCampaign:', error)
+      toast.error("Failed to open edit form. Please try again.")
+    }
   }
 
   // Reset form
@@ -632,17 +683,21 @@ export default function AdminCampaignsPage() {
                 <div>
                   <h3 className="font-semibold mb-2">Recent Submissions</h3>
                   <div className="space-y-2">
-                    {selectedCampaign.submissions.slice(0, 5).map((submission) => (
-                      <div key={submission.id} className="flex items-center justify-between p-2 border rounded">
-                        <div>
-                          <p className="font-medium">{submission.user.name || submission.user.email}</p>
-                          <p className="text-sm text-muted-foreground">{submission.clipUrl}</p>
+                    {selectedCampaign.clipSubmissions && selectedCampaign.clipSubmissions.length > 0 ? (
+                      selectedCampaign.clipSubmissions.slice(0, 5).map((submission) => (
+                        <div key={submission.id} className="flex items-center justify-between p-2 border rounded">
+                          <div>
+                            <p className="font-medium">{submission.user.name || submission.user.email}</p>
+                            <p className="text-sm text-muted-foreground">{submission.clipUrl}</p>
+                          </div>
+                          <Badge variant={submission.status === "APPROVED" ? "default" : "secondary"}>
+                            {submission.status}
+                          </Badge>
                         </div>
-                        <Badge variant={submission.status === "APPROVED" ? "default" : "secondary"}>
-                          {submission.status}
-                        </Badge>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No submissions yet</p>
+                    )}
                   </div>
                 </div>
               </div>
