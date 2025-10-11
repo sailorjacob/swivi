@@ -184,7 +184,7 @@ export default function AdminCampaignsPage() {
 
       console.log("🎯 Final imageUrl to use:", imageUrl)
 
-      const requestBody = {
+      const requestBody: any = {
         title: formData.title,
         description: formData.description,
         creator: formData.creator,
@@ -195,7 +195,14 @@ export default function AdminCampaignsPage() {
         targetPlatforms: formData.targetPlatforms,
         requirements: formData.requirements,
         status: formData.status,
-        featuredImage: imageUrl || null,
+      }
+
+      // Only include featuredImage if we have a valid URL
+      if (imageUrl && imageUrl.trim() !== '') {
+        requestBody.featuredImage = imageUrl
+        console.log("✅ Including featuredImage in request:", imageUrl)
+      } else {
+        console.log("❌ No valid image URL, omitting featuredImage field")
       }
 
       console.log("🚀 Sending campaign creation request:", JSON.stringify(requestBody, null, 2))
@@ -267,7 +274,7 @@ export default function AdminCampaignsPage() {
         }
       }
 
-      const updatePayload = {
+      const updatePayload: any = {
           title: formData.title,
           description: formData.description,
           creator: formData.creator,
@@ -278,7 +285,18 @@ export default function AdminCampaignsPage() {
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
-        featuredImage: imageUrl || null,
+      }
+
+      // Only include featuredImage if we have a valid URL
+      if (imageUrl && imageUrl.trim() !== '') {
+        updatePayload.featuredImage = imageUrl
+        console.log("✅ Including featuredImage in update:", imageUrl)
+      } else if (imageUrl === null) {
+        // If imageUrl is explicitly null, we want to remove the image
+        updatePayload.featuredImage = null
+        console.log("✅ Setting featuredImage to null (removing image)")
+      } else {
+        console.log("❌ No image URL to update, omitting featuredImage field")
       }
 
       console.log('🚀 Sending update payload:', updatePayload)

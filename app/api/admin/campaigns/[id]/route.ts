@@ -96,7 +96,9 @@ export async function PUT(
     }
 
     const body = await request.json()
+    console.log("🔧 Update campaign request body:", JSON.stringify(body, null, 2))
     const validatedData = updateCampaignSchema.parse(body)
+    console.log("✅ Validated update data:", JSON.stringify(validatedData, null, 2))
 
     // Check if campaign exists
     const existingCampaign = await prisma.campaign.findUnique({
@@ -120,7 +122,7 @@ export async function PUT(
     if (validatedData.status !== undefined) updateData.status = validatedData.status
     if (validatedData.targetPlatforms !== undefined) updateData.targetPlatforms = validatedData.targetPlatforms
     if (validatedData.requirements !== undefined) updateData.requirements = validatedData.requirements
-    if (validatedData.featuredImage !== undefined) updateData.featuredImage = validatedData.featuredImage
+    if (body.featuredImage !== undefined) updateData.featuredImage = validatedData.featuredImage
 
     // Note: The following fields are commented out because they don't exist in the current database
     // When the database is migrated to add these columns, uncomment them:

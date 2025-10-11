@@ -94,6 +94,8 @@ export async function POST(request: NextRequest) {
     console.log("🔧 Campaign creation request body:", JSON.stringify(body, null, 2))
     const validatedData = createCampaignSchema.parse(body)
     console.log("✅ Validated data:", JSON.stringify(validatedData, null, 2))
+    console.log("🔍 FeaturedImage in body:", body.featuredImage)
+    console.log("🔍 FeaturedImage in validatedData:", validatedData.featuredImage)
 
     // Create the campaign
     const campaignData: any = {
