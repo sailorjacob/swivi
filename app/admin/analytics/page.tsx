@@ -285,9 +285,9 @@ export default function AdminAnalyticsPage() {
                             <div className="flex-1">
                               <h3 className="font-medium">{campaign.title}</h3>
                               <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                                <span>Submissions: {campaign.submissions}</span>
-                                <span>Views: {campaign.views.toLocaleString()}</span>
-                                <span>Earnings: ${campaign.earnings.toFixed(2)}</span>
+                                <span>Submissions: {campaign.submissions || 0}</span>
+                                <span>Views: {Number(campaign.views || 0).toLocaleString()}</span>
+                                <span>Earnings: ${Number(campaign.earnings || 0).toFixed(2)}</span>
                               </div>
                             </div>
                             <Badge variant={campaign.status === "ACTIVE" ? "default" : "secondary"}>

@@ -208,19 +208,23 @@ export default function CampaignsPage() {
                     </div>
                   )}
                   <div className="relative w-full h-full">
-                    {campaign.featuredImage ? (
+                    {campaign.featuredImage && campaign.featuredImage.trim() !== '' ? (
                       <>
                         <img
                           src={campaign.featuredImage}
                           alt={campaign.title}
                           className="w-full h-full object-cover"
                           onError={(e) => {
+                            console.log('Image failed to load:', campaign.featuredImage)
                             // Hide the image and show the gradient fallback
                             e.currentTarget.style.display = 'none'
                             const fallback = e.currentTarget.parentElement?.querySelector('.gradient-fallback') as HTMLElement
                             if (fallback) {
                               fallback.style.display = 'flex'
                             }
+                          }}
+                          onLoad={() => {
+                            console.log('Image loaded successfully:', campaign.featuredImage)
                           }}
                         />
                         <div className="gradient-fallback hidden w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center absolute inset-0">
@@ -230,6 +234,10 @@ export default function CampaignsPage() {
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                         <span className="text-white text-lg font-medium">{campaign.title}</span>
+                        {/* Debug info */}
+                        <div className="absolute bottom-0 left-0 text-xs text-white/50 p-1">
+                          {campaign.featuredImage ? 'Empty URL' : 'No Image'}
+                        </div>
                       </div>
                     )}
                   </div>

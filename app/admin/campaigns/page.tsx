@@ -29,17 +29,18 @@ interface Campaign {
   budget: number
   spent: number
   payoutRate: number
-  deadline: string
-  startDate?: string
+  deadline: string | Date
+  startDate?: string | Date | null
   status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
   targetPlatforms: string[]
   requirements: string[]
-  featuredImage?: string
-  createdAt: string
+  featuredImage?: string | null
+  createdAt: string | Date
+  updatedAt?: string | Date
   _count: {
-    submissions: number
+    clipSubmissions: number
   }
-  submissions: Array<{
+  submissions?: Array<{
     id: string
     user: {
       id: string
@@ -299,10 +300,18 @@ export default function AdminCampaignsPage() {
     setSelectedCampaign(campaign)
     
     // Safe date formatting with proper error handling
-    const formatDateForInput = (dateString: string | undefined | null) => {
-      if (!dateString) return ""
+    const formatDateForInput = (dateValue: string | Date | undefined | null) => {
+      if (!dateValue) return ""
       try {
-        const date = new Date(dateString)
+        let date: Date
+        if (typeof dateValue === 'string') {
+          date = new Date(dateValue)
+        } else if (dateValue instanceof Date) {
+          date = dateValue
+        } else {
+          return ""
+        }
+        
         if (isNaN(date.getTime())) return ""
         return date.toISOString().slice(0, 16)
       } catch (error) {
@@ -411,13 +420,15 @@ export default function AdminCampaignsPage() {
               <CardTitle>Create New Campaign</CardTitle>
             </CardHeader>
             <CardContent>
-              <CampaignForm
-                formData={formData}
-                setFormData={setFormData}
-                onSubmit={handleCreateCampaign}
-                onCancel={() => setShowCreateDialog(false)}
-                isSubmitting={isSubmitting}
-              />
+                <CampaignForm
+                  formData={formData}
+                  setFormData={setFormData}
+                  onSubmit={handleCreateCampaign}
+                  onCancel={() => setShowCreateDialog(false)}
+                  isSubmitting={isSubmitting}
+                  uploadedFile={uploadedFile}
+                  setUploadedFile={setUploadedFile}
+                />
             </CardContent>
           </Card>
         )}
@@ -672,6 +683,8 @@ export default function AdminCampaignsPage() {
                 onCancel={() => setShowEditDialog(false)}
                 isEdit={true}
                 isSubmitting={isUpdating}
+                uploadedFile={uploadedFile}
+                setUploadedFile={setUploadedFile}
               />
             </CardContent>
           </Card>
@@ -688,7 +701,9 @@ function CampaignForm({
   onSubmit,
   onCancel,
   isEdit = false,
-  isSubmitting = false
+  isSubmitting = false,
+  uploadedFile,
+  setUploadedFile
 }: {
   formData: any
   setFormData: (data: any) => void
@@ -696,6 +711,8 @@ function CampaignForm({
   onCancel: () => void
   isEdit?: boolean
   isSubmitting?: boolean
+  uploadedFile?: File | null
+  setUploadedFile?: (file: File | null) => void
 }) {
   return (
     <div className="space-y-6 max-h-[70vh] overflow-y-auto">
@@ -740,25 +757,27 @@ function CampaignForm({
           />
         </div>
 
-        <div className="mb-4">
-          <FileUpload
-            label="Campaign Image"
-            accept="image/*"
-            maxSize={5}
-            onFileChange={setUploadedFile}
-            uploadedFile={uploadedFile}
-          />
-          {formData.featuredImage && !uploadedFile && (
-            <div className="mt-2">
-              <Label>Current Image:</Label>
-              <img 
-                src={formData.featuredImage} 
-                alt="Campaign" 
-                className="w-32 h-20 object-cover rounded border mt-1"
-              />
-            </div>
-          )}
-        </div>
+        {setUploadedFile && (
+          <div className="mb-4">
+            <FileUpload
+              label="Campaign Image"
+              accept="image/*"
+              maxSize={5}
+              onFileChange={setUploadedFile}
+              uploadedFile={uploadedFile || null}
+            />
+            {formData.featuredImage && !uploadedFile && (
+              <div className="mt-2">
+                <Label>Current Image:</Label>
+                <img 
+                  src={formData.featuredImage} 
+                  alt="Campaign" 
+                  className="w-32 h-20 object-cover rounded border mt-1"
+                />
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
 
@@ -978,7 +997,7 @@ function CampaignView({
         </div>
         <div>
           <Label className="text-sm font-medium text-muted-foreground">Submissions</Label>
-          <p className="text-lg font-medium">{campaign._count.submissions || 0}</p>
+          <p className="text-lg font-medium">{campaign._count.clipSubmissions || 0}</p>
         </div>
       </div>
 
