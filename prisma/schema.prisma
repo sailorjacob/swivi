@@ -89,6 +89,7 @@ model Campaign {
   status           CampaignStatus?  @default(ACTIVE)
   requirements     String[]         @default([])
   targetPlatforms  SocialPlatform[] @default([])
+  featuredImage    String?          // Campaign image URL
   createdAt        DateTime?        @default(now()) @db.Timestamp(6)
   updatedAt        DateTime?        @default(now()) @db.Timestamp(6)
   clipSubmissions ClipSubmission[]

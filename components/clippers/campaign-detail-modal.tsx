@@ -30,6 +30,7 @@ import {
   Clock
 } from "lucide-react"
 import toast from "react-hot-toast"
+import { authenticatedFetch } from "@/lib/supabase-browser"
 
 const submitSchema = z.object({
   clipUrl: z.string().url("Please enter a valid URL"),
@@ -88,14 +89,28 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
     setIsSubmitting(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const submissionData = {
+        campaignId: campaign?.id,
+        clipUrl: data.clipUrl,
+        platform: data.platform.toUpperCase(),
+      }
+
+      const response = await authenticatedFetch("/api/clippers/submissions", {
+        method: "POST",
+        body: JSON.stringify(submissionData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to submit clip")
+      }
       
       toast.success("Clip submitted successfully! You'll be notified once it's reviewed.")
       reset()
       onOpenChange(false)
     } catch (error) {
-      toast.error("Failed to submit clip. Please try again.")
+      console.error("Submission error:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to submit clip. Please try again.")
     } finally {
       setIsSubmitting(false)
     }

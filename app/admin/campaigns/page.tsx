@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { FileUpload } from "@/components/ui/file-upload"
 import { toast } from "sonner"
 
 interface Campaign {
@@ -33,6 +34,7 @@ interface Campaign {
   status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
   targetPlatforms: string[]
   requirements: string[]
+  featuredImage?: string
   createdAt: string
   _count: {
     submissions: number
@@ -83,8 +85,10 @@ export default function AdminCampaignsPage() {
     startDate: "",
     targetPlatforms: [] as string[],
     requirements: [] as string[],
-    status: "DRAFT" as Campaign["status"]
+    status: "DRAFT" as Campaign["status"],
+    featuredImage: ""
   })
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Fetch campaigns
@@ -141,6 +145,27 @@ export default function AdminCampaignsPage() {
   const handleCreateCampaign = async () => {
     setIsSubmitting(true)
     try {
+      // Handle image upload first if there's a file
+      let imageUrl = formData.featuredImage
+      if (uploadedFile) {
+        const formDataUpload = new FormData()
+        formDataUpload.append('file', uploadedFile)
+        formDataUpload.append('bucket', 'images')
+        
+        const uploadResponse = await authenticatedFetch("/api/upload", {
+          method: "POST",
+          body: formDataUpload
+        })
+        
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json()
+          imageUrl = uploadResult.url
+        } else {
+          toast.error("Failed to upload image")
+          return
+        }
+      }
+
       const response = await authenticatedFetch("/api/campaigns", {
         method: "POST",
         body: JSON.stringify({
@@ -154,6 +179,7 @@ export default function AdminCampaignsPage() {
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
+          featuredImage: imageUrl || null,
         })
       })
 
@@ -183,6 +209,27 @@ export default function AdminCampaignsPage() {
 
     setIsUpdating(true)
     try {
+      // Handle image upload first if there's a new file
+      let imageUrl = formData.featuredImage
+      if (uploadedFile) {
+        const formDataUpload = new FormData()
+        formDataUpload.append('file', uploadedFile)
+        formDataUpload.append('bucket', 'images')
+        
+        const uploadResponse = await authenticatedFetch("/api/upload", {
+          method: "POST",
+          body: formDataUpload
+        })
+        
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json()
+          imageUrl = uploadResult.url
+        } else {
+          toast.error("Failed to upload image")
+          return
+        }
+      }
+
       const response = await authenticatedFetch(`/api/admin/campaigns/${selectedCampaign.id}`, {
         method: "PUT",
         body: JSON.stringify({
@@ -196,6 +243,7 @@ export default function AdminCampaignsPage() {
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
+          featuredImage: imageUrl || null,
         })
       })
 
@@ -253,7 +301,9 @@ export default function AdminCampaignsPage() {
       targetPlatforms: campaign.targetPlatforms,
       requirements: campaign.requirements,
       status: campaign.status,
+      featuredImage: campaign.featuredImage || "",
     })
+    setUploadedFile(null) // Clear any uploaded file when editing
     setShowEditDialog(true)
   }
 
@@ -269,8 +319,10 @@ export default function AdminCampaignsPage() {
       startDate: "",
       targetPlatforms: [],
       requirements: [],
-      status: "DRAFT"
+      status: "DRAFT",
+      featuredImage: ""
     })
+    setUploadedFile(null)
     setSelectedCampaign(null)
   }
 
@@ -646,6 +698,26 @@ function CampaignForm({
             required
             disabled={isSubmitting}
           />
+        </div>
+
+        <div className="mb-4">
+          <FileUpload
+            label="Campaign Image"
+            accept="image/*"
+            maxSize={5}
+            onFileChange={setUploadedFile}
+            uploadedFile={uploadedFile}
+          />
+          {formData.featuredImage && !uploadedFile && (
+            <div className="mt-2">
+              <Label>Current Image:</Label>
+              <img 
+                src={formData.featuredImage} 
+                alt="Campaign" 
+                className="w-32 h-20 object-cover rounded border mt-1"
+              />
+            </div>
+          )}
         </div>
 
       </div>

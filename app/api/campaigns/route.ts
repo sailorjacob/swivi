@@ -13,6 +13,7 @@ const createCampaignSchema = z.object({
   startDate: z.string().transform((str) => str ? new Date(str) : null).nullable(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])),
   requirements: z.array(z.string()).optional().default([]),
+  featuredImage: z.string().url().optional().nullable(),
 })
 
 export async function GET(request: NextRequest) {
@@ -53,11 +54,7 @@ export async function GET(request: NextRequest) {
         status: true,
         targetPlatforms: true,
         requirements: true,
-        // featuredImage: true, // Commented out - column doesn't exist in DB
-        // category: true, // Commented out - column doesn't exist in DB
-        // difficulty: true, // Commented out - column doesn't exist in DB
-        // maxParticipants: true, // Commented out - column doesn't exist in DB
-        // tags: true, // Commented out - column doesn't exist in DB
+        featuredImage: true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -111,6 +108,7 @@ export async function POST(request: NextRequest) {
 
     // Add optional fields if provided
     if (validatedData.startDate) campaignData.startDate = validatedData.startDate
+    if (validatedData.featuredImage) campaignData.featuredImage = validatedData.featuredImage
 
     const campaign = await prisma.campaign.create({
       data: campaignData,

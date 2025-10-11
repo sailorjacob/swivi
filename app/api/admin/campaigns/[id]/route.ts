@@ -15,6 +15,7 @@ const updateCampaignSchema = z.object({
   status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])).optional(),
   requirements: z.array(z.string()).optional(),
+  featuredImage: z.string().url().optional().nullable(),
 })
 
 export async function GET(
@@ -52,11 +53,7 @@ export async function GET(
         status: true,
         targetPlatforms: true,
         requirements: true,
-        // featuredImage: true, // Commented out - not in DB
-        // category: true, // Commented out - not in DB
-        // difficulty: true, // Commented out - not in DB
-        // maxParticipants: true, // Commented out - not in DB
-        // tags: true, // Commented out - not in DB
+        featuredImage: true,
         createdAt: true,
         updatedAt: true,
         clipSubmissions: {
@@ -138,7 +135,7 @@ export async function PUT(
     if (validatedData.status !== undefined) updateData.status = validatedData.status
     if (validatedData.targetPlatforms !== undefined) updateData.targetPlatforms = validatedData.targetPlatforms
     if (validatedData.requirements !== undefined) updateData.requirements = validatedData.requirements
-    // if (validatedData.featuredImage !== undefined) updateData.featuredImage = validatedData.featuredImage  // Commented out - not in DB
+    if (validatedData.featuredImage !== undefined) updateData.featuredImage = validatedData.featuredImage
 
     // Note: The following fields are commented out because they don't exist in the current database
     // When the database is migrated to add these columns, uncomment them:

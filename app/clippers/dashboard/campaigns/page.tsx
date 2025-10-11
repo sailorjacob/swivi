@@ -36,9 +36,10 @@ interface Campaign {
   status: string
   targetPlatforms: string[]
   requirements: string[]
+  featuredImage?: string
   createdAt: string
   _count: {
-    submissions: number
+    clipSubmissions: number
   }
 }
 
@@ -95,11 +96,11 @@ export default function CampaignsPage() {
       title: campaign.title,
       creator: campaign.creator,
       description: campaign.description,
-      image: "", // We don't have image in current schema
+      image: campaign.featuredImage || "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop",
       pool: Number(campaign.budget),
-      spent: Number(campaign.spent),
+      spent: Number(campaign.spent || 0),
       cpm: Number(campaign.payoutRate), // Payout rate per 1K views
-      platforms: campaign.targetPlatforms,
+      platforms: campaign.targetPlatforms.map(p => p.toLowerCase()),
       totalSubmissions: campaign._count.clipSubmissions,
       totalViews: 0, // We don't track total views in current schema
       status: campaign.status,
@@ -206,9 +207,21 @@ export default function CampaignsPage() {
                       </Badge>
                     </div>
                   )}
-                  <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                    <span className="text-white text-lg font-medium">{campaign.title}</span>
-                  </div>
+                  {campaign.featuredImage ? (
+                    <img
+                      src={campaign.featuredImage}
+                      alt={campaign.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                        e.currentTarget.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center"><span class="text-white text-lg font-medium">${campaign.title}</span></div>`
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                      <span className="text-white text-lg font-medium">{campaign.title}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Campaign Info */}

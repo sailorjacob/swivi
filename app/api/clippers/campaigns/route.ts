@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
         status: true,
         targetPlatforms: true,
         requirements: true,
+        featuredImage: true,
         createdAt: true,
         updatedAt: true,
         _count: {
