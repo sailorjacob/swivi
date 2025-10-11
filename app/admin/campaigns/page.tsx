@@ -74,6 +74,7 @@ export default function AdminCampaignsPage() {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showViewDialog, setShowViewDialog] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [formData, setFormData] = useState({
     title: "",
@@ -285,6 +286,12 @@ export default function AdminCampaignsPage() {
       console.error("Error deleting campaign:", error)
       toast.error("Failed to delete campaign")
     }
+  }
+
+  // View campaign
+  const handleViewCampaign = (campaign: Campaign) => {
+    setSelectedCampaign(campaign)
+    setShowViewDialog(true)
   }
 
   // Edit campaign
@@ -500,7 +507,7 @@ export default function AdminCampaignsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setSelectedCampaign(campaign)}
+                      onClick={() => handleViewCampaign(campaign)}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -616,6 +623,25 @@ export default function AdminCampaignsPage() {
               </div>
             </DialogContent>
           </Dialog>
+        )}
+
+        {/* View Campaign Dialog */}
+        {showViewDialog && selectedCampaign && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Campaign Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CampaignView 
+                campaign={selectedCampaign} 
+                onClose={() => setShowViewDialog(false)}
+                onEdit={() => {
+                  setShowViewDialog(false)
+                  handleEditCampaign(selectedCampaign)
+                }}
+              />
+            </CardContent>
+          </Card>
         )}
 
         {/* Edit Campaign Form */}
@@ -856,6 +882,125 @@ function CampaignForm({
           ) : (
             <>{isEdit ? "Update" : "Create"} Campaign</>
           )}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// Campaign View Component
+function CampaignView({
+  campaign,
+  onClose,
+  onEdit
+}: {
+  campaign: Campaign
+  onClose: () => void
+  onEdit: () => void
+}) {
+  return (
+    <div className="space-y-6">
+      {/* Campaign Image */}
+      {campaign.featuredImage && (
+        <div className="relative h-48 bg-muted rounded-lg overflow-hidden">
+          <img
+            src={campaign.featuredImage}
+            alt={campaign.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+
+      {/* Basic Info */}
+      <div className="grid grid-cols-2 gap-6">
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Campaign Title</Label>
+          <p className="text-lg font-medium">{campaign.title}</p>
+        </div>
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Creator/Brand</Label>
+          <p className="text-lg">{campaign.creator}</p>
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-sm font-medium text-muted-foreground">Description</Label>
+        <p className="mt-1 text-sm leading-relaxed">{campaign.description}</p>
+      </div>
+
+      {/* Budget & Performance */}
+      <div className="grid grid-cols-3 gap-6">
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Budget</Label>
+          <p className="text-lg font-medium">${campaign.budget.toLocaleString()}</p>
+        </div>
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Spent</Label>
+          <p className="text-lg font-medium">${campaign.spent.toLocaleString()}</p>
+        </div>
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Payout Rate</Label>
+          <p className="text-lg font-medium">${campaign.payoutRate}/1K views</p>
+        </div>
+      </div>
+
+      {/* Dates & Status */}
+      <div className="grid grid-cols-3 gap-6">
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+          <Badge className={`mt-1 ${
+            campaign.status === "ACTIVE" ? "bg-green-600" :
+            campaign.status === "DRAFT" ? "bg-yellow-600" :
+            "bg-gray-600"
+          } text-white`}>
+            {campaign.status}
+          </Badge>
+        </div>
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Deadline</Label>
+          <p className="text-sm">{new Date(campaign.deadline).toLocaleDateString()}</p>
+        </div>
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Submissions</Label>
+          <p className="text-lg font-medium">{campaign._count.submissions || 0}</p>
+        </div>
+      </div>
+
+      {/* Platforms */}
+      <div>
+        <Label className="text-sm font-medium text-muted-foreground">Target Platforms</Label>
+        <div className="flex gap-2 mt-2">
+          {campaign.targetPlatforms.map((platform) => (
+            <Badge key={platform} variant="secondary">
+              {platform}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      {/* Requirements */}
+      {campaign.requirements.length > 0 && (
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Requirements</Label>
+          <ul className="mt-2 space-y-1">
+            {campaign.requirements.map((req, index) => (
+              <li key={index} className="text-sm flex items-start gap-2">
+                <span className="text-muted-foreground">•</span>
+                {req}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex justify-end space-x-2 pt-4 border-t">
+        <Button variant="outline" onClick={onClose}>
+          Close
+        </Button>
+        <Button onClick={onEdit}>
+          <Edit className="mr-2 h-4 w-4" />
+          Edit Campaign
         </Button>
       </div>
     </div>

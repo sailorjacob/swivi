@@ -96,7 +96,7 @@ export default function CampaignsPage() {
       title: campaign.title,
       creator: campaign.creator,
       description: campaign.description,
-      image: campaign.featuredImage || "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop",
+      image: campaign.featuredImage || "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&q=80",
       pool: Number(campaign.budget),
       spent: Number(campaign.spent || 0),
       cpm: Number(campaign.payoutRate), // Payout rate per 1K views
@@ -208,15 +208,22 @@ export default function CampaignsPage() {
                     </div>
                   )}
                   {campaign.featuredImage ? (
-                    <img
-                      src={campaign.featuredImage}
-                      alt={campaign.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                        e.currentTarget.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center"><span class="text-white text-lg font-medium">${campaign.title}</span></div>`
-                      }}
-                    />
+                    <div className="relative w-full h-full">
+                      <img
+                        src={campaign.featuredImage}
+                        alt={campaign.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Hide the image and show the gradient fallback
+                          e.currentTarget.style.display = 'none'
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                          if (fallback) fallback.style.display = 'flex'
+                        }}
+                      />
+                      <div className="hidden w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center absolute inset-0">
+                        <span className="text-white text-lg font-medium">{campaign.title}</span>
+                      </div>
+                    </div>
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                       <span className="text-white text-lg font-medium">{campaign.title}</span>
