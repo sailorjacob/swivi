@@ -25,7 +25,7 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
 
     // Override CSS custom properties for light theme
     const root = document.documentElement
-    root.style.setProperty('--background', '255 255 255')
+    root.style.setProperty('--background', '250 250 250')  // Softer off-white
     root.style.setProperty('--foreground', '0 0 0')
     root.style.setProperty('--muted', '244 244 245')
     root.style.setProperty('--muted-foreground', '113 113 122')
@@ -256,17 +256,17 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
         }
 
         /* Button text colors for light theme */
-        .light .bg-foreground {
-          color: white !important;
-        }
-
+        .light .bg-foreground,
         .light .hover\\:bg-foreground\\/90:hover {
-          color: white !important;
+          color: rgb(255, 255, 255) !important;
         }
 
-        /* Header logo inversion for light theme */
-        .light header img[alt*="Swivi"],
-        .light header img[alt*="Logo"] {
+        .light button[class*="bg-foreground"] {
+          color: rgb(255, 255, 255) !important;
+        }
+
+        /* Header logo - ensure proper inversion for light theme */
+        .light header img {
           filter: invert(1) !important;
         }
 
