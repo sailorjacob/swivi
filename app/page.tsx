@@ -12,7 +12,7 @@ import { Founder } from "@/components/marketing/founder"
 import { CampaignsPreview } from "@/components/marketing/campaigns-preview"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { DarkThemeWrapper } from "./layout-wrapper"
+import { LightThemeWrapper } from "./layout-wrapper"
 
 export default function HomePage() {
   return (

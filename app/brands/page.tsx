@@ -191,7 +191,7 @@ export default function BrandsPage() {
           </div>
         </section>
 
-        {/* Featured Campaign - Zeussy */}
+        {/* Featured Campaign - Caleb Simpson x Ed Sheeran */}
         <section className="py-20 md:py-32 border-t border-black/5">
           <div className="max-width-wrapper section-padding">
             <div className="mb-16">
@@ -199,7 +199,7 @@ export default function BrandsPage() {
                 Featured Campaign
               </h2>
               <p className="text-muted-foreground max-w-2xl">
-                See how we helped Zeussy scale their content and reach millions of viewers.
+                See how we helped Caleb Simpson create viral pizza review content featuring Ed Sheeran collaboration.
               </p>
             </div>
 
@@ -211,33 +211,33 @@ export default function BrandsPage() {
                 viewport={{ once: true }}
                 className="space-y-6"
               >
-                <h3 className="text-2xl font-normal">Zeussy Clips</h3>
+                <div className="flex items-center gap-4 mb-4">
+                  <span className="text-5xl opacity-90">🍕</span>
+                  <h3 className="text-2xl font-normal">Caleb Simpson x Ed Sheeran</h3>
+                </div>
                 <p className="text-muted-foreground">
-                  Join our exclusive community of content creators and earn $1,000 for every 1M views generated.
-                  Perfect for digital trendsetters and ambitious go-getters looking to turn their content knowledge
-                  into a profitable side hustle.
+                  Music and food collide in this viral collaboration featuring Ed Sheeran and pizza reviews.
+                  Our clipper network transformed authentic content into millions of views across platforms.
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-center text-sm">
                     <span className="mr-2">•</span>
-                    No specialized gear required
+                    Celebrity collaboration content
                   </li>
                   <li className="flex items-center text-sm">
                     <span className="mr-2">•</span>
-                    Work flexibly from any location
+                    Multi-platform distribution
                   </li>
                   <li className="flex items-center text-sm">
                     <span className="mr-2">•</span>
-                    Instant payouts for approved clips
+                    Authentic creator-brand partnerships
                   </li>
                 </ul>
                 <Link
-                  href="https://whop.com/zeussy/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
+                  href="/case-studies/caleb-simpson-ed-sheeran"
+                  className="inline-flex items-center text-sm font-normal bg-foreground text-background px-6 py-3 rounded-full hover:bg-foreground/90 transition-all duration-300"
                 >
-                  Learn More
+                  View Case Study
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </motion.div>
@@ -250,23 +250,23 @@ export default function BrandsPage() {
                 className="bg-black/5 rounded-2xl p-8"
               >
                 <div className="space-y-4">
-                  <h4 className="font-normal">Campaign Highlights</h4>
+                  <h4 className="font-normal">Campaign Results</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-background p-4 rounded-xl">
-                      <div className="text-2xl font-light mb-1">$1K</div>
-                      <div className="text-xs text-muted-foreground">Per 1M Views</div>
+                      <div className="text-2xl font-light mb-1">2.1M</div>
+                      <div className="text-xs text-muted-foreground">Views Generated</div>
                     </div>
                     <div className="bg-background p-4 rounded-xl">
-                      <div className="text-2xl font-light mb-1">15+</div>
-                      <div className="text-xs text-muted-foreground">Active Clippers</div>
+                      <div className="text-2xl font-light mb-1">84%</div>
+                      <div className="text-xs text-muted-foreground">Success Rate</div>
                     </div>
                     <div className="bg-background p-4 rounded-xl">
-                      <div className="text-2xl font-light mb-1">24/7</div>
-                      <div className="text-xs text-muted-foreground">Support</div>
+                      <div className="text-2xl font-light mb-1">$800</div>
+                      <div className="text-xs text-muted-foreground">Budget</div>
                     </div>
                     <div className="bg-background p-4 rounded-xl">
-                      <div className="text-2xl font-light mb-1">100%</div>
-                      <div className="text-xs text-muted-foreground">Satisfaction</div>
+                      <div className="text-2xl font-light mb-1">3 days</div>
+                      <div className="text-xs text-muted-foreground">Timeline</div>
                     </div>
                   </div>
                 </div>
