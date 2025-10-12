@@ -211,8 +211,26 @@ export function CampaignsShowcase() {
     },
   }
 
-  const getPlatformIcon = (platform: string) => {
-    switch (platform) {
+  const getCampaignIcon = (campaign: CampaignResult) => {
+    // Return relevant emoji based on campaign content
+    if (campaign.clientName.toLowerCase().includes("caleb") && campaign.clientName.toLowerCase().includes("sheeran")) {
+      return "🍕" // Pizza for Caleb Simpson x Ed Sheeran pizza review
+    }
+    if (campaign.clientName.toLowerCase().includes("owning")) {
+      return "🏢" // Building for real estate (Owning Manhattan)
+    }
+    if (campaign.clientName.toLowerCase().includes("rod")) {
+      return "🏠" // House for real estate educator
+    }
+    if (campaign.clientName.toLowerCase().includes("shvfty")) {
+      return "🎮" // Gaming for Twitch streamer
+    }
+    if (campaign.clientName.toLowerCase().includes("sportz")) {
+      return "⚽" // Sports for gambling/sports betting
+    }
+
+    // Default based on platform
+    switch (campaign.contentPlatform) {
       case "instagram":
         return "📸"
       case "tiktok":
@@ -327,10 +345,7 @@ export function CampaignsShowcase() {
                         <CardTitle className="text-3xl font-light text-white">
                           {campaign.clientName}
                         </CardTitle>
-                        <Badge variant="outline" className="text-sm border-neutral-700 text-neutral-300 bg-neutral-800/30">
-                          {campaign.clientType}
-                        </Badge>
-                        <span className="text-4xl opacity-60">{getPlatformIcon(campaign.contentPlatform)}</span>
+                        <span className="text-4xl opacity-60">{getCampaignIcon(campaign)}</span>
                       </div>
                       <p className="text-neutral-300 leading-relaxed text-lg">
                         {campaign.description}
