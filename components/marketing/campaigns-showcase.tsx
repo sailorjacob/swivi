@@ -189,9 +189,6 @@ export function CampaignsShowcase() {
 
   const getCampaignIcon = (campaign: CampaignResult) => {
     // Return relevant emoji based on campaign content
-    if (campaign.clientName.toLowerCase().includes("caleb") && campaign.clientName.toLowerCase().includes("sheeran")) {
-      return "🍕" // Pizza for Caleb Simpson x Ed Sheeran pizza review
-    }
     if (campaign.clientName.toLowerCase().includes("owning")) {
       return "🏢" // Building for real estate (Owning Manhattan)
     }

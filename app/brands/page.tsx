@@ -234,7 +234,7 @@ export default function BrandsPage() {
                   </li>
                 </ul>
                 <Link
-                  href="/case-studies/caleb-simpson-ed-sheeran"
+                  href="/case-studies/owning-manhattan"
                   className="inline-flex items-center text-sm font-normal bg-foreground text-background px-6 py-3 rounded-full hover:bg-foreground/90 transition-all duration-300"
                 >
                   View Case Study
