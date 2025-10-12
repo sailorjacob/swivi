@@ -4,11 +4,12 @@
 export const dynamic = 'force-dynamic'
 
 import { motion, easeOut } from "framer-motion"
-import { TrendingUp, DollarSign, Users, BarChart3 } from "lucide-react"
+import { TrendingUp, DollarSign, Users, BarChart3, ArrowRight } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { DarkThemeWrapper } from "../layout-wrapper"
 import Image from "next/image"
+import Link from "next/link"
 
 const stats = [
   {
