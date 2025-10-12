@@ -47,7 +47,7 @@ const campaignResults: CampaignResult[] = [
     highlights: [
       "6.1M views generated",
       "Completed in just 2 days",
-      "60 clips submitted",
+      "236 clips submitted",
       "$1K budget delivered"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
@@ -70,7 +70,7 @@ const campaignResults: CampaignResult[] = [
     status: "completed",
     highlights: [
       "1.8M views generated",
-      "85 clips submitted",
+      "342 clips submitted",
       "3-day timeline",
       "Real estate education focus"
     ],
@@ -94,7 +94,7 @@ const campaignResults: CampaignResult[] = [
     status: "completed",
     highlights: [
       "1.9M views generated",
-      "258 clips submitted",
+      "429 clips submitted",
       "5-day timeline"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/shvty.jpeg"
@@ -117,7 +117,7 @@ const campaignResults: CampaignResult[] = [
     status: "completed",
     highlights: [
       "8.1M views generated",
-      "$250 budget delivered",
+      "187 clips submitted",
       "2-week timeline",
       "Exceeded goal by 224%"
     ],
