@@ -136,11 +136,21 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           background-color: rgba(0, 0, 0, 0.1) !important;
         }
 
-        /* Ensure no yellow backgrounds or overflow colors */
+        /* Override any yellow backgrounds that might appear in overflow */
         .light [style*="yellow"],
-        .light [class*="yellow"] {
+        .light [class*="yellow"],
+        .light [style*="background-color: rgb(255, 255, 0)"],
+        .light [style*="background-color: #ffff00"],
+        .light [style*="background-color: yellow"] {
           background-color: transparent !important;
           color: inherit !important;
+        }
+
+        /* Fix any elements with yellow backgrounds in light theme */
+        .light div[style*="yellow"],
+        .light section[style*="yellow"],
+        .light main[style*="yellow"] {
+          background-color: transparent !important;
         }
 
         /* Fix any scrollbar or overflow backgrounds */
@@ -167,34 +177,30 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           background-color: white !important;
         }
 
-        /* Comprehensive background fix for light theme */
-        .light,
-        .light *,
-        .light *::before,
-        .light *::after {
+        /* Fix main layout containers that might have yellow overflow */
+        .light main {
           background-color: white !important;
         }
 
-        /* But restore transparency for specific elements that need it */
-        .light .bg-transparent,
-        .light .bg-background\\/*,
-        .light [class*="bg-transparent"],
-        .light [class*="bg-background\\/"] {
+        .light .max-width-wrapper {
           background-color: transparent !important;
         }
 
-        /* Fix main layout containers */
-        .light main,
-        .light .max-width-wrapper,
-        .light section,
-        .light div[class*="container"],
-        .light div[class*="wrapper"] {
-          background-color: white !important;
+        .light section {
+          background-color: transparent !important;
         }
 
         /* Fix any overflow containers that might show yellow */
-        .light [class*="overflow"] {
+        .light [class*="overflow-hidden"],
+        .light [class*="overflow-auto"],
+        .light [class*="overflow-scroll"] {
           background-color: transparent !important;
+        }
+
+        /* Ensure page backgrounds are white but don't break transparency */
+        .light body,
+        .light html {
+          background-color: white !important;
         }
 
         /* Card and container overrides */
