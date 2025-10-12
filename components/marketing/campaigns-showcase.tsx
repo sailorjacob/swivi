@@ -355,7 +355,7 @@ export function CampaignsShowcase() {
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-medium text-blue-400">75%</span>
+                    <span className="text-xs font-medium text-neutral-500">75%</span>
                   </div>
                 </div>
                 <div className="text-sm text-neutral-400">Client Satisfaction</div>
@@ -382,11 +382,11 @@ export function CampaignsShowcase() {
                       stroke="currentColor"
                       strokeWidth="2"
                       strokeDasharray="85, 100"
-                      className="text-purple-400"
+                      className="text-neutral-600"
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-medium text-purple-400">85%</span>
+                    <span className="text-xs font-medium text-neutral-600">85%</span>
                   </div>
                 </div>
                 <div className="text-sm text-neutral-400">Repeat Clients</div>
@@ -520,7 +520,8 @@ export function CampaignsShowcase() {
                       View Example Content
                       <ExternalLink className="h-3 w-3" />
                     </Link>
-                    {campaign.id === "owning-manhattan" && (
+                    {/* View Full Gallery button temporarily hidden */}
+                    {/* {campaign.id === "owning-manhattan" && (
                       <Link
                         href="/case-studies/owning-manhattan"
                         className="inline-flex items-center gap-2 text-sm font-medium bg-white text-black px-5 py-2.5 rounded-full hover:bg-neutral-200 transition-colors"
@@ -528,7 +529,7 @@ export function CampaignsShowcase() {
                         <Eye className="h-4 w-4" />
                         View Full Gallery
                       </Link>
-                    )}
+                    )} */}
                   </div>
                 </CardContent>
               </Card>
