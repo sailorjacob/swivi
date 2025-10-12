@@ -25,8 +25,9 @@ export function FloatingBranding({
   randomDelay = true
 }: FloatingBrandingProps) {
   const [isVisible, setIsVisible] = useState(false)
-  const [isHovered, setIsHovered] = useState(true) // Start expanded
+  const [isHovered, setIsHovered] = useState(false) // Start collapsed on mobile, expanded on desktop
   const [isPastFirstSection, setIsPastFirstSection] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   // Randomize position and timing for each render
   const randomConfig = useMemo(() => {
@@ -56,22 +57,40 @@ export function FloatingBranding({
     }
   }, [position, randomPosition, randomDelay])
 
+  // Detect mobile devices and set initial state
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768
+      setIsMobile(mobile)
+      setIsHovered(!mobile) // Start expanded on desktop, collapsed on mobile
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), randomConfig.delay)
     return () => clearTimeout(timer)
   }, [randomConfig.delay])
 
-  // Add scroll detection to collapse when past first section
+  // Add scroll detection - different behavior for mobile vs desktop
   useEffect(() => {
     const handleScroll = () => {
-      // Hero section is approximately 80vh, so collapse when scrolled past that
-      const scrollThreshold = window.innerHeight * 0.8
-      setIsPastFirstSection(window.scrollY > scrollThreshold)
+      if (isMobile) {
+        // On mobile, shrink immediately on any scroll
+        setIsPastFirstSection(window.scrollY > 0)
+      } else {
+        // On desktop, shrink when scrolled past 80vh
+        const scrollThreshold = window.innerHeight * 0.8
+        setIsPastFirstSection(window.scrollY > scrollThreshold)
+      }
     }
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [isMobile])
 
   const sizeClasses = {
     sm: "w-12 h-12",
@@ -101,22 +120,25 @@ export function FloatingBranding({
     >
       <div
         className={`
-          ${isHovered || !isPastFirstSection ? sizeClasses.xl : sizeClasses[size]}
+          ${isMobile ? (isHovered ? sizeClasses.xl : sizeClasses[size]) : (isHovered || !isPastFirstSection ? sizeClasses.xl : sizeClasses[size])}
           rounded-full overflow-hidden transition-all duration-500 ease-out
           border-2 border-border/20
           bg-background/80 backdrop-blur-sm
           hover:border-border/40
           cursor-pointer hover:shadow-lg
-          ${isHovered || !isPastFirstSection ? 'scale-125 shadow-2xl' : 'hover:scale-110'}
+          ${isMobile ? (isHovered ? 'scale-125 shadow-2xl' : 'scale-100') : (isHovered || !isPastFirstSection ? 'scale-125 shadow-2xl' : 'hover:scale-110')}
         `}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => !isMobile && setIsHovered(true)}
+        onMouseLeave={() => !isMobile && setIsHovered(false)}
+        onClick={() => isMobile && setIsHovered(!isHovered)}
+        onTouchStart={() => isMobile && setIsHovered(true)}
+        onTouchEnd={() => isMobile && setIsHovered(false)}
       >
         <Image
           src={src}
           alt={alt}
-          width={(isHovered || !isPastFirstSection) ? 128 : 80}
-          height={(isHovered || !isPastFirstSection) ? 128 : 80}
+          width={isMobile ? (isHovered ? 128 : 80) : ((isHovered || !isPastFirstSection) ? 128 : 80)}
+          height={isMobile ? (isHovered ? 128 : 80) : ((isHovered || !isPastFirstSection) ? 128 : 80)}
           className="w-full h-full object-cover transition-all duration-500"
           unoptimized
         />
