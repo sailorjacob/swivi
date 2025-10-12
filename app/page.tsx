@@ -255,26 +255,51 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           border-color: rgb(228 228 231) !important;
         }
 
-        /* Button text colors for light theme */
+        /* Button styling for light theme */
         .light .bg-foreground {
+          background-color: rgb(0, 0, 0) !important;
           color: rgb(255, 255, 255) !important;
           text-shadow: none !important;
         }
 
         .light .hover\\:bg-foreground\\/90:hover {
+          background-color: rgba(0, 0, 0, 0.9) !important;
           color: rgb(255, 255, 255) !important;
-          opacity: 0.9 !important;
         }
 
         .light button[class*="bg-foreground"] {
+          background-color: rgb(0, 0, 0) !important;
           color: rgb(255, 255, 255) !important;
           text-shadow: none !important;
         }
 
-        /* Ensure button text is bright white by default */
+        /* Ensure all dark buttons have white text */
         .light button[class*="bg-foreground"]:not(:hover) {
+          background-color: rgb(0, 0, 0) !important;
           color: rgb(255, 255, 255) !important;
           opacity: 1 !important;
+        }
+
+        /* Button hover states */
+        .light button[class*="bg-foreground"]:hover {
+          background-color: rgba(0, 0, 0, 0.9) !important;
+          color: rgb(255, 255, 255) !important;
+        }
+
+        /* Additional button styling for all dark buttons */
+        .light .bg-black {
+          background-color: rgb(0, 0, 0) !important;
+          color: rgb(255, 255, 255) !important;
+        }
+
+        .light .bg-gray-900 {
+          background-color: rgb(17, 24, 39) !important;
+          color: rgb(255, 255, 255) !important;
+        }
+
+        /* Ensure all button variants have proper contrast */
+        .light button[class*="bg-"][class*="text-"]:not([class*="text-background"]) {
+          color: rgb(255, 255, 255) !important;
         }
 
         /* Header logo - ensure proper inversion for light theme */
