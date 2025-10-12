@@ -25,7 +25,8 @@ export function FloatingBranding({
   randomDelay = true
 }: FloatingBrandingProps) {
   const [isVisible, setIsVisible] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = useState(true) // Start expanded
+  const [isPastFirstSection, setIsPastFirstSection] = useState(false)
 
   // Randomize position and timing for each render
   const randomConfig = useMemo(() => {
@@ -60,6 +61,18 @@ export function FloatingBranding({
     return () => clearTimeout(timer)
   }, [randomConfig.delay])
 
+  // Add scroll detection to collapse when past first section
+  useEffect(() => {
+    const handleScroll = () => {
+      // Hero section is approximately 80vh, so collapse when scrolled past that
+      const scrollThreshold = window.innerHeight * 0.8
+      setIsPastFirstSection(window.scrollY > scrollThreshold)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const sizeClasses = {
     sm: "w-12 h-12",
     md: "w-16 h-16",
@@ -88,13 +101,13 @@ export function FloatingBranding({
     >
       <div
         className={`
-          ${isHovered ? sizeClasses.xl : sizeClasses[size]}
+          ${isHovered || !isPastFirstSection ? sizeClasses.xl : sizeClasses[size]}
           rounded-full overflow-hidden transition-all duration-500 ease-out
           border-2 border-border/20
           bg-background/80 backdrop-blur-sm
           hover:border-border/40
           cursor-pointer hover:shadow-lg
-          ${isHovered ? 'scale-125 shadow-2xl' : 'hover:scale-110'}
+          ${isHovered || !isPastFirstSection ? 'scale-125 shadow-2xl' : 'hover:scale-110'}
         `}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -102,8 +115,8 @@ export function FloatingBranding({
         <Image
           src={src}
           alt={alt}
-          width={isHovered ? 128 : 80}
-          height={isHovered ? 128 : 80}
+          width={(isHovered || !isPastFirstSection) ? 128 : 80}
+          height={(isHovered || !isPastFirstSection) ? 128 : 80}
           className="w-full h-full object-cover transition-all duration-500"
           unoptimized
         />

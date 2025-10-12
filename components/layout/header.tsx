@@ -49,23 +49,14 @@ export function Header() {
       <nav className="max-width-wrapper section-padding flex h-24 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center">
-          <div className="relative">
-            <Image
-              src={isLightTheme
-                ? "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/invertedlogo.png"
-                : "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
-              }
-              alt="Swivi"
-              width={300}
-              height={100}
-              className={`h-16 w-auto transition-opacity duration-300 ${isLightTheme ? 'drop-shadow-lg filter brightness-110 contrast-110' : ''}`}
-              priority
-            />
-            {/* Subtle background for light theme logo to ensure visibility */}
-            {isLightTheme && (
-              <div className="absolute inset-0 bg-white/5 rounded-lg -z-10 blur-sm"></div>
-            )}
-          </div>
+          <Image
+            src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/invertedlogo.png"
+            alt="Swivi"
+            width={300}
+            height={100}
+            className="h-16 w-auto"
+            priority
+          />
         </Link>
 
         {/* Desktop Navigation */}
