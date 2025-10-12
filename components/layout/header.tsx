@@ -51,7 +51,7 @@ export function Header() {
         <Link href="/" className="flex items-center">
           <Image
             src={isLightTheme
-              ? "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/invertedlogo.png"
+              ? "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
               : "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
             }
             alt="Swivi"
