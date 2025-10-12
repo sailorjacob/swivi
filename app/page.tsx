@@ -127,13 +127,13 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           background: linear-gradient(to bottom, white, rgb(244 244 245)) !important;
         }
 
-        /* Fix any animated background elements that might appear yellow */
+        /* Fix animated background elements for light theme */
         .light .bg-foreground\\/10 {
-          background-color: rgba(255, 255, 255, 0.05) !important;
+          background-color: rgba(0, 0, 0, 0.1) !important;
         }
 
         .light [class*="bg-foreground\\/"] {
-          background-color: rgba(255, 255, 255, 0.05) !important;
+          background-color: rgba(0, 0, 0, 0.1) !important;
         }
 
         /* Ensure no yellow backgrounds */
