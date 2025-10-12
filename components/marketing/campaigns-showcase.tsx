@@ -245,7 +245,7 @@ export function CampaignsShowcase() {
           className="text-xl text-neutral-300 max-w-4xl mx-auto mb-12 leading-relaxed"
         >
           We work with creators across all niches, from entrepreneurs and content creators
-          to musicians, TV series, and betting apps. Here are some of our most successful campaigns.
+          to musicians, TV series, and athletes. Here are some of our most successful campaigns.
         </motion.p>
       </motion.div>
 
@@ -320,11 +320,11 @@ export function CampaignsShowcase() {
                       stroke="currentColor"
                       strokeWidth="2"
                       strokeDasharray="94, 100"
-                      className="text-green-400"
+                      className="text-neutral-400"
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-medium text-green-400">94%</span>
+                    <span className="text-xs font-medium text-neutral-400">94%</span>
                   </div>
                 </div>
                 <div className="text-sm text-neutral-400">Success Rate</div>
@@ -351,7 +351,7 @@ export function CampaignsShowcase() {
                       stroke="currentColor"
                       strokeWidth="2"
                       strokeDasharray="75, 100"
-                      className="text-blue-400"
+                      className="text-neutral-500"
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -409,8 +409,7 @@ export function CampaignsShowcase() {
             Featured Campaign Results
           </h2>
           <p className="text-neutral-300 text-center max-w-3xl mx-auto text-lg leading-relaxed">
-            Real results from real campaigns. See how we've helped clients achieve
-            exceptional ROI through our clipper network.
+            Featured campaigns
           </p>
         </div>
 

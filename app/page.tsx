@@ -33,6 +33,6 @@ export default function HomePage() {
         </div>
       </main>
       <Footer />
-    </DarkThemeWrapper>
+    </LightThemeWrapper>
   )
 } 
