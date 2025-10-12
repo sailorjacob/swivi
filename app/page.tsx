@@ -256,13 +256,25 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
         }
 
         /* Button text colors for light theme */
-        .light .bg-foreground,
+        .light .bg-foreground {
+          color: rgb(255, 255, 255) !important;
+          text-shadow: none !important;
+        }
+
         .light .hover\\:bg-foreground\\/90:hover {
           color: rgb(255, 255, 255) !important;
+          opacity: 0.9 !important;
         }
 
         .light button[class*="bg-foreground"] {
           color: rgb(255, 255, 255) !important;
+          text-shadow: none !important;
+        }
+
+        /* Ensure button text is bright white by default */
+        .light button[class*="bg-foreground"]:not(:hover) {
+          color: rgb(255, 255, 255) !important;
+          opacity: 1 !important;
         }
 
         /* Header logo - ensure proper inversion for light theme */
