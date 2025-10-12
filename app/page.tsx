@@ -1,3 +1,5 @@
+"use client"
+
 import { Hero } from "@/components/marketing/hero"
 // Force this page to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
@@ -12,9 +14,6 @@ import { Founder } from "@/components/marketing/founder"
 import { CampaignsPreview } from "@/components/marketing/campaigns-preview"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-
-"use client"
-
 import { useEffect } from "react"
 
 function LightThemeWrapper({ children }: { children: React.ReactNode }) {
