@@ -25,7 +25,7 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
 
     // Override CSS custom properties for light theme
     const root = document.documentElement
-    root.style.setProperty('--background', '250 250 250')  // Softer off-white
+    root.style.setProperty('--background', '255 255 255')  // Pure white
     root.style.setProperty('--foreground', '0 0 0')
     root.style.setProperty('--muted', '244 244 245')
     root.style.setProperty('--muted-foreground', '113 113 122')
@@ -177,17 +177,18 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           background-color: white !important;
         }
 
-        /* Fix main layout containers that might have yellow overflow */
-        .light main {
+        /* Comprehensive background override for light theme */
+        .light {
           background-color: white !important;
         }
 
-        .light .max-width-wrapper {
-          background-color: transparent !important;
-        }
-
-        .light section {
-          background-color: transparent !important;
+        /* Fix main layout containers that might have yellow overflow */
+        .light main,
+        .light .max-width-wrapper,
+        .light section,
+        .light div[class*="container"],
+        .light div[class*="wrapper"] {
+          background-color: white !important;
         }
 
         /* Fix any overflow containers that might show yellow */
@@ -200,6 +201,15 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
         /* Ensure page backgrounds are white but don't break transparency */
         .light body,
         .light html {
+          background-color: white !important;
+        }
+
+        /* Override any CSS custom properties that might be yellow */
+        .light [style*="background: hsl(var(--background))"] {
+          background-color: white !important;
+        }
+
+        .light [style*="background-color: hsl(var(--background))"] {
           background-color: white !important;
         }
 
