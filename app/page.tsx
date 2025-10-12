@@ -60,7 +60,7 @@ export default function HomePage() {
   return (
     <LightThemeWrapper>
       <Header />
-      <main className="flex min-h-screen flex-col pt-16 bg-white text-black">
+      <main className="flex min-h-screen flex-col pt-16">
         <Hero />
         <Founder />
         <CreatorViewsCalculator />

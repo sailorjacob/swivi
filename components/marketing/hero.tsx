@@ -34,7 +34,7 @@ export function Hero() {
         {[...Array(3)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-[500px] h-[500px] rounded-full bg-white/10"
+            className="absolute w-[500px] h-[500px] rounded-full bg-foreground/10"
             initial={{
               x: `${Math.random() * 100}%`,
               y: `${Math.random() * 100}%`,

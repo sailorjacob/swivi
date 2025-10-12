@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ExternalLink, TrendingUp, DollarSign, Clock, Play, Award, Eye } from "lucide-react"
+import { ExternalLink, TrendingUp, Users, DollarSign, Clock, Play, Award, Eye } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
