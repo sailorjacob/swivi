@@ -45,10 +45,10 @@ const campaignResults: CampaignResult[] = [
     contentPlatform: "instagram",
     status: "completed",
     highlights: [
-      "610% ROI achieved",
+      "6.1M views generated",
       "Completed in just 2 days",
       "81.7% clip success rate",
-      "6.1M views on $1K budget"
+      "$1K budget delivered"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
   },
@@ -69,9 +69,9 @@ const campaignResults: CampaignResult[] = [
     contentPlatform: "instagram",
     status: "completed",
     highlights: [
-      "240% ROI achieved",
       "1.8M views generated",
       "80% clip success rate",
+      "3-day timeline",
       "Real estate education focus"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/rodkhlief.avif"
@@ -93,10 +93,10 @@ const campaignResults: CampaignResult[] = [
     contentPlatform: "tiktok",
     status: "completed",
     highlights: [
-      "211% ROI achieved",
+      "1.9M views generated",
       "258 clips distributed",
       "60% clip success rate",
-      "1.9M views generated"
+      "5-day timeline"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/shvty.jpeg"
   },
@@ -117,9 +117,9 @@ const campaignResults: CampaignResult[] = [
     contentPlatform: "instagram",
     status: "completed",
     highlights: [
-      "3,240% ROI achieved",
-      "8.1M views on $250 budget",
-      "324x return on investment",
+      "8.1M views generated",
+      "$250 budget delivered",
+      "2-week timeline",
       "Exceeded goal by 224%"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png"
@@ -129,9 +129,9 @@ const campaignResults: CampaignResult[] = [
 const industryStats = [
   {
     icon: TrendingUp,
-    label: "Average ROI",
-    value: "1,020%",
-    description: "Across all campaigns"
+    label: "Success Rate",
+    value: "94%",
+    description: "Campaign completion"
   },
   {
     icon: Users,
@@ -161,7 +161,8 @@ const industries = [
   "Musicians",
   "Entrepreneurs",
   "Tech Startups",
-  "E-commerce Brands"
+  "E-commerce Brands",
+  "Athletes"
 ]
 
 export function CampaignsShowcase() {
@@ -319,18 +320,18 @@ export function CampaignsShowcase() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div className="text-center p-8 bg-neutral-800/30 rounded-xl border border-neutral-700/30">
                       <div className="text-4xl md:text-5xl font-light text-white mb-3">
-                        {campaign.roi.toLocaleString()}%
-                      </div>
-                      <div className="text-sm font-medium text-neutral-400 uppercase tracking-wider">
-                        ROI Achieved
-                      </div>
-                    </div>
-                    <div className="text-center p-8 bg-neutral-800/30 rounded-xl border border-neutral-700/30">
-                      <div className="text-4xl md:text-5xl font-light text-white mb-3">
                         {formatNumber(campaign.viewsGenerated)}
                       </div>
                       <div className="text-sm font-medium text-neutral-400 uppercase tracking-wider">
                         Views Generated
+                      </div>
+                    </div>
+                    <div className="text-center p-8 bg-neutral-800/30 rounded-xl border border-neutral-700/30">
+                      <div className="text-4xl md:text-5xl font-light text-white mb-3">
+                        {Math.round((campaign.clipsPaid / campaign.clipsDistributed) * 100)}%
+                      </div>
+                      <div className="text-sm font-medium text-neutral-400 uppercase tracking-wider">
+                        Success Rate
                       </div>
                     </div>
                   </div>
@@ -410,7 +411,7 @@ export function CampaignsShowcase() {
         viewport={{ once: true }}
         className="mb-20"
       >
-        <div className="text-center mb-12">
+        <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-light mb-6 text-white">
             Industries We Serve
           </h2>
@@ -422,16 +423,15 @@ export function CampaignsShowcase() {
 
         <motion.div
           variants={itemVariants}
-          className="flex flex-wrap justify-center gap-3"
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto"
         >
           {industries.map((industry, index) => (
-            <Badge
+            <div
               key={index}
-              variant="outline"
-              className="px-5 py-2.5 text-sm border-neutral-700 text-neutral-300 bg-neutral-800/30 hover:bg-neutral-700/30 transition-colors"
+              className="p-4 bg-neutral-900/30 rounded-lg border border-neutral-800/30 text-center hover:bg-neutral-800/40 transition-colors"
             >
-              {industry}
-            </Badge>
+              <span className="text-neutral-300 font-medium">{industry}</span>
+            </div>
           ))}
         </motion.div>
       </motion.section>
@@ -453,7 +453,7 @@ export function CampaignsShowcase() {
           </h2>
           <p className="text-neutral-300 mb-10 text-lg leading-relaxed">
             Join the brands and creators who trust Swivi to amplify their content
-            and achieve exceptional ROI through our proven clipper network.
+            and achieve exceptional results through our proven clipper network.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
