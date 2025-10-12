@@ -309,9 +309,17 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           color: rgb(64 64 64) !important;
         }
 
-        /* Footer background gradient for light theme */
+        /* Footer styling for light theme */
+        .light footer {
+          background-color: white !important;
+        }
+
         .light footer .bg-gradient-to-t {
-          background: linear-gradient(to top, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1), transparent) !important;
+          background: transparent !important;
+        }
+
+        .light footer img {
+          opacity: 0.1 !important;
         }
 
         /* Features section use cases text */
@@ -351,38 +359,113 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           color: rgb(255, 255, 255) !important;
         }
 
-        /* Ensure button text is white when background is filled on hover */
+        /* Ensure button text is black when background is filled on hover */
         .light button[class*="bg-foreground"]:hover,
         .light .hover\\:bg-foreground:hover,
         .light [class*="hover:bg-foreground"]:hover {
-          color: rgb(255, 255, 255) !important;
-          background-color: rgb(0, 0, 0) !important;
+          color: rgb(0, 0, 0) !important;
+          background-color: rgb(240, 240, 240) !important;
         }
 
         /* Ensure button hover states work correctly */
         .light a[class*="hover:bg-foreground"]:hover,
         .light button[class*="hover:bg-foreground"]:hover {
-          color: rgb(255, 255, 255) !important;
-          background-color: rgb(0, 0, 0) !important;
+          color: rgb(0, 0, 0) !important;
+          background-color: rgb(240, 240, 240) !important;
         }
 
         /* More specific button hover state fixes for light theme */
         .light button[class*="hover:bg-foreground"]:hover,
         .light button[class*="hover:text-background"]:hover {
-          color: rgb(255, 255, 255) !important;
-          background-color: rgb(0, 0, 0) !important;
+          color: rgb(0, 0, 0) !important;
+          background-color: rgb(240, 240, 240) !important;
         }
 
         /* Fix for outline variant buttons specifically */
         .light button[class*="bg-transparent"][class*="text-foreground"][class*="hover:bg-foreground"]:hover {
-          color: rgb(255, 255, 255) !important;
-          background-color: rgb(0, 0, 0) !important;
+          color: rgb(0, 0, 0) !important;
+          background-color: rgb(240, 240, 240) !important;
         }
 
         /* Fix for buttons with border-foreground in light theme */
         .light button[class*="border-foreground"]:hover {
+          color: rgb(0, 0, 0) !important;
+          background-color: rgb(240, 240, 240) !important;
+        }
+
+        /* Override transition effects that might cause text to appear faded */
+        .light button[class*="transition"]:hover {
+          transition: none !important;
+        }
+
+        /* Ensure text is pure black with no opacity effects */
+        .light button[class*="text-"]:hover {
+          color: rgb(0, 0, 0) !important;
+          opacity: 1 !important;
+        }
+
+        /* Force solid background for all button hover states */
+        .light button:hover[class*="bg-foreground"],
+        .light button:hover[class*="hover:bg-foreground"] {
+          background-color: rgb(240, 240, 240) !important;
+          background: rgb(240, 240, 240) !important;
+          opacity: 1 !important;
+        }
+
+        /* Additional specificity for Hero buttons */
+        .light .group:hover {
+          color: rgb(0, 0, 0) !important;
+        }
+
+        /* Ultra-specific rules for Hero buttons */
+        .light button[class*="group"][class*="bg-transparent"][class*="text-foreground"][class*="hover:bg-foreground"]:hover {
+          color: rgb(0, 0, 0) !important;
+          background-color: rgb(240, 240, 240) !important;
+          background: rgb(240, 240, 240) !important;
+        }
+
+        .light button[class*="bg-transparent"][class*="text-foreground"][class*="hover:bg-foreground"][class*="border-foreground"]:hover {
+          color: rgb(0, 0, 0) !important;
+          background-color: rgb(240, 240, 240) !important;
+          background: rgb(240, 240, 240) !important;
+        }
+
+        /* Override any Tailwind hover states */
+        .light .hover\:bg-foreground:hover {
+          background-color: rgb(240, 240, 240) !important;
+        }
+
+        .light .hover\:text-background:hover {
+          color: rgb(0, 0, 0) !important;
+        }
+
+        /* Force all button hover states in light theme */
+        .light button[class*="hover:bg-foreground"]:hover,
+        .light button[class*="hover:text-background"]:hover {
+          color: rgb(0, 0, 0) !important;
+          background-color: rgb(240, 240, 240) !important;
+          transition: none !important;
+        }
+
+        /* Nuclear option - override ALL button hover states in light theme */
+        .light button:hover {
+          color: rgb(0, 0, 0) !important;
+          background-color: rgb(240, 240, 240) !important;
+        }
+
+        /* Target the specific Hero section buttons */
+        .light section button[class*="bg-transparent"]:hover {
+          color: rgb(0, 0, 0) !important;
+          background-color: rgb(240, 240, 240) !important;
+        }
+
+        /* Override Tailwind's hover utilities specifically */
+        .light [class*="hover:bg-foreground"]:hover {
+          background-color: rgb(240, 240, 240) !important;
+        }
+
+        .light [class*="hover:text-background"]:hover {
           color: rgb(255, 255, 255) !important;
-          background-color: rgb(0, 0, 0) !important;
         }
 
         /* Header logo - ensure proper inversion for light theme */
@@ -470,21 +553,30 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
         }
 
         /* Slider component overrides for light theme */
-        .light [class*="slider"] [class*="bg-secondary"] {
+        .light [class*="slider"] [class*="bg-secondary"],
+        .light .bg-secondary {
           background-color: rgb(228 228 231) !important;
         }
 
-        .light [class*="slider"] [class*="bg-primary"] {
+        .light [class*="slider"] [class*="bg-primary"],
+        .light .bg-primary {
           background-color: black !important;
         }
 
-        .light [class*="slider"] [class*="border-primary"] {
+        .light [class*="slider"] [class*="border-primary"],
+        .light .border-primary {
           border-color: black !important;
         }
 
-        .light [class*="slider"] [class*="bg-background"] {
+        .light [class*="slider"] [class*="bg-background"],
+        .light .bg-background {
           background-color: white !important;
           border-color: black !important;
+        }
+
+        /* Ensure slider track has proper contrast */
+        .light [class*="relative h-2"] {
+          background-color: rgb(228 228 231) !important;
         }
 
         /* Card borders and outlines */
