@@ -79,11 +79,10 @@ export default function ClipperDashboard() {
     }
 
     if (status === "authenticated" && session && session.user) {
-      console.log('✅ User authenticated, fetching dashboard data')
-      // Add a small delay to prevent race conditions
-      setTimeout(() => {
-        fetchDashboardData()
-      }, 200) // Increased delay for more stability
+      console.log('✅ User authenticated, redirecting to campaigns')
+      // Redirect to campaigns page since that's the main functionality
+      router.replace("/clippers/dashboard/campaigns")
+      return
     }
   }, [session, status, router])
 
