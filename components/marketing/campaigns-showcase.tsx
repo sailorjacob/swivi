@@ -152,17 +152,6 @@ const industryStats = [
   }
 ]
 
-const industries = [
-  "Entertainment",
-  "Twitch Streamers",
-  "Music Collaborations",
-  "Content Creators",
-  "Musicians",
-  "Entrepreneurs",
-  "Tech Startups",
-  "E-commerce Brands",
-  "Athletes"
-]
 
 interface CampaignsShowcaseProps {
   showHeader?: boolean;
@@ -388,37 +377,39 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
         </div>
       </motion.section>
 
-      {/* Industries Section */}
+      {/* CTA Section */}
       <motion.section
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="mb-12 sm:mb-16 lg:mb-20"
+        className="py-20 md:py-32 border-t border-neutral-800/30"
       >
-        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4 sm:mb-6 text-white">
-            Industries We Serve
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-6 text-white">
+            Ready to Scale Your Brand?
           </h2>
-          <p className="text-neutral-300 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed px-4 sm:px-0">
-            From entertainment to tech, we help brands and creators across all industries
-            achieve viral success through our clipper network.
+          <p className="text-neutral-300 mb-8">
+            Book a call with our team to discuss how we can help you create
+            viral content that drives real results.
+          </p>
+
+          <a
+            href="https://calendly.com/bykevingeorge/30min?month=2025-05"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center text-sm font-normal bg-white text-black px-8 py-4 rounded-full hover:bg-neutral-200 transition-all duration-300 group"
+          >
+            Schedule a Call
+            <svg className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+
+          <p className="mt-8 text-xs text-neutral-400">
+            Free consultation • No commitment required • Start scaling today
           </p>
         </div>
-
-        <motion.div
-          variants={itemVariants}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto px-4 sm:px-0"
-        >
-          {industries.map((industry, index) => (
-            <div
-              key={index}
-              className="p-3 sm:p-4 bg-neutral-900/30 rounded-lg border border-neutral-800/30 text-center hover:bg-neutral-800/40 transition-colors"
-            >
-              <span className="text-neutral-300 font-medium text-sm sm:text-base">{industry}</span>
-            </div>
-          ))}
-        </motion.div>
       </motion.section>
 
     </div>
