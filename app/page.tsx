@@ -254,6 +254,100 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
         .light .border-border\\/50 {
           border-color: rgb(228 228 231) !important;
         }
+
+        /* Button text colors for light theme */
+        .light .bg-foreground {
+          color: white !important;
+        }
+
+        .light .hover\\:bg-foreground\\/90:hover {
+          color: white !important;
+        }
+
+        /* Header logo inversion for light theme */
+        .light header img[alt*="Swivi"],
+        .light header img[alt*="Logo"] {
+          filter: invert(1) !important;
+        }
+
+        /* Statistics cards text consistency */
+        .light .text-muted-foreground {
+          color: rgb(113 113 122) !important;
+        }
+
+        .light .font-light {
+          color: black !important;
+        }
+
+        /* Modal/popup specific text */
+        .light [class*="backdrop-blur"] .text-foreground {
+          color: black !important;
+        }
+
+        .light [class*="backdrop-blur"] .text-muted-foreground {
+          color: rgb(113 113 122) !important;
+        }
+
+        /* Calculator results consistency */
+        .light .text-2xl,
+        .light .text-3xl {
+          color: black !important;
+        }
+
+        .light .text-xs {
+          color: rgb(113 113 122) !important;
+        }
+
+        /* Ensure all headings in light theme are black */
+        .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
+          color: black !important;
+        }
+
+        /* Button text in calculator */
+        .light button[class*="bg-foreground"],
+        .light .bg-foreground {
+          color: white !important;
+        }
+
+        /* Specific calculator button */
+        .light .hover\\:bg-foreground\\/90 {
+          color: white !important;
+        }
+
+        /* Statistics cards - ensure consistent text colors */
+        .light .text-muted-foreground {
+          color: rgb(113 113 122) !important;
+        }
+
+        /* Large statistics numbers */
+        .light .text-2xl,
+        .light .text-3xl,
+        .light .text-4xl {
+          color: black !important;
+        }
+
+        /* Small statistics labels */
+        .light .text-sm {
+          color: rgb(113 113 122) !important;
+        }
+
+        /* Modal text consistency */
+        .light [class*="fixed"] .text-foreground {
+          color: black !important;
+        }
+
+        .light [class*="fixed"] .text-muted-foreground {
+          color: rgb(113 113 122) !important;
+        }
+
+        /* Calculator card text */
+        .light .border-primary {
+          border-color: black !important;
+        }
+
+        .light .text-primary {
+          color: black !important;
+        }
       `
       document.head.appendChild(style)
     }
