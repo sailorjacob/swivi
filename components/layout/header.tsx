@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { Menu, X, ChevronDown } from "lucide-react"
 
@@ -21,7 +21,28 @@ const navigation = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isLightTheme, setIsLightTheme] = useState(false)
   const { data: session, status } = useSession()
+
+  useEffect(() => {
+    // Check current theme
+    const checkTheme = () => {
+      const isLight = !document.documentElement.classList.contains('dark') ||
+                     document.documentElement.getAttribute('data-theme') === 'light'
+      setIsLightTheme(isLight)
+    }
+
+    checkTheme()
+
+    // Listen for theme changes
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme']
+    })
+
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <header className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-sm border-b border-black/5">
@@ -29,7 +50,10 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center">
           <Image
-            src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
+            src={isLightTheme
+              ? "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/invertedlogo.png"
+              : "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
+            }
             alt="Swivi"
             width={300}
             height={100}

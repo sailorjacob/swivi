@@ -235,9 +235,9 @@ export function CampaignsShowcase() {
       >
         <motion.h1
           variants={itemVariants}
-          className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-white"
+          className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-foreground"
         >
-          Proven <span className="font-normal text-white">Campaign Results</span>
+          Proven <span className="font-normal text-foreground">Campaign Results</span>
         </motion.h1>
         <motion.p
           variants={itemVariants}
@@ -258,7 +258,7 @@ export function CampaignsShowcase() {
         className="mb-20"
       >
         <div className="mb-16">
-          <h2 className="text-3xl md:text-4xl font-light mb-6 text-center text-white">
+          <h2 className="text-3xl md:text-4xl font-light mb-6 text-center text-foreground">
             Featured Campaign Results
           </h2>
           <p className="text-neutral-300 text-center max-w-3xl mx-auto text-lg leading-relaxed">
@@ -290,7 +290,7 @@ export function CampaignsShowcase() {
                         )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-4 mb-3">
-                        <CardTitle className="text-3xl font-light text-white">
+                        <CardTitle className="text-3xl font-light text-foreground">
                           {campaign.clientName}
                         </CardTitle>
                         <span className="text-4xl opacity-60">{getCampaignIcon(campaign)}</span>
@@ -306,7 +306,7 @@ export function CampaignsShowcase() {
                   {/* Key Metrics - Large and Prominent */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div className="text-center p-8 bg-neutral-800/30 rounded-xl border border-neutral-700/30">
-                      <div className="text-4xl md:text-5xl font-light text-white mb-3">
+                      <div className="text-4xl md:text-5xl font-light text-foreground mb-3">
                         {formatNumber(campaign.viewsGenerated)}
                       </div>
                       <div className="text-sm font-medium text-neutral-400 uppercase tracking-wider">
@@ -314,7 +314,7 @@ export function CampaignsShowcase() {
                       </div>
                     </div>
                     <div className="text-center p-8 bg-neutral-800/30 rounded-xl border border-neutral-700/30">
-                      <div className="text-4xl md:text-5xl font-light text-white mb-3">
+                      <div className="text-4xl md:text-5xl font-light text-foreground mb-3">
                         {Math.round((campaign.clipsPaid / campaign.clipsDistributed) * 100)}%
                       </div>
                       <div className="text-sm font-medium text-neutral-400 uppercase tracking-wider">
@@ -332,11 +332,11 @@ export function CampaignsShowcase() {
                       <div className="space-y-4">
                         <div className="flex justify-between items-center py-3 border-b border-neutral-700/30">
                           <span className="text-neutral-400">Budget:</span>
-                          <span className="font-medium text-white">${campaign.budget.toLocaleString()}</span>
+                          <span className="font-medium text-foreground">${campaign.budget.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between items-center py-3 border-b border-neutral-700/30">
                           <span className="text-neutral-400">Timeline:</span>
-                          <span className="font-medium text-white">{campaign.timeline}</span>
+                          <span className="font-medium text-foreground">{campaign.timeline}</span>
                         </div>
                         <div className="flex justify-between items-center py-3">
                           <span className="text-neutral-400">Success Rate:</span>
@@ -367,7 +367,7 @@ export function CampaignsShowcase() {
                       href={campaign.exampleContent}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm font-medium text-neutral-300 hover:text-white transition-colors"
+                      className="inline-flex items-center gap-2 text-sm font-medium text-neutral-300 hover:text-foreground transition-colors"
                     >
                       <Play className="h-4 w-4" />
                       View Example Content
