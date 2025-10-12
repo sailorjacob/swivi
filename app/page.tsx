@@ -16,7 +16,7 @@ import { LightThemeWrapper } from "./layout-wrapper"
 
 export default function HomePage() {
   return (
-    <DarkThemeWrapper>
+    <LightThemeWrapper>
       <Header />
       <main className="flex min-h-screen flex-col pt-16">
         <Hero />
