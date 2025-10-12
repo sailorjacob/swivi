@@ -271,12 +271,21 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           border-color: rgb(228 228 231) !important;
         }
 
-        /* Button text styling - keep original button styling but ensure readability */
+        /* Button text styling for light theme */
         .light .bg-foreground {
           color: rgb(255, 255, 255) !important;
         }
 
         .light button[class*="bg-foreground"] {
+          color: rgb(255, 255, 255) !important;
+        }
+
+        /* Ensure button text is white when background is filled on hover */
+        .light button[class*="bg-foreground"]:hover {
+          color: rgb(255, 255, 255) !important;
+        }
+
+        .light .hover\\:bg-foreground:hover {
           color: rgb(255, 255, 255) !important;
         }
 
