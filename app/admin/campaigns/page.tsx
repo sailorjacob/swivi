@@ -1241,7 +1241,7 @@ function CampaignView({
         </div>
         <div>
           <Label className="text-sm font-medium text-muted-foreground">Payout Rate</Label>
-          <p className="text-lg font-medium">${campaign.payoutRate}/1K views</p>
+          <p className="text-lg font-medium">{typeof campaign.payoutRate === 'number' ? `$${campaign.payoutRate}` : campaign.payoutRate}/1K views</p>
         </div>
       </div>
 

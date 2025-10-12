@@ -99,7 +99,7 @@ export function LiveCampaigns() {
       viewsGenerated: 0, // This would come from aggregated view tracking
       duration: `${Math.max(1, daysUntilDeadline)} days`,
       timeRemaining: daysUntilDeadline > 0 ? `${daysUntilDeadline} days` : "Ended",
-      payoutStructure: `$${campaign.payoutRate} per 1K views`,
+      payoutStructure: `${typeof campaign.payoutRate === 'number' ? '$' : ''}${campaign.payoutRate} per 1K views`,
       participants: campaign._count.clipSubmissions,
       maxParticipants: Math.floor(campaign.budget / campaign.payoutRate),
       featured: campaign.status === "ACTIVE",

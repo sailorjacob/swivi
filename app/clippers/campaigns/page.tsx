@@ -195,7 +195,7 @@ function CampaignsPage() {
                       <TrendingUp className="w-4 h-4 text-green-500" />
                       <span className="text-sm text-muted-foreground">Rate per 1000 Views</span>
                       <span className="text-lg font-bold text-green-500 ml-auto">
-                        ${campaign.payoutRate} per 1K views
+{typeof campaign.payoutRate === 'number' ? `$${campaign.payoutRate}` : campaign.payoutRate} per 1K views
                       </span>
                     </div>
 
