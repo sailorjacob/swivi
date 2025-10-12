@@ -165,7 +165,11 @@ const industries = [
   "Athletes"
 ]
 
-export function CampaignsShowcase() {
+interface CampaignsShowcaseProps {
+  showHeader?: boolean;
+}
+
+export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -227,7 +231,8 @@ export function CampaignsShowcase() {
 
   return (
     <div className="w-full">
-      {/* Header */}
+      {/* Header - conditionally shown */}
+      {showHeader && (
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -236,18 +241,19 @@ export function CampaignsShowcase() {
       >
         <motion.h1
           variants={itemVariants}
-          className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-foreground"
+            className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-foreground"
         >
-          Proven <span className="font-normal text-foreground">Campaign Results</span>
+            Proven <span className="font-normal text-foreground">Campaign Results</span>
         </motion.h1>
         <motion.p
           variants={itemVariants}
           className="text-xl text-neutral-300 max-w-4xl mx-auto mb-12 leading-relaxed"
         >
           We work with creators across all niches, from entrepreneurs and content creators
-          to musicians, TV series, and athletes. Here are some of our most successful campaigns.
+            to musicians, TV series, and athletes. Here are some of our most successful campaigns.
         </motion.p>
       </motion.div>
+      )}
 
 
       {/* Campaign Results */}
