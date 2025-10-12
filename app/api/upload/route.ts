@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from '@supabase/supabase-js'
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 
 // Server-side Supabase client for storage
 const supabase = createClient(
@@ -22,14 +23,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Supabase service key not configured" }, { status: 500 })
     }
 
-    // Simplified auth check for upload API
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.error("❌ No valid authorization header")
+    // Use proper authentication check
+    const { user, error } = await getServerUserWithRole(request)
+
+    if (!user?.id || error) {
+      console.error("❌ Upload authentication failed:", error?.message)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    console.log("✅ Authorization header present")
+    console.log("✅ Upload authenticated for user:", user.id)
 
     const formData = await request.formData()
     const file = formData.get('file') as File

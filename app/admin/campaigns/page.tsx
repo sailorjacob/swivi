@@ -162,25 +162,14 @@ export default function AdminCampaignsPage() {
           formDataUpload.append('file', uploadedFile)
           formDataUpload.append('bucket', 'images')
 
-          // Get the current session for authorization
-          const { data: { session } } = await supabase.auth.getSession()
-
-          const uploadHeaders: Record<string, string> = {}
-
-          if (session?.access_token) {
-            uploadHeaders['Authorization'] = `Bearer ${session.access_token}`
-          }
-
           console.log('🚀 Starting image upload...', {
             fileName: uploadedFile.name,
             fileSize: uploadedFile.size,
-            fileType: uploadedFile.type,
-            hasAuth: !!session?.access_token
+            fileType: uploadedFile.type
           })
 
           const uploadResponse = await fetch("/api/upload", {
             method: "POST",
-            headers: uploadHeaders,
             body: formDataUpload
           })
 
@@ -356,25 +345,14 @@ export default function AdminCampaignsPage() {
           formDataUpload.append('file', uploadedFile)
           formDataUpload.append('bucket', 'images')
 
-          // Get the current session for authorization
-          const { data: { session } } = await supabase.auth.getSession()
-
-          const uploadHeaders: Record<string, string> = {}
-
-          if (session?.access_token) {
-            uploadHeaders['Authorization'] = `Bearer ${session.access_token}`
-          }
-
           console.log('🚀 Starting image upload for update...', {
             fileName: uploadedFile.name,
             fileSize: uploadedFile.size,
-            fileType: uploadedFile.type,
-            hasAuth: !!session?.access_token
+            fileType: uploadedFile.type
           })
 
           const uploadResponse = await fetch("/api/upload", {
             method: "POST",
-            headers: uploadHeaders,
             body: formDataUpload
           })
 
