@@ -29,6 +29,30 @@ interface CampaignResult {
 
 const campaignResults: CampaignResult[] = [
   {
+    id: "caleb-simpson-ed-sheeran",
+    clientName: "Caleb Simpson x Ed Sheeran",
+    clientType: "Music Collaboration",
+    description: "Pizza review content featuring Ed Sheeran collaboration targeting food and music enthusiasts",
+    budget: 800,
+    budgetStructure: "$1 per 1,000 views",
+    goal: "800,000 views",
+    timeline: "3 days",
+    clipsDistributed: 45,
+    clipsPaid: 38,
+    viewsGenerated: 2100000,
+    roi: 262,
+    exampleContent: "https://www.instagram.com/reel/example-caleb-sheeran/",
+    contentPlatform: "instagram",
+    status: "completed",
+    highlights: [
+      "2.1M views generated",
+      "Ed Sheeran collaboration",
+      "3-day timeline",
+      "84% clip success rate"
+    ],
+    clientLogo: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/Caleb%20Simpson%20x%20Ed%20Sheeran%20Pizza%20Review.jpg"
+  },
+  {
     id: "owning-manhattan",
     clientName: "Owning Manhattan",
     clientType: "Netflix TV Series",
@@ -156,7 +180,7 @@ const industryStats = [
 const industries = [
   "Netflix TV Series",
   "Twitch Streamers",
-  "Gambling Companies",
+  "Music Collaborations",
   "Content Creators",
   "Musicians",
   "Entrepreneurs",
