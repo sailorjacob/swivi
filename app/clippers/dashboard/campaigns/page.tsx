@@ -96,7 +96,7 @@ export default function CampaignsPage() {
       title: campaign.title,
       creator: campaign.creator,
       description: campaign.description,
-      image: campaign.featuredImage || "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&q=80",
+      image: campaign.featuredImage || null,
       pool: Number(campaign.budget),
       spent: Number(campaign.spent || 0),
       cpm: Number(campaign.payoutRate), // Payout rate per 1K views

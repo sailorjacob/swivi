@@ -171,25 +171,38 @@ export default function AdminCampaignsPage() {
             uploadHeaders['Authorization'] = `Bearer ${session.access_token}`
           }
 
+          console.log('🚀 Starting image upload...', {
+            fileName: uploadedFile.name,
+            fileSize: uploadedFile.size,
+            fileType: uploadedFile.type,
+            hasAuth: !!session?.access_token
+          })
+
           const uploadResponse = await fetch("/api/upload", {
             method: "POST",
             headers: uploadHeaders,
             body: formDataUpload
           })
 
+          console.log('📊 Upload response status:', uploadResponse.status)
+
           if (uploadResponse.ok) {
             const uploadResult = await uploadResponse.json()
             imageUrl = uploadResult.url
             console.log('✅ Image uploaded successfully:', uploadResult.url)
           } else {
-            console.error('❌ Image upload failed:', uploadResponse.status)
-            toast.error("Image upload failed, but campaign will be created without image")
-            imageUrl = null // Continue without image
+            const errorText = await uploadResponse.text()
+            console.error('❌ Image upload failed:', uploadResponse.status, errorText)
+            toast.error(`Image upload failed (${uploadResponse.status}): ${errorText}`)
+            // Don't continue with campaign creation if image upload fails
+            setIsSubmitting(false)
+            return
           }
         } catch (error) {
           console.error('❌ Image upload error:', error)
-          toast.error("Image upload failed, but campaign will be created without image")
-          imageUrl = null // Continue without image
+          toast.error("Image upload failed. Please try again.")
+          setIsSubmitting(false)
+          return
         }
       }
 
@@ -352,25 +365,38 @@ export default function AdminCampaignsPage() {
             uploadHeaders['Authorization'] = `Bearer ${session.access_token}`
           }
 
+          console.log('🚀 Starting image upload for update...', {
+            fileName: uploadedFile.name,
+            fileSize: uploadedFile.size,
+            fileType: uploadedFile.type,
+            hasAuth: !!session?.access_token
+          })
+
           const uploadResponse = await fetch("/api/upload", {
             method: "POST",
             headers: uploadHeaders,
             body: formDataUpload
           })
 
+          console.log('📊 Upload response status:', uploadResponse.status)
+
           if (uploadResponse.ok) {
             const uploadResult = await uploadResponse.json()
             imageUrl = uploadResult.url
             console.log('✅ Image uploaded successfully:', imageUrl)
           } else {
-            console.error('❌ Image upload failed:', uploadResponse.status)
-            toast.error("Image upload failed, but campaign will be created without image")
-            imageUrl = null // Continue without image
+            const errorText = await uploadResponse.text()
+            console.error('❌ Image upload failed:', uploadResponse.status, errorText)
+            toast.error(`Image upload failed (${uploadResponse.status}): ${errorText}`)
+            // Don't continue with campaign update if image upload fails
+            setIsUpdating(false)
+            return
           }
         } catch (error) {
           console.error('❌ Image upload error:', error)
-          toast.error("Image upload failed, but campaign will be created without image")
-          imageUrl = null // Continue without image
+          toast.error("Image upload failed. Please try again.")
+          setIsUpdating(false)
+          return
         }
       }
 
