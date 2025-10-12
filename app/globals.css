@@ -97,17 +97,18 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-400/30 rounded-full;
+  background-color: rgba(156, 163, 175, 0.3) !important;
+  border-radius: 9999px !important;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500/40;
+  background-color: rgba(107, 114, 128, 0.4) !important;
 }
 
 /* Firefox scrollbar */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: rgb(156 163 175 / 0.3) transparent;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(156, 163, 175, 0.3) transparent !important;
 }
 
 /* Loading animation */
