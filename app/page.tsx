@@ -127,6 +127,22 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           background: linear-gradient(to bottom, white, rgb(244 244 245)) !important;
         }
 
+        /* Fix any animated background elements that might appear yellow */
+        .light .bg-foreground\\/10 {
+          background-color: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .light [class*="bg-foreground\\/"] {
+          background-color: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* Ensure no yellow backgrounds */
+        .light [style*="yellow"],
+        .light [class*="yellow"] {
+          background-color: transparent !important;
+          color: inherit !important;
+        }
+
         /* Card and container overrides */
         .light .bg-neutral-900\\/20 {
           background-color: rgba(255, 255, 255, 0.2) !important;
@@ -255,50 +271,12 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           border-color: rgb(228 228 231) !important;
         }
 
-        /* Button styling for light theme */
+        /* Button text styling - keep original button styling but ensure readability */
         .light .bg-foreground {
-          background-color: rgb(0, 0, 0) !important;
-          color: rgb(255, 255, 255) !important;
-          text-shadow: none !important;
-        }
-
-        .light .hover\\:bg-foreground\\/90:hover {
-          background-color: rgba(0, 0, 0, 0.9) !important;
           color: rgb(255, 255, 255) !important;
         }
 
         .light button[class*="bg-foreground"] {
-          background-color: rgb(0, 0, 0) !important;
-          color: rgb(255, 255, 255) !important;
-          text-shadow: none !important;
-        }
-
-        /* Ensure all dark buttons have white text */
-        .light button[class*="bg-foreground"]:not(:hover) {
-          background-color: rgb(0, 0, 0) !important;
-          color: rgb(255, 255, 255) !important;
-          opacity: 1 !important;
-        }
-
-        /* Button hover states */
-        .light button[class*="bg-foreground"]:hover {
-          background-color: rgba(0, 0, 0, 0.9) !important;
-          color: rgb(255, 255, 255) !important;
-        }
-
-        /* Additional button styling for all dark buttons */
-        .light .bg-black {
-          background-color: rgb(0, 0, 0) !important;
-          color: rgb(255, 255, 255) !important;
-        }
-
-        .light .bg-gray-900 {
-          background-color: rgb(17, 24, 39) !important;
-          color: rgb(255, 255, 255) !important;
-        }
-
-        /* Ensure all button variants have proper contrast */
-        .light button[class*="bg-"][class*="text-"]:not([class*="text-background"]) {
           color: rgb(255, 255, 255) !important;
         }
 
