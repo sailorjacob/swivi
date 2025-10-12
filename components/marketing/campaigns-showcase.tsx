@@ -263,15 +263,6 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
         viewport={{ once: true }}
         className="mb-20"
       >
-        <div className="mb-16">
-          <h2 className="text-3xl md:text-4xl font-light mb-6 text-center text-foreground">
-            Featured Campaign Results
-          </h2>
-          <p className="text-neutral-300 text-center max-w-3xl mx-auto text-lg leading-relaxed">
-            Featured campaigns
-          </p>
-        </div>
-
         <div className="space-y-8">
           {campaignResults.map((campaign, index) => (
             <motion.div

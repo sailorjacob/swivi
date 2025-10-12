@@ -15,7 +15,7 @@ export default function CaseStudiesPage() {
       <main className="flex min-h-screen flex-col pt-16">
         <section className="py-20 md:py-32">
           <div className="max-width-wrapper section-padding">
-            <CampaignsShowcase showHeader={false} />
+            <CampaignsShowcase showHeader={true} />
           </div>
         </section>
       </main>
