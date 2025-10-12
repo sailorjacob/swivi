@@ -14,15 +14,17 @@ interface CalculatorValues {
   platforms: number
   daysPerWeek: number
   viewsPerPost: number
+  budget: number
 }
 
 export function CreatorViewsCalculator() {
   const [values, setValues] = useState<CalculatorValues>({
-    numberOfClippers: 75,
+    numberOfClippers: 20,
     postsPerDay: 2,
     platforms: 3,
     daysPerWeek: 5,
-    viewsPerPost: 12000
+    viewsPerPost: 12000,
+    budget: 500
   })
 
   const [monthlyViews, setMonthlyViews] = useState(0)
@@ -32,16 +34,20 @@ export function CreatorViewsCalculator() {
 
   // Calculate views and savings whenever values change
   useEffect(() => {
+    // Calculate number of clippers based on budget (assuming $25 per clipper)
+    const costPerClipper = 25
+    const calculatedClippers = Math.floor(values.budget / costPerClipper)
+
     // Calculate total posts per week
-    const postsPerWeek = values.numberOfClippers * values.postsPerDay * values.platforms * values.daysPerWeek
-    
+    const postsPerWeek = calculatedClippers * values.postsPerDay * values.platforms * values.daysPerWeek
+
     // Calculate monthly views (assuming 4.33 weeks per month)
     const monthlyPosts = postsPerWeek * 4.33
     const totalMonthlyViews = monthlyPosts * values.viewsPerPost
-    
+
     // Calculate annual views
     const annualViews = totalMonthlyViews * 12
-    
+
     // Calculate savings vs traditional paid ads
     // Assuming $5 CPM (cost per thousand views) for traditional ads vs $1 CPM for clipper marketing
     const traditionalCPM = 5
@@ -49,7 +55,7 @@ export function CreatorViewsCalculator() {
     const annualAdCost = (annualViews / 1000) * traditionalCPM
     const clipperCost = (annualViews / 1000) * clipperCPM
     const savings = annualAdCost - clipperCost
-    
+
     setMonthlyViews(Math.round(totalMonthlyViews))
     setAnnualSavings(Math.round(savings))
   }, [values])
@@ -103,20 +109,19 @@ export function CreatorViewsCalculator() {
               <CardTitle className="text-xl font-normal">Adjust Your Campaign Parameters</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
-              {/* Number of Clippers */}
+              {/* Number of Clippers (calculated from budget) */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-medium">Number of Clippers</label>
-                  <span className="text-2xl font-light transition-all duration-200 ease-out">{values.numberOfClippers}</span>
+                  <label className="text-sm font-medium">Clipper Army Size</label>
+                  <span className="text-2xl font-light transition-all duration-200 ease-out">
+                    {Math.floor(values.budget / 25)}
+                  </span>
                 </div>
-                <Slider
-                  value={[values.numberOfClippers]}
-                  onValueChange={(value: number[]) => handleSliderChange('numberOfClippers', value)}
-                  min={1}
-                  max={100}
-                  step={1}
-                  className="w-full"
-                />
+                <div className="p-3 bg-muted/30 rounded-lg border">
+                  <p className="text-xs text-muted-foreground">
+                    Based on your ${formatCurrency(values.budget)} budget at $25 per clipper
+                  </p>
+                </div>
               </div>
 
               {/* Posts per Day */}
@@ -165,6 +170,25 @@ export function CreatorViewsCalculator() {
                   step={1}
                   className="w-full"
                 />
+              </div>
+
+              {/* Budget */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-sm font-medium">Campaign Budget</label>
+                  <span className="text-2xl font-light transition-all duration-200 ease-out">{formatCurrency(values.budget)}</span>
+                </div>
+                <Slider
+                  value={[values.budget]}
+                  onValueChange={(value: number[]) => handleSliderChange('budget', value)}
+                  min={500}
+                  max={10000}
+                  step={100}
+                  className="w-full"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {Math.floor(values.budget / 25)} clippers available at ${formatCurrency(values.budget)}
+                </p>
               </div>
 
               {/* Views per Post */}
@@ -242,7 +266,7 @@ export function CreatorViewsCalculator() {
                   <Video className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <p className="text-2xl font-light">
-                  {formatNumber(values.numberOfClippers * values.postsPerDay * values.platforms * values.daysPerWeek)}
+                  {formatNumber(Math.floor(values.budget / 25) * values.postsPerDay * values.platforms * values.daysPerWeek)}
                 </p>
               </CardContent>
             </Card>
@@ -289,12 +313,30 @@ export function CreatorViewsCalculator() {
           <Card>
             <CardHeader>
               <CardTitle className="text-xl font-normal flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Why Clipper Marketing Wins
+                <Users className="h-5 w-5" />
+                Army of Clippers + $500 Budget = Massive Reach
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                  <h4 className="font-medium mb-2 text-primary">Your {formatCurrency(values.budget)} Budget Unlocks:</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div>
+                      <p className="text-2xl font-bold text-primary">{Math.floor(values.budget / 25)}</p>
+                      <p className="text-xs text-muted-foreground">Clippers in your army</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-primary">{formatNumber(Math.floor(monthlyViews / 1000))}</p>
+                      <p className="text-xs text-muted-foreground">Monthly views (thousands)</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-primary">$1</p>
+                      <p className="text-xs text-muted-foreground">CPM vs $5 traditional</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h4 className="font-medium mb-2">Traditional Paid Ads</h4>
@@ -316,7 +358,7 @@ export function CreatorViewsCalculator() {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground pt-2 border-t">
-                  Based on {formatNumber(monthlyViews)} monthly views, you're saving {formatCurrency(annualSavings)} annually compared to traditional advertising.
+                  With a {formatCurrency(values.budget)} budget, you get {Math.floor(values.budget / 25)} clippers creating authentic content at just $1 CPM—saving {formatCurrency(annualSavings)} annually compared to traditional advertising.
                 </p>
               </div>
             </CardContent>
@@ -357,7 +399,7 @@ export function CreatorViewsCalculator() {
 
               <div className="space-y-6">
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Our clipper network delivers authentic reach at just $1 CPM—saving you up to 80% compared to traditional paid ads at $5 CPM.
+                  With your {formatCurrency(values.budget)} budget, you unlock {Math.floor(values.budget / 25)} clippers delivering authentic reach at just $1 CPM—saving you up to 80% compared to traditional paid ads at $5 CPM.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -528,7 +570,7 @@ export function CreatorViewsCalculator() {
                         </div>
 
                         <div className="text-xs text-muted-foreground text-center pt-4 border-t border-border/30 mt-4">
-                          Based on {formatNumber(monthlyViews)} monthly views, our clipper network saves you {formatCurrency(annualSavings)} annually compared to traditional advertising while delivering 3x higher engagement rates.
+                          With your {formatCurrency(values.budget)} budget and {Math.floor(values.budget / 25)} clippers, you get {formatNumber(monthlyViews)} monthly views at just $1 CPM—saving {formatCurrency(annualSavings)} annually compared to traditional advertising.
                         </div>
                       </div>
                     </motion.div>
