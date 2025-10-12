@@ -136,11 +136,33 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           background-color: rgba(0, 0, 0, 0.1) !important;
         }
 
-        /* Ensure no yellow backgrounds */
+        /* Ensure no yellow backgrounds or overflow colors */
         .light [style*="yellow"],
         .light [class*="yellow"] {
           background-color: transparent !important;
           color: inherit !important;
+        }
+
+        /* Fix any scrollbar or overflow backgrounds */
+        .light ::-webkit-scrollbar-track {
+          background-color: transparent !important;
+        }
+
+        .light ::-webkit-scrollbar-thumb {
+          background-color: rgba(156, 163, 175, 0.3) !important;
+        }
+
+        .light ::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(107, 114, 128, 0.4) !important;
+        }
+
+        /* Ensure page overflow areas are white */
+        .light body {
+          background-color: white !important;
+        }
+
+        .light html {
+          background-color: white !important;
         }
 
         /* Card and container overrides */
