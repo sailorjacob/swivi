@@ -3,7 +3,6 @@ import { Header } from "@/components/layout/header"
 export const dynamic = 'force-dynamic'
 import { Footer } from "@/components/layout/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Mail, MessageCircle, HelpCircle, Clock, CheckCircle, AlertCircle } from "lucide-react"
 
 export default function SupportPage() {
@@ -13,15 +12,9 @@ export default function SupportPage() {
       <main className="flex min-h-screen flex-col pt-16">
         <div className="max-width-wrapper section-padding py-20">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-5xl font-light mb-6">Support Center</h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Get help with your Swivi experience. Our team is here to support you every step of the way.
-              </p>
-            </div>
 
             {/* Contact Methods */}
-            <div className="grid md:grid-cols-2 gap-8 mb-16">
+            <div className="mb-16">
               <Card className="bg-neutral-900/40 border-neutral-800/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -41,163 +34,169 @@ export default function SupportPage() {
                   </a>
                 </CardContent>
               </Card>
-
-              <Card className="bg-neutral-900/40 border-neutral-800/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageCircle className="h-5 w-5" />
-                    Discord Community
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Join our Discord community for real-time help and discussions.
-                  </p>
-                  <a
-                    href="https://discord.gg/swivi"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 transition-colors font-medium"
-                  >
-                    Join Discord Community
-                  </a>
-                </CardContent>
-              </Card>
             </div>
 
-            {/* FAQ Section */}
+            {/* Clippers FAQ Section */}
             <section className="mb-16">
-              <h2 className="text-3xl font-light mb-8 text-center">Frequently Asked Questions</h2>
+              <h2 className="text-3xl font-light mb-8">For Clippers</h2>
+              <p className="text-muted-foreground mb-8">
+                Everything you need to know about participating in campaigns and earning money as a content creator.
+              </p>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <Card className="bg-neutral-900/40 border-neutral-800/50">
                   <CardHeader>
-                    <CardTitle className="text-lg">How do I join a campaign?</CardTitle>
+                    <CardTitle className="text-lg">How do I join Swivi Clippers?</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Browse available campaigns on your dashboard and click "Join Campaign" on any that interest you.
-                      Make sure your profile is complete and you've connected your social media accounts.
+                      Apply through our platform. Get instant access to creator content and our clipper dashboard. There's no minimum follower count needed - we welcome all clippers, whether you're brand new or experienced.
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card className="bg-neutral-900/40 border-neutral-800/50">
                   <CardHeader>
-                    <CardTitle className="text-lg">When do I get paid for approved clips?</CardTitle>
+                    <CardTitle className="text-lg">Is there a minimum follower requirement to join campaigns?</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Payments are processed within 24-48 hours after your clip is approved by the campaign manager.
-                      You'll receive an email notification when payment is sent to your connected payment method.
+                      No, there's no minimum follower count needed. We want to give all clippers—whether you're brand new or experienced, the chance to earn money.
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card className="bg-neutral-900/40 border-neutral-800/50">
                   <CardHeader>
-                    <CardTitle className="text-lg">What are the content requirements?</CardTitle>
+                    <CardTitle className="text-lg">What platforms can I clip on?</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Each campaign has specific requirements listed in the campaign details. Generally, clips should be
-                      high-quality, follow the campaign theme, and meet the specified length and format requirements.
+                      Currently, we support clips posted on TikTok, YouTube Shorts, Instagram Reels, and X (formerly Twitter). We might add Snapchat, Facebook, and Threads later, depending on campaign needs.
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card className="bg-neutral-900/40 border-neutral-800/50">
                   <CardHeader>
-                    <CardTitle className="text-lg">How do I track my earnings?</CardTitle>
+                    <CardTitle className="text-lg">How do I know if a campaign is still active?</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Your earnings dashboard shows your total earnings, pending payments, and payment history.
-                      Each campaign also displays your individual performance metrics.
+                      If you see the campaign listed under the "Active Campaigns" category, it's active, and you can participate.
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card className="bg-neutral-900/40 border-neutral-800/50">
                   <CardHeader>
-                    <CardTitle className="text-lg">What if my clip gets rejected?</CardTitle>
+                    <CardTitle className="text-lg">How much can I get paid?</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      If a clip is rejected, you'll receive feedback explaining why. You can then revise and resubmit
-                      your content. Campaign managers provide constructive feedback to help improve your submissions.
+                      Each campaign has different payouts. To see exactly how much you can get paid for a specific campaign, check the payouts in the campaign details.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-neutral-900/40 border-neutral-800/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">When do I get paid?</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      Payments are sent within one week after the campaign finishes, often quicker. Throughout the campaign, we regularly review and approve clips. Once the campaign budget is fully spent, we finalize who gets paid and how much. You will receive an email notification once the payment has been sent.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-neutral-900/40 border-neutral-800/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">What is the engagement rate requirement?</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      All clips must have a minimum of 0.5% engagement rate to qualify for campaigns. Any video with less than 0.5% engagement rate will not be eligible for payout. We lowered the requirement from 1% to 0.5% so more clips can qualify, while still keeping a fair standard for quality and performance.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-neutral-900/40 border-neutral-800/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">How are my clip views tracked?</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      After posting clips, submit them through the campaign dashboard. Here, you can either click "scan account" to automatically fetch your recent clips, or manually submit the links by clicking "submit clips." Make sure you submit clips regularly because we close campaigns when the budget is almost reached to avoid overspending.
                     </p>
                   </CardContent>
                 </Card>
               </div>
             </section>
 
-            {/* Common Issues */}
+            {/* For Potential Clients Section */}
             <section className="mb-16">
-              <h2 className="text-3xl font-light mb-8 text-center">Common Issues & Solutions</h2>
+              <h2 className="text-3xl font-light mb-8">For Potential Clients</h2>
+              <p className="text-muted-foreground mb-8">
+                Information for brands and businesses interested in running campaigns with Swivi.
+              </p>
 
-              <div className="grid gap-6">
-                <div className="flex gap-4 p-6 bg-neutral-900/40 border border-neutral-800/50 rounded-lg">
-                  <AlertCircle className="h-6 w-6 text-orange-400 flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold mb-2">Login Issues</h3>
-                    <p className="text-muted-foreground text-sm">
-                      If you're having trouble logging in, try clearing your browser cache and cookies, or use a different browser.
-                      Make sure you're using the correct Discord or Google account.
+              <div className="space-y-4">
+                <Card className="bg-neutral-900/40 border-neutral-800/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">How does Swivi work for brands?</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      Swivi connects your brand with thousands of content creators who create authentic, viral content for your campaigns. Our network of clippers amplifies your message across TikTok, Instagram, YouTube, and other platforms.
                     </p>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
 
-                <div className="flex gap-4 p-6 bg-neutral-900/40 border border-neutral-800/50 rounded-lg">
-                  <Clock className="h-6 w-6 text-blue-400 flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold mb-2">Payment Delays</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Payments typically process within 24-48 hours after approval. If it's been longer, please contact support
-                      with your campaign and submission details.
+                <Card className="bg-neutral-900/40 border-neutral-800/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">What types of campaigns can I run?</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      Product launches, brand awareness, event promotion, app downloads, website traffic, or any marketing objective. We work with entertainment, tech startups, e-commerce brands, musicians, athletes, and more.
                     </p>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
 
-                <div className="flex gap-4 p-6 bg-neutral-900/40 border border-neutral-800/50 rounded-lg">
-                  <CheckCircle className="h-6 w-6 text-green-400 flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold mb-2">Content Approval</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Campaign managers review submissions within 24 hours. Ensure your content follows all campaign guidelines
-                      and requirements to increase approval chances.
+                <Card className="bg-neutral-900/40 border-neutral-800/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">How much does it cost?</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      Campaign budgets start at $250 and scale based on your goals. You pay per 1,000 views generated, ensuring you only pay for real results. Contact us for a custom quote based on your specific needs.
                     </p>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-neutral-900/40 border-neutral-800/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">How quickly can I see results?</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      Most campaigns generate results within 2-3 days, with some completing in under 6 hours. You'll see real-time tracking of views, engagement, and performance metrics throughout your campaign.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-neutral-900/40 border-neutral-800/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">How do I get started?</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      Contact our team to discuss your campaign goals and budget. We'll help you design an effective campaign strategy and get you set up with tracking and reporting dashboards.
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
-            </section>
-
-            {/* Response Times */}
-            <section className="text-center">
-              <Card className="bg-neutral-900/40 border-neutral-800/50 max-w-md mx-auto">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-center gap-2">
-                    <HelpCircle className="h-5 w-5" />
-                    Response Times
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Email Support:</span>
-                      <Badge variant="secondary">24 hours</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Discord:</span>
-                      <Badge variant="secondary">Real-time</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Campaign Issues:</span>
-                      <Badge variant="secondary">Priority</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </section>
           </div>
         </div>

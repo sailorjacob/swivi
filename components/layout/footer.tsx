@@ -29,16 +29,16 @@ export function Footer() {
                 © {new Date().getFullYear()} Swivi. All rights reserved.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs">
-                <Link href="/support" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Support
-                </Link>
-                <span className="text-muted-foreground">•</span>
                 <Link href="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">
                   Privacy Policy
                 </Link>
                 <span className="text-muted-foreground">•</span>
                 <Link href="/terms-of-service" className="text-muted-foreground hover:text-foreground transition-colors">
                   Terms of Service
+                </Link>
+                <span className="text-muted-foreground">•</span>
+                <Link href="/support" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Support
                 </Link>
               </div>
             </div>
