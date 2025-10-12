@@ -360,6 +360,37 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
         .light .text-primary {
           color: black !important;
         }
+
+        /* Slider component overrides for light theme */
+        .light [class*="slider"] [class*="bg-secondary"] {
+          background-color: rgb(228 228 231) !important;
+        }
+
+        .light [class*="slider"] [class*="bg-primary"] {
+          background-color: black !important;
+        }
+
+        .light [class*="slider"] [class*="border-primary"] {
+          border-color: black !important;
+        }
+
+        .light [class*="slider"] [class*="bg-background"] {
+          background-color: white !important;
+          border-color: black !important;
+        }
+
+        /* Card borders and outlines */
+        .light .border {
+          border-color: rgb(228 228 231) !important;
+        }
+
+        .light .border-t {
+          border-color: rgb(228 228 231) !important;
+        }
+
+        .light .border-b {
+          border-color: rgb(228 228 231) !important;
+        }
       `
       document.head.appendChild(style)
     }
