@@ -120,7 +120,7 @@ export function Header() {
             <>
               <Link
                 href="/clippers/signup"
-                className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-foreground text-background hover:bg-transparent hover:text-foreground transition-all duration-300"
+                className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
               >
                 Become a Clipper
               </Link>

@@ -87,7 +87,7 @@ export function HowItWorks() {
             href="https://calendly.com/bykevingeorge/30min?month=2025-05"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center text-sm font-normal border border-foreground bg-foreground text-background hover:bg-transparent hover:text-foreground px-6 py-3 rounded-full transition-all duration-300"
+            className="inline-flex items-center text-sm font-normal border border-foreground bg-transparent text-foreground hover:bg-foreground hover:text-background px-6 py-3 rounded-full transition-all duration-300"
           >
             Book a Call →
           </a>

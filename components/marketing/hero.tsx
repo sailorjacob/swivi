@@ -96,7 +96,7 @@ export function Hero() {
             variants={itemVariants}
             className="flex flex-col sm:flex-row gap-4"
           >
-            <Button size="lg" className="group font-normal bg-foreground text-background hover:bg-transparent hover:text-foreground">
+            <Button size="lg" className="group font-normal bg-transparent text-foreground hover:bg-foreground hover:text-background border border-foreground">
               <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center">
                 Book a Call
                 <motion.span
@@ -108,7 +108,7 @@ export function Hero() {
                 </motion.span>
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="font-normal bg-foreground text-background hover:bg-transparent hover:text-foreground border-foreground">
+            <Button size="lg" variant="outline" className="font-normal bg-transparent text-foreground hover:bg-foreground hover:text-background border-foreground">
               <Link href="#how-it-works">
                 See How It Works
               </Link>
