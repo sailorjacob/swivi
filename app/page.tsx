@@ -156,13 +156,35 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           background-color: rgba(107, 114, 128, 0.4) !important;
         }
 
-        /* Ensure page overflow areas are white */
-        .light body {
+        /* Ensure page backgrounds are white */
+        .light body,
+        .light html {
           background-color: white !important;
         }
 
-        .light html {
+        /* Fix root element background */
+        .light :root {
           background-color: white !important;
+        }
+
+        /* Fix main layout containers that might have yellow overflow */
+        .light main {
+          background-color: white !important;
+        }
+
+        .light .max-width-wrapper {
+          background-color: transparent !important;
+        }
+
+        .light section {
+          background-color: transparent !important;
+        }
+
+        /* Fix any overflow containers */
+        .light [class*="overflow-hidden"],
+        .light [class*="overflow-auto"],
+        .light [class*="overflow-scroll"] {
+          background-color: transparent !important;
         }
 
         /* Card and container overrides */
