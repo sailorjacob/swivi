@@ -28,7 +28,11 @@ export function Footer() {
               <p className="text-xs text-muted-foreground">
                 © {new Date().getFullYear()} Swivi. All rights reserved.
               </p>
-              <div className="flex items-center space-x-4 text-xs">
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs">
+                <Link href="/support" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Support
+                </Link>
+                <span className="text-muted-foreground">•</span>
                 <Link href="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">
                   Privacy Policy
                 </Link>
