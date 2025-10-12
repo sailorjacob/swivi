@@ -366,6 +366,25 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           background-color: rgb(0, 0, 0) !important;
         }
 
+        /* More specific button hover state fixes for light theme */
+        .light button[class*="hover:bg-foreground"]:hover,
+        .light button[class*="hover:text-background"]:hover {
+          color: rgb(255, 255, 255) !important;
+          background-color: rgb(0, 0, 0) !important;
+        }
+
+        /* Fix for outline variant buttons specifically */
+        .light button[class*="bg-transparent"][class*="text-foreground"][class*="hover:bg-foreground"]:hover {
+          color: rgb(255, 255, 255) !important;
+          background-color: rgb(0, 0, 0) !important;
+        }
+
+        /* Fix for buttons with border-foreground in light theme */
+        .light button[class*="border-foreground"]:hover {
+          color: rgb(255, 255, 255) !important;
+          background-color: rgb(0, 0, 0) !important;
+        }
+
         /* Header logo - ensure proper inversion for light theme */
         .light header img {
           filter: invert(1) !important;

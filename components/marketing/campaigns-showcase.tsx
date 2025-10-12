@@ -47,7 +47,7 @@ const campaignResults: CampaignResult[] = [
     highlights: [
       "6.1M views generated",
       "Completed in just 2 days",
-      "81.7% clip success rate",
+      "60 clips submitted",
       "$1K budget delivered"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
@@ -70,7 +70,7 @@ const campaignResults: CampaignResult[] = [
     status: "completed",
     highlights: [
       "1.8M views generated",
-      "80% clip success rate",
+      "85 clips submitted",
       "3-day timeline",
       "Real estate education focus"
     ],
@@ -94,8 +94,7 @@ const campaignResults: CampaignResult[] = [
     status: "completed",
     highlights: [
       "1.9M views generated",
-      "258 clips distributed",
-      "60% clip success rate",
+      "258 clips submitted",
       "5-day timeline"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/shvty.jpeg"
@@ -322,10 +321,10 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
                     </div>
                     <div className="text-center p-8 bg-neutral-800/30 rounded-xl border border-neutral-700/30">
                       <div className="text-4xl md:text-5xl font-light text-foreground mb-3">
-                        {Math.round((campaign.clipsPaid / campaign.clipsDistributed) * 100)}%
+                        {campaign.clipsDistributed}
                       </div>
                       <div className="text-sm font-medium text-neutral-400 uppercase tracking-wider">
-                        Success Rate
+                        Submitted Clips
                       </div>
                     </div>
                   </div>
@@ -346,9 +345,9 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
                           <span className="font-medium text-foreground">{campaign.timeline}</span>
                         </div>
                         <div className="flex justify-between items-center py-3">
-                          <span className="text-neutral-400">Success Rate:</span>
+                          <span className="text-neutral-400">Submitted Clips:</span>
                           <span className="font-medium text-green-400">
-                            {Math.round((campaign.clipsPaid / campaign.clipsDistributed) * 100)}%
+                            {campaign.clipsDistributed}
                           </span>
                         </div>
                       </div>
