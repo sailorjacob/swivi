@@ -216,19 +216,19 @@ export function CampaignsShowcase() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="text-center mb-16"
+        className="text-center mb-20"
       >
         <motion.h1
           variants={itemVariants}
-          className="text-3xl md:text-4xl lg:text-5xl font-light mb-6"
+          className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-white"
         >
-          Proven <span className="font-normal">Campaign Results</span>
+          Proven <span className="font-normal text-white">Campaign Results</span>
         </motion.h1>
         <motion.p
           variants={itemVariants}
-          className="text-lg text-muted-foreground max-w-3xl mx-auto mb-8"
+          className="text-xl text-neutral-300 max-w-4xl mx-auto mb-12 leading-relaxed"
         >
-          We work with creators across all niches, from entrepreneurs and content creators 
+          We work with creators across all niches, from entrepreneurs and content creators
           to musicians, TV series, and betting apps. Here are some of our most successful campaigns.
         </motion.p>
       </motion.div>
@@ -246,12 +246,12 @@ export function CampaignsShowcase() {
             <motion.div
               key={stat.label}
               variants={itemVariants}
-              className="text-center"
+              className="text-center p-6 bg-neutral-900/30 rounded-lg border border-neutral-800/30"
             >
-              <stat.icon className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
-              <div className="text-2xl md:text-3xl font-light mb-1">{stat.value}</div>
-              <div className="text-sm font-normal mb-1">{stat.label}</div>
-              <div className="text-xs text-muted-foreground">{stat.description}</div>
+              <stat.icon className="w-8 h-8 mx-auto mb-4 text-neutral-500" />
+              <div className="text-3xl md:text-4xl font-light mb-2 text-white">{stat.value}</div>
+              <div className="text-sm font-medium mb-1 text-neutral-300">{stat.label}</div>
+              <div className="text-xs text-neutral-500">{stat.description}</div>
             </motion.div>
           ))}
         </div>
@@ -265,12 +265,12 @@ export function CampaignsShowcase() {
         viewport={{ once: true }}
         className="mb-20"
       >
-        <div className="mb-12">
-          <h2 className="text-2xl md:text-3xl font-light mb-4 text-center">
+        <div className="mb-16">
+          <h2 className="text-3xl md:text-4xl font-light mb-6 text-center text-white">
             Featured Campaign Results
           </h2>
-          <p className="text-muted-foreground text-center max-w-2xl mx-auto">
-            Real results from real campaigns. See how we've helped clients achieve 
+          <p className="text-neutral-300 text-center max-w-3xl mx-auto text-lg leading-relaxed">
+            Real results from real campaigns. See how we've helped clients achieve
             exceptional ROI through our clipper network.
           </p>
         </div>
@@ -282,32 +282,32 @@ export function CampaignsShowcase() {
               variants={itemVariants}
               className="relative"
             >
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-neutral-800/60 border-neutral-700">
-                <CardHeader className="border-b border-neutral-600/30 pb-6">
-                  <div className="flex items-start gap-6 mb-4">
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-neutral-900/40 border-neutral-800/50">
+                <CardHeader className="border-b border-neutral-800/30 pb-8">
+                  <div className="flex items-center gap-8 mb-6">
                         {campaign.clientLogo && (
                           <div className="flex-shrink-0">
                             <Image
                               src={campaign.clientLogo}
                               alt={campaign.clientName}
-                              width={200}
-                              height={200}
-                              className="rounded-lg object-cover ring-1 ring-neutral-600/30"
+                              width={280}
+                              height={280}
+                              className="rounded-xl object-cover ring-2 ring-neutral-800/40 shadow-lg"
                               unoptimized
                             />
                           </div>
                         )}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <CardTitle className="text-2xl font-normal">
+                      <div className="flex items-center gap-4 mb-3">
+                        <CardTitle className="text-3xl font-light text-white">
                           {campaign.clientName}
                         </CardTitle>
-                        <Badge variant="outline" className="text-sm">
+                        <Badge variant="outline" className="text-sm border-neutral-700 text-neutral-300 bg-neutral-800/30">
                           {campaign.clientType}
                         </Badge>
-                        <span className="text-3xl">{getPlatformIcon(campaign.contentPlatform)}</span>
+                        <span className="text-4xl opacity-60">{getPlatformIcon(campaign.contentPlatform)}</span>
                       </div>
-                      <p className="text-muted-foreground leading-relaxed">
+                      <p className="text-neutral-300 leading-relaxed text-lg">
                         {campaign.description}
                       </p>
                     </div>
@@ -317,42 +317,42 @@ export function CampaignsShowcase() {
                 <CardContent className="p-6 sm:p-8">
                   {/* Key Metrics - Large and Prominent */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div className="text-center p-6 bg-black/20 rounded-lg">
-                      <div className="text-3xl md:text-4xl font-light text-green-600 mb-2">
+                    <div className="text-center p-8 bg-neutral-800/30 rounded-xl border border-neutral-700/30">
+                      <div className="text-4xl md:text-5xl font-light text-white mb-3">
                         {campaign.roi.toLocaleString()}%
                       </div>
-                      <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                      <div className="text-sm font-medium text-neutral-400 uppercase tracking-wider">
                         ROI Achieved
                       </div>
                     </div>
-                    <div className="text-center p-6 bg-black/20 rounded-lg">
-                      <div className="text-3xl md:text-4xl font-light text-blue-400 mb-2">
+                    <div className="text-center p-8 bg-neutral-800/30 rounded-xl border border-neutral-700/30">
+                      <div className="text-4xl md:text-5xl font-light text-white mb-3">
                         {formatNumber(campaign.viewsGenerated)}
                       </div>
-                      <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                      <div className="text-sm font-medium text-neutral-400 uppercase tracking-wider">
                         Views Generated
                       </div>
                     </div>
                   </div>
 
-                  {/* Campaign Details - Simplified */}
+                  {/* Campaign Details - Condensed */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div className="space-y-4">
-                      <h4 className="font-medium text-muted-foreground uppercase tracking-wider text-sm">
+                      <h4 className="font-medium text-neutral-400 uppercase tracking-wider text-sm">
                         Campaign Overview
                       </h4>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center py-2 border-b border-black/10">
-                          <span className="text-muted-foreground">Budget:</span>
-                          <span className="font-medium">${campaign.budget.toLocaleString()}</span>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center py-3 border-b border-neutral-700/30">
+                          <span className="text-neutral-400">Budget:</span>
+                          <span className="font-medium text-white">${campaign.budget.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between items-center py-2 border-b border-black/10">
-                          <span className="text-muted-foreground">Timeline:</span>
-                          <span className="font-medium">{campaign.timeline}</span>
+                        <div className="flex justify-between items-center py-3 border-b border-neutral-700/30">
+                          <span className="text-neutral-400">Timeline:</span>
+                          <span className="font-medium text-white">{campaign.timeline}</span>
                         </div>
-                        <div className="flex justify-between items-center py-2">
-                          <span className="text-muted-foreground">Success Rate:</span>
-                          <span className="font-medium text-green-600">
+                        <div className="flex justify-between items-center py-3">
+                          <span className="text-neutral-400">Success Rate:</span>
+                          <span className="font-medium text-green-400">
                             {Math.round((campaign.clipsPaid / campaign.clipsDistributed) * 100)}%
                           </span>
                         </div>
@@ -360,26 +360,26 @@ export function CampaignsShowcase() {
                     </div>
 
                     <div className="space-y-4">
-                      <h4 className="font-medium text-muted-foreground uppercase tracking-wider text-sm">
+                      <h4 className="font-medium text-neutral-400 uppercase tracking-wider text-sm">
                         Key Highlights
                       </h4>
                       <div className="space-y-3">
                         {campaign.highlights.slice(0, 3).map((highlight, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 bg-black/10 rounded-lg">
-                            <Award className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-muted-foreground leading-relaxed">{highlight}</span>
+                          <div key={idx} className="flex items-start gap-3 p-4 bg-neutral-800/30 rounded-lg border border-neutral-700/30">
+                            <Award className="h-5 w-5 text-neutral-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-neutral-300 leading-relaxed">{highlight}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-black/5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                  <div className="pt-6 border-t border-neutral-700/30 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                     <Link
                       href={campaign.exampleContent}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+                      className="inline-flex items-center gap-2 text-sm font-medium text-neutral-300 hover:text-white transition-colors"
                     >
                       <Play className="h-4 w-4" />
                       View Example Content
@@ -388,7 +388,7 @@ export function CampaignsShowcase() {
                     {campaign.id === "owning-manhattan" && (
                       <Link
                         href="/case-studies/owning-manhattan"
-                        className="inline-flex items-center gap-2 text-sm font-medium bg-foreground text-background px-4 py-2 rounded-full hover:bg-foreground/90 transition-colors"
+                        className="inline-flex items-center gap-2 text-sm font-medium bg-white text-black px-5 py-2.5 rounded-full hover:bg-neutral-200 transition-colors"
                       >
                         <Eye className="h-4 w-4" />
                         View Full Gallery
@@ -411,11 +411,11 @@ export function CampaignsShowcase() {
         className="mb-20"
       >
         <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-light mb-4">
+          <h2 className="text-3xl md:text-4xl font-light mb-6 text-white">
             Industries We Serve
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            From entertainment to tech, we help brands and creators across all industries 
+          <p className="text-neutral-300 max-w-3xl mx-auto text-lg leading-relaxed">
+            From entertainment to tech, we help brands and creators across all industries
             achieve viral success through our clipper network.
           </p>
         </div>
@@ -428,7 +428,7 @@ export function CampaignsShowcase() {
             <Badge
               key={index}
               variant="outline"
-              className="px-4 py-2 text-sm hover:bg-black/5 transition-colors"
+              className="px-5 py-2.5 text-sm border-neutral-700 text-neutral-300 bg-neutral-800/30 hover:bg-neutral-700/30 transition-colors"
             >
               {industry}
             </Badge>
@@ -448,24 +448,24 @@ export function CampaignsShowcase() {
           variants={itemVariants}
           className="max-w-2xl mx-auto"
         >
-          <h2 className="text-2xl md:text-3xl font-light mb-4">
+          <h2 className="text-3xl md:text-4xl font-light mb-6 text-white">
             Ready to Achieve Similar Results?
           </h2>
-          <p className="text-muted-foreground mb-8">
-            Join the brands and creators who trust Swivi to amplify their content 
+          <p className="text-neutral-300 mb-10 text-lg leading-relaxed">
+            Join the brands and creators who trust Swivi to amplify their content
             and achieve exceptional ROI through our proven clipper network.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/brands"
-              className="inline-flex items-center text-sm font-normal bg-foreground text-background px-8 py-4 rounded-full hover:bg-foreground/90 transition-all duration-300 group"
+              className="inline-flex items-center text-sm font-medium bg-white text-black px-8 py-4 rounded-full hover:bg-neutral-200 transition-all duration-300 group"
             >
               Start Your Campaign
               <Target className="ml-2 h-4 w-4 group-hover:scale-110 transition-transform" />
             </Link>
             <Link
               href="/clippers"
-              className="inline-flex items-center text-sm font-normal border border-black/20 px-8 py-4 rounded-full hover:bg-black/5 transition-all duration-300 group"
+              className="inline-flex items-center text-sm font-medium border-2 border-neutral-700 text-white px-8 py-4 rounded-full hover:bg-neutral-800/50 transition-all duration-300 group"
             >
               Join as Clipper
               <Users className="ml-2 h-4 w-4 group-hover:scale-110 transition-transform" />
