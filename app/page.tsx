@@ -167,23 +167,33 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           background-color: white !important;
         }
 
-        /* Fix main layout containers that might have yellow overflow */
-        .light main {
+        /* Comprehensive background fix for light theme */
+        .light,
+        .light *,
+        .light *::before,
+        .light *::after {
           background-color: white !important;
         }
 
-        .light .max-width-wrapper {
+        /* But restore transparency for specific elements that need it */
+        .light .bg-transparent,
+        .light .bg-background\\/*,
+        .light [class*="bg-transparent"],
+        .light [class*="bg-background\\/"] {
           background-color: transparent !important;
         }
 
-        .light section {
-          background-color: transparent !important;
+        /* Fix main layout containers */
+        .light main,
+        .light .max-width-wrapper,
+        .light section,
+        .light div[class*="container"],
+        .light div[class*="wrapper"] {
+          background-color: white !important;
         }
 
-        /* Fix any overflow containers */
-        .light [class*="overflow-hidden"],
-        .light [class*="overflow-auto"],
-        .light [class*="overflow-scroll"] {
+        /* Fix any overflow containers that might show yellow */
+        .light [class*="overflow"] {
           background-color: transparent !important;
         }
 
