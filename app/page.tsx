@@ -293,22 +293,28 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           border-color: rgb(228 228 231) !important;
         }
 
-        /* Button text styling for light theme */
-        .light .bg-foreground {
+        /* Button text styling for light theme - only for non-hover states */
+        .light .bg-foreground:not(:hover) {
           color: rgb(255, 255, 255) !important;
         }
 
-        .light button[class*="bg-foreground"] {
+        .light button[class*="bg-foreground"]:not(:hover) {
           color: rgb(255, 255, 255) !important;
         }
 
         /* Ensure button text is white when background is filled on hover */
-        .light button[class*="bg-foreground"]:hover {
+        .light button[class*="bg-foreground"]:hover,
+        .light .hover\\:bg-foreground:hover,
+        .light [class*="hover:bg-foreground"]:hover {
           color: rgb(255, 255, 255) !important;
+          background-color: rgb(0, 0, 0) !important;
         }
 
-        .light .hover\\:bg-foreground:hover {
+        /* Ensure button hover states work correctly */
+        .light a[class*="hover:bg-foreground"]:hover,
+        .light button[class*="hover:bg-foreground"]:hover {
           color: rgb(255, 255, 255) !important;
+          background-color: rgb(0, 0, 0) !important;
         }
 
         /* Header logo - ensure proper inversion for light theme */
