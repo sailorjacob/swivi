@@ -26,7 +26,6 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
 import Image from "next/image"
-import { ClipSubmissionModal } from "@/components/clippers/clip-submission-modal"
 
 // Types for real data
 interface DashboardStats {
@@ -59,7 +58,6 @@ export default function ClipperDashboard() {
   const [activeCampaigns, setActiveCampaigns] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showSubmissionModal, setShowSubmissionModal] = useState(false)
   const [isFetching, setIsFetching] = useState(false)
 
   // Get display name with simplified fallback logic
@@ -388,56 +386,7 @@ export default function ClipperDashboard() {
         )}
       </div>
 
-      {/* Active Campaigns Section */}
-      <div className="mb-8">
-        <h2 className="text-xl font-medium mb-6">Active Campaigns ({activeCampaigns})</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Link href="/clippers/campaigns">
-            <Card className="bg-card border-border hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium">Browse Campaigns</h3>
-                  <Target className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground mb-4">
-                  Discover active campaigns and start earning from your content
-                </p>
-                <Button variant="outline" className="w-full">
-                  View All Campaigns
-                </Button>
-              </CardContent>
-            </Card>
-          </Link>
 
-          <div onClick={() => setShowSubmissionModal(true)} className="cursor-pointer">
-            <Card className="bg-card border-border hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium">Submit Clip</h3>
-                  <Play className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground mb-4">
-                  Submit your content to active campaigns and start earning
-                </p>
-                <Button className="w-full">
-                  Submit Content
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      {/* Clip Submission Modal */}
-      <ClipSubmissionModal
-        open={showSubmissionModal}
-        onOpenChange={(open) => {
-          setShowSubmissionModal(open)
-          if (!open) {
-            fetchDashboardData() // Refresh data after submission
-          }
-        }}
-      />
     </div>
   )
 }
