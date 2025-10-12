@@ -33,44 +33,44 @@ const campaignResults: CampaignResult[] = [
     clientName: "Owning Manhattan",
     clientType: "Entertainment",
     description: "Netflix series promotion campaign targeting real estate and lifestyle audiences",
-    budget: 1000,
-    budgetStructure: "$1 per 1,000 views",
-    goal: "1,000,000 views",
+    budget: 968,
+    budgetStructure: "$100 per 100,000 views",
+    goal: "6,700,000 views",
     timeline: "2 days",
     clipsDistributed: 60,
-    clipsPaid: 49,
-    viewsGenerated: 6100000,
-    roi: 610,
+    clipsPaid: 60,
+    viewsGenerated: 6700000,
+    roi: 593,
     exampleContent: "https://www.instagram.com/reel/DOKGK_ciO-9/",
     contentPlatform: "instagram",
     status: "completed",
     highlights: [
-      "6.1M views generated",
+      "6.7M views generated",
       "Completed in just 2 days",
-      "236 clips submitted",
-      "$1K budget delivered"
+      "60 clips submitted",
+      "$968 budget delivered"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
   },
   {
     id: "rod-khlief",
-    clientName: "Rod Khlief",
+    clientName: "Rod Khleif",
     clientType: "Real Estate Educator",
     description: "Real estate education and investment content targeting property investors and aspiring entrepreneurs",
-    budget: 750,
-    budgetStructure: "$1 per 1,000 views",
-    goal: "750,000 views",
+    budget: 864,
+    budgetStructure: "$100 per 100,000 views",
+    goal: "864,000 views",
     timeline: "3 days",
-    clipsDistributed: 85,
-    clipsPaid: 68,
-    viewsGenerated: 1800000,
-    roi: 240,
+    clipsDistributed: 720,
+    clipsPaid: 720,
+    viewsGenerated: 840000,
+    roi: 0,
     exampleContent: "https://www.instagram.com/reel/example-rod-khlief/",
     contentPlatform: "instagram",
     status: "completed",
     highlights: [
-      "1.8M views generated",
-      "342 clips submitted",
+      "840K views generated",
+      "720 clips submitted",
       "3-day timeline",
       "Real estate education focus"
     ],
@@ -104,22 +104,22 @@ const campaignResults: CampaignResult[] = [
     clientName: "Sportz Playz",
     clientType: "Gambling Company",
     description: "Sports betting platform targeting sports enthusiasts and betting communities",
-    budget: 250,
+    budget: 249,
     budgetStructure: "$100 per 1,000,000 views",
-    goal: "2.5M views",
+    goal: "2,490,000 views",
     timeline: "2 weeks",
     clipsDistributed: 98,
-    clipsPaid: 51,
-    viewsGenerated: 8100000,
-    roi: 3240,
+    clipsPaid: 98,
+    viewsGenerated: 9500000,
+    roi: 3717,
     exampleContent: "https://www.instagram.com/reel/DNVx_F0OKAx/",
     contentPlatform: "instagram",
     status: "completed",
     highlights: [
-      "8.1M views generated",
-      "187 clips submitted",
+      "9.5M views generated",
+      "98 clips submitted",
       "2-week timeline",
-      "Exceeded goal by 224%"
+      "Exceeded expectations"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png"
   }
@@ -129,25 +129,25 @@ const industryStats = [
   {
     icon: TrendingUp,
     label: "Success Rate",
-    value: "94%",
+    value: "100%",
     description: "Campaign completion"
   },
   {
     icon: Users,
     label: "Total Views",
-    value: "16M+",
+    value: "24.5M+",
     description: "Generated for clients"
   },
   {
     icon: DollarSign,
     label: "Total Budget",
-    value: "$2,150",
+    value: "$2,981",
     description: "Client investment"
   },
   {
     icon: Clock,
     label: "Avg. Timeline",
-    value: "6 days",
+    value: "3 days",
     description: "Campaign completion"
   }
 ]

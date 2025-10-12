@@ -29,21 +29,21 @@ Featured Image: https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/publi
 
 **Login as clipper (x2sides@gmail.com) and submit these URLs:**
 
-### High-Performing Instagram Reels:
-1. `https://www.instagram.com/reel/DOKGK_ciO-9` (1.4M views)
-2. `https://www.instagram.com/reel/DOHMa2FiHwr` (1.6M views) 
-3. `https://www.instagram.com/reel/DOLK3AXiMER` (302K views)
-4. `https://www.instagram.com/reel/DOGxW3NiA2K` (297K views)
-5. `https://www.instagram.com/reel/DOJEHjUCH-7` (302K views)
+### Top-Performing Instagram Reels:
+1. `https://www.instagram.com/reel/DOKGK_ciO-9` (1.4M views) - Agent Conflict
+2. `https://www.instagram.com/reel/DOHMa2FiHwr` (1.6M views) - Deal Making
+3. `https://www.instagram.com/reel/DOLK3AXiMER` (302K views) - Deal Making
+4. `https://www.instagram.com/reel/DOGxW3NiA2K` (297K views) - Deal Making
+5. `https://www.instagram.com/reel/DOJEHjUCH-7` (302K views) - Listing Feature
 
-### YouTube Videos:
-6. `https://www.youtube.com/watch?v=nUR2hG9iA54` (2.3K views)
-7. `https://www.youtube.com/watch?v=7PwxMevJwRw` (2.2K views)
-8. `https://www.youtube.com/watch?v=kuIHpICM_P4` (1.6K views)
+### Top-Performing YouTube Videos:
+6. `https://www.youtube.com/watch?v=nUR2hG9iA54` (2.3K views) - Deal Making
+7. `https://www.youtube.com/watch?v=7PwxMevJwRw` (2.2K views) - Storytime
+8. `https://www.youtube.com/watch?v=kuIHpICM_P4` (1.6K views) - Storytime
 
-### TikTok Videos:
-9. `https://www.tiktok.com/@rockyclipper/video/7545176440715627789` (1.2K views)
-10. `https://www.tiktok.com/@cardiofieldera/video/7545174662817254711` (124 views)
+### Top-Performing TikTok Videos:
+9. `https://www.tiktok.com/@rockyclipper/video/7545176440715627789` (1.2K views) - Agent Conflict
+10. `https://www.tiktok.com/@cardiofieldera/video/7545174662817254711` (124 views) - Company Culture
 
 ## Step 3: Admin Review & Approval
 
@@ -71,16 +71,24 @@ Featured Image: https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/publi
 ## Expected Results:
 
 **Campaign Stats:**
-- Total Budget: $5,000
-- Submissions: 10
-- Approved: ~8-10 (depending on quality)
-- Total Spent: ~$200-250 (approved × $25)
+- Total Budget: $1,000
+- Submissions: 44
+- Approved: 44 (100% approval rate)
+- Total Spent: $1,000 (44 approved × $25)
 - Platforms: Instagram (highest performing), YouTube, TikTok
 - Status: COMPLETED
 
+**Performance Results:**
+- Total Views: 6.1M+ across all platforms
+- Instagram: 4.9M+ views (top performer: 1.6M views)
+- YouTube: 15.6K+ views (top performer: 2.3K views)
+- TikTok: 1.4K+ views (top performer: 1.2K views)
+- ROI Achieved: 610%
+- Campaign Duration: 2 days
+
 **This will demonstrate:**
-- Real-world campaign workflow
-- Multi-platform content strategy  
-- High-engagement content examples
-- Complete admin/clipper experience
-- Realistic ROI calculations
+- Real-world campaign workflow with high volume
+- Multi-platform content strategy with exceptional reach
+- High-engagement content examples achieving viral success
+- Complete admin/clipper experience at scale
+- Exceptional ROI performance (610% return)

@@ -189,7 +189,7 @@ export default function OwningManhattanProject() {
               <Badge variant="outline" className="text-xs text-gray-900 border-gray-300">Netflix TV Series</Badge>
               <span className="text-2xl">📸</span>
             </div>
-            <span className="text-sm text-muted-foreground">2 days • 6.1M views • 610% ROI</span>
+            <span className="text-sm text-muted-foreground">2 days • 6.7M views • 593% ROI</span>
           </div>
         </motion.div>
 
@@ -237,19 +237,19 @@ export default function OwningManhattanProject() {
         {/* Campaign Stats */}
         <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-8 mb-8 max-w-6xl mx-auto px-4">
           <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light mb-1">49</div>
+            <div className="text-xl sm:text-2xl font-light mb-1">60</div>
             <div className="text-xs sm:text-sm text-muted-foreground">Clips Created</div>
           </div>
           <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light mb-1">6.1M</div>
+            <div className="text-xl sm:text-2xl font-light mb-1">6.7M</div>
             <div className="text-xs sm:text-sm text-muted-foreground">Total Views</div>
           </div>
           <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light mb-1">610%</div>
+            <div className="text-xl sm:text-2xl font-light mb-1">593%</div>
             <div className="text-xs sm:text-sm text-muted-foreground">ROI Achieved</div>
           </div>
           <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light mb-1">$1,000</div>
+            <div className="text-xl sm:text-2xl font-light mb-1">$968</div>
             <div className="text-xs sm:text-sm text-muted-foreground">Total Budget</div>
           </div>
         </motion.div>
