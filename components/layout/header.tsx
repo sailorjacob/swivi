@@ -50,7 +50,7 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center">
           <Image
-            src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/invertedlogo.png"
+            src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
             alt="Swivi"
             width={300}
             height={100}
