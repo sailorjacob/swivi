@@ -1,10 +1,9 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ExternalLink, TrendingUp, Users, DollarSign, Clock, Play, Target, Award, Eye } from "lucide-react"
+import { ExternalLink, TrendingUp, DollarSign, Clock, Play, Award, Eye } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
 import Image from "next/image"
 
 interface CampaignResult {
@@ -190,10 +189,10 @@ export function CampaignsShowcase() {
   const getCampaignIcon = (campaign: CampaignResult) => {
     // Return relevant emoji based on campaign content
     if (campaign.clientName.toLowerCase().includes("owning")) {
-      return "🏢" // Building for real estate (Owning Manhattan)
+      return "🎬" // Film/movie for TV series (Owning Manhattan)
     }
     if (campaign.clientName.toLowerCase().includes("rod")) {
-      return "🏠" // House for real estate educator
+      return "📷" // Camera for real estate educator
     }
     if (campaign.clientName.toLowerCase().includes("shvfty")) {
       return "🎮" // Gaming for Twitch streamer
@@ -571,8 +570,8 @@ export function CampaignsShowcase() {
         </motion.div>
       </motion.section>
 
-      {/* CTA Section */}
-      <motion.section
+      {/* CTA Section - Temporarily Hidden */}
+      {/* <motion.section
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
@@ -607,7 +606,7 @@ export function CampaignsShowcase() {
             </Link>
           </div>
         </motion.div>
-      </motion.section>
+      </motion.section> */}
     </div>
   )
 }
