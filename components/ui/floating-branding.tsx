@@ -64,20 +64,14 @@ export function FloatingBranding({
   // Add scroll detection to collapse when past first section
   useEffect(() => {
     const handleScroll = () => {
-      // Different scroll thresholds based on element position
-      let scrollThreshold = window.innerHeight * 0.8
-
-      // Bottom elements need a lower threshold since they're positioned from bottom
-      if (randomConfig.position.includes('bottom')) {
-        scrollThreshold = window.innerHeight * 0.6
-      }
-
+      // Hero section is approximately 80vh, so collapse when scrolled past that
+      const scrollThreshold = window.innerHeight * 0.8
       setIsPastFirstSection(window.scrollY > scrollThreshold)
     }
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [randomConfig.position])
+  }, [])
 
   const sizeClasses = {
     sm: "w-12 h-12",

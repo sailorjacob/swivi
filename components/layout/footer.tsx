@@ -10,7 +10,7 @@ export function Footer() {
           <div>
             <Link href="/" className="inline-flex items-center mb-4">
               <Image
-                src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
+                src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
                 alt="Swivi"
                 width={250}
                 height={84}
