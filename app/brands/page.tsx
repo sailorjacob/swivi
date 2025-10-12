@@ -3,9 +3,8 @@
 // Force this page to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
 
-import Link from "next/link"
 import { motion, easeOut } from "framer-motion"
-import { ArrowRight, TrendingUp, DollarSign, Users, BarChart3 } from "lucide-react"
+import { TrendingUp, DollarSign, Users, BarChart3 } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { DarkThemeWrapper } from "../layout-wrapper"
@@ -191,8 +190,8 @@ export default function BrandsPage() {
           </div>
         </section>
 
-        {/* Featured Campaign - Caleb Simpson x Ed Sheeran */}
-        <section className="py-20 md:py-32 border-t border-black/5">
+        {/* Featured Campaign - Temporarily Hidden */}
+        {/* <section className="py-20 md:py-32 border-t border-black/5">
           <div className="max-width-wrapper section-padding">
             <div className="mb-16">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
@@ -273,7 +272,7 @@ export default function BrandsPage() {
               </motion.div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Features */}
         <section className="py-20 md:py-32 border-t border-black/5">

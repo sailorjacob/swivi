@@ -144,6 +144,116 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
         .light p {
           color: rgb(113 113 122) !important;
         }
+
+        /* Footer specific overrides */
+        .light .text-neutral-400 {
+          color: rgb(161 161 170) !important;
+        }
+
+        .light .text-neutral-500 {
+          color: rgb(113 113 122) !important;
+        }
+
+        /* Logo and branding overrides */
+        .light img {
+          filter: invert(0) !important;
+        }
+
+        /* Specific text elements that need dark color on light theme */
+        .light .text-white {
+          color: black !important;
+        }
+
+        .light .text-gray-300,
+        .light .text-gray-400 {
+          color: rgb(113 113 122) !important;
+        }
+
+        /* Marketing section text overrides */
+        .light [class*="text-neutral"] {
+          color: rgb(113 113 122) !important;
+        }
+
+        /* Statistics and metrics text */
+        .light .text-4xl, .light .text-5xl, .light .text-6xl {
+          color: black !important;
+        }
+
+        /* Link text in light theme */
+        .light a {
+          color: black !important;
+        }
+
+        .light a:hover {
+          color: rgb(64 64 64) !important;
+        }
+
+        /* Button text in light theme */
+        .light button {
+          color: black !important;
+        }
+
+        /* Icon colors in light theme */
+        .light svg {
+          color: black !important;
+        }
+
+        /* Specific footer links */
+        .light .hover\\:text-white:hover {
+          color: black !important;
+        }
+
+        /* Footer logo inversion for light theme */
+        .light img[alt="Swivi"] {
+          filter: invert(1) !important;
+        }
+
+        /* Footer specific text colors */
+        .light footer .text-muted-foreground {
+          color: rgb(113 113 122) !important;
+        }
+
+        .light footer .text-foreground {
+          color: black !important;
+        }
+
+        /* Footer link hover states */
+        .light footer a:hover {
+          color: rgb(64 64 64) !important;
+        }
+
+        /* Footer background gradient for light theme */
+        .light footer .bg-gradient-to-t {
+          background: linear-gradient(to top, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1), transparent) !important;
+        }
+
+        /* Features section use cases text */
+        .light .text-muted-foreground\\/60 {
+          color: rgb(113 113 122) !important;
+        }
+
+        /* Creator calculator comparison text */
+        .light ul li {
+          color: rgb(113 113 122) !important;
+        }
+
+        .light h4 {
+          color: black !important;
+        }
+
+        /* Statistics cards text */
+        .light .text-primary {
+          color: black !important;
+        }
+
+        /* Calculator popup text */
+        .light .bg-background\\/95 {
+          background-color: rgba(255, 255, 255, 0.95) !important;
+        }
+
+        .light .border-border\\/50 {
+          border-color: rgb(228 228 231) !important;
+        }
       `
       document.head.appendChild(style)
     }
@@ -169,22 +279,22 @@ export default function HomePage() {
   return (
     <LightThemeWrapper>
       <div className="light">
-        <Header />
-        <main className="flex min-h-screen flex-col pt-16">
-          <Hero />
-          <Founder />
-          <CreatorViewsCalculator />
-          {/* <CampaignsPreview /> */}
-          {/* <MusicHubPreview /> */}
-          {/* <Testimonials /> */}
-          <div className="space-y-8 md:space-y-16">
-            {/* <Showcase /> */}
-            <Features />
-            <HowItWorks />
-            <FAQ />
-          </div>
-        </main>
-        <Footer />
+      <Header />
+      <main className="flex min-h-screen flex-col pt-16">
+        <Hero />
+        <Founder />
+        <CreatorViewsCalculator />
+        {/* <CampaignsPreview /> */}
+        {/* <MusicHubPreview /> */}
+        {/* <Testimonials /> */}
+        <div className="space-y-8 md:space-y-16">
+          {/* <Showcase /> */}
+          <Features />
+          <HowItWorks />
+          <FAQ />
+        </div>
+      </main>
+      <Footer />
       </div>
     </LightThemeWrapper>
   )

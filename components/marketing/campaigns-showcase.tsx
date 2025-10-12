@@ -31,7 +31,7 @@ const campaignResults: CampaignResult[] = [
   {
     id: "owning-manhattan",
     clientName: "Owning Manhattan",
-    clientType: "Netflix TV Series",
+    clientType: "Entertainment",
     description: "Netflix series promotion campaign targeting real estate and lifestyle audiences",
     budget: 1000,
     budgetStructure: "$1 per 1,000 views",
@@ -154,7 +154,7 @@ const industryStats = [
 ]
 
 const industries = [
-  "Netflix TV Series",
+  "Entertainment",
   "Twitch Streamers",
   "Music Collaborations",
   "Content Creators",
