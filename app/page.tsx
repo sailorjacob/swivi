@@ -318,8 +318,9 @@ function LightThemeWrapper({ children }: { children: React.ReactNode }) {
           background: transparent !important;
         }
 
+        /* Footer image should remain visible on light theme */
         .light footer img {
-          opacity: 0.1 !important;
+          opacity: 1 !important;
         }
 
         /* Features section use cases text */
