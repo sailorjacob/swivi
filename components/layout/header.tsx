@@ -119,7 +119,7 @@ export function Header() {
           ) : (
             <>
               <Link
-                href="/clippers/signup"
+                href="/clippers/become-a-clipper"
                 className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
               >
                 Become a Clipper
@@ -200,7 +200,7 @@ export function Header() {
             ) : (
               <>
                 <Link
-                  href="/clippers/signup"
+                  href="/clippers/become-a-clipper"
                   className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
