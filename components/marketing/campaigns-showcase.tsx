@@ -276,7 +276,7 @@ export function CampaignsShowcase() {
         </motion.p>
       </motion.div>
 
-      {/* Industry Stats */}
+      {/* Advanced Stats Showcase */}
       <motion.section
         variants={containerVariants}
         initial="hidden"
@@ -284,19 +284,142 @@ export function CampaignsShowcase() {
         viewport={{ once: true }}
         className="mb-20"
       >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {industryStats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              variants={itemVariants}
-              className="text-center p-6 bg-neutral-900/30 rounded-lg border border-neutral-800/30"
-            >
-              <stat.icon className="w-8 h-8 mx-auto mb-4 text-neutral-500" />
-              <div className="text-3xl md:text-4xl font-light mb-2 text-white">{stat.value}</div>
-              <div className="text-sm font-medium mb-1 text-neutral-300">{stat.label}</div>
-              <div className="text-xs text-neutral-500">{stat.description}</div>
-            </motion.div>
-          ))}
+        <div className="relative">
+          {/* Background gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-neutral-900/20 via-transparent to-neutral-800/20 rounded-3xl blur-3xl"></div>
+
+          <div className="relative bg-gradient-to-br from-neutral-900/40 to-neutral-800/40 backdrop-blur-sm rounded-3xl border border-neutral-700/30 p-8 md:p-12">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl md:text-3xl font-light mb-4 text-white">
+                Campaign Performance Metrics
+              </h2>
+              <p className="text-neutral-400 max-w-2xl mx-auto">
+                Real-time data showcasing our network's impact across all client campaigns
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+              {industryStats.map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  variants={itemVariants}
+                  className="group relative"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                  <div className="relative text-center p-6 bg-black/20 rounded-2xl border border-neutral-700/20 group-hover:border-neutral-600/40 transition-all duration-300">
+                    <div className="mb-4">
+                      <stat.icon className="w-10 h-10 mx-auto text-white/80 group-hover:text-white transition-colors duration-300" />
+                    </div>
+                    <div className="text-2xl md:text-3xl lg:text-4xl font-light mb-2 text-white group-hover:scale-105 transition-transform duration-300">
+                      {stat.value}
+                    </div>
+                    <div className="text-sm font-medium mb-1 text-neutral-300 group-hover:text-white transition-colors duration-300">
+                      {stat.label}
+                    </div>
+                    <div className="text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors duration-300">
+                      {stat.description}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Animated progress indicators */}
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="relative w-16 h-16 mx-auto mb-3">
+                  <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      d="M18 2.0845
+                         a 15.9155 15.9155 0 0 1 0 31.831
+                         a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeDasharray="100, 100"
+                      className="text-neutral-700"
+                    />
+                    <path
+                      d="M18 2.0845
+                         a 15.9155 15.9155 0 0 1 0 31.831
+                         a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeDasharray="94, 100"
+                      className="text-green-400"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs font-medium text-green-400">94%</span>
+                  </div>
+                </div>
+                <div className="text-sm text-neutral-400">Success Rate</div>
+              </div>
+
+              <div className="text-center">
+                <div className="relative w-16 h-16 mx-auto mb-3">
+                  <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      d="M18 2.0845
+                         a 15.9155 15.9155 0 0 1 0 31.831
+                         a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeDasharray="100, 100"
+                      className="text-neutral-700"
+                    />
+                    <path
+                      d="M18 2.0845
+                         a 15.9155 15.9155 0 0 1 0 31.831
+                         a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeDasharray="75, 100"
+                      className="text-blue-400"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs font-medium text-blue-400">75%</span>
+                  </div>
+                </div>
+                <div className="text-sm text-neutral-400">Client Satisfaction</div>
+              </div>
+
+              <div className="text-center">
+                <div className="relative w-16 h-16 mx-auto mb-3">
+                  <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      d="M18 2.0845
+                         a 15.9155 15.9155 0 0 1 0 31.831
+                         a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeDasharray="100, 100"
+                      className="text-neutral-700"
+                    />
+                    <path
+                      d="M18 2.0845
+                         a 15.9155 15.9155 0 0 1 0 31.831
+                         a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeDasharray="85, 100"
+                      className="text-purple-400"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs font-medium text-purple-400">85%</span>
+                  </div>
+                </div>
+                <div className="text-sm text-neutral-400">Repeat Clients</div>
+              </div>
+            </div>
+          </div>
         </div>
       </motion.section>
 
