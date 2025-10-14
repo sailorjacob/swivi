@@ -25,7 +25,7 @@ export function FloatingBranding({
   randomDelay = true
 }: FloatingBrandingProps) {
   const [isVisible, setIsVisible] = useState(false)
-  const [isHovered, setIsHovered] = useState(false) // Start collapsed on mobile, expanded on desktop
+  const [isHovered, setIsHovered] = useState(true) // Start with hover state (dropshadow + large size) by default
   const [isPastFirstSection, setIsPastFirstSection] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -62,7 +62,7 @@ export function FloatingBranding({
     const checkMobile = () => {
       const mobile = window.innerWidth <= 768
       setIsMobile(mobile)
-      setIsHovered(!mobile) // Start expanded on desktop, collapsed on mobile
+      setIsHovered(true) // Always start with hover state (dropshadow + large size) by default
     }
 
     checkMobile()
@@ -120,25 +120,25 @@ export function FloatingBranding({
     >
       <div
         className={`
-          ${isMobile ? (isHovered ? sizeClasses.xl : sizeClasses[size]) : (isHovered || !isPastFirstSection ? sizeClasses.xl : sizeClasses[size])}
+          ${isMobile ? (!isHovered ? sizeClasses.xl : sizeClasses[size]) : (!isHovered || !isPastFirstSection ? sizeClasses.xl : sizeClasses[size])}
           rounded-full overflow-hidden transition-all duration-500 ease-out
           border-2 border-border/20
           bg-background/80 backdrop-blur-sm
           hover:border-border/40
           cursor-pointer hover:shadow-lg
-          ${isMobile ? (isHovered ? 'scale-125 shadow-2xl' : 'scale-100') : (isHovered || !isPastFirstSection ? 'scale-125 shadow-2xl' : 'hover:scale-110')}
+          ${isMobile ? (!isHovered ? 'scale-125 shadow-2xl' : 'scale-100') : (!isHovered || !isPastFirstSection ? 'scale-125 shadow-2xl' : 'hover:scale-110')}
         `}
-        onMouseEnter={() => !isMobile && setIsHovered(true)}
-        onMouseLeave={() => !isMobile && setIsHovered(false)}
+        onMouseEnter={() => !isMobile && setIsHovered(false)}
+        onMouseLeave={() => !isMobile && setIsHovered(true)}
         onClick={() => isMobile && setIsHovered(!isHovered)}
-        onTouchStart={() => isMobile && setIsHovered(true)}
-        onTouchEnd={() => isMobile && setIsHovered(false)}
+        onTouchStart={() => isMobile && setIsHovered(false)}
+        onTouchEnd={() => isMobile && setIsHovered(true)}
       >
         <Image
           src={src}
           alt={alt}
-          width={isMobile ? (isHovered ? 128 : 80) : ((isHovered || !isPastFirstSection) ? 128 : 80)}
-          height={isMobile ? (isHovered ? 128 : 80) : ((isHovered || !isPastFirstSection) ? 128 : 80)}
+          width={isMobile ? (!isHovered ? 128 : 80) : ((!isHovered || !isPastFirstSection) ? 128 : 80)}
+          height={isMobile ? (!isHovered ? 128 : 80) : ((!isHovered || !isPastFirstSection) ? 128 : 80)}
           className="w-full h-full object-cover transition-all duration-500"
           unoptimized
         />
