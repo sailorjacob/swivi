@@ -2,17 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/view-tracking",
-      "schedule": "0 */4 * * *",
-      "headers": {
-        "Authorization": "Bearer 15fd6d93b3fb8674db88a77ada0edbe76d5784d9c2efa65c047d1e7481962d2d"
-      }
+      "schedule": "0 */4 * * *"
     },
     {
-      "path": "/api/cron/payout-calculation", 
-      "schedule": "0 */4 * * *",
-      "headers": {
-        "Authorization": "Bearer 15fd6d93b3fb8674db88a77ada0edbe76d5784d9c2efa65c047d1e7481962d2d"
-      }
+      "path": "/api/cron/payout-calculation",
+      "schedule": "0 */4 * * *"
     }
   ]
 }

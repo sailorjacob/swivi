@@ -7,11 +7,17 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   try {
-    // Basic security check - only allow from authorized sources
-    const authHeader = request.headers.get('authorization')
-    const cronSecret = process.env.CRON_SECRET
+    // Security check for Vercel cron jobs
+    // Vercel cron jobs come from specific IPs/user agents
+    const userAgent = request.headers.get('user-agent') || ''
+    const isVercelCron = userAgent.includes('Vercel-Cron') || userAgent.includes('vercel-cron')
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    // For development/testing, allow if no cron secret is set
+    const cronSecret = process.env.CRON_SECRET
+    const authHeader = request.headers.get('authorization')
+
+    // Allow if: it's a Vercel cron job, or has valid auth header, or no secret is configured (dev mode)
+    if (!isVercelCron && cronSecret && authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
