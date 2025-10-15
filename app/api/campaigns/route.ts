@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
+import { NotificationService } from "@/lib/notification-service"
+import { RateLimitingService } from "@/lib/rate-limiting-service"
 import { z } from "zod"
 
 const createCampaignSchema = z.object({
@@ -75,6 +77,20 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check
+    const rateLimitingService = RateLimitingService.getInstance()
+    const rateLimitResult = await rateLimitingService.checkRateLimit(
+      'campaign:create',
+      request.ip || 'unknown'
+    )
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Please try again later." },
+        { status: 429 }
+      )
+    }
+
     const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
@@ -128,6 +144,15 @@ export async function POST(request: NextRequest) {
     })
 
     console.log("🎉 Created campaign:", JSON.stringify(campaign, null, 2))
+
+    // Send notification to all clippers about new campaign
+    if (campaign.status === "ACTIVE") {
+      const notificationService = new NotificationService()
+      await notificationService.notifyNewCampaignAvailable(
+        campaign.id,
+        campaign.title
+      )
+    }
 
     return NextResponse.json(campaign, { status: 201 })
   } catch (error) {

@@ -1,24 +1,14 @@
-interface TikTokScrapeResult {
-  authorMeta: {
-    avatar: string
-    name: string
-  }
-  text: string
-  diggCount: number
-  shareCount: number
-  playCount: number
-  commentCount: number
-  collectCount: number
-  videoMeta: {
-    duration: number
-  }
-  musicMeta: {
-    musicName: string
-    musicAuthor: string
-    musicOriginal: boolean
-  }
-  createTimeISO: string
-  webVideoUrl: string
+interface YouTubeScrapeResult {
+  title: string
+  id: string
+  url: string
+  viewCount: number
+  date: string
+  likes: number
+  channelName: string
+  channelUrl: string
+  numberOfSubscribers: number
+  duration: string
 }
 
 interface ApifyResponse {
@@ -28,47 +18,36 @@ interface ApifyResponse {
 }
 
 interface ApifyDatasetItem {
-  pageFunctionResult: TikTokScrapeResult[]
+  pageFunctionResult: YouTubeScrapeResult[]
 }
 
-export class ApifyTikTokScraper {
+export class ApifyYouTubeScraper {
   private apiToken: string
   private baseUrl = 'https://api.apify.com/v2'
+  private actorName = 'streamers/youtube-shorts-scraper'
 
   constructor(apiToken: string) {
     this.apiToken = apiToken
   }
 
   /**
-   * Scrapes TikTok video data using Apify
-   * @param postUrl - TikTok post URL to scrape
-   * @returns Promise with TikTok video data
+   * Scrapes YouTube video data using Apify
+   * @param videoUrl - YouTube video URL to scrape
+   * @returns Promise with YouTube video data
    */
-  async scrapeTikTokVideo(postUrl: string): Promise<TikTokScrapeResult | null> {
+  async scrapeYouTubeVideo(videoUrl: string): Promise<YouTubeScrapeResult | null> {
     try {
       // Step 1: Start the Apify actor run
-      const runResponse = await fetch(`${this.baseUrl}/acts/clockworks~tiktok-scraper/runs`, {
+      // TODO: Replace 'youtube-scraper-placeholder' with actual actor name
+      const runResponse = await fetch(`${this.baseUrl}/acts/${this.actorName}/runs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiToken}`,
         },
         body: JSON.stringify({
-          excludePinnedPosts: false,
-          postURLs: [postUrl],
-          proxyCountryCode: "None",
-          resultsPerPage: 1,
-          scrapeRelatedVideos: false,
-          shouldDownloadAvatars: false,
-          shouldDownloadCovers: false,
-          shouldDownloadMusicCovers: false,
-          shouldDownloadSlideshowImages: false,
-          shouldDownloadSubtitles: false,
-          shouldDownloadVideos: false,
-          profileScrapeSections: ["videos"],
-          profileSorting: "latest",
-          searchSection: "",
-          maxProfilesPerQuery: 10
+          channels: [videoUrl],
+          maxResultsShorts: 1
         }),
       })
 
@@ -133,7 +112,7 @@ export class ApifyTikTokScraper {
         throw new Error(`Failed to fetch dataset: ${datasetResponse.status}`)
       }
 
-      const datasetItems: TikTokScrapeResult[] = await datasetResponse.json()
+      const datasetItems: YouTubeScrapeResult[] = await datasetResponse.json()
 
       // Extract the first result (should be the only one based on our configuration)
       const result = datasetItems[0]
@@ -145,18 +124,18 @@ export class ApifyTikTokScraper {
       return result
 
     } catch (error) {
-      console.error('Error scraping TikTok video:', error)
+      console.error('Error scraping YouTube video:', error)
       throw error
     }
   }
 
   /**
-   * Scrapes multiple TikTok videos concurrently
-   * @param postUrls - Array of TikTok post URLs to scrape
-   * @returns Promise with array of TikTok video data
+   * Scrapes multiple YouTube videos concurrently
+   * @param videoUrls - Array of YouTube video URLs to scrape
+   * @returns Promise with array of YouTube video data
    */
-  async scrapeMultipleTikTokVideos(postUrls: string[]): Promise<(TikTokScrapeResult | null)[]> {
-    const promises = postUrls.map(url => this.scrapeTikTokVideo(url))
+  async scrapeMultipleYouTubeVideos(videoUrls: string[]): Promise<(YouTubeScrapeResult | null)[]> {
+    const promises = videoUrls.map(url => this.scrapeYouTubeVideo(url))
     return Promise.allSettled(promises).then(results =>
       results.map(result =>
         result.status === 'fulfilled' ? result.value : null

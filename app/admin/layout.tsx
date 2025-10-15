@@ -25,6 +25,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 
 interface NavItem {
   label: string

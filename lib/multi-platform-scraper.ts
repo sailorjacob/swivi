@@ -1,4 +1,7 @@
 import { ApifyTikTokScraper } from './apify-tiktok-scraper'
+import { ApifyYouTubeScraper } from './apify-youtube-scraper'
+import { ApifyInstagramScraper } from './apify-instagram-scraper'
+import { ApifyTwitterScraper } from './apify-twitter-scraper'
 import { SocialPlatform } from '@prisma/client'
 
 export interface ScrapedContentData {
@@ -77,11 +80,11 @@ export class MultiPlatformScraper {
   }
 
   private initializeScrapers() {
-    // Initialize TikTok scraper
+    // Initialize all platform scrapers
     this.scrapers.set('TIKTOK', new ApifyTikTokScraper(this.apifyToken))
-
-    // Note: Other scrapers will be initialized when we have the specific Apify actor names
-    // For now, we'll create placeholder methods that can be implemented when we have the details
+    this.scrapers.set('YOUTUBE', new ApifyYouTubeScraper(this.apifyToken))
+    this.scrapers.set('INSTAGRAM', new ApifyInstagramScraper(this.apifyToken))
+    this.scrapers.set('TWITTER', new ApifyTwitterScraper(this.apifyToken))
   }
 
   /**
@@ -148,54 +151,41 @@ export class MultiPlatformScraper {
 
   /**
    * YouTube scraper using Apify
-   * TODO: Replace with actual Apify YouTube actor when provided
    */
   private async scrapeYouTubeVideo(url: string): Promise<ApifyScraperResponse> {
-    // Placeholder for YouTube scraping
-    // This will be implemented with the actual Apify YouTube actor
-    throw new Error('YouTube scraper not yet implemented - waiting for Apify actor details')
-
-    // Example implementation would be:
-    /*
-    const response = await fetch(`${this.baseUrl}/acts/youtube-scraper/runs`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apifyToken}`,
-      },
-      body: JSON.stringify({
-        videoUrls: [url],
-        // other YouTube-specific parameters
-      }),
-    })
-
-    const runData = await response.json()
-    // Poll for completion and return data
-    */
+    const scraper = this.scrapers.get('YOUTUBE') as ApifyYouTubeScraper
+    if (!scraper) {
+      throw new Error('YouTube scraper not initialized')
+    }
+    return scraper.scrapeYouTubeVideo(url)
   }
 
   /**
    * Twitter/X scraper using Apify
-   * TODO: Replace with actual Apify Twitter actor when provided
    */
   private async scrapeTwitterPost(url: string): Promise<ApifyScraperResponse> {
-    // Placeholder for Twitter scraping
-    throw new Error('Twitter scraper not yet implemented - waiting for Apify actor details')
+    const scraper = this.scrapers.get('TWITTER') as ApifyTwitterScraper
+    if (!scraper) {
+      throw new Error('Twitter scraper not initialized')
+    }
+    return scraper.scrapeTwitterPost(url)
   }
 
   /**
    * Instagram scraper using Apify
-   * TODO: Replace with actual Apify Instagram actor when provided
    */
   private async scrapeInstagramPost(url: string): Promise<ApifyScraperResponse> {
-    // Placeholder for Instagram scraping
-    throw new Error('Instagram scraper not yet implemented - waiting for Apify actor details')
+    const scraper = this.scrapers.get('INSTAGRAM') as ApifyInstagramScraper
+    if (!scraper) {
+      throw new Error('Instagram scraper not initialized')
+    }
+    return scraper.scrapeInstagramPost(url)
   }
 
   /**
    * Transforms raw Apify data into standardized format
    */
-  private transformRawData(rawData: ApifyScraperResponse, platform: SocialPlatform, url: string): ScrapedContentData {
+  private transformRawData(rawData: any, platform: SocialPlatform, url: string): ScrapedContentData {
     const baseData = {
       platform,
       url
@@ -209,7 +199,7 @@ export class MultiPlatformScraper {
           likes: rawData.diggCount,
           comments: rawData.commentCount,
           shares: rawData.shareCount,
-          author: rawData.authorMeta?.name,
+          author: rawData['authorMeta.name'],
           title: rawData.text,
           createdAt: rawData.createTimeISO ? new Date(rawData.createTimeISO) : undefined
         }
@@ -218,17 +208,16 @@ export class MultiPlatformScraper {
         return {
           ...baseData,
           views: rawData.viewCount,
-          likes: rawData.likeCount,
+          likes: rawData.likes,
           title: rawData.title,
-          description: rawData.description,
-          author: rawData.channelTitle,
-          createdAt: rawData.publishedAt ? new Date(rawData.publishedAt) : undefined
+          author: rawData.channelName,
+          createdAt: rawData.date ? new Date(rawData.date) : undefined
         }
 
       case 'TWITTER':
         return {
           ...baseData,
-          views: rawData.viewCount || 0, // Twitter doesn't have traditional views
+          views: rawData.viewCount || 0,
           likes: rawData.likeCount,
           comments: rawData.replyCount,
           shares: rawData.retweetCount,
@@ -241,9 +230,9 @@ export class MultiPlatformScraper {
         return {
           ...baseData,
           views: rawData.videoViewCount || rawData.videoPlayCount,
-          likes: rawData.instagramLikeCount,
-          comments: rawData.instagramCommentCount,
-          shares: rawData.instagramShareCount,
+          likes: rawData.likesCount,
+          comments: rawData.commentsCount,
+          shares: 0, // Instagram doesn't provide share count in this format
           author: rawData.ownerFullName,
           title: rawData.caption,
           createdAt: rawData.timestamp ? new Date(rawData.timestamp) : undefined

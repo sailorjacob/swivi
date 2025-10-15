@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
+import { RateLimitingService } from "@/lib/rate-limiting-service"
 import { z } from "zod"
 
 const createSubmissionSchema = z.object({
@@ -79,6 +80,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
+    // Rate limiting check
+    const rateLimitingService = RateLimitingService.getInstance()
+    const userIdentifier = dbUser.id
+
+    const rateLimitResult = await rateLimitingService.checkRateLimit(
+      userIdentifier,
+      'submission:create'
+    )
+
+    if (!rateLimitResult.success) {
+      await rateLimitingService.recordViolation(
+        userIdentifier,
+        'submission:create',
+        request.headers.get('user-agent') || undefined,
+        request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined
+      )
+
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded',
+          limit: rateLimitResult.limit,
+          remaining: rateLimitResult.remaining,
+          resetTime: rateLimitResult.resetTime
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),
+            'Retry-After': Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString()
+          }
+        }
+      )
+    }
+
     const body = await request.json()
     const validatedData = createSubmissionSchema.parse(body)
 
@@ -89,6 +126,30 @@ export async function POST(request: NextRequest) {
 
     if (!campaign || campaign.status !== "ACTIVE") {
       return NextResponse.json({ error: "Campaign not found or inactive" }, { status: 404 })
+    }
+
+    // Fraud detection check
+    const fraudResult = await rateLimitingService.detectFraud(
+      dbUser.id,
+      'submission',
+      { clipUrl: validatedData.clipUrl, platform: validatedData.platform }
+    )
+
+    if (fraudResult.action === 'block') {
+      console.warn(`Blocked suspicious submission from user ${dbUser.id}:`, fraudResult.reasons)
+
+      return NextResponse.json(
+        {
+          error: 'Submission blocked due to suspicious activity',
+          reasons: fraudResult.reasons
+        },
+        { status: 403 }
+      )
+    }
+
+    if (fraudResult.action === 'flag') {
+      console.warn(`Flagged suspicious submission from user ${dbUser.id}:`, fraudResult.reasons)
+      // Continue with submission but log for manual review
     }
 
     // Create the submission
@@ -111,7 +172,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid data", details: error.errors }, { status: 400 })
     }
-    
+
     console.error("Error creating submission:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }

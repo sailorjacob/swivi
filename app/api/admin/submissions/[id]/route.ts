@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
+import { NotificationService } from "@/lib/notification-service"
 import { z } from "zod"
 
 const updateSubmissionSchema = z.object({
@@ -128,20 +129,58 @@ export async function PUT(
       }
     })
 
-    // If approved and has payout, update user's earnings
-    if (validatedData.status === "APPROVED" && validatedData.payout) {
-      await prisma.user.update({
-        where: { id: submission.userId },
-        data: {
-          totalEarnings: {
-            increment: validatedData.payout
+    // Send notifications based on status change
+    const notificationService = new NotificationService()
+
+    // If approved, send approval notification and create clip
+    if (validatedData.status === "APPROVED" && submission.status !== "APPROVED") {
+      // Create or link to clip for view tracking
+      let clipId = submission.clipId
+      if (!clipId) {
+        const clip = await prisma.clip.create({
+          data: {
+            userId: submission.userId,
+            url: submission.clipUrl,
+            platform: submission.platform,
+            status: 'ACTIVE'
           }
-        }
-      })
+        })
+        
+        // Update submission with clip reference
+        await prisma.clipSubmission.update({
+          where: { id: params.id },
+          data: { clipId: clip.id }
+        })
+        
+        clipId = clip.id
+      }
+
+      await notificationService.notifySubmissionApproved(
+        params.id,
+        submission.userId,
+        submission.campaigns.title
+      )
     }
 
-    // If paid, update campaign spent amount
+    // If rejected, send rejection notification
+    if (validatedData.status === "REJECTED" && submission.status !== "REJECTED") {
+      await notificationService.notifySubmissionRejected(
+        params.id,
+        submission.userId,
+        submission.campaigns.title,
+        validatedData.rejectionReason
+      )
+    }
+
+    // If paid, send payout notification and update campaign
     if (validatedData.status === "PAID" && validatedData.payout) {
+      await notificationService.notifyPayoutProcessed(
+        submission.userId,
+        validatedData.payout,
+        `payout-${params.id}`
+      )
+
+      // Update campaign spent amount
       await prisma.campaign.update({
         where: { id: submission.campaignId },
         data: {

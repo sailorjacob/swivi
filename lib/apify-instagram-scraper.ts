@@ -1,24 +1,27 @@
-interface TikTokScrapeResult {
-  authorMeta: {
-    avatar: string
-    name: string
-  }
-  text: string
-  diggCount: number
-  shareCount: number
-  playCount: number
-  commentCount: number
-  collectCount: number
-  videoMeta: {
-    duration: number
-  }
-  musicMeta: {
-    musicName: string
-    musicAuthor: string
-    musicOriginal: boolean
-  }
-  createTimeISO: string
-  webVideoUrl: string
+interface InstagramScrapeResult {
+  inputUrl: string
+  id: string
+  type: string
+  shortCode: string
+  caption: string
+  hashtags: string[]
+  mentions: string[]
+  url: string
+  commentsCount: number
+  likesCount: number
+  videoViewCount?: number
+  videoPlayCount?: number
+  dimensionsHeight: number
+  dimensionsWidth: number
+  displayUrl: string
+  videoUrl?: string
+  timestamp: string
+  ownerFullName: string
+  ownerUsername: string
+  ownerId: string
+  productType: string
+  videoDuration?: number
+  isSponsored: boolean
 }
 
 interface ApifyResponse {
@@ -28,47 +31,43 @@ interface ApifyResponse {
 }
 
 interface ApifyDatasetItem {
-  pageFunctionResult: TikTokScrapeResult[]
+  pageFunctionResult: InstagramScrapeResult[]
 }
 
-export class ApifyTikTokScraper {
+export class ApifyInstagramScraper {
   private apiToken: string
   private baseUrl = 'https://api.apify.com/v2'
+  private actorName = 'apify/instagram-scraper'
 
   constructor(apiToken: string) {
     this.apiToken = apiToken
   }
 
   /**
-   * Scrapes TikTok video data using Apify
-   * @param postUrl - TikTok post URL to scrape
-   * @returns Promise with TikTok video data
+   * Scrapes Instagram post data using Apify
+   * @param postUrl - Instagram post URL to scrape
+   * @returns Promise with Instagram post data
    */
-  async scrapeTikTokVideo(postUrl: string): Promise<TikTokScrapeResult | null> {
+  async scrapeInstagramPost(postUrl: string): Promise<InstagramScrapeResult | null> {
     try {
       // Step 1: Start the Apify actor run
-      const runResponse = await fetch(`${this.baseUrl}/acts/clockworks~tiktok-scraper/runs`, {
+      // TODO: Replace 'instagram-scraper-placeholder' with actual actor name
+      const runResponse = await fetch(`${this.baseUrl}/acts/${this.actorName}/runs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiToken}`,
         },
         body: JSON.stringify({
-          excludePinnedPosts: false,
-          postURLs: [postUrl],
-          proxyCountryCode: "None",
-          resultsPerPage: 1,
-          scrapeRelatedVideos: false,
-          shouldDownloadAvatars: false,
-          shouldDownloadCovers: false,
-          shouldDownloadMusicCovers: false,
-          shouldDownloadSlideshowImages: false,
-          shouldDownloadSubtitles: false,
-          shouldDownloadVideos: false,
-          profileScrapeSections: ["videos"],
-          profileSorting: "latest",
-          searchSection: "",
-          maxProfilesPerQuery: 10
+          addParentData: false,
+          directUrls: [postUrl],
+          enhanceUserSearchWithFacebookPage: false,
+          isUserReelFeedURL: false,
+          isUserTaggedFeedURL: false,
+          resultsLimit: 200,
+          resultsType: "posts",
+          searchLimit: 1,
+          searchType: "hashtag"
         }),
       })
 
@@ -133,7 +132,7 @@ export class ApifyTikTokScraper {
         throw new Error(`Failed to fetch dataset: ${datasetResponse.status}`)
       }
 
-      const datasetItems: TikTokScrapeResult[] = await datasetResponse.json()
+      const datasetItems: InstagramScrapeResult[] = await datasetResponse.json()
 
       // Extract the first result (should be the only one based on our configuration)
       const result = datasetItems[0]
@@ -145,18 +144,18 @@ export class ApifyTikTokScraper {
       return result
 
     } catch (error) {
-      console.error('Error scraping TikTok video:', error)
+      console.error('Error scraping Instagram post:', error)
       throw error
     }
   }
 
   /**
-   * Scrapes multiple TikTok videos concurrently
-   * @param postUrls - Array of TikTok post URLs to scrape
-   * @returns Promise with array of TikTok video data
+   * Scrapes multiple Instagram posts concurrently
+   * @param postUrls - Array of Instagram post URLs to scrape
+   * @returns Promise with array of Instagram post data
    */
-  async scrapeMultipleTikTokVideos(postUrls: string[]): Promise<(TikTokScrapeResult | null)[]> {
-    const promises = postUrls.map(url => this.scrapeTikTokVideo(url))
+  async scrapeMultipleInstagramPosts(postUrls: string[]): Promise<(InstagramScrapeResult | null)[]> {
+    const promises = postUrls.map(url => this.scrapeInstagramPost(url))
     return Promise.allSettled(promises).then(results =>
       results.map(result =>
         result.status === 'fulfilled' ? result.value : null

@@ -1,9 +1,24 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
+import { RateLimitingService } from "@/lib/rate-limiting-service"
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting check for admin analytics
+    const rateLimitingService = RateLimitingService.getInstance()
+    const rateLimitResult = await rateLimitingService.checkRateLimit(
+      'admin:analytics',
+      request.ip || 'unknown'
+    )
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Please try again later." },
+        { status: 429 }
+      )
+    }
+
     const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {

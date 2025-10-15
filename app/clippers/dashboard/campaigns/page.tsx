@@ -8,6 +8,7 @@ import { Badge } from "../../../../components/ui/badge"
 import { Button } from "../../../../components/ui/button"
 import { Progress } from "../../../../components/ui/progress"
 import { CampaignDetailModal } from "../../../../components/clippers/campaign-detail-modal"
+import { ErrorBoundary, CampaignErrorFallback } from "../../../../components/error-boundary"
 import Image from "next/image"
 import { 
   TrendingUp, 
@@ -146,14 +147,15 @@ export default function CampaignsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-light text-foreground">Active Campaigns</h1>
-        <p className="text-muted-foreground mt-2">
-          Join campaigns and start earning from your content
-        </p>
-      </div>
+    <ErrorBoundary fallback={CampaignErrorFallback}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-light text-foreground">Active Campaigns</h1>
+          <p className="text-muted-foreground mt-2">
+            Join campaigns and start earning from your content
+          </p>
+        </div>
 
       {/* Empty State */}
       {campaigns.length === 0 ? (
@@ -331,12 +333,13 @@ export default function CampaignsPage() {
         </div>
       )}
 
-      {/* Campaign Detail Modal */}
-      <CampaignDetailModal
-        campaign={selectedCampaign ? transformCampaignForModal(selectedCampaign) : null}
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-      />
-    </div>
+        {/* Campaign Detail Modal */}
+        <CampaignDetailModal
+          campaign={selectedCampaign ? transformCampaignForModal(selectedCampaign) : null}
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+        />
+      </div>
+    </ErrorBoundary>
   )
 }

@@ -34,6 +34,8 @@ import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { FloatingBranding } from "@/components/ui/floating-branding"
+import { NotificationBell } from "@/components/notifications/notification-bell"
+import { ErrorBoundary, DashboardErrorFallback } from "@/components/error-boundary"
 
 interface NavItem {
   label: string
@@ -218,6 +220,7 @@ function Sidebar({ className }: { className?: string }) {
               {dbUser?.email || activeSession?.user?.email || ""}
             </p>
           </div>
+          <NotificationBell />
         </div>
 
         <Button
@@ -290,31 +293,36 @@ export default function DashboardLayout({
             <SwiviLogo size={32} />
             <h1 className="text-foreground font-light">Swivi Clippers</h1>
           </Link>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                <Menu className="w-6 h-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-64 bg-card border-r border-border">
-              <Sidebar />
-            </SheetContent>
-          </Sheet>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                  <Menu className="w-6 h-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-64 bg-card border-r border-border">
+                <Sidebar />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden relative">
-          <AnimatePresence mode="wait">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="p-6 min-h-full"
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          <ErrorBoundary fallback={DashboardErrorFallback}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="p-6 min-h-full"
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          </ErrorBoundary>
 
           {/* Removed overlapping branding element */}
         </main>
