@@ -21,7 +21,7 @@ export class NotificationService {
    */
   async createNotification(data: NotificationData): Promise<void> {
     try {
-      await prisma.Notification.create({
+      await prisma.notification.create({
         data: {
           userId: data.userId,
           type: data.type,
@@ -55,7 +55,7 @@ export class NotificationService {
         data: n.data || null
       }))
 
-      await prisma.Notification.createMany({
+      await prisma.notification.createMany({
         data: notificationData
       })
 
@@ -75,12 +75,22 @@ export class NotificationService {
   /**
    * Marks a notification as read
    */
-  async markAsRead(notificationId: string, userId: string): Promise<void> {
+  async markAsRead(notificationId: string, supabaseUserId: string): Promise<void> {
     try {
-      await prisma.Notification.updateMany({
+      // First, find the user's internal ID from their Supabase auth ID
+      const user = await prisma.user.findUnique({
+        where: { supabaseAuthId: supabaseUserId },
+        select: { id: true }
+      })
+
+      if (!user) {
+        throw new Error('User not found')
+      }
+
+      await prisma.notification.updateMany({
         where: {
           id: notificationId,
-          userId: userId
+          userId: user.id
         },
         data: {
           read: true,
@@ -96,11 +106,21 @@ export class NotificationService {
   /**
    * Marks all notifications as read for a user
    */
-  async markAllAsRead(userId: string): Promise<void> {
+  async markAllAsRead(supabaseUserId: string): Promise<void> {
     try {
-      await prisma.Notification.updateMany({
+      // First, find the user's internal ID from their Supabase auth ID
+      const user = await prisma.user.findUnique({
+        where: { supabaseAuthId: supabaseUserId },
+        select: { id: true }
+      })
+
+      if (!user) {
+        throw new Error('User not found')
+      }
+
+      await prisma.notification.updateMany({
         where: {
-          userId: userId,
+          userId: user.id,
           read: false
         },
         data: {
@@ -117,7 +137,7 @@ export class NotificationService {
   /**
    * Gets notifications for a user
    */
-  async getUserNotifications(userId: string, options?: {
+  async getUserNotifications(supabaseUserId: string, options?: {
     limit?: number
     offset?: number
     unreadOnly?: boolean
@@ -129,21 +149,36 @@ export class NotificationService {
     try {
       const { limit = 50, offset = 0, unreadOnly = false } = options || {}
 
-      const whereClause: any = { userId }
+      // First, find the user's internal ID from their Supabase auth ID
+      const user = await prisma.user.findUnique({
+        where: { supabaseAuthId: supabaseUserId },
+        select: { id: true }
+      })
+
+      if (!user) {
+        // User doesn't exist in our database yet, return empty notifications
+        return {
+          notifications: [],
+          total: 0,
+          unread: 0
+        }
+      }
+
+      const whereClause: any = { userId: user.id }
       if (unreadOnly) {
         whereClause.read = false
       }
 
       const [notifications, total, unread] = await Promise.all([
-        prisma.Notification.findMany({
+        prisma.notification.findMany({
           where: whereClause,
           orderBy: { createdAt: 'desc' },
           take: limit,
           skip: offset
         }),
-        prisma.Notification.count({ where: whereClause }),
-        prisma.Notification.count({
-          where: { userId, read: false }
+        prisma.notification.count({ where: whereClause }),
+        prisma.notification.count({
+          where: { userId: user.id, read: false }
         })
       ])
 
@@ -329,15 +364,15 @@ export class NotificationService {
   }> {
     try {
       const [totalNotifications, unreadNotifications, notificationsByType, recentActivity] = await Promise.all([
-        prisma.Notification.count(),
-        prisma.Notification.count({ where: { read: false } }),
-        prisma.Notification.groupBy({
+        prisma.notification.count(),
+        prisma.notification.count({ where: { read: false } }),
+        prisma.notification.groupBy({
           by: ['type'],
           _count: {
             type: true
           }
         }),
-        prisma.Notification.findMany({
+        prisma.notification.findMany({
           take: 10,
           orderBy: { createdAt: 'desc' },
           include: {
