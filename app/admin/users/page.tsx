@@ -30,6 +30,7 @@ interface User {
   id: string
   name: string | null
   email: string | null
+  image: string | null
   role: "CLIPPER" | "ADMIN"
   createdAt: string
   totalViews: number
@@ -445,15 +446,30 @@ export default function AdminUsersPage() {
                     key={user.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                   >
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 flex-1">
                       <div className="flex-shrink-0">
-                        <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                        {user.image ? (
+                          <img 
+                            src={user.image} 
+                            alt={user.name || user.email || 'User'} 
+                            className="w-10 h-10 rounded-full object-cover"
+                            onError={(e) => {
+                              // Fallback to icon if image fails to load
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={`w-10 h-10 bg-muted rounded-full flex items-center justify-center ${user.image ? 'hidden' : ''}`}>
                           <RoleIcon className="h-5 w-5 text-muted-foreground" />
                         </div>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-1">
-                          <h3 className="font-medium">
+                          <h3 
+                            className="font-medium cursor-pointer hover:text-primary transition-colors"
+                            onClick={() => setSelectedUser(user)}
+                          >
                             {user.name || user.email || 'Unknown User'}
                           </h3>
                           <Badge className={getRoleColor(user.role)}>
@@ -472,41 +488,6 @@ export default function AdminUsersPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {user.role !== "ADMIN" && (
-                        <Button
-                          size="sm"
-                          onClick={() => promoteToAdmin(user.id)}
-                        >
-                          <Crown className="h-4 w-4 mr-1" />
-                          Promote
-                        </Button>
-                      )}
-                      {user.role === "ADMIN" && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <UserX className="h-4 w-4 mr-1" />
-                              Demote
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Demote Admin</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to demote this admin to clipper? They will lose admin access.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => demoteFromAdmin(user.id)}
-                              >
-                                Demote
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
                       <Button
                         variant="outline"
                         size="sm"
@@ -658,6 +639,55 @@ export default function AdminUsersPage() {
                       </div>
                     </div>
                   )}
+
+                  {/* Role Management Actions */}
+                  <div className="pt-4 border-t">
+                    <label className="text-sm font-medium">Role Management</label>
+                    <div className="mt-2 flex gap-3">
+                      {selectedUser.role !== "ADMIN" && (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            promoteToAdmin(selectedUser.id)
+                            setSelectedUser(null) // Close modal after action
+                          }}
+                          className="flex-1"
+                        >
+                          <Crown className="h-4 w-4 mr-2" />
+                          Promote to Admin
+                        </Button>
+                      )}
+                      {selectedUser.role === "ADMIN" && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm" className="flex-1">
+                              <UserX className="h-4 w-4 mr-2" />
+                              Demote to Clipper
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Demote Admin</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to demote {selectedUser.name || selectedUser.email} from admin to clipper? They will lose admin access immediately.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => {
+                                  demoteFromAdmin(selectedUser.id)
+                                  setSelectedUser(null) // Close modal after action
+                                }}
+                              >
+                                Demote
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
