@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { ViewTrackingService } from "@/lib/view-tracking"
+import { XViewTrackingService } from "@/lib/x-view-tracking"
 import { prisma } from "@/lib/prisma"
 
 // This endpoint should only be called by authorized services (cron jobs, etc.)
@@ -25,18 +25,12 @@ export async function GET(request: NextRequest) {
     }
 
     const apifyToken = process.env.APIFY_API_KEY
+    
+    // X API credentials are handled internally by XViewTrackingService
+    const viewTrackingService = new XViewTrackingService(apifyToken)
 
-    if (!apifyToken) {
-      return NextResponse.json(
-        { error: "Apify API key not configured" },
-        { status: 500 }
-      )
-    }
-
-    const viewTrackingService = new ViewTrackingService(apifyToken)
-
-    // Update view tracking for all platforms
-    console.log('🚀 Starting automated view tracking update...')
+    // Update view tracking for active campaigns only
+    console.log('🚀 Starting automated view tracking update for active campaigns...')
     const startTime = Date.now()
 
     await viewTrackingService.updateAllPlatformViews()
@@ -59,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "View tracking updated successfully",
+      message: "View tracking updated successfully for active campaigns",
       duration: `${duration}ms`
     })
 

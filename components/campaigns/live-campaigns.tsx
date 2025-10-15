@@ -48,6 +48,7 @@ interface LiveCampaign {
 
 export function LiveCampaigns() {
   const [campaigns, setCampaigns] = useState<LiveCampaign[]>([])
+  const [campaignStats, setCampaignStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
@@ -65,13 +66,24 @@ export function LiveCampaigns() {
         params.append("status", selectedStatus.toUpperCase())
       }
 
-      const response = await fetch(`/api/campaigns?${params}`)
-      if (response.ok) {
-        const data = await response.json()
-        setCampaigns(data)
+      // Fetch both campaigns and real-time stats
+      const [campaignsResponse, statsResponse] = await Promise.all([
+        fetch(`/api/campaigns?${params}`),
+        fetch('/api/campaigns/stats')
+      ])
+      
+      if (campaignsResponse.ok) {
+        const campaignsData = await campaignsResponse.json()
+        setCampaigns(campaignsData)
       } else {
         setError("Failed to load campaigns")
       }
+      
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json()
+        setCampaignStats(statsData)
+      }
+      
     } catch (error) {
       console.error("Error fetching campaigns:", error)
       setError("Failed to load campaigns")
@@ -83,6 +95,15 @@ export function LiveCampaigns() {
   useEffect(() => {
     fetchCampaigns()
   }, [selectedStatus])
+
+  // Auto-refresh every 5 minutes for live data
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchCampaigns()
+    }, 5 * 60 * 1000) // 5 minutes
+
+    return () => clearInterval(interval)
+  }, [])
 
   // Transform API data to UI format
   const transformCampaignForUI = (campaign: any): LiveCampaign => {
@@ -116,30 +137,34 @@ export function LiveCampaigns() {
 
   const liveCampaigns = campaigns.map(transformCampaignForUI)
 
-  // Calculate real stats
-  const campaignStats = [
+  // Calculate real stats using live data
+  const realTimeStats = [
     {
       icon: Target,
       label: "Active Activations",
-      value: campaigns.filter(c => c.status === "ACTIVE").length.toString(),
+      value: campaignStats?.summary?.totalActiveCampaigns?.toString() || campaigns.filter(c => c.status === "ACTIVE").length.toString(),
       description: "Available now"
     },
     {
       icon: Users,
       label: "Total Participants",
-      value: campaigns.reduce((sum, c) => sum + c._count.clipSubmissions, 0).toString() + "+",
+      value: (campaignStats?.summary?.totalSubmissions || campaigns.reduce((sum, c) => sum + c._count.clipSubmissions, 0)).toString() + "+",
       description: "Clippers earning"
     },
     {
       icon: DollarSign,
       label: "Live Budgets",
-      value: `$${(campaigns.reduce((sum, c) => sum + c.budget, 0) / 1000).toFixed(1)}K`,
+      value: campaignStats?.summary?.totalBudget ? `$${(campaignStats.summary.totalBudget / 1000).toFixed(1)}K` : `$${(campaigns.reduce((sum, c) => sum + c.budget, 0) / 1000).toFixed(1)}K`,
       description: "Available payouts"
     },
     {
       icon: TrendingUp,
       label: "Views Generated",
-      value: "Live", // This would be calculated from view tracking
+      value: campaignStats?.summary?.totalViews ? 
+        campaignStats.summary.totalViews > 1000000 ? 
+          `${(campaignStats.summary.totalViews / 1000000).toFixed(1)}M` : 
+          `${(campaignStats.summary.totalViews / 1000).toFixed(1)}K`
+        : "Live",
       description: "Real-time tracking"
     }
   ]
@@ -177,9 +202,16 @@ export function LiveCampaigns() {
     return Math.min((spent / total) * 100, 100)
   }
 
-  // Helper function to get budget spent (for backward compatibility)
+  // Helper function to get budget spent with real-time data
   const getBudgetSpent = (campaign: LiveCampaign) => {
-    return campaign.spent || 0
+    const realTimeData = campaignStats?.campaigns?.find((c: any) => c.id === campaign.id)
+    return realTimeData?.spent || campaign.spent || 0
+  }
+
+  // Helper function to get real-time views
+  const getCampaignViews = (campaign: LiveCampaign) => {
+    const realTimeData = campaignStats?.campaigns?.find((c: any) => c.id === campaign.id)
+    return realTimeData?.totalViews || campaign.viewsGenerated || 0
   }
 
   if (error) {
@@ -238,7 +270,7 @@ export function LiveCampaigns() {
         className="mb-12"
       >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {campaignStats.map((stat, index) => (
+          {realTimeStats.map((stat, index) => (
             <motion.div
               key={stat.label}
               variants={itemVariants}

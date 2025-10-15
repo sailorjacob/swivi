@@ -125,6 +125,25 @@ export function CreatorViewsCalculator() {
               <CardTitle className="text-xl font-normal">Adjust Your Campaign Parameters</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
+              {/* Budget - First Slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-sm font-medium">Campaign Budget</label>
+                  <span className="text-2xl font-light transition-all duration-200 ease-out">{formatCurrency(values.budget)}</span>
+                </div>
+                <Slider
+                  value={[values.budget]}
+                  onValueChange={(value: number[]) => handleSliderChange('budget', value)}
+                  min={500}
+                  max={10000}
+                  step={100}
+                  className="w-full"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Total budget for your clipper campaign
+                </p>
+              </div>
+
               {/* Number of Clippers */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
@@ -210,25 +229,6 @@ export function CreatorViewsCalculator() {
                 </p>
               </div>
 
-              {/* Budget */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-medium">Campaign Budget</label>
-                  <span className="text-2xl font-light transition-all duration-200 ease-out">{formatCurrency(values.budget)}</span>
-                </div>
-                <Slider
-                  value={[values.budget]}
-                  onValueChange={(value: number[]) => handleSliderChange('budget', value)}
-                  min={500}
-                  max={10000}
-                  step={100}
-                  className="w-full"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Total budget for your clipper campaign
-                </p>
-              </div>
-
               {/* Views per Post */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
@@ -277,7 +277,7 @@ export function CreatorViewsCalculator() {
               >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Annual Ad Savings</span>
+                    <span className="text-sm text-muted-foreground">Budget & Savings</span>
                     <div className="flex items-center gap-1">
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
                       <Info className="h-3 w-3 text-muted-foreground" />
@@ -285,50 +285,15 @@ export function CreatorViewsCalculator() {
                   </div>
                   <p className="text-2xl font-light">{formatCurrency(annualSavings)} 💸</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    vs. traditional paid ads
+                    Annual savings vs. traditional ads
                   </p>
                   <p className="text-xs text-gray-400 mt-1 font-medium">
-                    Click to see breakdown
+                    Click for budget breakdown
                   </p>
                 </CardContent>
               </Card>
             </motion.div>
           </div>
-
-          {/* Budget Allocation */}
-          <Card className="mb-8 border-blue-200 bg-blue-50/50">
-            <CardHeader>
-              <CardTitle className="text-xl font-normal flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Budget Allocation Breakdown
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-white rounded-lg border">
-                  <p className="text-2xl font-light text-blue-600">{formatCurrency(calculateBudgetAllocation().budgetUsed)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Budget Used for Views</p>
-                  <p className="text-xs text-blue-600 font-medium">{calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of budget</p>
-                </div>
-                <div className="text-center p-4 bg-white rounded-lg border">
-                  <p className="text-2xl font-light text-green-600">{formatNumber(calculateBudgetAllocation().totalPossibleViews)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Max Views Budget Can Support</p>
-                  <p className="text-xs text-green-600 font-medium">At ${values.paymentPer1000Views.toFixed(2)} per 1K</p>
-                </div>
-                <div className="text-center p-4 bg-white rounded-lg border">
-                  <p className="text-2xl font-light text-gray-600">{formatCurrency(calculateBudgetAllocation().budgetRemaining)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Budget Remaining</p>
-                  <p className="text-xs text-gray-600 font-medium">Available for more views</p>
-                </div>
-              </div>
-              <div className="mt-4 p-3 bg-blue-100/50 rounded-lg border border-blue-200">
-                <p className="text-sm text-blue-800">
-                  Your {formatCurrency(values.budget)} budget can support up to {formatNumber(calculateBudgetAllocation().totalPossibleViews)} views at ${values.paymentPer1000Views.toFixed(2)} per 1,000 views. 
-                  With {values.numberOfClippers} clippers generating {formatNumber(monthlyViews * 12)} annual views, you'll use {calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of your budget.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Additional Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -456,9 +421,9 @@ export function CreatorViewsCalculator() {
             <div className="p-6 sm:p-8">
               <div className="flex items-start justify-between mb-8">
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-light text-foreground mb-3">Your Annual Savings Breakdown</h3>
+                  <h3 className="text-xl sm:text-2xl font-light text-foreground mb-3">Budget Allocation & Savings</h3>
                   <p className="text-2xl sm:text-3xl font-light text-foreground">{formatCurrency(annualSavings)}</p>
-                  <p className="text-sm text-muted-foreground mt-2">vs. traditional advertising</p>
+                  <p className="text-sm text-muted-foreground mt-2">Annual savings vs. traditional advertising</p>
                 </div>
                 <Button
                   variant="ghost"
@@ -471,8 +436,40 @@ export function CreatorViewsCalculator() {
               </div>
 
               <div className="space-y-6">
+                {/* Budget Allocation Breakdown */}
+                <Card className="border-blue-200 bg-blue-50/30">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-normal">Your Budget Allocation</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-white rounded-lg border">
+                        <p className="text-lg font-light text-blue-600">{formatCurrency(calculateBudgetAllocation().budgetUsed)}</p>
+                        <p className="text-xs text-muted-foreground">Budget Used</p>
+                        <p className="text-xs text-blue-600 font-medium">{calculateBudgetAllocation().budgetUtilization.toFixed(1)}%</p>
+                      </div>
+                      <div className="text-center p-3 bg-white rounded-lg border">
+                        <p className="text-lg font-light text-green-600">{formatNumber(calculateBudgetAllocation().totalPossibleViews)}</p>
+                        <p className="text-xs text-muted-foreground">Max Views Supported</p>
+                        <p className="text-xs text-green-600 font-medium">At ${values.paymentPer1000Views.toFixed(2)}/1K</p>
+                      </div>
+                      <div className="text-center p-3 bg-white rounded-lg border">
+                        <p className="text-lg font-light text-gray-600">{formatCurrency(calculateBudgetAllocation().budgetRemaining)}</p>
+                        <p className="text-xs text-muted-foreground">Budget Remaining</p>
+                        <p className="text-xs text-gray-600 font-medium">Available</p>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-blue-100/50 rounded-lg border border-blue-200">
+                      <p className="text-sm text-blue-800">
+                        Your {formatCurrency(values.budget)} budget supports up to {formatNumber(calculateBudgetAllocation().totalPossibleViews)} views at ${values.paymentPer1000Views.toFixed(2)} per 1,000 views. 
+                        With {values.numberOfClippers} clippers generating {formatNumber(monthlyViews * 12)} annual views, you'll use {calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of your budget.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Your {formatCurrency(values.budget)} budget is allocated to {values.numberOfClippers} clippers who earn ${values.paymentPer1000Views.toFixed(2)} per 1,000 views they generate. This performance-based model saves you up to {Math.round(((5 - values.paymentPer1000Views) / 5) * 100)}% compared to traditional paid ads at $5 CPM, using only {calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of your budget.
+                  Your performance-based model saves you up to {Math.round(((5 - values.paymentPer1000Views) / 5) * 100)}% compared to traditional paid ads at $5 CPM, while only using {calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of your available budget.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
