@@ -21,7 +21,7 @@ export class NotificationService {
    */
   async createNotification(data: NotificationData): Promise<void> {
     try {
-      await prisma.notification.create({
+      await prisma.Notification.create({
         data: {
           userId: data.userId,
           type: data.type,
@@ -55,7 +55,7 @@ export class NotificationService {
         data: n.data || null
       }))
 
-      await prisma.notification.createMany({
+      await prisma.Notification.createMany({
         data: notificationData
       })
 
@@ -77,7 +77,7 @@ export class NotificationService {
    */
   async markAsRead(notificationId: string, userId: string): Promise<void> {
     try {
-      await prisma.notification.updateMany({
+      await prisma.Notification.updateMany({
         where: {
           id: notificationId,
           userId: userId
@@ -98,7 +98,7 @@ export class NotificationService {
    */
   async markAllAsRead(userId: string): Promise<void> {
     try {
-      await prisma.notification.updateMany({
+      await prisma.Notification.updateMany({
         where: {
           userId: userId,
           read: false
@@ -135,14 +135,14 @@ export class NotificationService {
       }
 
       const [notifications, total, unread] = await Promise.all([
-        prisma.notification.findMany({
+        prisma.Notification.findMany({
           where: whereClause,
           orderBy: { createdAt: 'desc' },
           take: limit,
           skip: offset
         }),
-        prisma.notification.count({ where: whereClause }),
-        prisma.notification.count({
+        prisma.Notification.count({ where: whereClause }),
+        prisma.Notification.count({
           where: { userId, read: false }
         })
       ])
@@ -329,15 +329,15 @@ export class NotificationService {
   }> {
     try {
       const [totalNotifications, unreadNotifications, notificationsByType, recentActivity] = await Promise.all([
-        prisma.notification.count(),
-        prisma.notification.count({ where: { read: false } }),
-        prisma.notification.groupBy({
+        prisma.Notification.count(),
+        prisma.Notification.count({ where: { read: false } }),
+        prisma.Notification.groupBy({
           by: ['type'],
           _count: {
             type: true
           }
         }),
-        prisma.notification.findMany({
+        prisma.Notification.findMany({
           take: 10,
           orderBy: { createdAt: 'desc' },
           include: {

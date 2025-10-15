@@ -78,12 +78,8 @@ export default function ClipperDashboard() {
       return
     }
 
-    if (status === "authenticated" && session && session.user) {
-      console.log('✅ User authenticated, redirecting to campaigns')
-      // Redirect to campaigns page since that's the main functionality
-      router.replace("/clippers/dashboard/campaigns")
-      return
-    }
+    // Removed automatic redirect to campaigns - let users see the dashboard
+    console.log('✅ User authenticated, showing dashboard')
   }, [session, status, router])
 
   const fetchDashboardData = async () => {

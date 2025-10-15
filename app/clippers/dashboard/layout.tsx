@@ -45,8 +45,8 @@ interface NavItem {
 }
 
   const navItems: NavItem[] = [
-    { label: "Campaigns", href: "/clippers/dashboard/campaigns", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png" },
     { label: "Dashboard", href: "/clippers/dashboard", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/3422.png" },
+    { label: "Campaigns", href: "/clippers/dashboard/campaigns", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png" },
     { label: "Profile", href: "/clippers/dashboard/profile", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/342.png" },
     // Analytics temporarily hidden for platform cleanup
     // { label: "Analytics", href: "/clippers/dashboard/analytics", icon: BarChart3 },
