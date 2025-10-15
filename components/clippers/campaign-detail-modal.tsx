@@ -163,10 +163,10 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-card border-border">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card border-border">
         <div className="space-y-6">
           {/* Header */}
-          <div className="relative h-48 bg-muted rounded-lg overflow-hidden">
+          <div className="relative h-32 bg-muted rounded-lg overflow-hidden">
             <div className="absolute top-4 left-4">
               <Badge className="bg-foreground text-background">
                 LIVE
@@ -181,17 +181,98 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
               }}
             />
             <div className="absolute inset-0 bg-black/40 flex items-end">
-              <div className="p-6">
-                <h2 className="text-2xl font-light text-white mb-2">
+              <div className="p-4">
+                <h2 className="text-xl font-light text-white mb-1">
                   {campaign.title}
                 </h2>
-                <p className="text-white/80">by {campaign.creator}</p>
+                <p className="text-white/80 text-sm">by {campaign.creator}</p>
               </div>
             </div>
           </div>
 
+          {/* Submit Form - Moved to Top */}
+          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                <Link2 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-white">Submit Your Clip</h3>
+                <p className="text-sm text-muted-foreground">Ready to earn? Submit your content link below</p>
+              </div>
+            </div>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="platform" className="text-white font-medium">Platform</Label>
+                  <Select onValueChange={(value) => setValue("platform", value as any)}>
+                    <SelectTrigger className="mt-1 bg-background/50">
+                      <SelectValue placeholder="Select platform" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {campaign.platforms.map((platform) => {
+                        const Icon = platformIcons[platform as keyof typeof platformIcons]
+                        return (
+                          <SelectItem key={platform} value={platform}>
+                            <div className="flex items-center gap-2">
+                              <Icon className="w-4 h-4" />
+                              <span className="capitalize">{platform}</span>
+                            </div>
+                          </SelectItem>
+                        )
+                      })}
+                    </SelectContent>
+                  </Select>
+                  {errors.platform && (
+                    <p className="text-red-400 text-sm mt-1">{errors.platform.message}</p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="clipUrl" className="text-white font-medium">Content URL</Label>
+                  <div className="relative mt-1">
+                    <Link2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="clipUrl"
+                      placeholder={getPlatformPlaceholder(selectedPlatform)}
+                      className="pl-10 bg-background/50"
+                      {...register("clipUrl")}
+                    />
+                  </div>
+                  {errors.clipUrl && (
+                    <p className="text-red-400 text-sm mt-1">{errors.clipUrl.message}</p>
+                  )}
+                  {selectedPlatform && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {getPlatformHint(selectedPlatform)}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                  size="lg"
+                >
+                  {isSubmitting ? "Submitting..." : "Submit Clip & Start Earning"}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  size="lg"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </div>
+
           {/* Campaign Description */}
           <div>
+            <h3 className="text-lg font-medium text-white mb-2">About This Campaign</h3>
             <p className="text-muted-foreground leading-relaxed">
               {campaign.description}
             </p>
@@ -248,74 +329,6 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
             </div>
           )}
 
-          {/* Submit Form */}
-          <div className="border-t border-border pt-6">
-            <h3 className="text-lg font-medium text-white mb-4">Submit Your Clip</h3>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <Label htmlFor="clipUrl" className="text-white">Clip URL</Label>
-                <div className="relative mt-1">
-                  <Link2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="clipUrl"
-                    placeholder={getPlatformPlaceholder(selectedPlatform)}
-                    className="pl-10"
-                    {...register("clipUrl")}
-                  />
-                </div>
-                {errors.clipUrl && (
-                  <p className="text-red-500 text-sm mt-1">{errors.clipUrl.message}</p>
-                )}
-                {selectedPlatform && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {getPlatformHint(selectedPlatform)}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="platform" className="text-white">Platform</Label>
-                <Select onValueChange={(value) => setValue("platform", value as any)}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select platform" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {campaign.platforms.map((platform) => {
-                      const Icon = platformIcons[platform as keyof typeof platformIcons]
-                      return (
-                        <SelectItem key={platform} value={platform}>
-                          <div className="flex items-center gap-2">
-                            <Icon className="w-4 h-4" />
-                            <span className="capitalize">{platform}</span>
-                          </div>
-                        </SelectItem>
-                      )
-                    })}
-                  </SelectContent>
-                </Select>
-                {errors.platform && (
-                  <p className="text-red-500 text-sm mt-1">{errors.platform.message}</p>
-                )}
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="flex-1"
-                >
-                  {isSubmitting ? "Submitting..." : "Submit Clip"}
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </div>
         </div>
       </DialogContent>
     </Dialog>

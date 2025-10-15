@@ -194,7 +194,10 @@ export default function CampaignsPage() {
             <Card className="bg-card border-border hover:shadow-lg transition-all duration-300 cursor-pointer group">
               <CardContent className="p-0">
                 {/* Campaign Image */}
-                <div className="relative h-48 bg-muted rounded-t-lg overflow-hidden">
+                <div 
+                  className="relative h-48 bg-muted rounded-t-lg overflow-hidden cursor-pointer group-hover:scale-105 transition-transform duration-300"
+                  onClick={() => handleJoinCampaign(campaign)}
+                >
                   {isActive && (
                     <div className="absolute top-3 left-3 z-10">
                       <Badge className="bg-foreground text-background text-xs px-2 py-1">
@@ -209,6 +212,12 @@ export default function CampaignsPage() {
                       </Badge>
                     </div>
                   )}
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 z-5 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/20 backdrop-blur-sm rounded-full p-3">
+                      <Eye className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
                   <div className="relative w-full h-full">
                     {campaign.featuredImage && campaign.featuredImage.trim() !== '' ? (
                       <>
