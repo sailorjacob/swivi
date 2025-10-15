@@ -168,7 +168,7 @@ export class NotificationService {
       if (unreadOnly) {
         whereClause.read = false
       }
-
+      
       const [notifications, total, unread] = await Promise.all([
         prisma.notification.findMany({
           where: whereClause,

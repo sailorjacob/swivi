@@ -21,7 +21,15 @@ export async function GET(request: NextRequest) {
 
     const { user, error } = await getServerUserWithRole(request)
 
+    console.log('🔍 Notifications API - User auth result:', { 
+      hasUser: !!user, 
+      userId: user?.id, 
+      email: user?.email,
+      error: error?.message 
+    })
+
     if (!user?.id || error) {
+      console.log('❌ Notifications API - Unauthorized:', { user: !!user, userId: user?.id, error })
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -30,6 +38,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0')
     const unreadOnly = searchParams.get('unreadOnly') === 'true'
 
+    console.log('🔍 Notifications API - Calling service with user.id:', user.id)
     const notificationService = new NotificationService()
 
     const result = await notificationService.getUserNotifications(user.id, {
