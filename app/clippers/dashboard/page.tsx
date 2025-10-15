@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 
 // Force this page to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
@@ -78,11 +78,12 @@ export default function ClipperDashboard() {
       return
     }
 
-    // Removed automatic redirect to campaigns - let users see the dashboard
-    console.log('✅ User authenticated, showing dashboard')
-  }, [session, status, router])
+    // User is authenticated, fetch dashboard data
+    console.log('✅ User authenticated, fetching dashboard data')
+    fetchDashboardData()
+  }, [session, status, router, fetchDashboardData])
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     if (isFetching) return // Prevent multiple concurrent requests
 
     try {
@@ -202,7 +203,7 @@ export default function ClipperDashboard() {
       setLoading(false)
       setIsFetching(false)
     }
-  }
+  }, [isFetching])
 
   const getIcon = (iconName: string) => {
     switch (iconName) {
@@ -373,9 +374,11 @@ export default function ClipperDashboard() {
               <p className="text-muted-foreground mb-4">
                 Start earning by submitting clips to active campaigns
               </p>
-              <Button onClick={() => setShowSubmissionModal(true)}>
-                Submit Your First Clip
-              </Button>
+              <Link href="/clippers/dashboard/campaigns">
+                <Button>
+                  Submit Your First Clip
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         )}
