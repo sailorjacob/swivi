@@ -1,44 +1,18 @@
 {
-  "buildCommand": "npm run vercel-build",
-  "outputDirectory": ".next",
-  "installCommand": "npm install",
-  "devCommand": "npm run dev",
-  "framework": "nextjs",
-  "regions": ["iad1", "sfo1"],
-  "functions": {
-    "app/api/**/*.ts": {
-      "maxDuration": 30
-    }
-  },
   "crons": [
     {
-      "path": "/api/health",
-      "schedule": "0 */6 * * *"
-    }
-  ],
-  "headers": [
+      "path": "/api/cron/view-tracking",
+      "schedule": "0 */4 * * *",
+      "headers": {
+        "Authorization": "Bearer 15fd6d93b3fb8674db88a77ada0edbe76d5784d9c2efa65c047d1e7481962d2d"
+      }
+    },
     {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "path": "/api/cron/payout-calculation", 
+      "schedule": "0 */4 * * *",
+      "headers": {
+        "Authorization": "Bearer 15fd6d93b3fb8674db88a77ada0edbe76d5784d9c2efa65c047d1e7481962d2d"
+      }
     }
   ]
 }

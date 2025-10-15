@@ -2,26 +2,27 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from '@supabase/supabase-js'
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 
-// Server-side Supabase client for storage
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Server-side Supabase client for storage (only if configured)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+const supabase = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null
 
 export async function POST(request: NextRequest) {
   try {
     console.log("📤 Upload API called")
 
-    // Check environment variables first
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      console.error("❌ NEXT_PUBLIC_SUPABASE_URL not set")
-      return NextResponse.json({ error: "Supabase URL not configured" }, { status: 500 })
+    // Check if Supabase is configured
+    if (!supabase) {
+      console.error("❌ Supabase not configured")
+      return NextResponse.json({
+        error: "Supabase not configured",
+        message: "NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables are required"
+      }, { status: 500 })
     }
 
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error("❌ SUPABASE_SERVICE_ROLE_KEY not set")
-      return NextResponse.json({ error: "Supabase service key not configured" }, { status: 500 })
-    }
 
     // Use proper authentication check
     const { user, error } = await getServerUserWithRole(request)

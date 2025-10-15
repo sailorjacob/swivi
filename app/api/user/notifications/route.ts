@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerUser } from "@/lib/supabase-auth-server"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { NotificationService } from "@/lib/notification-service"
 import { RateLimitingService } from "@/lib/rate-limiting-service"
 
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { user, error } = await getServerUser(request)
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -62,7 +62,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const { user, error } = await getServerUser(request)
+    const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
