@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       const testQuery = await prisma.user.count()
       console.log("✅ Database connection test passed, found", testQuery, "users")
 
-      // Execute main query with complete select including stats
+      // Execute main query with complete select including stats and social accounts
       console.log("🔍 Executing main users query...")
       users = await prisma.user.findMany({
         where,
@@ -71,6 +71,23 @@ export async function GET(request: NextRequest) {
           _count: {
             select: {
               clipSubmissions: true
+            }
+          },
+          // Include verified social accounts
+          socialAccounts: {
+            where: {
+              verified: true
+            },
+            select: {
+              id: true,
+              platform: true,
+              username: true,
+              displayName: true,
+              verifiedAt: true,
+              followers: true
+            },
+            orderBy: {
+              platform: "asc"
             }
           }
         },

@@ -8,7 +8,7 @@ import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Search, UserCheck, UserX, Shield, Users, Crown, Eye, RefreshCw } from "lucide-react"
+import { Search, UserCheck, UserX, Shield, Users, Crown, Eye, RefreshCw, CheckCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,15 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
+
+interface SocialAccount {
+  id: string
+  platform: "TIKTOK" | "YOUTUBE" | "INSTAGRAM" | "TWITTER"
+  username: string
+  displayName: string | null
+  verifiedAt: string | null
+  followers: number | null
+}
 
 interface User {
   id: string
@@ -28,6 +37,7 @@ interface User {
   _count?: {
     clipSubmissions: number
   }
+  socialAccounts?: SocialAccount[]
 }
 
 const roleOptions = [
@@ -229,6 +239,28 @@ export default function AdminUsersPage() {
       case "ADMIN": return Crown
       case "CLIPPER": return Users
       default: return Users
+    }
+  }
+
+  // Get social platform icon
+  const getSocialPlatformIcon = (platform: string) => {
+    switch (platform) {
+      case "TIKTOK": return "🎵"
+      case "YOUTUBE": return "📺"
+      case "INSTAGRAM": return "📷"
+      case "TWITTER": return "🐦"
+      default: return "🔗"
+    }
+  }
+
+  // Get social platform name
+  const getSocialPlatformName = (platform: string) => {
+    switch (platform) {
+      case "TIKTOK": return "TikTok"
+      case "YOUTUBE": return "YouTube"
+      case "INSTAGRAM": return "Instagram"
+      case "TWITTER": return "Twitter"
+      default: return platform
     }
   }
 
@@ -576,6 +608,56 @@ export default function AdminUsersPage() {
                       <p className="text-lg font-semibold">{selectedUser._count?.clipSubmissions || 0}</p>
                     </div>
                   </div>
+
+                  {/* Verified Social Accounts */}
+                  {selectedUser.socialAccounts && selectedUser.socialAccounts.length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium">Verified Social Accounts</label>
+                      <div className="mt-2 space-y-3">
+                        {selectedUser.socialAccounts.map((account) => (
+                          <div key={account.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className="text-lg">
+                                {getSocialPlatformIcon(account.platform)}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium">{account.displayName || account.username}</p>
+                                  <Badge variant="secondary" className="text-xs">
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    Verified
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  @{account.username} • {getSocialPlatformName(account.platform)}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-muted-foreground">
+                                {account.followers ? `${account.followers.toLocaleString()} followers` : 'Followers: N/A'}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Verified: {account.verifiedAt ? new Date(account.verifiedAt).toLocaleDateString() : 'Unknown'}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Show message if no verified accounts */}
+                  {(!selectedUser.socialAccounts || selectedUser.socialAccounts.length === 0) && (
+                    <div>
+                      <label className="text-sm font-medium">Verified Social Accounts</label>
+                      <div className="mt-2 p-3 bg-muted/50 rounded-lg">
+                        <p className="text-sm text-muted-foreground text-center">
+                          No verified social accounts found for this user
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
