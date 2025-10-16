@@ -14,12 +14,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user is admin
+    // Check if user is admin - handle database errors gracefully
     console.log("🔍 Looking up user in database:", user.id)
-    const userData = await prisma.user.findUnique({
-      where: { supabaseAuthId: user.id }
-    })
-    console.log("🔍 User data found:", { id: userData?.id, role: userData?.role })
+    let userData
+    try {
+      userData = await prisma.user.findUnique({
+        where: { supabaseAuthId: user.id }
+      })
+      console.log("🔍 User data found:", { id: userData?.id, role: userData?.role })
+    } catch (dbError) {
+      console.error("❌ Database error looking up user:", dbError.message)
+      return NextResponse.json({ error: "Database unavailable" }, { status: 503 })
+    }
 
     if (!userData) {
       console.log("❌ User not found in database")
@@ -88,7 +94,9 @@ export async function GET(request: NextRequest) {
 
     console.log("🔍 Fetching submissions with filters:", where)
 
-    const submissions = await prisma.clipSubmission.findMany({
+    let submissions
+    try {
+      submissions = await prisma.clipSubmission.findMany({
       where,
       orderBy: {
         createdAt: "desc"
@@ -139,20 +147,46 @@ export async function GET(request: NextRequest) {
     })
 
     console.log("✅ Found submissions:", submissions.length)
+    } catch (dbError) {
+      console.error("❌ Database error fetching submissions:", dbError.message)
+      return NextResponse.json({
+        submissions: [],
+        pagination: {
+          total: 0,
+          limit,
+          offset,
+          hasMore: false
+        }
+      })
+    }
 
-    // Calculate pagination info
-    const total = await prisma.clipSubmission.count({ where })
-    const hasMore = offset + limit < total
+    // Calculate pagination info - handle database errors
+    let total
+    try {
+      total = await prisma.clipSubmission.count({ where })
+      const hasMore = offset + limit < total
 
-    return NextResponse.json({
-      submissions: submissions,
-      pagination: {
-        total,
-        limit,
-        offset,
-        hasMore
-      }
-    })
+      return NextResponse.json({
+        submissions: submissions,
+        pagination: {
+          total,
+          limit,
+          offset,
+          hasMore
+        }
+      })
+    } catch (dbError) {
+      console.error("❌ Database error counting submissions:", dbError.message)
+      return NextResponse.json({
+        submissions: submissions,
+        pagination: {
+          total: 0,
+          limit,
+          offset,
+          hasMore: false
+        }
+      })
+    }
   } catch (error) {
     console.error("Error fetching submissions:", error)
 
