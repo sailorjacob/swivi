@@ -16,6 +16,11 @@ export const createSupabaseServerClient = (request?: NextRequest) => {
   }
 
   const supabaseClient = createServerClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: authHeader ? {
+        'Authorization': authHeader
+      } : {}
+    },
     cookies: {
       get(name: string) {
         if (request) {
@@ -97,6 +102,25 @@ export const getServerUserWithRole = async (request?: NextRequest): Promise<{ us
       email: user?.email,
       error: error?.message 
     })
+
+    // If auth failed and we have an Authorization header, try using it directly
+    if (error && request?.headers.get('authorization')) {
+      console.log('🔄 Retrying auth with Authorization header...')
+      const authHeader = request.headers.get('authorization')
+      if (authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.substring(7)
+        try {
+          const { data: { user: headerUser }, error: headerError } = await supabase.auth.getUser(token)
+          if (headerUser && !headerError) {
+            console.log('✅ Auth successful with Authorization header')
+            user = headerUser
+            error = null
+          }
+        } catch (headerAuthError) {
+          console.log('❌ Authorization header auth also failed:', headerAuthError)
+        }
+      }
+    }
 
     if (error) {
       console.warn('Auth error:', error.message)

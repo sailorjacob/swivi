@@ -198,34 +198,39 @@ export default function AdminCampaignsPage() {
       // Validate required fields
       if (!formData.title?.trim()) {
         toast.error("Campaign title is required")
+        setIsSubmitting(false)
         return
       }
 
       if (!formData.description?.trim() || formData.description.length < 10) {
         toast.error("Description must be at least 10 characters")
+        setIsSubmitting(false)
         return
       }
 
       if (!formData.creator?.trim()) {
         toast.error("Creator name is required")
+        setIsSubmitting(false)
         return
       }
 
       const budget = parseFloat(formData.budget)
       if (isNaN(budget) || budget <= 0) {
         toast.error("Budget must be a positive number")
+        setIsSubmitting(false)
         return
       }
 
       const payoutRate = parseFloat(formData.payoutRate)
       if (isNaN(payoutRate) || payoutRate <= 0) {
         toast.error("Payout rate must be a positive number")
+        setIsSubmitting(false)
         return
       }
 
-
       if (!formData.targetPlatforms || formData.targetPlatforms.length === 0) {
         toast.error("At least one platform must be selected")
+        setIsSubmitting(false)
         return
       }
 
@@ -253,10 +258,21 @@ export default function AdminCampaignsPage() {
 
       const response = await authenticatedFetch("/api/campaigns", {
         method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(requestBody)
       })
 
+      console.log("📊 Campaign creation response:", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      })
+
       if (response.ok) {
+        const result = await response.json()
+        console.log("✅ Campaign created successfully:", result)
         toast.success("Campaign created successfully!")
         // Show success state briefly before closing
         setTimeout(() => {
@@ -265,8 +281,22 @@ export default function AdminCampaignsPage() {
           fetchCampaigns()
         }, 1500)
       } else {
-        const error = await response.json()
-        toast.error(error.error || "Failed to create campaign")
+        const errorText = await response.text()
+        console.error("❌ Campaign creation failed:", {
+          status: response.status,
+          statusText: response.statusText,
+          errorText
+        })
+        
+        let errorMessage = "Failed to create campaign"
+        try {
+          const errorData = JSON.parse(errorText)
+          errorMessage = errorData.error || errorMessage
+        } catch (e) {
+          errorMessage = errorText || errorMessage
+        }
+        
+        toast.error(errorMessage)
       }
     } catch (error) {
       console.error("Error creating campaign:", error)
@@ -967,6 +997,7 @@ function CampaignForm({
             <Label htmlFor="title">Campaign Title *</Label>
             <Input
               id="title"
+              name="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="e.g., Summer Fitness Challenge"
@@ -978,6 +1009,7 @@ function CampaignForm({
             <Label htmlFor="creator">Brand/Creator Name *</Label>
             <Input
               id="creator"
+              name="creator"
               value={formData.creator}
               onChange={(e) => setFormData({ ...formData, creator: e.target.value })}
               placeholder="e.g., Nike, Your Brand Name"
@@ -991,6 +1023,7 @@ function CampaignForm({
           <Label htmlFor="description">Campaign Description *</Label>
           <Textarea
             id="description"
+            name="description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Describe your campaign, goals, and what content creators should focus on..."
@@ -1011,8 +1044,9 @@ function CampaignForm({
             />
             {formData.featuredImage && !uploadedFile && (
               <div className="mt-2">
-                <Label>Current Image:</Label>
+                <Label htmlFor="current-image">Current Image:</Label>
                 <img 
+                  id="current-image"
                   src={formData.featuredImage} 
                   alt="Campaign" 
                   className="w-32 h-20 object-cover rounded border mt-1"
@@ -1032,6 +1066,7 @@ function CampaignForm({
             <Label htmlFor="budget">Total Budget ($) *</Label>
             <Input
               id="budget"
+              name="budget"
               type="number"
               value={formData.budget}
               onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
@@ -1044,6 +1079,7 @@ function CampaignForm({
             <Label htmlFor="payoutRate">Payout Rate per 1K Views ($) *</Label>
             <Input
               id="payoutRate"
+              name="payoutRate"
               type="number"
               step="0.01"
               value={formData.payoutRate}
@@ -1065,6 +1101,7 @@ function CampaignForm({
             <Label htmlFor="startDate">Start Date</Label>
             <Input
               id="startDate"
+              name="startDate"
               type="datetime-local"
               value={formData.startDate}
               onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
@@ -1079,11 +1116,13 @@ function CampaignForm({
         <h3 className="text-lg font-medium mb-4">Platforms & Requirements</h3>
 
         <div className="mb-4">
-          <Label>Accepted Platforms *</Label>
-          <div className="grid grid-cols-3 gap-2 mt-2">
+          <Label htmlFor="platforms-group">Accepted Platforms *</Label>
+          <div id="platforms-group" className="grid grid-cols-3 gap-2 mt-2" role="group" aria-labelledby="platforms-group">
             {platformOptions.map((platform) => (
-              <label key={platform.value} className="flex items-center space-x-2">
+              <label key={platform.value} className="flex items-center space-x-2" htmlFor={`platform-${platform.value}`}>
                 <input
+                  id={`platform-${platform.value}`}
+                  name={`platform-${platform.value}`}
                   type="checkbox"
                   checked={formData.targetPlatforms.includes(platform.value)}
                   onChange={(e) => {
@@ -1105,6 +1144,7 @@ function CampaignForm({
           <Label htmlFor="requirements">Content Requirements</Label>
           <Textarea
             id="requirements"
+            name="requirements"
             value={formData.requirements.join('\n')}
             onChange={(e) => setFormData({ ...formData, requirements: e.target.value.split('\n').filter(r => r.trim()) })}
             placeholder="Enter each requirement on a new line&#10;e.g.&#10;Must include brand hashtag&#10;Minimum 10 seconds duration&#10;Show product clearly"
@@ -1122,7 +1162,7 @@ function CampaignForm({
           <div>
             <Label htmlFor="status">Campaign Status</Label>
             <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })} disabled={isSubmitting}>
-              <SelectTrigger>
+              <SelectTrigger id="status">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
