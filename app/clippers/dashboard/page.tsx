@@ -251,7 +251,6 @@ export default function ClipperDashboard() {
         </div>
       </div>
     )
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -371,6 +370,15 @@ export default function ClipperDashboard() {
                             {clip.clipUrl.length > 60 ? `${clip.clipUrl.substring(0, 60)}...` : clip.clipUrl}
                           </button>
                         </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(clip.clipUrl, '_blank')}
+                        className="ml-4"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
                     </div>
                 </CardContent>
               </Card>
@@ -397,6 +405,7 @@ export default function ClipperDashboard() {
 
     </div>
   )
+}
 }
 
 // Force this page to be dynamic (not statically generated)
