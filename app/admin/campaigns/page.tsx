@@ -1128,8 +1128,10 @@ function CampaignForm({
         
         <div className="grid grid-cols-2 gap-2">
           {platformOptions.map((platform) => (
-            <label key={platform.value} className="flex items-center space-x-2">
+            <label key={platform.value} className="flex items-center space-x-2" htmlFor={`platform-${platform.value}`}>
               <input
+                id={`platform-${platform.value}`}
+                name={`platform-${platform.value}`}
                 type="checkbox"
                 checked={formData.targetPlatforms?.includes(platform.value) || false}
                 onChange={(e) => {
