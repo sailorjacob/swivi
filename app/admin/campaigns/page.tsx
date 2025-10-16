@@ -1090,6 +1090,32 @@ function CampaignForm({
             required
           />
         </div>
+
+        {/* Image Upload */}
+        {setUploadedFile && (
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Campaign Image
+            </label>
+            <FileUpload
+              label="Campaign Image"
+              accept="image/*"
+              maxSize={5}
+              onFileChange={setUploadedFile}
+              uploadedFile={uploadedFile || null}
+            />
+            {formData.featuredImage && !uploadedFile && (
+              <div className="mt-2">
+                <span className="text-sm text-gray-600">Current Image:</span>
+                <img
+                  src={formData.featuredImage} 
+                  alt="Campaign" 
+                  className="w-32 h-20 object-cover rounded border mt-1"
+                />
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Budget */}
@@ -1186,7 +1212,7 @@ function CampaignForm({
             value={formData.status || 'ACTIVE'} 
             onValueChange={(value) => setFormData({ ...formData, status: value })}
           >
-            <SelectTrigger id="campaign-status">
+            <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
