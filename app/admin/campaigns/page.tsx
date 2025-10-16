@@ -197,8 +197,19 @@ export default function AdminCampaignsPage() {
       console.log("🎯 Final imageUrl to use:", imageUrl)
 
       console.log("🔍 Starting validation...")
+      console.log("🔍 Form data for validation:", {
+        title: formData.title,
+        description: formData.description,
+        creator: formData.creator,
+        budget: formData.budget,
+        payoutRate: formData.payoutRate,
+        targetPlatforms: formData.targetPlatforms,
+        targetPlatformsLength: formData.targetPlatforms?.length
+      })
+      
       // Validate required fields
       if (!formData.title?.trim()) {
+        console.log("❌ Validation failed: title missing")
         toast.error("Campaign title is required")
         setIsSubmitting(false)
         return
@@ -231,6 +242,8 @@ export default function AdminCampaignsPage() {
       }
 
       if (!formData.targetPlatforms || formData.targetPlatforms.length === 0) {
+        console.log("❌ Validation failed: no platforms selected")
+        console.log("❌ targetPlatforms:", formData.targetPlatforms)
         toast.error("At least one platform must be selected")
         setIsSubmitting(false)
         return
@@ -1130,9 +1143,11 @@ function CampaignForm({
                   type="checkbox"
                   checked={formData.targetPlatforms.includes(platform.value)}
                   onChange={(e) => {
+                    console.log(`🔘 Platform ${platform.value} ${e.target.checked ? 'checked' : 'unchecked'}`)
                     const platforms = e.target.checked
                       ? [...formData.targetPlatforms, platform.value]
                       : formData.targetPlatforms.filter((p: string) => p !== platform.value)
+                    console.log('🎯 Updated platforms:', platforms)
                     setFormData({ ...formData, targetPlatforms: platforms })
                   }}
                   className="rounded"
@@ -1186,6 +1201,9 @@ function CampaignForm({
           onClick={() => {
             console.log('🔘 Form submit button clicked')
             console.log('📋 Current form data:', formData)
+            console.log('🎯 Target platforms:', formData.targetPlatforms)
+            console.log('🎯 Target platforms length:', formData.targetPlatforms?.length)
+            console.log('🎯 Is submitting:', isSubmitting)
             onSubmit()
           }} 
           disabled={isSubmitting}
