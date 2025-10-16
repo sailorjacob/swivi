@@ -10,7 +10,6 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS "users_createdAt_idx" ON "users"("create
 -- Campaigns table indexes
 CREATE INDEX CONCURRENTLY IF NOT EXISTS "campaigns_status_idx" ON "campaigns"("status");
 CREATE INDEX CONCURRENTLY IF NOT EXISTS "campaigns_startDate_idx" ON "campaigns"("startDate");
-CREATE INDEX CONCURRENTLY IF NOT EXISTS "campaigns_endDate_idx" ON "campaigns"("endDate");
 CREATE INDEX CONCURRENTLY IF NOT EXISTS "campaigns_createdAt_idx" ON "campaigns"("createdAt");
 CREATE INDEX CONCURRENTLY IF NOT EXISTS "campaigns_status_startDate_idx" ON "campaigns"("status", "startDate");
 
