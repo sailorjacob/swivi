@@ -1004,214 +1004,197 @@ function CampaignForm({
   uploadedFile?: File | null
   setUploadedFile?: (file: File | null) => void
 }) {
+  const handleSubmit = (e: React.MouseEvent) => {
+    e.preventDefault()
+    console.log('🔘 BUTTON CLICKED - Starting submission')
+    console.log('📋 Form data:', formData)
+    console.log('🎯 Platforms:', formData.targetPlatforms)
+    
+    // Basic validation
+    if (!formData.title?.trim()) {
+      console.log('❌ Missing title')
+      return
+    }
+    if (!formData.creator?.trim()) {
+      console.log('❌ Missing creator')
+      return
+    }
+    if (!formData.description?.trim()) {
+      console.log('❌ Missing description')
+      return
+    }
+    if (!formData.targetPlatforms?.length) {
+      console.log('❌ No platforms selected')
+      return
+    }
+    
+    console.log('✅ Validation passed, calling onSubmit')
+    onSubmit()
+  }
+
   return (
-    <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+    <form className="space-y-6">
       {/* Basic Information */}
-      <div>
-        <h3 className="text-lg font-medium mb-4">Campaign Information</h3>
-        <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Campaign Information</h3>
+        
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="title">Campaign Title *</Label>
+            <label htmlFor="campaign-title" className="block text-sm font-medium mb-1">
+              Campaign Title *
+            </label>
             <Input
-              id="title"
+              id="campaign-title"
               name="title"
-              value={formData.title}
+              value={formData.title || ''}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g., Summer Fitness Challenge"
+              placeholder="Enter campaign title"
               required
-              disabled={isSubmitting}
             />
           </div>
+          
           <div>
-            <Label htmlFor="creator">Brand/Creator Name *</Label>
+            <label htmlFor="campaign-creator" className="block text-sm font-medium mb-1">
+              Brand/Creator Name *
+            </label>
             <Input
-              id="creator"
+              id="campaign-creator"
               name="creator"
-              value={formData.creator}
+              value={formData.creator || ''}
               onChange={(e) => setFormData({ ...formData, creator: e.target.value })}
-              placeholder="e.g., Nike, Your Brand Name"
+              placeholder="Enter brand name"
               required
-              disabled={isSubmitting}
             />
           </div>
         </div>
 
-        <div className="mb-4">
-          <Label htmlFor="description">Campaign Description *</Label>
+        <div>
+          <label htmlFor="campaign-description" className="block text-sm font-medium mb-1">
+            Description *
+          </label>
           <Textarea
-            id="description"
+            id="campaign-description"
             name="description"
-            value={formData.description}
+            value={formData.description || ''}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Describe your campaign, goals, and what content creators should focus on..."
-            rows={4}
+            placeholder="Describe your campaign..."
+            rows={3}
             required
-            disabled={isSubmitting}
           />
         </div>
-
-        {setUploadedFile && (
-          <div className="mb-4">
-            <FileUpload
-              label="Campaign Image"
-              accept="image/*"
-              maxSize={5}
-              onFileChange={setUploadedFile}
-              uploadedFile={uploadedFile || null}
-            />
-            {formData.featuredImage && !uploadedFile && (
-              <div className="mt-2">
-                <Label>Current Image:</Label>
-                <img
-                  src={formData.featuredImage} 
-                  alt="Campaign" 
-                  className="w-32 h-20 object-cover rounded border mt-1"
-                />
-              </div>
-            )}
-          </div>
-        )}
-
       </div>
 
-      {/* Budget & Payouts */}
-      <div>
-        <h3 className="text-lg font-medium mb-4">Budget & Payouts</h3>
-        <div className="grid grid-cols-2 gap-4 mb-4">
+      {/* Budget */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Budget & Payouts</h3>
+        
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="budget">Total Budget ($) *</Label>
+            <label htmlFor="campaign-budget" className="block text-sm font-medium mb-1">
+              Total Budget ($) *
+            </label>
             <Input
-              id="budget"
+              id="campaign-budget"
               name="budget"
               type="number"
-              value={formData.budget}
+              value={formData.budget || ''}
               onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-              placeholder="5000"
+              placeholder="1000"
               required
-              disabled={isSubmitting}
             />
           </div>
+          
           <div>
-            <Label htmlFor="payoutRate">Payout Rate per 1K Views ($) *</Label>
+            <label htmlFor="campaign-payout" className="block text-sm font-medium mb-1">
+              Payout Rate per 1K Views ($) *
+            </label>
             <Input
-              id="payoutRate"
+              id="campaign-payout"
               name="payoutRate"
               type="number"
               step="0.01"
-              value={formData.payoutRate}
+              value={formData.payoutRate || ''}
               onChange={(e) => setFormData({ ...formData, payoutRate: e.target.value })}
               placeholder="2.50"
               required
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
-
-      </div>
-
-      {/* Timeline */}
-      <div>
-        <h3 className="text-lg font-medium mb-4">Timeline</h3>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <Label htmlFor="startDate">Start Date</Label>
-            <Input
-              id="startDate"
-              name="startDate"
-              type="datetime-local"
-              value={formData.startDate}
-              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-              disabled={isSubmitting}
             />
           </div>
         </div>
       </div>
 
-      {/* Platforms & Requirements */}
-      <div>
-        <h3 className="text-lg font-medium mb-4">Platforms & Requirements</h3>
-
-        <div className="mb-4">
-          <Label id="platforms-label">Accepted Platforms *</Label>
-          <div id="platforms-group" className="grid grid-cols-3 gap-2 mt-2" role="group" aria-labelledby="platforms-label">
-            {platformOptions.map((platform) => (
-              <label key={platform.value} className="flex items-center space-x-2" htmlFor={`platform-${platform.value}`}>
-                <input
-                  id={`platform-${platform.value}`}
-                  name={`platform-${platform.value}`}
-                  type="checkbox"
-                  checked={formData.targetPlatforms.includes(platform.value)}
-                  onChange={(e) => {
-                    console.log(`🔘 Platform ${platform.value} ${e.target.checked ? 'checked' : 'unchecked'}`)
-                    const platforms = e.target.checked
-                      ? [...formData.targetPlatforms, platform.value]
-                      : formData.targetPlatforms.filter((p: string) => p !== platform.value)
-                    console.log('🎯 Updated platforms:', platforms)
-                    setFormData({ ...formData, targetPlatforms: platforms })
-                  }}
-                  className="rounded"
-                  disabled={isSubmitting}
-                />
-                <span className="text-sm">{platform.label}</span>
-              </label>
-            ))}
-          </div>
+      {/* Platforms */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Target Platforms *</h3>
+        
+        <div className="grid grid-cols-2 gap-2">
+          {platformOptions.map((platform) => (
+            <label key={platform.value} className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.targetPlatforms?.includes(platform.value) || false}
+                onChange={(e) => {
+                  const platforms = e.target.checked
+                    ? [...(formData.targetPlatforms || []), platform.value]
+                    : (formData.targetPlatforms || []).filter((p: string) => p !== platform.value)
+                  setFormData({ ...formData, targetPlatforms: platforms })
+                }}
+                className="rounded"
+              />
+              <span className="text-sm">{platform.label}</span>
+            </label>
+          ))}
         </div>
+      </div>
 
-        <div className="mb-4">
-          <Label htmlFor="requirements">Content Requirements</Label>
+      {/* Requirements */}
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="campaign-requirements" className="block text-sm font-medium mb-1">
+            Content Requirements
+          </label>
           <Textarea
-            id="requirements"
+            id="campaign-requirements"
             name="requirements"
-            value={formData.requirements.join('\n')}
-            onChange={(e) => setFormData({ ...formData, requirements: e.target.value.split('\n').filter(r => r.trim()) })}
-            placeholder="Enter each requirement on a new line&#10;e.g.&#10;Must include brand hashtag&#10;Minimum 10 seconds duration&#10;Show product clearly"
-            rows={4}
-            disabled={isSubmitting}
+            value={formData.requirements?.join('\n') || ''}
+            onChange={(e) => setFormData({ 
+              ...formData, 
+              requirements: e.target.value.split('\n').filter(r => r.trim()) 
+            })}
+            placeholder="Enter requirements (one per line)"
+            rows={3}
           />
         </div>
-
       </div>
 
-      {/* Settings */}
-      <div>
-        <h3 className="text-lg font-medium mb-4">Settings</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="status">Campaign Status</Label>
-            <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })} disabled={isSubmitting}>
-              <SelectTrigger id="status">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="DRAFT">Draft</SelectItem>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      {/* Status */}
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="campaign-status" className="block text-sm font-medium mb-1">
+            Campaign Status
+          </label>
+          <Select 
+            value={formData.status || 'ACTIVE'} 
+            onValueChange={(value) => setFormData({ ...formData, status: value })}
+          >
+            <SelectTrigger id="campaign-status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="DRAFT">Draft</SelectItem>
+              <SelectItem value="ACTIVE">Active</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
+      {/* Buttons */}
       <div className="flex justify-end space-x-2 pt-4 border-t">
-        <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button 
-          onClick={(e) => {
-            console.log('🔘 BUTTON CLICKED - Event:', e)
-            console.log('🔘 Form submit button clicked')
-            console.log('📋 Current form data:', formData)
-            console.log('🎯 Target platforms:', formData.targetPlatforms)
-            console.log('🎯 Target platforms length:', formData.targetPlatforms?.length)
-            console.log('🎯 Is submitting:', isSubmitting)
-            console.log('🎯 onSubmit function:', typeof onSubmit)
-            try {
-              onSubmit()
-              console.log('✅ onSubmit called successfully')
-            } catch (error) {
-              console.error('❌ Error calling onSubmit:', error)
-            }
-          }} 
+          type="button"
+          onClick={handleSubmit}
           disabled={isSubmitting}
         >
           {isSubmitting ? (
@@ -1224,7 +1207,7 @@ function CampaignForm({
           )}
         </Button>
       </div>
-    </div>
+    </form>
   )
 }
 
