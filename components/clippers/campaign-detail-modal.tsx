@@ -166,10 +166,10 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card border-border">
         <div className="space-y-6">
           {/* Header */}
-          <div className="relative h-32 bg-muted rounded-lg overflow-hidden">
+          <div className="relative h-48 bg-muted rounded-lg overflow-hidden">
             <div className="absolute top-4 left-4">
-              <Badge className="bg-foreground text-background">
-                LIVE
+              <Badge className="bg-green-600 text-white hover:bg-green-700">
+                {campaign.status}
               </Badge>
             </div>
             <img
@@ -180,29 +180,28 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
                 e.currentTarget.src = "/placeholder-campaign.jpg"
               }}
             />
-            <div className="absolute inset-0 bg-black/40 flex items-end">
-              <div className="p-4">
-                <h2 className="text-xl font-light text-white mb-1">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end">
+              <div className="p-4 w-full">
+                <h2 className="text-2xl font-semibold text-white mb-1">
                   {campaign.title}
                 </h2>
-                <p className="text-white/80 text-sm">by {campaign.creator}</p>
+                <p className="text-white/90 text-sm">by {campaign.creator}</p>
               </div>
             </div>
           </div>
 
           {/* Submit Form - Moved to Top */}
-          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
+          <div className="bg-muted/30 border border-border rounded-lg p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
                 <Link2 className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h3 className="text-lg font-medium text-white">Submit Your Clip</h3>
-                <p className="text-sm text-muted-foreground">Ready to earn? Submit your content link below</p>
               </div>
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label htmlFor="platform" className="text-white font-medium">Platform</Label>
                   <Select onValueChange={(value) => setValue("platform", value as any)}>
@@ -250,19 +249,20 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                  className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
                   size="lg"
                 >
-                  {isSubmitting ? "Submitting..." : "Submit Clip & Start Earning"}
+                  {isSubmitting ? "Submitting..." : "Submit"}
                 </Button>
-                <Button 
-                  type="button" 
-                  variant="outline"
+                <Button
+                  type="button"
+                  variant="ghost"
                   onClick={() => onOpenChange(false)}
                   size="lg"
+                  className="text-muted-foreground hover:text-white"
                 >
                   Cancel
                 </Button>
@@ -278,28 +278,35 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
             </p>
           </div>
 
-          {/* Campaign Details Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-muted/30 rounded-lg p-4">
-              <div className="text-sm text-muted-foreground mb-1">Pool Budget</div>
-              <div className="text-xl font-medium text-white">${campaign.pool.toLocaleString()}</div>
-            </div>
-            <div className="bg-muted/30 rounded-lg p-4">
-              <div className="text-sm text-muted-foreground mb-1">Rate per 1K views</div>
-              <div className="text-xl font-medium text-white">${campaign.cpm}</div>
-            </div>
-            <div className="bg-muted/30 rounded-lg p-4">
-              <div className="text-sm text-muted-foreground mb-1">Submissions</div>
-              <div className="text-xl font-medium text-white">{campaign.totalSubmissions}</div>
-            </div>
-            <div className="bg-muted/30 rounded-lg p-4">
-              <div className="text-sm text-muted-foreground mb-1">Status</div>
-              <div className="text-xl font-medium text-white">{campaign.status}</div>
+          {/* Campaign Details - Condensed */}
+          <div className="bg-muted/20 rounded-lg p-4">
+            <h3 className="text-lg font-medium text-white mb-3">Campaign Details</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Pool Budget</div>
+                  <div className="text-lg font-semibold text-white">${campaign.pool.toLocaleString()}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Rate per 1K views</div>
+                  <div className="text-lg font-semibold text-white">${campaign.cpm}</div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Submissions</div>
+                  <div className="text-lg font-semibold text-white">{campaign.totalSubmissions}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Status</div>
+                  <div className="text-lg font-semibold text-white">{campaign.status}</div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Platforms */}
-          <div>
+          <div className="bg-muted/20 rounded-lg p-4">
             <h3 className="text-lg font-medium text-white mb-3">Accepted Platforms</h3>
             <div className="flex gap-3">
               {campaign.platforms.map((platform) => {
@@ -316,13 +323,13 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
 
           {/* Requirements */}
           {campaign.requirements.length > 0 && (
-            <div>
+            <div className="bg-muted/20 rounded-lg p-4">
               <h3 className="text-lg font-medium text-white mb-3">Requirements</h3>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {campaign.requirements.map((req, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
-                    <span className="text-sm text-muted-foreground">{req}</span>
+                  <div key={index} className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-muted-foreground leading-relaxed">{req}</span>
                   </div>
                 ))}
               </div>
