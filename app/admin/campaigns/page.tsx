@@ -148,6 +148,7 @@ export default function AdminCampaignsPage() {
   // Create campaign
   const handleCreateCampaign = async () => {
     console.log("🚀 handleCreateCampaign started")
+    alert("handleCreateCampaign called!")
     setIsSubmitting(true)
     try {
       // Handle image upload first if there's a file (optional)
@@ -1010,33 +1011,43 @@ function CampaignForm({
     console.log('📋 Form data:', formData)
     console.log('🎯 Platforms:', formData.targetPlatforms)
     
+    // Add alert to make sure this is being called
+    alert('Form submitted! Check console for details.')
+    
     // Basic validation
     if (!formData.title?.trim()) {
       console.log('❌ Missing title')
+      alert('Missing title!')
       return
     }
     if (!formData.creator?.trim()) {
       console.log('❌ Missing creator')
+      alert('Missing creator!')
       return
     }
     if (!formData.description?.trim()) {
       console.log('❌ Missing description')
+      alert('Missing description!')
       return
     }
     if (!formData.budget || isNaN(parseFloat(formData.budget)) || parseFloat(formData.budget) <= 0) {
       console.log('❌ Invalid budget')
+      alert('Invalid budget!')
       return
     }
     if (!formData.payoutRate || isNaN(parseFloat(formData.payoutRate)) || parseFloat(formData.payoutRate) <= 0) {
       console.log('❌ Invalid payout rate')
+      alert('Invalid payout rate!')
       return
     }
     if (!formData.targetPlatforms?.length) {
       console.log('❌ No platforms selected')
+      alert('No platforms selected!')
       return
     }
     
     console.log('✅ Validation passed, calling onSubmit')
+    alert('Validation passed! Calling onSubmit...')
     onSubmit()
   }
 
