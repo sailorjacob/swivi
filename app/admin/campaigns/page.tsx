@@ -1,8 +1,5 @@
 "use client"
 
-// Force this page to be dynamic (not statically generated)
-export const dynamic = 'force-dynamic'
-
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -20,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { FileUpload } from "@/components/ui/file-upload"
-import { toast } from "sonner"
+import toast from "react-hot-toast"
 
 interface Campaign {
   id: string
@@ -148,7 +145,6 @@ export default function AdminCampaignsPage() {
   // Create campaign
   const handleCreateCampaign = async () => {
     console.log("🚀 handleCreateCampaign started")
-    alert("handleCreateCampaign called!")
     setIsSubmitting(true)
     try {
       // Handle image upload first if there's a file (optional)
@@ -1011,43 +1007,39 @@ function CampaignForm({
     console.log('📋 Form data:', formData)
     console.log('🎯 Platforms:', formData.targetPlatforms)
     
-    // Add alert to make sure this is being called
-    alert('Form submitted! Check console for details.')
-    
     // Basic validation
     if (!formData.title?.trim()) {
       console.log('❌ Missing title')
-      alert('Missing title!')
+      toast.error('Campaign title is required')
       return
     }
     if (!formData.creator?.trim()) {
       console.log('❌ Missing creator')
-      alert('Missing creator!')
+      toast.error('Creator name is required')
       return
     }
     if (!formData.description?.trim()) {
       console.log('❌ Missing description')
-      alert('Missing description!')
+      toast.error('Description is required')
       return
     }
     if (!formData.budget || isNaN(parseFloat(formData.budget)) || parseFloat(formData.budget) <= 0) {
       console.log('❌ Invalid budget')
-      alert('Invalid budget!')
+      toast.error('Budget must be a positive number')
       return
     }
     if (!formData.payoutRate || isNaN(parseFloat(formData.payoutRate)) || parseFloat(formData.payoutRate) <= 0) {
       console.log('❌ Invalid payout rate')
-      alert('Invalid payout rate!')
+      toast.error('Payout rate must be a positive number')
       return
     }
     if (!formData.targetPlatforms?.length) {
       console.log('❌ No platforms selected')
-      alert('No platforms selected!')
+      toast.error('At least one platform must be selected')
       return
     }
     
     console.log('✅ Validation passed, calling onSubmit')
-    alert('Validation passed! Calling onSubmit...')
     onSubmit()
   }
 
@@ -1386,3 +1378,6 @@ function CampaignView({
     </div>
   )
 }
+
+// Force this page to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
