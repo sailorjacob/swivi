@@ -1061,9 +1061,8 @@ function CampaignForm({
             />
             {formData.featuredImage && !uploadedFile && (
               <div className="mt-2">
-                <Label htmlFor="current-image">Current Image:</Label>
-                <img 
-                  id="current-image"
+                <Label>Current Image:</Label>
+                <img
                   src={formData.featuredImage} 
                   alt="Campaign" 
                   className="w-32 h-20 object-cover rounded border mt-1"
@@ -1133,7 +1132,7 @@ function CampaignForm({
         <h3 className="text-lg font-medium mb-4">Platforms & Requirements</h3>
 
         <div className="mb-4">
-          <Label id="platforms-label" htmlFor="platforms-group">Accepted Platforms *</Label>
+          <Label id="platforms-label">Accepted Platforms *</Label>
           <div id="platforms-group" className="grid grid-cols-3 gap-2 mt-2" role="group" aria-labelledby="platforms-label">
             {platformOptions.map((platform) => (
               <label key={platform.value} className="flex items-center space-x-2" htmlFor={`platform-${platform.value}`}>
