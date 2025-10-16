@@ -4,18 +4,35 @@ import { prisma } from '@/lib/prisma'
 import type { SupabaseUser, SupabaseSession } from './supabase-auth'
 import { NextRequest } from 'next/server'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Safe environment variable access with validation
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+// Validate environment variables
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ Missing Supabase environment variables:', {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseAnonKey,
+    urlLength: supabaseUrl?.length || 0,
+    keyLength: supabaseAnonKey?.length || 0
+  })
+}
 
 // Clean server-side Supabase client for API routes
 export const createSupabaseServerClient = (request?: NextRequest) => {
+  // Validate environment variables before creating client
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase configuration missing')
+  }
+
   // Check for Authorization header
   const authHeader = request?.headers.get('authorization')
   if (authHeader) {
     console.log('🔑 Found Authorization header:', authHeader.substring(0, 20) + '...')
   }
 
-  const supabaseClient = createServerClient(supabaseUrl, supabaseAnonKey, {
+  try {
+    const supabaseClient = createServerClient(supabaseUrl, supabaseAnonKey, {
     global: {
       headers: authHeader ? {
         'Authorization': authHeader
@@ -76,6 +93,10 @@ export const createSupabaseServerClient = (request?: NextRequest) => {
   }
 
   return supabaseClient
+  } catch (error) {
+    console.error('❌ Failed to create Supabase client:', error)
+    throw new Error('Supabase client creation failed')
+  }
 }
 
 // Server-side session helper for API routes
@@ -93,7 +114,21 @@ export const getServerSession = async (request?: NextRequest): Promise<{ session
 export const getServerUserWithRole = async (request?: NextRequest): Promise<{ user: SupabaseUser | null; error: any }> => {
   try {
     console.log('🔍 getServerUserWithRole called with request:', !!request)
-    const supabase = createSupabaseServerClient(request)
+
+    // Handle missing environment variables gracefully
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('❌ Supabase environment variables missing')
+      return { user: null, error: 'Service configuration error' }
+    }
+
+    let supabase
+    try {
+      supabase = createSupabaseServerClient(request)
+    } catch (clientError) {
+      console.error('❌ Failed to create Supabase client:', clientError.message)
+      return { user: null, error: 'Authentication service unavailable' }
+    }
+
     let { data: { user }, error } = await supabase.auth.getUser()
 
     console.log('🔍 Supabase auth result:', { 
@@ -128,44 +163,60 @@ export const getServerUserWithRole = async (request?: NextRequest): Promise<{ us
 
     if (user && !error) {
       try {
-        // Ensure user exists in our database
-        await ensureUserExists(user)
-
-        // Fetch enhanced user data from database
-        const userData = await prisma.user.findUnique({
-          where: { supabaseAuthId: user.id },
-          select: {
-            id: true,
-            role: true,
-            verified: true,
-            name: true,
-            image: true,
-            email: true,
-            bio: true,
-            website: true,
-            walletAddress: true,
-            paypalEmail: true,
-            totalEarnings: true,
-            totalViews: true
+        // Ensure user exists in our database - handle errors gracefully
+        try {
+          await ensureUserExists(user)
+        } catch (userError) {
+          if (userError.message?.includes('database') || userError.message?.includes('connection')) {
+            console.warn('Database unavailable for user creation - using OAuth data only')
+          } else {
+            throw userError
           }
-        })
+        }
 
-        if (userData) {
-          // Merge Supabase Auth user with database data
-          return {
-            user: {
-              ...user,
-              ...userData,
-              // Ensure we keep the auth data as primary
-              id: user.id,
-              email: user.email,
-              user_metadata: user.user_metadata,
-              email_confirmed_at: user.email_confirmed_at,
-              // Override with database profile data for display
-              name: userData.name,
-              image: userData.image
-            } as SupabaseUser,
-            error: null
+        // Fetch enhanced user data from database - handle errors gracefully
+        try {
+          const userData = await prisma.user.findUnique({
+            where: { supabaseAuthId: user.id },
+            select: {
+              id: true,
+              role: true,
+              verified: true,
+              name: true,
+              image: true,
+              email: true,
+              bio: true,
+              website: true,
+              walletAddress: true,
+              paypalEmail: true,
+              totalEarnings: true,
+              totalViews: true
+            }
+          })
+
+          if (userData) {
+            // Merge Supabase Auth user with database data
+            return {
+              user: {
+                ...user,
+                ...userData,
+                // Ensure we keep the auth data as primary
+                id: user.id,
+                email: user.email,
+                user_metadata: user.user_metadata,
+                email_confirmed_at: user.email_confirmed_at,
+                // Override with database profile data for display
+                name: userData.name,
+                image: userData.image
+              } as SupabaseUser,
+              error: null
+            }
+          }
+        } catch (dbError) {
+          if (dbError.message?.includes('database') || dbError.message?.includes('connection')) {
+            console.warn('Database unavailable for user lookup - using OAuth data only:', dbError.message)
+          } else {
+            throw dbError
           }
         }
       } catch (dbError) {

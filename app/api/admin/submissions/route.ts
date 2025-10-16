@@ -6,7 +6,15 @@ export async function GET(request: NextRequest) {
   try {
     console.log("🔍 Admin submissions API called")
 
-    const { user, error } = await getServerUserWithRole(request)
+    let authResult
+    try {
+      authResult = await getServerUserWithRole(request)
+    } catch (authError) {
+      console.error("❌ Authentication error:", authError.message)
+      return NextResponse.json({ error: "Authentication service unavailable" }, { status: 503 })
+    }
+
+    const { user, error } = authResult
     console.log("🔍 Auth result:", { userId: user?.id, error })
 
     if (!user?.id || error) {
