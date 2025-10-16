@@ -1202,15 +1202,13 @@ function CampaignForm({
       {/* Status */}
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Campaign Status
-          </label>
+          <span className="block text-sm font-medium mb-1">Campaign Status</span>
           <Select 
             value={formData.status || 'ACTIVE'} 
             onValueChange={(value) => setFormData({ ...formData, status: value })}
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="DRAFT">Draft</SelectItem>
