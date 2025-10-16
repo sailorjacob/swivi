@@ -1197,13 +1197,20 @@ function CampaignForm({
           Cancel
         </Button>
         <Button 
-          onClick={() => {
+          onClick={(e) => {
+            console.log('🔘 BUTTON CLICKED - Event:', e)
             console.log('🔘 Form submit button clicked')
             console.log('📋 Current form data:', formData)
             console.log('🎯 Target platforms:', formData.targetPlatforms)
             console.log('🎯 Target platforms length:', formData.targetPlatforms?.length)
             console.log('🎯 Is submitting:', isSubmitting)
-            onSubmit()
+            console.log('🎯 onSubmit function:', typeof onSubmit)
+            try {
+              onSubmit()
+              console.log('✅ onSubmit called successfully')
+            } catch (error) {
+              console.error('❌ Error calling onSubmit:', error)
+            }
           }} 
           disabled={isSubmitting}
         >
