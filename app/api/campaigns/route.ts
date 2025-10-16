@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     if (validatedData.startDate) campaignData.startDate = validatedData.startDate
     if (body.featuredImage !== undefined) campaignData.featuredImage = validatedData.featuredImage
 
-    console.log("📊 Final campaign data to create:", JSON.stringify(campaignData, null, 2))
+    console.log("📊 Final campaign data to create:", JSON.stringify(campaignData, null, 2)) JSON.stringify(campaignData, null, 2))
 
     const campaign = await prisma.campaign.create({
       data: campaignData,
