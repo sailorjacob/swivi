@@ -1004,9 +1004,9 @@ function CampaignForm({
   uploadedFile?: File | null
   setUploadedFile?: (file: File | null) => void
 }) {
-  const handleSubmit = (e: React.MouseEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('🔘 BUTTON CLICKED - Starting submission')
+    console.log('🔘 FORM SUBMITTED - Starting submission')
     console.log('📋 Form data:', formData)
     console.log('🎯 Platforms:', formData.targetPlatforms)
     
@@ -1041,10 +1041,10 @@ function CampaignForm({
   }
 
   return (
-    <form className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic Information */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Campaign Information</h3>
+      <fieldset className="space-y-4">
+        <legend className="text-lg font-medium">Campaign Information</legend>
         
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -1058,6 +1058,7 @@ function CampaignForm({
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Enter campaign title"
               required
+              aria-required="true"
             />
           </div>
           
@@ -1072,6 +1073,7 @@ function CampaignForm({
               onChange={(e) => setFormData({ ...formData, creator: e.target.value })}
               placeholder="Enter brand name"
               required
+              aria-required="true"
             />
           </div>
         </div>
@@ -1088,6 +1090,7 @@ function CampaignForm({
             placeholder="Describe your campaign..."
             rows={3}
             required
+            aria-required="true"
           />
         </div>
 
@@ -1103,21 +1106,21 @@ function CampaignForm({
             />
             {formData.featuredImage && !uploadedFile && (
               <div className="mt-2">
-                <span className="text-sm text-gray-600">Current Image:</span>
+                <p className="text-sm text-gray-600 mb-1">Current Image:</p>
                 <img
                   src={formData.featuredImage} 
                   alt="Current campaign image" 
-                  className="w-32 h-20 object-cover rounded border mt-1"
+                  className="w-32 h-20 object-cover rounded border"
                 />
               </div>
             )}
           </div>
         )}
-      </div>
+      </fieldset>
 
       {/* Budget */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Budget & Payouts</h3>
+      <fieldset className="space-y-4">
+        <legend className="text-lg font-medium">Budget & Payouts</legend>
         
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -1128,10 +1131,13 @@ function CampaignForm({
               id="campaign-budget"
               name="budget"
               type="number"
+              min="1"
+              step="1"
               value={formData.budget || ''}
               onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
               placeholder="1000"
               required
+              aria-required="true"
             />
           </div>
           
@@ -1143,27 +1149,30 @@ function CampaignForm({
               id="campaign-payout"
               name="payoutRate"
               type="number"
+              min="0.01"
               step="0.01"
               value={formData.payoutRate || ''}
               onChange={(e) => setFormData({ ...formData, payoutRate: e.target.value })}
               placeholder="2.50"
               required
+              aria-required="true"
             />
           </div>
         </div>
-      </div>
+      </fieldset>
 
       {/* Platforms */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Target Platforms *</h3>
+      <fieldset className="space-y-4">
+        <legend className="text-lg font-medium">Target Platforms *</legend>
         
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="platforms-legend">
           {platformOptions.map((platform) => (
-            <label key={platform.value} className="flex items-center space-x-2" htmlFor={`platform-${platform.value}`}>
+            <div key={platform.value} className="flex items-center space-x-2">
               <input
                 id={`platform-${platform.value}`}
-                name={`platform-${platform.value}`}
+                name="targetPlatforms"
                 type="checkbox"
+                value={platform.value}
                 checked={formData.targetPlatforms?.includes(platform.value) || false}
                 onChange={(e) => {
                   const platforms = e.target.checked
@@ -1172,18 +1181,22 @@ function CampaignForm({
                   setFormData({ ...formData, targetPlatforms: platforms })
                 }}
                 className="rounded"
+                aria-required="true"
               />
-              <span className="text-sm">{platform.label}</span>
-            </label>
+              <label htmlFor={`platform-${platform.value}`} className="text-sm">
+                {platform.label}
+              </label>
+            </div>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {/* Requirements */}
-      <div className="space-y-4">
+      <fieldset className="space-y-4">
+        <legend className="text-lg font-medium">Content Requirements</legend>
         <div>
           <label htmlFor="campaign-requirements" className="block text-sm font-medium mb-1">
-            Content Requirements
+            Requirements (Optional)
           </label>
           <Textarea
             id="campaign-requirements"
@@ -1197,17 +1210,18 @@ function CampaignForm({
             rows={3}
           />
         </div>
-      </div>
+      </fieldset>
 
       {/* Status */}
-      <div className="space-y-4">
+      <fieldset className="space-y-4">
+        <legend className="text-lg font-medium">Campaign Status</legend>
         <div>
-          <span className="block text-sm font-medium mb-1">Campaign Status</span>
           <Select 
             value={formData.status || 'ACTIVE'} 
             onValueChange={(value) => setFormData({ ...formData, status: value })}
+            name="status"
           >
-            <SelectTrigger>
+            <SelectTrigger id="campaign-status" aria-label="Campaign Status">
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
@@ -1216,7 +1230,7 @@ function CampaignForm({
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </fieldset>
 
       {/* Buttons */}
       <div className="flex justify-end space-x-2 pt-4 border-t">
@@ -1224,8 +1238,7 @@ function CampaignForm({
           Cancel
         </Button>
         <Button 
-          type="button"
-          onClick={handleSubmit}
+          type="submit"
           disabled={isSubmitting}
         >
           {isSubmitting ? (

@@ -76,9 +76,11 @@ export function FileUpload({
     }
   }
 
+  const inputId = `file-upload-${Math.random().toString(36).substr(2, 9)}`
+
   return (
     <div className={cn("space-y-2", className)}>
-      {label && <Label className="text-foreground">{label}</Label>}
+      {label && <label htmlFor={inputId} className="block text-sm font-medium text-foreground">{label}</label>}
 
       <div
         className={cn(
@@ -134,6 +136,7 @@ export function FileUpload({
         )}
 
         <input
+          id={inputId}
           ref={fileInputRef}
           type="file"
           className="hidden"
