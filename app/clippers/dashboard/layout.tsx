@@ -1,8 +1,5 @@
 "use client"
 
-// Force this layout to be dynamic (not statically generated)
-export const dynamic = 'force-dynamic'
-
 import { useState, useEffect } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useAuth } from "@/lib/supabase-auth-provider"
@@ -345,3 +342,6 @@ export default function DashboardLayout({
     </div>
   )
 }
+
+// Force this layout to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'

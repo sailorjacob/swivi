@@ -17,7 +17,6 @@ interface CampaignDetailModalProps {
     budget: number
     spent: number
     payoutRate: number
-    deadline: string
     startDate?: string
     status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
     targetPlatforms: string[]

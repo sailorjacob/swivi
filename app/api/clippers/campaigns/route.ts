@@ -50,7 +50,6 @@ export async function GET(request: NextRequest) {
         budget: true,
         spent: true,
         payoutRate: true,
-        deadline: true,
         startDate: true,
         status: true,
         targetPlatforms: true,

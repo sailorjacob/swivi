@@ -20,7 +20,6 @@ interface LiveCampaign {
   budget: number
   spent: number
   payoutRate: number
-  deadline: string
   startDate?: string
   status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
   targetPlatforms: string[]
@@ -107,30 +106,31 @@ export function LiveCampaigns() {
 
   // Transform API data to UI format
   const transformCampaignForUI = (campaign: any): LiveCampaign => {
-    const now = new Date()
-    const deadline = new Date(campaign.deadline)
-    const daysUntilDeadline = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const remainingBudget = campaign.budget - (campaign.spent || 0)
+    const budgetProgress = campaign.budget > 0 ? ((campaign.spent || 0) / campaign.budget) * 100 : 0
+    const isBudgetFull = budgetProgress >= 100
 
     return {
       ...campaign,
       // Map API fields to UI fields
       creator: campaign.creator,
-      budgetSpent: campaign.spent,
+      budgetSpent: campaign.spent || 0,
       viewGoal: campaign.budget * 1000, // Estimate based on budget
       viewsGenerated: 0, // This would come from aggregated view tracking
-      duration: `${Math.max(1, daysUntilDeadline)} days`,
-      timeRemaining: daysUntilDeadline > 0 ? `${daysUntilDeadline} days` : "Ended",
+      duration: isBudgetFull ? "Budget Full" : "Active",
+      timeRemaining: isBudgetFull ? "Budget Full" : `$${remainingBudget.toFixed(0)} left`,
       payoutStructure: `${typeof campaign.payoutRate === 'number' ? '$' : ''}${campaign.payoutRate} per 1K views`,
       participants: campaign._count.clipSubmissions,
       maxParticipants: Math.floor(campaign.budget / campaign.payoutRate),
-      featured: campaign.status === "ACTIVE",
+      featured: campaign.status === "ACTIVE" && !isBudgetFull,
       difficulty: campaign.requirements.length > 3 ? "advanced" : "beginner",
       estimatedEarnings: {
         min: campaign.payoutRate * 10,
         max: campaign.payoutRate * 50
       },
       tags: campaign.targetPlatforms,
-      status: campaign.status === "ACTIVE" ? "active" :
+      status: isBudgetFull ? "completed" : 
+              campaign.status === "ACTIVE" ? "active" :
               campaign.status === "COMPLETED" ? "completed" : "paused"
     }
   }

@@ -11,7 +11,6 @@ const createCampaignSchema = z.object({
   creator: z.string().min(1, "Creator name is required"),
   budget: z.number().positive("Budget must be positive"),
   payoutRate: z.number().positive("Payout rate must be positive"),
-  deadline: z.string().transform((str) => new Date(str)),
   startDate: z.string().transform((str) => str ? new Date(str) : null).nullable(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])),
   requirements: z.array(z.string()).optional().default([]),
@@ -51,7 +50,6 @@ export async function GET(request: NextRequest) {
         budget: true,
         spent: true,
         payoutRate: true,
-        deadline: true,
         startDate: true,
         status: true,
         targetPlatforms: true,
@@ -120,7 +118,6 @@ export async function POST(request: NextRequest) {
       creator: validatedData.creator,
       budget: validatedData.budget,
       payoutRate: validatedData.payoutRate,
-      deadline: validatedData.deadline,
       targetPlatforms: validatedData.targetPlatforms,
       requirements: validatedData.requirements,
       status: "ACTIVE"

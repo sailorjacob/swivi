@@ -85,7 +85,6 @@ model Campaign {
   budget           Decimal          @db.Decimal(10, 2)
   spent            Decimal?         @default(0) @db.Decimal(10, 2)
   payoutRate       Decimal          @db.Decimal(10, 2)
-  deadline         DateTime         @db.Timestamp(6)
   startDate        DateTime?        @db.Timestamp(6)
   status           CampaignStatus?  @default(ACTIVE)
   requirements     String[]         @default([])

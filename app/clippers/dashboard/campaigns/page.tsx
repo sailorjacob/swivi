@@ -32,7 +32,6 @@ interface Campaign {
   budget: number
   spent: number
   payoutRate: number
-  deadline: string
   startDate?: string
   status: string
   targetPlatforms: string[]
@@ -58,10 +57,6 @@ export default function CampaignsPage() {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
 
-  useEffect(() => {
-    fetchCampaigns()
-  }, [])
-
   const fetchCampaigns = async () => {
     try {
       setLoading(true)
@@ -84,6 +79,10 @@ export default function CampaignsPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchCampaigns()
+  }, [])
 
   const handleJoinCampaign = (campaign: Campaign) => {
     setSelectedCampaign(campaign)
@@ -178,11 +177,9 @@ export default function CampaignsPage() {
           const isActive = campaign.status === "ACTIVE"
           const isLaunching = campaign.status === "DRAFT"
 
-          // Calculate days until deadline
-          const deadlineDate = new Date(campaign.deadline)
-          const now = new Date()
-          const daysUntilDeadline = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-          const deadlineText = daysUntilDeadline > 0 ? `${daysUntilDeadline} days left` : "Ended"
+          // Campaign runs until budget is exhausted
+          const remainingBudget = campaign.budget - campaign.spent
+          const budgetText = remainingBudget > 0 ? `$${remainingBudget.toFixed(0)} left` : "Budget Full"
 
           return (
           <motion.div
@@ -280,7 +277,7 @@ export default function CampaignsPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">{deadlineText}</span>
+                        <span className="text-sm text-muted-foreground">{budgetText}</span>
                       </div>
                     </div>
 

@@ -352,29 +352,11 @@ export function CreatorViewsCalculator() {
             <CardHeader>
               <CardTitle className="text-xl font-normal flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Budget Allocation: Pay Only for Performance
+                Why Clipper Marketing Works
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                  <h4 className="font-medium mb-2 text-primary">Your {formatCurrency(values.budget)} Budget Unlocks:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div>
-                      <p className="text-2xl font-bold text-primary">{values.numberOfClippers}</p>
-                      <p className="text-xs text-muted-foreground">Clippers in your army</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-primary">{formatNumber(Math.floor(monthlyViews / 1000))}</p>
-                      <p className="text-xs text-muted-foreground">Monthly views (thousands)</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-primary">${values.paymentPer1000Views.toFixed(2)}</p>
-                      <p className="text-xs text-muted-foreground">CPM vs $5 traditional</p>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h4 className="font-medium mb-2">Traditional Paid Ads</h4>
@@ -396,7 +378,7 @@ export function CreatorViewsCalculator() {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground pt-2 border-t">
-                  Your {formatCurrency(values.budget)} budget is allocated based on actual performance. You pay {values.numberOfClippers} clippers ${values.paymentPer1000Views.toFixed(2)} per 1,000 views they generate, using only {calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of your budget for {formatNumber(monthlyViews * 12)} annual views.
+                  Performance-based pricing ensures you only pay for actual results, making clipper marketing {Math.round(((5 - values.paymentPer1000Views) / 5) * 100)}% more cost-effective than traditional advertising.
                 </p>
               </div>
             </CardContent>

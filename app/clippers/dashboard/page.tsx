@@ -1,9 +1,6 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-
-// Force this page to be dynamic (not statically generated)
-export const dynamic = 'force-dynamic'
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import { supabase, authenticatedFetch } from "@/lib/supabase-browser"
@@ -68,20 +65,6 @@ export default function ClipperDashboard() {
     }
     return 'User'
   }
-
-  useEffect(() => {
-    if (status === "loading") return
-
-    if (status === "unauthenticated" || !session) {
-      console.log('🚪 No session found, redirecting to login')
-      router.push("/clippers/login")
-      return
-    }
-
-    // User is authenticated, fetch dashboard data
-    console.log('✅ User authenticated, fetching dashboard data')
-    fetchDashboardData()
-  }, [session, status, router, fetchDashboardData])
 
   const fetchDashboardData = useCallback(async () => {
     if (isFetching) return // Prevent multiple concurrent requests
@@ -204,6 +187,20 @@ export default function ClipperDashboard() {
       setIsFetching(false)
     }
   }, [isFetching])
+
+  useEffect(() => {
+    if (status === "loading") return
+
+    if (status === "unauthenticated" || !session) {
+      console.log('🚪 No session found, redirecting to login')
+      router.push("/clippers/login")
+      return
+    }
+
+    // User is authenticated, fetch dashboard data
+    console.log('✅ User authenticated, fetching dashboard data')
+    fetchDashboardData()
+  }, [session, status, router])
 
   const getIcon = (iconName: string) => {
     switch (iconName) {
@@ -388,3 +385,6 @@ export default function ClipperDashboard() {
     </div>
   )
 }
+
+// Force this page to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'

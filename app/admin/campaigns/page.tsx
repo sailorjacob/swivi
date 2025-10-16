@@ -30,7 +30,6 @@ interface Campaign {
   budget: number
   spent: number
   payoutRate: number
-  deadline: string | Date
   startDate?: string | Date | null
   status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
   targetPlatforms: string[]
@@ -85,7 +84,6 @@ export default function AdminCampaignsPage() {
     creator: "",
     budget: "",
     payoutRate: "",
-    deadline: "",
     startDate: "",
     targetPlatforms: [] as string[],
     requirements: [] as string[],
@@ -225,10 +223,6 @@ export default function AdminCampaignsPage() {
         return
       }
 
-      if (!formData.deadline) {
-        toast.error("Deadline is required")
-        return
-      }
 
       if (!formData.targetPlatforms || formData.targetPlatforms.length === 0) {
         toast.error("At least one platform must be selected")
@@ -241,7 +235,6 @@ export default function AdminCampaignsPage() {
         creator: formData.creator.trim(),
         budget,
         payoutRate,
-        deadline: formData.deadline,
         startDate: formData.startDate || null,
         targetPlatforms: formData.targetPlatforms,
         requirements: formData.requirements || [],
@@ -321,10 +314,6 @@ export default function AdminCampaignsPage() {
       return
     }
 
-    if (!formData.deadline) {
-      toast.error("Deadline is required")
-      return
-    }
 
     if (!formData.targetPlatforms || formData.targetPlatforms.length === 0) {
       toast.error("At least one platform must be selected")
@@ -384,7 +373,6 @@ export default function AdminCampaignsPage() {
           creator: formData.creator,
         budget: parseFloat(formData.budget) || 0,
         payoutRate: parseFloat(formData.payoutRate) || 0,
-        deadline: formData.deadline || undefined,
           startDate: formData.startDate || null,
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
@@ -575,7 +563,6 @@ export default function AdminCampaignsPage() {
         creator: campaign.creator || "",
         budget: (campaign.budget || 0).toString(),
         payoutRate: (campaign.payoutRate || 0).toString(),
-        deadline: formatDateForInput(campaign.deadline, 'deadline'),
         startDate: formatDateForInput(campaign.startDate, 'startDate'),
         targetPlatforms: campaign.targetPlatforms || [],
         requirements: campaign.requirements || [],
@@ -602,9 +589,8 @@ export default function AdminCampaignsPage() {
       description: "",
       creator: "",
       budget: "",
-      payoutRate: "",
-      deadline: "",
-      startDate: "",
+        payoutRate: "",
+        startDate: "",
       targetPlatforms: [],
       requirements: [],
       status: "ACTIVE",
@@ -784,7 +770,6 @@ export default function AdminCampaignsPage() {
                       <span>Budget: ${campaign.budget.toLocaleString()}</span>
                       <span>Spent: ${campaign.spent.toLocaleString()}</span>
                       <span>Submissions: {campaign._count.clipSubmissions}</span>
-                      <span>Deadline: {new Date(campaign.deadline).toLocaleDateString()}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -868,9 +853,6 @@ export default function AdminCampaignsPage() {
                     </div>
                     <div>
                       <span className="font-medium">Spent:</span> ${selectedCampaign.spent.toLocaleString()}
-                    </div>
-                    <div>
-                      <span className="font-medium">Deadline:</span> {new Date(selectedCampaign.deadline).toLocaleDateString()}
                     </div>
                     <div>
                       <span className="font-medium">Submissions:</span> {selectedCampaign._count.clipSubmissions}
@@ -1086,17 +1068,6 @@ function CampaignForm({
               type="datetime-local"
               value={formData.startDate}
               onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-              disabled={isSubmitting}
-            />
-          </div>
-          <div>
-            <Label htmlFor="deadline">End Date *</Label>
-            <Input
-              id="deadline"
-              type="datetime-local"
-              value={formData.deadline}
-              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-              required
               disabled={isSubmitting}
             />
           </div>

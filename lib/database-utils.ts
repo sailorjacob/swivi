@@ -21,7 +21,6 @@ export type CampaignCreateData = {
   creator: string
   budget: number
   payoutRate: number
-  deadline: Date
   startDate?: Date
   requirements?: string[]
   targetPlatforms?: SocialPlatform[]
