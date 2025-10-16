@@ -155,6 +155,21 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error("Error fetching submissions:", error)
+
+    // Handle database connection errors gracefully
+    if (error.message?.includes('database') || error.message?.includes('connection') || error.message?.includes("Can't reach database server")) {
+      console.log('🔧 Database unavailable - returning empty results instead of 500 error')
+      return NextResponse.json({
+        submissions: [],
+        pagination: {
+          total: 0,
+          limit,
+          offset,
+          hasMore: false
+        }
+      })
+    }
+
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

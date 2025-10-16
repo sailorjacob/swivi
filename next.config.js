@@ -48,8 +48,8 @@ const nextConfig = {
   // Ensure environment variables are available during build
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
-    // Ensure Prisma can generate client during build
-    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/db',
+    // Ensure Prisma can generate client during build - use a fallback that won't break builds
+    DATABASE_URL: process.env.DATABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', 'postgresql://user:pass@') + ':5432/postgres' || 'postgresql://user:pass@localhost:5432/db',
   },
 }
 

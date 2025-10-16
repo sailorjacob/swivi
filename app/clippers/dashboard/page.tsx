@@ -269,6 +269,27 @@ export default function ClipperDashboard() {
               Welcome back, {getDisplayName()}
             </p>
           </div>
+
+          {/* Error Display */}
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 max-w-md">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-destructive" />
+                <div>
+                  <p className="text-sm font-medium text-destructive">Dashboard Error</p>
+                  <p className="text-sm text-destructive/80">{error}</p>
+                </div>
+              </div>
+              <Button
+                onClick={fetchDashboardData}
+                variant="outline"
+                size="sm"
+                className="mt-2"
+              >
+                Try Again
+              </Button>
+            </div>
+          )}
           {/* Admin Link - Only show for admin users */}
           {session?.user?.role === "ADMIN" && (
             <Link href="/admin">
