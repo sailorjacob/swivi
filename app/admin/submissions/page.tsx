@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Check, X, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2 } from "lucide-react"
+import { Check, X, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2, AlertCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,6 +26,8 @@ interface Submission {
   payout?: number
   paidAt?: string
   rejectionReason?: string
+  requiresReview?: boolean
+  reviewReason?: string
   createdAt: string
   updatedAt: string
   users: {
@@ -34,6 +36,16 @@ interface Submission {
     email: string | null
     totalViews?: number
     totalEarnings?: number
+  }
+  clips?: {
+    id: string
+    title?: string
+    views?: number
+    earnings?: number
+    view_tracking?: Array<{
+      views: number
+      date: string
+    }>
   }
   campaigns: {
     id: string
@@ -45,6 +57,7 @@ interface Submission {
 
 const statusOptions = [
   { value: "all", label: "All Status" },
+  { value: "flagged", label: "Flagged for Review" },
   { value: "PENDING", label: "Pending" },
   { value: "APPROVED", label: "Approved" },
   { value: "REJECTED", label: "Rejected" },
@@ -107,7 +120,11 @@ export default function AdminSubmissionsPage() {
       })
 
       if (filters.status !== "all") {
-        params.append("status", filters.status)
+        if (filters.status === "flagged") {
+          params.append("requiresReview", "true")
+        } else {
+          params.append("status", filters.status)
+        }
       }
       if (filters.platform !== "all") {
         params.append("platform", filters.platform)
@@ -194,8 +211,12 @@ export default function AdminSubmissionsPage() {
   }
 
   // Get status badge color
-  const getStatusColor = (status: Submission["status"]) => {
-    switch (status) {
+  const getStatusColor = (submission: Submission) => {
+    if (submission.requiresReview) {
+      return "bg-orange-100 text-orange-800 border-orange-300"
+    }
+
+    switch (submission.status) {
       case "PENDING": return "bg-yellow-100 text-yellow-800"
       case "APPROVED": return "bg-green-100 text-green-800"
       case "REJECTED": return "bg-red-100 text-red-800"
@@ -205,9 +226,10 @@ export default function AdminSubmissionsPage() {
   }
 
   // Calculate stats
-  const pendingCount = submissions.filter(s => s.status === "PENDING").length
+  const pendingCount = submissions.filter(s => s.status === "PENDING" && !s.requiresReview).length
   const approvedCount = submissions.filter(s => s.status === "APPROVED").length
   const paidCount = submissions.filter(s => s.status === "PAID").length
+  const flaggedCount = submissions.filter(s => s.requiresReview).length
   const totalEarnings = submissions
     .filter(s => s.status === "PAID" && s.payout)
     .reduce((sum, s) => sum + (s.payout || 0), 0)
@@ -259,7 +281,7 @@ export default function AdminSubmissionsPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -303,6 +325,18 @@ export default function AdminSubmissionsPage() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">Paid Submissions</p>
                   <p className="text-2xl font-semibold">{paidCount}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <AlertCircle className="h-8 w-8 text-orange-500" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-muted-foreground">Flagged for Review</p>
+                  <p className="text-2xl font-semibold text-orange-600">{flaggedCount}</p>
                 </div>
               </div>
             </CardContent>
@@ -425,12 +459,14 @@ export default function AdminSubmissionsPage() {
                 submissions.map((submission) => (
                 <div
                   key={submission.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                  className={`flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors ${
+                    submission.requiresReview ? 'border-orange-300 bg-orange-50/30' : ''
+                  }`}
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <Badge className={getStatusColor(submission.status)}>
-                        {submission.status}
+                      <Badge className={getStatusColor(submission)}>
+                        {submission.requiresReview ? 'FLAGGED' : submission.status}
                       </Badge>
                       <Badge variant="secondary">
                         {submission.platform}
@@ -439,19 +475,42 @@ export default function AdminSubmissionsPage() {
                         {submission.users.email}
                         {submission.users.name && ` (${submission.users.name})`}
                       </span>
+                      {submission.requiresReview && (
+                        <AlertCircle className="w-4 h-4 text-orange-500" title="Flagged for review" />
+                      )}
                     </div>
                     <div className="mb-2">
                       <p className="font-medium">{submission.campaigns.title}</p>
-                      <p className="text-sm text-muted-foreground truncate max-w-md">
-                        {submission.clipUrl}
-                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                        <button
+                          onClick={() => window.open(submission.clipUrl, '_blank')}
+                          className="text-sm text-blue-500 hover:text-blue-700 underline hover:underline-offset-2 transition-colors"
+                          title={submission.clipUrl}
+                        >
+                          {submission.clipUrl.length > 60 ? `${submission.clipUrl.substring(0, 60)}...` : submission.clipUrl}
+                        </button>
+                      </div>
+                      {submission.requiresReview && submission.reviewReason && (
+                        <p className="text-sm text-orange-600 bg-orange-50 p-2 rounded mt-2">
+                          <strong>Review Reason:</strong> {submission.reviewReason}
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span>Submitted: {new Date(submission.createdAt).toLocaleDateString()}</span>
                       {submission.payout && (
                         <span>Payout: ${submission.payout.toFixed(2)}</span>
                       )}
-                      <span>Views: {(submission.users.totalViews || 0).toLocaleString()}</span>
+                      {submission.clips?.views && (
+                        <span>Clip Views: {Number(submission.clips.views).toLocaleString()}</span>
+                      )}
+                      {submission.clips?.earnings && Number(submission.clips.earnings) > 0 && (
+                        <span>Clip Earnings: ${Number(submission.clips.earnings).toFixed(2)}</span>
+                      )}
+                      {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 && (
+                        <span>Last Tracked: {new Date(submission.clips.view_tracking[0].date).toLocaleDateString()}</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

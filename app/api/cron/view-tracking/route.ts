@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { XViewTrackingService } from "@/lib/x-view-tracking"
+import { ViewTrackingService } from "@/lib/view-tracking-service"
+import { CampaignCompletionService } from "@/lib/campaign-completion-service"
 import { prisma } from "@/lib/prisma"
 
 // This endpoint should only be called by authorized services (cron jobs, etc.)
@@ -24,19 +25,30 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const apifyToken = process.env.APIFY_API_KEY
-    
-    // X API credentials are handled internally by XViewTrackingService
-    const viewTrackingService = new XViewTrackingService(apifyToken)
+    // Initialize the view tracking service
+    const viewTrackingService = new ViewTrackingService()
 
     // Update view tracking for active campaigns only
     console.log('🚀 Starting automated view tracking update for active campaigns...')
     const startTime = Date.now()
 
-    await viewTrackingService.updateAllPlatformViews()
+    const result = await viewTrackingService.processViewTracking(50) // Process up to 50 clips per cron run
 
     const duration = Date.now() - startTime
-    console.log(`✅ View tracking update completed in ${duration}ms`)
+    console.log(`✅ View tracking update completed in ${duration}ms - Processed: ${result.processed}, Successful: ${result.successful}, Failed: ${result.failed}`)
+
+    // Check for campaigns that should be completed
+    console.log('🔍 Checking for campaigns that should be completed...')
+    const completionStartTime = Date.now()
+
+    const completionResult = await CampaignCompletionService.autoCompleteCampaigns()
+
+    const completionDuration = Date.now() - completionStartTime
+    console.log(`✅ Campaign completion check completed in ${completionDuration}ms - Completed: ${completionResult.completed}, Skipped: ${completionResult.skipped}`)
+
+    if (completionResult.errors.length > 0) {
+      console.warn('⚠️ Campaign completion errors:', completionResult.errors)
+    }
 
     // Log the update for monitoring
     await prisma.viewTracking.create({
@@ -53,8 +65,20 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "View tracking updated successfully for active campaigns",
-      duration: `${duration}ms`
+      message: "View tracking and campaign completion check completed successfully",
+      viewTracking: {
+        duration: `${duration}ms`,
+        processed: result.processed,
+        successful: result.successful,
+        failed: result.failed,
+        errors: result.errors
+      },
+      campaignCompletion: {
+        duration: `${completionDuration}ms`,
+        completed: completionResult.completed,
+        skipped: completionResult.skipped,
+        errors: completionResult.errors
+      }
     })
 
   } catch (error) {

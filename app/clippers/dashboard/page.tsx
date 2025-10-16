@@ -41,9 +41,11 @@ interface RecentClip {
   status: string
   submittedAt: string
   views: number
+  viewGrowth: number
   earnings: number
   clipUrl: string
   platform: string
+  lastTracked?: string
 }
 
 export default function ClipperDashboard() {
@@ -340,25 +342,45 @@ export default function ClipperDashboard() {
                     <span className="text-muted-foreground text-sm">{clip.submittedAt}</span>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="text-foreground font-medium mb-1">{clip.title}</h4>
-                      <p className="text-muted-foreground text-sm mb-2">{clip.campaign}</p>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <span>{clip.views.toLocaleString()} views</span>
-                        {clip.earnings > 0 && (
-                          <span>${clip.earnings.toFixed(2)} earned</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="text-foreground font-medium mb-1">{clip.title}</h4>
+                        <p className="text-muted-foreground text-sm mb-2">{clip.campaign}</p>
+                        <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
+                          <span>{clip.views.toLocaleString()} views</span>
+                          {clip.viewGrowth !== 0 && (
+                            <span className={clip.viewGrowth > 0 ? "text-green-600" : "text-red-600"}>
+                              {clip.viewGrowth > 0 ? "+" : ""}{clip.viewGrowth.toLocaleString()} today
+                            </span>
+                          )}
+                          {clip.earnings > 0 && (
+                            <span>${clip.earnings.toFixed(2)} earned</span>
+                          )}
+                        </div>
+                        {clip.lastTracked && (
+                          <div className="text-xs text-muted-foreground">
+                            Last tracked: {clip.lastTracked}
+                          </div>
                         )}
+                        <div className="flex items-center gap-2">
+                          <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                          <button
+                            onClick={() => window.open(clip.clipUrl, '_blank')}
+                            className="text-sm text-blue-500 hover:text-blue-700 underline hover:underline-offset-2 transition-colors"
+                          >
+                            {clip.clipUrl.length > 60 ? `${clip.clipUrl.substring(0, 60)}...` : clip.clipUrl}
+                          </button>
+                        </div>
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(clip.clipUrl, '_blank')}
+                        className="ml-4"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(clip.clipUrl, '_blank')}
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
             ))}

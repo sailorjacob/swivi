@@ -11,10 +11,12 @@ const updateCampaignSchema = z.object({
   spent: z.number().min(0, "Spent amount cannot be negative").optional(),
   payoutRate: z.number().positive("Payout rate must be positive").optional(),
   startDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
+  endDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
   status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])).optional(),
   requirements: z.array(z.string()).optional(),
   featuredImage: z.string().url().optional().nullable(),
+  completionReason: z.string().optional(),
 })
 
 export async function GET(
@@ -118,7 +120,15 @@ export async function PUT(
     if (validatedData.spent !== undefined) updateData.spent = validatedData.spent
     if (validatedData.payoutRate !== undefined) updateData.payoutRate = validatedData.payoutRate
     if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate
-    if (validatedData.status !== undefined) updateData.status = validatedData.status
+    if (validatedData.endDate !== undefined) updateData.endDate = validatedData.endDate
+    if (validatedData.status !== undefined) {
+      updateData.status = validatedData.status
+      // If status is being set to COMPLETED, set completedAt timestamp
+      if (validatedData.status === "COMPLETED") {
+        updateData.completedAt = new Date()
+        updateData.completionReason = validatedData.completionReason || "Campaign completed by admin"
+      }
+    }
     if (validatedData.targetPlatforms !== undefined) updateData.targetPlatforms = validatedData.targetPlatforms
     if (validatedData.requirements !== undefined) updateData.requirements = validatedData.requirements
     if (body.featuredImage !== undefined) updateData.featuredImage = validatedData.featuredImage

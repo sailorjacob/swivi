@@ -147,19 +147,29 @@ export async function GET(request: NextRequest) {
     const approvedSubmissions = userData.clipSubmissions.filter(s => s.status === "APPROVED" || s.status === "PAID").length
     const pendingSubmissions = userData.clipSubmissions.filter(s => s.status === "PENDING").length
 
-    // Get recent clips with proper data structure
+    // Get recent clips with detailed view tracking
     const recentClips = userData.clipSubmissions.map(submission => {
-      const latestTracking = submission.clips?.view_tracking[0]
+      const clip = submission.clips
+      const latestTracking = clip?.view_tracking[0]
+      const previousTracking = clip?.view_tracking[1]
+
+      // Calculate view growth
+      const currentViews = latestTracking ? Number(latestTracking.views) : 0
+      const previousViews = previousTracking ? Number(previousTracking.views) : 0
+      const viewGrowth = currentViews - previousViews
+
       return {
         id: submission.id,
-        title: submission.clips?.title || submission.clipUrl,
+        title: clip?.title || submission.clipUrl,
         campaign: submission.campaigns.title,
         status: submission.status.toLowerCase(),
         submittedAt: submission.createdAt.toISOString().split('T')[0],
-        views: latestTracking ? Number(latestTracking.views) : 0,
+        views: currentViews,
+        viewGrowth: viewGrowth,
         earnings: submission.status === "PAID" ? Number(submission.payout || 0) : 0,
         clipUrl: submission.clipUrl,
-        platform: submission.platform
+        platform: submission.platform,
+        lastTracked: latestTracking?.date ? latestTracking.date.toISOString().split('T')[0] : null
       }
     })
 

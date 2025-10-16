@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 import { RateLimitingService } from "@/lib/rate-limiting-service"
+import { SubmissionVerificationService } from "@/lib/submission-verification-service"
+import { SocialUrlParser } from "@/lib/social-url-parser"
 import { z } from "zod"
 
 const createSubmissionSchema = z.object({
@@ -128,6 +130,71 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Campaign not found or inactive" }, { status: 404 })
     }
 
+    // Parse the submitted URL to ensure it's valid and get platform info
+    const parsedUrl = SocialUrlParser.parseUrl(validatedData.clipUrl)
+
+    if (!parsedUrl.isValid) {
+      return NextResponse.json({
+        error: "Invalid social media URL",
+        details: parsedUrl.error
+      }, { status: 400 })
+    }
+
+    // Verify platform access - user must have verified account for this platform
+    const platformAccess = await SubmissionVerificationService.validatePlatformAccess(
+      dbUser.id,
+      parsedUrl.platform
+    )
+
+    if (!platformAccess.canSubmit) {
+      return NextResponse.json({
+        error: "Platform verification required",
+        details: platformAccess.reason,
+        requiresVerification: true
+      }, { status: 403 })
+    }
+
+    // Verify that the submitted content belongs to one of the user's verified accounts
+    const verificationResult = await SubmissionVerificationService.verifySubmissionOwnership({
+      userId: dbUser.id,
+      clipUrl: validatedData.clipUrl,
+      platform: parsedUrl.platform
+    })
+
+    if (!verificationResult.isVerified) {
+      // Create submission with REJECTED status if verification fails completely
+      // or PENDING if it requires manual review
+      const submissionStatus = verificationResult.requiresReview ? "PENDING" : "REJECTED"
+
+      const submission = await prisma.clipSubmission.create({
+        data: {
+          userId: dbUser.id,
+          campaignId: validatedData.campaignId,
+          clipUrl: validatedData.clipUrl,
+          platform: validatedData.platform,
+          mediaFileUrl: validatedData.mediaFileUrl,
+          status: submissionStatus,
+          rejectionReason: verificationResult.reason
+        },
+        include: {
+          campaigns: true
+        }
+      })
+
+      // Send notification for flagged submissions
+      if (verificationResult.requiresReview) {
+        await this.notifyAdminsOfFlaggedSubmission(submission.id, verificationResult.reviewReason!)
+      }
+
+      return NextResponse.json({
+        ...submission,
+        verificationFailed: true,
+        reason: verificationResult.reason,
+        requiresReview: verificationResult.requiresReview,
+        reviewReason: verificationResult.reviewReason
+      }, { status: verificationResult.requiresReview ? 202 : 403 })
+    }
+
     // Fraud detection check
     const fraudResult = await rateLimitingService.detectFraud(
       dbUser.id,
@@ -152,7 +219,7 @@ export async function POST(request: NextRequest) {
       // Continue with submission but log for manual review
     }
 
-    // Create the submission
+    // Create the submission for verified content
     const submission = await prisma.clipSubmission.create({
       data: {
         userId: dbUser.id,
@@ -160,7 +227,7 @@ export async function POST(request: NextRequest) {
         clipUrl: validatedData.clipUrl,
         platform: validatedData.platform,
         mediaFileUrl: validatedData.mediaFileUrl,
-        status: "PENDING"
+        status: "PENDING" // Still PENDING for admin approval, but verified
       },
       include: {
         campaigns: true
@@ -175,5 +242,57 @@ export async function POST(request: NextRequest) {
 
     console.error("Error creating submission:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
+
+async function notifyAdminsOfFlaggedSubmission(submissionId: string, reviewReason: string) {
+  try {
+    // Get all admin users
+    const admins = await prisma.user.findMany({
+      where: { role: "ADMIN" },
+      select: { id: true }
+    })
+
+    if (admins.length === 0) {
+      console.warn("No admin users found to notify about flagged submission")
+      return
+    }
+
+    // Get submission details for notification
+    const submission = await prisma.clipSubmission.findUnique({
+      where: { id: submissionId },
+      include: {
+        users: { select: { name: true, email: true } },
+        campaigns: { select: { title: true } }
+      }
+    })
+
+    if (!submission) {
+      console.warn(`Submission ${submissionId} not found for notification`)
+      return
+    }
+
+    // Create notifications for all admins
+    const notifications = admins.map(admin => ({
+      userId: admin.id,
+      type: "SYSTEM_UPDATE" as const,
+      title: "Submission Requires Review",
+      message: `Submission from ${submission.users.name || submission.users.email} for campaign "${submission.campaigns.title}" requires manual review.`,
+      data: {
+        submissionId,
+        reviewReason,
+        campaignTitle: submission.campaigns.title,
+        submitterName: submission.users.name,
+        submitterEmail: submission.users.email
+      }
+    }))
+
+    await prisma.notification.createMany({
+      data: notifications
+    })
+
+    console.log(`Notified ${admins.length} admins about flagged submission ${submissionId}`)
+  } catch (error) {
+    console.error("Error notifying admins of flagged submission:", error)
   }
 }
