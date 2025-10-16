@@ -1094,11 +1094,8 @@ function CampaignForm({
         {/* Image Upload */}
         {setUploadedFile && (
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Campaign Image
-            </label>
             <FileUpload
-              label="Campaign Image"
+              label="Campaign Image (Optional)"
               accept="image/*"
               maxSize={5}
               onFileChange={setUploadedFile}
@@ -1109,7 +1106,7 @@ function CampaignForm({
                 <span className="text-sm text-gray-600">Current Image:</span>
                 <img
                   src={formData.featuredImage} 
-                  alt="Campaign" 
+                  alt="Current campaign image" 
                   className="w-32 h-20 object-cover rounded border mt-1"
                 />
               </div>
@@ -1205,7 +1202,7 @@ function CampaignForm({
       {/* Status */}
       <div className="space-y-4">
         <div>
-          <label htmlFor="campaign-status" className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1">
             Campaign Status
           </label>
           <Select 
