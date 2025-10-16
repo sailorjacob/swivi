@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
+import { authenticatedFetch } from "@/lib/supabase-browser"
 
 interface Submission {
   id: string
@@ -139,7 +140,7 @@ export default function AdminSubmissionsPage() {
         params.append("campaignId", filters.campaignId)
       }
 
-      const response = await fetch(`/api/admin/submissions?${params}`)
+      const response = await authenticatedFetch(`/api/admin/submissions?${params}`)
       if (response.ok) {
         const data = await response.json()
         setSubmissions(data.submissions)
@@ -162,7 +163,7 @@ export default function AdminSubmissionsPage() {
   // Update submission status
   const updateSubmissionStatus = async (submissionId: string, status: Submission["status"], reason?: string, payout?: number) => {
     try {
-      const response = await fetch(`/api/admin/submissions/${submissionId}`, {
+      const response = await authenticatedFetch(`/api/admin/submissions/${submissionId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
@@ -193,7 +194,7 @@ export default function AdminSubmissionsPage() {
   // Delete submission
   const deleteSubmission = async (submissionId: string) => {
     try {
-      const response = await fetch(`/api/admin/submissions/${submissionId}`, {
+      const response = await authenticatedFetch(`/api/admin/submissions/${submissionId}`, {
         method: "DELETE"
       })
 
