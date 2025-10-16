@@ -14,6 +14,7 @@ const createCampaignSchema = z.object({
   startDate: z.string().transform((str) => str ? new Date(str) : null).nullable(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])),
   requirements: z.array(z.string()).optional().default([]),
+  status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional().default("ACTIVE"),
   featuredImage: z.string().url().optional().nullable(),
 })
 
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
       payoutRate: validatedData.payoutRate,
       targetPlatforms: validatedData.targetPlatforms,
       requirements: validatedData.requirements,
-      status: "ACTIVE"
+      status: validatedData.status || "ACTIVE"
     }
 
     // Add optional fields if provided

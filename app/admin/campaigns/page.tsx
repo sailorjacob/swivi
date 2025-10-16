@@ -1023,6 +1023,14 @@ function CampaignForm({
       console.log('❌ Missing description')
       return
     }
+    if (!formData.budget || isNaN(parseFloat(formData.budget)) || parseFloat(formData.budget) <= 0) {
+      console.log('❌ Invalid budget')
+      return
+    }
+    if (!formData.payoutRate || isNaN(parseFloat(formData.payoutRate)) || parseFloat(formData.payoutRate) <= 0) {
+      console.log('❌ Invalid payout rate')
+      return
+    }
     if (!formData.targetPlatforms?.length) {
       console.log('❌ No platforms selected')
       return
