@@ -147,6 +147,7 @@ export default function AdminCampaignsPage() {
 
   // Create campaign
   const handleCreateCampaign = async () => {
+    console.log("🚀 handleCreateCampaign started")
     setIsSubmitting(true)
     try {
       // Handle image upload first if there's a file (optional)
@@ -195,6 +196,7 @@ export default function AdminCampaignsPage() {
 
       console.log("🎯 Final imageUrl to use:", imageUrl)
 
+      console.log("🔍 Starting validation...")
       // Validate required fields
       if (!formData.title?.trim()) {
         toast.error("Campaign title is required")
@@ -234,6 +236,7 @@ export default function AdminCampaignsPage() {
         return
       }
 
+      console.log("✅ Validation passed, creating request body...")
       const requestBody: any = {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -256,6 +259,7 @@ export default function AdminCampaignsPage() {
 
       console.log("🚀 Sending campaign creation request:", JSON.stringify(requestBody, null, 2))
 
+      console.log("📡 Calling authenticatedFetch...")
       const response = await authenticatedFetch("/api/campaigns", {
         method: "POST",
         headers: {
@@ -1116,8 +1120,8 @@ function CampaignForm({
         <h3 className="text-lg font-medium mb-4">Platforms & Requirements</h3>
 
         <div className="mb-4">
-          <Label htmlFor="platforms-group">Accepted Platforms *</Label>
-          <div id="platforms-group" className="grid grid-cols-3 gap-2 mt-2" role="group" aria-labelledby="platforms-group">
+          <Label id="platforms-label" htmlFor="platforms-group">Accepted Platforms *</Label>
+          <div id="platforms-group" className="grid grid-cols-3 gap-2 mt-2" role="group" aria-labelledby="platforms-label">
             {platformOptions.map((platform) => (
               <label key={platform.value} className="flex items-center space-x-2" htmlFor={`platform-${platform.value}`}>
                 <input
