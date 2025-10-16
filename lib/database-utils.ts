@@ -119,7 +119,6 @@ export async function createCampaign(data: CampaignCreateData) {
         creator: data.creator,
         budget: new Prisma.Decimal(data.budget),
         payoutRate: new Prisma.Decimal(data.payoutRate),
-        deadline: data.deadline,
         startDate: data.startDate,
         requirements: data.requirements || [],
         targetPlatforms: data.targetPlatforms || [] as SocialPlatform[],

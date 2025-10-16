@@ -136,7 +136,7 @@ export class PayoutCalculationService {
       }
 
       const remainingBudget = Number(campaign.budget) - Number(campaign.spent || 0) - totalSpent
-      const shouldComplete = remainingBudget <= 0 || new Date() > campaign.deadline
+      const shouldComplete = remainingBudget <= 0
 
       return {
         campaignId,

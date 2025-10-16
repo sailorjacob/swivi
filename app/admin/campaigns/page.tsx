@@ -1313,9 +1313,9 @@ function CampaignView({
           </Badge>
         </div>
         <div>
-          <Label className="text-sm font-medium text-muted-foreground">Deadline</Label>
+          <Label className="text-sm font-medium text-muted-foreground">Budget Status</Label>
           <p className="text-sm">
-            {campaign.deadline ? new Date(campaign.deadline).toLocaleDateString() : "Not set"}
+            {campaign.spent >= campaign.budget ? "Budget Exhausted" : `$${(campaign.budget - campaign.spent).toFixed(0)} Remaining`}
           </p>
         </div>
         <div>

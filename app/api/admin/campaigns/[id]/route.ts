@@ -10,7 +10,6 @@ const updateCampaignSchema = z.object({
   budget: z.number().positive("Budget must be positive").optional(),
   spent: z.number().min(0, "Spent amount cannot be negative").optional(),
   payoutRate: z.number().positive("Payout rate must be positive").optional(),
-  deadline: z.string().transform((str) => new Date(str)).optional(),
   startDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
   status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])).optional(),
@@ -48,7 +47,6 @@ export async function GET(
         budget: true,
         spent: true,
         payoutRate: true,
-        deadline: true,
         startDate: true,
         status: true,
         targetPlatforms: true,
@@ -119,7 +117,6 @@ export async function PUT(
     if (validatedData.budget !== undefined) updateData.budget = validatedData.budget
     if (validatedData.spent !== undefined) updateData.spent = validatedData.spent
     if (validatedData.payoutRate !== undefined) updateData.payoutRate = validatedData.payoutRate
-    if (validatedData.deadline !== undefined) updateData.deadline = validatedData.deadline
     if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate
     if (validatedData.status !== undefined) updateData.status = validatedData.status
     if (validatedData.targetPlatforms !== undefined) updateData.targetPlatforms = validatedData.targetPlatforms
