@@ -229,7 +229,7 @@ export async function GET(request: NextRequest) {
         submittedAt: submission.createdAt ? submission.createdAt.toISOString().split('T')[0] : "Unknown",
         views: currentViews,
         viewGrowth: viewGrowth,
-        earnings: submission.status === "PAID" ? Number(submission.payout || 0) : 0,
+        earnings: submission.status === "PAID" ? parseFloat(String(submission.payout || 0)) : 0,
         clipUrl: submission.clipUrl,
         platform: submission.platform,
         lastTracked: latestTracking?.date ? latestTracking.date.toISOString().split('T')[0] : null

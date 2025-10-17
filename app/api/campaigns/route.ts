@@ -27,7 +27,11 @@ export async function GET(request: NextRequest) {
     const where: any = {}
 
     if (status) {
-      where.status = status.toUpperCase()
+      if (status.toLowerCase() === "all") {
+        // Don't filter by status - show all campaigns
+      } else {
+        where.status = status.toUpperCase()
+      }
     } else {
       where.status = "ACTIVE" // Default to active campaigns
     }

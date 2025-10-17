@@ -300,7 +300,7 @@ export default function ClipperDashboard() {
                             </span>
                           )}
                           {clip.earnings > 0 && (
-                            <span>${clip.earnings.toFixed(2)} earned</span>
+                            <span>${(typeof clip.earnings === 'number' ? clip.earnings : parseFloat(clip.earnings || 0)).toFixed(2)} earned</span>
                           )}
                         </div>
                         {clip.lastTracked && (

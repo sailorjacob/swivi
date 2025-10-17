@@ -93,7 +93,8 @@ export default function AdminCampaignsPage() {
   // Fetch campaigns
   const fetchCampaigns = async () => {
     try {
-      const response = await authenticatedFetch("/api/campaigns")
+      // Admin should see ALL campaigns including DRAFT ones
+      const response = await authenticatedFetch("/api/campaigns?status=all")
       if (response.ok) {
         const data = await response.json()
         console.log('🔍 Fetched campaigns data:', data)
@@ -529,17 +530,10 @@ export default function AdminCampaignsPage() {
   const handleViewCampaign = async (campaign: Campaign) => {
     try {
       console.log('🔍 Fetching full campaign details for:', campaign.id)
-      
-      // Clear any existing state first
-      setSelectedCampaign(null)
-      setShowViewDialog(false)
-      
       const response = await authenticatedFetch(`/api/admin/campaigns/${campaign.id}`)
       if (response.ok) {
         const fullCampaign = await response.json()
         console.log('🔍 Full campaign data:', fullCampaign)
-        
-        // Set the campaign and show dialog
         setSelectedCampaign(fullCampaign)
         setShowViewDialog(true)
       } else {
@@ -680,6 +674,7 @@ export default function AdminCampaignsPage() {
     totalEarnings: 0
   }
 
+
   return (
     <div className="container mx-auto px-4 py-8">
       <motion.div
@@ -801,201 +796,160 @@ export default function AdminCampaignsPage() {
                   </Button>
                 </div>
               ) : (
-                campaigns.map((campaign) => {
-                  const progressPercentage = campaign.budget > 0 ? Math.min((campaign.spent / campaign.budget) * 100, 100) : 0
-                  
-                  return (
-                    <motion.div
-                      key={campaign.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="group relative overflow-hidden rounded-xl border bg-card hover:shadow-lg transition-all duration-300"
+                campaigns.map((campaign) => (
+                <div
+                  key={campaign.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-semibold">{campaign.title}</h3>
+                      <Badge className={getStatusColor(campaign.status)}>
+                        {campaign.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {campaign.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span>Budget: ${campaign.budget.toLocaleString()}</span>
+                      <span>Spent: ${campaign.spent.toLocaleString()}</span>
+                      <span>Submissions: {campaign._count.clipSubmissions}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewCampaign(campaign)}
                     >
-                      <div className="flex">
-                        {/* Campaign Image */}
-                        <div className="relative w-32 h-32 flex-shrink-0">
-                          {campaign.featuredImage ? (
-                            <img
-                              src={campaign.featuredImage}
-                              alt={campaign.title}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                              <Target className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                          )}
-                          {/* Status Badge Overlay */}
-                          <div className="absolute top-2 left-2">
-                            <Badge className={getStatusColor(campaign.status)}>
-                              {campaign.status}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        {/* Campaign Content */}
-                        <div className="flex-1 p-6">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1">
-                              <h3 className="text-lg font-semibold mb-1 group-hover:text-primary transition-colors">
-                                {campaign.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                                {campaign.description}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                by {campaign.creator}
-                              </p>
-                            </div>
-                            
-                            {/* Action Buttons */}
-                            <div className="flex items-center gap-2 ml-4">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewCampaign(campaign)}
-                                className="opacity-70 group-hover:opacity-100 transition-opacity"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditCampaign(campaign)}
-                                className="opacity-70 group-hover:opacity-100 transition-opacity"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              {campaign.status === "DRAFT" && (
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  onClick={() => handlePublishCampaign(campaign.id)}
-                                  className="bg-green-600 hover:bg-green-700 opacity-70 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <span className="text-xs">Publish</span>
-                                </Button>
-                              )}
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    className="opacity-70 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to delete &quot;{campaign.title}&quot;? This action cannot be undone.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => handleDeleteCampaign(campaign.id)}
-                                    >
-                                      Delete
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </div>
-
-                          {/* Budget Progress Bar */}
-                          <div className="mb-3">
-                            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                              <span>Budget Progress</span>
-                              <span>{progressPercentage.toFixed(1)}%</span>
-                            </div>
-                            <div className="w-full bg-muted rounded-full h-2">
-                              <div
-                                className={`h-2 rounded-full transition-all duration-500 ${
-                                  progressPercentage >= 100 
-                                    ? 'bg-red-500' 
-                                    : progressPercentage >= 80 
-                                    ? 'bg-yellow-500' 
-                                    : 'bg-green-500'
-                                }`}
-                                style={{ width: `${progressPercentage}%` }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Campaign Stats */}
-                          <div className="grid grid-cols-4 gap-4 text-sm">
-                            <div>
-                              <p className="text-muted-foreground">Budget</p>
-                              <p className="font-medium">${campaign.budget.toLocaleString()}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Spent</p>
-                              <p className="font-medium">${campaign.spent.toLocaleString()}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Remaining</p>
-                              <p className="font-medium">${(campaign.budget - campaign.spent).toLocaleString()}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Submissions</p>
-                              <p className="font-medium">{campaign._count.clipSubmissions}</p>
-                            </div>
-                          </div>
-
-                          {/* Platform Tags */}
-                          <div className="flex gap-1 mt-3">
-                            {campaign.targetPlatforms.slice(0, 3).map((platform) => (
-                              <Badge key={platform} variant="secondary" className="text-xs">
-                                {platform}
-                              </Badge>
-                            ))}
-                            {campaign.targetPlatforms.length > 3 && (
-                              <Badge variant="secondary" className="text-xs">
-                                +{campaign.targetPlatforms.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )
-                })
-              )
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditCampaign(campaign)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    {campaign.status === "DRAFT" && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handlePublishCampaign(campaign.id)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <span className="text-xs">Publish</span>
+                      </Button>
+                    )}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete &quot;{campaign.title}&quot;? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteCampaign(campaign.id)}
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              ))
               )}
             </div>
           </CardContent>
         </Card>
 
+        {/* Campaign Detail Modal */}
+        {selectedCampaign && (
+          <Dialog open={!!selectedCampaign} onOpenChange={() => setSelectedCampaign(null)}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{selectedCampaign.title}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-2">Campaign Details</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium">Creator:</span> {selectedCampaign.creator}
+                    </div>
+                    <div>
+                      <span className="font-medium">Status:</span>
+                      <Badge className={`ml-2 ${getStatusColor(selectedCampaign.status)}`}>
+                        {selectedCampaign.status}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="font-medium">Budget:</span> ${selectedCampaign.budget.toLocaleString()}
+                    </div>
+                    <div>
+                      <span className="font-medium">Spent:</span> ${selectedCampaign.spent.toLocaleString()}
+                    </div>
+                    <div>
+                      <span className="font-medium">Submissions:</span> {selectedCampaign._count.clipSubmissions}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2">Target Platforms</h3>
+                  <div className="flex gap-2">
+                    {selectedCampaign.targetPlatforms.map((platform) => (
+                      <Badge key={platform} variant="secondary">
+                        {platform}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2">Requirements</h3>
+                  <ul className="list-disc list-inside text-sm space-y-1">
+                    {selectedCampaign.requirements.map((req, index) => (
+                      <li key={index}>{req}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2">Recent Submissions</h3>
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground text-sm">
+                      {selectedCampaign._count?.clipSubmissions || 0} submissions total
+                    </p>
+                        </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
 
         {/* View Campaign Dialog */}
         {showViewDialog && selectedCampaign && (
-          <Dialog 
-            open={showViewDialog} 
-            onOpenChange={(open) => {
-              setShowViewDialog(open)
-              if (!open) {
-                // Clear selected campaign when dialog closes
-                setTimeout(() => setSelectedCampaign(null), 150)
-              }
-            }}
-          >
+          <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Campaign Details</DialogTitle>
               </DialogHeader>
               <CampaignView 
                 campaign={selectedCampaign} 
-                onClose={() => {
-                  setShowViewDialog(false)
-                  setTimeout(() => setSelectedCampaign(null), 150)
-                }}
+                onClose={() => setShowViewDialog(false)}
                 onEdit={() => {
                   setShowViewDialog(false)
-                  setTimeout(() => setSelectedCampaign(null), 150)
                   handleEditCampaign(selectedCampaign)
                 }}
               />
@@ -1345,49 +1299,19 @@ function CampaignView({
         <p className="mt-1 text-sm leading-relaxed">{campaign.description}</p>
       </div>
 
-      {/* Budget Progress */}
-      <div className="space-y-4">
+      {/* Budget & Performance */}
+      <div className="grid grid-cols-3 gap-6">
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <Label className="text-sm font-medium text-muted-foreground">Budget Progress</Label>
-            <span className="text-sm text-muted-foreground">
-              {campaign.budget > 0 ? Math.min((campaign.spent / campaign.budget) * 100, 100).toFixed(1) : 0}%
-            </span>
-          </div>
-          <div className="w-full bg-muted rounded-full h-3">
-            <div
-              className={`h-3 rounded-full transition-all duration-500 ${
-                campaign.spent >= campaign.budget 
-                  ? 'bg-red-500' 
-                  : (campaign.spent / campaign.budget) >= 0.8 
-                  ? 'bg-yellow-500' 
-                  : 'bg-green-500'
-              }`}
-              style={{ 
-                width: `${campaign.budget > 0 ? Math.min((campaign.spent / campaign.budget) * 100, 100) : 0}%` 
-              }}
-            />
-          </div>
+          <Label className="text-sm font-medium text-muted-foreground">Budget</Label>
+          <p className="text-lg font-medium">${campaign.budget.toLocaleString()}</p>
         </div>
-
-        {/* Budget & Performance */}
-        <div className="grid grid-cols-4 gap-6">
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Budget</Label>
-            <p className="text-lg font-medium">${campaign.budget.toLocaleString()}</p>
-          </div>
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Spent</Label>
-            <p className="text-lg font-medium">${campaign.spent.toLocaleString()}</p>
-          </div>
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Remaining</Label>
-            <p className="text-lg font-medium">${(campaign.budget - campaign.spent).toLocaleString()}</p>
-          </div>
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Payout Rate</Label>
-            <p className="text-lg font-medium">{typeof campaign.payoutRate === 'number' ? `$${campaign.payoutRate}` : campaign.payoutRate}/1K views</p>
-          </div>
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Spent</Label>
+          <p className="text-lg font-medium">${campaign.spent.toLocaleString()}</p>
+        </div>
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground">Payout Rate</Label>
+          <p className="text-lg font-medium">{typeof campaign.payoutRate === 'number' ? `$${campaign.payoutRate}` : campaign.payoutRate}/1K views</p>
         </div>
       </div>
 
