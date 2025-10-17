@@ -57,3 +57,9 @@ export const safeBigIntToNumber = (value: bigint | null | undefined): number => 
   
   return Number(value)
 }
+
+/**
+ * Legacy alias for convertBigIntToString - used by existing user profile API
+ * This maintains backward compatibility with existing code
+ */
+export const serializeUser = convertBigIntToString
