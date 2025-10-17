@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
+import { convertBigIntToString } from "@/lib/bigint-utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -271,8 +272,8 @@ export async function GET(request: NextRequest) {
     ]
 
     return NextResponse.json({
-      stats,
-      recentClips,
+      stats: convertBigIntToString(stats),
+      recentClips: convertBigIntToString(recentClips),
       activeCampaigns: activeCampaigns
     })
 

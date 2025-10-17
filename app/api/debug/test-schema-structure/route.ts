@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { convertBigIntToString } from "@/lib/bigint-utils"
 
 export async function GET(request: NextRequest) {
   console.log("🧪 DEBUG: Test schema structure")
@@ -185,12 +186,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       tests: {
-        simple_submission: simpleSubmission,
-        user_relation: userRelationTest,
-        campaign_relation: campaignRelationTest,
-        clip_relation: clipRelationTest,
-        view_tracking: viewTrackingTest,
-        exact_api_query: exactApiTest
+        simple_submission: convertBigIntToString(simpleSubmission),
+        user_relation: convertBigIntToString(userRelationTest),
+        campaign_relation: convertBigIntToString(campaignRelationTest),
+        clip_relation: convertBigIntToString(clipRelationTest),
+        view_tracking: convertBigIntToString(viewTrackingTest),
+        exact_api_query: convertBigIntToString(exactApiTest)
       }
     })
 

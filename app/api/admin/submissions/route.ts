@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
+import { convertBigIntToString } from "@/lib/bigint-utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -175,7 +176,7 @@ export async function GET(request: NextRequest) {
       const hasMore = offset + limit < total
 
       return NextResponse.json({
-        submissions: submissions,
+        submissions: convertBigIntToString(submissions),
         pagination: {
           total,
           limit,
@@ -185,8 +186,9 @@ export async function GET(request: NextRequest) {
       })
     } catch (dbError) {
       console.error("❌ Database error counting submissions:", dbError.message)
+      
       return NextResponse.json({
-        submissions: submissions,
+        submissions: convertBigIntToString(submissions),
         pagination: {
           total: 0,
           limit,

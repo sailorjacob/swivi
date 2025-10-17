@@ -3,78 +3,57 @@
  */
 
 /**
- * Recursively converts BigInt values to strings in an object
- * This is needed because JSON.stringify() cannot serialize BigInt values
+ * Recursively converts BigInt values to strings for JSON serialization
+ * This is necessary because JSON.stringify() cannot handle BigInt values
  */
-export function serializeBigInt<T>(obj: T): T {
-  if (obj === null || obj === undefined) {
-    return obj
-  }
-  
-  if (typeof obj === 'bigint') {
-    return obj.toString() as unknown as T
-  }
-  
-  if (Array.isArray(obj)) {
-    return obj.map(item => serializeBigInt(item)) as unknown as T
-  }
-  
+export const convertBigIntToString = (obj: any): any => {
+  if (obj === null || obj === undefined) return obj
+  if (typeof obj === 'bigint') return obj.toString()
+  if (Array.isArray(obj)) return obj.map(convertBigIntToString)
   if (typeof obj === 'object') {
-    const serialized: any = {}
-    for (const [key, value] of Object.entries(obj)) {
-      serialized[key] = serializeBigInt(value)
+    const converted: any = {}
+    for (const key in obj) {
+      converted[key] = convertBigIntToString(obj[key])
     }
-    return serialized
+    return converted
   }
-  
   return obj
 }
 
 /**
- * Convert specific BigInt fields to appropriate types for a user object
+ * Converts BigInt values to numbers for frontend consumption
+ * Use this when you need actual numbers instead of strings
  */
-export function serializeUser(user: any) {
-  if (!user) return user
-  
-  return {
-    ...user,
-    // Convert Decimal to number for totalEarnings (so .toFixed() works)
-    totalEarnings: user.totalEarnings ? Number(user.totalEarnings.toString()) : 0,
-    // Convert BigInt to number for totalViews (so .toFixed() works)
-    totalViews: user.totalViews ? Number(user.totalViews.toString()) : 0
+export const convertBigIntToNumber = (obj: any): any => {
+  if (obj === null || obj === undefined) return obj
+  if (typeof obj === 'bigint') return Number(obj)
+  if (Array.isArray(obj)) return obj.map(convertBigIntToNumber)
+  if (typeof obj === 'object') {
+    const converted: any = {}
+    for (const key in obj) {
+      converted[key] = convertBigIntToNumber(obj[key])
+    }
+    return converted
   }
+  return obj
 }
 
 /**
- * Convert specific BigInt fields to numbers for a clip object
+ * Safely converts a BigInt to a number, with overflow protection
  */
-export function serializeClip(clip: any) {
-  if (!clip) return clip
+export const safeBigIntToNumber = (value: bigint | null | undefined): number => {
+  if (value === null || value === undefined) return 0
   
-  return {
-    ...clip,
-    views: clip.views ? Number(clip.views.toString()) : 0,
-    likes: clip.likes ? Number(clip.likes.toString()) : 0,
-    shares: clip.shares ? Number(clip.shares.toString()) : 0
+  // Check for safe integer range
+  if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
+    console.warn(`BigInt value ${value} exceeds MAX_SAFE_INTEGER, returning MAX_SAFE_INTEGER`)
+    return Number.MAX_SAFE_INTEGER
   }
-}
-
-/**
- * Convert specific BigInt fields to numbers for view tracking
- */
-export function serializeViewTracking(viewTracking: any) {
-  if (!viewTracking) return viewTracking
   
-  return {
-    ...viewTracking,
-    views: viewTracking.views ? Number(viewTracking.views.toString()) : 0
+  if (value < BigInt(Number.MIN_SAFE_INTEGER)) {
+    console.warn(`BigInt value ${value} is below MIN_SAFE_INTEGER, returning MIN_SAFE_INTEGER`)
+    return Number.MIN_SAFE_INTEGER
   }
-}
-
-/**
- * Convert BigInt fields in an array of objects
- */
-export function serializeArray<T>(array: T[], serializeFunction: (item: T) => T): T[] {
-  if (!Array.isArray(array)) return array
-  return array.map(serializeFunction)
+  
+  return Number(value)
 }
