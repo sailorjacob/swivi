@@ -38,7 +38,9 @@ export async function GET(request: NextRequest) {
       unreadOnly
     })
 
-    return NextResponse.json(result)
+    // Apply BigInt conversion to prevent serialization errors
+    const { convertBigIntToString } = await import("@/lib/bigint-utils")
+    return NextResponse.json(convertBigIntToString(result))
 
   } catch (error) {
     console.error("Error fetching notifications:", error)
