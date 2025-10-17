@@ -4,7 +4,17 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   try {
-    const { user, error } = await getServerUserWithRole(request)
+    console.log("🔍 Clipper dashboard API called")
+
+    let authResult
+    try {
+      authResult = await getServerUserWithRole(request)
+    } catch (authError) {
+      console.error("❌ Dashboard authentication error:", authError)
+      return NextResponse.json({ error: "Authentication service unavailable" }, { status: 503 })
+    }
+
+    const { user, error } = authResult
 
     if (!user || error) {
       console.log('❌ Dashboard auth failed:', {
@@ -21,41 +31,86 @@ export async function GET(request: NextRequest) {
     const userId = user.id
 
     // Get user's real stats
-    let userData = await prisma.user.findUnique({
-      where: { supabaseAuthId: userId },
-      select: {
-        totalViews: true,
-        totalEarnings: true,
-        clipSubmissions: {
-          select: {
-            id: true,
-            status: true,
-            payout: true,
-            clipUrl: true,
-            platform: true,
-            createdAt: true,
-            campaigns: {
-              select: {
-                title: true,
-                creator: true
-              }
-            },
-            clips: {
-              select: {
-                id: true,
-                title: true,
-                view_tracking: {
-                  orderBy: { date: "desc" },
-                  take: 1
+    let userData
+    try {
+      userData = await prisma.user.findUnique({
+        where: { supabaseAuthId: userId },
+        select: {
+          totalViews: true,
+          totalEarnings: true,
+          clipSubmissions: {
+            select: {
+              id: true,
+              status: true,
+              payout: true,
+              clipUrl: true,
+              platform: true,
+              createdAt: true,
+              campaigns: {
+                select: {
+                  title: true,
+                  creator: true
+                }
+              },
+              clips: {
+                select: {
+                  id: true,
+                  title: true,
+                  view_tracking: {
+                    orderBy: { date: "desc" },
+                    take: 1
+                  }
                 }
               }
-            }
-          },
-          orderBy: { createdAt: "desc" },
-          take: 10
+            },
+            orderBy: { createdAt: "desc" },
+            take: 10
+          }
         }
-      }
-    })
+      })
+      console.log("🔍 User data lookup result:", { found: !!userData, userId })
+    } catch (dbError) {
+      console.error("❌ Database error looking up user:", dbError)
+      // Return empty dashboard instead of error
+      return NextResponse.json({
+        stats: [
+          {
+            title: "Total Earned",
+            value: "$0.00",
+            change: "Start earning from approved clips",
+            changeType: "neutral",
+            icon: "DollarSign",
+            color: "text-foreground"
+          },
+          {
+            title: "Active Campaigns",
+            value: "0",
+            change: "Available to join",
+            changeType: "neutral",
+            icon: "Target",
+            color: "text-muted-foreground"
+          },
+          {
+            title: "Clips Submitted",
+            value: "0",
+            change: "Submit your first clip",
+            changeType: "neutral",
+            icon: "Play",
+            color: "text-muted-foreground"
+          },
+          {
+            title: "Total Views",
+            value: "0",
+            change: "Grow your audience",
+            changeType: "neutral",
+            icon: "Eye",
+            color: "text-muted-foreground"
+          }
+        ],
+        recentClips: [],
+        activeCampaigns: 0
+      })
+    }
 
     // If user doesn't exist in database, create them
     if (!userData) {
@@ -138,9 +193,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Get active campaigns count
-    const activeCampaigns = await prisma.campaign.count({
-      where: { status: "ACTIVE" }
-    })
+    let activeCampaigns = 0
+    try {
+      activeCampaigns = await prisma.campaign.count({
+        where: { status: "ACTIVE" }
+      })
+      console.log("🔍 Active campaigns count:", activeCampaigns)
+    } catch (dbError) {
+      console.error("❌ Database error counting campaigns:", dbError)
+      activeCampaigns = 0
+    }
 
     // Calculate real stats
     const totalSubmissions = userData.clipSubmissions.length
@@ -150,8 +212,8 @@ export async function GET(request: NextRequest) {
     // Get recent clips with detailed view tracking
     const recentClips = userData.clipSubmissions.map(submission => {
       const clip = submission.clips
-      const latestTracking = clip?.view_tracking[0]
-      const previousTracking = clip?.view_tracking[1]
+      const latestTracking = clip?.view_tracking?.[0]
+      const previousTracking = clip?.view_tracking?.[1]
 
       // Calculate view growth
       const currentViews = latestTracking ? Number(latestTracking.views) : 0
@@ -161,9 +223,9 @@ export async function GET(request: NextRequest) {
       return {
         id: submission.id,
         title: clip?.title || submission.clipUrl,
-        campaign: submission.campaigns.title,
-        status: submission.status.toLowerCase(),
-        submittedAt: submission.createdAt.toISOString().split('T')[0],
+        campaign: submission.campaigns?.title || "Unknown Campaign",
+        status: submission.status?.toLowerCase() || "unknown",
+        submittedAt: submission.createdAt ? submission.createdAt.toISOString().split('T')[0] : "Unknown",
         views: currentViews,
         viewGrowth: viewGrowth,
         earnings: submission.status === "PAID" ? Number(submission.payout || 0) : 0,

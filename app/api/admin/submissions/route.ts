@@ -105,58 +105,58 @@ export async function GET(request: NextRequest) {
     let submissions
     try {
       submissions = await prisma.clipSubmission.findMany({
-      where,
-      orderBy: {
-        createdAt: "desc"
-      },
-      select: {
-        id: true,
-        clipUrl: true,
-        platform: true,
-        status: true,
-        payout: true,
-        paidAt: true,
-        createdAt: true,
-        rejectionReason: true,
-        requiresReview: true,
-        reviewReason: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            totalViews: true,
-            totalEarnings: true
-          }
+        where,
+        orderBy: {
+          createdAt: "desc"
         },
-        clip: {
-          select: {
-            id: true,
-            title: true,
-            views: true,
-            earnings: true,
-            viewTracking: {
-              orderBy: { date: "desc" },
-              take: 2
+        select: {
+          id: true,
+          clipUrl: true,
+          platform: true,
+          status: true,
+          payout: true,
+          paidAt: true,
+          createdAt: true,
+          rejectionReason: true,
+          requiresReview: true,
+          reviewReason: true,
+          users: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              totalViews: true,
+              totalEarnings: true
+            }
+          },
+          clips: {
+            select: {
+              id: true,
+              title: true,
+              views: true,
+              earnings: true,
+              view_tracking: {
+                orderBy: { date: "desc" },
+                take: 2
+              }
+            }
+          },
+          campaigns: {
+            select: {
+              id: true,
+              title: true,
+              creator: true,
+              payoutRate: true
             }
           }
         },
-        campaign: {
-          select: {
-            id: true,
-            title: true,
-            creator: true,
-            payoutRate: true
-          }
-        }
-      },
-      take: limit,
-      skip: offset
-    })
+        take: limit,
+        skip: offset
+      })
 
-    console.log("✅ Found submissions:", submissions.length)
+      console.log("✅ Found submissions:", submissions.length)
     } catch (dbError) {
-      console.error("❌ Database error fetching submissions:", dbError.message)
+      console.error("❌ Database error fetching submissions:", dbError)
       return NextResponse.json({
         submissions: [],
         pagination: {
