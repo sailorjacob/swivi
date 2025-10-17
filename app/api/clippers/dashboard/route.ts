@@ -239,7 +239,7 @@ export async function GET(request: NextRequest) {
     const stats = [
       {
         title: "Total Earned",
-        value: `$${(typeof userData.totalEarnings === 'number' ? userData.totalEarnings : parseFloat(userData.totalEarnings || 0)).toFixed(2)}`,
+        value: `$${parseFloat(userData.totalEarnings?.toString() || '0').toFixed(2)}`,
         change: approvedSubmissions > 0 ? `${approvedSubmissions} approved clips` : "Start earning from approved clips",
         changeType: approvedSubmissions > 0 ? "positive" : "neutral" as const,
         icon: "DollarSign",
@@ -263,7 +263,7 @@ export async function GET(request: NextRequest) {
       },
       {
         title: "Total Views",
-        value: (typeof userData.totalViews === 'number' ? userData.totalViews : parseFloat(userData.totalViews || 0)).toLocaleString(),
+        value: Number(userData.totalViews?.toString() || '0').toLocaleString(),
         change: "Grow your audience",
         changeType: "neutral" as const,
         icon: "Eye",
