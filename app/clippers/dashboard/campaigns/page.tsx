@@ -179,7 +179,7 @@ export default function CampaignsPage() {
 
           // Campaign runs until budget is exhausted
           const remainingBudget = campaign.budget - campaign.spent
-          const budgetText = remainingBudget > 0 ? `$${remainingBudget.toFixed(0)} left` : "Budget Full"
+          const budgetText = remainingBudget > 0 ? `$${(typeof remainingBudget === 'number' ? remainingBudget : parseFloat(remainingBudget || 0)).toFixed(0)} left` : "Budget Full"
 
           return (
           <motion.div

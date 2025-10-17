@@ -545,7 +545,7 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div className="flex justify-between py-3 border-b border-border">
                 <span className="text-muted-foreground">Total Earnings</span>
-                <span className="text-white font-medium">${user?.totalEarnings?.toFixed(2) || "0.00"}</span>
+                <span className="text-white font-medium">${(typeof user?.totalEarnings === 'number' ? user.totalEarnings : parseFloat(user?.totalEarnings || 0)).toFixed(2)}</span>
               </div>
               <div className="flex justify-between py-3 border-b border-border">
                 <span className="text-muted-foreground">Total Views</span>

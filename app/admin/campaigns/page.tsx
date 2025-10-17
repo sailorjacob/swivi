@@ -796,78 +796,169 @@ export default function AdminCampaignsPage() {
                   </Button>
                 </div>
               ) : (
-                campaigns.map((campaign) => (
-                <div
-                  key={campaign.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold">{campaign.title}</h3>
-                      <Badge className={getStatusColor(campaign.status)}>
-                        {campaign.status}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {campaign.description}
-                    </p>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>Budget: ${campaign.budget.toLocaleString()}</span>
-                      <span>Spent: ${campaign.spent.toLocaleString()}</span>
-                      <span>Submissions: {campaign._count.clipSubmissions}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleViewCampaign(campaign)}
+                campaigns.map((campaign) => {
+                  const progressPercentage = campaign.budget > 0 ? Math.min((campaign.spent / campaign.budget) * 100, 100) : 0
+                  
+                  return (
+                    <motion.div
+                      key={campaign.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="group relative overflow-hidden rounded-xl border bg-card hover:shadow-lg transition-all duration-300"
                     >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditCampaign(campaign)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    {campaign.status === "DRAFT" && (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => handlePublishCampaign(campaign.id)}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <span className="text-xs">Publish</span>
-                      </Button>
-                    )}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete &quot;{campaign.title}&quot;? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteCampaign(campaign.id)}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-              ))
+                      <div className="flex">
+                        {/* Campaign Image */}
+                        <div className="relative w-32 h-32 flex-shrink-0">
+                          {campaign.featuredImage ? (
+                            <img
+                              src={campaign.featuredImage}
+                              alt={campaign.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                              <Target className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                          )}
+                          {/* Status Badge Overlay */}
+                          <div className="absolute top-2 left-2">
+                            <Badge className={getStatusColor(campaign.status)}>
+                              {campaign.status}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Campaign Content */}
+                        <div className="flex-1 p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold mb-1 group-hover:text-primary transition-colors">
+                                {campaign.title}
+                              </h3>
+                              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                                {campaign.description}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                by {campaign.creator}
+                              </p>
+                            </div>
+                            
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2 ml-4">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewCampaign(campaign)}
+                                className="opacity-70 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditCampaign(campaign)}
+                                className="opacity-70 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              {campaign.status === "DRAFT" && (
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() => handlePublishCampaign(campaign.id)}
+                                  className="bg-green-600 hover:bg-green-700 opacity-70 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <span className="text-xs">Publish</span>
+                                </Button>
+                              )}
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="opacity-70 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete &quot;{campaign.title}&quot;? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDeleteCampaign(campaign.id)}
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </div>
+
+                          {/* Budget Progress Bar */}
+                          <div className="mb-3">
+                            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                              <span>Budget Progress</span>
+                              <span>{progressPercentage.toFixed(1)}%</span>
+                            </div>
+                            <div className="w-full bg-muted rounded-full h-2">
+                              <div
+                                className={`h-2 rounded-full transition-all duration-500 ${
+                                  progressPercentage >= 100 
+                                    ? 'bg-red-500' 
+                                    : progressPercentage >= 80 
+                                    ? 'bg-yellow-500' 
+                                    : 'bg-green-500'
+                                }`}
+                                style={{ width: `${progressPercentage}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Campaign Stats */}
+                          <div className="grid grid-cols-4 gap-4 text-sm">
+                            <div>
+                              <p className="text-muted-foreground">Budget</p>
+                              <p className="font-medium">${campaign.budget.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Spent</p>
+                              <p className="font-medium">${campaign.spent.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Remaining</p>
+                              <p className="font-medium">${(campaign.budget - campaign.spent).toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Submissions</p>
+                              <p className="font-medium">{campaign._count.clipSubmissions}</p>
+                            </div>
+                          </div>
+
+                          {/* Platform Tags */}
+                          <div className="flex gap-1 mt-3">
+                            {campaign.targetPlatforms.slice(0, 3).map((platform) => (
+                              <Badge key={platform} variant="secondary" className="text-xs">
+                                {platform}
+                              </Badge>
+                            ))}
+                            {campaign.targetPlatforms.length > 3 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{campaign.targetPlatforms.length - 3} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })
               )}
             </div>
           </CardContent>
@@ -940,16 +1031,29 @@ export default function AdminCampaignsPage() {
 
         {/* View Campaign Dialog */}
         {showViewDialog && selectedCampaign && (
-          <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+          <Dialog 
+            open={showViewDialog} 
+            onOpenChange={(open) => {
+              setShowViewDialog(open)
+              if (!open) {
+                // Clear selected campaign when dialog closes to prevent glitches
+                setTimeout(() => setSelectedCampaign(null), 150)
+              }
+            }}
+          >
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Campaign Details</DialogTitle>
               </DialogHeader>
               <CampaignView 
                 campaign={selectedCampaign} 
-                onClose={() => setShowViewDialog(false)}
+                onClose={() => {
+                  setShowViewDialog(false)
+                  setTimeout(() => setSelectedCampaign(null), 150)
+                }}
                 onEdit={() => {
                   setShowViewDialog(false)
+                  setTimeout(() => setSelectedCampaign(null), 150)
                   handleEditCampaign(selectedCampaign)
                 }}
               />

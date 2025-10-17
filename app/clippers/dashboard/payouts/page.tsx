@@ -159,10 +159,10 @@ export default function PayoutsPage() {
         <CardContent>
           <div className="text-left">
             <div className="text-4xl font-bold text-white mb-2">
-              ${availableBalance.toFixed(2)}
+              ${(typeof availableBalance === 'number' ? availableBalance : parseFloat(availableBalance || 0)).toFixed(2)}
             </div>
             <p className="text-muted-foreground">
-              Minimum payout: ${minimumPayout.toFixed(2)}
+              Minimum payout: ${(typeof minimumPayout === 'number' ? minimumPayout : parseFloat(minimumPayout || 0)).toFixed(2)}
             </p>
           </div>
         </CardContent>
@@ -316,7 +316,7 @@ export default function PayoutsPage() {
                   <div key={payout.id} className="p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center justify-between mb-3">
                       <div className="font-bold text-white text-lg">
-                        ${payout.amount.toFixed(2)}
+                        ${(typeof payout.amount === 'number' ? payout.amount : parseFloat(payout.amount || 0)).toFixed(2)}
                       </div>
                       <Badge variant="outline" className={getStatusColor(payout.status)}>
                         {payout.status}
