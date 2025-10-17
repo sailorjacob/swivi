@@ -61,13 +61,16 @@ function DashboardTest() {
 }
 
 export default function ClipperDashboard() {
-  console.log('🚀 ClipperDashboard component mounting...')
+  console.log('🚀 ClipperDashboard component MOUNTING...')
 
   const { data: session, status } = useSession()
   console.log('🔍 useSession hook loaded:', { session: !!session, status })
 
   const router = useRouter()
   console.log('🔍 useRouter hook loaded')
+
+  // Check if this is the first render
+  console.log('🔄 First render of ClipperDashboard')
 
   const [stats, setStats] = useState<DashboardStats[]>([])
   const [recentClips, setRecentClips] = useState<RecentClip[]>([])

@@ -257,6 +257,7 @@ export default function DashboardLayout({
   }, [status, session, router])
 
   if (status === "loading") {
+    console.log('🔄 Session loading in dashboard layout')
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
@@ -265,8 +266,11 @@ export default function DashboardLayout({
   }
 
   if (status === "unauthenticated" || !session?.user) {
+    console.log('🚪 No session in dashboard layout, status:', status)
     return null // Will redirect in useEffect
   }
+
+  console.log('✅ Dashboard layout rendering with session:', !!session?.user)
 
   return (
     <div className="h-screen bg-background flex overflow-hidden">
