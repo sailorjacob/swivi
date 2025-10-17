@@ -76,12 +76,18 @@ export default function ClipperDashboard() {
       setLoading(true)
       setError(null)
       console.log('📊 Fetching dashboard data...')
+      console.log('🔍 Session status:', status)
+      console.log('🔍 Session user:', session?.user)
 
       const response = await authenticatedFetch("/api/clippers/dashboard")
+      console.log('🔍 API Response status:', response.status)
+      console.log('🔍 API Response headers:', Object.fromEntries(response.headers.entries()))
 
       if (response.ok) {
         const data = await response.json()
-        console.log('✅ Dashboard data loaded successfully')
+        console.log('✅ Dashboard data loaded successfully:', data)
+        console.log('📊 Stats:', data.stats)
+        console.log('📊 Recent clips:', data.recentClips)
         setStats(data.stats)
         setRecentClips(data.recentClips)
         setActiveCampaigns(data.activeCampaigns)
@@ -105,10 +111,14 @@ export default function ClipperDashboard() {
       }
     } catch (error) {
       console.error("❌ Error fetching dashboard data:", error)
+      console.error("❌ Error type:", typeof error)
+      console.error("❌ Error message:", error instanceof Error ? error.message : String(error))
+      console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack')
+      
       if (error instanceof TypeError && error.message.includes('fetch')) {
         setError("Network error. Please check your internet connection and try again.")
       } else {
-        setError("Failed to load dashboard data. Please try again.")
+        setError(`Failed to load dashboard data: ${error instanceof Error ? error.message : String(error)}`)
       }
     } finally {
       setLoading(false)

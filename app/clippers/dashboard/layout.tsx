@@ -31,7 +31,7 @@ import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { FloatingBranding } from "@/components/ui/floating-branding"
-import { NotificationBell } from "@/components/notifications/notification-bell"
+// import { NotificationBell } from "@/components/notifications/notification-bell"
 import { ErrorBoundary, DashboardErrorFallback } from "@/components/error-boundary"
 
 interface NavItem {
@@ -217,7 +217,7 @@ function Sidebar({ className }: { className?: string }) {
               {dbUser?.email || activeSession?.user?.email || ""}
             </p>
           </div>
-          <NotificationBell />
+          {/* <NotificationBell /> */}
         </div>
 
         <Button
@@ -291,7 +291,7 @@ export default function DashboardLayout({
             <h1 className="text-foreground font-light">Swivi Clippers</h1>
           </Link>
           <div className="flex items-center gap-2">
-            <NotificationBell />
+            {/* <NotificationBell /> */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
