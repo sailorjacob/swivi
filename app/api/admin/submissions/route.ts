@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
         rejectionReason: true,
         requiresReview: true,
         reviewReason: true,
-        users: {
+        user: {
           select: {
             id: true,
             name: true,
@@ -129,19 +129,19 @@ export async function GET(request: NextRequest) {
             totalEarnings: true
           }
         },
-        clips: {
+        clip: {
           select: {
             id: true,
             title: true,
             views: true,
             earnings: true,
-            view_tracking: {
+            viewTracking: {
               orderBy: { date: "desc" },
               take: 2
             }
           }
         },
-        campaigns: {
+        campaign: {
           select: {
             id: true,
             title: true,

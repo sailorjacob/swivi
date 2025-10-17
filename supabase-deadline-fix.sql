@@ -23,3 +23,4 @@ ALTER TABLE "campaigns" DROP COLUMN IF EXISTS "deadline";
 -- Campaign creation should now work without the "Null constraint violation" error.
 
 
+
