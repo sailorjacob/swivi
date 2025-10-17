@@ -63,11 +63,11 @@ function DashboardTest() {
 export default function ClipperDashboard() {
   console.log('🚀 ClipperDashboard component mounting...')
 
-  // Always render the test component first to see if the issue is with the component itself
-  return <DashboardTest />
-
   const { data: session, status } = useSession()
+  console.log('🔍 useSession hook loaded:', { session: !!session, status })
+
   const router = useRouter()
+  console.log('🔍 useRouter hook loaded')
 
   const [stats, setStats] = useState<DashboardStats[]>([])
   const [recentClips, setRecentClips] = useState<RecentClip[]>([])
@@ -75,6 +75,11 @@ export default function ClipperDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isFetching, setIsFetching] = useState(false)
+
+  console.log('🔍 State variables initialized')
+
+  // Always render the test component first to see if the issue is with the component itself
+  return <DashboardTest />
 
   // Get display name with simplified fallback logic
   const getDisplayName = () => {
