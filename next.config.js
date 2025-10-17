@@ -38,7 +38,7 @@ const nextConfig = {
   },
   // Build optimizations
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: false, // Keep console logs for debugging
   },
   // Better error handling during build
   onDemandEntries: {

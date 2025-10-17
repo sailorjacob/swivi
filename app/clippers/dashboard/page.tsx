@@ -48,29 +48,9 @@ interface RecentClip {
   lastTracked?: string
 }
 
-// Force render test - temporary fallback
-function DashboardTest() {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-4">Dashboard Test</h1>
-        <p className="text-muted-foreground">This should always render</p>
-      </div>
-    </div>
-  )
-}
-
 export default function ClipperDashboard() {
-  console.log('🚀 ClipperDashboard component MOUNTING...')
-
   const { data: session, status } = useSession()
-  console.log('🔍 useSession hook loaded:', { session: !!session, status })
-
   const router = useRouter()
-  console.log('🔍 useRouter hook loaded')
-
-  // Check if this is the first render
-  console.log('🔄 First render of ClipperDashboard')
 
   const [stats, setStats] = useState<DashboardStats[]>([])
   const [recentClips, setRecentClips] = useState<RecentClip[]>([])
@@ -78,11 +58,6 @@ export default function ClipperDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isFetching, setIsFetching] = useState(false)
-
-  console.log('🔍 State variables initialized')
-
-  // Always render the test component first to see if the issue is with the component itself
-  return <DashboardTest />
 
   // Get display name with simplified fallback logic
   const getDisplayName = () => {
