@@ -71,6 +71,24 @@ export default function ClipperDashboard() {
   // Show loading state while session is loading
   if (status === 'loading') {
     console.log('⏳ Session still loading, showing loading state')
+
+    // Force session refresh after 3 seconds if stuck
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        console.log('🔄 Force refreshing session...')
+        // Try to refresh the session
+        supabase.auth.getSession().then(({ data, error }) => {
+          console.log('🔄 Session refresh result:', { data: !!data.session, error })
+          if (data.session) {
+            console.log('✅ Session found, reloading page...')
+            window.location.reload()
+          }
+        })
+      }, 3000)
+
+      return () => clearTimeout(timer)
+    }, [])
+
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-64">
@@ -79,6 +97,30 @@ export default function ClipperDashboard() {
       </div>
     )
   }
+
+  // Force session refresh if stuck in loading state for too long
+  useEffect(() => {
+    if (status === 'loading') {
+      console.log('🔄 Forcing session refresh...')
+      const timer = setTimeout(() => {
+        console.log('🔄 Reloading page to refresh session...')
+        // Force a session refresh after 5 seconds
+        window.location.reload()
+      }, 5000)
+
+      return () => clearTimeout(timer)
+    }
+  }, [status])
+
+  // Debug session provider state
+  useEffect(() => {
+    console.log('🔍 Session provider debug:', {
+      status,
+      hasSession: !!session?.user,
+      sessionId: session?.user?.id,
+      timestamp: new Date().toISOString()
+    })
+  }, [status, session])
 
   const fetchDashboardData = useCallback(async () => {
     if (isFetching) return // Prevent multiple concurrent requests

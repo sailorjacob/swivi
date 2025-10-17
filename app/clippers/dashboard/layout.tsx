@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "@/lib/supabase-auth-provider"
+import { useSession } from "next-auth/react"
 import { useAuth } from "@/lib/supabase-auth-provider"
 import { useRouter, usePathname } from "next/navigation"
 import { authenticatedFetch } from "@/lib/supabase-browser"
