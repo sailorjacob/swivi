@@ -188,6 +188,14 @@ export default function ClipperDashboard() {
       </div>
     )
 
+  console.log('🎨 Dashboard component rendering with:', {
+    loading,
+    statsLength: stats.length,
+    recentClipsLength: recentClips.length,
+    error,
+    session: !!session?.user
+  })
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Subtle loading indicator */}
