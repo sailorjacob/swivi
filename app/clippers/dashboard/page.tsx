@@ -68,8 +68,26 @@ export default function ClipperDashboard() {
     return 'User'
   }
 
+  // Show loading state while session is loading
+  if (status === 'loading') {
+    console.log('⏳ Session still loading, showing loading state')
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
+        </div>
+      </div>
+    )
+  }
+
   const fetchDashboardData = useCallback(async () => {
     if (isFetching) return // Prevent multiple concurrent requests
+
+    // Don't fetch if session is still loading or no session
+    if (status === 'loading' || !session?.user) {
+      console.log('⏸️ Not fetching dashboard data - session loading or missing')
+      return
+    }
 
     try {
       setIsFetching(true)
@@ -127,9 +145,14 @@ export default function ClipperDashboard() {
   }, [isFetching])
 
   useEffect(() => {
-    if (status === "loading") return
+    console.log('🔄 useEffect triggered:', { status, hasSession: !!session?.user })
 
-    if (status === "unauthenticated" || !session) {
+    if (status === "loading") {
+      console.log('⏳ Session still loading, waiting...')
+      return
+    }
+
+    if (status === "unauthenticated" || !session?.user) {
       console.log('🚪 No session found, redirecting to login')
       router.push("/clippers/login")
       return
