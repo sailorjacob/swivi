@@ -48,7 +48,24 @@ interface RecentClip {
   lastTracked?: string
 }
 
+// Force render test - temporary fallback
+function DashboardTest() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-4">Dashboard Test</h1>
+        <p className="text-muted-foreground">This should always render</p>
+      </div>
+    </div>
+  )
+}
+
 export default function ClipperDashboard() {
+  console.log('🚀 ClipperDashboard component mounting...')
+
+  // Always render the test component first to see if the issue is with the component itself
+  return <DashboardTest />
+
   const { data: session, status } = useSession()
   const router = useRouter()
 
