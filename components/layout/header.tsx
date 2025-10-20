@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useState, useEffect } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { Menu, X, ChevronDown } from "lucide-react"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 const navigation = [
   {
@@ -61,6 +62,7 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex md:items-center md:space-x-8">
+          <ThemeToggle />
           {navigation.map((item) => (
             <div key={item.name} className="relative group">
               <Link
@@ -131,19 +133,22 @@ export function Header() {
           )}
         </div>
 
-        {/* Mobile menu button */}
-        <button
-          type="button"
-          className="md:hidden inline-flex items-center justify-center rounded-full p-2"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          <span className="sr-only">Open main menu</span>
-          {mobileMenuOpen ? (
-            <X className="h-5 w-5" aria-hidden="true" />
-          ) : (
-            <Menu className="h-5 w-5" aria-hidden="true" />
-          )}
-        </button>
+        {/* Mobile controls */}
+        <div className="md:hidden flex items-center space-x-3">
+          <ThemeToggle />
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-full p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <span className="sr-only">Open main menu</span>
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <Menu className="h-5 w-5" aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile menu */}
