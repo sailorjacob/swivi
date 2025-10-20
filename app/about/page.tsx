@@ -96,13 +96,24 @@ export default function AboutPage() {
               >
                 <video 
                   className="w-full h-auto object-cover"
-                  src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs//SwiviBilker.mp4"
+                  src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviBilker.mp4"
                   autoPlay
                   loop
                   muted
                   playsInline
                   preload="auto"
-                />
+                  onError={(e) => {
+                    console.error('Video failed to load:', e);
+                    // Fallback: hide video or show placeholder
+                    e.currentTarget.style.display = 'none';
+                  }}
+                  onLoadStart={() => console.log('Video loading started')}
+                  onCanPlay={() => console.log('Video can play')}
+                >
+                  <p className="text-center text-muted-foreground p-8">
+                    Your browser doesn't support the video tag or the video failed to load.
+                  </p>
+                </video>
               </motion.div>
             </motion.div>
           </div>
