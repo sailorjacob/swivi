@@ -97,6 +97,18 @@ export default function ClipperDashboard() {
     )
   }
 
+  // Force loading to false after 10 seconds to prevent infinite loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) {
+        console.log('⏰ Forcing loading state to false after timeout')
+        setLoading(false)
+      }
+    }, 10000)
+
+    return () => clearTimeout(timer)
+  }, [loading])
+
   // Force session refresh if stuck in loading state for too long
   useEffect(() => {
     if (status === 'loading') {
@@ -201,12 +213,17 @@ export default function ClipperDashboard() {
   }, [session, status, router, fetchDashboardData])
 
   const getIcon = (iconName: string) => {
-    switch (iconName) {
-      case "DollarSign": return DollarSign
-      case "Target": return Target
-      case "Play": return Play
-      case "Eye": return Eye
-      default: return DollarSign
+    try {
+      switch (iconName) {
+        case "DollarSign": return DollarSign
+        case "Target": return Target
+        case "Play": return Play
+        case "Eye": return Eye
+        default: return DollarSign
+      }
+    } catch (error) {
+      console.error('Error getting icon:', error)
+      return DollarSign
     }
   }
 
@@ -253,63 +270,71 @@ export default function ClipperDashboard() {
     statsLength: stats.length,
     recentClipsLength: recentClips.length,
     error,
-    session: !!session?.user
+    session: !!session?.user,
+    status,
+    hasSession: !!session?.user
   })
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Subtle loading indicator */}
-      {loading && (
-        <div className="fixed top-4 right-4 z-50">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      )}
+  // If still loading after data should have loaded, force render anyway
+  if (loading && stats.length === 0 && !error && session?.user) {
+    console.log('⚠️ Still loading but should have data, forcing render...')
+  }
 
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-light mb-2">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Welcome back, {getDisplayName()}
-            </p>
+  try {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        {/* Subtle loading indicator */}
+        {loading && (
+          <div className="fixed top-4 right-4 z-50">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
+        )}
 
-          {/* Error Display */}
-          {error && (
-            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 max-w-md">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-destructive" />
-                <div>
-                  <p className="text-sm font-medium text-destructive">Dashboard Error</p>
-                  <p className="text-sm text-destructive/80">{error}</p>
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-light mb-2">Dashboard</h1>
+              <p className="text-muted-foreground">
+                Welcome back, {getDisplayName()}
+              </p>
+            </div>
+
+            {/* Error Display */}
+            {error && (
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 max-w-md">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-destructive" />
+                  <div>
+                    <p className="text-sm font-medium text-destructive">Dashboard Error</p>
+                    <p className="text-sm text-destructive/80">{error}</p>
+                  </div>
                 </div>
+                <Button
+                  onClick={fetchDashboardData}
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                >
+                  Try Again
+                </Button>
               </div>
-              <Button
-                onClick={fetchDashboardData}
-                variant="outline"
-                size="sm"
-                className="mt-2"
-              >
-                Try Again
-              </Button>
-            </div>
-          )}
-          {/* Admin Link - Only show for admin users */}
-          {session?.user?.role === "ADMIN" && (
-            <Link href="/admin">
-              <Button variant="outline" size="sm">
-                🛡️ Admin Dashboard
-              </Button>
-            </Link>
-          )}
-          {/* Debug: Show current user role */}
-          {process.env.NODE_ENV === "development" && (
-            <div className="text-xs text-muted-foreground">
-              Role: {session?.user?.role || "undefined"}
-            </div>
-          )}
+            )}
+            {/* Admin Link - Only show for admin users */}
+            {session?.user?.role === "ADMIN" && (
+              <Link href="/admin">
+                <Button variant="outline" size="sm">
+                  🛡️ Admin Dashboard
+                </Button>
+              </Link>
+            )}
+            {/* Debug: Show current user role */}
+            {process.env.NODE_ENV === "development" && (
+              <div className="text-xs text-muted-foreground">
+                Role: {session?.user?.role || "undefined"}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -428,8 +453,40 @@ export default function ClipperDashboard() {
       </div>
 
 
-    </div>
-  )
+      </div>
+    )
+  } catch (renderError) {
+    console.error('❌ Dashboard render error:', renderError)
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-64">
+          <div className="text-center max-w-md">
+            <div className="mb-6">
+              <AlertCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
+              <h2 className="text-xl font-semibold text-foreground mb-2">Dashboard Error</h2>
+              <p className="text-muted-foreground">
+                There was an error rendering the dashboard. Please try refreshing the page.
+              </p>
+              {process.env.NODE_ENV === 'development' && (
+                <details className="mt-4 text-left">
+                  <summary className="cursor-pointer text-sm font-medium mb-2">
+                    Error Details (Development)
+                  </summary>
+                  <pre className="text-xs bg-muted p-2 rounded overflow-auto max-h-32">
+                    {renderError.message}
+                    {renderError.stack && `\n\n${renderError.stack}`}
+                  </pre>
+                </details>
+              )}
+            </div>
+            <Button onClick={() => window.location.reload()}>
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 }
 }
 
