@@ -110,6 +110,9 @@ export async function GET(request: NextRequest) {
 
     let submissions
     try {
+      // First, try a simpler query to isolate the issue
+      console.log("🔍 Attempting simplified query first...")
+      
       submissions = await prisma.clipSubmission.findMany({
         where,
         orderBy: {
@@ -126,6 +129,7 @@ export async function GET(request: NextRequest) {
           rejectionReason: true,
           requiresReview: true,
           reviewReason: true,
+          clipId: true, // Add clipId to check for null values
           users: {
             select: {
               id: true,
@@ -133,18 +137,6 @@ export async function GET(request: NextRequest) {
               email: true,
               totalViews: true,
               totalEarnings: true
-            }
-          },
-          clips: {
-            select: {
-              id: true,
-              title: true,
-              views: true,
-              earnings: true,
-              view_tracking: {
-                orderBy: { date: "desc" },
-                take: 2
-              }
             }
           },
           campaigns: {
@@ -160,7 +152,37 @@ export async function GET(request: NextRequest) {
         skip: offset
       })
 
-      console.log("✅ Found submissions:", submissions.length)
+      console.log("✅ Basic query successful, found submissions:", submissions.length)
+      
+      // Now try to add clips data separately for submissions that have clipId
+      for (let i = 0; i < submissions.length; i++) {
+        const submission = submissions[i]
+        if (submission.clipId) {
+          try {
+            const clipData = await prisma.clip.findUnique({
+              where: { id: submission.clipId },
+              select: {
+                id: true,
+                title: true,
+                views: true,
+                earnings: true,
+                view_tracking: {
+                  orderBy: { date: "desc" },
+                  take: 2
+                }
+              }
+            })
+            submissions[i].clips = clipData
+          } catch (clipError) {
+            console.error(`❌ Error fetching clip data for submission ${submission.id}:`, clipError)
+            submissions[i].clips = null
+          }
+        } else {
+          submissions[i].clips = null
+        }
+      }
+
+      console.log("✅ Enhanced submissions with clip data:", submissions.length)
     } catch (dbError) {
       console.error("❌ Database error fetching submissions:", dbError)
       return NextResponse.json({
