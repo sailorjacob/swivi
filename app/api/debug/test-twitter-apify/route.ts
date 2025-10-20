@@ -1,3 +1,6 @@
+// Force this route to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from "next/server"
 
 // Twitter/X bio checking via Apify (fastcrawler/twitter-user-profile-fast-cheapest-scraper-2025)

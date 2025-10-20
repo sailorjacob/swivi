@@ -1,3 +1,9 @@
+// Force this route to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
+// Force this route to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
@@ -36,8 +42,8 @@ export async function GET(request: NextRequest) {
 
     // Enhanced patterns for bio extraction
     const patterns = [
-      /"description":"([^"]*(?:\\.[^"]*)*)"/,
-      /"bio":"([^"]*(?:\\.[^"]*)*)"/,
+      /"description":"([^"]*(?:\.[^"]*)*)"/,
+      /"bio":"([^"]*(?:\.[^"]*)*)"/,
       /description['"]:[\s]*['"]([^'"]*)['"],/,
       /<meta\s+name=['"]description['"][^>]*content=['"]([^'"]*)['"][^>]*>/,
       /<meta\s+property=['"]og:description['"][^>]*content=['"]([^'"]*)['"][^>]*>/
@@ -70,12 +76,13 @@ export async function GET(request: NextRequest) {
 
     // Decode entities
     const decodedBio = bio
-      .replace(/\\u[\dA-F]{4}/gi, (match) => {
-        return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
+      .replace(/\u[\dA-F]{4}/gi, (match) => {
+        return String.fromCharCode(parseInt(match.replace(/\u/g, ''), 16))
       })
-      .replace(/\\n/g, ' ')
-      .replace(/\\t/g, ' ')
-      .replace(/\\"/g, '"')
+      .replace(/
+/g, ' ')
+      .replace(/	/g, ' ')
+      .replace(/\"/g, '"')
       .replace(/&quot;/g, '"')
       .replace(/&amp;/g, '&')
 

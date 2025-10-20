@@ -1,3 +1,6 @@
+// Force this route to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from "next/server"
 import { BrowserQLClient } from "@/lib/browserql-client"
 
@@ -31,8 +34,8 @@ export async function GET(request: NextRequest) {
         
         // Look for bio content in the HTML
         const bioPatterns = [
-          /"description":"([^"]*(?:\\.[^"]*)*)"/g,
-          /"bio":"([^"]*(?:\\.[^"]*)*)"/g
+          /"description":"([^"]*(?:\.[^"]*)*)"/g,
+          /"bio":"([^"]*(?:\.[^"]*)*)"/g
         ]
         
         let bioFound = false

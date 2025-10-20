@@ -1,3 +1,6 @@
+// Force this route to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
@@ -20,7 +23,8 @@ export async function POST(request: NextRequest) {
 
   // Method 1: /scrape API (current method)
   try {
-    logs.push(`\n📡 METHOD 1: /scrape API`)
+    logs.push(`
+📡 METHOD 1: /scrape API`)
     
     const profileUrl = platform === 'twitter' ? `https://x.com/${username}` : `https://instagram.com/${username}`
     const bioSelectors = platform === 'twitter' 
@@ -70,7 +74,8 @@ export async function POST(request: NextRequest) {
 
   // Method 2: /content API (alternative)
   try {
-    logs.push(`\n📡 METHOD 2: /content API`)
+    logs.push(`
+📡 METHOD 2: /content API`)
     
     const profileUrl = platform === 'twitter' ? `https://x.com/${username}` : `https://instagram.com/${username}`
     
@@ -117,7 +122,8 @@ export async function POST(request: NextRequest) {
 
   // Method 3: /screenshot API (to see what's actually rendered)
   try {
-    logs.push(`\n📸 METHOD 3: /screenshot API`)
+    logs.push(`
+📸 METHOD 3: /screenshot API`)
     
     const profileUrl = platform === 'twitter' ? `https://x.com/${username}` : `https://instagram.com/${username}`
     
@@ -167,7 +173,8 @@ export async function POST(request: NextRequest) {
 
   // Method 4: Test simple example.com to verify API key works
   try {
-    logs.push(`\n🧪 METHOD 4: Test with example.com`)
+    logs.push(`
+🧪 METHOD 4: Test with example.com`)
     
     const testResponse = await fetch(`https://production-sfo.browserless.io/scrape?token=${BROWSERLESS_API_KEY}`, {
       method: "POST",
@@ -209,7 +216,8 @@ export async function POST(request: NextRequest) {
   }
 
   // Summary
-  logs.push(`\n📊 SUMMARY:`)
+  logs.push(`
+📊 SUMMARY:`)
   logs.push(`- /scrape API: ${results.scrapeAPI?.success ? '✅' : '❌'}`)
   logs.push(`- /content API: ${results.contentAPI?.success ? '✅' : '❌'}`)
   logs.push(`- /screenshot API: ${results.screenshotAPI?.success ? '✅' : '❌'}`)

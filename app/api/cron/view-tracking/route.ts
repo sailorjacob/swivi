@@ -1,3 +1,6 @@
+// Force this route to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from "next/server"
 import { ViewTrackingService } from "@/lib/view-tracking-service"
 import { CampaignCompletionService } from "@/lib/campaign-completion-service"

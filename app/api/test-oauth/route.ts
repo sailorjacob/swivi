@@ -19,6 +19,7 @@ export async function GET() {
         name: "OAuth Test User",
         role: "CLIPPER",
         verified: false,
+        supabaseAuthId: `test-auth-id-${Date.now()}`, // Required field for Supabase Auth integration
       }
     })
     

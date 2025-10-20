@@ -1,3 +1,9 @@
+// Force this route to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
+// Force this route to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
@@ -52,9 +58,9 @@ export async function GET(request: NextRequest) {
     
     // Try to extract bio using our patterns
     const patterns = [
-      /"biography":"([^"]*(?:\\.[^"]*)*)"/,
-      /"description":"([^"]*(?:\\.[^"]*)*)"/,
-      /"bio":"([^"]*(?:\\.[^"]*)*)"/
+      /"biography":"([^"]*(?:\.[^"]*)*)"/,
+      /"description":"([^"]*(?:\.[^"]*)*)"/,
+      /"bio":"([^"]*(?:\.[^"]*)*)"/
     ]
     
     let foundBio = null

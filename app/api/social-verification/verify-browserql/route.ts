@@ -1,3 +1,9 @@
+// Force this route to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
+// Force this route to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
@@ -386,8 +392,8 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
         }
 
         // Decode Unicode escape sequences
-        const decodedBio = bio.replace(/\\u[\dA-F]{4}/gi, (match: string) => {
-          return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
+        const decodedBio = bio.replace(/\u[\dA-F]{4}/gi, (match: string) => {
+          return String.fromCharCode(parseInt(match.replace(/\u/g, ''), 16))
         })
 
         console.log(`📝 Bio extracted via Apify: "${decodedBio.substring(0, 100)}${decodedBio.length > 100 ? '...' : ''}"`)
@@ -467,9 +473,9 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
     // Enhanced patterns for extracting bio/description
     const patterns = [
       // New Instagram GraphQL patterns (2024)
-      /"biography":"([^"]*(?:\\.[^"]*)*)"/,
-      /"description":"([^"]*(?:\\.[^"]*)*)"/,
-      /"bio":"([^"]*(?:\\.[^"]*)*)"/,
+      /"biography":"([^"]*(?:\.[^"]*)*)"/,
+      /"description":"([^"]*(?:\.[^"]*)*)"/,
+      /"bio":"([^"]*(?:\.[^"]*)*)"/,
 
       // Legacy patterns
       /biography['"]:[\s]*['"]([^'"]*)['"]/,
@@ -522,13 +528,14 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
 
     // Decode Unicode escape sequences and HTML entities
     let decodedBio = bio
-      .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
-        return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
+      .replace(/\u[\dA-F]{4}/gi, (match: string) => {
+        return String.fromCharCode(parseInt(match.replace(/\u/g, ''), 16))
       })
-      .replace(/\\n/g, ' ')
-      .replace(/\\t/g, ' ')
-      .replace(/\\"/g, '"')
-      .replace(/\\'/g, "'")
+      .replace(/
+/g, ' ')
+      .replace(/	/g, ' ')
+      .replace(/\"/g, '"')
+      .replace(/\'/g, "'")
       .replace(/&quot;/g, '"')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
