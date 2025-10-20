@@ -126,6 +126,7 @@ export async function GET(request: NextRequest) {
           payout: true,
           paidAt: true,
           createdAt: true,
+          updatedAt: true,
           rejectionReason: true,
           requiresReview: true,
           reviewReason: true,
@@ -155,32 +156,36 @@ export async function GET(request: NextRequest) {
       console.log("✅ Basic query successful, found submissions:", submissions.length)
       
       // Now try to add clips data separately for submissions that have clipId
-      for (let i = 0; i < submissions.length; i++) {
-        const submission = submissions[i]
-        if (submission.clipId) {
-          try {
-            const clipData = await prisma.clip.findUnique({
-              where: { id: submission.clipId },
-              select: {
-                id: true,
-                title: true,
-                views: true,
-                earnings: true,
-                view_tracking: {
-                  orderBy: { date: "desc" },
-                  take: 2
+      const submissionsWithClips = await Promise.all(
+        submissions.map(async (submission: any) => {
+          if (submission.clipId) {
+            try {
+              const clipData = await prisma.clip.findUnique({
+                where: { id: submission.clipId },
+                select: {
+                  id: true,
+                  title: true,
+                  views: true,
+                  earnings: true,
+                  view_tracking: {
+                    orderBy: { date: "desc" },
+                    take: 2
+                  }
                 }
-              }
-            })
-            submissions[i].clips = clipData
-          } catch (clipError) {
-            console.error(`❌ Error fetching clip data for submission ${submission.id}:`, clipError)
-            submissions[i].clips = null
+              })
+              return { ...submission, clips: clipData }
+            } catch (clipError) {
+              console.error(`❌ Error fetching clip data for submission ${submission.id}:`, clipError)
+              return { ...submission, clips: null }
+            }
+          } else {
+            return { ...submission, clips: null }
           }
-        } else {
-          submissions[i].clips = null
-        }
-      }
+        })
+      )
+      
+      // Update submissions with the enhanced data
+      submissions = submissionsWithClips
 
       console.log("✅ Enhanced submissions with clip data:", submissions.length)
     } catch (dbError) {
@@ -203,12 +208,36 @@ export async function GET(request: NextRequest) {
       const hasMore = offset + limit < total
 
       // Convert dates to ISO strings and BigInt to strings
-      const processedSubmissions = convertBigIntToString(submissions).map((submission: any) => ({
-        ...submission,
-        createdAt: submission.createdAt ? new Date(submission.createdAt).toISOString() : null,
-        updatedAt: submission.updatedAt ? new Date(submission.updatedAt).toISOString() : null,
-        paidAt: submission.paidAt ? new Date(submission.paidAt).toISOString() : null
-      }))
+      console.log("🔍 Processing submissions for response, count:", submissions.length)
+      
+      const processedSubmissions = convertBigIntToString(submissions).map((submission: any) => {
+        try {
+          return {
+            ...submission,
+            createdAt: submission.createdAt ? new Date(submission.createdAt).toISOString() : null,
+            updatedAt: submission.updatedAt ? new Date(submission.updatedAt).toISOString() : null,
+            paidAt: submission.paidAt ? new Date(submission.paidAt).toISOString() : null,
+            // Ensure clips data is properly processed
+            clips: submission.clips ? {
+              ...submission.clips,
+              views: submission.clips.views ? submission.clips.views.toString() : null,
+              earnings: submission.clips.earnings ? submission.clips.earnings.toString() : null,
+              view_tracking: submission.clips.view_tracking || []
+            } : null
+          }
+        } catch (dateError) {
+          console.error("❌ Error processing submission dates:", dateError, "Submission:", submission.id)
+          return {
+            ...submission,
+            createdAt: null,
+            updatedAt: null,
+            paidAt: null,
+            clips: null
+          }
+        }
+      })
+      
+      console.log("✅ Processed submissions successfully")
 
       return NextResponse.json({
         submissions: processedSubmissions,
@@ -223,12 +252,31 @@ export async function GET(request: NextRequest) {
       console.error("❌ Database error counting submissions:", dbError)
       
       // Convert dates to ISO strings and BigInt to strings for error case too
-      const processedSubmissions = convertBigIntToString(submissions).map((submission: any) => ({
-        ...submission,
-        createdAt: submission.createdAt ? new Date(submission.createdAt).toISOString() : null,
-        updatedAt: submission.updatedAt ? new Date(submission.updatedAt).toISOString() : null,
-        paidAt: submission.paidAt ? new Date(submission.paidAt).toISOString() : null
-      }))
+      const processedSubmissions = convertBigIntToString(submissions).map((submission: any) => {
+        try {
+          return {
+            ...submission,
+            createdAt: submission.createdAt ? new Date(submission.createdAt).toISOString() : null,
+            updatedAt: submission.updatedAt ? new Date(submission.updatedAt).toISOString() : null,
+            paidAt: submission.paidAt ? new Date(submission.paidAt).toISOString() : null,
+            clips: submission.clips ? {
+              ...submission.clips,
+              views: submission.clips.views ? submission.clips.views.toString() : null,
+              earnings: submission.clips.earnings ? submission.clips.earnings.toString() : null,
+              view_tracking: submission.clips.view_tracking || []
+            } : null
+          }
+        } catch (dateError) {
+          console.error("❌ Error processing submission dates in error case:", dateError)
+          return {
+            ...submission,
+            createdAt: null,
+            updatedAt: null,
+            paidAt: null,
+            clips: null
+          }
+        }
+      })
 
       return NextResponse.json({
         submissions: processedSubmissions,
@@ -241,7 +289,10 @@ export async function GET(request: NextRequest) {
       })
     }
   } catch (error) {
-    console.error("Error fetching submissions:", error)
+    console.error("❌ CRITICAL ERROR in submissions API:", error)
+    console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack trace')
+    console.error("❌ Error type:", typeof error)
+    console.error("❌ Error string:", String(error))
 
     // Handle database connection errors gracefully
     if (String(error).includes('database') || String(error).includes('connection') || String(error).includes("Can't reach database server")) {
@@ -257,6 +308,9 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+    }, { status: 500 })
   }
 }
