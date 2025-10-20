@@ -107,7 +107,7 @@ export default function ClipperDashboard() {
     }, 10000)
 
     return () => clearTimeout(timer)
-  }, [loading])
+  }, []) // Empty dependency array since we want this to run once on mount
 
   // Force session refresh if stuck in loading state for too long
   useEffect(() => {
@@ -141,7 +141,10 @@ export default function ClipperDashboard() {
     }
 
     // Don't fetch if already fetching
-    if (loading) return
+    if (loading) {
+      console.log('⏸️ Already fetching dashboard data, skipping...')
+      return
+    }
 
     try {
       setLoading(true)
@@ -191,7 +194,7 @@ export default function ClipperDashboard() {
     } finally {
       setLoading(false)
     }
-  }, [status, session?.user, loading])
+  }, [status, session?.user]) // Removed loading from dependencies to prevent infinite loop
 
   useEffect(() => {
     console.log('🔄 useEffect triggered:', { status, hasSession: !!session?.user })
@@ -210,7 +213,7 @@ export default function ClipperDashboard() {
     // User is authenticated, fetch dashboard data
     console.log('✅ User authenticated, fetching dashboard data')
     fetchDashboardData()
-  }, [session, status, router, fetchDashboardData])
+  }, [session, status, router]) // Removed fetchDashboardData to prevent infinite loop
 
   const getIcon = (iconName: string) => {
     try {
