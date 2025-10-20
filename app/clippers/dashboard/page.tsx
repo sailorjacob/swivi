@@ -243,27 +243,17 @@ export default function ClipperDashboard() {
                         )}
                       </div>
 
-                      {/* Clickable clip URL - like admin submissions */}
+                      {/* Clean clickable clip URL - just the essential link */}
                       <div className="flex items-center gap-2">
                         <ExternalLink className="w-3 h-3 text-muted-foreground" />
                         <button
                           onClick={() => window.open(clip.clipUrl, '_blank')}
                           className="text-sm text-blue-500 hover:text-blue-700 underline hover:underline-offset-2 transition-colors"
-                          title={clip.clipUrl}
+                          title={`Open clip: ${clip.clipUrl}`}
                         >
                           {clip.clipUrl.length > 60 ? `${clip.clipUrl.substring(0, 60)}...` : clip.clipUrl}
                         </button>
                       </div>
-
-                      {/* External link button - like admin submissions */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(clip.clipUrl, '_blank')}
-                        className="ml-4"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
                     </div>
                   </div>
                 </CardContent>
