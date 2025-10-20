@@ -233,9 +233,7 @@ export default function ClipperDashboard() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      {clip.title && !clip.title.startsWith('http') && (
-                        <h4 className="text-foreground font-medium mb-1">{clip.title}</h4>
-                      )}
+                      <h4 className="text-foreground font-medium mb-1">Clip Submission</h4>
                       <p className="text-muted-foreground text-sm mb-2">{clip.campaign}</p>
 
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
