@@ -211,18 +211,18 @@ export default function AdminSubmissionsPage() {
     }
   }
 
-  // Get status badge color
+  // Get status badge color - professional, subtle styling
   const getStatusColor = (submission: Submission) => {
     if (submission.requiresReview) {
-      return "bg-orange-100 text-orange-800 border-orange-300"
+      return "bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/50 dark:text-orange-300 dark:border-orange-800 font-medium"
     }
 
     switch (submission.status) {
-      case "PENDING": return "bg-yellow-100 text-yellow-800"
-      case "APPROVED": return "bg-green-100 text-green-800"
-      case "REJECTED": return "bg-red-100 text-red-800"
-      case "PAID": return "bg-blue-100 text-blue-800"
-      default: return "bg-gray-100 text-gray-800"
+      case "PENDING": return "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800 font-medium"
+      case "APPROVED": return "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800 font-medium"
+      case "REJECTED": return "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800 font-medium"
+      case "PAID": return "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800 font-medium"
+      default: return "bg-slate-50 text-slate-700 border border-slate-200 dark:bg-slate-950/50 dark:text-slate-300 dark:border-slate-800 font-medium"
     }
   }
 

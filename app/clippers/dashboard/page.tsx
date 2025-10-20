@@ -217,12 +217,11 @@ export default function ClipperDashboard() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-2">
                       <Badge
-                        variant="outline"
-                        className={`capitalize ${
-                          clip.status === 'approved' ? 'border-green-500 text-green-700 bg-green-50' :
-                          clip.status === 'pending' ? 'border-yellow-500 text-yellow-700 bg-yellow-50' :
-                          clip.status === 'rejected' ? 'border-red-500 text-red-700 bg-red-50' :
-                          'border-gray-500 text-gray-700 bg-gray-50'
+                        className={`capitalize font-medium ${
+                          clip.status === 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800' :
+                          clip.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800' :
+                          clip.status === 'rejected' ? 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800' :
+                          'bg-slate-50 text-slate-700 border border-slate-200 dark:bg-slate-950/50 dark:text-slate-300 dark:border-slate-800'
                         }`}
                       >
                         {clip.status}
