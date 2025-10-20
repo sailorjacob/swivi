@@ -5,6 +5,7 @@ import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import {
@@ -12,7 +13,8 @@ import {
   TrendingUp,
   Target,
   Play,
-  Eye
+  Eye,
+  ExternalLink
 } from "lucide-react"
 
 interface DashboardData {
@@ -115,12 +117,9 @@ export default function ClipperDashboard() {
           <div className="text-center max-w-md">
             <h2 className="text-xl font-semibold mb-4">Dashboard Error</h2>
             <p className="text-muted-foreground mb-4">{error}</p>
-            <button
-              onClick={fetchDashboardData}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            >
+            <Button onClick={fetchDashboardData}>
               Try Again
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -143,9 +142,9 @@ export default function ClipperDashboard() {
           {/* Admin Link - Top Right like original */}
           {session?.user?.role === "ADMIN" && (
             <Link href="/admin">
-              <button className="px-3 py-2 border border-border rounded-md hover:bg-muted text-sm">
+              <Button variant="outline" size="sm">
                 🛡️ Admin Dashboard
-              </button>
+              </Button>
             </Link>
           )}
         </div>
@@ -244,6 +243,14 @@ export default function ClipperDashboard() {
                         )}
                       </div>
 
+                      {/* Simple clickable clip link */}
+                      <button
+                        onClick={() => window.open(clip.clipUrl, '_blank')}
+                        className="text-sm text-blue-500 hover:text-blue-700 transition-colors flex items-center gap-1"
+                      >
+                        <span>View Clip</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </button>
                     </div>
                   </div>
                 </CardContent>
@@ -258,9 +265,9 @@ export default function ClipperDashboard() {
                 Start earning by submitting clips to active campaigns
               </p>
               <Link href="/clippers/dashboard/campaigns">
-                <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+                <Button>
                   Submit Your First Clip
-                </button>
+                </Button>
               </Link>
             </CardContent>
           </Card>
