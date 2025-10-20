@@ -180,8 +180,16 @@ export async function GET(request: NextRequest) {
       total = await prisma.clipSubmission.count({ where })
       const hasMore = offset + limit < total
 
+      // Convert dates to ISO strings and BigInt to strings
+      const processedSubmissions = convertBigIntToString(submissions).map((submission: any) => ({
+        ...submission,
+        createdAt: submission.createdAt ? new Date(submission.createdAt).toISOString() : null,
+        updatedAt: submission.updatedAt ? new Date(submission.updatedAt).toISOString() : null,
+        paidAt: submission.paidAt ? new Date(submission.paidAt).toISOString() : null
+      }))
+
       return NextResponse.json({
-        submissions: convertBigIntToString(submissions),
+        submissions: processedSubmissions,
         pagination: {
           total,
           limit: limit,
@@ -192,8 +200,16 @@ export async function GET(request: NextRequest) {
     } catch (dbError) {
       console.error("❌ Database error counting submissions:", dbError)
       
+      // Convert dates to ISO strings and BigInt to strings for error case too
+      const processedSubmissions = convertBigIntToString(submissions).map((submission: any) => ({
+        ...submission,
+        createdAt: submission.createdAt ? new Date(submission.createdAt).toISOString() : null,
+        updatedAt: submission.updatedAt ? new Date(submission.updatedAt).toISOString() : null,
+        paidAt: submission.paidAt ? new Date(submission.paidAt).toISOString() : null
+      }))
+
       return NextResponse.json({
-        submissions: convertBigIntToString(submissions),
+        submissions: processedSubmissions,
         pagination: {
           total: 0,
           limit: limit,

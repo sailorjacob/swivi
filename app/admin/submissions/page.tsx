@@ -531,13 +531,24 @@ export default function AdminSubmissionsPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>Submitted: {new Date(submission.createdAt).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        year: new Date(submission.createdAt).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}</span>
+                      <span>Submitted: {(() => {
+                        try {
+                          const date = new Date(submission.createdAt)
+                          if (isNaN(date.getTime())) {
+                            return 'Unknown date'
+                          }
+                          return date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                        } catch (error) {
+                          console.error('Date parsing error:', error, 'Raw date:', submission.createdAt)
+                          return 'Invalid date'
+                        }
+                      })()}</span>
                       {submission.payout && (
                         <span>Payout: ${submission.payout.toFixed(2)}</span>
                       )}
