@@ -226,7 +226,7 @@ export async function GET(request: NextRequest) {
         title: clip?.title || submission.clipUrl,
         campaign: submission.campaigns?.title || "Unknown Campaign",
         status: submission.status?.toLowerCase() || "unknown",
-        submittedAt: submission.createdAt ? submission.createdAt.toISOString().split('T')[0] : "Unknown",
+        createdAt: submission.createdAt ? submission.createdAt.toISOString() : new Date().toISOString(),
         views: currentViews,
         viewGrowth: viewGrowth,
         earnings: submission.status === "PAID" ? parseFloat(String(submission.payout || 0)) : 0,

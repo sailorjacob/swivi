@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     try {
       authResult = await getServerUserWithRole(request)
     } catch (authError) {
-      console.error("❌ Authentication error:", authError.message)
+      console.error("❌ Authentication error:", authError)
       return NextResponse.json({ error: "Authentication service unavailable" }, { status: 503 })
     }
 
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       })
       console.log("🔍 User data found:", { id: userData?.id, role: userData?.role })
     } catch (dbError) {
-      console.error("❌ Database error looking up user:", dbError.message)
+      console.error("❌ Database error looking up user:", dbError)
       return NextResponse.json({ error: "Database unavailable" }, { status: 503 })
     }
 
@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0")
     const status = searchParams.get("status")
     const platform = searchParams.get("platform")
+    const campaignId = searchParams.get("campaignId")
     const dateRange = searchParams.get("dateRange")
     const payoutStatus = searchParams.get("payoutStatus")
     const requiresReview = searchParams.get("requiresReview")
@@ -70,6 +71,10 @@ export async function GET(request: NextRequest) {
 
     if (platform && platform !== "all") {
       where.platform = platform
+    }
+
+    if (campaignId && campaignId !== "all") {
+      where.campaignId = campaignId
     }
 
     if (dateRange && dateRange !== "all") {
@@ -162,8 +167,8 @@ export async function GET(request: NextRequest) {
         submissions: [],
         pagination: {
           total: 0,
-          limit,
-          offset,
+          limit: limit,
+          offset: offset,
           hasMore: false
         }
       })
@@ -179,20 +184,20 @@ export async function GET(request: NextRequest) {
         submissions: convertBigIntToString(submissions),
         pagination: {
           total,
-          limit,
-          offset,
+          limit: limit,
+          offset: offset,
           hasMore
         }
       })
     } catch (dbError) {
-      console.error("❌ Database error counting submissions:", dbError.message)
+      console.error("❌ Database error counting submissions:", dbError)
       
       return NextResponse.json({
         submissions: convertBigIntToString(submissions),
         pagination: {
           total: 0,
-          limit,
-          offset,
+          limit: limit,
+          offset: offset,
           hasMore: false
         }
       })
@@ -201,14 +206,14 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching submissions:", error)
 
     // Handle database connection errors gracefully
-    if (error.message?.includes('database') || error.message?.includes('connection') || error.message?.includes("Can't reach database server")) {
+    if (String(error).includes('database') || String(error).includes('connection') || String(error).includes("Can't reach database server")) {
       console.log('🔧 Database unavailable - returning empty results instead of 500 error')
       return NextResponse.json({
         submissions: [],
         pagination: {
           total: 0,
-          limit,
-          offset,
+          limit: 50,
+          offset: 0,
           hasMore: false
         }
       })

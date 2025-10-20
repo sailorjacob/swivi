@@ -89,6 +89,7 @@ const payoutStatusOptions = [
 
 export default function AdminSubmissionsPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
+  const [campaigns, setCampaigns] = useState<Array<{id: string, title: string, creator: string}>>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null)
@@ -109,6 +110,19 @@ export default function AdminSubmissionsPage() {
     offset: 0,
     hasMore: false
   })
+
+  // Fetch campaigns for filtering
+  const fetchCampaigns = useCallback(async () => {
+    try {
+      const response = await authenticatedFetch("/api/admin/campaigns")
+      if (response.ok) {
+        const campaignData = await response.json()
+        setCampaigns(campaignData)
+      }
+    } catch (error) {
+      console.error("Error fetching campaigns:", error)
+    }
+  }, [])
 
   // Fetch submissions
   const fetchSubmissions = useCallback(async () => {
@@ -157,8 +171,9 @@ export default function AdminSubmissionsPage() {
   }, [filters, pagination.limit, pagination.offset])
 
   useEffect(() => {
+    fetchCampaigns()
     fetchSubmissions()
-  }, [fetchSubmissions])
+  }, [fetchCampaigns, fetchSubmissions])
 
   // Update submission status
   const updateSubmissionStatus = async (submissionId: string, status: Submission["status"], reason?: string, payout?: number) => {
@@ -394,6 +409,23 @@ export default function AdminSubmissionsPage() {
                 </Select>
               </div>
 
+              <div className="min-w-[200px]">
+                <Label>Campaign</Label>
+                <Select value={filters.campaignId} onValueChange={(value) => setFilters({ ...filters, campaignId: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Campaigns" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Campaigns</SelectItem>
+                    {campaigns.map((campaign) => (
+                      <SelectItem key={campaign.id} value={campaign.id}>
+                        {campaign.title} ({campaign.creator})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="min-w-[150px]">
                 <Label>Date Range</Label>
                 <Select value={filters.dateRange} onValueChange={(value) => setFilters({ ...filters, dateRange: value })}>
@@ -499,7 +531,13 @@ export default function AdminSubmissionsPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>Submitted: {new Date(submission.createdAt).toLocaleDateString()}</span>
+                      <span>Submitted: {new Date(submission.createdAt).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: new Date(submission.createdAt).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}</span>
                       {submission.payout && (
                         <span>Payout: ${submission.payout.toFixed(2)}</span>
                       )}

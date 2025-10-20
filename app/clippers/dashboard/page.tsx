@@ -24,16 +24,17 @@ interface DashboardData {
     change: string
     icon: string
   }>
-  recentClips: Array<{
-    id: string
-    title: string
-    campaign: string
-    status: string
-    views: number
-    earnings: number
-    clipUrl: string
-    platform: string
-  }>
+      recentClips: Array<{
+        id: string
+        title: string
+        campaign: string
+        status: string
+        views: number
+        earnings: number
+        clipUrl: string
+        platform: string
+        createdAt: string
+      }>
   activeCampaigns: number
 }
 
@@ -240,6 +241,14 @@ export default function ClipperDashboard() {
                         {clip.earnings > 0 && (
                           <span>${clip.earnings.toFixed(2)} earned</span>
                         )}
+                        <span>•</span>
+                        <span>Submitted {new Date(clip.createdAt).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric', 
+                          year: new Date(clip.createdAt).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}</span>
                       </div>
 
                       {/* Clean clickable clip URL - just the essential link */}
