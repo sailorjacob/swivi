@@ -6,7 +6,16 @@ import { useRouter } from "next/navigation"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import {
+  DollarSign,
+  TrendingUp,
+  Target,
+  Play,
+  ExternalLink,
+  Eye
+} from "lucide-react"
 
 interface DashboardData {
   stats: Array<{
@@ -35,6 +44,18 @@ export default function ClipperDashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Get icon component from string name
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case "DollarSign": return DollarSign
+      case "Target": return Target
+      case "Play": return Play
+      case "Eye": return Eye
+      case "TrendingUp": return TrendingUp
+      default: return DollarSign
+    }
+  }
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -108,31 +129,47 @@ export default function ClipperDashboard() {
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-light mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back, {session?.user?.name || session?.user?.email?.split('@')[0] || 'User'}
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-light mb-2">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Welcome back, {session?.user?.name || session?.user?.email?.split('@')[0] || 'User'}
+            </p>
+          </div>
+
+          {/* Admin Link - Top Right like original */}
+          {session?.user?.role === "ADMIN" && (
+            <Link href="/admin">
+              <Button variant="outline" size="sm">
+                🛡️ Admin Dashboard
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {data?.stats?.map((stat, index) => (
-          <Card key={index} className="bg-card border-border">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
-                  <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
-                  <p className="text-sm mt-1 text-muted-foreground">{stat.change}</p>
+        {data?.stats?.map((stat, index) => {
+          const Icon = getIcon(stat.icon)
+          return (
+            <Card key={index} className="bg-card border-border">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
+                    <p className="text-sm mt-1 text-muted-foreground">{stat.change}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted">
+                    <Icon className="w-6 h-6 text-muted-foreground" />
+                  </div>
                 </div>
-                <div className="p-3 rounded-lg bg-muted">
-                  <div className="w-6 h-6 bg-muted-foreground/20 rounded"></div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )) || (
-          // Fallback stats
+              </CardContent>
+            </Card>
+          )
+        }) || (
+          // Fallback stats with proper icons
           <>
             <Card className="bg-card border-border">
               <CardContent className="p-6">
@@ -140,7 +177,10 @@ export default function ClipperDashboard() {
                   <div>
                     <p className="text-muted-foreground text-sm font-medium">Total Earned</p>
                     <p className="text-2xl font-bold text-foreground mt-1">$0.00</p>
-                    <p className="text-sm mt-1 text-muted-foreground">Start earning</p>
+                    <p className="text-sm mt-1 text-muted-foreground">Start earning from approved clips</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted">
+                    <DollarSign className="w-6 h-6 text-muted-foreground" />
                   </div>
                 </div>
               </CardContent>
@@ -151,7 +191,10 @@ export default function ClipperDashboard() {
                   <div>
                     <p className="text-muted-foreground text-sm font-medium">Active Campaigns</p>
                     <p className="text-2xl font-bold text-foreground mt-1">0</p>
-                    <p className="text-sm mt-1 text-muted-foreground">Join campaigns</p>
+                    <p className="text-sm mt-1 text-muted-foreground">Available to join</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted">
+                    <Target className="w-6 h-6 text-muted-foreground" />
                   </div>
                 </div>
               </CardContent>
@@ -169,37 +212,53 @@ export default function ClipperDashboard() {
             {data.recentClips.map((clip) => (
               <Card key={clip.id} className="bg-card border-border">
                 <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <Badge
+                        variant="outline"
+                        className={`capitalize ${
+                          clip.status === 'approved' ? 'border-green-500 text-green-700 bg-green-50' :
+                          clip.status === 'pending' ? 'border-yellow-500 text-yellow-700 bg-yellow-50' :
+                          clip.status === 'rejected' ? 'border-red-500 text-red-700 bg-red-50' :
+                          'border-gray-500 text-gray-700 bg-gray-50'
+                        }`}
+                      >
+                        {clip.status}
+                      </Badge>
+                      <span className="text-muted-foreground text-sm">{clip.platform}</span>
+                    </div>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          clip.status === 'approved' ? 'bg-green-100 text-green-800' :
-                          clip.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {clip.status}
-                        </span>
-                        <span className="text-sm text-muted-foreground">{clip.platform}</span>
-                      </div>
-
                       <h4 className="text-foreground font-medium mb-1">{clip.title}</h4>
                       <p className="text-muted-foreground text-sm mb-2">{clip.campaign}</p>
 
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                      <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
                         <span>{clip.views.toLocaleString()} views</span>
                         {clip.earnings > 0 && (
                           <span>${clip.earnings.toFixed(2)} earned</span>
                         )}
                       </div>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(clip.clipUrl, '_blank')}
-                      >
-                        View Clip
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                        <button
+                          onClick={() => window.open(clip.clipUrl, '_blank')}
+                          className="text-sm text-blue-500 hover:text-blue-700 underline hover:underline-offset-2 transition-colors"
+                        >
+                          {clip.clipUrl.length > 60 ? `${clip.clipUrl.substring(0, 60)}...` : clip.clipUrl}
+                        </button>
+                      </div>
                     </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(clip.clipUrl, '_blank')}
+                      className="ml-4"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -220,14 +279,6 @@ export default function ClipperDashboard() {
         )}
       </div>
 
-      {/* Admin Link */}
-      {session?.user?.role === "ADMIN" && (
-        <div className="mb-8">
-          <Link href="/admin">
-            <Button variant="outline">🛡️ Admin Dashboard</Button>
-          </Link>
-        </div>
-      )}
     </div>
   )
 }
