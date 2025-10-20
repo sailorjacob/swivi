@@ -57,7 +57,6 @@ export default function ClipperDashboard() {
   const [activeCampaigns, setActiveCampaigns] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isFetching, setIsFetching] = useState(false)
 
   // Get display name with simplified fallback logic
   const getDisplayName = () => {
@@ -123,16 +122,16 @@ export default function ClipperDashboard() {
   }, [status, session])
 
   const fetchDashboardData = useCallback(async () => {
-    if (isFetching) return // Prevent multiple concurrent requests
-
     // Don't fetch if session is still loading or no session
     if (status === 'loading' || !session?.user) {
       console.log('⏸️ Not fetching dashboard data - session loading or missing')
       return
     }
 
+    // Don't fetch if already fetching
+    if (loading) return
+
     try {
-      setIsFetching(true)
       setLoading(true)
       setError(null)
       console.log('📊 Fetching dashboard data...')
@@ -151,19 +150,16 @@ export default function ClipperDashboard() {
         setStats(data.stats)
         setRecentClips(data.recentClips)
         setActiveCampaigns(data.activeCampaigns)
-        setIsFetching(false)
       } else if (response.status === 401) {
         console.log('❌ Authentication failed - showing error instead of redirecting')
         // Authentication error - show error but don't redirect to avoid auth loop
         setError("Authentication failed. Please try refreshing the page or logging in again.")
-        setIsFetching(false)
       } else if (response.status === 404) {
         console.log('❌ User not found')
         setError("Your account was not found. Please contact support.")
       } else if (response.status >= 500) {
         console.log('❌ Server error:', response.status)
         setError("Server error. Please try again later.")
-        setIsFetching(false)
       } else {
         const errorData = await response.json().catch(() => ({}))
         console.log('❌ Dashboard API error:', errorData.error)
@@ -174,7 +170,7 @@ export default function ClipperDashboard() {
       console.error("❌ Error type:", typeof error)
       console.error("❌ Error message:", error instanceof Error ? error.message : String(error))
       console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack')
-      
+
       if (error instanceof TypeError && error.message.includes('fetch')) {
         setError("Network error. Please check your internet connection and try again.")
       } else {
@@ -182,9 +178,8 @@ export default function ClipperDashboard() {
       }
     } finally {
       setLoading(false)
-      setIsFetching(false)
     }
-  }, [isFetching])
+  }, [status, session?.user, loading])
 
   useEffect(() => {
     console.log('🔄 useEffect triggered:', { status, hasSession: !!session?.user })
@@ -203,7 +198,7 @@ export default function ClipperDashboard() {
     // User is authenticated, fetch dashboard data
     console.log('✅ User authenticated, fetching dashboard data')
     fetchDashboardData()
-  }, [session, status, router])
+  }, [session, status, router, fetchDashboardData])
 
   const getIcon = (iconName: string) => {
     switch (iconName) {
