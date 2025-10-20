@@ -341,27 +341,65 @@ export default function ClipperDashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => {
-          const Icon = getIcon(stat.icon)
-          return (
-            <Card key={index} className="bg-card border-border">
+        {stats.length > 0 ? (
+          stats.map((stat, index) => {
+            const Icon = getIcon(stat.icon)
+            return (
+              <Card key={index} className="bg-card border-border">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
+                      <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
+                      <p className="text-sm mt-1 text-muted-foreground">
+                        {stat.change}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-muted">
+                      <Icon className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })
+        ) : (
+          /* Fallback stats when API fails */
+          <>
+            <Card className="bg-card border-border">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
-                    <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
+                    <p className="text-muted-foreground text-sm font-medium">Total Earned</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">$0.00</p>
                     <p className="text-sm mt-1 text-muted-foreground">
-                      {stat.change}
+                      Start earning from approved clips
                     </p>
                   </div>
                   <div className="p-3 rounded-lg bg-muted">
-                    <Icon className="w-6 h-6 text-muted-foreground" />
+                    <DollarSign className="w-6 h-6 text-muted-foreground" />
                   </div>
                 </div>
               </CardContent>
             </Card>
-          )
-        })}
+            <Card className="bg-card border-border">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-muted-foreground text-sm font-medium">Active Campaigns</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">0</p>
+                    <p className="text-sm mt-1 text-muted-foreground">
+                      Available to join
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted">
+                    <Target className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Recent Clips Section */}
