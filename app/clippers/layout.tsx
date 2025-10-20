@@ -7,7 +7,6 @@ import { useEffect } from "react"
 import { useTheme } from "next-themes"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { QueryProvider } from "@/components/providers/query-provider"
-import { AuthProvider } from "@/components/providers/auth-provider"
 import { Toaster } from "react-hot-toast"
 
 function ClippersThemeEnforcer({ children }: { children: React.ReactNode }) {
@@ -32,26 +31,24 @@ export default function ClippersLayout({
       enableSystem={false}
       disableTransitionOnChange
     >
-      <AuthProvider>
-        <QueryProvider>
-          <div className="min-h-screen bg-background text-foreground">
-            <ClippersThemeEnforcer>
-              {children}
-            </ClippersThemeEnforcer>
-          </div>
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              duration: 5000,
-              style: {
-                background: "hsl(var(--background))",
-                color: "hsl(var(--foreground))",
-                border: "1px solid hsl(var(--border))",
-              },
-            }}
-          />
-        </QueryProvider>
-      </AuthProvider>
+      <QueryProvider>
+        <div className="min-h-screen bg-background text-foreground">
+          <ClippersThemeEnforcer>
+            {children}
+          </ClippersThemeEnforcer>
+        </div>
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            duration: 5000,
+            style: {
+              background: "hsl(var(--background))",
+              color: "hsl(var(--foreground))",
+              border: "1px solid hsl(var(--border))",
+            },
+          }}
+        />
+      </QueryProvider>
     </ThemeProvider>
   )
 }
