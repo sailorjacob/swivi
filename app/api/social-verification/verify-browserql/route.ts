@@ -528,8 +528,7 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
       .replace(/\u[\dA-F]{4}/gi, (match: string) => {
         return String.fromCharCode(parseInt(match.replace(/\u/g, ''), 16))
       })
-      .replace(/
-/g, ' ')
+      .replace(/\n/g, ' ')
       .replace(/	/g, ' ')
       .replace(/\"/g, '"')
       .replace(/\'/g, "'")

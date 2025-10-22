@@ -76,8 +76,7 @@ export async function GET(request: NextRequest) {
       .replace(/\u[\dA-F]{4}/gi, (match) => {
         return String.fromCharCode(parseInt(match.replace(/\u/g, ''), 16))
       })
-      .replace(/
-/g, ' ')
+      .replace(/\n/g, ' ')
       .replace(/	/g, ' ')
       .replace(/\"/g, '"')
       .replace(/&quot;/g, '"')
