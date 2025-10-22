@@ -1,9 +1,6 @@
 // Force this route to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
 
-// Force this route to be dynamic (not statically generated)
-export const dynamic = 'force-dynamic'
-
 import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
@@ -11,7 +8,7 @@ import { prisma } from "@/lib/prisma"
 export async function GET(request: NextRequest) {
   try {
     console.log("🔍 Complete authentication debug started")
-    
+
     const results: any = {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
@@ -36,16 +33,17 @@ export async function GET(request: NextRequest) {
     }
 
     // 3. Check session
-    let user, error
+    let sessionUser, error, sessionResult
     try {
       const result = await getServerUserWithRole()
-      user = result.user
+      sessionUser = result.user
       error = result.error
+      sessionResult = result  // Store the full result for later use
       results.checks.session = {
-        exists: !!user,
-        user_id: user?.id || null,
-        user_email: user?.email || null,
-        role: user?.role || null
+        exists: !!sessionUser,
+        user_id: sessionUser?.id || null,
+        user_email: sessionUser?.email || null,
+        role: sessionUser?.role || null
       }
     } catch (error) {
       results.checks.session = {
@@ -68,10 +66,10 @@ export async function GET(request: NextRequest) {
     }
 
     // 5. Check if current user exists in database (if session exists)
-    if (session?.user?.id) {
+    if (sessionUser?.id) {
       try {
-        const user = await prisma.user.findUnique({
-          where: { id: session.user.id },
+        const dbUser = await prisma.user.findUnique({
+          where: { id: sessionUser.id },
           include: {
             accounts: true,
             socialAccounts: true,
@@ -102,9 +100,9 @@ export async function GET(request: NextRequest) {
     }
 
     // 7. Overall status
-    const hasSession = !!session
+    const hasSession = !!sessionUser
     const hasDatabase = results.checks.database.connected
-    const hasEnvVars = results.checks.environment_vars.DATABASE_URL && 
+    const hasEnvVars = results.checks.environment_vars.DATABASE_URL &&
                       results.checks.environment_vars.NEXTAUTH_SECRET
 
     results.overall_status = {
