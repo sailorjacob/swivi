@@ -17,7 +17,9 @@ import {
   Settings,
   LogOut,
   Menu,
-  ArrowLeft
+  ArrowLeft,
+  Beaker,
+  Wallet
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -45,6 +47,11 @@ const navItems: NavItem[] = [
     icon: Shield
   },
   {
+    label: "Payout Management",
+    href: "/admin/payouts",
+    icon: Wallet
+  },
+  {
     label: "View Analytics",
     href: "/admin/analytics",
     icon: BarChart3
@@ -53,6 +60,16 @@ const navItems: NavItem[] = [
     label: "User Management",
     href: "/admin/users",
     icon: Users
+  },
+  {
+    label: "View Tracking Test",
+    href: "/test/view-tracking",
+    icon: Beaker
+  },
+  {
+    label: "Debug Tools",
+    href: "/debug",
+    icon: Settings
   }
 ]
 

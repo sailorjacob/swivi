@@ -4,9 +4,13 @@ import { useState, useEffect } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import { authenticatedFetch } from "@/lib/supabase-browser"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
 import Link from "next/link"
 import {
   DollarSign,
@@ -14,7 +18,10 @@ import {
   Target,
   Play,
   Eye,
-  ExternalLink
+  ExternalLink,
+  Wallet,
+  Clock,
+  CheckCircle
 } from "lucide-react"
 
 interface DashboardData {
@@ -24,27 +31,37 @@ interface DashboardData {
     change: string
     icon: string
   }>
-      recentClips: Array<{
-        id: string
-        title: string
-        campaign: string
-        status: string
-        views: number
-        earnings: number
-        clipUrl: string
-        platform: string
-        createdAt: string
-      }>
+  recentClips: Array<{
+    id: string
+    title: string
+    campaign: string
+    status: string
+    views: number
+    earnings: number
+    clipUrl: string
+    platform: string
+    createdAt: string
+  }>
   activeCampaigns: number
+  availableBalance?: number
+  totalEarnings?: number
 }
 
 export default function ClipperDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { toast } = useToast()
 
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Payout request state
+  const [payoutDialogOpen, setPayoutDialogOpen] = useState(false)
+  const [payoutAmount, setPayoutAmount] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE'>('PAYPAL')
+  const [paymentDetails, setPaymentDetails] = useState('')
+  const [submittingPayout, setSubmittingPayout] = useState(false)
 
   // Get icon component from string name
   const getIcon = (iconName: string) => {
@@ -96,6 +113,68 @@ export default function ClipperDashboard() {
     }
   }
 
+  const handleRequestPayout = async () => {
+    try {
+      setSubmittingPayout(true)
+
+      const amount = parseFloat(payoutAmount)
+      if (isNaN(amount) || amount < 20) {
+        toast({
+          title: 'Invalid Amount',
+          description: 'Minimum payout is $20.00',
+          variant: 'destructive'
+        })
+        return
+      }
+
+      if (!paymentDetails) {
+        toast({
+          title: 'Payment Details Required',
+          description: 'Please enter your payment details',
+          variant: 'destructive'
+        })
+        return
+      }
+
+      const response = await authenticatedFetch('/api/clippers/payout-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount,
+          paymentMethod,
+          paymentDetails
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast({
+          title: 'Payout Requested! 🎉',
+          description: `Your request for $${amount.toFixed(2)} has been submitted`
+        })
+        setPayoutDialogOpen(false)
+        setPayoutAmount('')
+        setPaymentDetails('')
+        fetchDashboardData()
+      } else {
+        toast({
+          title: 'Request Failed',
+          description: data.error || 'Failed to submit payout request',
+          variant: 'destructive'
+        })
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to submit payout request',
+        variant: 'destructive'
+      })
+    } finally {
+      setSubmittingPayout(false)
+    }
+  }
+
   // Show loading state
   if (status === "loading" || loading) {
     return (
@@ -140,14 +219,24 @@ export default function ClipperDashboard() {
             </p>
           </div>
 
-          {/* Admin Link - Top Right like original */}
-          {session?.user?.role === "ADMIN" && (
-            <Link href="/admin">
+          {/* Admin and Test Links - Top Right */}
+          <div className="flex gap-2">
+            {/* Test Link - Available to all users */}
+            <Link href="/test/view-tracking">
               <Button variant="outline" size="sm">
-                🛡️ Admin Dashboard
+                🧪 Test View Tracking
               </Button>
             </Link>
-          )}
+
+            {/* Admin Link */}
+            {session?.user?.role === "ADMIN" && (
+              <Link href="/admin">
+                <Button variant="outline" size="sm">
+                  🛡️ Admin Dashboard
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
@@ -205,6 +294,131 @@ export default function ClipperDashboard() {
           </>
         )}
       </div>
+
+      {/* Payout Card */}
+      {data && data.availableBalance !== undefined && data.availableBalance > 0 && (
+        <Card className="mb-8 border-2 border-green-500/20 bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="w-5 h-5" />
+                  Available Balance
+                </CardTitle>
+                <CardDescription>
+                  Request payout from completed campaigns
+                </CardDescription>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                  ${data.availableBalance.toFixed(2)}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Total: ${data.totalEarnings?.toFixed(2) || '0.00'}
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {data.availableBalance >= 20 
+                  ? 'You can request a payout now!' 
+                  : `Earn $${(20 - data.availableBalance).toFixed(2)} more to request payout (minimum $20)`
+                }
+              </p>
+              <Button
+                onClick={() => {
+                  setPayoutAmount(data.availableBalance?.toFixed(2) || '')
+                  setPayoutDialogOpen(true)
+                }}
+                disabled={data.availableBalance < 20}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Wallet className="w-4 h-4 mr-2" />
+                Request Payout
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Payout Request Dialog */}
+      <Dialog open={payoutDialogOpen} onOpenChange={setPayoutDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Payout</DialogTitle>
+            <DialogDescription>
+              Submit a payout request for your earnings (minimum $20)
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Amount (USD)</label>
+              <Input
+                type="number"
+                min="20"
+                step="0.01"
+                placeholder="20.00"
+                value={payoutAmount}
+                onChange={(e) => setPayoutAmount(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Available: ${data?.availableBalance?.toFixed(2) || '0.00'}
+              </p>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Payment Method</label>
+              <Select value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PAYPAL">PayPal</SelectItem>
+                  <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+                  <SelectItem value="STRIPE">Stripe</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">
+                {paymentMethod === 'PAYPAL' ? 'PayPal Email' : 
+                 paymentMethod === 'STRIPE' ? 'Wallet Address' : 
+                 'Bank Account Details'}
+              </label>
+              <Input
+                type="text"
+                placeholder={
+                  paymentMethod === 'PAYPAL' ? 'your@email.com' : 
+                  paymentMethod === 'STRIPE' ? '0x...' : 
+                  'Account number or details'
+                }
+                value={paymentDetails}
+                onChange={(e) => setPaymentDetails(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setPayoutDialogOpen(false)}
+              disabled={submittingPayout}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRequestPayout}
+              disabled={submittingPayout}
+            >
+              {submittingPayout ? 'Submitting...' : 'Submit Request'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Recent Clips */}
       <div className="mb-8">

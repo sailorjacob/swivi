@@ -1,13 +1,15 @@
 import { prisma } from '@/lib/prisma'
 import { MultiPlatformScraper } from '@/lib/multi-platform-scraper'
-import { SocialPlatform } from '@prisma/client'
+import { SocialPlatform, Prisma } from '@prisma/client'
 
 export interface ViewTrackingResult {
   success: boolean
   clipId?: string
+  submissionId?: string
   previousViews?: number
   currentViews?: number
   viewsGained?: number
+  earningsAdded?: number
   error?: string
 }
 
@@ -15,11 +17,13 @@ export interface TrackingBatchResult {
   processed: number
   successful: number
   failed: number
+  totalEarningsAdded: number
+  campaignsCompleted: string[]
   errors: Array<{ clipId: string; error: string }>
 }
 
 /**
- * Service for tracking view counts on clips and calculating earnings
+ * Unified service for tracking view counts, calculating earnings, and managing campaign budgets
  */
 export class ViewTrackingService {
   private scraper: MultiPlatformScraper
@@ -29,18 +33,27 @@ export class ViewTrackingService {
   }
 
   /**
-   * Tracks views for a single clip and updates the database
+   * Tracks views for a single clip and calculates earnings with budget enforcement
    */
   async trackClipViews(clipId: string): Promise<ViewTrackingResult> {
     try {
-      // Get clip details
+      // Get clip with all necessary relations
       const clip = await prisma.clip.findUnique({
         where: { id: clipId },
-        select: {
-          id: true,
-          url: true,
-          platform: true,
-          views: true,
+        include: {
+          clipSubmissions: {
+            include: {
+              campaigns: {
+                select: {
+                  id: true,
+                  payoutRate: true,
+                  budget: true,
+                  spent: true,
+                  status: true
+                }
+              }
+            }
+          },
           view_tracking: {
             orderBy: { date: 'desc' },
             take: 1,
@@ -56,9 +69,24 @@ export class ViewTrackingService {
         }
       }
 
-      // Get latest view tracking record
-      const latestTracking = clip.view_tracking[0]
-      const previousViews = latestTracking ? Number(latestTracking.views) : 0
+      // Only track active clips with approved submissions
+      const activeSubmission = clip.clipSubmissions.find(s => s.status === 'APPROVED')
+      if (!activeSubmission) {
+        return {
+          success: false,
+          error: 'No approved submission found for clip'
+        }
+      }
+
+      const campaign = activeSubmission.campaigns
+      
+      // Skip if campaign is completed
+      if (campaign.status === 'COMPLETED') {
+        return {
+          success: false,
+          error: 'Campaign already completed'
+        }
+      }
 
       // Scrape current view count
       const scrapedData = await this.scraper.scrapeContent(clip.url, clip.platform)
@@ -72,26 +100,25 @@ export class ViewTrackingService {
       }
 
       const currentViews = scrapedData.views || 0
-      const viewsGained = currentViews - previousViews
+      const latestTracking = clip.view_tracking[0]
+      const previousViews = latestTracking ? Number(latestTracking.views) : 0
+      const viewsGained = Math.max(0, currentViews - previousViews)
 
-      // Update clip's total views if this is higher
-      if (currentViews > Number(clip.views)) {
-        await prisma.clip.update({
-          where: { id: clipId },
-          data: {
-            views: BigInt(currentViews),
-            likes: BigInt(scrapedData.likes || 0),
-            shares: BigInt(scrapedData.shares || 0)
-          }
-        })
-      }
+      // Update clip's total views
+      await prisma.clip.update({
+        where: { id: clipId },
+        data: {
+          views: BigInt(currentViews),
+          likes: BigInt(scrapedData.likes || 0),
+          shares: BigInt(scrapedData.shares || 0)
+        }
+      })
 
       // Create new view tracking record for today
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      // Check if we already have a record for today
-      const existingToday = await prisma.viewTracking.findUnique({
+      await prisma.viewTracking.upsert({
         where: {
           userId_clipId_date_platform: {
             userId: clip.userId,
@@ -99,36 +126,114 @@ export class ViewTrackingService {
             date: today,
             platform: clip.platform
           }
+        },
+        update: {
+          views: BigInt(currentViews)
+        },
+        create: {
+          userId: clip.userId,
+          clipId,
+          views: BigInt(currentViews),
+          date: today,
+          platform: clip.platform
         }
       })
 
-      if (existingToday) {
-        // Update existing record if views have increased
-        if (currentViews > Number(existingToday.views)) {
-          await prisma.viewTracking.update({
-            where: { id: existingToday.id },
-            data: { views: BigInt(currentViews) }
+      // Calculate earnings from view growth
+      const initialViews = Number(activeSubmission.initialViews || 0)
+      const totalViewGrowth = currentViews - initialViews
+      const payoutRate = Number(campaign.payoutRate)
+      
+      // Calculate total earnings that should exist for this clip
+      const totalEarningsShouldBe = (totalViewGrowth / 1000) * payoutRate
+      const currentClipEarnings = Number(clip.earnings || 0)
+      const earningsDelta = Math.max(0, totalEarningsShouldBe - currentClipEarnings)
+
+      // Budget enforcement - only add earnings if budget allows
+      const campaignSpent = Number(campaign.spent || 0)
+      const campaignBudget = Number(campaign.budget)
+      const remainingBudget = Math.max(0, campaignBudget - campaignSpent)
+      const earningsToAdd = Math.min(earningsDelta, remainingBudget)
+
+      let campaignCompleted = false
+
+      if (earningsToAdd > 0) {
+        // Update everything in a transaction
+        await prisma.$transaction(async (tx) => {
+          // Update clip earnings
+          await tx.clip.update({
+            where: { id: clipId },
+            data: {
+              earnings: {
+                increment: earningsToAdd
+              }
+            }
           })
-        }
-      } else {
-        // Create new record
-        await prisma.viewTracking.create({
-          data: {
-            userId: clip.userId,
-            clipId,
-            views: BigInt(currentViews),
-            date: today,
-            platform: clip.platform
+
+          // Update user total earnings
+          await tx.user.update({
+            where: { id: clip.userId },
+            data: {
+              totalEarnings: {
+                increment: earningsToAdd
+              },
+              totalViews: {
+                increment: viewsGained
+              }
+            }
+          })
+
+          // Update campaign spent
+          const newSpent = campaignSpent + earningsToAdd
+          await tx.campaign.update({
+            where: { id: campaign.id },
+            data: {
+              spent: newSpent
+            }
+          })
+
+          // Check if campaign should be completed
+          if (newSpent >= campaignBudget) {
+            await tx.campaign.update({
+              where: { id: campaign.id },
+              data: {
+                status: 'COMPLETED',
+                completedAt: new Date(),
+                completionReason: `Budget fully utilized ($${campaignBudget.toFixed(2)})`
+              }
+            })
+
+            // Snapshot final earnings for all submissions in this campaign
+            await tx.clipSubmission.updateMany({
+              where: {
+                campaignId: campaign.id,
+                status: 'APPROVED'
+              },
+              data: {
+                finalEarnings: {
+                  set: Prisma.sql`(SELECT COALESCE(earnings, 0) FROM clips WHERE clips.id = clip_submissions.clip_id)`
+                }
+              }
+            })
+
+            campaignCompleted = true
           }
         })
+
+        // Send notifications if campaign completed
+        if (campaignCompleted) {
+          await this.notifyCampaignCompletion(campaign.id)
+        }
       }
 
       return {
         success: true,
         clipId,
+        submissionId: activeSubmission.id,
         previousViews,
         currentViews,
-        viewsGained
+        viewsGained,
+        earningsAdded: earningsToAdd
       }
 
     } catch (error) {
@@ -153,6 +258,8 @@ export class ViewTrackingService {
       processed: results.length,
       successful: 0,
       failed: 0,
+      totalEarningsAdded: 0,
+      campaignsCompleted: [],
       errors: []
     }
 
@@ -160,6 +267,7 @@ export class ViewTrackingService {
       if (result.status === 'fulfilled') {
         if (result.value.success) {
           batchResult.successful++
+          batchResult.totalEarningsAdded += result.value.earningsAdded || 0
         } else {
           batchResult.failed++
           batchResult.errors.push({
@@ -188,16 +296,17 @@ export class ViewTrackingService {
     platform: SocialPlatform
     lastTracked?: Date
   }>> {
-    // Get clips that haven't been tracked today or need updating
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
+    // Get clips with approved submissions in active campaigns
     const clips = await prisma.clip.findMany({
       where: {
         status: 'ACTIVE',
-        // Only include clips created in the last 30 days to avoid tracking old content
-        createdAt: {
-          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        clipSubmissions: {
+          some: {
+            status: 'APPROVED',
+            campaigns: {
+              status: 'ACTIVE'
+            }
+          }
         }
       },
       select: {
@@ -222,103 +331,32 @@ export class ViewTrackingService {
   }
 
   /**
-   * Processes view tracking for all clips that need it
+   * Processes view tracking for all clips that need it (main cron job entry point)
    */
   async processViewTracking(limit: number = 50): Promise<TrackingBatchResult> {
+    console.log(`📊 Starting view tracking process for up to ${limit} clips...`)
+    
     const clipsNeedingTracking = await this.getClipsNeedingTracking(limit)
     const clipIds = clipsNeedingTracking.map(clip => clip.id)
+
+    console.log(`Found ${clipIds.length} clips to track`)
 
     if (clipIds.length === 0) {
       return {
         processed: 0,
         successful: 0,
         failed: 0,
+        totalEarningsAdded: 0,
+        campaignsCompleted: [],
         errors: []
       }
     }
 
-    return await this.trackMultipleClips(clipIds)
-  }
-
-  /**
-   * Calculates earnings for a clip based on view growth and campaign payout rate
-   */
-  async calculateClipEarnings(clipId: string): Promise<{
-    success: boolean
-    earnings?: number
-    viewsGained?: number
-    error?: string
-  }> {
-    try {
-      const clip = await prisma.clip.findUnique({
-        where: { id: clipId },
-        include: {
-          clipSubmissions: {
-            include: {
-              campaigns: {
-                select: { payoutRate: true }
-              }
-            }
-          },
-          view_tracking: {
-            orderBy: { date: 'desc' },
-            take: 2 // Get last 2 records to calculate growth
-          }
-        }
-      })
-
-      if (!clip) {
-        return { success: false, error: 'Clip not found' }
-      }
-
-      if (clip.view_tracking.length < 2) {
-        return { success: false, error: 'Insufficient view tracking data' }
-      }
-
-      const latest = clip.view_tracking[0]
-      const previous = clip.view_tracking[1]
-
-      const viewsGained = Number(latest.views) - Number(previous.views)
-      const payoutRate = clip.clipSubmissions[0]?.campaigns.payoutRate || 0
-
-      // Calculate earnings based on views per 1K views rate
-      const earnings = (viewsGained / 1000) * Number(payoutRate)
-
-      // Update clip earnings if positive
-      if (earnings > 0) {
-        await prisma.clip.update({
-          where: { id: clipId },
-          data: {
-            earnings: {
-              increment: earnings
-            }
-          }
-        })
-
-        // Update user's total earnings
-        await prisma.user.update({
-          where: { id: clip.userId },
-          data: {
-            totalEarnings: {
-              increment: earnings
-            }
-          }
-        })
-      }
-
-      return {
-        success: true,
-        earnings,
-        viewsGained
-      }
-
-    } catch (error) {
-      console.error(`Error calculating earnings for clip ${clipId}:`, error)
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }
-    }
+    const result = await this.trackMultipleClips(clipIds)
+    
+    console.log(`✅ Tracking complete: ${result.successful} successful, ${result.failed} failed, $${result.totalEarningsAdded.toFixed(2)} earnings added`)
+    
+    return result
   }
 
   /**
@@ -331,6 +369,8 @@ export class ViewTrackingService {
     viewsThisWeek: number
     averageDailyViews: number
     daysTracked: number
+    currentEarnings: number
+    projectedFinalEarnings: number
   } | null> {
     try {
       const clip = await prisma.clip.findUnique({
@@ -338,6 +378,17 @@ export class ViewTrackingService {
         include: {
           view_tracking: {
             orderBy: { date: 'desc' }
+          },
+          clipSubmissions: {
+            include: {
+              campaigns: {
+                select: {
+                  payoutRate: true,
+                  budget: true,
+                  spent: true
+                }
+              }
+            }
           }
         }
       })
@@ -358,14 +409,13 @@ export class ViewTrackingService {
       let viewsToday = 0
       let viewsYesterday = 0
       let viewsThisWeek = 0
-      let totalViews = 0
 
       for (const tracking of clip.view_tracking) {
-        totalViews += Number(tracking.views)
-
-        if (tracking.date.getTime() === today.getTime()) {
+        const trackingDate = tracking.date.getTime()
+        
+        if (trackingDate === today.getTime()) {
           viewsToday = Number(tracking.views)
-        } else if (tracking.date.getTime() === yesterday.getTime()) {
+        } else if (trackingDate === yesterday.getTime()) {
           viewsYesterday = Number(tracking.views)
         }
 
@@ -374,8 +424,21 @@ export class ViewTrackingService {
         }
       }
 
+      const totalViews = Number(clip.views || 0)
       const daysTracked = clip.view_tracking.length
       const averageDailyViews = daysTracked > 0 ? totalViews / daysTracked : 0
+      const currentEarnings = Number(clip.earnings || 0)
+
+      // Project final earnings based on current view growth rate
+      const activeSubmission = clip.clipSubmissions.find(s => s.status === 'APPROVED')
+      const campaign = activeSubmission?.campaigns
+      let projectedFinalEarnings = currentEarnings
+
+      if (campaign && daysTracked > 1) {
+        const payoutRate = Number(campaign.payoutRate)
+        const remainingBudget = Number(campaign.budget) - Number(campaign.spent || 0)
+        projectedFinalEarnings = Math.min(currentEarnings + remainingBudget, currentEarnings * 2)
+      }
 
       return {
         totalViews,
@@ -383,12 +446,147 @@ export class ViewTrackingService {
         viewsYesterday,
         viewsThisWeek,
         averageDailyViews,
-        daysTracked
+        daysTracked,
+        currentEarnings,
+        projectedFinalEarnings
       }
 
     } catch (error) {
       console.error(`Error getting view stats for clip ${clipId}:`, error)
       return null
+    }
+  }
+
+  /**
+   * Notify all clippers when a campaign completes
+   */
+  private async notifyCampaignCompletion(campaignId: string): Promise<void> {
+    try {
+      const campaign = await prisma.campaign.findUnique({
+        where: { id: campaignId },
+        select: { title: true, completionReason: true }
+      })
+
+      if (!campaign) return
+
+      // Get all users who have approved submissions in this campaign
+      const submissions = await prisma.clipSubmission.findMany({
+        where: {
+          campaignId,
+          status: 'APPROVED'
+        },
+        select: {
+          userId: true,
+          users: {
+            select: { id: true }
+          }
+        },
+        distinct: ['userId']
+      })
+
+      // Send notifications
+      for (const submission of submissions) {
+        await prisma.notification.create({
+          data: {
+            userId: submission.userId,
+            type: 'CAMPAIGN_COMPLETED',
+            title: 'Campaign Completed! 🎉',
+            message: `"${campaign.title}" has reached its budget and is now complete. You can now request a payout for your earnings.`,
+            data: {
+              campaignId,
+              campaignTitle: campaign.title,
+              reason: campaign.completionReason
+            }
+          }
+        })
+      }
+
+      console.log(`📢 Notified ${submissions.length} clippers about campaign completion`)
+    } catch (error) {
+      console.error('Error notifying campaign completion:', error)
+    }
+  }
+
+  /**
+   * Get campaign view and earnings statistics
+   */
+  async getCampaignViewStats(campaignId: string): Promise<{
+    totalViews: number
+    totalSubmissions: number
+    averageViewsPerSubmission: number
+    totalEarnings: number
+    budgetUtilization: number
+    topPerformers: Array<{
+      userId: string
+      userName: string
+      views: number
+      earnings: number
+    }>
+  }> {
+    try {
+      const campaign = await prisma.campaign.findUnique({
+        where: { id: campaignId },
+        select: {
+          budget: true,
+          spent: true,
+          clipSubmissions: {
+            where: {
+              status: { in: ['APPROVED', 'PAID'] }
+            },
+            include: {
+              clips: {
+                select: {
+                  views: true,
+                  earnings: true
+                }
+              },
+              users: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              }
+            }
+          }
+        }
+      })
+
+      if (!campaign) {
+        throw new Error('Campaign not found')
+      }
+
+      const totalViews = campaign.clipSubmissions.reduce((sum, sub) => {
+        return sum + Number(sub.clips?.views || 0)
+      }, 0)
+
+      const totalSubmissions = campaign.clipSubmissions.length
+      const averageViewsPerSubmission = totalSubmissions > 0 ? totalViews / totalSubmissions : 0
+      const totalEarnings = Number(campaign.spent || 0)
+      const budgetUtilization = (totalEarnings / Number(campaign.budget)) * 100
+
+      // Get top performers
+      const performers = campaign.clipSubmissions
+        .map(sub => ({
+          userId: sub.userId,
+          userName: sub.users.name || 'Unknown',
+          views: Number(sub.clips?.views || 0),
+          earnings: Number(sub.clips?.earnings || 0)
+        }))
+        .sort((a, b) => b.earnings - a.earnings)
+        .slice(0, 10)
+
+      return {
+        totalViews,
+        totalSubmissions,
+        averageViewsPerSubmission,
+        totalEarnings,
+        budgetUtilization,
+        topPerformers: performers
+      }
+
+    } catch (error) {
+      console.error(`Error getting campaign stats for ${campaignId}:`, error)
+      throw error
     }
   }
 }

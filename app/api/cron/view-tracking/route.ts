@@ -3,16 +3,13 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from "next/server"
 import { ViewTrackingService } from "@/lib/view-tracking-service"
-import { CampaignCompletionService } from "@/lib/campaign-completion-service"
-import { prisma } from "@/lib/prisma"
 
-// This endpoint should only be called by authorized services (cron jobs, etc.)
-// In production, add proper authentication/authorization
+// This endpoint is called by Vercel Cron Jobs every 4 hours
+// It handles: view tracking → earnings calculation → budget updates → campaign completion
 
 export async function GET(request: NextRequest) {
   try {
     // Security check for Vercel cron jobs
-    // Vercel cron jobs come from specific IPs/user agents
     const userAgent = request.headers.get('user-agent') || ''
     const isVercelCron = userAgent.includes('Vercel-Cron') || userAgent.includes('vercel-cron')
 
@@ -28,67 +25,59 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    console.log('🚀 Starting integrated view tracking and earnings calculation...')
+    const startTime = Date.now()
+
     // Initialize the view tracking service
     const viewTrackingService = new ViewTrackingService()
 
-    // Update view tracking for active campaigns only
-    console.log('🚀 Starting automated view tracking update for active campaigns...')
-    const startTime = Date.now()
-
-    const result = await viewTrackingService.processViewTracking(50) // Process up to 50 clips per cron run
+    // Process view tracking with integrated earnings calculation
+    // This will:
+    // 1. Scrape views for active clips
+    // 2. Calculate earnings from view growth
+    // 3. Update clip, user, and campaign earnings
+    // 4. Check budget limits and complete campaigns if needed
+    // 5. Send notifications when campaigns complete
+    const result = await viewTrackingService.processViewTracking(50)
 
     const duration = Date.now() - startTime
-    console.log(`✅ View tracking update completed in ${duration}ms - Processed: ${result.processed}, Successful: ${result.successful}, Failed: ${result.failed}`)
 
-    // Check for campaigns that should be completed
-    console.log('🔍 Checking for campaigns that should be completed...')
-    const completionStartTime = Date.now()
-
-    const completionResult = await CampaignCompletionService.autoCompleteCampaigns()
-
-    const completionDuration = Date.now() - completionStartTime
-    console.log(`✅ Campaign completion check completed in ${completionDuration}ms - Completed: ${completionResult.completed}, Skipped: ${completionResult.skipped}`)
-
-    if (completionResult.errors.length > 0) {
-      console.warn('⚠️ Campaign completion errors:', completionResult.errors)
+    console.log(`✅ View tracking completed in ${duration}ms`)
+    console.log(`   Processed: ${result.processed}`)
+    console.log(`   Successful: ${result.successful}`)
+    console.log(`   Failed: ${result.failed}`)
+    console.log(`   Earnings Added: $${result.totalEarningsAdded.toFixed(2)}`)
+    
+    if (result.campaignsCompleted.length > 0) {
+      console.log(`   Campaigns Completed: ${result.campaignsCompleted.length}`)
     }
 
-    // Log the update for monitoring
-    await prisma.viewTracking.create({
-      data: {
-        userId: 'system',
-        clipId: 'system',
-        views: 0,
-        date: new Date(),
-        platform: 'TIKTOK'
-      }
-    }).catch(() => {
-      // Ignore duplicate key errors for system tracking
-    })
+    if (result.errors.length > 0) {
+      console.warn('⚠️ Errors during tracking:', result.errors)
+    }
 
     return NextResponse.json({
       success: true,
-      message: "View tracking and campaign completion check completed successfully",
-      viewTracking: {
-        duration: `${duration}ms`,
+      message: "View tracking and earnings calculation completed successfully",
+      duration: `${duration}ms`,
+      stats: {
         processed: result.processed,
         successful: result.successful,
         failed: result.failed,
-        errors: result.errors
+        earningsAdded: `$${result.totalEarningsAdded.toFixed(2)}`,
+        campaignsCompleted: result.campaignsCompleted.length
       },
-      campaignCompletion: {
-        duration: `${completionDuration}ms`,
-        completed: completionResult.completed,
-        skipped: completionResult.skipped,
-        errors: completionResult.errors
-      }
+      errors: result.errors.length > 0 ? result.errors : undefined
     })
 
   } catch (error) {
-    console.error("Error in automated view tracking:", error)
+    console.error("❌ Error in view tracking cron job:", error)
 
     return NextResponse.json(
-      { error: "Failed to update view tracking" },
+      { 
+        error: "Failed to update view tracking",
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }

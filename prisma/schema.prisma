@@ -35,6 +35,7 @@ model User {
   clipSubmissions     ClipSubmission[]
   clips               Clip[]
   payouts             Payout[]
+  payoutRequests      PayoutRequest[]
   referralsGiven      Referral[]           @relation("referrals_referrerIdTousers")
   referralsReceived   Referral[]           @relation("referrals_referredIdTousers")
   socialAccounts      SocialAccount[]
@@ -132,7 +133,9 @@ model ClipSubmission {
   rejectionReason String?
   requiresReview  Boolean?          @default(false)
   reviewReason    String?
-  payout          Decimal?          @db.Decimal(10, 2)
+  initialViews    BigInt?           @default(0) // Views at time of approval
+  finalEarnings   Decimal?          @default(0) @db.Decimal(10, 2) // Snapshot when campaign ends
+  payout          Decimal?          @db.Decimal(10, 2) // DEPRECATED: use finalEarnings
   paidAt          DateTime?         @db.Timestamp(6)
   createdAt       DateTime?         @default(now()) @db.Timestamp(6)
   updatedAt       DateTime?         @default(now()) @db.Timestamp(6)
@@ -140,6 +143,7 @@ model ClipSubmission {
   clips           Clip?             @relation(fields: [clipId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users           User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@index([campaignId, status])
   @@map("clip_submissions")
 }
 
@@ -175,6 +179,7 @@ model ViewTracking {
   users     User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([userId, clipId, date, platform])
+  @@index([clipId, date])
   @@map("view_tracking")
 }
 
@@ -221,6 +226,28 @@ model Notification {
   users     User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("notifications")
+}
+
+model PayoutRequest {
+  id              String              @id @default(cuid())
+  userId          String
+  amount          Decimal             @db.Decimal(10, 2)
+  status          PayoutRequestStatus @default(PENDING)
+  requestedAt     DateTime            @default(now()) @db.Timestamp(6)
+  processedAt     DateTime?           @db.Timestamp(6)
+  processedBy     String? // Admin user ID who processed it
+  paymentMethod   PayoutMethod?
+  paymentDetails  String? // PayPal email, wallet address, etc.
+  notes           String? // Admin notes
+  transactionId   String? // External payment transaction ID
+  payoutId        String? // Link to Payout record once created
+  createdAt       DateTime            @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime            @default(now()) @db.Timestamp(6)
+  users           User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId, status])
+  @@index([status, requestedAt])
+  @@map("payout_requests")
 }
 
 enum UserRole {
@@ -281,6 +308,7 @@ enum NotificationType {
   SUBMISSION_APPROVED
   SUBMISSION_REJECTED
   PAYOUT_PROCESSED
+  PAYOUT_REQUESTED
   CAMPAIGN_COMPLETED
   CAMPAIGN_STARTED
   NEW_CAMPAIGN_AVAILABLE
@@ -288,4 +316,13 @@ enum NotificationType {
   SYSTEM_UPDATE
   VERIFICATION_SUCCESS
   VERIFICATION_FAILED
+}
+
+enum PayoutRequestStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  REJECTED
+  CANCELLED
 }

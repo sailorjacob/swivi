@@ -97,11 +97,13 @@ export class ClipCreationService {
       })
 
       // Update submission to link to the clip and mark as approved
+      // Store initialViews for earnings calculation
       await prisma.clipSubmission.update({
         where: { id: createData.submissionId },
         data: {
           clipId: clip.id,
           status: 'APPROVED',
+          initialViews: BigInt(scrapedData.views || 0),
           rejectionReason: null // Clear any previous rejection reason
         }
       })
