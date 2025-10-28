@@ -107,60 +107,60 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl bg-card border-border">
-        <DialogHeader>
-          <DialogTitle className="text-foreground">Create submission</DialogTitle>
+      <DialogContent className="sm:max-w-lg bg-card border-border">
+        <DialogHeader className="pb-3">
+          <DialogTitle className="text-lg font-medium text-foreground">Create submission</DialogTitle>
         </DialogHeader>
 
         {/* Info Alert */}
-        <Alert className="bg-yellow-50 border-yellow-200">
-          <AlertCircle className="h-4 w-4 text-yellow-600" />
-          <AlertDescription className="text-yellow-800">
-            Only views after you submit count towards payout. Submit as soon as you post to get paid for all of your views.
+        <Alert className="bg-muted/50 border-border">
+          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          <AlertDescription className="text-muted-foreground text-sm">
+            Only views after you submit count towards payout. Submit as soon as you post to get paid for all views.
           </AlertDescription>
         </Alert>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Campaign Info */}
           {campaign && (
-            <div className="bg-muted p-4 rounded-lg">
-              <h3 className="font-medium text-foreground">{campaign.title}</h3>
-              <p className="text-sm text-muted-foreground">by {campaign.creator}</p>
-              <p className="text-sm text-foreground font-medium mt-1">{campaign.payout}</p>
+            <div className="border border-border rounded-lg p-3">
+              <h3 className="text-sm font-medium text-foreground">{campaign.title}</h3>
+              <p className="text-xs text-muted-foreground">by {campaign.creator}</p>
+              <p className="text-xs text-foreground font-medium mt-1">{campaign.payout}</p>
             </div>
           )}
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-foreground">Submit your social media post</h3>
-            <p className="text-muted-foreground">
-              Share your post's link and the original image or video below. Once approved, you'll start earning rewards based on the views your content generates.
+          <div className="space-y-2">
+            <h3 className="text-base font-medium text-foreground">Submit your social media post</h3>
+            <p className="text-sm text-muted-foreground">
+              Share your post's link and original media. Once approved, you'll earn based on views generated.
             </p>
           </div>
 
           {/* URL Input */}
           <div className="space-y-2">
-            <Label htmlFor="url" className="text-foreground">
-              Provide link <span className="text-red-500">*</span>
+            <Label htmlFor="url" className="text-sm text-foreground">
+              Provide link <span className="text-destructive">*</span>
             </Label>
             <Input
               id="url"
               {...register("url")}
-              placeholder="https://www.tiktok.com/@frankwarrinkmotivation/video/7522962756245474591"
-              className="bg-input border-border text-foreground"
+              placeholder="https://www.tiktok.com/@username/video/123456789"
+              className="h-9 text-sm"
             />
             {errors.url && (
-              <p className="text-red-500 text-sm">{String(errors.url.message)}</p>
+              <p className="text-destructive text-xs">{String(errors.url.message)}</p>
             )}
           </div>
 
           {/* File Upload */}
           <div className="space-y-2">
-            <Label className="text-foreground">
-              Media <span className="text-red-500">*</span>
+            <Label className="text-sm text-foreground">
+              Media <span className="text-destructive">*</span>
             </Label>
             
             <div
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
                 dragActive 
                   ? "border-foreground bg-muted" 
                   : "border-border hover:border-muted-foreground"
@@ -172,8 +172,8 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
             >
               {uploadedFile ? (
                 <div className="space-y-2">
-                  <p className="text-foreground font-medium">{uploadedFile.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-foreground font-medium">{uploadedFile.name}</p>
+                  <p className="text-xs text-muted-foreground">
                     {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                   <Button
@@ -181,15 +181,16 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
                     variant="outline"
                     size="sm"
                     onClick={() => setUploadedFile(null)}
+                    className="h-8"
                   >
                     Remove
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="text-muted-foreground">
-                    <p className="font-medium">
-                      Upload the original media file you posted (not a screenshot). For videos, upload the video file. For posts with multiple files, upload the first file.
+                    <p className="text-sm">
+                      Upload the original media file (not a screenshot). For videos, upload the video file.
                     </p>
                   </div>
                   
@@ -204,10 +205,11 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
                     <Button
                       type="button"
                       variant="outline"
+                      size="sm"
                       onClick={() => document.getElementById('file-upload')?.click()}
-                      className="border-border focus:outline-none focus-visible:outline-none"
+                      className="h-8"
                     >
-                      <Upload className="w-4 h-4 mr-2" />
+                      <Upload className="w-3 h-3 mr-2" />
                       Upload media
                     </Button>
                   </div>
@@ -217,13 +219,25 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
           </div>
 
           {/* Submit Button */}
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            {isLoading ? "Submitting..." : "Submit"}
-          </Button>
+          <div className="flex gap-2 pt-2">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 h-9"
+              size="sm"
+            >
+              {isLoading ? "Submitting..." : "Submit"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              size="sm"
+              className="h-9"
+            >
+              Cancel
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

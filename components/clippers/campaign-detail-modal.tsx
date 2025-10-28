@@ -163,49 +163,27 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card border-border">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="relative h-48 bg-muted rounded-lg overflow-hidden">
-            <div className="absolute top-4 left-4">
-              <Badge className="bg-green-600 text-white hover:bg-green-700">
-                {campaign.status}
-              </Badge>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-card border-border">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-xl font-medium text-foreground">
+            {campaign.title}
+          </DialogTitle>
+          <p className="text-sm text-muted-foreground">by {campaign.creator}</p>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          {/* Submit Form - Compact */}
+          <div className="border border-border rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Link2 className="w-4 h-4 text-foreground" />
+              <h3 className="text-base font-medium text-foreground">Submit Your Clip</h3>
             </div>
-            <img
-              src={campaign.image || "/placeholder-campaign.jpg"}
-              alt={campaign.title}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src = "/placeholder-campaign.jpg"
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end">
-              <div className="p-4 w-full">
-                <h2 className="text-2xl font-semibold text-white mb-1">
-                  {campaign.title}
-                </h2>
-                <p className="text-white/90 text-sm">by {campaign.creator}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Submit Form - Moved to Top */}
-          <div className="bg-muted/30 border border-border rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-                <Link2 className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-white">Submit Your Clip</h3>
-              </div>
-            </div>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="platform" className="text-white font-medium">Platform</Label>
+                  <Label htmlFor="platform" className="text-sm text-foreground">Platform</Label>
                   <Select onValueChange={(value) => setValue("platform", value as any)}>
-                    <SelectTrigger className="mt-1 bg-background/50">
+                    <SelectTrigger className="mt-1 h-9">
                       <SelectValue placeholder="Select platform" />
                     </SelectTrigger>
                     <SelectContent>
@@ -214,8 +192,8 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
                         return (
                           <SelectItem key={platform} value={platform}>
                             <div className="flex items-center gap-2">
-                              <Icon className="w-4 h-4" />
-                              <span className="capitalize">{platform}</span>
+                              <Icon className="w-3 h-3" />
+                              <span className="capitalize text-xs">{platform}</span>
                             </div>
                           </SelectItem>
                         )
@@ -223,46 +201,45 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
                     </SelectContent>
                   </Select>
                   {errors.platform && (
-                    <p className="text-red-400 text-sm mt-1">{errors.platform.message}</p>
+                    <p className="text-destructive text-xs mt-1">{errors.platform.message}</p>
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="clipUrl" className="text-white font-medium">Content URL</Label>
+                  <Label htmlFor="clipUrl" className="text-sm text-foreground">Content URL</Label>
                   <div className="relative mt-1">
-                    <Link2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="clipUrl"
                       placeholder={getPlatformPlaceholder(selectedPlatform)}
-                      className="pl-10 bg-background/50"
+                      className="h-9 text-sm"
                       {...register("clipUrl")}
                     />
                   </div>
                   {errors.clipUrl && (
-                    <p className="text-red-400 text-sm mt-1">{errors.clipUrl.message}</p>
-                  )}
-                  {selectedPlatform && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {getPlatformHint(selectedPlatform)}
-                    </p>
+                    <p className="text-destructive text-xs mt-1">{errors.clipUrl.message}</p>
                   )}
                 </div>
               </div>
+              {selectedPlatform && (
+                <p className="text-xs text-muted-foreground">
+                  {getPlatformHint(selectedPlatform)}
+                </p>
+              )}
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-2 pt-2">
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
-                  size="lg"
+                  className="flex-1 h-9"
+                  size="sm"
                 >
                   {isSubmitting ? "Submitting..." : "Submit"}
                 </Button>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => onOpenChange(false)}
-                  size="lg"
-                  className="text-muted-foreground hover:text-white"
+                  size="sm"
+                  className="h-9"
                 >
                   Cancel
                 </Button>
@@ -270,66 +247,57 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
             </form>
           </div>
 
-          {/* Campaign Description */}
-          <div>
-            <h3 className="text-lg font-medium text-white mb-2">About This Campaign</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              {campaign.description}
-            </p>
-          </div>
-
-          {/* Campaign Details - Condensed */}
-          <div className="bg-muted/20 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-white mb-3">Campaign Details</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Pool Budget</div>
-                  <div className="text-lg font-semibold text-white">${campaign.pool.toLocaleString()}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Rate per 1K views</div>
-                  <div className="text-lg font-semibold text-white">${campaign.cpm}</div>
-                </div>
+          {/* Campaign Info - Compact */}
+          <div className="border border-border rounded-lg p-4">
+            <div className="grid grid-cols-3 gap-4 mb-3">
+              <div>
+                <div className="text-xs text-muted-foreground">Budget</div>
+                <div className="text-sm font-medium text-foreground">${campaign.pool.toLocaleString()}</div>
               </div>
-              <div className="space-y-3">
-                <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Submissions</div>
-                  <div className="text-lg font-semibold text-white">{campaign.totalSubmissions}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wide">Status</div>
-                  <div className="text-lg font-semibold text-white">{campaign.status}</div>
-                </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Rate/1K views</div>
+                <div className="text-sm font-medium text-foreground">${campaign.cpm}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Submissions</div>
+                <div className="text-sm font-medium text-foreground">{campaign.totalSubmissions}</div>
               </div>
             </div>
-          </div>
+            
+            {/* Platforms */}
+            <div className="mb-3">
+              <div className="text-xs text-muted-foreground mb-2">Platforms</div>
+              <div className="flex gap-2">
+                {campaign.platforms.map((platform) => {
+                  const Icon = platformIcons[platform as keyof typeof platformIcons]
+                  return (
+                    <div key={platform} className="flex items-center gap-1 bg-muted rounded px-2 py-1">
+                      <Icon className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-xs capitalize text-foreground">{platform}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
 
-          {/* Platforms */}
-          <div className="bg-muted/20 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-white mb-3">Accepted Platforms</h3>
-            <div className="flex gap-3">
-              {campaign.platforms.map((platform) => {
-                const Icon = platformIcons[platform as keyof typeof platformIcons]
-                return (
-                  <div key={platform} className="flex items-center gap-2 bg-muted/30 rounded-lg px-3 py-2">
-                    <Icon className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm capitalize text-white">{platform}</span>
-                  </div>
-                )
-              })}
+            {/* Description */}
+            <div>
+              <div className="text-xs text-muted-foreground mb-2">Description</div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {campaign.description}
+              </p>
             </div>
           </div>
 
           {/* Requirements */}
           {campaign.requirements.length > 0 && (
-            <div className="bg-muted/20 rounded-lg p-4">
-              <h3 className="text-lg font-medium text-white mb-3">Requirements</h3>
-              <div className="space-y-3">
+            <div className="border border-border rounded-lg p-4">
+              <div className="text-xs text-muted-foreground mb-2">Requirements</div>
+              <div className="space-y-2">
                 {campaign.requirements.map((req, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-muted-foreground leading-relaxed">{req}</span>
+                  <div key={index} className="flex items-start gap-2">
+                    <CheckCircle className="w-3 h-3 text-foreground mt-0.5 flex-shrink-0" />
+                    <span className="text-xs text-muted-foreground leading-relaxed">{req}</span>
                   </div>
                 ))}
               </div>
