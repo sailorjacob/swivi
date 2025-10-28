@@ -90,6 +90,17 @@ export async function POST(request: NextRequest) {
         })
       }
 
+      // Scrape initial views at submission time (CRITICAL: baseline for all future earnings)
+      let initialViews = 0
+      try {
+        const scraper = new (await import('@/lib/multi-platform-scraper')).MultiPlatformScraper(process.env.APIFY_TOKEN || '')
+        const scrapedData = await scraper.scrapeContent(url, platform)
+        initialViews = scrapedData.views || 0
+        console.log(`📊 Initial views at submission: ${initialViews}`)
+      } catch (error) {
+        console.error('Error scraping initial views at submission:', error)
+      }
+
       // Create a test clip with submission
       const testClip = await prisma.clip.create({
         data: {
@@ -98,7 +109,8 @@ export async function POST(request: NextRequest) {
           platform: platform,
           title: `Test Clip - ${platform} - ${new Date().toISOString()}`,
           description: `Test clip created for view tracking testing on ${platform}`,
-          status: 'ACTIVE'
+          status: 'ACTIVE',
+          views: BigInt(initialViews) // Set initial views on clip too
         }
       })
 
@@ -111,7 +123,7 @@ export async function POST(request: NextRequest) {
           clipUrl: url,
           platform: platform,
           status: 'PENDING', // Start as pending
-          initialViews: 0 // Will be set on approval
+          initialViews: BigInt(initialViews) // SET AT SUBMISSION TIME - this is the earnings baseline!
         }
       })
 
@@ -151,26 +163,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Submission not found" }, { status: 404 })
       }
 
-      // Scrape current views to set as initialViews
-      const viewTrackingService = new ViewTrackingService()
-      let initialViews = 0
-
-      if (submission.clips) {
-        try {
-          const scraper = new (await import('@/lib/multi-platform-scraper')).MultiPlatformScraper(process.env.APIFY_TOKEN || '')
-          const scrapedData = await scraper.scrapeContent(submission.clips.url, submission.clips.platform)
-          initialViews = scrapedData.views || 0
-        } catch (error) {
-          console.error('Error scraping initial views:', error)
-        }
-      }
-
-      // Approve submission and set initialViews
+      // Just approve - initialViews was already set at submission time!
       const updatedSubmission = await prisma.clipSubmission.update({
         where: { id: submissionId },
         data: {
-          status: 'APPROVED',
-          initialViews: BigInt(initialViews)
+          status: 'APPROVED'
         }
       })
 
@@ -178,8 +175,8 @@ export async function POST(request: NextRequest) {
         success: true,
         submissionId: submissionId,
         status: updatedSubmission.status,
-        initialViews: initialViews,
-        message: `Submission approved with ${initialViews} initial views. Earnings will now accumulate as views grow.`
+        initialViews: Number(submission.initialViews || 0),
+        message: `Submission approved! Earnings will now accumulate from baseline of ${Number(submission.initialViews || 0)} views.`
       })
 
     } else if (action === "track_views") {

@@ -222,6 +222,19 @@ export async function POST(request: NextRequest) {
       // Continue with submission but log for manual review
     }
 
+    // Scrape initial views at submission time (CRITICAL: this is the baseline for earnings)
+    let initialViews = 0
+    try {
+      const { MultiPlatformScraper } = await import('@/lib/multi-platform-scraper')
+      const scraper = new MultiPlatformScraper(process.env.APIFY_TOKEN || '')
+      const scrapedData = await scraper.scrapeContent(validatedData.clipUrl, validatedData.platform)
+      initialViews = scrapedData.views || 0
+      console.log(`📊 Initial views at submission: ${initialViews} for ${validatedData.clipUrl}`)
+    } catch (error) {
+      console.error('Error scraping initial views at submission:', error)
+      // Continue with submission even if scraping fails
+    }
+
     // Create the submission for verified content
     const submission = await prisma.clipSubmission.create({
       data: {
@@ -230,7 +243,8 @@ export async function POST(request: NextRequest) {
         clipUrl: validatedData.clipUrl,
         platform: validatedData.platform,
         mediaFileUrl: validatedData.mediaFileUrl,
-        status: "PENDING" // Still PENDING for admin approval, but verified
+        status: "PENDING", // Still PENDING for admin approval, but verified
+        initialViews: BigInt(initialViews) // SET AT SUBMISSION TIME - earnings baseline!
       },
       include: {
         campaigns: true

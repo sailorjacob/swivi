@@ -97,13 +97,13 @@ export class ClipCreationService {
       })
 
       // Update submission to link to the clip and mark as approved
-      // Store initialViews for earnings calculation
+      // NOTE: initialViews was already set at submission time - preserve it!
       await prisma.clipSubmission.update({
         where: { id: createData.submissionId },
         data: {
           clipId: clip.id,
           status: 'APPROVED',
-          initialViews: BigInt(scrapedData.views || 0),
+          // DO NOT update initialViews - it was set at submission time as the earnings baseline
           rejectionReason: null // Clear any previous rejection reason
         }
       })
@@ -119,7 +119,7 @@ export class ClipCreationService {
       return {
         success: true,
         clipId: clip.id,
-        initialViews: scrapedData.views || 0,
+        initialViews: Number(submission.initialViews || 0), // Return the baseline from submission time
         metadata: {
           title: scrapedData.title,
           description: scrapedData.description,
