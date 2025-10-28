@@ -329,116 +329,165 @@ export class ViewTrackingService {
   }
 
   /**
-   * Gets all active clips that need view tracking with smart prioritization
-   * Prioritizes: never tracked > not tracked in 8h > new campaigns > older clips
+   * Gets all active clips that need view tracking, grouped by campaign for fairness
+   * CRITICAL: All clips in a campaign are tracked together to ensure fair competition
    */
   async getClipsNeedingTracking(limit: number = 100): Promise<Array<{
     id: string
     url: string
     platform: SocialPlatform
     lastTracked?: Date
+    campaignId: string
   }>> {
-    // Get more clips than we need for prioritization
-    const clips = await prisma.clip.findMany({
+    // First, get all ACTIVE campaigns that haven't exceeded budget
+    const activeCampaigns = await prisma.campaign.findMany({
       where: {
         status: 'ACTIVE',
-        clipSubmissions: {
-          some: {
-            campaigns: {
-              status: 'ACTIVE'
-            }
-          }
-        }
+        // Only track campaigns that still have budget left
+        OR: [
+          { spent: { lt: prisma.campaign.fields.budget } },
+          { spent: null }
+        ]
       },
       select: {
         id: true,
-        url: true,
-        platform: true,
-        view_tracking: {
-          orderBy: { date: 'desc' },
-          take: 1,
-          select: { date: true }
-        },
+        name: true,
+        createdAt: true,
+        spent: true,
+        budget: true,
         clipSubmissions: {
           where: {
-            campaigns: {
-              status: 'ACTIVE'
-            }
+            status: 'APPROVED',
+            clipId: { not: null }
           },
           select: {
-            campaigns: {
+            clipId: true,
+            clip: {
               select: {
-                createdAt: true
+                id: true,
+                url: true,
+                platform: true,
+                status: true,
+                view_tracking: {
+                  orderBy: { date: 'desc' },
+                  take: 1,
+                  select: { date: true }
+                }
               }
             }
           }
         }
       },
-      take: limit * 2 // Get extra for prioritization
+      orderBy: { createdAt: 'desc' } // Prioritize newer campaigns
     })
 
-    // Calculate priority scores
-    const scored = clips.map(clip => {
-      const lastTracked = clip.view_tracking[0]?.date
-      const hoursSinceTracking = lastTracked 
-        ? (Date.now() - lastTracked.getTime()) / (1000 * 60 * 60)
-        : 999 // Never tracked = highest priority
-      
-      // Base priority on time since last tracking
-      let priority = hoursSinceTracking
-      
-      // Boost priority for new campaigns (< 7 days old)
-      const newestCampaign = clip.clipSubmissions
-        .map(s => s.campaigns.createdAt)
-        .sort((a, b) => b.getTime() - a.getTime())[0]
-      
-      if (newestCampaign) {
-        const campaignAgeDays = (Date.now() - newestCampaign.getTime()) / (1000 * 60 * 60 * 24)
+    // Calculate campaign priority scores
+    interface CampaignWithPriority {
+      campaignId: string
+      campaignName: string
+      clips: Array<{
+        id: string
+        url: string
+        platform: SocialPlatform
+        lastTracked?: Date
+        campaignId: string
+      }>
+      priority: number
+      budgetRemaining: number
+    }
+
+    const campaignsWithClips: CampaignWithPriority[] = activeCampaigns
+      .map(campaign => {
+        const clips = campaign.clipSubmissions
+          .filter(sub => sub.clip?.status === 'ACTIVE')
+          .map(sub => ({
+            id: sub.clip!.id,
+            url: sub.clip!.url,
+            platform: sub.clip!.platform,
+            lastTracked: sub.clip!.view_tracking[0]?.date,
+            campaignId: campaign.id
+          }))
+
+        if (clips.length === 0) return null
+
+        // Calculate campaign priority based on oldest untracked clip
+        const oldestTracking = clips
+          .map(c => c.lastTracked?.getTime() || 0)
+          .sort((a, b) => a - b)[0]
+        
+        const hoursSinceOldest = oldestTracking 
+          ? (Date.now() - oldestTracking) / (1000 * 60 * 60)
+          : 999 // Never tracked = highest priority
+        
+        // Boost priority for new campaigns
+        const campaignAgeDays = (Date.now() - campaign.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+        let priority = hoursSinceOldest
         if (campaignAgeDays < 7) {
-          priority *= 1.5 // 50% boost for new campaigns
+          priority *= 1.5
         }
+
+        return {
+          campaignId: campaign.id,
+          campaignName: campaign.name,
+          clips,
+          priority,
+          budgetRemaining: Number(campaign.budget) - Number(campaign.spent || 0)
+        }
+      })
+      .filter((c): c is CampaignWithPriority => c !== null)
+
+    // Sort campaigns by priority
+    campaignsWithClips.sort((a, b) => b.priority - a.priority)
+
+    // Collect clips by campaign until we hit the limit
+    // CRITICAL: Include ALL clips from a campaign or NONE (fairness)
+    const selectedClips: Array<{
+      id: string
+      url: string
+      platform: SocialPlatform
+      lastTracked?: Date
+      campaignId: string
+    }> = []
+    
+    for (const campaign of campaignsWithClips) {
+      // If adding this campaign would exceed limit, stop
+      // But if it's the first campaign, include it anyway (minimum 1 campaign per run)
+      if (selectedClips.length > 0 && selectedClips.length + campaign.clips.length > limit) {
+        break
       }
       
-      return {
-        id: clip.id,
-        url: clip.url,
-        platform: clip.platform,
-        lastTracked,
-        priority
-      }
-    })
+      selectedClips.push(...campaign.clips)
+      console.log(`📦 Including campaign "${campaign.campaignName}" (${campaign.clips.length} clips, $${campaign.budgetRemaining.toFixed(2)} remaining)`)
+    }
 
-    // Sort by priority (highest first) and return top N
-    const prioritized = scored
-      .sort((a, b) => b.priority - a.priority)
-      .slice(0, limit)
+    const neverTrackedCount = selectedClips.filter(c => !c.lastTracked).length
+    const staleCount = selectedClips.filter(c => {
+      if (!c.lastTracked) return false
+      const hours = (Date.now() - c.lastTracked.getTime()) / (1000 * 60 * 60)
+      return hours > 8
+    }).length
     
-    console.log(`📊 Prioritized ${prioritized.length} clips (${scored.filter(c => c.priority > 100).length} never tracked, ${scored.filter(c => c.priority > 8 && c.priority < 100).length} stale)`)
+    console.log(`📊 Selected ${selectedClips.length} clips from ${new Set(selectedClips.map(c => c.campaignId)).size} campaigns (${neverTrackedCount} never tracked, ${staleCount} stale)`)
     
-    return prioritized.map(({ id, url, platform, lastTracked }) => ({
-      id,
-      url,
-      platform,
-      lastTracked
-    }))
+    return selectedClips
   }
 
   /**
    * Processes view tracking for all clips that need it (main cron job entry point)
-   * Uses batched processing to stay within rate limits and timeouts
+   * Uses campaign-grouped batched processing for fairness and rate limit compliance
+   * CRITICAL: All clips from the same campaign are tracked together in the same run
    */
   async processViewTracking(
     limit: number = 100, 
     batchSize: number = 10
   ): Promise<TrackingBatchResult> {
     console.log(`📊 Starting view tracking process for up to ${limit} clips (batches of ${batchSize})...`)
+    console.log(`⚖️  Fair tracking mode: All clips from a campaign tracked together`)
     
     const clipsNeedingTracking = await this.getClipsNeedingTracking(limit)
-    const clipIds = clipsNeedingTracking.map(clip => clip.id)
-
-    console.log(`Found ${clipIds.length} clips to track`)
-
-    if (clipIds.length === 0) {
+    
+    if (clipsNeedingTracking.length === 0) {
+      console.log(`✨ No clips need tracking at this time`)
       return {
         processed: 0,
         successful: 0,
@@ -449,14 +498,34 @@ export class ViewTrackingService {
       }
     }
 
+    // Group clips by campaign for organized tracking
+    const clipsByCampaign = new Map<string, string[]>()
+    clipsNeedingTracking.forEach(clip => {
+      const existing = clipsByCampaign.get(clip.campaignId) || []
+      existing.push(clip.id)
+      clipsByCampaign.set(clip.campaignId, existing)
+    })
+
+    console.log(`🎯 Tracking ${clipsNeedingTracking.length} clips across ${clipsByCampaign.size} campaigns`)
+    
+    // Track all clips (they're already grouped fairly by campaign)
+    const clipIds = clipsNeedingTracking.map(clip => clip.id)
     const result = await this.trackMultipleClips(clipIds, batchSize)
     
     const successRate = ((result.successful / result.processed) * 100).toFixed(1)
     console.log(`✅ Tracking complete: ${result.successful}/${result.processed} successful (${successRate}%), $${result.totalEarningsAdded.toFixed(2)} earnings added`)
     
     if (result.failed > 0) {
-      console.warn(`⚠️  ${result.failed} clips failed to track. Errors:`, result.errors.slice(0, 5))
+      console.warn(`⚠️  ${result.failed} clips failed to track. First 5 errors:`, result.errors.slice(0, 5))
     }
+    
+    // Show per-campaign summary
+    clipsByCampaign.forEach((clipIds, campaignId) => {
+      const campaignSuccessful = clipIds.filter(id => 
+        result.errors.every(e => e.clipId !== id)
+      ).length
+      console.log(`  📋 Campaign ${campaignId}: ${campaignSuccessful}/${clipIds.length} clips tracked`)
+    })
     
     return result
   }
