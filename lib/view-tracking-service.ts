@@ -205,18 +205,29 @@ export class ViewTrackingService {
               }
             })
 
-            // Snapshot final earnings for all submissions in this campaign
-            await tx.clipSubmission.updateMany({
+            // Snapshot final earnings for all approved submissions in this campaign
+            const approvedSubmissions = await tx.clipSubmission.findMany({
               where: {
                 campaignId: campaign.id,
-                status: 'APPROVED'
+                status: 'APPROVED',
+                clipId: { not: null }
               },
-              data: {
-                finalEarnings: {
-                  set: Prisma.sql`(SELECT COALESCE(earnings, 0) FROM clips WHERE clips.id = clip_submissions.clip_id)`
+              include: {
+                clip: {
+                  select: { earnings: true }
                 }
               }
             })
+
+            // Update each submission with its clip's final earnings
+            for (const submission of approvedSubmissions) {
+              await tx.clipSubmission.update({
+                where: { id: submission.id },
+                data: {
+                  finalEarnings: submission.clip?.earnings || 0
+                }
+              })
+            }
 
             campaignCompleted = true
           }

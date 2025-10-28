@@ -87,7 +87,7 @@ export class ApifyTikTokScraper {
 
       // Step 2: Poll for completion
       let attempts = 0
-      const maxAttempts = 30 // 30 seconds max wait
+      const maxAttempts = 60 // 60 seconds max wait
       let lastStatusData: any = null
 
       while (attempts < maxAttempts) {
