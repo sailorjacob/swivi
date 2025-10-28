@@ -441,6 +441,7 @@ export class ViewTrackingService {
 
     // Collect clips by campaign until we hit the limit
     // CRITICAL: Include ALL clips from a campaign or NONE (fairness)
+    // SPECIAL: For large campaigns (> limit), process them alone with increased capacity
     const selectedClips: Array<{
       id: string
       url: string
@@ -450,14 +451,32 @@ export class ViewTrackingService {
     }> = []
     
     for (const campaign of campaignsWithClips) {
-      // If adding this campaign would exceed limit, stop
-      // But if it's the first campaign, include it anyway (minimum 1 campaign per run)
-      if (selectedClips.length > 0 && selectedClips.length + campaign.clips.length > limit) {
-        break
+      const campaignSize = campaign.clips.length
+      
+      // Case 1: Large campaign (> limit) - process it ALONE in this run
+      if (campaignSize > limit) {
+        if (selectedClips.length === 0) {
+          // This is the first campaign, include it even though it exceeds limit
+          selectedClips.push(...campaign.clips)
+          console.log(`🎯 Large campaign "${campaign.campaignName}" (${campaignSize} clips) - processing alone this run`)
+          console.log(`⚠️  This may take longer than normal (${Math.ceil(campaignSize / 10)} batches)`)
+          break // Process only this campaign
+        } else {
+          // We already have some clips, skip this large campaign for next run
+          console.log(`⏭️  Skipping large campaign "${campaign.campaignName}" (${campaignSize} clips) - will process in next run`)
+          break
+        }
       }
       
-      selectedClips.push(...campaign.clips)
-      console.log(`📦 Including campaign "${campaign.campaignName}" (${campaign.clips.length} clips, $${campaign.budgetRemaining.toFixed(2)} remaining)`)
+      // Case 2: Normal campaign - add if it fits
+      if (selectedClips.length + campaignSize <= limit) {
+        selectedClips.push(...campaign.clips)
+        console.log(`📦 Including campaign "${campaign.campaignName}" (${campaignSize} clips, $${campaign.budgetRemaining.toFixed(2)} remaining)`)
+      } else {
+        // Would exceed limit, stop here
+        console.log(`⏸️  Stopping at ${selectedClips.length} clips (adding "${campaign.campaignName}" would exceed ${limit} limit)`)
+        break
+      }
     }
 
     const neverTrackedCount = selectedClips.filter(c => !c.lastTracked).length
