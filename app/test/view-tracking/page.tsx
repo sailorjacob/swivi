@@ -15,16 +15,31 @@ import { authenticatedFetch } from "@/lib/supabase-browser"
 import toast from "react-hot-toast"
 import Link from "next/link"
 
-interface TestClip {
+interface TestSubmission {
   id: string
-  url: string
-  platform: string
-  title: string
-  totalViews: number
-  latestTracking: {
-    date: string
-    views: number
+  status: string
+  initialViews: number
+  finalEarnings: number
+  clip: {
+    id: string
+    url: string
+    platform: string
+    title: string
+    totalViews: number
+    earnings: number
+    latestTracking: {
+      date: string
+      views: number
+    } | null
   } | null
+  campaign: {
+    id: string
+    title: string
+    budget: number
+    spent: number
+    payoutRate: number
+    status: string
+  }
   createdAt: string
 }
 
@@ -89,7 +104,7 @@ export default function ViewTrackingTestPage() {
   const [url, setUrl] = useState("")
   const [platform, setPlatform] = useState("")
   const [loading, setLoading] = useState(false)
-  const [testClips, setTestClips] = useState<TestClip[]>([])
+  const [testSubmissions, setTestSubmissions] = useState<TestSubmission[]>([])
   const [selectedClipId, setSelectedClipId] = useState("")
   const [trackingResults, setTrackingResults] = useState<Record<string, TrackingResult>>({})
   const [clipStats, setClipStats] = useState<ClipStats | null>(null)
@@ -97,10 +112,11 @@ export default function ViewTrackingTestPage() {
   const [earningsResults, setEarningsResults] = useState<EarningsResult | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
-  // Load test clips when authenticated
+  // Load test submissions when authenticated or in development
   useEffect(() => {
-    if (status === "authenticated" && session?.user) {
-      loadTestClips()
+    const isDev = typeof window !== 'undefined' && process.env.NODE_ENV === 'development'
+    if ((status === "authenticated" && session?.user) || isDev) {
+      loadTestSubmissions()
     }
   }, [status, session])
 
@@ -157,7 +173,7 @@ export default function ViewTrackingTestPage() {
     )
   }
 
-  const loadTestClips = async () => {
+  const loadTestSubmissions = async () => {
     setRefreshing(true)
     try {
       const response = await authenticatedFetch("/api/test/view-tracking", {
@@ -168,13 +184,40 @@ export default function ViewTrackingTestPage() {
       if (response.ok) {
         const data = await response.json()
         if (data.success) {
-          setTestClips(data.clips)
+          setTestSubmissions(data.submissions || [])
         }
       }
     } catch (error) {
-      console.error("Error loading test clips:", error)
+      console.error("Error loading test submissions:", error)
     } finally {
       setRefreshing(false)
+    }
+  }
+
+  const approveSubmission = async (submissionId: string) => {
+    setLoading(true)
+    try {
+      const response = await authenticatedFetch("/api/test/view-tracking", {
+        method: "POST",
+        body: JSON.stringify({
+          submissionId,
+          action: "approve_submission"
+        })
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        toast.success(`Submission approved! Initial views: ${result.initialViews}`)
+        await loadTestSubmissions() // Refresh the list
+      } else {
+        toast.error(result.error || "Failed to approve submission")
+      }
+    } catch (error) {
+      console.error("Error approving submission:", error)
+      toast.error("Network error")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -198,12 +241,12 @@ export default function ViewTrackingTestPage() {
       const result = await response.json()
 
       if (response.ok && result.success) {
-        toast.success("Test clip created successfully!")
+        toast.success("Test submission created! Approve it to start earning.")
         setUrl("")
         setPlatform("")
-        await loadTestClips() // Refresh the list
+        await loadTestSubmissions() // Refresh the list
       } else {
-        toast.error(result.error || "Failed to create test clip")
+        toast.error(result.error || "Failed to create test submission")
       }
     } catch (error) {
       console.error("Error creating test clip:", error)
@@ -232,7 +275,7 @@ export default function ViewTrackingTestPage() {
           [`track_${clipId}`]: result
         }))
         toast.success("Views tracked successfully!")
-        await loadTestClips() // Refresh to get latest data
+        await loadTestSubmissions() // Refresh to get latest data
       } else {
         setTrackingResults(prev => ({
           ...prev,
@@ -326,7 +369,7 @@ export default function ViewTrackingTestPage() {
 
       if (response.ok && result.success) {
         toast.success("Test clip deleted successfully!")
-        await loadTestClips() // Refresh the list
+        await loadTestSubmissions() // Refresh the list
         if (selectedClipId === clipId) {
           setSelectedClipId("")
           setClipStats(null)
@@ -386,6 +429,16 @@ export default function ViewTrackingTestPage() {
       case 'INSTAGRAM': return '📸'
       case 'TWITTER': return '🐦'
       default: return '📱'
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800'
+      case 'APPROVED': return 'bg-green-100 text-green-800'
+      case 'REJECTED': return 'bg-red-100 text-red-800'
+      case 'PAID': return 'bg-blue-100 text-blue-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -458,22 +511,22 @@ export default function ViewTrackingTestPage() {
                 className="w-full"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                Create Test Clip
+                Create Test Submission
               </Button>
               <p className="text-sm text-gray-500 mt-2">
-                Submit URLs from any platform to create test clips for tracking. These clips are separate from campaign submissions.
+                This creates a <strong>test campaign & submission</strong> that mirrors production. Submissions start as <Badge className="bg-yellow-100 text-yellow-800 text-xs">PENDING</Badge> → Approve to start tracking earnings!
               </p>
             </CardContent>
           </Card>
 
-          {/* Test Clips List */}
+          {/* Test Submissions List */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Eye className="w-5 h-5" />
-                Your Test Clips ({testClips.length})
+                Your Test Submissions ({testSubmissions.length})
                 <Button
-                  onClick={loadTestClips}
+                  onClick={loadTestSubmissions}
                   disabled={refreshing}
                   variant="outline"
                   size="sm"
@@ -484,62 +537,97 @@ export default function ViewTrackingTestPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {testClips.length === 0 ? (
+              {testSubmissions.length === 0 ? (
                 <div className="text-center py-8">
                   <Eye className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">No test clips created yet</p>
-                  <p className="text-sm text-gray-400">Submit a URL above to create your first test clip</p>
+                  <p className="text-gray-500">No test submissions created yet</p>
+                  <p className="text-sm text-gray-400">Submit a URL above to create your first test submission</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {testClips.map((clip) => (
-                    <Card key={clip.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <Badge className={getPlatformColor(clip.platform)}>
-                            {getPlatformIcon(clip.platform)} {clip.platform}
-                          </Badge>
-                          <Button
-                            onClick={() => deleteTestClip(clip.id)}
-                            disabled={loading}
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                <div className="space-y-4">
+                  {testSubmissions.map((submission) => {
+                    if (!submission.clip) return null
+                    return (
+                      <Card key={submission.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">
+                            <div className="space-y-2">
+                              <div className="flex items-start gap-2 flex-wrap">
+                                <Badge className={getPlatformColor(submission.clip.platform)}>
+                                  {getPlatformIcon(submission.clip.platform)} {submission.clip.platform}
+                                </Badge>
+                                <Badge className={getStatusColor(submission.status)}>
+                                  {submission.status}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {submission.campaign.title}
+                                </Badge>
+                              </div>
 
-                        <h4 className="font-medium text-sm mb-2 line-clamp-2">{clip.title}</h4>
+                              <div className="text-xs text-gray-500 truncate" title={submission.clip.url}>
+                                {submission.clip.url}
+                              </div>
 
-                        <div className="text-xs text-gray-500 mb-2 truncate" title={clip.url}>
-                          {clip.url}
-                        </div>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                <div>
+                                  <span className="text-gray-500">Views:</span>
+                                  <div className="font-mono font-medium">{formatNumber(submission.clip.totalViews)}</div>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">Initial:</span>
+                                  <div className="font-mono">{formatNumber(submission.initialViews)}</div>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">Earnings:</span>
+                                  <div className="font-mono text-green-600">{formatCurrency(submission.clip.earnings)}</div>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">Budget:</span>
+                                  <div className="font-mono text-xs">{formatCurrency(submission.campaign.spent)}/{formatCurrency(submission.campaign.budget)}</div>
+                                </div>
+                              </div>
+                            </div>
 
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Views: {formatNumber(clip.totalViews)}</span>
-                          <Button
-                            onClick={() => {
-                              setSelectedClipId(clip.id)
-                              trackViews(clip.id)
-                            }}
-                            disabled={loading}
-                            size="sm"
-                            variant="outline"
-                          >
-                            <Play className="w-3 h-3 mr-1" />
-                            Track
-                          </Button>
-                        </div>
-
-                        {clip.latestTracking && (
-                          <div className="text-xs text-gray-400 mt-1">
-                            Last tracked: {formatDate(clip.latestTracking.date)}
+                            <div className="flex flex-col gap-2">
+                              {submission.status === 'PENDING' && (
+                                <Button
+                                  onClick={() => approveSubmission(submission.id)}
+                                  disabled={loading}
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Approve
+                                </Button>
+                              )}
+                              <Button
+                                onClick={() => {
+                                  setSelectedClipId(submission.clip!.id)
+                                  trackViews(submission.clip!.id)
+                                }}
+                                disabled={loading}
+                                size="sm"
+                                variant="outline"
+                              >
+                                <Play className="w-3 h-3 mr-1" />
+                                Track
+                              </Button>
+                              <Button
+                                onClick={() => deleteTestClip(submission.clip!.id)}
+                                disabled={loading}
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-3 h-3 mr-1" />
+                                Delete
+                              </Button>
+                            </div>
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
                 </div>
               )}
             </CardContent>
@@ -562,9 +650,9 @@ export default function ViewTrackingTestPage() {
                     <SelectValue placeholder="Choose a test clip to track" />
                   </SelectTrigger>
                   <SelectContent>
-                    {testClips.map((clip) => (
-                      <SelectItem key={clip.id} value={clip.id}>
-                        {getPlatformIcon(clip.platform)} {clip.platform} - {formatNumber(clip.totalViews)} views
+                    {testSubmissions.filter(s => s.clip).map((submission) => (
+                      <SelectItem key={submission.clip!.id} value={submission.clip!.id}>
+                        {getPlatformIcon(submission.clip!.platform)} {submission.clip!.platform} - {formatNumber(submission.clip!.totalViews)} views ({submission.status})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -643,9 +731,9 @@ export default function ViewTrackingTestPage() {
                       <SelectValue placeholder="Choose a test clip for stats" />
                     </SelectTrigger>
                     <SelectContent>
-                      {testClips.map((clip) => (
-                        <SelectItem key={clip.id} value={clip.id}>
-                          {getPlatformIcon(clip.platform)} {clip.platform} - {formatNumber(clip.totalViews)} views
+                      {testSubmissions.filter(s => s.clip).map((submission) => (
+                        <SelectItem key={submission.clip!.id} value={submission.clip!.id}>
+                          {getPlatformIcon(submission.clip!.platform)} {submission.clip!.platform} - {formatNumber(submission.clip!.totalViews)} views ({submission.status})
                         </SelectItem>
                       ))}
                     </SelectContent>

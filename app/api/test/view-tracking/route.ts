@@ -64,7 +64,33 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid platform. Supported: TIKTOK, YOUTUBE, INSTAGRAM, TWITTER" }, { status: 400 })
       }
 
-      // Create a test clip for tracking
+      // Find or create a test campaign for this platform
+      let testCampaign = await prisma.campaign.findFirst({
+        where: {
+          title: { contains: 'Test Campaign' },
+          status: 'ACTIVE',
+          targetPlatforms: { has: platform }
+        }
+      })
+
+      if (!testCampaign) {
+        testCampaign = await prisma.campaign.create({
+          data: {
+            title: `Test Campaign - ${platform}`,
+            description: `Test campaign for ${platform} view tracking and earnings`,
+            creator: 'Test System',
+            budget: 1000.00, // $1000 test budget
+            payoutRate: 25.00, // $25 per 1000 views
+            spent: 0,
+            status: 'ACTIVE',
+            startDate: new Date(),
+            targetPlatforms: [platform],
+            requirements: ['Test requirement']
+          }
+        })
+      }
+
+      // Create a test clip with submission
       const testClip = await prisma.clip.create({
         data: {
           userId: userData.id,
@@ -76,16 +102,84 @@ export async function POST(request: NextRequest) {
         }
       })
 
+      // Create submission for the clip (PENDING by default - mirrors production flow)
+      const submission = await prisma.clipSubmission.create({
+        data: {
+          userId: userData.id,
+          campaignId: testCampaign.id,
+          clipId: testClip.id,
+          clipUrl: url,
+          platform: platform,
+          status: 'PENDING', // Start as pending
+          initialViews: 0 // Will be set on approval
+        }
+      })
+
       return NextResponse.json({
         success: true,
         clipId: testClip.id,
-        message: "Test clip created successfully",
+        submissionId: submission.id,
+        campaignId: testCampaign.id,
+        message: "Test clip and submission created successfully. Use 'approve_submission' to approve it.",
         clip: {
           id: testClip.id,
           url: testClip.url,
           platform: testClip.platform,
           title: testClip.title
+        },
+        submission: {
+          id: submission.id,
+          status: submission.status,
+          campaignTitle: testCampaign.title
         }
+      })
+
+    } else if (action === "approve_submission") {
+      const { submissionId } = body
+
+      if (!submissionId) {
+        return NextResponse.json({ error: "submissionId is required" }, { status: 400 })
+      }
+
+      // Get submission with clip
+      const submission = await prisma.clipSubmission.findUnique({
+        where: { id: submissionId },
+        include: { clips: true }
+      })
+
+      if (!submission) {
+        return NextResponse.json({ error: "Submission not found" }, { status: 404 })
+      }
+
+      // Scrape current views to set as initialViews
+      const viewTrackingService = new ViewTrackingService()
+      let initialViews = 0
+
+      if (submission.clips) {
+        try {
+          const scraper = new (await import('@/lib/multi-platform-scraper')).MultiPlatformScraper(process.env.APIFY_TOKEN || '')
+          const scrapedData = await scraper.scrapeContent(submission.clips.url, submission.clips.platform)
+          initialViews = scrapedData.views || 0
+        } catch (error) {
+          console.error('Error scraping initial views:', error)
+        }
+      }
+
+      // Approve submission and set initialViews
+      const updatedSubmission = await prisma.clipSubmission.update({
+        where: { id: submissionId },
+        data: {
+          status: 'APPROVED',
+          initialViews: BigInt(initialViews)
+        }
+      })
+
+      return NextResponse.json({
+        success: true,
+        submissionId: submissionId,
+        status: updatedSubmission.status,
+        initialViews: initialViews,
+        message: `Submission approved with ${initialViews} initial views. Earnings will now accumulate as views grow.`
       })
 
     } else if (action === "track_views") {
@@ -219,21 +313,32 @@ export async function POST(request: NextRequest) {
       })
 
     } else if (action === "list_test_clips") {
-      // List all test clips for the user
-      const testClips = await prisma.clip.findMany({
+      // List all test clips and submissions for the user
+      const testSubmissions = await prisma.clipSubmission.findMany({
         where: {
           userId: userData.id,
-          title: {
-            contains: "Test Clip"
+          campaigns: {
+            title: { contains: 'Test Campaign' }
           }
         },
         include: {
-          view_tracking: {
-            orderBy: { date: 'desc' },
-            take: 1
+          clips: {
+            include: {
+              view_tracking: {
+                orderBy: { date: 'desc' },
+                take: 1
+              }
+            }
           },
-          users: {
-            select: { id: true, name: true, email: true }
+          campaigns: {
+            select: {
+              id: true,
+              title: true,
+              budget: true,
+              spent: true,
+              payoutRate: true,
+              status: true
+            }
           }
         },
         orderBy: { createdAt: 'desc' }
@@ -241,17 +346,32 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        clips: testClips.map(clip => ({
-          id: clip.id,
-          url: clip.url,
-          platform: clip.platform,
-          title: clip.title,
-          totalViews: Number(clip.views),
-          latestTracking: clip.view_tracking[0] ? {
-            date: clip.view_tracking[0].date,
-            views: Number(clip.view_tracking[0].views)
+        submissions: testSubmissions.map(submission => ({
+          id: submission.id,
+          status: submission.status,
+          initialViews: Number(submission.initialViews || 0),
+          finalEarnings: Number(submission.finalEarnings || 0),
+          clip: submission.clips ? {
+            id: submission.clips.id,
+            url: submission.clips.url,
+            platform: submission.clips.platform,
+            title: submission.clips.title,
+            totalViews: Number(submission.clips.views || 0),
+            earnings: Number(submission.clips.earnings || 0),
+            latestTracking: submission.clips.view_tracking[0] ? {
+              date: submission.clips.view_tracking[0].date,
+              views: Number(submission.clips.view_tracking[0].views)
+            } : null
           } : null,
-          createdAt: clip.createdAt
+          campaign: {
+            id: submission.campaigns.id,
+            title: submission.campaigns.title,
+            budget: Number(submission.campaigns.budget),
+            spent: Number(submission.campaigns.spent || 0),
+            payoutRate: Number(submission.campaigns.payoutRate),
+            status: submission.campaigns.status
+          },
+          createdAt: submission.createdAt
         }))
       })
 
@@ -376,7 +496,7 @@ export async function POST(request: NextRequest) {
 
     } else {
       return NextResponse.json({
-        error: "Invalid action. Supported actions: submit_url, track_views, get_tracking_history, list_test_clips, delete_test_clip, test_cron_job, calculate_earnings"
+        error: "Invalid action. Supported actions: submit_url, approve_submission, track_views, get_tracking_history, list_test_clips, delete_test_clip, test_cron_job, calculate_earnings"
       }, { status: 400 })
     }
 

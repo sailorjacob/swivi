@@ -69,24 +69,20 @@ export class ViewTrackingService {
         }
       }
 
-      // Only track active clips with approved submissions
-      const activeSubmission = clip.clipSubmissions.find(s => s.status === 'APPROVED')
+      // Get any submission in an active campaign (track views from submission, not just approval)
+      const activeSubmission = clip.clipSubmissions.find(s => 
+        s.campaigns.status === 'ACTIVE'
+      )
+      
       if (!activeSubmission) {
         return {
           success: false,
-          error: 'No approved submission found for clip'
+          error: 'No active campaign submission found for clip'
         }
       }
 
       const campaign = activeSubmission.campaigns
-      
-      // Skip if campaign is completed
-      if (campaign.status === 'COMPLETED') {
-        return {
-          success: false,
-          error: 'Campaign already completed'
-        }
-      }
+      const isApproved = activeSubmission.status === 'APPROVED'
 
       // Scrape current view count
       const scrapedData = await this.scraper.scrapeContent(clip.url, clip.platform)
@@ -139,25 +135,30 @@ export class ViewTrackingService {
         }
       })
 
-      // Calculate earnings from view growth
-      const initialViews = Number(activeSubmission.initialViews || 0)
-      const totalViewGrowth = currentViews - initialViews
-      const payoutRate = Number(campaign.payoutRate)
-      
-      // Calculate total earnings that should exist for this clip
-      const totalEarningsShouldBe = (totalViewGrowth / 1000) * payoutRate
-      const currentClipEarnings = Number(clip.earnings || 0)
-      const earningsDelta = Math.max(0, totalEarningsShouldBe - currentClipEarnings)
-
-      // Budget enforcement - only add earnings if budget allows
-      const campaignSpent = Number(campaign.spent || 0)
-      const campaignBudget = Number(campaign.budget)
-      const remainingBudget = Math.max(0, campaignBudget - campaignSpent)
-      const earningsToAdd = Math.min(earningsDelta, remainingBudget)
-
+      // Only calculate earnings for APPROVED submissions
+      let earningsToAdd = 0
       let campaignCompleted = false
 
+      if (isApproved) {
+        // Calculate earnings from view growth
+        const initialViews = Number(activeSubmission.initialViews || 0)
+        const totalViewGrowth = currentViews - initialViews
+        const payoutRate = Number(campaign.payoutRate)
+        
+        // Calculate total earnings that should exist for this clip
+        const totalEarningsShouldBe = (totalViewGrowth / 1000) * payoutRate
+        const currentClipEarnings = Number(clip.earnings || 0)
+        const earningsDelta = Math.max(0, totalEarningsShouldBe - currentClipEarnings)
+
+        // Budget enforcement - only add earnings if budget allows
+        const campaignSpent = Number(campaign.spent || 0)
+        const campaignBudget = Number(campaign.budget)
+        const remainingBudget = Math.max(0, campaignBudget - campaignSpent)
+        earningsToAdd = Math.min(earningsDelta, remainingBudget)
+      }
+
       if (earningsToAdd > 0) {
+        const campaignSpent = Number(campaign.spent || 0)
         // Update everything in a transaction
         await prisma.$transaction(async (tx) => {
           // Update clip earnings
@@ -184,6 +185,7 @@ export class ViewTrackingService {
           })
 
           // Update campaign spent
+          const campaignBudget = Number(campaign.budget)
           const newSpent = campaignSpent + earningsToAdd
           await tx.campaign.update({
             where: { id: campaign.id },
@@ -289,6 +291,7 @@ export class ViewTrackingService {
 
   /**
    * Gets all active clips that need view tracking
+   * Tracks ALL submissions in active campaigns (not just approved)
    */
   async getClipsNeedingTracking(limit: number = 100): Promise<Array<{
     id: string
@@ -296,13 +299,12 @@ export class ViewTrackingService {
     platform: SocialPlatform
     lastTracked?: Date
   }>> {
-    // Get clips with approved submissions in active campaigns
+    // Get clips with ANY submission in active campaigns (track views from submission time)
     const clips = await prisma.clip.findMany({
       where: {
         status: 'ACTIVE',
         clipSubmissions: {
           some: {
-            status: 'APPROVED',
             campaigns: {
               status: 'ACTIVE'
             }
