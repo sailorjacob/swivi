@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
-import { ViewTrackingService } from "@/lib/view-tracking"
+import { ViewTrackingService } from "@/lib/view-tracking-service"
 
 export async function GET(request: NextRequest) {
   try {

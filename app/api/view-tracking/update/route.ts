@@ -2,7 +2,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from "next/server"
-import { ViewTrackingService } from "@/lib/view-tracking"
+import { ViewTrackingService } from "@/lib/view-tracking-service"
 
 export async function POST(request: NextRequest) {
   try {
