@@ -88,7 +88,7 @@ export class ApifyTikTokScraper {
       // Step 2: Poll for completion
       let attempts = 0
       const maxAttempts = 30 // 30 seconds max wait
-      let lastStatusResponse: Response | null = null
+      let lastStatusData: any = null
 
       while (attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
@@ -99,13 +99,12 @@ export class ApifyTikTokScraper {
           },
         })
 
-        lastStatusResponse = statusResponse
-
         if (!statusResponse.ok) {
           throw new Error(`Failed to check run status: ${statusResponse.status}`)
         }
 
         const statusData = await statusResponse.json()
+        lastStatusData = statusData
 
         if (statusData.data.status === 'SUCCEEDED') {
           break
@@ -120,13 +119,12 @@ export class ApifyTikTokScraper {
         throw new Error('Apify run timed out')
       }
 
-      if (!lastStatusResponse) {
-        throw new Error('No status response received')
+      if (!lastStatusData) {
+        throw new Error('No status data received')
       }
 
       // Step 3: Get the dataset ID and fetch results
-      const statusData = await lastStatusResponse.json()
-      const datasetId = statusData.data.defaultDatasetId
+      const datasetId = lastStatusData.data.defaultDatasetId
 
       const datasetResponse = await fetch(`${this.baseUrl}/datasets/${datasetId}/items`, {
         headers: {

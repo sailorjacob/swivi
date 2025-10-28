@@ -257,7 +257,7 @@ export default function ViewTrackingTestPage() {
   }
 
   const trackViews = async (clipId: string) => {
-    setLoading(true)
+    setTrackingClipId(clipId)
     try {
       const response = await authenticatedFetch("/api/test/view-tracking", {
         method: "POST",
@@ -287,7 +287,7 @@ export default function ViewTrackingTestPage() {
       console.error("Error tracking views:", error)
       toast.error("Network error")
     } finally {
-      setLoading(false)
+      setTrackingClipId(null)
     }
   }
 
@@ -529,15 +529,18 @@ export default function ViewTrackingTestPage() {
                   <Button
                     onClick={async () => {
                       setLoading(true)
-                      for (const submission of testSubmissions) {
-                        if (submission.clip) {
-                          await trackViews(submission.clip.id)
-                          await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 sec between each
+                      try {
+                        for (const submission of testSubmissions) {
+                          if (submission.clip) {
+                            await trackViews(submission.clip.id)
+                            await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 sec between each
+                          }
                         }
+                      } finally {
+                        setLoading(false)
                       }
-                      setLoading(false)
                     }}
-                    disabled={loading || testSubmissions.length === 0}
+                    disabled={loading || trackingClipId !== null || testSubmissions.length === 0}
                     variant="default"
                     size="sm"
                   >
@@ -620,15 +623,16 @@ export default function ViewTrackingTestPage() {
                                 </Button>
                               )}
                               <Button
-                                onClick={() => {
-                                  setSelectedClipId(submission.clip!.id)
-                                  trackViews(submission.clip!.id)
-                                }}
-                                disabled={loading}
+                                onClick={() => trackViews(submission.clip!.id)}
+                                disabled={loading || trackingClipId !== null}
                                 size="sm"
                                 variant="outline"
                               >
-                                <Play className="w-3 h-3 mr-1" />
+                                {trackingClipId === submission.clip!.id ? (
+                                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                ) : (
+                                  <Play className="w-3 h-3 mr-1" />
+                                )}
                                 Track
                               </Button>
                               <Button
