@@ -514,7 +514,7 @@ export default function ViewTrackingTestPage() {
                 Create Test Submission
               </Button>
               <p className="text-sm text-gray-500 mt-2">
-                This creates a <strong>test campaign & submission</strong> that mirrors production. Submissions start as <Badge className="bg-yellow-100 text-yellow-800 text-xs">PENDING</Badge> → Approve to start tracking earnings!
+                This creates a <strong>test campaign & submission</strong> that mirrors production. Submissions start as <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">PENDING</span> → Approve to start tracking earnings!
               </p>
             </CardContent>
           </Card>
