@@ -24,8 +24,7 @@ interface ApifyDatasetItem {
 export class ApifyYouTubeScraper {
   private apiToken: string
   private baseUrl = 'https://api.apify.com/v2'
-  // Updated: Using a more reliable YouTube scraper that works for all videos
-  private actorName = 'bernardo/youtube-scraper' // Works for regular videos, not just shorts
+  private actorName = 'streamers/youtube-shorts-scraper'
 
   constructor(apiToken: string) {
     this.apiToken = apiToken
@@ -39,6 +38,7 @@ export class ApifyYouTubeScraper {
   async scrapeYouTubeVideo(videoUrl: string): Promise<YouTubeScrapeResult | null> {
     try {
       // Step 1: Start the Apify actor run
+      // TODO: Replace 'youtube-scraper-placeholder' with actual actor name
       const runResponse = await fetch(`${this.baseUrl}/acts/${this.actorName}/runs`, {
         method: 'POST',
         headers: {
@@ -46,8 +46,8 @@ export class ApifyYouTubeScraper {
           'Authorization': `Bearer ${this.apiToken}`,
         },
         body: JSON.stringify({
-          startUrls: [{ url: videoUrl }],
-          maxResults: 1
+          channels: [videoUrl],
+          maxResultsShorts: 1
         }),
       })
 
