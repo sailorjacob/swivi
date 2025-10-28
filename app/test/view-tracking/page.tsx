@@ -111,6 +111,7 @@ export default function ViewTrackingTestPage() {
   const [cronResults, setCronResults] = useState<CronTestResult | null>(null)
   const [earningsResults, setEarningsResults] = useState<EarningsResult | null>(null)
   const [refreshing, setRefreshing] = useState(false)
+  const [trackingClipId, setTrackingClipId] = useState<string | null>(null)
 
   // Load test submissions when authenticated or in development
   useEffect(() => {
