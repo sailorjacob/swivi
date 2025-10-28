@@ -112,6 +112,7 @@ export default function ViewTrackingTestPage() {
   const [earningsResults, setEarningsResults] = useState<EarningsResult | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [trackingClipId, setTrackingClipId] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   // Load test submissions when authenticated or in development
   useEffect(() => {
@@ -228,7 +229,7 @@ export default function ViewTrackingTestPage() {
       return
     }
 
-    setLoading(true)
+    setSubmitting(true)
     try {
       const response = await authenticatedFetch("/api/test/view-tracking", {
         method: "POST",
@@ -253,7 +254,7 @@ export default function ViewTrackingTestPage() {
       console.error("Error creating test clip:", error)
       toast.error("Network error")
     } finally {
-      setLoading(false)
+      setSubmitting(false)
     }
   }
 
@@ -508,14 +509,15 @@ export default function ViewTrackingTestPage() {
               </div>
               <Button
                 onClick={submitUrl}
-                disabled={loading || !url.trim() || !platform}
+                disabled={submitting || !url.trim() || !platform}
                 className="w-full"
+                type="button"
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
                 Create Test Submission
               </Button>
               <p className="text-sm text-gray-500 mt-2">
-                This creates a <strong>test campaign & submission</strong> that mirrors production. Submissions start as <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">PENDING</span> → Approve to start tracking earnings!
+                This creates a <strong>test campaign & submission</strong> that mirrors production. Submissions start as PENDING → Approve to start tracking earnings!
               </p>
             </CardContent>
           </Card>
