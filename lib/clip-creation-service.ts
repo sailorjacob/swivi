@@ -32,7 +32,7 @@ export class ClipCreationService {
 
   constructor() {
     // Initialize scraper with Apify token from environment
-    this.scraper = new MultiPlatformScraper(process.env.APIFY_TOKEN || '')
+    this.scraper = new MultiPlatformScraper(process.env.APIFY_API_KEY || '')
   }
 
   /**

@@ -29,7 +29,7 @@ export class ViewTrackingService {
   private scraper: MultiPlatformScraper
 
   constructor() {
-    this.scraper = new MultiPlatformScraper(process.env.APIFY_TOKEN || '')
+    this.scraper = new MultiPlatformScraper(process.env.APIFY_API_KEY || '')
   }
 
   /**

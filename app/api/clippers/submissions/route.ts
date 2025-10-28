@@ -226,7 +226,7 @@ export async function POST(request: NextRequest) {
     let initialViews = 0
     try {
       const { MultiPlatformScraper } = await import('@/lib/multi-platform-scraper')
-      const scraper = new MultiPlatformScraper(process.env.APIFY_TOKEN || '')
+      const scraper = new MultiPlatformScraper(process.env.APIFY_API_KEY || '')
       const scrapedData = await scraper.scrapeContent(validatedData.clipUrl, validatedData.platform)
       initialViews = scrapedData.views || 0
       console.log(`📊 Initial views at submission: ${initialViews} for ${validatedData.clipUrl}`)

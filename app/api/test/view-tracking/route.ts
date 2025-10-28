@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       // Scrape initial views at submission time (CRITICAL: baseline for all future earnings)
       let initialViews = 0
       try {
-        const scraper = new (await import('@/lib/multi-platform-scraper')).MultiPlatformScraper(process.env.APIFY_TOKEN || '')
+        const scraper = new (await import('@/lib/multi-platform-scraper')).MultiPlatformScraper(process.env.APIFY_API_KEY || '')
         const scrapedData = await scraper.scrapeContent(url, platform)
         initialViews = scrapedData.views || 0
         console.log(`📊 Initial views at submission: ${initialViews}`)
