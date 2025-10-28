@@ -260,15 +260,43 @@ export class ViewTrackingService {
   }
 
   /**
-   * Tracks views for multiple clips concurrently
+   * Tracks views for multiple clips in controlled batches
+   * Prevents overwhelming Apify API and respects rate limits
    */
-  async trackMultipleClips(clipIds: string[]): Promise<TrackingBatchResult> {
-    const results = await Promise.allSettled(
-      clipIds.map(clipId => this.trackClipViews(clipId))
-    )
+  async trackMultipleClips(
+    clipIds: string[], 
+    batchSize: number = 10
+  ): Promise<TrackingBatchResult> {
+    const results: ViewTrackingResult[] = []
+    
+    // Process in smaller batches to avoid overwhelming Apify
+    for (let i = 0; i < clipIds.length; i += batchSize) {
+      const batch = clipIds.slice(i, i + batchSize)
+      console.log(`📦 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(clipIds.length / batchSize)} (${batch.length} clips)`)
+      
+      const batchResults = await Promise.allSettled(
+        batch.map(clipId => this.trackClipViews(clipId))
+      )
+      
+      // Collect results
+      batchResults.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          results.push(result.value)
+        }
+      })
+      
+      // Small delay between batches to respect Apify rate limits
+      if (i + batchSize < clipIds.length) {
+        console.log(`⏸️  Pausing 2s before next batch...`)
+        await new Promise(resolve => setTimeout(resolve, 2000))
+      }
+    }
+    
+    // Convert to Promise.allSettled format for compatibility
+    const settledResults = results.map(r => ({ status: 'fulfilled' as const, value: r }))
 
     const batchResult: TrackingBatchResult = {
-      processed: results.length,
+      processed: settledResults.length,
       successful: 0,
       failed: 0,
       totalEarningsAdded: 0,
@@ -276,7 +304,7 @@ export class ViewTrackingService {
       errors: []
     }
 
-    results.forEach((result, index) => {
+    settledResults.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         if (result.value.success) {
           batchResult.successful++
@@ -284,14 +312,14 @@ export class ViewTrackingService {
         } else {
           batchResult.failed++
           batchResult.errors.push({
-            clipId: clipIds[index],
+            clipId: result.value.clipId || 'unknown',
             error: result.value.error || 'Unknown error'
           })
         }
       } else {
         batchResult.failed++
         batchResult.errors.push({
-          clipId: clipIds[index],
+          clipId: 'unknown',
           error: result.reason?.message || 'Promise rejection'
         })
       }
@@ -301,8 +329,8 @@ export class ViewTrackingService {
   }
 
   /**
-   * Gets all active clips that need view tracking
-   * Tracks ALL submissions in active campaigns (not just approved)
+   * Gets all active clips that need view tracking with smart prioritization
+   * Prioritizes: never tracked > not tracked in 8h > new campaigns > older clips
    */
   async getClipsNeedingTracking(limit: number = 100): Promise<Array<{
     id: string
@@ -310,7 +338,7 @@ export class ViewTrackingService {
     platform: SocialPlatform
     lastTracked?: Date
   }>> {
-    // Get clips with ANY submission in active campaigns (track views from submission time)
+    // Get more clips than we need for prioritization
     const clips = await prisma.clip.findMany({
       where: {
         status: 'ACTIVE',
@@ -330,24 +358,80 @@ export class ViewTrackingService {
           orderBy: { date: 'desc' },
           take: 1,
           select: { date: true }
+        },
+        clipSubmissions: {
+          where: {
+            campaigns: {
+              status: 'ACTIVE'
+            }
+          },
+          select: {
+            campaigns: {
+              select: {
+                createdAt: true
+              }
+            }
+          }
         }
       },
-      take: limit
+      take: limit * 2 // Get extra for prioritization
     })
 
-    return clips.map(clip => ({
-      id: clip.id,
-      url: clip.url,
-      platform: clip.platform,
-      lastTracked: clip.view_tracking[0]?.date
+    // Calculate priority scores
+    const scored = clips.map(clip => {
+      const lastTracked = clip.view_tracking[0]?.date
+      const hoursSinceTracking = lastTracked 
+        ? (Date.now() - lastTracked.getTime()) / (1000 * 60 * 60)
+        : 999 // Never tracked = highest priority
+      
+      // Base priority on time since last tracking
+      let priority = hoursSinceTracking
+      
+      // Boost priority for new campaigns (< 7 days old)
+      const newestCampaign = clip.clipSubmissions
+        .map(s => s.campaigns.createdAt)
+        .sort((a, b) => b.getTime() - a.getTime())[0]
+      
+      if (newestCampaign) {
+        const campaignAgeDays = (Date.now() - newestCampaign.getTime()) / (1000 * 60 * 60 * 24)
+        if (campaignAgeDays < 7) {
+          priority *= 1.5 // 50% boost for new campaigns
+        }
+      }
+      
+      return {
+        id: clip.id,
+        url: clip.url,
+        platform: clip.platform,
+        lastTracked,
+        priority
+      }
+    })
+
+    // Sort by priority (highest first) and return top N
+    const prioritized = scored
+      .sort((a, b) => b.priority - a.priority)
+      .slice(0, limit)
+    
+    console.log(`📊 Prioritized ${prioritized.length} clips (${scored.filter(c => c.priority > 100).length} never tracked, ${scored.filter(c => c.priority > 8 && c.priority < 100).length} stale)`)
+    
+    return prioritized.map(({ id, url, platform, lastTracked }) => ({
+      id,
+      url,
+      platform,
+      lastTracked
     }))
   }
 
   /**
    * Processes view tracking for all clips that need it (main cron job entry point)
+   * Uses batched processing to stay within rate limits and timeouts
    */
-  async processViewTracking(limit: number = 50): Promise<TrackingBatchResult> {
-    console.log(`📊 Starting view tracking process for up to ${limit} clips...`)
+  async processViewTracking(
+    limit: number = 100, 
+    batchSize: number = 10
+  ): Promise<TrackingBatchResult> {
+    console.log(`📊 Starting view tracking process for up to ${limit} clips (batches of ${batchSize})...`)
     
     const clipsNeedingTracking = await this.getClipsNeedingTracking(limit)
     const clipIds = clipsNeedingTracking.map(clip => clip.id)
@@ -365,9 +449,14 @@ export class ViewTrackingService {
       }
     }
 
-    const result = await this.trackMultipleClips(clipIds)
+    const result = await this.trackMultipleClips(clipIds, batchSize)
     
-    console.log(`✅ Tracking complete: ${result.successful} successful, ${result.failed} failed, $${result.totalEarningsAdded.toFixed(2)} earnings added`)
+    const successRate = ((result.successful / result.processed) * 100).toFixed(1)
+    console.log(`✅ Tracking complete: ${result.successful}/${result.processed} successful (${successRate}%), $${result.totalEarningsAdded.toFixed(2)} earnings added`)
+    
+    if (result.failed > 0) {
+      console.warn(`⚠️  ${result.failed} clips failed to track. Errors:`, result.errors.slice(0, 5))
+    }
     
     return result
   }
