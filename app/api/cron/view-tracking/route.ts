@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     // 3. Update clip, user, and campaign earnings
     // 4. Check budget limits and complete campaigns if needed
     // 5. Send notifications when campaigns complete
-    const result = await viewTrackingService.processViewTracking(50)
+    const result = await viewTrackingService.processViewTracking(100)
 
     const duration = Date.now() - startTime
 
