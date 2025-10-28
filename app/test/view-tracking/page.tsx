@@ -525,15 +525,34 @@ export default function ViewTrackingTestPage() {
               <CardTitle className="flex items-center gap-2">
                 <Eye className="w-5 h-5" />
                 Your Test Submissions ({testSubmissions.length})
-                <Button
-                  onClick={loadTestSubmissions}
-                  disabled={refreshing}
-                  variant="outline"
-                  size="sm"
-                  className="ml-auto"
-                >
-                  {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Refresh"}
-                </Button>
+                <div className="ml-auto flex gap-2">
+                  <Button
+                    onClick={async () => {
+                      setLoading(true)
+                      for (const submission of testSubmissions) {
+                        if (submission.clip) {
+                          await trackViews(submission.clip.id)
+                          await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 sec between each
+                        }
+                      }
+                      setLoading(false)
+                    }}
+                    disabled={loading || testSubmissions.length === 0}
+                    variant="default"
+                    size="sm"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Play className="w-4 h-4 mr-1" />}
+                    Track All
+                  </Button>
+                  <Button
+                    onClick={loadTestSubmissions}
+                    disabled={refreshing}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Refresh"}
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
