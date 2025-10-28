@@ -37,7 +37,7 @@ interface ApifyDatasetItem {
 export class ApifyInstagramScraper {
   private apiToken: string
   private baseUrl = 'https://api.apify.com/v2'
-  private actorName = 'apify/instagram-scraper'
+  private actorName = 'apify~instagram-scraper' // Fixed: Use tilde instead of slash
 
   constructor(apiToken: string) {
     this.apiToken = apiToken

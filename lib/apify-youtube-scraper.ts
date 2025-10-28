@@ -24,7 +24,7 @@ interface ApifyDatasetItem {
 export class ApifyYouTubeScraper {
   private apiToken: string
   private baseUrl = 'https://api.apify.com/v2'
-  private actorName = 'streamers/youtube-shorts-scraper'
+  private actorName = 'streamers~youtube-shorts-scraper' // Fixed: Use tilde instead of slash
 
   constructor(apiToken: string) {
     this.apiToken = apiToken
