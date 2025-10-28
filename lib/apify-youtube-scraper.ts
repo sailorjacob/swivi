@@ -52,8 +52,13 @@ export class ApifyYouTubeScraper {
       })
 
       if (!runResponse.ok) {
-        const error = await runResponse.text()
-        throw new Error(`Apify API error: ${runResponse.status} ${error}`)
+        let errorText = ''
+        try {
+          errorText = await runResponse.text()
+        } catch (e) {
+          errorText = 'Unable to read error response'
+        }
+        throw new Error(`Apify API error: ${runResponse.status} ${errorText}`)
       }
 
       const runData: ApifyResponse = await runResponse.json()
