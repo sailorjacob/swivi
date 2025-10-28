@@ -15,8 +15,9 @@ export class SocialUrlParser {
   private static readonly URL_PATTERNS = {
     TIKTOK: [
       /^https?:\/\/(www\.)?tiktok\.com\/@([^\/\?#]+)\/video\/([^\/\?#]+)/i,
+      /^https?:\/\/(www\.)?tiktok\.com\/t\/([^\/\?#]+)/i, // Short share links
+      /^https?:\/\/vm\.tiktok\.com\/([^\/\?#]+)/i, // Mobile short links
       /^https?:\/\/(www\.)?tiktok\.com\/@([^\/\?#]+)\/?$/i,
-      /^https?:\/\/vm\.tiktok\.com\/([^\/\?#]+)/i,
       /^https?:\/\/(www\.)?tiktok\.com\/([^\/\?#]+)\/?$/i
     ],
     INSTAGRAM: [
@@ -103,34 +104,54 @@ export class SocialUrlParser {
 
   private static parseTikTokMatch(match: RegExpMatchArray, url: string): ParsedSocialUrl {
     // TikTok patterns:
-    // 0: https://tiktok.com/@username/video/123
-    // 1: https://tiktok.com/@username
-    // 2: https://vm.tiktok.com/123
-    // 3: https://tiktok.com/username
+    // Pattern 0: https://tiktok.com/@username/video/123 -> match[2]=username, match[3]=videoId
+    // Pattern 1: https://tiktok.com/t/ABC123 -> match[2]=shortCode
+    // Pattern 2: https://vm.tiktok.com/ABC123 -> match[1]=shortCode
+    // Pattern 3: https://tiktok.com/@username -> match[2]=username
+    // Pattern 4: https://tiktok.com/username -> match[2]=username
 
-    if (match[2]) { // @username/video/123 pattern
+    // Check for @username/video/videoId pattern
+    if (match[2] && match[3] && url.includes('/video/')) {
       return {
         platform: 'TIKTOK',
         username: match[2].replace('@', ''),
         postId: match[3],
         isValid: true
       }
-    } else if (match[1]) { // @username pattern
+    }
+    
+    // Check for /t/ short links (e.g., https://www.tiktok.com/t/ZTMCocrA5/)
+    if (url.includes('/t/') && match[2]) {
       return {
         platform: 'TIKTOK',
-        username: match[1].replace('@', ''),
+        postId: match[2], // Short code is the post identifier
         isValid: true
       }
-    } else if (match[0]?.includes('vm.tiktok.com')) { // Shortened URL
+    }
+    
+    // Check for vm.tiktok.com short links
+    if (url.includes('vm.tiktok.com') && match[1]) {
       return {
         platform: 'TIKTOK',
         postId: match[1],
         isValid: true
       }
-    } else if (match[1]) { // Username without @ pattern
+    }
+    
+    // Check for @username profile links
+    if (match[2] && !url.includes('/video/')) {
       return {
         platform: 'TIKTOK',
-        username: match[1],
+        username: match[2].replace('@', ''),
+        isValid: true
+      }
+    }
+    
+    // Fallback for other username patterns
+    if (match[2]) {
+      return {
+        platform: 'TIKTOK',
+        username: match[2],
         isValid: true
       }
     }
