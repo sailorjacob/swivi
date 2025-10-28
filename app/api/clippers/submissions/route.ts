@@ -78,12 +78,17 @@ export async function POST(request: NextRequest) {
     // Get the internal user ID from the database using supabaseAuthId
     const dbUser = await prisma.user.findUnique({
       where: { supabaseAuthId: user.id },
-      select: { id: true }
+      select: { 
+        id: true,
+        role: true // Need role to check for admin bypass
+      }
     })
 
     if (!dbUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
+
+    const isAdmin = dbUser.role === 'ADMIN'
 
     // Rate limiting check
     const rateLimitingService = RateLimitingService.getInstance()
@@ -143,62 +148,67 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Verify platform access - user must have verified account for this platform
-    const platformAccess = await SubmissionVerificationService.validatePlatformAccess(
-      dbUser.id,
-      parsedUrl.platform
-    )
+    // Admin bypass for testing - admins can submit any URL without verification
+    if (!isAdmin) {
+      // Verify platform access - user must have verified account for this platform
+      const platformAccess = await SubmissionVerificationService.validatePlatformAccess(
+        dbUser.id,
+        parsedUrl.platform
+      )
 
-    if (!platformAccess.canSubmit) {
-      return NextResponse.json({
-        error: "Platform verification required",
-        details: platformAccess.reason,
-        requiresVerification: true
-      }, { status: 403 })
-    }
-
-    // Verify that the submitted content belongs to one of the user's verified accounts
-    const verificationResult = await SubmissionVerificationService.verifySubmissionOwnership({
-      userId: dbUser.id,
-      clipUrl: validatedData.clipUrl,
-      platform: parsedUrl.platform
-    })
-
-    if (!verificationResult.isVerified) {
-      // Create submission with REJECTED status if verification fails completely
-      // or PENDING if it requires manual review
-      const submissionStatus = verificationResult.requiresReview ? "PENDING" : "REJECTED"
-
-      const submission = await prisma.clipSubmission.create({
-        data: {
-          userId: dbUser.id,
-          campaignId: validatedData.campaignId,
-          clipUrl: validatedData.clipUrl,
-          platform: validatedData.platform,
-          mediaFileUrl: validatedData.mediaFileUrl,
-          status: submissionStatus,
-          rejectionReason: verificationResult.reason
-        },
-        include: {
-          campaigns: true
-        }
-      })
-
-      // Send notification for flagged submissions
-      if (verificationResult.requiresReview) {
-        await this.notifyAdminsOfFlaggedSubmission(submission.id, verificationResult.reviewReason!)
+      if (!platformAccess.canSubmit) {
+        return NextResponse.json({
+          error: "Platform verification required",
+          details: platformAccess.reason,
+          requiresVerification: true
+        }, { status: 403 })
       }
 
-      return NextResponse.json({
-        ...submission,
-        verificationFailed: true,
-        reason: verificationResult.reason,
-        requiresReview: verificationResult.requiresReview,
-        reviewReason: verificationResult.reviewReason
-      }, { status: verificationResult.requiresReview ? 202 : 403 })
+      // Verify that the submitted content belongs to one of the user's verified accounts
+      const verificationResult = await SubmissionVerificationService.verifySubmissionOwnership({
+        userId: dbUser.id,
+        clipUrl: validatedData.clipUrl,
+        platform: parsedUrl.platform
+      })
+
+      if (!verificationResult.isVerified) {
+        // Create submission with REJECTED status if verification fails completely
+        // or PENDING if it requires manual review
+        const submissionStatus = verificationResult.requiresReview ? "PENDING" : "REJECTED"
+
+        const submission = await prisma.clipSubmission.create({
+          data: {
+            userId: dbUser.id,
+            campaignId: validatedData.campaignId,
+            clipUrl: validatedData.clipUrl,
+            platform: validatedData.platform,
+            mediaFileUrl: validatedData.mediaFileUrl,
+            status: submissionStatus,
+            rejectionReason: verificationResult.reason
+          },
+          include: {
+            campaigns: true
+          }
+        })
+
+        // Send notification for flagged submissions
+        if (verificationResult.requiresReview) {
+          await this.notifyAdminsOfFlaggedSubmission(submission.id, verificationResult.reviewReason!)
+        }
+
+        return NextResponse.json({
+          ...submission,
+          verificationFailed: true,
+          reason: verificationResult.reason,
+          requiresReview: verificationResult.requiresReview,
+          reviewReason: verificationResult.reviewReason
+        }, { status: verificationResult.requiresReview ? 202 : 403 })
+      }
+    } else {
+      console.log('🔓 Admin bypass: Skipping social media verification for admin user')
     }
 
-    // Fraud detection check
+    // Fraud detection check (still apply to admins for testing realism)
     const fraudResult = await rateLimitingService.detectFraud(
       dbUser.id,
       'submission',
