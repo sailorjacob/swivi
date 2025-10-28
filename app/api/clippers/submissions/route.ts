@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
 
         // Send notification for flagged submissions
         if (verificationResult.requiresReview) {
-          await this.notifyAdminsOfFlaggedSubmission(submission.id, verificationResult.reviewReason!)
+          await notifyAdminsOfFlaggedSubmission(submission.id, verificationResult.reviewReason!)
         }
 
         return NextResponse.json({
