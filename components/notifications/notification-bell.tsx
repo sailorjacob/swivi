@@ -186,30 +186,30 @@ export function NotificationBell() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 hover:bg-muted/50 transition-colors cursor-pointer ${
-                    !notification.read ? 'bg-muted/30' : ''
+                  className={`p-3 hover:bg-muted/50 transition-colors cursor-pointer ${
+                    !notification.read ? 'bg-muted/20' : ''
                   }`}
                   onClick={() => !notification.read && markAsRead(notification.id)}
                 >
-                  <div className="flex gap-3">
-                    <div className="text-lg flex-shrink-0">
+                  <div className="flex gap-2 items-start">
+                    <div className="text-base flex-shrink-0 mt-0.5">
                       {getNotificationIcon(notification.type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className={`text-sm font-medium ${
+                      <div className="flex items-start justify-between gap-2 mb-0.5">
+                        <h4 className={`text-xs font-medium leading-tight ${
                           !notification.read ? 'text-foreground' : 'text-muted-foreground'
                         }`}>
                           {notification.title}
                         </h4>
                         {!notification.read && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1" />
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0 mt-1" />
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                      <p className="text-xs text-muted-foreground leading-tight line-clamp-2">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-2">
+                      <p className="text-[10px] text-muted-foreground/70 mt-1">
                         {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                       </p>
                     </div>

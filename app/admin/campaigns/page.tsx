@@ -902,14 +902,14 @@ export default function AdminCampaignsPage() {
                           </div>
 
                           {/* Budget Progress Bar */}
-                          <div className="mb-3">
-                            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                              <span>Budget Progress</span>
-                              <span>{progressPercentage.toFixed(1)}%</span>
+                          <div className="mb-4">
+                            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                              <span className="font-medium">Budget Progress</span>
+                              <span className="font-medium">${campaign.spent.toLocaleString()} / ${campaign.budget.toLocaleString()} ({progressPercentage.toFixed(1)}%)</span>
                             </div>
-                            <div className="w-full bg-muted rounded-full h-2">
+                            <div className="w-full bg-muted rounded-full h-3">
                               <div
-                                className={`h-2 rounded-full transition-all duration-500 ${
+                                className={`h-3 rounded-full transition-all duration-500 ${
                                   progressPercentage >= 100 
                                     ? 'bg-red-500' 
                                     : progressPercentage >= 80 

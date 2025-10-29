@@ -331,23 +331,23 @@ export function LiveCampaigns() {
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                     {campaign.description}
                   </p>
+                </CardHeader>
 
-                  {/* Progress Bar */}
+                <CardContent className="pt-0">
+                  {/* Budget Progress Bar */}
                   <div className="mb-4">
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>Budget Progress</span>
-                      <span>${campaign.spent.toLocaleString()} / ${campaign.budget.toLocaleString()}</span>
+                    <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+                      <span className="font-medium">Budget Progress</span>
+                      <span className="font-medium">${campaign.spent.toLocaleString()} / ${campaign.budget.toLocaleString()}</span>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-2">
+                    <div className="w-full bg-muted rounded-full h-3">
                       <div
-                        className="bg-foreground h-2 rounded-full transition-all duration-300"
+                        className="bg-foreground h-3 rounded-full transition-all duration-300"
                         style={{ width: `${getProgressPercentage(getBudgetSpent(campaign), campaign.budget)}%` }}
                       />
                     </div>
                   </div>
-                </CardHeader>
 
-                <CardContent className="pt-0">
                   {/* Key Metrics */}
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="space-y-2">

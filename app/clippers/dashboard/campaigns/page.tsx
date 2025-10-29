@@ -268,6 +268,20 @@ export default function CampaignsPage() {
                     {campaign.description}
                   </p>
 
+                  {/* Budget Progress Bar */}
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+                      <span className="font-medium">Budget Progress</span>
+                      <span className="font-medium">{formatCurrency(campaign.spent)} / {formatCurrency(campaign.budget)}</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-3">
+                      <div
+                        className="bg-foreground h-3 rounded-full transition-all duration-300"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+
                   {/* Key Metrics */}
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center justify-between">
@@ -289,20 +303,6 @@ export default function CampaignsPage() {
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">{campaign._count.clipSubmissions} submissions</span>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div>
-                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                        <span>Budget Progress</span>
-                        <span>{formatCurrency(campaign.spent)} / {formatCurrency(campaign.budget)}</span>
-                      </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div
-                          className="bg-foreground h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${progress}%` }}
-                        />
                       </div>
                     </div>
                   </div>
