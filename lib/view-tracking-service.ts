@@ -44,8 +44,8 @@ export class ViewTrackingService {
           clipSubmissions: {
             include: {
               campaigns: {
-                select: {
-                  id: true,
+        select: {
+          id: true,
                   payoutRate: true,
                   budget: true,
                   spent: true,
@@ -101,14 +101,14 @@ export class ViewTrackingService {
       const viewsGained = Math.max(0, currentViews - previousViews)
 
       // Update clip's total views
-      await prisma.clip.update({
-        where: { id: clipId },
-        data: {
-          views: BigInt(currentViews),
-          likes: BigInt(scrapedData.likes || 0),
-          shares: BigInt(scrapedData.shares || 0)
-        }
-      })
+        await prisma.clip.update({
+          where: { id: clipId },
+          data: {
+            views: BigInt(currentViews),
+            likes: BigInt(scrapedData.likes || 0),
+            shares: BigInt(scrapedData.shares || 0)
+          }
+        })
 
       // Create new view tracking record for today
       const today = new Date()
@@ -127,13 +127,13 @@ export class ViewTrackingService {
           views: BigInt(currentViews)
         },
         create: {
-          userId: clip.userId,
-          clipId,
-          views: BigInt(currentViews),
-          date: today,
-          platform: clip.platform
-        }
-      })
+            userId: clip.userId,
+            clipId,
+            views: BigInt(currentViews),
+            date: today,
+            platform: clip.platform
+          }
+        })
 
       // Only calculate earnings for APPROVED submissions
       let earningsToAdd = 0
@@ -363,15 +363,15 @@ export class ViewTrackingService {
           select: {
             clipId: true,
             clip: {
-              select: {
-                id: true,
-                url: true,
-                platform: true,
+      select: {
+        id: true,
+        url: true,
+        platform: true,
                 status: true,
-                view_tracking: {
-                  orderBy: { date: 'desc' },
-                  take: 1,
-                  select: { date: true }
+        view_tracking: {
+          orderBy: { date: 'desc' },
+          take: 1,
+          select: { date: true }
                 }
               }
             }
@@ -504,7 +504,7 @@ export class ViewTrackingService {
     console.log(`⚖️  Fair tracking mode: All clips from a campaign tracked together`)
     
     const clipsNeedingTracking = await this.getClipsNeedingTracking(limit)
-    
+
     if (clipsNeedingTracking.length === 0) {
       console.log(`✨ No clips need tracking at this time`)
       return {
@@ -602,7 +602,7 @@ export class ViewTrackingService {
 
       for (const tracking of clip.view_tracking) {
         const trackingDate = tracking.date.getTime()
-        
+
         if (trackingDate === today.getTime()) {
           viewsToday = Number(tracking.views)
         } else if (trackingDate === yesterday.getTime()) {

@@ -237,9 +237,21 @@ export async function POST(request: NextRequest) {
     try {
       const { MultiPlatformScraper } = await import('@/lib/multi-platform-scraper')
       const scraper = new MultiPlatformScraper(process.env.APIFY_API_KEY || '')
+      console.log(`🔍 Starting initial view scrape for: ${validatedData.clipUrl}`)
       const scrapedData = await scraper.scrapeContent(validatedData.clipUrl, validatedData.platform)
-      initialViews = scrapedData.views || 0
-      console.log(`📊 Initial views at submission: ${initialViews} for ${validatedData.clipUrl}`)
+      console.log(`🔍 Scraped data:`, scrapedData)
+      
+      // Ensure we have a valid number
+      const rawViews = scrapedData.views || scrapedData.viewCount || 0
+      initialViews = typeof rawViews === 'string' ? parseInt(rawViews, 10) : rawViews
+      
+      // Fallback to 0 if parsing failed
+      if (isNaN(initialViews) || initialViews < 0) {
+        console.warn(`⚠️ Invalid view count detected (${rawViews}), using 0`)
+        initialViews = 0
+      }
+      
+      console.log(`📊 Initial views at submission: ${initialViews} (type: ${typeof initialViews}) for ${validatedData.clipUrl}`)
     } catch (error) {
       console.error('⚠️ Error scraping initial views at submission:', error)
       // Continue with submission even if scraping fails (views can be tracked later)
@@ -249,6 +261,12 @@ export async function POST(request: NextRequest) {
     // Create the submission for verified content (or admin bypass)
     let submission
     try {
+      console.log(`🔍 About to create submission with initialViews: ${initialViews} (type: ${typeof initialViews})`)
+      
+      // Ensure initialViews is a valid integer before converting to BigInt
+      const viewsToStore = Math.max(0, Math.floor(Number(initialViews)))
+      console.log(`🔍 Converting to BigInt: ${viewsToStore}`)
+      
       submission = await prisma.clipSubmission.create({
         data: {
           userId: dbUser.id,
@@ -257,14 +275,23 @@ export async function POST(request: NextRequest) {
           platform: validatedData.platform,
           mediaFileUrl: validatedData.mediaFileUrl,
           status: "PENDING", // Still PENDING for admin approval, but verified
-          initialViews: BigInt(initialViews) // SET AT SUBMISSION TIME - earnings baseline!
+          initialViews: BigInt(viewsToStore) // SET AT SUBMISSION TIME - earnings baseline!
         },
         include: {
           campaigns: true
         }
       })
-    } catch (dbError) {
+      
+      console.log(`✅ Submission created successfully with ID: ${submission.id}`)
+    } catch (dbError: any) {
       console.error('❌ Database error creating submission:', dbError)
+      console.error('❌ Error details:', {
+        message: dbError.message,
+        code: dbError.code,
+        meta: dbError.meta,
+        initialViewsValue: initialViews,
+        initialViewsType: typeof initialViews
+      })
       
       // Check if it's a missing column error
       if (dbError.message?.includes('initialViews') || dbError.message?.includes('column')) {
@@ -275,10 +302,20 @@ export async function POST(request: NextRequest) {
         }, { status: 500 })
       }
       
+      // Check for BigInt conversion errors
+      if (dbError.message?.includes('BigInt')) {
+        return NextResponse.json({
+          error: "Invalid view count",
+          details: `Could not process view count: ${initialViews}`,
+          debugInfo: `Type: ${typeof initialViews}, Value: ${initialViews}`
+        }, { status: 500 })
+      }
+      
       // Generic database error
       return NextResponse.json({
         error: "Failed to create submission",
-        details: dbError.message || "Database error"
+        details: dbError.message || "Database error",
+        debugInfo: process.env.NODE_ENV === 'development' ? dbError : undefined
       }, { status: 500 })
     }
 
