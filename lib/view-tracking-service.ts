@@ -224,7 +224,7 @@ export class ViewTrackingService {
               await tx.clipSubmission.update({
                 where: { id: submission.id },
                 data: {
-                  finalEarnings: submission.clip?.earnings || 0
+                  finalEarnings: submission.clips?.earnings || 0
                 }
               })
             }
@@ -362,16 +362,16 @@ export class ViewTrackingService {
           },
           select: {
             clipId: true,
-            clip: {
-      select: {
-        id: true,
-        url: true,
-        platform: true,
+            clips: {
+              select: {
+                id: true,
+                url: true,
+                platform: true,
                 status: true,
-        view_tracking: {
-          orderBy: { date: 'desc' },
-          take: 1,
-          select: { date: true }
+                view_tracking: {
+                  orderBy: { date: 'desc' },
+                  take: 1,
+                  select: { date: true }
                 }
               }
             }
@@ -399,12 +399,12 @@ export class ViewTrackingService {
     const campaignsWithClips: CampaignWithPriority[] = activeCampaigns
       .map(campaign => {
         const clips = campaign.clipSubmissions
-          .filter(sub => sub.clip?.status === 'ACTIVE')
+          .filter(sub => sub.clips?.status === 'ACTIVE')
           .map(sub => ({
-            id: sub.clip!.id,
-            url: sub.clip!.url,
-            platform: sub.clip!.platform,
-            lastTracked: sub.clip!.view_tracking[0]?.date,
+            id: sub.clips!.id,
+            url: sub.clips!.url,
+            platform: sub.clips!.platform,
+            lastTracked: sub.clips!.view_tracking[0]?.date,
             campaignId: campaign.id
           }))
 
