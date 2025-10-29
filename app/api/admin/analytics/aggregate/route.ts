@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
         totalCampaigns,
         totalSubmissions,
         activeCampaigns,
-        totalViews: totalViews._sum.totalViews || 0,
+        totalViews: Number(totalViews._sum.totalViews || 0),
         totalEarnings: Number(totalEarnings._sum.totalEarnings || 0),
         pendingSubmissions: 0, // We'll calculate these from submissions
         approvedSubmissions: 0,
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
         status: campaign.status,
         submissions: campaign._count.clipSubmissions,
         views: 0, // Would need to calculate from submissions
-        earnings: campaign.spent
+        earnings: Number(campaign.spent || 0)
       })),
       platformBreakdown: platformBreakdown.reduce((acc, item) => {
         acc[item.platform] = item._count.platform
@@ -306,8 +306,8 @@ export async function GET(request: NextRequest) {
         platformStats.userDetails = {
           name: userStats.name || 'Unknown',
           email: userStats.email,
-          totalViews: userStats.totalViews,
-          totalEarnings: Number(userStats.totalEarnings),
+          totalViews: Number(userStats.totalViews || 0),
+          totalEarnings: Number(userStats.totalEarnings || 0),
           activeSubmissions: userStats.clipSubmissions.length,
           recentSubmissions
         }
