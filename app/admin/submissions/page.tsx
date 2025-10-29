@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
@@ -652,6 +652,70 @@ export default function AdminSubmissionsPage() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Reject Submission Dialog */}
+      <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Submission</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="rejection-reason">Rejection Reason</Label>
+              <Select
+                value={rejectionReason}
+                onValueChange={setRejectionReason}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="not-about-brand">Not about the brand</SelectItem>
+                  <SelectItem value="low-quality">Low quality content</SelectItem>
+                  <SelectItem value="inappropriate">Inappropriate content</SelectItem>
+                  <SelectItem value="wrong-platform">Wrong platform</SelectItem>
+                  <SelectItem value="duplicate">Duplicate submission</SelectItem>
+                  <SelectItem value="guidelines-violation">Violates guidelines</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {rejectionReason === 'other' && (
+              <div>
+                <Label htmlFor="custom-reason">Custom Reason</Label>
+                <Textarea
+                  id="custom-reason"
+                  placeholder="Enter custom rejection reason..."
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowRejectDialog(false)
+                setRejectionReason("")
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (selectedSubmission && rejectionReason) {
+                  updateSubmissionStatus(selectedSubmission.id, "REJECTED", rejectionReason)
+                }
+              }}
+              disabled={!rejectionReason}
+            >
+              Reject
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

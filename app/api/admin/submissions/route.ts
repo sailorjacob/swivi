@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     console.log("✅ Admin access confirmed")
 
     const { searchParams } = new URL(request.url)
-    const limit = parseInt(searchParams.get("limit") || "50")
+    const limit = parseInt(searchParams.get("limit") || "1000")
     const offset = parseInt(searchParams.get("offset") || "0")
     const status = searchParams.get("status")
     const platform = searchParams.get("platform")

@@ -505,9 +505,9 @@ export default function ClipperDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Recent Clips */}
+      {/* All Submissions */}
       <div className="mb-8">
-        <h2 className="text-xl font-medium mb-6">Recent Clips</h2>
+        <h2 className="text-xl font-medium mb-6">All Submissions</h2>
 
         {data?.recentClips?.length > 0 ? (
           <div className="space-y-4">
