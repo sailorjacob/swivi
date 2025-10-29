@@ -24,6 +24,8 @@ interface TikTokScrapeResult {
 interface ApifyResponse {
   data: {
     id: string
+    status: string
+    defaultDatasetId: string
   }
 }
 
@@ -46,8 +48,8 @@ export class ApifyTikTokScraper {
    */
   async scrapeTikTokVideo(postUrl: string): Promise<TikTokScrapeResult | null> {
     try {
-      // Step 1: Start the Apify actor run
-      const runResponse = await fetch(`${this.baseUrl}/acts/clockworks~tiktok-scraper/runs`, {
+      // Use waitForFinish parameter to avoid polling - Apify holds connection until done
+      const runResponse = await fetch(`${this.baseUrl}/acts/clockworks~tiktok-scraper/runs?waitForFinish=120`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,48 +85,14 @@ export class ApifyTikTokScraper {
       }
 
       const runData: ApifyResponse = await runResponse.json()
-      const runId = runData.data.id
-
-      // Step 2: Poll for completion
-      let attempts = 0
-      const maxAttempts = 180 // 180 seconds (3 min) max wait - Apify can be slow
-      let lastStatusData: any = null
-
-      while (attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
-
-        const statusResponse = await fetch(`${this.baseUrl}/actor-runs/${runId}`, {
-          headers: {
-            'Authorization': `Bearer ${this.apiToken}`,
-          },
-        })
-
-        if (!statusResponse.ok) {
-          throw new Error(`Failed to check run status: ${statusResponse.status}`)
-        }
-
-        const statusData = await statusResponse.json()
-        lastStatusData = statusData
-
-        if (statusData.data.status === 'SUCCEEDED') {
-          break
-        } else if (statusData.data.status === 'FAILED') {
-          throw new Error(`Apify run failed: ${statusData.data.errorMessage || 'Unknown error'}`)
-        }
-
-        attempts++
+      
+      // Check if run succeeded
+      if (runData.data.status !== 'SUCCEEDED') {
+        throw new Error(`Apify run failed with status: ${runData.data.status}`)
       }
 
-      if (attempts >= maxAttempts) {
-        throw new Error('Apify run timed out')
-      }
-
-      if (!lastStatusData) {
-        throw new Error('No status data received')
-      }
-
-      // Step 3: Get the dataset ID and fetch results
-      const datasetId = lastStatusData.data.defaultDatasetId
+      // Get the dataset ID and fetch results
+      const datasetId = runData.data.defaultDatasetId
 
       const datasetResponse = await fetch(`${this.baseUrl}/datasets/${datasetId}/items`, {
         headers: {
