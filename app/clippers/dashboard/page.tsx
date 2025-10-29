@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 import Link from "next/link"
+import { getPlatformLogo } from "@/components/ui/icons/platform-logos"
 import {
   DollarSign,
   TrendingUp,
@@ -24,26 +25,18 @@ import {
   Clock,
   CheckCircle,
   Trash2,
-  Music,
-  PlayCircle,
-  Camera,
-  Twitter
+  ArrowUpRight,
+  XCircle
 } from "lucide-react"
 
-// Get platform icon component
-const getPlatformIcon = (platform: string) => {
-  switch (platform.toUpperCase()) {
-    case "TIKTOK":
-      return <Music className="w-4 h-4" />
-    case "YOUTUBE":
-      return <PlayCircle className="w-4 h-4" />
-    case "INSTAGRAM":
-      return <Camera className="w-4 h-4" />
-    case "TWITTER":
-      return <Twitter className="w-4 h-4" />
-    default:
-      return <Target className="w-4 h-4" />
+// Get status icon component
+const getStatusIcon = (status: string) => {
+  if (status === "approved" || status === "APPROVED") {
+    return <ArrowUpRight className="w-3 h-3 text-green-600" />
+  } else if (status === "rejected" || status === "REJECTED") {
+    return <XCircle className="w-3 h-3 text-red-600" />
   }
+  return null
 }
 
 interface DashboardData {
@@ -516,11 +509,14 @@ export default function ClipperDashboard() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-2">
-                      <Badge className="bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 font-medium capitalize">
-                        {clip.status}
-                      </Badge>
+                      <div className="flex items-center gap-1">
+                        {getStatusIcon(clip.status)}
+                        <Badge className="bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 font-medium capitalize">
+                          {clip.status}
+                        </Badge>
+                      </div>
                       <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
-                        {getPlatformIcon(clip.platform)}
+                        {getPlatformLogo(clip.platform, '', 18)}
                       </div>
                     </div>
                   </div>

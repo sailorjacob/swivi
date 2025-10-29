@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Check, X, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2, AlertCircle, Music, PlayCircle, Camera, Twitter } from "lucide-react"
+import { Check, X, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2, AlertCircle, ArrowUpRight, XCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
 import { authenticatedFetch } from "@/lib/supabase-browser"
+import { getPlatformLogo } from "@/components/ui/icons/platform-logos"
 
 interface Submission {
   id: string
@@ -29,6 +30,8 @@ interface Submission {
   rejectionReason?: string
   requiresReview?: boolean
   reviewReason?: string
+  autoRejected?: boolean
+  processingStatus?: string
   createdAt: string
   updatedAt: string
   initialViews?: string
@@ -91,20 +94,14 @@ const payoutStatusOptions = [
   { value: "unpaid", label: "Unpaid" }
 ]
 
-// Get platform icon component
-const getPlatformIcon = (platform: string) => {
-  switch (platform.toUpperCase()) {
-    case "TIKTOK":
-      return <Music className="w-4 h-4" />
-    case "YOUTUBE":
-      return <PlayCircle className="w-4 h-4" />
-    case "INSTAGRAM":
-      return <Camera className="w-4 h-4" />
-    case "TWITTER":
-      return <Twitter className="w-4 h-4" />
-    default:
-      return <Target className="w-4 h-4" />
+// Get status icon component
+const getStatusIcon = (status: string, autoRejected?: boolean) => {
+  if (status === "APPROVED") {
+    return <ArrowUpRight className="w-3 h-3 text-green-600" />
+  } else if (status === "REJECTED") {
+    return <XCircle className="w-3 h-3 text-red-600" />
   }
+  return null
 }
 
 export default function AdminSubmissionsPage() {
@@ -508,11 +505,14 @@ export default function AdminSubmissionsPage() {
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <Badge className={getStatusColor(submission)}>
-                        {submission.requiresReview ? 'Flagged' : submission.status.charAt(0) + submission.status.slice(1).toLowerCase()}
-                      </Badge>
+                      <div className="flex items-center gap-1">
+                        {getStatusIcon(submission.status, submission.autoRejected)}
+                        <Badge className={getStatusColor(submission)}>
+                          {submission.requiresReview ? 'Flagged' : submission.status.charAt(0) + submission.status.slice(1).toLowerCase()}
+                        </Badge>
+                      </div>
                       <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
-                        {getPlatformIcon(submission.platform)}
+                        {getPlatformLogo(submission.platform, '', 18)}
                       </div>
                       <span className="text-sm text-muted-foreground">
                         {submission.users.email}
@@ -520,6 +520,11 @@ export default function AdminSubmissionsPage() {
                       </span>
                       {submission.requiresReview && (
                         <AlertCircle className="w-4 h-4 text-slate-500" title="Flagged for review" />
+                      )}
+                      {submission.autoRejected && (
+                        <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded">
+                          Auto-rejected
+                        </span>
                       )}
                     </div>
                     <div className="mb-2">
