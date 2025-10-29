@@ -183,7 +183,7 @@ export default function AboutPage() {
               </div>
 
               {/* Comparison Section */}
-              <Card className="mt-12 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+              <Card className="mt-12 bg-white border-black/10">
                 <CardContent className="p-8">
                   <div className="text-center">
                     <h3 className="text-xl font-medium mb-4">How Swivi Media Changes the Game</h3>
