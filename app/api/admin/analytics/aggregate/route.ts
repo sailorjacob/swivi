@@ -134,10 +134,10 @@ export async function GET(request: NextRequest) {
           },
           select: {
             id: true,
+            initialViews: true,
             clips: {
               select: {
                 id: true,
-                initialViews: true,
                 view_tracking: {
                   orderBy: { date: 'desc' },
                   take: 1,
@@ -159,16 +159,14 @@ export async function GET(request: NextRequest) {
       let totalCurrentViews = 0
       
       campaign.clipSubmissions.forEach(submission => {
-        if (submission.clips) {
-          const initialViews = Number(submission.clips.initialViews || 0)
-          const currentViews = submission.clips.view_tracking?.[0] 
-            ? Number(submission.clips.view_tracking[0].views || 0) 
-            : initialViews
-          
-          totalInitialViews += initialViews
-          totalCurrentViews += currentViews
-          totalTrackedViews += Math.max(0, currentViews - initialViews)
-        }
+        const initialViews = Number(submission.initialViews || 0)
+        const currentViews = submission.clips?.view_tracking?.[0] 
+          ? Number(submission.clips.view_tracking[0].views || 0) 
+          : initialViews
+        
+        totalInitialViews += initialViews
+        totalCurrentViews += currentViews
+        totalTrackedViews += Math.max(0, currentViews - initialViews)
       })
 
       return {
