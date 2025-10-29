@@ -105,7 +105,7 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
         throw new Error(errorData.error || "Failed to submit clip")
       }
       
-      toast.success("Clip submitted successfully! You'll be notified once it's reviewed.")
+      toast.success("Clip submitted successfully! View tracking has started. You'll be notified once it's reviewed.")
       reset()
       onOpenChange(false)
     } catch (error) {

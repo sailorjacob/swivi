@@ -67,7 +67,7 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
       }
 
       const result = await response.json()
-      toast.success("Clip submitted successfully! You'll be notified once it's reviewed.")
+      toast.success("Clip submitted successfully! View tracking has started. You'll be notified once it's reviewed.")
       reset()
       setUploadedFile(null)
       onOpenChange(false)

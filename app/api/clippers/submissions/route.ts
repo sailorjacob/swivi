@@ -49,6 +49,8 @@ export async function GET(request: NextRequest) {
         payout: true,
         paidAt: true,
         createdAt: true,
+        initialViews: true,
+        finalEarnings: true,
         campaigns: {
           select: {
             id: true,
@@ -60,7 +62,15 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json(submissions)
+    // Convert BigInt values to strings for JSON serialization
+    const submissionsResponse = submissions.map(sub => ({
+      ...sub,
+      initialViews: sub.initialViews ? sub.initialViews.toString() : "0",
+      finalEarnings: sub.finalEarnings ? sub.finalEarnings.toString() : "0",
+      payout: sub.payout ? sub.payout.toString() : null,
+    }))
+
+    return NextResponse.json(submissionsResponse)
   } catch (error) {
     console.error("Error fetching submissions:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
@@ -287,6 +297,16 @@ export async function POST(request: NextRequest) {
       })
       
       console.log(`✅ Submission created successfully with ID: ${submission.id}`)
+      
+      // Convert BigInt to string for JSON serialization
+      const submissionResponse = {
+        ...submission,
+        initialViews: submission.initialViews ? submission.initialViews.toString() : "0",
+        finalEarnings: submission.finalEarnings ? submission.finalEarnings.toString() : "0",
+        payout: submission.payout ? submission.payout.toString() : null,
+      }
+      
+      return NextResponse.json(submissionResponse, { status: 201 })
     } catch (dbError: any) {
       console.error('❌ Database error creating submission:', dbError)
       console.error('❌ Error details:', {
@@ -322,8 +342,6 @@ export async function POST(request: NextRequest) {
         debugInfo: process.env.NODE_ENV === 'development' ? dbError : undefined
       }, { status: 500 })
     }
-
-    return NextResponse.json(submission, { status: 201 })
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       console.error('❌ Validation error:', error.errors)
