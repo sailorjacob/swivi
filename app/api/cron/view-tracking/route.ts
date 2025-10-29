@@ -33,13 +33,13 @@ export async function GET(request: NextRequest) {
 
     // Process view tracking with integrated earnings calculation
     // This will:
-    // 1. Scrape views for active clips
+    // 1. Scrape views for active clips (in smaller batches for Apify)
     // 2. Calculate earnings from view growth
     // 3. Update clip, user, and campaign earnings
     // 4. Check budget limits and complete campaigns if needed
     // 5. Send notifications when campaigns complete
     // 6. Handle large campaigns (>100 clips) by processing them alone
-    const result = await viewTrackingService.processViewTracking(100, 10)
+    const result = await viewTrackingService.processViewTracking(100, 5)
 
     const duration = Date.now() - startTime
 
