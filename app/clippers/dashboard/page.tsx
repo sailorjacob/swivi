@@ -339,35 +339,65 @@ export default function ClipperDashboard() {
       </div>
 
       {/* Payout Card */}
-      {data && data.availableBalance !== undefined && data.availableBalance > 0 && (
+      {data && (data.availableBalance !== undefined && data.availableBalance > 0 || (data as any).activeCampaignEarnings > 0) && (
         <Card className="mb-8 border-2 border-green-500/20 bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Wallet className="w-5 h-5" />
-                  Available Balance
+                  Earnings Overview
                 </CardTitle>
                 <CardDescription>
-                  Request payout from completed campaigns
+                  Track your earnings and request payouts
                 </CardDescription>
               </div>
               <div className="text-right">
                 <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                  ${data.availableBalance.toFixed(2)}
+                  ${data.totalEarnings?.toFixed(2) || '0.00'}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Total: ${data.totalEarnings?.toFixed(2) || '0.00'}
+                  Total Earned
                 </div>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
+          <CardContent className="space-y-4">
+            {/* Available Balance */}
+            <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800/50 rounded-lg border">
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">Available Balance</div>
+                <div className="text-xs text-muted-foreground">From completed campaigns</div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  ${data.availableBalance?.toFixed(2) || '0.00'}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {data.availableBalance >= 20 ? 'Ready for payout' : `Need $${(20 - (data.availableBalance || 0)).toFixed(2)} more`}
+                </div>
+              </div>
+            </div>
+
+            {/* Active Campaign Earnings */}
+            {(data as any).activeCampaignEarnings > 0 && (
+              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div>
+                  <div className="text-sm font-medium text-blue-700 dark:text-blue-300">Active Campaign Earnings</div>
+                  <div className="text-xs text-blue-600 dark:text-blue-400">Available when campaigns complete</div>
+                </div>
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  ${((data as any).activeCampaignEarnings || 0).toFixed(2)}
+                </div>
+              </div>
+            )}
+
+            {/* Payout Button */}
+            <div className="flex items-center justify-between pt-2">
               <p className="text-sm text-muted-foreground">
                 {data.availableBalance >= 20 
                   ? 'You can request a payout now!' 
-                  : `Earn $${(20 - data.availableBalance).toFixed(2)} more to request payout (minimum $20)`
+                  : 'Minimum $20 required to request payout'
                 }
               </p>
               <Button
@@ -375,8 +405,8 @@ export default function ClipperDashboard() {
                   setPayoutAmount(data.availableBalance?.toFixed(2) || '')
                   setPayoutDialogOpen(true)
                 }}
-                disabled={data.availableBalance < 20}
-                className="bg-green-600 hover:bg-green-700"
+                disabled={!data.availableBalance || data.availableBalance < 20}
+                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
               >
                 <Wallet className="w-4 h-4 mr-2" />
                 Request Payout

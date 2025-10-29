@@ -217,9 +217,30 @@ export async function GET(request: NextRequest) {
     const approvedSubmissions = userData.clipSubmissions.filter(s => s.status === "APPROVED" || s.status === "PAID").length
     const pendingSubmissions = userData.clipSubmissions.filter(s => s.status === "PENDING").length
 
-    // Calculate available balance (only from COMPLETED campaigns)
+    // Calculate REAL-TIME totals from actual clip data (not cached User fields)
+    const totalEarned = userData.clipSubmissions
+      .filter(s => s.status === 'APPROVED')
+      .reduce((sum, submission) => {
+        return sum + Number(submission.clips?.earnings || 0)
+      }, 0)
+
+    const totalViews = userData.clipSubmissions
+      .filter(s => s.status === 'APPROVED' && s.clips?.view_tracking?.[0])
+      .reduce((sum, submission) => {
+        const latestViews = Number(submission.clips.view_tracking[0].views || 0)
+        return sum + latestViews
+      }, 0)
+
+    // Available balance: Only from COMPLETED campaigns (can request payout)
     const availableBalance = userData.clipSubmissions
       .filter(s => s.status === 'APPROVED' && s.campaigns.status === 'COMPLETED')
+      .reduce((sum, submission) => {
+        return sum + Number(submission.clips?.earnings || 0)
+      }, 0)
+
+    // Active campaign earnings: Preview of what will be available when campaigns complete
+    const activeCampaignEarnings = userData.clipSubmissions
+      .filter(s => s.status === 'APPROVED' && s.campaigns.status === 'ACTIVE')
       .reduce((sum, submission) => {
         return sum + Number(submission.clips?.earnings || 0)
       }, 0)
@@ -257,8 +278,12 @@ export async function GET(request: NextRequest) {
     const stats = [
       {
         title: "Total Earned",
-        value: `$${parseFloat(userData.totalEarnings?.toString() || '0').toFixed(2)}`,
-        change: approvedSubmissions > 0 ? `${approvedSubmissions} approved clips` : "Start earning from approved clips",
+        value: `$${totalEarned.toFixed(2)}`,
+        change: activeCampaignEarnings > 0 
+          ? `$${activeCampaignEarnings.toFixed(2)} in active campaigns` 
+          : approvedSubmissions > 0 
+            ? `${approvedSubmissions} approved clips` 
+            : "Start earning from approved clips",
         changeType: approvedSubmissions > 0 ? "positive" : "neutral" as const,
         icon: "DollarSign",
         color: "text-foreground"
@@ -281,8 +306,8 @@ export async function GET(request: NextRequest) {
       },
       {
         title: "Total Views",
-        value: Number(userData.totalViews?.toString() || '0').toLocaleString(),
-        change: "Grow your audience",
+        value: totalViews.toLocaleString(),
+        change: "Across all approved clips",
         changeType: "neutral" as const,
         icon: "Eye",
         color: "text-muted-foreground"
@@ -294,7 +319,9 @@ export async function GET(request: NextRequest) {
       recentClips: convertBigIntToString(recentClips),
       activeCampaigns: activeCampaigns,
       availableBalance: availableBalance,
-      totalEarnings: parseFloat(userData.totalEarnings?.toString() || '0')
+      activeCampaignEarnings: activeCampaignEarnings,
+      totalEarnings: totalEarned,
+      totalViews: totalViews
     })
 
   } catch (error) {
