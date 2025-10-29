@@ -516,11 +516,8 @@ export default function AdminSubmissionsPage() {
                           {submission.requiresReview ? 'Flagged' : submission.status.charAt(0) + submission.status.slice(1).toLowerCase()}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md text-xl">
-                        {submission.platform === 'TIKTOK' && '📱'}
-                        {submission.platform === 'YOUTUBE' && '▶️'}
-                        {submission.platform === 'INSTAGRAM' && '📷'}
-                        {submission.platform === 'TWITTER' && '🐦'}
+                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
+                        {getPlatformLogo(submission.platform, '', 20)}
                       </div>
                       <span className="text-sm text-muted-foreground">
                         {submission.users.email}

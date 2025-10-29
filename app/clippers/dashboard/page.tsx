@@ -448,11 +448,8 @@ export default function ClipperDashboard() {
                           {clip.status}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md text-xl">
-                        {clip.platform === 'TIKTOK' && '📱'}
-                        {clip.platform === 'YOUTUBE' && '▶️'}
-                        {clip.platform === 'INSTAGRAM' && '📷'}
-                        {clip.platform === 'TWITTER' && '🐦'}
+                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
+                        {getPlatformLogo(clip.platform, '', 20)}
                       </div>
                     </div>
                   </div>
