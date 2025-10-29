@@ -7,23 +7,29 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   try {
     // Verify admin access
-    const { user, error: authError } = await getServerUserWithRole(['ADMIN'])
+    const authResult = await getServerUserWithRole(request)
     
-    if (authError || !user) {
+    if (!authResult || !authResult.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    
+    const { user } = authResult
+    
+    // Check if user is actually an admin
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id },
+      select: { role: true }
+    })
+    
+    if (!dbUser || dbUser.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
     const { searchParams } = new URL(request.url)
     const campaignId = searchParams.get('campaignId')
 
-    // Build where clause
-    const whereClause: any = {
-      campaigns: {
-        status: {
-          in: ['ACTIVE', 'COMPLETED']
-        }
-      }
-    }
+    // Build where clause - show all submissions with clips/tracking
+    const whereClause: any = {}
 
     if (campaignId) {
       whereClause.campaignId = campaignId

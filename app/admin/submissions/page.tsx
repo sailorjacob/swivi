@@ -509,28 +509,32 @@ export default function AdminSubmissionsPage() {
                   }`}
                 >
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="flex items-center gap-1">
-                        {getStatusIcon(submission.status, submission.autoRejected)}
-                        <Badge className={getStatusColor(submission)}>
-                          {submission.requiresReview ? 'Flagged' : submission.status.charAt(0) + submission.status.slice(1).toLowerCase()}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
-                        {getPlatformLogo(submission.platform, '', 20)}
-                      </div>
-                      <span className="text-sm text-muted-foreground">
-                        {submission.users.email}
-                        {submission.users.name && ` (${submission.users.name})`}
-                      </span>
-                      {submission.requiresReview && (
-                        <AlertCircle className="w-4 h-4 text-slate-500" title="Flagged for review" />
-                      )}
-                      {submission.autoRejected && (
-                        <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded">
-                          Auto-rejected
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-muted-foreground">
+                          {submission.users.email}
+                          {submission.users.name && ` (${submission.users.name})`}
                         </span>
-                      )}
+                        {submission.requiresReview && (
+                          <AlertCircle className="w-4 h-4 text-slate-500" title="Flagged for review" />
+                        )}
+                        {submission.autoRejected && (
+                          <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded">
+                            Auto-rejected
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
+                          {getPlatformLogo(submission.platform, '', 20)}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {getStatusIcon(submission.status, submission.autoRejected)}
+                          <Badge className={getStatusColor(submission)}>
+                            {submission.requiresReview ? 'Flagged' : submission.status.charAt(0) + submission.status.slice(1).toLowerCase()}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
                     <div className="mb-2">
                       <p className="font-medium">{submission.campaigns.title}</p>

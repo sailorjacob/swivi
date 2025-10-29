@@ -429,7 +429,11 @@ export default function ClipperDashboard() {
               <Card key={clip.id} className="bg-card border-border">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex-1"></div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
+                        {getPlatformLogo(clip.platform, '', 20)}
+                      </div>
                       <div className="flex items-center gap-1">
                         {getStatusIcon(clip.status)}
                         <Badge className={
@@ -439,9 +443,6 @@ export default function ClipperDashboard() {
                         }>
                           {clip.status}
                         </Badge>
-                      </div>
-                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
-                        {getPlatformLogo(clip.platform, '', 20)}
                       </div>
                     </div>
                   </div>
