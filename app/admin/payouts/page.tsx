@@ -135,28 +135,6 @@ export default function AdminPayoutsPage() {
     setProcessDialogOpen(true)
   }
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      PENDING: 'bg-slate-100 text-slate-700 border-slate-300',
-      APPROVED: 'bg-blue-100 text-blue-700 border-blue-300',
-      PROCESSING: 'bg-amber-100 text-amber-700 border-amber-300',
-      COMPLETED: 'bg-emerald-100 text-emerald-700 border-emerald-300',
-      REJECTED: 'bg-red-100 text-red-700 border-red-300'
-    }
-    return colors[status] || colors.PENDING
-  }
-
-  const getStatusIcon = (status: string) => {
-    const icons: Record<string, any> = {
-      PENDING: <Clock className="w-4 h-4" />,
-      APPROVED: <AlertCircle className="w-4 h-4" />,
-      PROCESSING: <Clock className="w-4 h-4" />,
-      COMPLETED: <CheckCircle2 className="w-4 h-4" />,
-      REJECTED: <XCircle className="w-4 h-4" />
-    }
-    return icons[status] || icons.PENDING
-  }
-
   const renderPayoutCards = (requests: PayoutRequest[]) => (
     <div className="space-y-4">
       {requests.length === 0 ? (
@@ -169,35 +147,34 @@ export default function AdminPayoutsPage() {
           {requests.map((request) => (
             <Card 
               key={request.id} 
-              className="hover:shadow-lg transition-all duration-200 border-slate-200 bg-gradient-to-br from-white to-slate-50/50"
+              className="hover:shadow-md transition-shadow"
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <User className="w-4 h-4 text-slate-500" />
-                      <CardTitle className="text-base font-semibold text-slate-900">
+                      <User className="w-4 h-4 text-muted-foreground" />
+                      <CardTitle className="text-base font-semibold">
                         {request.user.name || 'Unknown User'}
                       </CardTitle>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Mail className="w-3 h-3" />
                       {request.user.email}
                     </div>
                   </div>
-                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(request.status)}`}>
-                    {getStatusIcon(request.status)}
+                  <Badge variant="outline" className="text-xs">
                     {request.status}
-                  </div>
+                  </Badge>
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-4">
                 {/* Amount Section */}
-                <div className="bg-slate-900 text-white rounded-lg p-4">
-                  <div className="text-xs text-slate-400 mb-1">Payout Amount</div>
+                <div className="border rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Payout Amount</div>
                   <div className="flex items-center gap-2">
-                    <DollarSign className="w-6 h-6" />
+                    <DollarSign className="w-6 h-6 text-muted-foreground" />
                     <span className="text-3xl font-bold">{request.amount.toFixed(2)}</span>
                   </div>
                 </div>
@@ -205,34 +182,34 @@ export default function AdminPayoutsPage() {
                 {/* Payment Details */}
                 <div className="space-y-2.5">
                   <div className="flex items-start gap-2 text-sm">
-                    <CreditCard className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
+                    <CreditCard className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs text-slate-500">Payment Method</div>
-                      <div className="font-medium text-slate-900 truncate">{request.paymentMethod}</div>
-                      <div className="text-xs text-slate-600 truncate">{request.paymentDetails}</div>
+                      <div className="text-xs text-muted-foreground">Payment Method</div>
+                      <div className="font-medium truncate">{request.paymentMethod}</div>
+                      <div className="text-xs text-muted-foreground truncate">{request.paymentDetails}</div>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2 text-sm">
-                    <DollarSign className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
+                    <DollarSign className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <div className="text-xs text-slate-500">Current Balance</div>
-                      <div className="font-medium text-slate-900">${request.user.totalEarnings.toFixed(2)}</div>
+                      <div className="text-xs text-muted-foreground">Current Balance</div>
+                      <div className="font-medium">${request.user.totalEarnings.toFixed(2)}</div>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2 text-sm">
-                    <Calendar className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
+                    <Calendar className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <div className="text-xs text-slate-500">Requested</div>
-                      <div className="font-medium text-slate-900">
+                      <div className="text-xs text-muted-foreground">Requested</div>
+                      <div className="font-medium">
                         {new Date(request.requestedAt).toLocaleDateString('en-US', { 
                           month: 'short', 
                           day: 'numeric', 
                           year: 'numeric' 
                         })}
                       </div>
-                      <div className="text-xs text-slate-600">
+                      <div className="text-xs text-muted-foreground">
                         {new Date(request.requestedAt).toLocaleTimeString('en-US', { 
                           hour: '2-digit', 
                           minute: '2-digit' 
@@ -243,20 +220,20 @@ export default function AdminPayoutsPage() {
 
                   {request.transactionId && (
                     <div className="flex items-start gap-2 text-sm">
-                      <FileText className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
+                      <FileText className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs text-slate-500">Transaction ID</div>
-                        <div className="font-mono text-xs text-slate-900 truncate">{request.transactionId}</div>
+                        <div className="text-xs text-muted-foreground">Transaction ID</div>
+                        <div className="font-mono text-xs truncate">{request.transactionId}</div>
                       </div>
                     </div>
                   )}
 
                   {request.notes && (
-                    <div className="flex items-start gap-2 text-sm bg-slate-50 p-2.5 rounded-md">
-                      <FileText className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
+                    <div className="flex items-start gap-2 text-sm bg-muted/50 p-2.5 rounded-md">
+                      <FileText className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs text-slate-500 mb-0.5">Notes</div>
-                        <div className="text-xs text-slate-700 line-clamp-2">{request.notes}</div>
+                        <div className="text-xs text-muted-foreground mb-0.5">Notes</div>
+                        <div className="text-xs line-clamp-2">{request.notes}</div>
                       </div>
                     </div>
                   )}
@@ -268,7 +245,7 @@ export default function AdminPayoutsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
+                      className="flex-1"
                       onClick={() => {
                         setSelectedRequest(request)
                         setNotes(request.notes || '')
@@ -280,7 +257,7 @@ export default function AdminPayoutsPage() {
                     </Button>
                     <Button
                       size="sm"
-                      className="flex-1 bg-slate-900 hover:bg-slate-800 text-white"
+                      className="flex-1"
                       onClick={() => {
                         setSelectedRequest(request)
                         setNotes(request.notes || '')
@@ -296,7 +273,7 @@ export default function AdminPayoutsPage() {
                 {(request.status === 'APPROVED' || request.status === 'PROCESSING') && (
                   <Button
                     size="sm"
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                    className="w-full"
                     onClick={() => {
                       setSelectedRequest(request)
                       setNotes(request.notes || '')
@@ -309,14 +286,14 @@ export default function AdminPayoutsPage() {
                 )}
 
                 {request.status === 'COMPLETED' && (
-                  <div className="flex items-center justify-center gap-2 py-2 text-emerald-700 bg-emerald-50 rounded-md">
+                  <div className="flex items-center justify-center gap-2 py-2 bg-muted rounded-md">
                     <CheckCircle2 className="w-4 h-4" />
                     <span className="text-sm font-medium">Payment Completed</span>
                   </div>
                 )}
 
                 {request.status === 'REJECTED' && (
-                  <div className="flex items-center justify-center gap-2 py-2 text-red-700 bg-red-50 rounded-md">
+                  <div className="flex items-center justify-center gap-2 py-2 bg-muted rounded-md">
                     <XCircle className="w-4 h-4" />
                     <span className="text-sm font-medium">Request Rejected</span>
                   </div>
@@ -337,73 +314,56 @@ export default function AdminPayoutsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="space-y-6">
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-lg p-6">
-          <h1 className="text-3xl font-bold mb-2">Payout Management</h1>
-          <p className="text-slate-300">
-            Review and process clipper payout requests
-          </p>
-        </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="border-slate-200 bg-gradient-to-br from-slate-50 to-white">
+      <div className="grid gap-4 md:grid-cols-4 mb-8">
+        <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-700">Pending</CardTitle>
-            <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center">
-              <Clock className="h-5 w-5 text-slate-600" />
-            </div>
+            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{pendingRequests.length}</div>
-            <p className="text-sm text-slate-600 mt-1 flex items-center gap-1">
-              <DollarSign className="w-3 h-3" />
-              {pendingRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)} total
+            <div className="text-2xl font-bold">{pendingRequests.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              ${pendingRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)} total
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+        <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Processing</CardTitle>
-            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <AlertCircle className="h-5 w-5 text-blue-600" />
-            </div>
+            <CardTitle className="text-sm font-medium">Processing</CardTitle>
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-900">{processingRequests.length}</div>
-            <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
-              <DollarSign className="w-3 h-3" />
-              {processingRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)} total
+            <div className="text-2xl font-bold">{processingRequests.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              ${processingRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)} total
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
+        <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-emerald-700">Completed</CardTitle>
-            <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-            </div>
+            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-emerald-900">{completedRequests.length}</div>
-            <p className="text-sm text-emerald-600 mt-1 flex items-center gap-1">
-              <DollarSign className="w-3 h-3" />
-              {completedRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)} paid out
+            <div className="text-2xl font-bold">{completedRequests.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              ${completedRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)} paid out
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-red-200 bg-gradient-to-br from-red-50 to-white">
+        <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">Rejected</CardTitle>
-            <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-              <XCircle className="h-5 w-5 text-red-600" />
-            </div>
+            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+            <XCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-900">{rejectedRequests.length}</div>
-            <p className="text-sm text-red-600 mt-1">
+            <div className="text-2xl font-bold">{rejectedRequests.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
               Not processed
             </p>
           </CardContent>
@@ -419,21 +379,21 @@ export default function AdminPayoutsPage() {
             fetchPayoutRequests(value.toUpperCase())
           }
         }}>
-          <TabsList className="bg-slate-100 border border-slate-200">
-            <TabsTrigger value="pending" className="data-[state=active]:bg-white data-[state=active]:text-slate-900">
-              Pending <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-200 text-xs font-medium">{pendingRequests.length}</span>
+          <TabsList>
+            <TabsTrigger value="pending">
+              Pending ({pendingRequests.length})
             </TabsTrigger>
-            <TabsTrigger value="processing" className="data-[state=active]:bg-white data-[state=active]:text-slate-900">
-              Processing <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-200 text-xs font-medium">{processingRequests.length}</span>
+            <TabsTrigger value="processing">
+              Processing ({processingRequests.length})
             </TabsTrigger>
-            <TabsTrigger value="completed" className="data-[state=active]:bg-white data-[state=active]:text-slate-900">
-              Completed <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-200 text-xs font-medium">{completedRequests.length}</span>
+            <TabsTrigger value="completed">
+              Completed ({completedRequests.length})
             </TabsTrigger>
-            <TabsTrigger value="rejected" className="data-[state=active]:bg-white data-[state=active]:text-slate-900">
-              Rejected <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-200 text-xs font-medium">{rejectedRequests.length}</span>
+            <TabsTrigger value="rejected">
+              Rejected ({rejectedRequests.length})
             </TabsTrigger>
-            <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-slate-900">
-              All <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-200 text-xs font-medium">{payoutRequests.length}</span>
+            <TabsTrigger value="all">
+              All ({payoutRequests.length})
             </TabsTrigger>
           </TabsList>
 
@@ -463,8 +423,8 @@ export default function AdminPayoutsPage() {
       <Dialog open={processDialogOpen} onOpenChange={setProcessDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-900">Process Payout Request</DialogTitle>
-            <DialogDescription className="text-slate-600">
+            <DialogTitle>Process Payout Request</DialogTitle>
+            <DialogDescription>
               Review and process this payout request
             </DialogDescription>
           </DialogHeader>
@@ -472,33 +432,32 @@ export default function AdminPayoutsPage() {
           {selectedRequest && (
             <div className="space-y-5">
               {/* User and Amount Info Card */}
-              <div className="bg-slate-900 text-white rounded-lg p-4">
+              <div className="border rounded-lg p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <User className="w-4 h-4 text-slate-400" />
+                      <User className="w-4 h-4 text-muted-foreground" />
                       <div className="font-semibold">{selectedRequest.user.name}</div>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Mail className="w-3 h-3" />
                       {selectedRequest.user.email}
                     </div>
                   </div>
-                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(selectedRequest.status)}`}>
-                    {getStatusIcon(selectedRequest.status)}
+                  <Badge variant="outline">
                     {selectedRequest.status}
-                  </div>
+                  </Badge>
                 </div>
-                <div className="flex items-center justify-between pt-3 border-t border-slate-700">
+                <div className="flex items-center justify-between pt-3 border-t">
                   <div>
-                    <div className="text-xs text-slate-400">Payout Amount</div>
+                    <div className="text-xs text-muted-foreground">Payout Amount</div>
                     <div className="flex items-center gap-1 text-2xl font-bold">
                       <DollarSign className="w-5 h-5" />
                       {selectedRequest.amount.toFixed(2)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-slate-400">Current Balance</div>
+                    <div className="text-xs text-muted-foreground">Current Balance</div>
                     <div className="flex items-center gap-1 text-lg font-semibold">
                       <DollarSign className="w-4 h-4" />
                       {selectedRequest.user.totalEarnings.toFixed(2)}
@@ -509,39 +468,37 @@ export default function AdminPayoutsPage() {
 
               {/* Payment Details */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                <div className="border rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
-                    <CreditCard className="w-4 h-4 text-slate-500" />
-                    <label className="text-xs font-medium text-slate-600">Payment Method</label>
+                    <CreditCard className="w-4 h-4 text-muted-foreground" />
+                    <label className="text-xs font-medium text-muted-foreground">Payment Method</label>
                   </div>
-                  <div className="text-sm font-semibold text-slate-900">{selectedRequest.paymentMethod}</div>
+                  <div className="text-sm font-semibold">{selectedRequest.paymentMethod}</div>
                 </div>
-                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                <div className="border rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
-                    <FileText className="w-4 h-4 text-slate-500" />
-                    <label className="text-xs font-medium text-slate-600">Payment Details</label>
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    <label className="text-xs font-medium text-muted-foreground">Payment Details</label>
                   </div>
-                  <div className="text-sm font-semibold text-slate-900 truncate">{selectedRequest.paymentDetails}</div>
+                  <div className="text-sm font-semibold truncate">{selectedRequest.paymentDetails}</div>
                 </div>
               </div>
 
               {selectedRequest.status === 'PENDING' && (
                 <>
                   <div>
-                    <label className="text-sm font-medium text-slate-700 mb-2 block">Notes (optional)</label>
+                    <label className="text-sm font-medium mb-2 block">Notes (optional)</label>
                     <Textarea
                       placeholder="Add notes about this payout..."
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows={3}
-                      className="border-slate-300 focus:border-slate-500"
                     />
                   </div>
 
                   <DialogFooter className="gap-2">
                     <Button
                       variant="outline"
-                      className="border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
                       onClick={() => handleProcess('reject')}
                       disabled={processing}
                     >
@@ -549,7 +506,6 @@ export default function AdminPayoutsPage() {
                       Reject Request
                     </Button>
                     <Button
-                      className="bg-slate-900 hover:bg-slate-800 text-white"
                       onClick={() => handleProcess('approve')}
                       disabled={processing}
                     >
@@ -563,29 +519,27 @@ export default function AdminPayoutsPage() {
               {(selectedRequest.status === 'APPROVED' || selectedRequest.status === 'PROCESSING') && (
                 <>
                   <div>
-                    <label className="text-sm font-medium text-slate-700 mb-2 block">Transaction ID *</label>
+                    <label className="text-sm font-medium mb-2 block">Transaction ID *</label>
                     <Input
                       placeholder="Enter transaction ID from payment provider (e.g., PayPal, Stripe)"
                       value={transactionId}
                       onChange={(e) => setTransactionId(e.target.value)}
-                      className="border-slate-300 focus:border-slate-500"
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-700 mb-2 block">Notes (optional)</label>
+                    <label className="text-sm font-medium mb-2 block">Notes (optional)</label>
                     <Textarea
                       placeholder="Add notes about this payout..."
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows={3}
-                      className="border-slate-300 focus:border-slate-500"
                     />
                   </div>
 
                   <DialogFooter>
                     <Button
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="w-full"
                       onClick={() => handleProcess('complete')}
                       disabled={processing || !transactionId}
                     >

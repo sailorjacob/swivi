@@ -144,19 +144,6 @@ export default function AdminAnalyticsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <div className="flex items-center gap-4 mb-2">
-          <Link href="/admin">
-            <Button variant="outline" size="sm">
-              ← Back to Admin
-            </Button>
-          </Link>
-          <h1 className="text-3xl font-light">View Tracking Analytics</h1>
-        </div>
-        <p className="text-muted-foreground">
-          Monitor view growth and scraping history for all campaigns and clips
-        </p>
-      </div>
 
       {/* Cron Job Logs */}
       <Card className="mb-8">

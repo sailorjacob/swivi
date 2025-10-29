@@ -291,23 +291,6 @@ export default function AdminSubmissionsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <div className="flex items-center gap-4 mb-2">
-              <Link href="/admin">
-                <Button variant="outline" size="sm">
-                  ← Back to Admin
-                </Button>
-              </Link>
-              <h1 className="text-3xl font-light">Submission Management</h1>
-            </div>
-            <p className="text-muted-foreground">
-              Review and manage clipper submissions
-            </p>
-          </div>
-        </div>
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <Card>

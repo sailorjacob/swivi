@@ -298,30 +298,6 @@ export default function AdminUsersPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <div className="flex items-center gap-4 mb-2">
-              <Link href="/admin">
-                <Button variant="outline" size="sm">
-                  ← Back to Admin
-                </Button>
-              </Link>
-              <h1 className="text-3xl font-light">User Management</h1>
-            </div>
-            <p className="text-muted-foreground">
-              Manage user roles and permissions
-            </p>
-            {/* Debug info for development */}
-            {process.env.NODE_ENV === "development" && (
-              <div className="mt-2 text-xs text-muted-foreground">
-                <p>Session: {session ? "authenticated" : "not authenticated"}</p>
-                <p>Role: {session?.user?.role || "none"}</p>
-                <p>Users loaded: {users.length}</p>
-              </div>
-            )}
-          </div>
-        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
