@@ -50,13 +50,31 @@ interface CampaignGroup {
   clips: ClipData[]
 }
 
+interface CronLog {
+  id: string
+  jobName: string
+  status: string
+  startedAt: string
+  completedAt: string | null
+  duration: number | null
+  clipsProcessed: number
+  clipsSuccessful: number
+  clipsFailed: number
+  earningsCalculated: number
+  campaignsCompleted: number
+  errorMessage: string | null
+}
+
 export default function AdminAnalyticsPage() {
   const [campaigns, setCampaigns] = useState<CampaignGroup[]>([])
+  const [cronLogs, setCronLogs] = useState<CronLog[]>([])
   const [loading, setLoading] = useState(true)
+  const [logsLoading, setLogsLoading] = useState(true)
   const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     fetchViewHistory()
+    fetchCronLogs()
   }, [])
 
   const fetchViewHistory = async () => {
@@ -78,6 +96,24 @@ export default function AdminAnalyticsPage() {
       console.error('Error fetching view history:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchCronLogs = async () => {
+    try {
+      setLogsLoading(true)
+      const response = await authenticatedFetch('/api/admin/analytics/cron-logs?limit=20')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch cron logs')
+      }
+
+      const data = await response.json()
+      setCronLogs(data.logs || [])
+    } catch (error) {
+      console.error('Failed to fetch cron logs:', error)
+    } finally {
+      setLogsLoading(false)
     }
   }
 
@@ -121,6 +157,71 @@ export default function AdminAnalyticsPage() {
           Monitor view growth and scraping history for all campaigns and clips
         </p>
       </div>
+
+      {/* Cron Job Logs */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="text-lg">Recent Cron Job Runs</CardTitle>
+          <CardDescription>View tracking and earnings calculation job history</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {logsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : cronLogs.length > 0 ? (
+            <div className="space-y-3">
+              {cronLogs.map((log) => {
+                const isSuccess = log.status === 'SUCCESS'
+                const duration = log.duration ? `${(log.duration / 1000).toFixed(1)}s` : 'N/A'
+                
+                return (
+                  <div 
+                    key={log.id} 
+                    className="p-3 bg-muted/30 rounded-lg border border-border"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3 flex-1">
+                        {isSuccess ? (
+                          <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                        )}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium">{log.jobName}</span>
+                            <Badge className={isSuccess ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-300" : "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-300"}>
+                              {log.status}
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground space-x-3">
+                            <span>{new Date(log.startedAt).toLocaleString()}</span>
+                            <span>•</span>
+                            <span>Duration: {duration}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right text-xs text-muted-foreground ml-4">
+                        <div>Processed: {log.clipsProcessed}</div>
+                        <div className="text-green-600">✓ {log.clipsSuccessful}</div>
+                        {log.clipsFailed > 0 && <div className="text-red-600">✗ {log.clipsFailed}</div>}
+                        {log.earningsCalculated > 0 && <div className="text-blue-600">${log.earningsCalculated.toFixed(2)}</div>}
+                      </div>
+                    </div>
+                    {log.errorMessage && (
+                      <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs text-red-800 dark:text-red-300">
+                        {log.errorMessage}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">No cron job logs found</p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-3 mb-8">
