@@ -46,7 +46,8 @@ export async function GET(request: NextRequest) {
       totalUsers,
       totalCampaigns,
       totalSubmissions,
-      activeCampaigns
+      activeCampaigns,
+      trackedViewsTotal
     ] = await Promise.all([
       // Total users
       prisma.user.count(),
@@ -60,6 +61,11 @@ export async function GET(request: NextRequest) {
       // Active campaigns
       prisma.campaign.count({
         where: { status: "ACTIVE" }
+      }),
+
+      // Total tracked views from scrapes
+      prisma.viewTracking.aggregate({
+        _sum: { views: true }
       })
     ])
 
@@ -116,6 +122,67 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    // Get tracked views per campaign
+    const campaignsWithTrackedViews = await prisma.campaign.findMany({
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        clipSubmissions: {
+          where: {
+            status: 'APPROVED'
+          },
+          select: {
+            id: true,
+            clips: {
+              select: {
+                id: true,
+                initialViews: true,
+                view_tracking: {
+                  orderBy: { date: 'desc' },
+                  take: 1,
+                  select: {
+                    views: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    // Calculate tracked views for each campaign
+    const campaignTrackedViews = campaignsWithTrackedViews.map(campaign => {
+      let totalTrackedViews = 0
+      let totalInitialViews = 0
+      let totalCurrentViews = 0
+      
+      campaign.clipSubmissions.forEach(submission => {
+        if (submission.clips) {
+          const initialViews = Number(submission.clips.initialViews || 0)
+          const currentViews = submission.clips.view_tracking?.[0] 
+            ? Number(submission.clips.view_tracking[0].views || 0) 
+            : initialViews
+          
+          totalInitialViews += initialViews
+          totalCurrentViews += currentViews
+          totalTrackedViews += Math.max(0, currentViews - initialViews)
+        }
+      })
+
+      return {
+        campaignId: campaign.id,
+        campaignTitle: campaign.title,
+        campaignStatus: campaign.status,
+        totalSubmissions: campaign.clipSubmissions.length,
+        trackedViews: totalTrackedViews,
+        initialViews: totalInitialViews,
+        currentViews: totalCurrentViews
+      }
+    }).filter(c => c.totalSubmissions > 0) // Only include campaigns with submissions
+      .sort((a, b) => b.trackedViews - a.trackedViews) // Sort by tracked views
+
     // Get platform breakdown
     const platformBreakdown = await prisma.clipSubmission.groupBy({
       by: ['platform'],
@@ -151,6 +218,7 @@ export async function GET(request: NextRequest) {
         pendingPayouts: number
         averagePayout: number
       }
+      campaignTrackedViews?: any[]
     } = {
       overview: {
         totalUsers,
@@ -158,6 +226,7 @@ export async function GET(request: NextRequest) {
         totalSubmissions,
         activeCampaigns,
         totalViews: totalViews, // Real-time from clips
+        trackedViews: Number(trackedViewsTotal._sum.views || 0), // Total tracked views from scrapes
         totalEarnings: totalEarnings, // Real-time from clips
         pendingSubmissions: 0, // We'll calculate these from submissions
         approvedSubmissions: 0,
@@ -335,6 +404,9 @@ export async function GET(request: NextRequest) {
         }
       }
     }
+
+    // Add campaign tracked views breakdown
+    platformStats.campaignTrackedViews = campaignTrackedViews
 
     return NextResponse.json(platformStats)
 

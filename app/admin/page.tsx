@@ -11,6 +11,8 @@ import { BarChart3, Users, Target, DollarSign, Settings, Shield, Activity, Loade
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
@@ -208,18 +210,90 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Activity className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Tracked Views</p>
-                  <p className="text-2xl font-semibold">{Number(stats.trackedViews).toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground mt-1">From scrapes</p>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Card className="cursor-pointer hover:border-primary transition-colors">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Activity className="h-8 w-8 text-muted-foreground" />
+                      <div className="ml-4">
+                        <p className="text-sm font-medium text-muted-foreground">Tracked Views</p>
+                        <p className="text-2xl font-semibold">{Number(stats.trackedViews).toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground mt-1">From scrapes • Click for breakdown</p>
+                      </div>
+                    </div>
+                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Tracked Views by Campaign</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Platform Tracked Views</p>
+                    <p className="text-3xl font-bold">{Number(stats.trackedViews).toLocaleString()}</p>
+                  </div>
+                  <Activity className="h-10 w-10 text-muted-foreground" />
                 </div>
+                
+                {analytics?.campaignTrackedViews && analytics.campaignTrackedViews.length > 0 ? (
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium text-muted-foreground">Campaign Breakdown</h3>
+                    {analytics.campaignTrackedViews.map((campaign: any) => (
+                      <Card key={campaign.campaignId}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="font-medium">{campaign.campaignTitle}</h4>
+                                <Badge variant="outline" className="text-xs">
+                                  {campaign.campaignStatus}
+                                </Badge>
+                              </div>
+                              <div className="grid grid-cols-3 gap-4 text-sm">
+                                <div>
+                                  <p className="text-muted-foreground">Tracked Views</p>
+                                  <p className="text-lg font-semibold text-primary">
+                                    +{campaign.trackedViews.toLocaleString()}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">Initial Views</p>
+                                  <p className="text-lg font-semibold">
+                                    {campaign.initialViews.toLocaleString()}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">Current Views</p>
+                                  <p className="text-lg font-semibold">
+                                    {campaign.currentViews.toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="mt-2">
+                                <p className="text-xs text-muted-foreground">
+                                  {campaign.totalSubmissions} submission{campaign.totalSubmissions !== 1 ? 's' : ''}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No campaign data available yet
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </DialogContent>
+          </Dialog>
 
           <Card>
             <CardContent className="p-6">
