@@ -66,7 +66,7 @@ export class ApifyYouTubeScraper {
 
       // Step 2: Poll for completion
       let attempts = 0
-      const maxAttempts = 60 // 60 seconds max wait (YouTube can be slow)
+      const maxAttempts = 180 // 180 seconds (3 min) max wait - YouTube is very slow
       let lastStatusData: any = null
 
       while (attempts < maxAttempts) {

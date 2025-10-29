@@ -265,7 +265,7 @@ export class ViewTrackingService {
    */
   async trackMultipleClips(
     clipIds: string[], 
-    batchSize: number = 10
+    batchSize: number = 5  // Reduced to avoid overwhelming Apify
   ): Promise<TrackingBatchResult> {
     const results: ViewTrackingResult[] = []
     
@@ -285,10 +285,10 @@ export class ViewTrackingService {
         }
       })
       
-      // Small delay between batches to respect Apify rate limits
+      // Longer delay between batches to let Apify complete previous runs
       if (i + batchSize < clipIds.length) {
-        console.log(`⏸️  Pausing 2s before next batch...`)
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        console.log(`⏸️  Pausing 5s before next batch...`)
+        await new Promise(resolve => setTimeout(resolve, 5000))
       }
     }
     
@@ -498,7 +498,7 @@ export class ViewTrackingService {
    */
   async processViewTracking(
     limit: number = 100, 
-    batchSize: number = 10
+    batchSize: number = 5  // Smaller batches for better Apify completion rate
   ): Promise<TrackingBatchResult> {
     console.log(`📊 Starting view tracking process for up to ${limit} clips (batches of ${batchSize})...`)
     console.log(`⚖️  Fair tracking mode: All clips from a campaign tracked together`)
