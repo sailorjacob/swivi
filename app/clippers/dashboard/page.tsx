@@ -255,11 +255,53 @@ export default function ClipperDashboard() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex-1">
             <h1 className="text-3xl font-light mb-2">Dashboard</h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground mb-4">
               Welcome back, {session?.user?.name || session?.user?.email?.split('@')[0] || 'User'}
             </p>
+            
+            {/* Compact Earnings Breakdown */}
+            {data && (data.totalEarnings > 0 || (data as any).activeCampaignEarnings > 0) && (
+              <div className="inline-flex items-center gap-6 text-sm bg-muted/50 px-4 py-2 rounded-lg">
+                <div>
+                  <span className="text-muted-foreground">Total: </span>
+                  <span className="font-semibold">${data.totalEarnings?.toFixed(2) || '0.00'}</span>
+                </div>
+                {data.availableBalance > 0 && (
+                  <>
+                    <div className="h-4 w-px bg-border" />
+                    <div>
+                      <span className="text-muted-foreground">Available: </span>
+                      <span className="font-semibold text-foreground">${data.availableBalance.toFixed(2)}</span>
+                      {data.availableBalance >= 20 && (
+                        <Button 
+                          size="sm" 
+                          variant="default"
+                          className="ml-3 h-7 text-xs"
+                          onClick={() => {
+                            setPayoutAmount(data.availableBalance?.toFixed(2) || '')
+                            setPayoutDialogOpen(true)
+                          }}
+                        >
+                          <Wallet className="w-3 h-3 mr-1" />
+                          Request Payout
+                        </Button>
+                      )}
+                    </div>
+                  </>
+                )}
+                {(data as any).activeCampaignEarnings > 0 && (
+                  <>
+                    <div className="h-4 w-px bg-border" />
+                    <div>
+                      <span className="text-muted-foreground">Pending: </span>
+                      <span className="font-semibold text-muted-foreground">${((data as any).activeCampaignEarnings).toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Admin and Test Links - Top Right */}
@@ -338,83 +380,6 @@ export default function ClipperDashboard() {
         )}
       </div>
 
-      {/* Payout Card */}
-      {data && (data.availableBalance !== undefined && data.availableBalance > 0 || (data as any).activeCampaignEarnings > 0) && (
-        <Card className="mb-8 border-2 border-green-500/20 bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Wallet className="w-5 h-5" />
-                  Earnings Overview
-                </CardTitle>
-                <CardDescription>
-                  Track your earnings and request payouts
-                </CardDescription>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                  ${data.totalEarnings?.toFixed(2) || '0.00'}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Total Earned
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Available Balance */}
-            <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800/50 rounded-lg border">
-              <div>
-                <div className="text-sm font-medium text-muted-foreground">Available Balance</div>
-                <div className="text-xs text-muted-foreground">From completed campaigns</div>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  ${data.availableBalance?.toFixed(2) || '0.00'}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {data.availableBalance >= 20 ? 'Ready for payout' : `Need $${(20 - (data.availableBalance || 0)).toFixed(2)} more`}
-                </div>
-              </div>
-            </div>
-
-            {/* Active Campaign Earnings */}
-            {(data as any).activeCampaignEarnings > 0 && (
-              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div>
-                  <div className="text-sm font-medium text-blue-700 dark:text-blue-300">Active Campaign Earnings</div>
-                  <div className="text-xs text-blue-600 dark:text-blue-400">Available when campaigns complete</div>
-                </div>
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  ${((data as any).activeCampaignEarnings || 0).toFixed(2)}
-                </div>
-              </div>
-            )}
-
-            {/* Payout Button */}
-            <div className="flex items-center justify-between pt-2">
-              <p className="text-sm text-muted-foreground">
-                {data.availableBalance >= 20 
-                  ? 'You can request a payout now!' 
-                  : 'Minimum $20 required to request payout'
-                }
-              </p>
-              <Button
-                onClick={() => {
-                  setPayoutAmount(data.availableBalance?.toFixed(2) || '')
-                  setPayoutDialogOpen(true)
-                }}
-                disabled={!data.availableBalance || data.availableBalance < 20}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
-              >
-                <Wallet className="w-4 h-4 mr-2" />
-                Request Payout
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Payout Request Dialog */}
       <Dialog open={payoutDialogOpen} onOpenChange={setPayoutDialogOpen}>
