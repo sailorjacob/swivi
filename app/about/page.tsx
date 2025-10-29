@@ -181,30 +181,6 @@ export default function AboutPage() {
                   For a more precise estimate, you'd need to specify the medium, target audience, or market, as these drive significant variation. If you're comparing to digital, online CPMs often range from $3–$10 for display ads, though platforms like Google or Facebook can see higher or lower rates depending on targeting.
                 </p>
               </div>
-
-              {/* Comparison Section */}
-              <Card className="mt-12 bg-white border-black/10">
-                <CardContent className="p-8">
-                  <div className="text-center">
-                    <h3 className="text-xl font-medium mb-4">How Swivi Media Changes the Game</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-                      <div>
-                        <h4 className="font-medium mb-2 text-muted-foreground">Traditional Advertising</h4>
-                        <p className="text-2xl font-light mb-2">$4 - $30 CPM</p>
-                        <p className="text-sm text-muted-foreground">Estimated viewership, limited targeting</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium mb-2 text-primary">Clipper Marketing</h4>
-                        <p className="text-2xl font-light text-primary mb-2">$0.50 - $3 CPM</p>
-                        <p className="text-sm text-muted-foreground">Authentic content, precise tracking</p>
-                      </div>
-                    </div>
-                    <p className="text-muted-foreground">
-                      Save up to <span className="font-semibold text-primary">80-95%</span> on your advertising costs while achieving higher engagement rates through authentic, user-generated content.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
             </motion.div>
           </div>
         </section>
