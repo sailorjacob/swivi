@@ -44,7 +44,7 @@ export class PayoutCalculationService {
             include: {
               clips: {
                 include: {
-                  viewTracking: true
+                  view_tracking: true
                 }
               },
               users: true
@@ -88,7 +88,7 @@ export class PayoutCalculationService {
             include: {
               clips: {
                 include: {
-                  viewTracking: true
+                  view_tracking: true
                 }
               },
               users: true
@@ -116,7 +116,7 @@ export class PayoutCalculationService {
         if (!submission.clips) continue
 
         // Get latest view tracking data
-        const latestTracking = submission.clips.viewTracking
+        const latestTracking = submission.clips.view_tracking
           .sort((a, b) => b.date.getTime() - a.date.getTime())[0]
 
         const views = latestTracking ? Number(latestTracking.views) : 0

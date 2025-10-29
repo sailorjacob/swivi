@@ -2,18 +2,11 @@
   "functions": {
     "app/api/cron/view-tracking/route.ts": {
       "maxDuration": 300
-    },
-    "app/api/cron/payout-calculation/route.ts": {
-      "maxDuration": 60
     }
   },
   "crons": [
     {
       "path": "/api/cron/view-tracking",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/cron/payout-calculation",
       "schedule": "0 * * * *"
     }
   ]
