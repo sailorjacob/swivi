@@ -41,13 +41,14 @@ interface NavItem {
   badge?: string
 }
 
-  const navItems: NavItem[] = [
+  const getNavItems = (isAdmin: boolean): NavItem[] => [
     { label: "Dashboard", href: "/clippers/dashboard", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/3422.png" },
     { label: "Campaigns", href: "/clippers/dashboard/campaigns", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png" },
     { label: "Profile", href: "/clippers/dashboard/profile", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/342.png" },
     // Analytics temporarily hidden for platform cleanup
     // { label: "Analytics", href: "/clippers/dashboard/analytics", icon: BarChart3 },
     { label: "Payouts", href: "/clippers/dashboard/payouts", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/233.png" },
+    ...(isAdmin ? [{ label: "Admin Dashboard", href: "/admin", icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/3422.png" as string }] : []),
   ]
 
   const renderNavIcon = (icon: React.ComponentType<{ className?: string }> | string, className?: string) => {
@@ -79,6 +80,10 @@ function Sidebar({ className }: { className?: string }) {
   const router = useRouter()
   const pathname = usePathname()
   const [dbUser, setDbUser] = useState<DatabaseUser | null>(null)
+  
+  // Check if user is admin
+  const isAdmin = session?.user?.role === "ADMIN"
+  const navItems = getNavItems(isAdmin)
 
   // Demo mode mock session
   const isDemoMode = process.env.NODE_ENV === "development"

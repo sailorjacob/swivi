@@ -228,7 +228,6 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="space-y-8">
-        <h1 className="text-3xl font-light text-foreground">Profile & Settings</h1>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
@@ -247,7 +246,6 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-light text-foreground">Profile & Settings</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Profile Settings */}

@@ -265,26 +265,6 @@ export default function ClipperDashboard() {
   // Main dashboard render
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <h1 className="text-3xl font-light mb-2">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Welcome back, {session?.user?.name || session?.user?.email?.split('@')[0] || 'User'}
-            </p>
-          </div>
-
-          {/* Admin Link - Top Right */}
-          {session?.user?.role === "ADMIN" && (
-            <Link href="/admin">
-              <Button variant="outline" size="sm">
-                🛡️ Admin Dashboard
-              </Button>
-            </Link>
-          )}
-        </div>
-      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

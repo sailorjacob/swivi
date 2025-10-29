@@ -148,13 +148,6 @@ export default function CampaignsPage() {
   return (
     <ErrorBoundary fallback={CampaignErrorFallback}>
       <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-light text-foreground">Active Campaigns</h1>
-          <p className="text-muted-foreground mt-2">
-            Join campaigns and start earning from your content
-          </p>
-        </div>
 
       {/* Empty State */}
       {campaigns.length === 0 ? (

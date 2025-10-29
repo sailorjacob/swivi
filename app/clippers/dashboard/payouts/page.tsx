@@ -171,7 +171,6 @@ export default function PayoutsPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-light text-foreground">Payouts</h1>
       
       {/* Earnings Overview */}
       <div className="grid gap-4 md:grid-cols-3 mb-8">
@@ -180,7 +179,7 @@ export default function PayoutsPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Earned</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold text-foreground">
               ${totalEarned.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">All time earnings</p>
@@ -192,12 +191,12 @@ export default function PayoutsPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Available Balance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-foreground">
               ${availableBalance.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">From completed campaigns</p>
             {availableBalance < minimumPayout && (
-              <p className="text-xs text-yellow-600 mt-2">
+              <p className="text-xs text-muted-foreground/70 mt-2">
                 Need ${(minimumPayout - availableBalance).toFixed(2)} more to request payout
               </p>
             )}
@@ -209,7 +208,7 @@ export default function PayoutsPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Pending Earnings</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-foreground">
               ${activeCampaignEarnings.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">From active campaigns</p>
