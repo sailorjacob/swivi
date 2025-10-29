@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Check, X, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2, AlertCircle } from "lucide-react"
+import { Check, X, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2, AlertCircle, Music, PlayCircle, Camera, Twitter } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -90,6 +90,22 @@ const payoutStatusOptions = [
   { value: "paid", label: "Paid" },
   { value: "unpaid", label: "Unpaid" }
 ]
+
+// Get platform icon component
+const getPlatformIcon = (platform: string) => {
+  switch (platform.toUpperCase()) {
+    case "TIKTOK":
+      return <Music className="w-4 h-4" />
+    case "YOUTUBE":
+      return <PlayCircle className="w-4 h-4" />
+    case "INSTAGRAM":
+      return <Camera className="w-4 h-4" />
+    case "TWITTER":
+      return <Twitter className="w-4 h-4" />
+    default:
+      return <Target className="w-4 h-4" />
+  }
+}
 
 export default function AdminSubmissionsPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
@@ -230,19 +246,9 @@ export default function AdminSubmissionsPage() {
     }
   }
 
-  // Get status badge color - professional, subtle styling
+  // Get status badge color - monochromatic styling
   const getStatusColor = (submission: Submission) => {
-    if (submission.requiresReview) {
-      return "bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/50 dark:text-orange-300 dark:border-orange-800 font-medium"
-    }
-
-    switch (submission.status) {
-      case "PENDING": return "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800 font-medium"
-      case "APPROVED": return "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800 font-medium"
-      case "REJECTED": return "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800 font-medium"
-      case "PAID": return "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800 font-medium"
-      default: return "bg-slate-50 text-slate-700 border border-slate-200 dark:bg-slate-950/50 dark:text-slate-300 dark:border-slate-800 font-medium"
-    }
+    return "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 font-medium"
   }
 
   // Calculate stats
@@ -503,17 +509,17 @@ export default function AdminSubmissionsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <Badge className={getStatusColor(submission)}>
-                        {submission.requiresReview ? 'FLAGGED' : submission.status}
+                        {submission.requiresReview ? 'Flagged' : submission.status.charAt(0) + submission.status.slice(1).toLowerCase()}
                       </Badge>
-                      <Badge variant="secondary">
-                        {submission.platform}
-                      </Badge>
+                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
+                        {getPlatformIcon(submission.platform)}
+                      </div>
                       <span className="text-sm text-muted-foreground">
                         {submission.users.email}
                         {submission.users.name && ` (${submission.users.name})`}
                       </span>
                       {submission.requiresReview && (
-                        <AlertCircle className="w-4 h-4 text-orange-500" title="Flagged for review" />
+                        <AlertCircle className="w-4 h-4 text-slate-500" title="Flagged for review" />
                       )}
                     </div>
                     <div className="mb-2">

@@ -23,8 +23,28 @@ import {
   Wallet,
   Clock,
   CheckCircle,
-  Trash2
+  Trash2,
+  Music,
+  PlayCircle,
+  Camera,
+  Twitter
 } from "lucide-react"
+
+// Get platform icon component
+const getPlatformIcon = (platform: string) => {
+  switch (platform.toUpperCase()) {
+    case "TIKTOK":
+      return <Music className="w-4 h-4" />
+    case "YOUTUBE":
+      return <PlayCircle className="w-4 h-4" />
+    case "INSTAGRAM":
+      return <Camera className="w-4 h-4" />
+    case "TWITTER":
+      return <Twitter className="w-4 h-4" />
+    default:
+      return <Target className="w-4 h-4" />
+  }
+}
 
 interface DashboardData {
   stats: Array<{
@@ -304,26 +324,53 @@ export default function ClipperDashboard() {
             )}
           </div>
 
-          {/* Admin and Test Links - Top Right */}
-          <div className="flex gap-2">
-            {/* Test Link - Available to all users */}
-            <Link href="/test/view-tracking">
+          {/* Admin Link - Top Right */}
+          {session?.user?.role === "ADMIN" && (
+            <Link href="/admin">
               <Button variant="outline" size="sm">
-                🧪 Test View Tracking
+                🛡️ Admin Dashboard
               </Button>
             </Link>
-
-            {/* Admin Link */}
-            {session?.user?.role === "ADMIN" && (
-              <Link href="/admin">
-                <Button variant="outline" size="sm">
-                  🛡️ Admin Dashboard
-                </Button>
-              </Link>
-            )}
-          </div>
+          )}
         </div>
       </div>
+
+      {/* Earnings Overview Card */}
+      {data && (data.totalEarnings > 0 || (data as any).activeCampaignEarnings > 0) && (
+        <Card className="mb-6 bg-muted/30">
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Earned</p>
+                  <p className="text-lg font-semibold">${data.totalEarnings?.toFixed(2) || '0.00'}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Available Balance</p>
+                  <p className="text-lg font-semibold text-foreground">${data.availableBalance?.toFixed(2) || '0.00'}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">From completed campaigns</p>
+                </div>
+              </div>
+              
+              {data.availableBalance < 20 && (
+                <p className="text-xs text-muted-foreground">Need ${(20 - (data.availableBalance || 0)).toFixed(2)} more to request payout</p>
+              )}
+              
+              {(data as any).activeCampaignEarnings > 0 && (
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-muted-foreground">Active Campaign Earnings</p>
+                  <p className="text-sm font-medium">${((data as any).activeCampaignEarnings).toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Available when campaigns complete</p>
+                </div>
+              )}
+              
+              <p className="text-xs text-muted-foreground italic pt-2 border-t">
+                Minimum $20 required to request payout
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -469,17 +516,12 @@ export default function ClipperDashboard() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-2">
-                      <Badge
-                        className={`capitalize font-medium ${
-                          clip.status === 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800' :
-                          clip.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800' :
-                          clip.status === 'rejected' ? 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800' :
-                          'bg-slate-50 text-slate-700 border border-slate-200 dark:bg-slate-950/50 dark:text-slate-300 dark:border-slate-800'
-                        }`}
-                      >
+                      <Badge className="bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 font-medium capitalize">
                         {clip.status}
                       </Badge>
-                      <span className="text-muted-foreground text-sm">{clip.platform}</span>
+                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
+                        {getPlatformIcon(clip.platform)}
+                      </div>
                     </div>
                   </div>
 

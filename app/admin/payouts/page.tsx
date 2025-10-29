@@ -165,12 +165,12 @@ export default function AdminPayoutsPage() {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>User</TableHead>
-          <TableHead>Amount</TableHead>
-          <TableHead>Method</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Requested</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead className="text-left">User</TableHead>
+          <TableHead className="text-left">Amount</TableHead>
+          <TableHead className="text-left">Method</TableHead>
+          <TableHead className="text-left">Status</TableHead>
+          <TableHead className="text-left">Requested</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -183,7 +183,7 @@ export default function AdminPayoutsPage() {
         ) : (
           requests.map((request) => (
             <TableRow key={request.id}>
-              <TableCell>
+              <TableCell className="py-4">
                 <div>
                   <div className="font-medium">{request.user.name || 'Unknown'}</div>
                   <div className="text-sm text-muted-foreground">{request.user.email}</div>
@@ -192,13 +192,13 @@ export default function AdminPayoutsPage() {
                   </div>
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="py-4">
                 <div className="flex items-center gap-1 font-medium">
                   <DollarSign className="w-4 h-4" />
                   {request.amount.toFixed(2)}
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="py-4">
                 <div>
                   <Badge variant="outline">{request.paymentMethod}</Badge>
                   <div className="text-xs text-muted-foreground mt-1">
@@ -206,8 +206,8 @@ export default function AdminPayoutsPage() {
                   </div>
                 </div>
               </TableCell>
-              <TableCell>{getStatusBadge(request.status)}</TableCell>
-              <TableCell>
+              <TableCell className="py-4">{getStatusBadge(request.status)}</TableCell>
+              <TableCell className="py-4">
                 <div className="text-sm">
                   {new Date(request.requestedAt).toLocaleDateString()}
                 </div>
@@ -215,7 +215,7 @@ export default function AdminPayoutsPage() {
                   {new Date(request.requestedAt).toLocaleTimeString()}
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="py-4 text-right">
                 <Button
                   variant="outline"
                   size="sm"
@@ -238,13 +238,14 @@ export default function AdminPayoutsPage() {
   const rejectedRequests = payoutRequests.filter(r => r.status === 'REJECTED')
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Payout Management</h1>
-        <p className="text-muted-foreground">
-          Review and process clipper payout requests
-        </p>
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Payout Management</h1>
+          <p className="text-muted-foreground">
+            Review and process clipper payout requests
+          </p>
+        </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -458,6 +459,7 @@ export default function AdminPayoutsPage() {
           )}
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   )
 }

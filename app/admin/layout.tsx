@@ -14,11 +14,9 @@ import {
   Shield,
   BarChart3,
   Users,
-  Settings,
   LogOut,
   Menu,
   ArrowLeft,
-  Beaker,
   Wallet
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -60,16 +58,6 @@ const navItems: NavItem[] = [
     label: "User Management",
     href: "/admin/users",
     icon: Users
-  },
-  {
-    label: "View Tracking Test",
-    href: "/test/view-tracking",
-    icon: Beaker
-  },
-  {
-    label: "Debug Tools",
-    href: "/debug",
-    icon: Settings
   }
 ]
 
