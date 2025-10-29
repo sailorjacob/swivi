@@ -162,6 +162,21 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
+    // Check for duplicate URL in the same campaign
+    const existingSubmission = await prisma.clipSubmission.findFirst({
+      where: {
+        campaignId: validatedData.campaignId,
+        clipUrl: validatedData.clipUrl
+      }
+    })
+
+    if (existingSubmission) {
+      return NextResponse.json({
+        error: "Duplicate submission",
+        details: "This URL has already been submitted to this campaign."
+      }, { status: 400 })
+    }
+
     // Admin bypass for testing - admins can submit any URL without verification
     if (!isAdmin) {
       // Verify platform access - user must have verified account for this platform

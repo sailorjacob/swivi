@@ -133,7 +133,9 @@ export async function GET(request: NextRequest) {
           rejectionReason: true,
           requiresReview: true,
           reviewReason: true,
-          clipId: true, // Add clipId to check for null values
+          clipId: true,
+          initialViews: true,
+          finalEarnings: true,
           users: {
             select: {
               id: true,
@@ -215,11 +217,20 @@ export async function GET(request: NextRequest) {
       
       const processedSubmissions = convertBigIntToString(submissions).map((submission: any) => {
         try {
+          // Calculate view change
+          const latestViews = submission.clips?.view_tracking?.[0]?.views || BigInt(0)
+          const initialViews = submission.initialViews || BigInt(0)
+          const viewChange = latestViews - initialViews
+          
           return {
             ...submission,
             createdAt: submission.createdAt ? new Date(submission.createdAt).toISOString() : null,
             updatedAt: submission.updatedAt ? new Date(submission.updatedAt).toISOString() : null,
             paidAt: submission.paidAt ? new Date(submission.paidAt).toISOString() : null,
+            initialViews: submission.initialViews ? submission.initialViews.toString() : "0",
+            finalEarnings: submission.finalEarnings ? submission.finalEarnings.toString() : "0",
+            currentViews: latestViews.toString(),
+            viewChange: viewChange.toString(),
             // Ensure clips data is properly processed
             clips: submission.clips ? {
               ...submission.clips,
@@ -257,11 +268,20 @@ export async function GET(request: NextRequest) {
       // Convert dates to ISO strings and BigInt to strings for error case too
       const processedSubmissions = convertBigIntToString(submissions).map((submission: any) => {
         try {
+          // Calculate view change
+          const latestViews = submission.clips?.view_tracking?.[0]?.views || BigInt(0)
+          const initialViews = submission.initialViews || BigInt(0)
+          const viewChange = latestViews - initialViews
+          
           return {
             ...submission,
             createdAt: submission.createdAt ? new Date(submission.createdAt).toISOString() : null,
             updatedAt: submission.updatedAt ? new Date(submission.updatedAt).toISOString() : null,
             paidAt: submission.paidAt ? new Date(submission.paidAt).toISOString() : null,
+            initialViews: submission.initialViews ? submission.initialViews.toString() : "0",
+            finalEarnings: submission.finalEarnings ? submission.finalEarnings.toString() : "0",
+            currentViews: latestViews.toString(),
+            viewChange: viewChange.toString(),
             clips: submission.clips ? {
               ...submission.clips,
               views: submission.clips.views ? submission.clips.views.toString() : null,

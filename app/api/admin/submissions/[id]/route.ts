@@ -45,6 +45,9 @@ export async function GET(
         paidAt: true,
         createdAt: true,
         updatedAt: true,
+        initialViews: true,
+        finalEarnings: true,
+        clipId: true,
         users: {
           select: {
             id: true,
@@ -60,6 +63,22 @@ export async function GET(
             budget: true,
             spent: true
           }
+        },
+        clips: {
+          select: {
+            id: true,
+            earnings: true,
+            view_tracking: {
+              orderBy: {
+                date: 'desc'
+              },
+              take: 1,
+              select: {
+                views: true,
+                date: true
+              }
+            }
+          }
         }
       }
     })
@@ -68,7 +87,31 @@ export async function GET(
       return NextResponse.json({ error: "Submission not found" }, { status: 404 })
     }
 
-    return NextResponse.json(submission)
+    // Get latest view count and calculate change
+    const latestViews = submission.clips?.view_tracking[0]?.views || BigInt(0)
+    const initialViews = submission.initialViews || BigInt(0)
+    const viewChange = latestViews - initialViews
+
+    // Convert BigInt values to strings for JSON serialization
+    const submissionResponse = {
+      ...submission,
+      initialViews: submission.initialViews?.toString() || "0",
+      finalEarnings: submission.finalEarnings?.toString() || "0",
+      payout: submission.payout?.toString() || null,
+      currentViews: latestViews.toString(),
+      viewChange: viewChange.toString(),
+      earnings: submission.clips?.earnings?.toString() || "0",
+      clips: submission.clips ? {
+        ...submission.clips,
+        earnings: submission.clips.earnings?.toString() || "0",
+        view_tracking: submission.clips.view_tracking.map(vt => ({
+          ...vt,
+          views: vt.views.toString()
+        }))
+      } : null
+    }
+
+    return NextResponse.json(submissionResponse)
   } catch (error) {
     console.error("Error fetching submission:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
@@ -194,7 +237,15 @@ export async function PUT(
       })
     }
 
-    return NextResponse.json(updatedSubmission)
+    // Convert BigInt for response
+    const responseData = {
+      ...updatedSubmission,
+      initialViews: updatedSubmission.initialViews?.toString() || "0",
+      finalEarnings: updatedSubmission.finalEarnings?.toString() || "0",
+      payout: updatedSubmission.payout?.toString() || null,
+    }
+
+    return NextResponse.json(responseData)
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid data", details: error.errors }, { status: 400 })
@@ -216,25 +267,48 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user is admin
+    // Get current user
     const currentUserData = await prisma.user.findUnique({
       where: { supabaseAuthId: user.id }
     })
 
-    if (!currentUserData || currentUserData.role !== "ADMIN") {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
+    if (!currentUserData) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    // Check if submission exists
+    // Check if submission exists and get its details
     const submission = await prisma.clipSubmission.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
+      include: {
+        clips: {
+          select: {
+            earnings: true
+          }
+        }
+      }
     })
 
     if (!submission) {
       return NextResponse.json({ error: "Submission not found" }, { status: 404 })
     }
 
-    // Delete the submission
+    // Check permissions: Admin can delete any, clipper can only delete their own
+    const isAdmin = currentUserData.role === "ADMIN"
+    const isOwner = submission.userId === currentUserData.id
+
+    if (!isAdmin && !isOwner) {
+      return NextResponse.json({ error: "You can only delete your own submissions" }, { status: 403 })
+    }
+
+    // Clippers cannot delete if there are earnings
+    if (!isAdmin && submission.clips?.earnings && Number(submission.clips.earnings) > 0) {
+      return NextResponse.json({ 
+        error: "Cannot delete submission with earnings",
+        details: "This submission has already earned money and cannot be deleted."
+      }, { status: 400 })
+    }
+
+    // Delete the submission (and related clip if no other submissions reference it)
     await prisma.clipSubmission.delete({
       where: { id: params.id }
     })

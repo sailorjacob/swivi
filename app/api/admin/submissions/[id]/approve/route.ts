@@ -62,7 +62,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({
       message: "Submission approved and clip created successfully",
       clipId: result.clipId,
-      initialViews: result.initialViews,
+      initialViews: typeof result.initialViews === 'bigint' ? result.initialViews.toString() : result.initialViews,
       metadata: result.metadata
     })
 
