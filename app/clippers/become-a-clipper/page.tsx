@@ -128,11 +128,11 @@ export default function BecomeAClipperPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Users className="w-4 h-4" />
-                <span>Join 1000+ active clippers</span>
+                <span>Join our active community</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <TrendingUp className="w-4 h-4" />
-                <span>Average $500+/month earnings</span>
+                <span>Earn competitive monthly earnings</span>
               </div>
             </div>
           </motion.div>

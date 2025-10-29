@@ -25,8 +25,8 @@ export function CreatorViewsCalculator() {
     platforms: 3,
     daysPerWeek: 5,
     viewsPerPost: 12000,
-    budget: 500,
-    paymentPer1000Views: 2.0
+    budget: 1000,
+    paymentPer1000Views: 1.0
   })
 
   const [monthlyViews, setMonthlyViews] = useState(0)
@@ -135,7 +135,7 @@ export function CreatorViewsCalculator() {
                   value={[values.budget]}
                   onValueChange={(value: number[]) => handleSliderChange('budget', value)}
                   min={500}
-                  max={10000}
+                  max={100000}
                   step={100}
                   className="w-full"
                 />
