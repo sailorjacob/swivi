@@ -683,20 +683,7 @@ export default function AdminCampaignsPage() {
         transition={{ duration: 0.6 }}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <div className="flex items-center gap-4 mb-2">
-              <Link href="/admin">
-                <Button variant="outline" size="sm">
-                  ← Back to Admin
-                </Button>
-              </Link>
-              <h1 className="text-3xl font-light">Campaign Management</h1>
-            </div>
-            <p className="text-muted-foreground">
-              Create and manage brand activation campaigns
-            </p>
-          </div>
+        <div className="flex justify-end items-center mb-8">
           <Button onClick={() => setShowCreateDialog(!showCreateDialog)}>
             <Plus className="h-4 w-4 mr-2" />
             {showCreateDialog ? "Cancel" : "Create Campaign"}

@@ -154,23 +154,6 @@ export default function AdminDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Link href="/clippers/dashboard">
-              <Button variant="outline" size="sm">
-                ← Back to Dashboard
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-3xl font-light mb-2">Admin Dashboard</h1>
-              <p className="text-muted-foreground">
-                Welcome back, {session?.user?.name || session?.user?.email}
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card>
