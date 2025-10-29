@@ -42,7 +42,7 @@ export class PayoutCalculationService {
               status: 'APPROVED'
             },
             include: {
-              clip: {
+              clips: {
                 include: {
                   viewTracking: true
                 }
@@ -86,7 +86,7 @@ export class PayoutCalculationService {
               status: 'APPROVED'
             },
             include: {
-              clip: {
+              clips: {
                 include: {
                   viewTracking: true
                 }
@@ -113,10 +113,10 @@ export class PayoutCalculationService {
 
       // Calculate payouts for each approved submission
       for (const submission of campaign.clipSubmissions) {
-        if (!submission.clip) continue
+        if (!submission.clips) continue
 
         // Get latest view tracking data
-        const latestTracking = submission.clip.viewTracking
+        const latestTracking = submission.clips.viewTracking
           .sort((a, b) => b.date.getTime() - a.date.getTime())[0]
 
         const views = latestTracking ? Number(latestTracking.views) : 0
@@ -241,7 +241,7 @@ export class PayoutCalculationService {
               status: 'APPROVED'
             },
             include: {
-              clip: {
+              clips: {
                 include: {
                   viewTracking: true
                 }
@@ -265,8 +265,8 @@ export class PayoutCalculationService {
 
       // Calculate total views from approved submissions
       const totalViews = campaign.clipSubmissions.reduce((sum, submission) => {
-        if (!submission.clip) return sum
-        const latestTracking = submission.clip.viewTracking
+        if (!submission.clips) return sum
+        const latestTracking = submission.clips.viewTracking
           .sort((a, b) => b.date.getTime() - a.date.getTime())[0]
         return sum + (latestTracking ? Number(latestTracking.views) : 0)
       }, 0)

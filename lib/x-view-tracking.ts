@@ -455,7 +455,7 @@ export class XViewTrackingService {
       const platformStats = new Map<string, { views: number; submissions: number }>()
 
       for (const submission of submissions) {
-        const latestTracking = submission.clip?.viewTracking
+        const latestTracking = submission.clips?.viewTracking
           ?.sort((a, b) => b.date.getTime() - a.date.getTime())[0]
 
         const views = latestTracking ? Number(latestTracking.views) : 0

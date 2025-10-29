@@ -148,8 +148,8 @@ export class AnalyticsService {
         const approvedSubmissions = campaign.clipSubmissions.filter(s => s.status === 'APPROVED').length
 
         const totalViews = campaign.clipSubmissions.reduce((sum, submission) => {
-          if (submission.clip?.viewTracking && submission.clip.viewTracking.length > 0) {
-            return sum + Number(submission.clip.viewTracking[0]?.views || 0)
+          if (submission.clips?.viewTracking && submission.clips.viewTracking.length > 0) {
+            return sum + Number(submission.clips.viewTracking[0]?.views || 0)
           }
           return sum
         }, 0)

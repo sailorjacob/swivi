@@ -236,23 +236,23 @@ export async function GET(request: NextRequest) {
       })
 
       const totalCampaignViews = campaignSubmissions.reduce((sum, submission) => {
-        if (submission.clip?.viewTracking && submission.clip.viewTracking.length > 0) {
-          return sum + Number(submission.clip.viewTracking[0]?.views || 0)
+        if (submission.clips?.viewTracking && submission.clips.viewTracking.length > 0) {
+          return sum + Number(submission.clips.viewTracking[0]?.views || 0)
         }
         return sum
       }, 0)
 
       const totalCampaignEarnings = campaignSubmissions
-        .filter(s => s.clip)
-        .reduce((sum, s) => sum + Number(s.clip?.earnings || 0), 0)
+        .filter(s => s.clips)
+        .reduce((sum, s) => sum + Number(s.clips?.earnings || 0), 0)
 
       const topPerformers = campaignSubmissions
-        .filter(submission => submission.clip?.viewTracking && submission.clip.viewTracking.length > 0)
+        .filter(submission => submission.clips?.viewTracking && submission.clips.viewTracking.length > 0)
         .map(submission => ({
           userId: submission.users.id,
           userName: submission.users.name || submission.users.email || 'Unknown',
-          views: Number(submission.clip?.viewTracking[0]?.views || 0),
-          earnings: Number(submission.clip?.earnings || 0),
+          views: Number(submission.clips?.viewTracking[0]?.views || 0),
+          earnings: Number(submission.clips?.earnings || 0),
           submissionId: submission.id
         }))
         .sort((a, b) => b.views - a.views)
