@@ -270,100 +270,29 @@ export default function ClipperDashboard() {
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <h1 className="text-3xl font-light mb-2">Dashboard</h1>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground">
               Welcome back, {session?.user?.name || session?.user?.email?.split('@')[0] || 'User'}
             </p>
-            
-            {/* Compact Earnings Breakdown */}
-            {data && (data.totalEarnings > 0 || (data as any).activeCampaignEarnings > 0) && (
-              <div className="inline-flex items-center gap-6 text-sm bg-muted/50 px-4 py-2 rounded-lg">
-                <div>
-                  <span className="text-muted-foreground">Total: </span>
-                  <span className="font-semibold">${data.totalEarnings?.toFixed(2) || '0.00'}</span>
-                </div>
-                {data.availableBalance > 0 && (
-                  <>
-                    <div className="h-4 w-px bg-border" />
-                    <div>
-                      <span className="text-muted-foreground">Available: </span>
-                      <span className="font-semibold text-foreground">${data.availableBalance.toFixed(2)}</span>
-                      {data.availableBalance >= 20 && (
-                        <Button 
-                          size="sm" 
-                          variant="default"
-                          className="ml-3 h-7 text-xs"
-                          onClick={() => {
-                            setPayoutAmount(data.availableBalance?.toFixed(2) || '')
-                            setPayoutDialogOpen(true)
-                          }}
-                        >
-                          <Wallet className="w-3 h-3 mr-1" />
-                          Request Payout
-                        </Button>
-                      )}
-                    </div>
-                  </>
-                )}
-                {(data as any).activeCampaignEarnings > 0 && (
-                  <>
-                    <div className="h-4 w-px bg-border" />
-                    <div>
-                      <span className="text-muted-foreground">Pending: </span>
-                      <span className="font-semibold text-muted-foreground">${((data as any).activeCampaignEarnings).toFixed(2)}</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
           </div>
 
-          {/* Admin Link - Top Right */}
-          {session?.user?.role === "ADMIN" && (
-            <Link href="/admin">
+          {/* Top Right Links */}
+          <div className="flex gap-2">
+            <Link href="/clippers/payouts">
               <Button variant="outline" size="sm">
-                🛡️ Admin Dashboard
+                <Wallet className="w-4 h-4 mr-2" />
+                Payouts
               </Button>
             </Link>
-          )}
+            {session?.user?.role === "ADMIN" && (
+              <Link href="/admin">
+                <Button variant="outline" size="sm">
+                  🛡️ Admin Dashboard
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
-
-      {/* Earnings Overview Card */}
-      {data && (data.totalEarnings > 0 || (data as any).activeCampaignEarnings > 0) && (
-        <Card className="mb-6 bg-muted/30">
-          <CardContent className="p-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">Total Earned</p>
-                  <p className="text-lg font-semibold">${data.totalEarnings?.toFixed(2) || '0.00'}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Available Balance</p>
-                  <p className="text-lg font-semibold text-foreground">${data.availableBalance?.toFixed(2) || '0.00'}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">From completed campaigns</p>
-                </div>
-              </div>
-              
-              {data.availableBalance < 20 && (
-                <p className="text-xs text-muted-foreground">Need ${(20 - (data.availableBalance || 0)).toFixed(2)} more to request payout</p>
-              )}
-              
-              {(data as any).activeCampaignEarnings > 0 && (
-                <div className="pt-2 border-t">
-                  <p className="text-xs text-muted-foreground">Active Campaign Earnings</p>
-                  <p className="text-sm font-medium">${((data as any).activeCampaignEarnings).toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Available when campaigns complete</p>
-                </div>
-              )}
-              
-              <p className="text-xs text-muted-foreground italic pt-2 border-t">
-                Minimum $20 required to request payout
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -511,12 +440,19 @@ export default function ClipperDashboard() {
                     <div className="flex items-center space-x-2">
                       <div className="flex items-center gap-1">
                         {getStatusIcon(clip.status)}
-                        <Badge className="bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 font-medium capitalize">
+                        <Badge className={
+                          clip.status === 'pending' 
+                            ? "bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:text-white font-medium capitalize"
+                            : "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 font-medium capitalize"
+                        }>
                           {clip.status}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
-                        {getPlatformLogo(clip.platform, '', 18)}
+                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md text-xl">
+                        {clip.platform === 'TIKTOK' && '📱'}
+                        {clip.platform === 'YOUTUBE' && '▶️'}
+                        {clip.platform === 'INSTAGRAM' && '📷'}
+                        {clip.platform === 'TWITTER' && '🐦'}
                       </div>
                     </div>
                   </div>

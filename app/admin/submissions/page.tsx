@@ -243,8 +243,13 @@ export default function AdminSubmissionsPage() {
     }
   }
 
-  // Get status badge color - monochromatic styling
+  // Get status badge color
   const getStatusColor = (submission: Submission) => {
+    // Pending gets inverted blue pill
+    if (submission.status === "PENDING" && !submission.requiresReview) {
+      return "bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:text-white font-medium"
+    }
+    // Everything else monochromatic
     return "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 font-medium"
   }
 
@@ -511,8 +516,11 @@ export default function AdminSubmissionsPage() {
                           {submission.requiresReview ? 'Flagged' : submission.status.charAt(0) + submission.status.slice(1).toLowerCase()}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
-                        {getPlatformLogo(submission.platform, '', 18)}
+                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md text-xl">
+                        {submission.platform === 'TIKTOK' && '📱'}
+                        {submission.platform === 'YOUTUBE' && '▶️'}
+                        {submission.platform === 'INSTAGRAM' && '📷'}
+                        {submission.platform === 'TWITTER' && '🐦'}
                       </div>
                       <span className="text-sm text-muted-foreground">
                         {submission.users.email}
