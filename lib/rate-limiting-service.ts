@@ -228,18 +228,18 @@ export class RateLimitingService {
       }
 
       // Determine action based on risk score
-      let action: 'allow' | 'flag' | 'block' = 'allow'
+      let fraudAction: 'allow' | 'flag' | 'block' = 'allow'
       if (riskScore >= 70) {
-        action = 'block'
+        fraudAction = 'block'
       } else if (riskScore >= 40) {
-        action = 'flag'
+        fraudAction = 'flag'
       }
 
       return {
         isSuspicious: riskScore >= 20,
         riskScore,
         reasons,
-        action
+        action: fraudAction
       }
 
     } catch (error) {

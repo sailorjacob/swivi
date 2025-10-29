@@ -68,12 +68,16 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('📥 ============= NEW SUBMISSION REQUEST =============')
   try {
     const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
+      console.error('❌ Unauthorized submission attempt:', { user, error })
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    
+    console.log('✅ User authenticated:', { userId: user.id, email: user.email })
 
     // Get the internal user ID from the database using supabaseAuthId
     const dbUser = await prisma.user.findUnique({
@@ -320,13 +324,25 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(submission, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
+      console.error('❌ Validation error:', error.errors)
       return NextResponse.json({ error: "Invalid data", details: error.errors }, { status: 400 })
     }
 
-    console.error("Error creating submission:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("❌ Error creating submission:", error)
+    console.error("❌ Error stack:", error?.stack)
+    console.error("❌ Error details:", {
+      message: error?.message,
+      name: error?.name,
+      code: error?.code,
+    })
+    
+    return NextResponse.json({ 
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' ? error?.message : undefined,
+      hint: "Check server logs for more details"
+    }, { status: 500 })
   }
 }
 
