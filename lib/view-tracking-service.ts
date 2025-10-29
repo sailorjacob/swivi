@@ -351,7 +351,7 @@ export class ViewTrackingService {
       },
       select: {
         id: true,
-        name: true,
+        title: true,
         createdAt: true,
         spent: true,
         budget: true,
@@ -428,7 +428,7 @@ export class ViewTrackingService {
 
         return {
           campaignId: campaign.id,
-          campaignName: campaign.name,
+          campaignName: campaign.title,
           clips,
           priority,
           budgetRemaining: Number(campaign.budget) - Number(campaign.spent || 0)
