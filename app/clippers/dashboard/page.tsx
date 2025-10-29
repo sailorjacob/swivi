@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
@@ -21,7 +22,8 @@ import {
   ExternalLink,
   Wallet,
   Clock,
-  CheckCircle
+  CheckCircle,
+  Trash2
 } from "lucide-react"
 
 interface DashboardData {
@@ -41,6 +43,9 @@ interface DashboardData {
     clipUrl: string
     platform: string
     createdAt: string
+    initialViews?: string
+    currentViews?: string
+    viewChange?: string
   }>
   activeCampaigns: number
   availableBalance?: number
@@ -172,6 +177,44 @@ export default function ClipperDashboard() {
       })
     } finally {
       setSubmittingPayout(false)
+    }
+  }
+
+  const handleDeleteSubmission = async (submissionId: string, hasEarnings: boolean) => {
+    if (hasEarnings) {
+      toast({
+        title: 'Cannot Delete',
+        description: 'Submissions with earnings cannot be deleted',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    try {
+      const response = await authenticatedFetch(`/api/admin/submissions/${submissionId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        toast({
+          title: 'Submission Deleted',
+          description: 'Your submission has been removed'
+        })
+        fetchDashboardData() // Refresh the dashboard
+      } else {
+        const data = await response.json()
+        toast({
+          title: 'Delete Failed',
+          description: data.error || 'Failed to delete submission',
+          variant: 'destructive'
+        })
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete submission',
+        variant: 'destructive'
+      })
     }
   }
 
@@ -451,7 +494,11 @@ export default function ClipperDashboard() {
                       <p className="text-muted-foreground text-sm mb-2">{clip.campaign}</p>
 
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
-                        <span>{clip.views.toLocaleString()} views</span>
+                        <span>{clip.views.toLocaleString()} views
+                          {clip.viewChange && Number(clip.viewChange) > 0 && (
+                            <span className="text-green-600 ml-1">(+{Number(clip.viewChange).toLocaleString()})</span>
+                          )}
+                        </span>
                         {clip.earnings > 0 && (
                           <span>${clip.earnings.toFixed(2)} earned</span>
                         )}
@@ -477,6 +524,34 @@ export default function ClipperDashboard() {
                         </button>
                       </div>
                     </div>
+                    
+                    {/* Delete button - only show for pending/rejected clips with no earnings */}
+                    {(clip.status === 'pending' || clip.status === 'rejected') && clip.earnings === 0 && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Submission?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete your submission.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteSubmission(clip.id, clip.earnings > 0)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   </div>
                 </CardContent>
               </Card>

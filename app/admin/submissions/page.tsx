@@ -31,6 +31,10 @@ interface Submission {
   reviewReason?: string
   createdAt: string
   updatedAt: string
+  initialViews?: string
+  currentViews?: string
+  viewChange?: string
+  finalEarnings?: string
   users: {
     id: string
     name: string | null
@@ -41,10 +45,10 @@ interface Submission {
   clips?: {
     id: string
     title?: string
-    views?: number
-    earnings?: number
+    views?: string
+    earnings?: string
     view_tracking?: Array<{
-      views: number
+      views: string
       date: string
     }>
   }
@@ -552,11 +556,15 @@ export default function AdminSubmissionsPage() {
                       {submission.payout && (
                         <span>Payout: ${submission.payout.toFixed(2)}</span>
                       )}
-                      {submission.clips?.views && (
-                        <span>Clip Views: {Number(submission.clips.views).toLocaleString()}</span>
+                      {submission.currentViews && Number(submission.currentViews) > 0 && (
+                        <span>Views: {Number(submission.currentViews).toLocaleString()}
+                          {submission.viewChange && Number(submission.viewChange) > 0 && (
+                            <span className="text-green-600 ml-1">(+{Number(submission.viewChange).toLocaleString()})</span>
+                          )}
+                        </span>
                       )}
                       {submission.clips?.earnings && Number(submission.clips.earnings) > 0 && (
-                        <span>Clip Earnings: ${Number(submission.clips.earnings).toFixed(2)}</span>
+                        <span>Earnings: ${Number(submission.clips.earnings).toFixed(2)}</span>
                       )}
                       {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 && (
                         <span>Last Tracked: {new Date(submission.clips.view_tracking[0].date).toLocaleDateString()}</span>

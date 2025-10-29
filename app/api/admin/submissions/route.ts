@@ -215,7 +215,7 @@ export async function GET(request: NextRequest) {
       // Convert dates to ISO strings and BigInt to strings
       console.log("🔍 Processing submissions for response, count:", submissions.length)
       
-      const processedSubmissions = convertBigIntToString(submissions).map((submission: any) => {
+      const processedSubmissions = submissions.map((submission: any) => {
         try {
           // Calculate view change
           const latestViews = submission.clips?.view_tracking?.[0]?.views || BigInt(0)
@@ -224,9 +224,9 @@ export async function GET(request: NextRequest) {
           
           return {
             ...submission,
-            createdAt: submission.createdAt ? new Date(submission.createdAt).toISOString() : null,
-            updatedAt: submission.updatedAt ? new Date(submission.updatedAt).toISOString() : null,
-            paidAt: submission.paidAt ? new Date(submission.paidAt).toISOString() : null,
+            createdAt: submission.createdAt ? submission.createdAt.toISOString() : null,
+            updatedAt: submission.updatedAt ? submission.updatedAt.toISOString() : null,
+            paidAt: submission.paidAt ? submission.paidAt.toISOString() : null,
             initialViews: submission.initialViews ? submission.initialViews.toString() : "0",
             finalEarnings: submission.finalEarnings ? submission.finalEarnings.toString() : "0",
             currentViews: latestViews.toString(),
@@ -236,8 +236,17 @@ export async function GET(request: NextRequest) {
               ...submission.clips,
               views: submission.clips.views ? submission.clips.views.toString() : null,
               earnings: submission.clips.earnings ? submission.clips.earnings.toString() : null,
-              view_tracking: submission.clips.view_tracking || []
-            } : null
+              view_tracking: submission.clips.view_tracking?.map((vt: any) => ({
+                ...vt,
+                views: vt.views.toString(),
+                date: vt.date.toISOString()
+              })) || []
+            } : null,
+            users: {
+              ...submission.users,
+              totalViews: submission.users.totalViews ? Number(submission.users.totalViews) : 0,
+              totalEarnings: submission.users.totalEarnings ? Number(submission.users.totalEarnings) : 0
+            }
           }
         } catch (dateError) {
           console.error("❌ Error processing submission dates:", dateError, "Submission:", submission.id)
@@ -266,7 +275,7 @@ export async function GET(request: NextRequest) {
       console.error("❌ Database error counting submissions:", dbError)
       
       // Convert dates to ISO strings and BigInt to strings for error case too
-      const processedSubmissions = convertBigIntToString(submissions).map((submission: any) => {
+      const processedSubmissions = submissions.map((submission: any) => {
         try {
           // Calculate view change
           const latestViews = submission.clips?.view_tracking?.[0]?.views || BigInt(0)
@@ -275,9 +284,9 @@ export async function GET(request: NextRequest) {
           
           return {
             ...submission,
-            createdAt: submission.createdAt ? new Date(submission.createdAt).toISOString() : null,
-            updatedAt: submission.updatedAt ? new Date(submission.updatedAt).toISOString() : null,
-            paidAt: submission.paidAt ? new Date(submission.paidAt).toISOString() : null,
+            createdAt: submission.createdAt ? submission.createdAt.toISOString() : null,
+            updatedAt: submission.updatedAt ? submission.updatedAt.toISOString() : null,
+            paidAt: submission.paidAt ? submission.paidAt.toISOString() : null,
             initialViews: submission.initialViews ? submission.initialViews.toString() : "0",
             finalEarnings: submission.finalEarnings ? submission.finalEarnings.toString() : "0",
             currentViews: latestViews.toString(),
@@ -286,8 +295,17 @@ export async function GET(request: NextRequest) {
               ...submission.clips,
               views: submission.clips.views ? submission.clips.views.toString() : null,
               earnings: submission.clips.earnings ? submission.clips.earnings.toString() : null,
-              view_tracking: submission.clips.view_tracking || []
-            } : null
+              view_tracking: submission.clips.view_tracking?.map((vt: any) => ({
+                ...vt,
+                views: vt.views.toString(),
+                date: vt.date.toISOString()
+              })) || []
+            } : null,
+            users: {
+              ...submission.users,
+              totalViews: submission.users.totalViews ? Number(submission.users.totalViews) : 0,
+              totalEarnings: submission.users.totalEarnings ? Number(submission.users.totalEarnings) : 0
+            }
           }
         } catch (dateError) {
           console.error("❌ Error processing submission dates in error case:", dateError)
