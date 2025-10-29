@@ -46,9 +46,7 @@ export async function GET(request: NextRequest) {
       totalUsers,
       totalCampaigns,
       totalSubmissions,
-      activeCampaigns,
-      totalViews,
-      totalEarnings
+      activeCampaigns
     ] = await Promise.all([
       // Total users
       prisma.user.count(),
@@ -62,22 +60,41 @@ export async function GET(request: NextRequest) {
       // Active campaigns
       prisma.campaign.count({
         where: { status: "ACTIVE" }
-      }),
-
-      // Total views across all users
-      prisma.user.aggregate({
-        _sum: {
-          totalViews: true
-        }
-      }),
-
-      // Total earnings across all users
-      prisma.user.aggregate({
-        _sum: {
-          totalEarnings: true
-        }
       })
     ])
+
+    // Calculate REAL-TIME totals from actual clips (not cached User values)
+    const allApprovedSubmissions = await prisma.clipSubmission.findMany({
+      where: {
+        status: 'APPROVED'
+      },
+      select: {
+        clips: {
+          select: {
+            earnings: true,
+            view_tracking: {
+              orderBy: { date: 'desc' },
+              take: 1,
+              select: {
+                views: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    // Calculate real-time totals
+    const totalEarnings = allApprovedSubmissions.reduce((sum, submission) => {
+      return sum + Number(submission.clips?.earnings || 0)
+    }, 0)
+
+    const totalViews = allApprovedSubmissions.reduce((sum, submission) => {
+      if (submission.clips?.view_tracking?.[0]) {
+        return sum + Number(submission.clips.view_tracking[0].views || 0)
+      }
+      return sum
+    }, 0)
 
     // Get top performing campaigns
     const topCampaigns = await prisma.campaign.findMany({
@@ -107,12 +124,17 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Get payout statistics
-    const paidSubmissions = await prisma.clipSubmission.aggregate({
-      where: { status: 'PAID' },
-      _sum: { payout: true },
-      _count: true
-    })
+    // Get payout statistics - Real-time from PayoutRequest table
+    const [completedPayouts, pendingPayoutRequests] = await Promise.all([
+      prisma.payout.aggregate({
+        _sum: { amount: true },
+        _count: true
+      }),
+      prisma.payoutRequest.aggregate({
+        where: { status: 'PENDING' },
+        _sum: { amount: true }
+      })
+    ])
 
     const pendingSubmissions = await prisma.clipSubmission.count({
       where: { status: 'APPROVED' }
@@ -135,8 +157,8 @@ export async function GET(request: NextRequest) {
         totalCampaigns,
         totalSubmissions,
         activeCampaigns,
-        totalViews: Number(totalViews._sum.totalViews || 0),
-        totalEarnings: Number(totalEarnings._sum.totalEarnings || 0),
+        totalViews: totalViews, // Real-time from clips
+        totalEarnings: totalEarnings, // Real-time from clips
         pendingSubmissions: 0, // We'll calculate these from submissions
         approvedSubmissions: 0,
         paidSubmissions: 0
@@ -154,9 +176,9 @@ export async function GET(request: NextRequest) {
         return acc
       }, {} as Record<string, number>),
       payoutStats: {
-        totalPaid: Number(paidSubmissions._sum.payout || 0),
-        pendingPayouts: pendingSubmissions * 0, // For now, assuming no pending payouts
-        averagePayout: paidSubmissions._count > 0 ? Number(paidSubmissions._sum.payout || 0) / paidSubmissions._count : 0
+        totalPaid: Number(completedPayouts._sum.amount || 0),
+        pendingPayouts: Number(pendingPayoutRequests._sum.amount || 0),
+        averagePayout: completedPayouts._count > 0 ? Number(completedPayouts._sum.amount || 0) / completedPayouts._count : 0
       }
     }
 
@@ -221,8 +243,8 @@ export async function GET(request: NextRequest) {
       }, 0)
 
       const totalCampaignEarnings = campaignSubmissions
-        .filter(s => s.status === 'PAID' && s.payout)
-        .reduce((sum, s) => sum + Number(s.payout || 0), 0)
+        .filter(s => s.clip)
+        .reduce((sum, s) => sum + Number(s.clip?.earnings || 0), 0)
 
       const topPerformers = campaignSubmissions
         .filter(submission => submission.clip?.viewTracking && submission.clip.viewTracking.length > 0)
@@ -230,7 +252,7 @@ export async function GET(request: NextRequest) {
           userId: submission.users.id,
           userName: submission.users.name || submission.users.email || 'Unknown',
           views: Number(submission.clip?.viewTracking[0]?.views || 0),
-          earnings: Number(submission.payout || 0),
+          earnings: Number(submission.clip?.earnings || 0),
           submissionId: submission.id
         }))
         .sort((a, b) => b.views - a.views)
@@ -287,8 +309,8 @@ export async function GET(request: NextRequest) {
         }, 0)
 
         const totalUserEarnings = userStats.clipSubmissions
-          .filter(s => s.status === 'PAID' && s.payout)
-          .reduce((sum, s) => sum + Number(s.payout || 0), 0)
+          .filter(s => s.clip)
+          .reduce((sum, s) => sum + Number(s.clip?.earnings || 0), 0)
 
         const recentSubmissions = userStats.clipSubmissions
           .filter(submission => submission.clip?.viewTracking && submission.clip.viewTracking.length > 0)
@@ -296,7 +318,7 @@ export async function GET(request: NextRequest) {
             campaignTitle: submission.campaign.title,
             platform: submission.platform,
             views: Number(submission.clip?.viewTracking[0]?.views || 0),
-            earnings: Number(submission.payout || 0),
+            earnings: Number(submission.clip?.earnings || 0),
             status: submission.status,
             submittedAt: submission.createdAt
           }))
