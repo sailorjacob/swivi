@@ -10,7 +10,7 @@ const MINIMUM_PAYOUT = 20 // $20 minimum
 
 const payoutRequestSchema = z.object({
   amount: z.number().min(MINIMUM_PAYOUT, `Minimum payout is $${MINIMUM_PAYOUT}`),
-  paymentMethod: z.enum(['PAYPAL', 'BANK_TRANSFER', 'STRIPE']),
+  paymentMethod: z.enum(['PAYPAL', 'BANK_TRANSFER', 'STRIPE', 'USDC', 'BITCOIN']),
   paymentDetails: z.string().min(1, 'Payment details required (email, wallet address, etc.)')
 })
 

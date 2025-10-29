@@ -31,7 +31,7 @@ export default function PayoutsPage() {
   const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(false)
   const [payoutAmount, setPayoutAmount] = useState("")
-  const [payoutMethod, setPayoutMethod] = useState("")
+  const [payoutMethod, setPayoutMethod] = useState<'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE' | 'USDC' | 'BITCOIN'>('PAYPAL')
   const [payoutSaving, setPayoutSaving] = useState(false)
   const [payoutSuccess, setPayoutSuccess] = useState(false)
   const [user, setUser] = useState<any>(null)
@@ -97,6 +97,11 @@ export default function PayoutsPage() {
     
     const amount = parseFloat(payoutAmount)
     
+    if (isNaN(amount)) {
+      toast.error("Please enter a valid amount")
+      return
+    }
+    
     if (amount < minimumPayout) {
       toast.error(`Minimum payout is $${minimumPayout}`)
       return
@@ -112,16 +117,45 @@ export default function PayoutsPage() {
       return
     }
 
+    // Get payment details based on method
+    let paymentDetails = ''
+    if (payoutMethod === 'PAYPAL') {
+      paymentDetails = payoutData.paypalEmail || ''
+    } else if (payoutMethod === 'USDC') {
+      paymentDetails = payoutData.walletAddress || ''
+    } else if (payoutMethod === 'BITCOIN') {
+      paymentDetails = payoutData.bitcoinAddress || ''
+    }
+
+    if (!paymentDetails) {
+      toast.error(`Please set your ${payoutMethod} payment details in Payout Settings first`)
+      return
+    }
+
     setIsLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      toast.success("Payout request submitted successfully!")
-      setPayoutAmount("")
-      setPayoutMethod("")
+      const response = await authenticatedFetch("/api/clippers/payout-request", {
+        method: "POST",
+        body: JSON.stringify({
+          amount,
+          paymentMethod,
+          paymentDetails
+        })
+      })
+
+      if (response.ok) {
+        toast.success("Payout request submitted successfully!")
+        setPayoutAmount("")
+        setPayoutMethod("PAYPAL")
+        // Refresh dashboard data to update available balance
+        loadDashboard()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to submit payout request")
+      }
     } catch (error) {
+      console.error("Error submitting payout request:", error)
       toast.error("Failed to submit payout request")
     } finally {
       setIsLoading(false)
@@ -257,19 +291,19 @@ export default function PayoutsPage() {
                     <SelectValue placeholder="Select payout method" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="usdc">
+                    <SelectItem value="USDC">
                       <div className="flex items-center gap-2">
                         <Wallet className="w-4 h-4" />
                         USDC Wallet
                       </div>
                     </SelectItem>
-                    <SelectItem value="bitcoin">
+                    <SelectItem value="BITCOIN">
                       <div className="flex items-center gap-2">
                         <Wallet className="w-4 h-4" />
                         Bitcoin
                       </div>
                     </SelectItem>
-                    <SelectItem value="paypal">
+                    <SelectItem value="PAYPAL">
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4" />
                         PayPal

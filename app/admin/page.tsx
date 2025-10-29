@@ -208,14 +208,14 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-blue-200 bg-blue-50/30 dark:bg-blue-900/10 dark:border-blue-800">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Activity className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                <Activity className="h-8 w-8 text-muted-foreground" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Tracked Views</p>
-                  <p className="text-2xl font-semibold text-blue-900 dark:text-blue-100">{Number(stats.trackedViews).toLocaleString()}</p>
-                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">From scrapes</p>
+                  <p className="text-sm font-medium text-muted-foreground">Tracked Views</p>
+                  <p className="text-2xl font-semibold">{Number(stats.trackedViews).toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground mt-1">From scrapes</p>
                 </div>
               </div>
             </CardContent>
