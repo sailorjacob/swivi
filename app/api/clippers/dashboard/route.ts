@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
       userData = await prisma.user.findUnique({
         where: { supabaseAuthId: userId },
         select: {
+          id: true,
           totalViews: true,
           totalEarnings: true,
           clipSubmissions: {
@@ -50,19 +51,22 @@ export async function GET(request: NextRequest) {
               clipUrl: true,
               platform: true,
               createdAt: true,
+              initialViews: true,
               campaigns: {
                 select: {
                   title: true,
-                  creator: true
+                  creator: true,
+                  status: true
                 }
               },
               clips: {
                 select: {
                   id: true,
                   title: true,
+                  earnings: true,
                   view_tracking: {
                     orderBy: { date: "desc" },
-                    take: 1
+                    take: 2
                   }
                 }
               }
@@ -213,16 +217,25 @@ export async function GET(request: NextRequest) {
     const approvedSubmissions = userData.clipSubmissions.filter(s => s.status === "APPROVED" || s.status === "PAID").length
     const pendingSubmissions = userData.clipSubmissions.filter(s => s.status === "PENDING").length
 
+    // Calculate available balance (only from COMPLETED campaigns)
+    const availableBalance = userData.clipSubmissions
+      .filter(s => s.status === 'APPROVED' && s.campaigns.status === 'COMPLETED')
+      .reduce((sum, submission) => {
+        return sum + Number(submission.clips?.earnings || 0)
+      }, 0)
+
     // Get recent clips with detailed view tracking
     const recentClips = userData.clipSubmissions.map(submission => {
       const clip = submission.clips
       const latestTracking = clip?.view_tracking?.[0]
-      const previousTracking = clip?.view_tracking?.[1]
+      const initialViews = submission.initialViews ? Number(submission.initialViews) : 0
 
-      // Calculate view growth
-      const currentViews = latestTracking ? Number(latestTracking.views) : 0
-      const previousViews = previousTracking ? Number(previousTracking.views) : 0
-      const viewGrowth = currentViews - previousViews
+      // Calculate current views and view change since submission
+      const currentViews = latestTracking ? Number(latestTracking.views) : initialViews
+      const viewChange = currentViews - initialViews
+
+      // Get earnings from clip (not submission.payout which is deprecated)
+      const earnings = clip?.earnings ? Number(clip.earnings) : 0
 
       return {
         id: submission.id,
@@ -231,8 +244,10 @@ export async function GET(request: NextRequest) {
         status: submission.status?.toLowerCase() || "unknown",
         createdAt: submission.createdAt ? submission.createdAt.toISOString() : new Date().toISOString(),
         views: currentViews,
-        viewGrowth: viewGrowth,
-        earnings: submission.status === "PAID" ? parseFloat(String(submission.payout || 0)) : 0,
+        initialViews: initialViews.toString(),
+        currentViews: currentViews.toString(),
+        viewChange: viewChange.toString(),
+        earnings: earnings,
         clipUrl: submission.clipUrl,
         platform: submission.platform,
         lastTracked: latestTracking?.date ? latestTracking.date.toISOString().split('T')[0] : null
@@ -277,7 +292,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       stats: convertBigIntToString(stats),
       recentClips: convertBigIntToString(recentClips),
-      activeCampaigns: activeCampaigns
+      activeCampaigns: activeCampaigns,
+      availableBalance: availableBalance,
+      totalEarnings: parseFloat(userData.totalEarnings?.toString() || '0')
     })
 
   } catch (error) {
