@@ -275,22 +275,14 @@ export default function ClipperDashboard() {
             </p>
           </div>
 
-          {/* Top Right Links */}
-          <div className="flex gap-2">
-            <Link href="/clippers/payouts">
+          {/* Admin Link - Top Right */}
+          {session?.user?.role === "ADMIN" && (
+            <Link href="/admin">
               <Button variant="outline" size="sm">
-                <Wallet className="w-4 h-4 mr-2" />
-                Payouts
+                🛡️ Admin Dashboard
               </Button>
             </Link>
-            {session?.user?.role === "ADMIN" && (
-              <Link href="/admin">
-                <Button variant="outline" size="sm">
-                  🛡️ Admin Dashboard
-                </Button>
-              </Link>
-            )}
-          </div>
+          )}
         </div>
       </div>
 

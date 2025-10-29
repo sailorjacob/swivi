@@ -35,6 +35,7 @@ export default function PayoutsPage() {
   const [payoutSaving, setPayoutSaving] = useState(false)
   const [payoutSuccess, setPayoutSuccess] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [dashboardData, setDashboardData] = useState<any>(null)
 
   // Payout settings
   const [payoutData, setPayoutData] = useState({
@@ -42,8 +43,29 @@ export default function PayoutsPage() {
     paypalEmail: ""
   })
 
-  const availableBalance = 0.00 // Will be loaded from user's actual earnings
-  const minimumPayout = 50.00
+  const availableBalance = dashboardData?.availableBalance || 0.00
+  const totalEarned = dashboardData?.totalEarnings || 0.00
+  const activeCampaignEarnings = dashboardData?.activeCampaignEarnings || 0.00
+  const minimumPayout = 20.00
+
+  // Load dashboard data (earnings)
+  useEffect(() => {
+    const loadDashboard = async () => {
+      if (!session?.user?.id) return
+      
+      try {
+        const response = await authenticatedFetch("/api/clippers/dashboard")
+        if (response.ok) {
+          const data = await response.json()
+          setDashboardData(data)
+        }
+      } catch (error) {
+        console.error("Error loading dashboard data:", error)
+      }
+    }
+
+    loadDashboard()
+  }, [session])
 
   // Load user profile data for payout settings
   useEffect(() => {
@@ -151,22 +173,54 @@ export default function PayoutsPage() {
     <div className="space-y-8">
       <h1 className="text-3xl font-light text-foreground">Payouts</h1>
       
-      {/* Balance Overview */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-white">Available Balance</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-left">
-            <div className="text-4xl font-bold text-white mb-2">
-              ${(typeof availableBalance === 'number' ? availableBalance : parseFloat(availableBalance || 0)).toFixed(2)}
+      {/* Earnings Overview */}
+      <div className="grid gap-4 md:grid-cols-3 mb-8">
+        <Card className="bg-card border-border">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Earned</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-white">
+              ${totalEarned.toFixed(2)}
             </div>
-            <p className="text-muted-foreground">
-              Minimum payout: ${(typeof minimumPayout === 'number' ? minimumPayout : parseFloat(minimumPayout || 0)).toFixed(2)}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+            <p className="text-xs text-muted-foreground mt-1">All time earnings</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border-border">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Available Balance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              ${availableBalance.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">From completed campaigns</p>
+            {availableBalance < minimumPayout && (
+              <p className="text-xs text-yellow-600 mt-2">
+                Need ${(minimumPayout - availableBalance).toFixed(2)} more to request payout
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border-border">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Earnings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">
+              ${activeCampaignEarnings.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">From active campaigns</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="text-sm text-muted-foreground mb-4 p-4 bg-muted/30 rounded-lg">
+        <p><strong>Minimum payout:</strong> ${minimumPayout.toFixed(2)}</p>
+        <p className="mt-1 text-xs">Active campaign earnings will be available for payout once campaigns are completed.</p>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Request Payout */}
