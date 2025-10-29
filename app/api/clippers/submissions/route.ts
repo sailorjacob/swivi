@@ -241,25 +241,46 @@ export async function POST(request: NextRequest) {
       initialViews = scrapedData.views || 0
       console.log(`📊 Initial views at submission: ${initialViews} for ${validatedData.clipUrl}`)
     } catch (error) {
-      console.error('Error scraping initial views at submission:', error)
-      // Continue with submission even if scraping fails
+      console.error('⚠️ Error scraping initial views at submission:', error)
+      // Continue with submission even if scraping fails (views can be tracked later)
+      initialViews = 0
     }
 
-    // Create the submission for verified content
-    const submission = await prisma.clipSubmission.create({
-      data: {
-        userId: dbUser.id,
-        campaignId: validatedData.campaignId,
-        clipUrl: validatedData.clipUrl,
-        platform: validatedData.platform,
-        mediaFileUrl: validatedData.mediaFileUrl,
-        status: "PENDING", // Still PENDING for admin approval, but verified
-        initialViews: BigInt(initialViews) // SET AT SUBMISSION TIME - earnings baseline!
-      },
-      include: {
-        campaigns: true
+    // Create the submission for verified content (or admin bypass)
+    let submission
+    try {
+      submission = await prisma.clipSubmission.create({
+        data: {
+          userId: dbUser.id,
+          campaignId: validatedData.campaignId,
+          clipUrl: validatedData.clipUrl,
+          platform: validatedData.platform,
+          mediaFileUrl: validatedData.mediaFileUrl,
+          status: "PENDING", // Still PENDING for admin approval, but verified
+          initialViews: BigInt(initialViews) // SET AT SUBMISSION TIME - earnings baseline!
+        },
+        include: {
+          campaigns: true
+        }
+      })
+    } catch (dbError) {
+      console.error('❌ Database error creating submission:', dbError)
+      
+      // Check if it's a missing column error
+      if (dbError.message?.includes('initialViews') || dbError.message?.includes('column')) {
+        return NextResponse.json({
+          error: "Database migration required",
+          details: "The 'initialViews' column is missing. Please run the database migration.",
+          migrationInstructions: "See APPLY_MIGRATION.md for instructions"
+        }, { status: 500 })
       }
-    })
+      
+      // Generic database error
+      return NextResponse.json({
+        error: "Failed to create submission",
+        details: dbError.message || "Database error"
+      }, { status: 500 })
+    }
 
     return NextResponse.json(submission, { status: 201 })
   } catch (error) {
