@@ -46,8 +46,7 @@ export async function GET(request: NextRequest) {
       totalUsers,
       totalCampaigns,
       totalSubmissions,
-      activeCampaigns,
-      trackedViewsTotal
+      activeCampaigns
     ] = await Promise.all([
       // Total users
       prisma.user.count(),
@@ -61,11 +60,6 @@ export async function GET(request: NextRequest) {
       // Active campaigns
       prisma.campaign.count({
         where: { status: "ACTIVE" }
-      }),
-
-      // Total tracked views from scrapes
-      prisma.viewTracking.aggregate({
-        _sum: { views: true }
       })
     ])
 
@@ -205,6 +199,9 @@ export async function GET(request: NextRequest) {
       where: { status: 'APPROVED' }
     })
 
+    // Calculate total tracked views from campaign breakdown (sum of all tracked views)
+    const totalTrackedViews = campaignTrackedViews.reduce((sum, campaign) => sum + campaign.trackedViews, 0)
+
     const platformStats: {
       overview: any
       campaignDetails?: any
@@ -224,7 +221,7 @@ export async function GET(request: NextRequest) {
         totalSubmissions,
         activeCampaigns,
         totalViews: totalViews, // Real-time from clips
-        trackedViews: Number(trackedViewsTotal._sum.views || 0), // Total tracked views from scrapes
+        trackedViews: totalTrackedViews, // Total tracked views (current - initial)
         totalEarnings: totalEarnings, // Real-time from clips
         pendingSubmissions: 0, // We'll calculate these from submissions
         approvedSubmissions: 0,
