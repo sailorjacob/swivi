@@ -71,6 +71,7 @@ export default function AdminDashboard() {
     totalSubmissions: 0,
     activeCampaigns: 0,
     totalViews: 0,
+    trackedViews: 0,
     totalEarnings: 0
   }
 
@@ -169,7 +170,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -201,6 +202,20 @@ export default function AdminDashboard() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">Total Views</p>
                   <p className="text-2xl font-semibold">{Number(stats.totalViews).toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Includes initial views</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-200 bg-blue-50/30 dark:bg-blue-900/10 dark:border-blue-800">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Activity className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Tracked Views</p>
+                  <p className="text-2xl font-semibold text-blue-900 dark:text-blue-100">{Number(stats.trackedViews).toLocaleString()}</p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">From scrapes</p>
                 </div>
               </div>
             </CardContent>

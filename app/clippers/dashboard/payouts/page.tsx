@@ -40,7 +40,8 @@ export default function PayoutsPage() {
   // Payout settings
   const [payoutData, setPayoutData] = useState({
     walletAddress: "",
-    paypalEmail: ""
+    paypalEmail: "",
+    bitcoinAddress: ""
   })
 
   const availableBalance = dashboardData?.availableBalance || 0.00
@@ -79,7 +80,8 @@ export default function PayoutsPage() {
           setUser(userData)
           setPayoutData({
             walletAddress: userData.walletAddress || "",
-            paypalEmail: userData.paypalEmail || ""
+            paypalEmail: userData.paypalEmail || "",
+            bitcoinAddress: userData.bitcoinAddress || ""
           })
         }
       } catch (error) {
@@ -261,6 +263,12 @@ export default function PayoutsPage() {
                         USDC Wallet
                       </div>
                     </SelectItem>
+                    <SelectItem value="bitcoin">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="w-4 h-4" />
+                        Bitcoin
+                      </div>
+                    </SelectItem>
                     <SelectItem value="paypal">
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4" />
@@ -274,6 +282,7 @@ export default function PayoutsPage() {
               <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
                 <p className="font-medium text-foreground mb-1">Processing Times:</p>
                 <p>• USDC: 1-2 hours</p>
+                <p>• Bitcoin: 1-2 hours</p>
                 <p>• PayPal: 1-3 business days</p>
               </div>
 
@@ -310,6 +319,23 @@ export default function PayoutsPage() {
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Enter your Ethereum address for USDC payments
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="bitcoin">Bitcoin Address</Label>
+                <div className="relative mt-1">
+                  <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="bitcoin"
+                    placeholder="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+                    value={payoutData.bitcoinAddress}
+                    onChange={(e) => setPayoutData(prev => ({ ...prev, bitcoinAddress: e.target.value }))}
+                    className="pl-10 font-mono text-sm"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Enter your Bitcoin address for Bitcoin payments
                 </p>
               </div>
 

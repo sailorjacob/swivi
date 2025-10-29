@@ -16,6 +16,7 @@ const updateProfileSchema = z.object({
 const updatePayoutSchema = z.object({
   walletAddress: z.string().max(100, "Wallet address too long").optional().or(z.literal("")),
   paypalEmail: z.string().email("Invalid email").optional().or(z.literal("")),
+  bitcoinAddress: z.string().max(100, "Bitcoin address too long").optional().or(z.literal("")),
 })
 
 export async function GET(request: NextRequest) {
@@ -54,6 +55,7 @@ export async function GET(request: NextRequest) {
           website: true,
           walletAddress: true,
           paypalEmail: true,
+          bitcoinAddress: true,
           image: true,
           verified: true,
           totalEarnings: true,
@@ -119,6 +121,7 @@ export async function GET(request: NextRequest) {
             website: true,
             walletAddress: true,
             paypalEmail: true,
+            bitcoinAddress: true,
             image: true,
             verified: true,
             totalEarnings: true,
@@ -162,6 +165,7 @@ export async function GET(request: NextRequest) {
           website: null,
           walletAddress: null,
           paypalEmail: null,
+          bitcoinAddress: null,
           image: fallbackImage || null,
           verified: user.email_confirmed_at ? true : false,
           totalEarnings: 0,
@@ -264,6 +268,7 @@ export async function PUT(request: NextRequest) {
           website: true,
           walletAddress: true,
           paypalEmail: true,
+          bitcoinAddress: true,
           image: true,
           verified: true,
           updatedAt: true,

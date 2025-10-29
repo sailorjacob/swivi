@@ -37,6 +37,7 @@ interface UserProfile {
   website: string | null
   walletAddress: string | null
   paypalEmail: string | null
+  bitcoinAddress: string | null
   image: string | null
   verified: boolean
   totalEarnings: number

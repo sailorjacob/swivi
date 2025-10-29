@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
             email: true,
             paypalEmail: true,
             walletAddress: true,
+            bitcoinAddress: true,
             totalEarnings: true
           }
         }
@@ -73,6 +74,7 @@ export async function GET(request: NextRequest) {
           email: pr.users.email,
           paypalEmail: pr.users.paypalEmail,
           walletAddress: pr.users.walletAddress,
+          bitcoinAddress: pr.users.bitcoinAddress,
           totalEarnings: Number(pr.users.totalEarnings)
         }
       }))

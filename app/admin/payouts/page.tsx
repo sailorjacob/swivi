@@ -34,6 +34,7 @@ interface PayoutRequest {
     email: string
     paypalEmail?: string
     walletAddress?: string
+    bitcoinAddress?: string
     totalEarnings: number
   }
 }

@@ -18,11 +18,12 @@ model User {
   verified       Boolean  @default(false)
 
   // Enhanced profile fields (optional)
-  bio           String?
-  website       String?
-  location      String?
-  walletAddress String?
-  paypalEmail   String?
+  bio            String?
+  website        String?
+  location       String?
+  walletAddress  String? // USDC wallet address
+  paypalEmail    String?
+  bitcoinAddress String? // Bitcoin wallet address
 
   // Stats (calculated from submissions)
   totalEarnings Decimal @default(0) @db.Decimal(10, 2)
@@ -312,6 +313,8 @@ enum PayoutMethod {
   PAYPAL
   BANK_TRANSFER
   STRIPE
+  USDC
+  BITCOIN
 }
 
 enum PayoutStatus {

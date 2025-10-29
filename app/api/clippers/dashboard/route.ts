@@ -230,6 +230,18 @@ export async function GET(request: NextRequest) {
         return sum + latestViews
       }, 0)
 
+    // Tracked views: Views gained from scraping (total views - initial views)
+    const trackedViews = userData.clipSubmissions
+      .filter(s => s.status === 'APPROVED')
+      .reduce((sum, submission) => {
+        const latestViews = submission.clips?.view_tracking?.[0] 
+          ? Number(submission.clips.view_tracking[0].views || 0)
+          : 0
+        const initialViews = submission.initialViews ? Number(submission.initialViews) : 0
+        const viewsGained = Math.max(0, latestViews - initialViews)
+        return sum + viewsGained
+      }, 0)
+
     // Available balance: Only from COMPLETED campaigns (can request payout)
     const availableBalance = userData.clipSubmissions
       .filter(s => s.status === 'APPROVED' && s.campaigns.status === 'COMPLETED')
@@ -306,10 +318,18 @@ export async function GET(request: NextRequest) {
       {
         title: "Total Views",
         value: totalViews.toLocaleString(),
-        change: "Across all approved clips",
+        change: "Includes initial views",
         changeType: "neutral" as const,
         icon: "Eye",
         color: "text-muted-foreground"
+      },
+      {
+        title: "Tracked Views",
+        value: trackedViews.toLocaleString(),
+        change: "Views from scrapes",
+        changeType: trackedViews > 0 ? "positive" : "neutral" as const,
+        icon: "Eye",
+        color: "text-blue-600 dark:text-blue-400"
       }
     ]
 
@@ -320,7 +340,8 @@ export async function GET(request: NextRequest) {
       availableBalance: availableBalance,
       activeCampaignEarnings: activeCampaignEarnings,
       totalEarnings: totalEarned,
-      totalViews: totalViews
+      totalViews: totalViews,
+      trackedViews: trackedViews
     })
 
   } catch (error) {

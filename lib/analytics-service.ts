@@ -455,6 +455,7 @@ export class AnalyticsService {
       approvedSubmissions: number
       paidSubmissions: number
       totalViews: number
+      trackedViews: number
       totalEarnings: number
       averagePayout: number
     }
@@ -483,6 +484,7 @@ export class AnalyticsService {
         approvedSubmissions,
         paidSubmissions,
         totalViews,
+        trackedViews,
         totalEarnings,
         averagePayout,
         platformBreakdown,
@@ -503,6 +505,7 @@ export class AnalyticsService {
         prisma.clipSubmission.count({ where: { status: 'APPROVED' } }),
         prisma.clipSubmission.count({ where: { status: 'PAID' } }),
         prisma.user.aggregate({ _sum: { totalViews: true } }),
+        prisma.viewTracking.aggregate({ _sum: { views: true } }), // Tracked views from scrapes
         prisma.user.aggregate({ _sum: { totalEarnings: true } }),
         prisma.clipSubmission.aggregate({
           where: { status: 'PAID', payout: { not: null } },
@@ -538,6 +541,7 @@ export class AnalyticsService {
           approvedSubmissions,
           paidSubmissions,
           totalViews: Number(totalViews._sum.totalViews || 0),
+          trackedViews: Number(trackedViews._sum.views || 0), // Views from tracking/scrapes
           totalEarnings: Number(totalEarnings._sum.totalEarnings || 0),
           averagePayout: Number(averagePayout._avg.payout || 0)
         },

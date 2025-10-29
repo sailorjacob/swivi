@@ -267,20 +267,21 @@ export default function ClipperDashboard() {
     <div className="container mx-auto px-4 py-8">
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
         {data?.stats?.map((stat, index) => {
           const Icon = getIcon(stat.icon)
+          const isTrackedViews = stat.title === "Tracked Views"
           return (
-            <Card key={index} className="bg-card border-border">
+            <Card key={index} className={`bg-card border-border ${isTrackedViews ? 'border-blue-200 bg-blue-50/30 dark:bg-blue-900/10 dark:border-blue-800' : ''}`}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
-                    <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
-                    <p className="text-sm mt-1 text-muted-foreground">{stat.change}</p>
+                    <p className={`text-sm font-medium ${isTrackedViews ? 'text-blue-700 dark:text-blue-300' : 'text-muted-foreground'}`}>{stat.title}</p>
+                    <p className={`text-2xl font-bold mt-1 ${isTrackedViews ? 'text-blue-900 dark:text-blue-100' : 'text-foreground'}`}>{stat.value}</p>
+                    <p className={`text-sm mt-1 ${isTrackedViews ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}>{stat.change}</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-muted">
-                    <Icon className="w-6 h-6 text-muted-foreground" />
+                  <div className={`p-3 rounded-lg ${isTrackedViews ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-muted'}`}>
+                    <Icon className={`w-6 h-6 ${isTrackedViews ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`} />
                   </div>
                 </div>
               </CardContent>
