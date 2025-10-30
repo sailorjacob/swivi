@@ -553,7 +553,9 @@ export default function ProfilePage() {
               <div className="flex justify-between py-3">
                 <span className="text-muted-foreground">Member Since</span>
                 <span className="text-white font-medium">
-                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
+                  {user?.createdAt && !isNaN(new Date(user.createdAt).getTime()) 
+                    ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                    : "N/A"}
                 </span>
               </div>
             </div>

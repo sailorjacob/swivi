@@ -58,8 +58,6 @@ export async function GET(request: NextRequest) {
           bitcoinAddress: true,
           image: true,
           verified: true,
-          totalEarnings: true,
-          totalViews: true,
           createdAt: true,
           socialAccounts: {
             select: {
@@ -68,6 +66,25 @@ export async function GET(request: NextRequest) {
               displayName: true,
               verified: true,
               verifiedAt: true,
+            }
+          },
+          clipSubmissions: {
+            where: {
+              status: 'APPROVED'
+            },
+            select: {
+              clips: {
+                select: {
+                  earnings: true,
+                  view_tracking: {
+                    orderBy: { date: 'desc' },
+                    take: 1,
+                    select: {
+                      views: true
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -124,8 +141,6 @@ export async function GET(request: NextRequest) {
             bitcoinAddress: true,
             image: true,
             verified: true,
-            totalEarnings: true,
-            totalViews: true,
             createdAt: true,
             socialAccounts: {
               select: {
@@ -140,7 +155,15 @@ export async function GET(request: NextRequest) {
         })
 
         console.log("✅ User created successfully:", newUser.id)
-        return NextResponse.json(serializeUser(newUser))
+        
+        // New users have no submissions yet, so totals are 0
+        const newUserWithTotals = {
+          ...newUser,
+          totalEarnings: 0,
+          totalViews: 0
+        }
+        
+        return NextResponse.json(serializeUser(newUserWithTotals))
       } catch (createError) {
         console.error("❌ Failed to create user:", createError)
         // Return minimal user data from session if creation fails
@@ -176,12 +199,40 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Calculate real-time totals from actual clip data (not cached User fields)
+    let totalEarnings = 0
+    let totalViews = 0
+
+    if (dbUser.clipSubmissions) {
+      for (const submission of dbUser.clipSubmissions) {
+        if (submission.clips) {
+          // Add earnings
+          totalEarnings += Number(submission.clips.earnings || 0)
+
+          // Add latest view count
+          if (submission.clips.view_tracking && submission.clips.view_tracking.length > 0) {
+            totalViews += Number(submission.clips.view_tracking[0].views || 0)
+          }
+        }
+      }
+    }
+
+    // Remove clipSubmissions from response and add calculated totals
+    const { clipSubmissions, ...userWithoutSubmissions } = dbUser
+    const userWithCalculatedTotals = {
+      ...userWithoutSubmissions,
+      totalEarnings,
+      totalViews
+    }
+
     // Convert BigInt fields to strings for JSON serialization
-    const serializedUser = serializeUser(dbUser)
+    const serializedUser = serializeUser(userWithCalculatedTotals)
     console.log("✅ Profile API: Returning user data with role:", { 
       email: dbUser.email, 
       role: dbUser.role, 
-      name: dbUser.name 
+      name: dbUser.name,
+      calculatedEarnings: totalEarnings,
+      calculatedViews: totalViews
     })
     return NextResponse.json(serializedUser)
   } catch (error) {
