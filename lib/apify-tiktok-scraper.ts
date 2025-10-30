@@ -26,6 +26,7 @@ interface ApifyResponse {
     id: string
     status: string
     defaultDatasetId: string
+    errorMessage?: string
   }
 }
 
@@ -49,7 +50,8 @@ export class ApifyTikTokScraper {
   async scrapeTikTokVideo(postUrl: string): Promise<TikTokScrapeResult | null> {
     try {
       // Use waitForFinish parameter to avoid polling - Apify holds connection until done
-      const runResponse = await fetch(`${this.baseUrl}/acts/clockworks~tiktok-scraper/runs?waitForFinish=120`, {
+      // Increased to 240s (4min) to handle slow scrapes, still under Vercel's 5min limit
+      const runResponse = await fetch(`${this.baseUrl}/acts/clockworks~tiktok-scraper/runs?waitForFinish=240`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,8 +89,12 @@ export class ApifyTikTokScraper {
       const runData: ApifyResponse = await runResponse.json()
       
       // Check if run succeeded
-      if (runData.data.status !== 'SUCCEEDED') {
-        throw new Error(`Apify run failed with status: ${runData.data.status}`)
+      if (runData.data.status === 'FAILED') {
+        throw new Error(`Apify run failed: ${runData.data.errorMessage || 'Unknown error'}`)
+      } else if (runData.data.status === 'READY' || runData.data.status === 'RUNNING') {
+        throw new Error(`Apify run timed out (still ${runData.data.status.toLowerCase()}) - will retry next cron run`)
+      } else if (runData.data.status !== 'SUCCEEDED') {
+        throw new Error(`Apify run ended with unexpected status: ${runData.data.status}`)
       }
 
       // Get the dataset ID and fetch results
