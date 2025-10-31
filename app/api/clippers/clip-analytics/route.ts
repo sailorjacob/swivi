@@ -40,11 +40,10 @@ export async function GET(request: NextRequest) {
       },
       select: {
         id: true,
-        clipUrl: true,
+        url: true,
         platform: true,
         status: true,
-        initialViews: true,
-        currentViews: true,
+        views: true,
         createdAt: true,
         earnings: true,
         view_tracking: {
@@ -61,6 +60,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             status: true,
+            initialViews: true,
             finalEarnings: true,
             createdAt: true,
             campaigns: {
@@ -88,15 +88,15 @@ export async function GET(request: NextRequest) {
     }))
 
     // Calculate tracked views (current - initial)
-    const initialViews = Number(clip.initialViews || 0)
-    const currentViews = Number(clip.currentViews || 0)
+    const initialViews = Number(clip.clipSubmissions?.[0]?.initialViews || 0)
+    const currentViews = Number(clip.views || 0)
     const trackedViews = currentViews - initialViews
 
     return NextResponse.json({
       success: true,
       clip: {
         id: clip.id,
-        clipUrl: clip.clipUrl,
+        clipUrl: clip.url,
         platform: clip.platform,
         status: clip.status,
         initialViews: initialViews,
