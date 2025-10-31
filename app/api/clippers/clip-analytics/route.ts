@@ -22,12 +22,12 @@ export async function GET(request: NextRequest) {
 
     console.log("✅ Clip Analytics API: Valid session for user", user.id)
 
-    // Get clipId from query params
+    // Get submissionId from query params (dashboard passes submission.id as clip.id)
     const { searchParams } = new URL(request.url)
-    const clipId = searchParams.get('clipId')
+    const submissionId = searchParams.get('clipId') // frontend sends as clipId but it's actually submissionId
 
-    if (!clipId) {
-      return NextResponse.json({ error: 'clipId is required' }, { status: 400 })
+    if (!submissionId) {
+      return NextResponse.json({ error: 'submissionId is required' }, { status: 400 })
     }
 
     // Get user from database to verify ownership
@@ -43,11 +43,11 @@ export async function GET(request: NextRequest) {
 
     console.log("✅ Found database user:", dbUser.id)
 
-    // Fetch clip submission first to verify ownership, then get clip data
-    console.log("🔍 Looking up clip submission for clip:", clipId, "for user:", dbUser.id)
+    // Fetch clip submission by submissionId to verify ownership
+    console.log("🔍 Looking up submission:", submissionId, "for user:", dbUser.id)
     const submission = await prisma.clipSubmission.findFirst({
       where: {
-        clipId: clipId,
+        id: submissionId,
         userId: dbUser.id
       },
       select: {
@@ -67,17 +67,39 @@ export async function GET(request: NextRequest) {
     })
 
     if (!submission) {
-      console.log("❌ Submission not found or unauthorized:", clipId, "for user:", dbUser.id)
+      console.log("❌ Submission not found or unauthorized:", submissionId, "for user:", dbUser.id)
       return NextResponse.json({ error: 'Clip not found or unauthorized' }, { status: 404 })
     }
 
-    console.log("✅ Found submission:", submission.id)
+    console.log("✅ Found submission:", submission.id, "with clipId:", submission.clipId)
+
+    // If no clip is linked, return early with submission data only
+    if (!submission.clipId) {
+      console.log("⚠️ Submission has no linked clip")
+      return NextResponse.json({
+        success: true,
+        clip: {
+          id: submission.id,
+          clipUrl: submission.clipUrl,
+          platform: submission.platform,
+          status: submission.status,
+          initialViews: Number(submission.initialViews || 0),
+          currentViews: Number(submission.initialViews || 0),
+          trackedViews: 0,
+          createdAt: submission.createdAt,
+          earnings: 0,
+          campaign: submission.campaigns || null,
+          submission: submission || null,
+          viewHistory: []
+        }
+      })
+    }
 
     // Now fetch the actual clip with view history
-    console.log("🔍 Looking up clip data:", clipId)
+    console.log("🔍 Looking up clip data:", submission.clipId)
     const clip = await prisma.clip.findUnique({
       where: {
-        id: clipId
+        id: submission.clipId
       },
       select: {
         id: true,
@@ -101,7 +123,7 @@ export async function GET(request: NextRequest) {
     })
 
     if (!clip) {
-      console.log("❌ Clip data not found:", clipId)
+      console.log("❌ Clip data not found:", submission.clipId)
       return NextResponse.json({ error: 'Clip not found' }, { status: 404 })
     }
 
@@ -120,7 +142,7 @@ export async function GET(request: NextRequest) {
     const currentViews = Number(clip.views || 0)
     const trackedViews = currentViews - initialViews
 
-    console.log(`📊 Returning analytics for clip ${clipId} for user ${user.id}`)
+    console.log(`📊 Returning analytics for submission ${submissionId} (clip ${clip.id}) for user ${user.id}`)
     
     return NextResponse.json({
       success: true,
