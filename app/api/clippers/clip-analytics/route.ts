@@ -1,20 +1,26 @@
 // Force this route to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
 
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getServerUserWithRole } from '@/lib/supabase-auth-server'
+import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 
 export async function GET(request: NextRequest) {
   try {
-    // Authenticate user
-    const authResult = await getServerUserWithRole(request)
-    
-    if (!authResult || !authResult.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Check if user is authenticated
+    const { user, error } = await getServerUserWithRole(request)
+
+    if (!user || error) {
+      console.log("❌ Clip Analytics API: No authenticated user or error:", {
+        hasUser: !!user,
+        userId: user?.id,
+        error: error?.message,
+        timestamp: new Date().toISOString()
+      })
+      return NextResponse.json({ error: "No authenticated user" }, { status: 401 })
     }
-    
-    const { user } = authResult
+
+    console.log("✅ Clip Analytics API: Valid session for user", user.id)
 
     // Get clipId from query params
     const { searchParams } = new URL(request.url)
@@ -93,6 +99,8 @@ export async function GET(request: NextRequest) {
     const currentViews = Number(clip.views || 0)
     const trackedViews = currentViews - initialViews
 
+    console.log(`📊 Returning analytics for clip ${clipId} for user ${user.id}`)
+    
     return NextResponse.json({
       success: true,
       clip: {
