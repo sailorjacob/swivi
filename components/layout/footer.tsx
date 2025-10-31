@@ -15,8 +15,8 @@ export function Footer() {
 
   // Determine logo based on theme
   const logoSrc = mounted && resolvedTheme === 'light'
-    ? "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
-    : "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
+    ? "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
+    : "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
 
   return (
     <footer className="border-t border-black/10 mt-auto relative">

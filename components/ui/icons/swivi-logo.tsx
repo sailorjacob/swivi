@@ -20,10 +20,10 @@ export function SwiviLogo({ className = "", size = 40 }: SwiviLogoProps) {
   // Use resolvedTheme to handle system theme, fallback to theme
   const currentTheme = mounted ? (resolvedTheme || theme) : 'dark'
   
-  // Use inverted2.png for dark theme (white logo) and SwiviLogo.png for light theme (dark logo)
+  // Use inverted2.png for light theme (dark logo) and SwiviLogo.png for dark theme (white logo)
   const logoSrc = currentTheme === 'light' 
-    ? "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
-    : "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
+    ? "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
+    : "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
 
   return (
     <div className={`relative ${className}`}>
