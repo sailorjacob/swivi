@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch clip with view history - ensure user owns this clip
-    const clip = await prisma.clips.findFirst({
+    const clip = await prisma.clip.findFirst({
       where: {
         id: clipId,
         userId: dbUser.id
