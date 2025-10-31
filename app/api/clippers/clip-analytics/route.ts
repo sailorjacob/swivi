@@ -49,21 +49,20 @@ export async function GET(request: NextRequest) {
         earnings: true,
         view_tracking: {
           orderBy: {
-            date: 'asc'
+            createdAt: 'asc'
           },
           select: {
             id: true,
             views: true,
-            date: true,
-            scrapedAt: true
+            createdAt: true
           }
         },
-        clip_submissions: {
+        clipSubmissions: {
           select: {
             id: true,
             status: true,
-            earnings: true,
-            submittedAt: true,
+            finalEarnings: true,
+            createdAt: true,
             campaigns: {
               select: {
                 id: true,
@@ -82,9 +81,9 @@ export async function GET(request: NextRequest) {
 
     // Format view history
     const viewHistory = (clip.view_tracking || []).map((track: any) => ({
-      date: new Date(track.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: new Date(track.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       views: Number(track.views || 0),
-      scrapedAt: track.scrapedAt,
+      scrapedAt: track.createdAt,
       success: Number(track.views) > 0 || clip.view_tracking.indexOf(track) > 0
     }))
 
@@ -105,8 +104,8 @@ export async function GET(request: NextRequest) {
         trackedViews: trackedViews > 0 ? trackedViews : 0,
         createdAt: clip.createdAt,
         earnings: Number(clip.earnings || 0),
-        campaign: clip.clip_submissions?.[0]?.campaigns || null,
-        submission: clip.clip_submissions?.[0] || null,
+        campaign: clip.clipSubmissions?.[0]?.campaigns || null,
+        submission: clip.clipSubmissions?.[0] || null,
         viewHistory
       }
     })
