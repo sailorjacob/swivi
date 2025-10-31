@@ -109,27 +109,27 @@ export function CreatorViewsCalculator() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mx-auto max-w-4xl"
+          className="mx-auto max-w-2xl"
         >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-light mb-4">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-light mb-3">
               Creator Views Calculator
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               See the massive reach and savings potential of clipper marketing
             </p>
           </div>
 
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-xl font-normal">Adjust Your Campaign Parameters</CardTitle>
+          <Card className="mb-6">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-normal">Adjust Your Campaign Parameters</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-8">
+            <CardContent className="space-y-6">
               {/* Budget - First Slider */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium">Campaign Budget</label>
-                  <span className="text-2xl font-light transition-all duration-200 ease-out">{formatCurrency(values.budget)}</span>
+                  <span className="text-xl font-light transition-all duration-200 ease-out">{formatCurrency(values.budget)}</span>
                 </div>
                 <Slider
                   value={[values.budget]}
@@ -148,7 +148,7 @@ export function CreatorViewsCalculator() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium">Clipper Army Size</label>
-                  <span className="text-2xl font-light transition-all duration-200 ease-out">
+                  <span className="text-xl font-light transition-all duration-200 ease-out">
                     {values.numberOfClippers}
                   </span>
                 </div>
@@ -166,7 +166,7 @@ export function CreatorViewsCalculator() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium">Posts per Day (per platform)</label>
-                  <span className="text-2xl font-light transition-all duration-200 ease-out">{values.postsPerDay}</span>
+                  <span className="text-xl font-light transition-all duration-200 ease-out">{values.postsPerDay}</span>
                 </div>
                 <Slider
                   value={[values.postsPerDay]}
@@ -182,7 +182,7 @@ export function CreatorViewsCalculator() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium">Social Media Platforms</label>
-                  <span className="text-2xl font-light transition-all duration-200 ease-out">{values.platforms}</span>
+                  <span className="text-xl font-light transition-all duration-200 ease-out">{values.platforms}</span>
                 </div>
                 <Slider
                   value={[values.platforms]}
@@ -198,7 +198,7 @@ export function CreatorViewsCalculator() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium">Days per Week</label>
-                  <span className="text-2xl font-light transition-all duration-200 ease-out">{values.daysPerWeek}</span>
+                  <span className="text-xl font-light transition-all duration-200 ease-out">{values.daysPerWeek}</span>
                 </div>
                 <Slider
                   value={[values.daysPerWeek]}
@@ -214,7 +214,7 @@ export function CreatorViewsCalculator() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium">Payment per 1,000 Views</label>
-                  <span className="text-2xl font-light transition-all duration-200 ease-out">${values.paymentPer1000Views.toFixed(2)}</span>
+                  <span className="text-xl font-light transition-all duration-200 ease-out">${values.paymentPer1000Views.toFixed(2)}</span>
                 </div>
                 <Slider
                   value={[values.paymentPer1000Views]}
@@ -233,7 +233,7 @@ export function CreatorViewsCalculator() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium">Average Views per Post</label>
-                  <span className="text-2xl font-light transition-all duration-200 ease-out">{formatNumber(values.viewsPerPost)}</span>
+                  <span className="text-xl font-light transition-all duration-200 ease-out">{formatNumber(values.viewsPerPost)}</span>
                 </div>
                 <Slider
                   value={[values.viewsPerPost]}
@@ -248,18 +248,18 @@ export function CreatorViewsCalculator() {
           </Card>
 
           {/* Results Display */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
             <motion.div
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <Card className="border-primary">
-                <CardContent className="p-6">
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Monthly Views</span>
+                    <span className="text-xs text-muted-foreground">Monthly Views</span>
                     <TrendingUp className="h-4 w-4 text-primary" />
                   </div>
-                  <p className="text-2xl font-light text-primary">{formatNumber(monthlyViews)} 🎬</p>
+                  <p className="text-xl font-light text-primary">{formatNumber(monthlyViews)} 🎬</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {formatNumber(Math.round(monthlyViews / 30))} views per day
                   </p>
@@ -275,15 +275,15 @@ export function CreatorViewsCalculator() {
                 className="cursor-pointer relative"
                 onClick={() => setShowSavingsPopup(true)}
               >
-                <CardContent className="p-6">
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Budget & Savings</span>
+                    <span className="text-xs text-muted-foreground">Budget & Savings</span>
                     <div className="flex items-center gap-1">
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
                       <Info className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </div>
-                  <p className="text-2xl font-light">{formatCurrency(annualSavings)} 💸</p>
+                  <p className="text-xl font-light">{formatCurrency(annualSavings)} 💸</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Annual savings vs. traditional ads
                   </p>
@@ -296,50 +296,50 @@ export function CreatorViewsCalculator() {
           </div>
 
           {/* Additional Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Posts/Week</span>
-                  <Video className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Posts/Week</span>
+                  <Video className="h-3 w-3 text-muted-foreground" />
                 </div>
-                <p className="text-2xl font-light">
+                <p className="text-lg font-light">
                   {formatNumber(values.numberOfClippers * values.postsPerDay * values.platforms * values.daysPerWeek)}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Annual Views</span>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Annual Views</span>
+                  <TrendingUp className="h-3 w-3 text-muted-foreground" />
                 </div>
-                <p className="text-2xl font-light">
+                <p className="text-lg font-light">
                   {formatNumber(Math.round(monthlyViews * 12))}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Monthly Savings</span>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Monthly Savings</span>
+                  <DollarSign className="h-3 w-3 text-muted-foreground" />
                 </div>
-                <p className="text-2xl font-light">
+                <p className="text-lg font-light">
                   {formatCurrency(Math.round(annualSavings / 12))}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">CPM Saved</span>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">CPM Saved</span>
+                  <Users className="h-3 w-3 text-muted-foreground" />
                 </div>
-                <p className="text-2xl font-light">${(5 - values.paymentPer1000Views).toFixed(2)}</p>
+                <p className="text-lg font-light">${(5 - values.paymentPer1000Views).toFixed(2)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   per 1K views
                 </p>
@@ -349,18 +349,18 @@ export function CreatorViewsCalculator() {
 
           {/* Info Box */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-xl font-normal flex items-center gap-2">
-                <Users className="h-5 w-5" />
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-normal flex items-center gap-2">
+                <Users className="h-4 w-4" />
                 Why Clipper Marketing Works
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <h4 className="font-medium mb-2">Traditional Paid Ads</h4>
-                    <ul className="space-y-1 text-sm text-muted-foreground">
+                    <h4 className="text-sm font-medium mb-1.5">Traditional Paid Ads</h4>
+                    <ul className="space-y-1 text-xs text-muted-foreground">
                       <li>• $5 CPM costs</li>
                       <li>• Low engagement rates</li>
                       <li>• Ad fatigue issues</li>
@@ -368,8 +368,8 @@ export function CreatorViewsCalculator() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-medium mb-2">Clipper Marketing</h4>
-                    <ul className="space-y-1 text-sm text-muted-foreground">
+                    <h4 className="text-sm font-medium mb-1.5">Clipper Marketing</h4>
+                    <ul className="space-y-1 text-xs text-muted-foreground">
                       <li>• ${values.paymentPer1000Views.toFixed(2)} CPM costs</li>
                       <li>• 3x higher engagement</li>
                       <li>• Authentic content</li>
@@ -377,7 +377,7 @@ export function CreatorViewsCalculator() {
                     </ul>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground pt-2 border-t">
+                <p className="text-xs text-muted-foreground pt-2 border-t">
                   Performance-based pricing ensures you only pay for actual results, making clipper marketing {Math.round(((5 - values.paymentPer1000Views) / 5) * 100)}% more cost-effective than traditional advertising.
                 </p>
               </div>

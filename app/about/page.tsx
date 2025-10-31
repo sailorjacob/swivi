@@ -77,7 +77,7 @@ export default function AboutPage() {
               {/* Video Section */}
               <motion.div
                 variants={itemVariants}
-                className="w-full max-w-3xl mx-auto mb-8 rounded-lg overflow-hidden"
+                className="w-full max-w-3xl mx-auto mb-0 rounded-lg overflow-hidden relative"
               >
                 <video 
                   className="w-full h-auto object-cover"
@@ -99,6 +99,13 @@ export default function AboutPage() {
                     Your browser doesn't support the video tag or the video failed to load.
                   </p>
                 </video>
+                {/* Description overlapping below video */}
+                <motion.p
+                  variants={itemVariants}
+                  className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mt-8 -mb-12 relative z-10"
+                >
+                  Understanding the landscape of traditional advertising costs and how clipper marketing revolutionizes brand reach.
+                </motion.p>
               </motion.div>
             </motion.div>
           </div>
