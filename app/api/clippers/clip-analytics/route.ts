@@ -31,15 +31,20 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user from database to verify ownership
+    console.log("🔍 Looking up database user for supabaseAuthId:", user.id)
     const dbUser = await prisma.user.findUnique({
       where: { supabaseAuthId: user.id }
     })
 
     if (!dbUser) {
+      console.log("❌ Database user not found for supabaseAuthId:", user.id)
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    console.log("✅ Found database user:", dbUser.id)
+
     // Fetch clip with view history - ensure user owns this clip
+    console.log("🔍 Looking up clip:", clipId, "for user:", dbUser.id)
     const clip = await prisma.clip.findFirst({
       where: {
         id: clipId,
@@ -83,8 +88,11 @@ export async function GET(request: NextRequest) {
     })
 
     if (!clip) {
+      console.log("❌ Clip not found or unauthorized:", clipId, "for user:", dbUser.id)
       return NextResponse.json({ error: 'Clip not found or unauthorized' }, { status: 404 })
     }
+
+    console.log("✅ Found clip:", clip.id, "with", clip.view_tracking?.length || 0, "tracking records")
 
     // Format view history
     const viewHistory = (clip.view_tracking || []).map((track: any) => ({
