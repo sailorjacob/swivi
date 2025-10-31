@@ -43,12 +43,41 @@ export async function GET(request: NextRequest) {
 
     console.log("✅ Found database user:", dbUser.id)
 
-    // Fetch clip with view history - ensure user owns this clip
-    console.log("🔍 Looking up clip:", clipId, "for user:", dbUser.id)
-    const clip = await prisma.clip.findFirst({
+    // Fetch clip submission first to verify ownership, then get clip data
+    console.log("🔍 Looking up clip submission for clip:", clipId, "for user:", dbUser.id)
+    const submission = await prisma.clipSubmission.findFirst({
       where: {
-        id: clipId,
+        clipId: clipId,
         userId: dbUser.id
+      },
+      select: {
+        id: true,
+        status: true,
+        initialViews: true,
+        finalEarnings: true,
+        createdAt: true,
+        campaigns: {
+          select: {
+            id: true,
+            title: true,
+            status: true
+          }
+        }
+      }
+    })
+
+    if (!submission) {
+      console.log("❌ Submission not found or unauthorized:", clipId, "for user:", dbUser.id)
+      return NextResponse.json({ error: 'Clip not found or unauthorized' }, { status: 404 })
+    }
+
+    console.log("✅ Found submission:", submission.id)
+
+    // Now fetch the actual clip with view history
+    console.log("🔍 Looking up clip data:", clipId)
+    const clip = await prisma.clip.findUnique({
+      where: {
+        id: clipId
       },
       select: {
         id: true,
@@ -67,29 +96,13 @@ export async function GET(request: NextRequest) {
             views: true,
             createdAt: true
           }
-        },
-        clipSubmissions: {
-          select: {
-            id: true,
-            status: true,
-            initialViews: true,
-            finalEarnings: true,
-            createdAt: true,
-            campaigns: {
-              select: {
-                id: true,
-                title: true,
-                status: true
-              }
-            }
-          }
         }
       }
     })
 
     if (!clip) {
-      console.log("❌ Clip not found or unauthorized:", clipId, "for user:", dbUser.id)
-      return NextResponse.json({ error: 'Clip not found or unauthorized' }, { status: 404 })
+      console.log("❌ Clip data not found:", clipId)
+      return NextResponse.json({ error: 'Clip not found' }, { status: 404 })
     }
 
     console.log("✅ Found clip:", clip.id, "with", clip.view_tracking?.length || 0, "tracking records")
@@ -103,7 +116,7 @@ export async function GET(request: NextRequest) {
     }))
 
     // Calculate tracked views (current - initial)
-    const initialViews = Number(clip.clipSubmissions?.[0]?.initialViews || 0)
+    const initialViews = Number(submission.initialViews || 0)
     const currentViews = Number(clip.views || 0)
     const trackedViews = currentViews - initialViews
 
@@ -121,8 +134,8 @@ export async function GET(request: NextRequest) {
         trackedViews: trackedViews > 0 ? trackedViews : 0,
         createdAt: clip.createdAt,
         earnings: Number(clip.earnings || 0),
-        campaign: clip.clipSubmissions?.[0]?.campaigns || null,
-        submission: clip.clipSubmissions?.[0] || null,
+        campaign: submission.campaigns || null,
+        submission: submission || null,
         viewHistory
       }
     })
