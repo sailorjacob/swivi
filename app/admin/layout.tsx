@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 // import { NotificationBell } from "@/components/notifications/notification-bell"
@@ -167,6 +168,14 @@ function AdminNav({ className }: { className?: string }) {
           </Link>
         </div>
       </nav>
+
+      {/* Theme Toggle */}
+      <div className="px-4 pb-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground font-medium">Theme</span>
+          <ThemeToggle />
+        </div>
+      </div>
 
       {/* Branding Image */}
       <div className="px-4 pb-2">
