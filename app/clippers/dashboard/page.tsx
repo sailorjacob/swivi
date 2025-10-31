@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast"
 import Link from "next/link"
 import { getPlatformLogo } from "@/components/ui/icons/platform-logos"
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import {
   DollarSign,
   TrendingUp,
@@ -26,7 +27,10 @@ import {
   CheckCircle,
   Trash2,
   ArrowUpRight,
-  XCircle
+  XCircle,
+  ChevronDown,
+  ChevronRight,
+  Loader2
 } from "lucide-react"
 
 // Get status icon component
@@ -80,6 +84,11 @@ export default function ClipperDashboard() {
   const [paymentMethod, setPaymentMethod] = useState<'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE'>('PAYPAL')
   const [paymentDetails, setPaymentDetails] = useState('')
   const [submittingPayout, setSubmittingPayout] = useState(false)
+  
+  // Analytics state
+  const [expandedClips, setExpandedClips] = useState<Set<string>>(new Set())
+  const [clipAnalytics, setClipAnalytics] = useState<Record<string, any>>({})
+  const [loadingAnalytics, setLoadingAnalytics] = useState<Set<string>>(new Set())
 
   // Get icon component from string name
   const getIcon = (iconName: string) => {
@@ -91,6 +100,50 @@ export default function ClipperDashboard() {
       case "TrendingUp": return TrendingUp
       default: return DollarSign
     }
+  }
+
+  // Toggle clip analytics expansion
+  const toggleClipAnalytics = async (clipId: string) => {
+    const newExpanded = new Set(expandedClips)
+    
+    if (newExpanded.has(clipId)) {
+      // Collapse
+      newExpanded.delete(clipId)
+      setExpandedClips(newExpanded)
+    } else {
+      // Expand - fetch analytics if not already loaded
+      newExpanded.add(clipId)
+      setExpandedClips(newExpanded)
+      
+      if (!clipAnalytics[clipId]) {
+        // Fetch analytics data
+        const newLoading = new Set(loadingAnalytics)
+        newLoading.add(clipId)
+        setLoadingAnalytics(newLoading)
+        
+        try {
+          const response = await authenticatedFetch(`/api/clippers/clip-analytics?clipId=${clipId}`)
+          if (response.ok) {
+            const data = await response.json()
+            setClipAnalytics(prev => ({
+              ...prev,
+              [clipId]: data.clip
+            }))
+          }
+        } catch (error) {
+          console.error("Error fetching clip analytics:", error)
+        } finally {
+          const updatedLoading = new Set(loadingAnalytics)
+          updatedLoading.delete(clipId)
+          setLoadingAnalytics(updatedLoading)
+        }
+      }
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
   // Redirect if not authenticated
@@ -463,6 +516,28 @@ export default function ClipperDashboard() {
                           {clip.clipUrl.length > 60 ? `${clip.clipUrl.substring(0, 60)}...` : clip.clipUrl}
                         </button>
                       </div>
+
+                      {/* View Analytics Toggle Button */}
+                      <div className="mt-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleClipAnalytics(clip.id)}
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                        >
+                          {expandedClips.has(clip.id) ? (
+                            <>
+                              <ChevronDown className="w-4 h-4 mr-1" />
+                              Hide Analytics
+                            </>
+                          ) : (
+                            <>
+                              <ChevronRight className="w-4 h-4 mr-1" />
+                              View Tracking Data
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
                     
                     {/* Delete button - only show for pending/rejected clips with no earnings */}
@@ -493,6 +568,117 @@ export default function ClipperDashboard() {
                       </AlertDialog>
                     )}
                   </div>
+
+                  {/* Expandable Analytics Section */}
+                  {expandedClips.has(clip.id) && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      {loadingAnalytics.has(clip.id) ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                        </div>
+                      ) : clipAnalytics[clip.id] ? (
+                        <div className="space-y-4">
+                          {/* Stats Summary */}
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="bg-muted/50 p-3 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1">Initial Views</div>
+                              <div className="text-lg font-semibold">
+                                {clipAnalytics[clip.id].initialViews.toLocaleString()}
+                              </div>
+                            </div>
+                            <div className="bg-muted/50 p-3 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1">Current Views</div>
+                              <div className="text-lg font-semibold">
+                                {clipAnalytics[clip.id].currentViews.toLocaleString()}
+                              </div>
+                            </div>
+                            <div className="bg-primary/10 p-3 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1">Tracked Views</div>
+                              <div className="text-lg font-semibold text-primary">
+                                +{clipAnalytics[clip.id].trackedViews.toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* View History Chart */}
+                          {clipAnalytics[clip.id].viewHistory.length > 0 ? (
+                            <>
+                              <div>
+                                <h4 className="text-sm font-medium mb-3">View History</h4>
+                                <div className="h-48 w-full">
+                                  <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={clipAnalytics[clip.id].viewHistory}>
+                                      <XAxis
+                                        dataKey="date"
+                                        stroke="hsl(var(--muted-foreground))"
+                                        fontSize={12}
+                                        tickLine={false}
+                                      />
+                                      <YAxis
+                                        stroke="hsl(var(--muted-foreground))"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        tickFormatter={(value) => value.toLocaleString()}
+                                      />
+                                      <Tooltip
+                                        content={({ active, payload }) => {
+                                          if (active && payload && payload.length) {
+                                            return (
+                                              <div className="bg-background border rounded-lg p-2 shadow-lg">
+                                                <p className="text-sm font-semibold">{payload[0].value?.toLocaleString()} views</p>
+                                                <p className="text-xs text-muted-foreground">{payload[0].payload.date}</p>
+                                              </div>
+                                            )
+                                          }
+                                          return null
+                                        }}
+                                      />
+                                      <Line
+                                        type="monotone"
+                                        dataKey="views"
+                                        stroke="hsl(var(--primary))"
+                                        strokeWidth={2}
+                                        dot={{ fill: 'hsl(var(--primary))', r: 3 }}
+                                        activeDot={{ r: 5 }}
+                                      />
+                                    </LineChart>
+                                  </ResponsiveContainer>
+                                </div>
+                              </div>
+
+                              {/* Scrape Log */}
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs text-muted-foreground">Tracking History:</span>
+                                {clipAnalytics[clip.id].viewHistory.map((point: any, idx: number) => (
+                                  <div 
+                                    key={idx}
+                                    className="flex items-center gap-1"
+                                    title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
+                                  >
+                                    {point.success ? (
+                                      <CheckCircle className="w-3 h-3 text-green-600" />
+                                    ) : (
+                                      <XCircle className="w-3 h-3 text-red-600" />
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          ) : (
+                            <div className="text-center py-6 text-sm text-muted-foreground">
+                              <Eye className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p>No tracking data yet</p>
+                              <p className="text-xs mt-1">View tracking data will appear here once scraping begins</p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6 text-sm text-muted-foreground">
+                          Failed to load analytics data
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
