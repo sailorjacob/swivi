@@ -1,4 +1,8 @@
+// Force this route to be dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from "next/server"
+import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { createClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
@@ -8,18 +12,14 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    // Get session
-    const authHeader = request.headers.get("authorization")
-    if (!authHeader) {
-      return NextResponse.json({ error: "No authorization header" }, { status: 401 })
-    }
-
-    const token = authHeader.replace("Bearer ", "")
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-
-    if (authError || !user) {
+    // Authenticate user
+    const authResult = await getServerUserWithRole(request)
+    
+    if (!authResult.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    const user = authResult.user
 
     // Get clipId from query params
     const { searchParams } = new URL(request.url)
