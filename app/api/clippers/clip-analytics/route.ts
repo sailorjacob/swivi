@@ -1,111 +1,121 @@
-// Force this route to be dynamic (not statically generated)
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { getServerUserWithRole } from '@/lib/supabase-auth-server'
+
 export const dynamic = 'force-dynamic'
-
-import { NextRequest, NextResponse } from "next/server"
-import { getServerUserWithRole } from "@/lib/supabase-auth-server"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function GET(request: NextRequest) {
   try {
     // Authenticate user
     const authResult = await getServerUserWithRole(request)
     
-    if (!authResult.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!authResult || !authResult.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const user = authResult.user
+    
+    const { user } = authResult
 
     // Get clipId from query params
     const { searchParams } = new URL(request.url)
-    const clipId = searchParams.get("clipId")
+    const clipId = searchParams.get('clipId')
 
     if (!clipId) {
-      return NextResponse.json({ error: "clipId is required" }, { status: 400 })
+      return NextResponse.json({ error: 'clipId is required' }, { status: 400 })
+    }
+
+    // Get user from database to verify ownership
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseAuthId: user.id }
+    })
+
+    if (!dbUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Fetch clip with view history - ensure user owns this clip
-    const { data: clip, error: clipError } = await supabase
-      .from("clips")
-      .select(`
-        id,
-        clipUrl,
-        platform,
-        status,
-        initialViews,
-        currentViews,
-        createdAt,
-        viewChanges,
-        userId,
-        campaigns (
-          id,
-          title,
-          status
-        ),
-        submissions!inner (
-          id,
-          status,
-          earnings,
-          submittedAt
-        )
-      `)
-      .eq("id", clipId)
-      .eq("userId", user.id)
-      .single()
+    const clip = await prisma.clips.findFirst({
+      where: {
+        id: clipId,
+        userId: dbUser.id
+      },
+      select: {
+        id: true,
+        clipUrl: true,
+        platform: true,
+        status: true,
+        initialViews: true,
+        currentViews: true,
+        createdAt: true,
+        earnings: true,
+        view_tracking: {
+          orderBy: {
+            date: 'asc'
+          },
+          select: {
+            id: true,
+            views: true,
+            date: true,
+            scrapedAt: true
+          }
+        },
+        clip_submissions: {
+          select: {
+            id: true,
+            status: true,
+            earnings: true,
+            submittedAt: true,
+            campaigns: {
+              select: {
+                id: true,
+                title: true,
+                status: true
+              }
+            }
+          }
+        }
+      }
+    })
 
-    if (clipError || !clip) {
-      return NextResponse.json({ error: "Clip not found or unauthorized" }, { status: 404 })
-    }
-
-    // Fetch view scrapes for this clip
-    const { data: viewScrapes, error: scrapesError } = await supabase
-      .from("view_scrapes")
-      .select("*")
-      .eq("clipId", clipId)
-      .order("scrapedAt", { ascending: true })
-
-    if (scrapesError) {
-      console.error("Error fetching view scrapes:", scrapesError)
+    if (!clip) {
+      return NextResponse.json({ error: 'Clip not found or unauthorized' }, { status: 404 })
     }
 
     // Format view history
-    const viewHistory = (viewScrapes || []).map((scrape: any) => ({
-      date: new Date(scrape.scrapedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      views: scrape.views || 0,
-      scrapedAt: scrape.scrapedAt,
-      success: scrape.success || false
+    const viewHistory = (clip.view_tracking || []).map((track: any) => ({
+      date: new Date(track.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      views: Number(track.views || 0),
+      scrapedAt: track.scrapedAt,
+      success: Number(track.views) > 0 || clip.view_tracking.indexOf(track) > 0
     }))
 
     // Calculate tracked views (current - initial)
-    const trackedViews = (clip.currentViews || 0) - (clip.initialViews || 0)
+    const initialViews = Number(clip.initialViews || 0)
+    const currentViews = Number(clip.currentViews || 0)
+    const trackedViews = currentViews - initialViews
 
     return NextResponse.json({
+      success: true,
       clip: {
         id: clip.id,
         clipUrl: clip.clipUrl,
         platform: clip.platform,
         status: clip.status,
-        initialViews: clip.initialViews || 0,
-        currentViews: clip.currentViews || 0,
+        initialViews: initialViews,
+        currentViews: currentViews,
         trackedViews: trackedViews > 0 ? trackedViews : 0,
         createdAt: clip.createdAt,
-        campaign: clip.campaigns,
-        submission: clip.submissions?.[0] || null,
+        earnings: Number(clip.earnings || 0),
+        campaign: clip.clip_submissions?.[0]?.campaigns || null,
+        submission: clip.clip_submissions?.[0] || null,
         viewHistory
       }
     })
 
   } catch (error) {
-    console.error("Error in clip analytics API:", error)
+    console.error('Error in clip analytics API:', error)
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
 }
-
