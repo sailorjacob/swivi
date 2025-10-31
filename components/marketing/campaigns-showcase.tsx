@@ -269,7 +269,7 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
                               alt={campaign.clientName}
                               width={280}
                               height={280}
-                              className="w-20 h-20 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-xl object-cover ring-2 ring-neutral-800/40 shadow-lg"
+                              className="w-20 h-20 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-xl object-cover ring-2 ring-neutral-800/40"
                               unoptimized
                             />
                           </div>

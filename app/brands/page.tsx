@@ -153,7 +153,7 @@ export default function BrandsPage() {
                     alt="Caleb Simpson x Ed Sheeran Pizza Review Campaign"
                     width={400}
                     height={300}
-                    className="rounded-lg shadow-lg"
+                    className="rounded-lg"
                     priority
                   />
                 </motion.div>

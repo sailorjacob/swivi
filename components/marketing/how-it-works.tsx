@@ -50,13 +50,6 @@ export function HowItWorks() {
               ))}
             </div>
           </div>
-          <div className="flex-shrink-0 w-80">
-            <img
-              src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/howitworks.png"
-              alt="How It Works"
-              className="w-full h-auto rounded-lg"
-            />
-          </div>
         </div>
 
         {/* Mobile Layout: Single column */}

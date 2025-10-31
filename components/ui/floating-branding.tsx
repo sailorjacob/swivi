@@ -125,8 +125,8 @@ export function FloatingBranding({
           border-2 border-border/20
           bg-background/80 backdrop-blur-sm
           hover:border-border/40
-          cursor-pointer hover:shadow-lg
-          ${isMobile ? (!isHovered ? 'scale-125 shadow-2xl' : 'scale-100') : (!isHovered || !isPastFirstSection ? 'scale-125 shadow-2xl' : 'hover:scale-110')}
+          cursor-pointer
+          ${isMobile ? (!isHovered ? 'scale-125' : 'scale-100') : (!isHovered || !isPastFirstSection ? 'scale-125' : 'hover:scale-110')}
         `}
         onMouseEnter={() => !isMobile && setIsHovered(false)}
         onMouseLeave={() => !isMobile && setIsHovered(true)}

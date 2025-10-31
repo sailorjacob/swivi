@@ -74,25 +74,10 @@ export default function AboutPage() {
               animate="visible"
               className="mx-auto max-w-4xl"
             >
-              <motion.h1
-                variants={itemVariants}
-                className="mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light leading-tight text-center"
-              >
-                About{" "}
-                <span className="font-normal">Swivi Media</span>
-              </motion.h1>
-
-              <motion.p
-                variants={itemVariants}
-                className="mb-8 text-lg text-muted-foreground text-center max-w-2xl mx-auto"
-              >
-                Understanding the landscape of traditional advertising costs and how clipper marketing revolutionizes brand reach.
-              </motion.p>
-              
               {/* Video Section */}
               <motion.div
                 variants={itemVariants}
-                className="w-full max-w-3xl mx-auto mb-16 rounded-lg overflow-hidden"
+                className="w-full max-w-3xl mx-auto mb-8 rounded-lg overflow-hidden"
               >
                 <video 
                   className="w-full h-auto object-cover"
@@ -120,7 +105,7 @@ export default function AboutPage() {
         </section>
 
         {/* CPM Article Section */}
-        <section className="py-20 md:py-32 border-t border-black/5">
+        <section className="py-12 md:py-16 border-t border-black/5">
           <div className="max-width-wrapper section-padding">
             <motion.div
               initial={{ opacity: 0, y: 20 }}

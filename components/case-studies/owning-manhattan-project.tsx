@@ -177,7 +177,7 @@ export default function OwningManhattanProject() {
               alt="Owning Manhattan"
               width={300}
               height={300}
-              className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-2xl object-cover ring-2 ring-black/10 shadow-lg"
+              className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-2xl object-cover ring-2 ring-black/10"
               unoptimized
             />
           </div>
