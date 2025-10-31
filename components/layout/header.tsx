@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { useSession } from "@/lib/supabase-auth-provider"
+import { useTheme } from "next-themes"
 import { Menu, X, ChevronDown } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 
@@ -23,32 +24,22 @@ const navigation = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isLightTheme, setIsLightTheme] = useState(false)
   const { data: session, status } = useSession()
+  const { resolvedTheme } = useTheme()
   const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
 
   // Hide theme toggle on case-studies page
   const showThemeToggle = pathname !== '/case-studies'
 
   useEffect(() => {
-    // Check current theme
-    const checkTheme = () => {
-      const isLight = !document.documentElement.classList.contains('dark') ||
-                     document.documentElement.getAttribute('data-theme') === 'light'
-      setIsLightTheme(isLight)
-    }
-
-    checkTheme()
-
-    // Listen for theme changes
-    const observer = new MutationObserver(checkTheme)
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class', 'data-theme']
-    })
-
-    return () => observer.disconnect()
+    setMounted(true)
   }, [])
+
+  // Determine logo based on theme
+  const logoSrc = mounted && resolvedTheme === 'light'
+    ? "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
+    : "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
 
   return (
     <header className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-sm border-b border-black/5">
@@ -56,7 +47,7 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center">
           <Image
-            src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
+            src={logoSrc}
             alt="Swivi"
             width={300}
             height={100}

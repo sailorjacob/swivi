@@ -1,4 +1,8 @@
+"use client"
+
 import Image from "next/image"
+import { useTheme } from "next-themes"
+import { useState, useEffect } from "react"
 
 interface SwiviLogoProps {
   className?: string
@@ -6,10 +10,25 @@ interface SwiviLogoProps {
 }
 
 export function SwiviLogo({ className = "", size = 40 }: SwiviLogoProps) {
+  const { theme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Use resolvedTheme to handle system theme, fallback to theme
+  const currentTheme = mounted ? (resolvedTheme || theme) : 'dark'
+  
+  // Use inverted2.png for dark theme (white logo) and SwiviLogo.png for light theme (dark logo)
+  const logoSrc = currentTheme === 'light' 
+    ? "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
+    : "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
+
   return (
     <div className={`relative ${className}`}>
       <Image
-        src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
+        src={logoSrc}
         alt="Swivi Logo"
         width={size}
         height={size}

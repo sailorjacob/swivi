@@ -1,7 +1,23 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
+import { useTheme } from "next-themes"
+import { useState, useEffect } from "react"
 
 export function Footer() {
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Determine logo based on theme
+  const logoSrc = mounted && resolvedTheme === 'light'
+    ? "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
+    : "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
+
   return (
     <footer className="border-t border-black/10 mt-auto relative">
       <div className="max-width-wrapper section-padding py-12 md:py-16">
@@ -10,7 +26,7 @@ export function Footer() {
           <div>
             <Link href="/" className="inline-flex items-center mb-4">
               <Image
-                src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
+                src={logoSrc}
                 alt="Swivi"
                 width={250}
                 height={84}
