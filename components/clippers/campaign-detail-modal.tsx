@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { 
   DollarSign, 
   TrendingUp, 
@@ -27,7 +28,8 @@ import {
   Youtube,
   Twitter,
   CheckCircle,
-  Clock
+  Clock,
+  AlertCircle
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { authenticatedFetch } from "@/lib/supabase-browser"
@@ -161,18 +163,43 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
 
   if (!campaign) return null
 
+  const isCampaignCompleted = campaign.status === 'COMPLETED'
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-card border-border">
         <DialogHeader className="pb-4">
-          <DialogTitle className="text-xl font-medium text-foreground">
-            {campaign.title}
-          </DialogTitle>
-          <p className="text-sm text-muted-foreground">by {campaign.creator}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="text-xl font-medium text-foreground">
+                {campaign.title}
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground">by {campaign.creator}</p>
+            </div>
+            {isCampaignCompleted && (
+              <Badge className="bg-green-600 text-white">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Completed
+              </Badge>
+            )}
+          </div>
         </DialogHeader>
         
         <div className="space-y-4">
+          {/* Campaign Completed Alert */}
+          {isCampaignCompleted && (
+            <Alert className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
+              <AlertCircle className="h-4 w-4 text-green-600" />
+              <AlertTitle className="text-green-800 dark:text-green-200">Campaign Completed</AlertTitle>
+              <AlertDescription className="text-green-700 dark:text-green-300">
+                This campaign has reached its budget limit and is no longer accepting submissions. 
+                All earnings have been finalized and are ready for payout.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Submit Form - Compact */}
+          {!isCampaignCompleted && (
           <div className="border border-border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
               <Link2 className="w-4 h-4 text-foreground" />
@@ -246,6 +273,7 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
               </div>
             </form>
           </div>
+          )}
 
           {/* Campaign Info - Compact */}
           <div className="border border-border rounded-lg p-4">

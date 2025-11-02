@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Plus, Edit, Trash2, Eye, Users, DollarSign, TrendingUp, Calendar, Target, Loader2 } from "lucide-react"
+import { Plus, Edit, Trash2, Eye, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle } from "lucide-react"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { supabase } from "@/lib/supabase-auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -506,6 +506,38 @@ export default function AdminCampaignsPage() {
     }
   }
 
+  // Complete campaign manually
+  const handleCompleteCampaign = async (campaignId: string) => {
+    if (!confirm("Are you sure you want to complete this campaign? This will finalize all earnings and stop view tracking.")) {
+      return
+    }
+
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/complete`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          campaignId,
+          completionReason: "Manually completed by admin"
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        toast.success(`Campaign completed! ${result.earnings.totalClips} clips finalized with total earnings of $${result.budgetStatus.totalEarnings.toFixed(2)}`)
+        await fetchCampaigns()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to complete campaign")
+      }
+    } catch (error) {
+      console.error("Error completing campaign:", error)
+      toast.error("Failed to complete campaign")
+    }
+  }
+
   // Delete campaign
   const handleDeleteCampaign = async (campaignId: string) => {
     try {
@@ -856,6 +888,17 @@ export default function AdminCampaignsPage() {
                                   className="bg-green-600 hover:bg-green-700 opacity-70 group-hover:opacity-100 transition-opacity"
                                 >
                                   <span className="text-xs">Publish</span>
+                                </Button>
+                              )}
+                              {campaign.status === "ACTIVE" && progressPercentage >= 50 && (
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() => handleCompleteCampaign(campaign.id)}
+                                  className="bg-blue-600 hover:bg-blue-700 opacity-70 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  <span className="text-xs">Complete</span>
                                 </Button>
                               )}
                               <AlertDialog>

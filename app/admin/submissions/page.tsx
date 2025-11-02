@@ -566,9 +566,13 @@ export default function AdminSubmissionsPage() {
                           )}
                         </span>
                       )}
-                      {submission.clips?.earnings && Number(submission.clips.earnings) > 0 && (
-                        <span>Earnings: ${Number(submission.clips.earnings).toFixed(2)}</span>
-                      )}
+                      {submission.campaigns.status === 'COMPLETED' && submission.finalEarnings ? (
+                        <span className="text-green-600 font-bold flex items-center gap-1">
+                          Final Earnings: ${Number(submission.finalEarnings).toFixed(2)} 🔒
+                        </span>
+                      ) : submission.clips?.earnings && Number(submission.clips.earnings) > 0 ? (
+                        <span>Current Earnings: ${Number(submission.clips.earnings).toFixed(2)}</span>
+                      ) : null}
                       {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 && (
                         <span>Last Tracked: {new Date(submission.clips.view_tracking[0].date).toLocaleDateString()}</span>
                       )}
