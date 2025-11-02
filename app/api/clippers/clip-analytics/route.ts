@@ -52,6 +52,9 @@ export async function GET(request: NextRequest) {
       },
       select: {
         id: true,
+        clipId: true,
+        clipUrl: true,
+        platform: true,
         status: true,
         initialViews: true,
         finalEarnings: true,
@@ -80,16 +83,15 @@ export async function GET(request: NextRequest) {
         success: true,
         clip: {
           id: submission.id,
-          clipUrl: submission.clipUrl,
-          platform: submission.platform,
-          status: submission.status,
+          clipUrl: submission.clipUrl || '',
+          platform: submission.platform || 'UNKNOWN',
+          status: submission.status || 'PENDING',
           initialViews: Number(submission.initialViews || 0),
           currentViews: Number(submission.initialViews || 0),
           trackedViews: 0,
-          createdAt: submission.createdAt,
-          earnings: 0,
+          createdAt: submission.createdAt.toISOString(),
+          earnings: Number(submission.finalEarnings || 0),
           campaign: submission.campaigns || null,
-          submission: submission || null,
           viewHistory: []
         }
       })
@@ -154,10 +156,9 @@ export async function GET(request: NextRequest) {
         initialViews: initialViews,
         currentViews: currentViews,
         trackedViews: trackedViews > 0 ? trackedViews : 0,
-        createdAt: clip.createdAt,
+        createdAt: clip.createdAt.toISOString(),
         earnings: Number(clip.earnings || 0),
         campaign: submission.campaigns || null,
-        submission: submission || null,
         viewHistory
       }
     })
