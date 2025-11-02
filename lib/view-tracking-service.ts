@@ -158,7 +158,6 @@ export class ViewTrackingService {
       }
 
       if (earningsToAdd > 0) {
-        const campaignSpent = Number(campaign.spent || 0)
         // Update everything in a transaction
         await prisma.$transaction(async (tx) => {
           // Update clip earnings
@@ -184,18 +183,35 @@ export class ViewTrackingService {
             }
           })
 
-          // Update campaign spent
+          // Recalculate campaign spent from actual clip earnings (prevents drift)
+          const actualSpent = await tx.clipSubmission.findMany({
+            where: {
+              campaignId: campaign.id,
+              status: 'APPROVED',
+              clipId: { not: null }
+            },
+            include: {
+              clips: {
+                select: { earnings: true }
+              }
+            }
+          })
+
+          const totalSpent = actualSpent.reduce((sum, sub) => {
+            return sum + Number(sub.clips?.earnings || 0)
+          }, 0)
+
+          // Update campaign spent to actual total
           const campaignBudget = Number(campaign.budget)
-          const newSpent = campaignSpent + earningsToAdd
           await tx.campaign.update({
             where: { id: campaign.id },
             data: {
-              spent: newSpent
+              spent: totalSpent
             }
           })
 
           // Check if campaign should be completed
-          if (newSpent >= campaignBudget) {
+          if (totalSpent >= campaignBudget) {
             await tx.campaign.update({
               where: { id: campaign.id },
               data: {
