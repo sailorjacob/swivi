@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Check, X, ExternalLink, Search, Filter, Calendar, User, Target, DollarSign, Loader2, AlertCircle, ArrowUpRight, XCircle } from "lucide-react"
+import { Check, X, ExternalLink, Search, Filter, Calendar, User, DollarSign, Loader2, AlertCircle, ArrowUpRight, XCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -291,67 +291,30 @@ export default function AdminSubmissionsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Target className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Pending Review</p>
-                  <p className="text-2xl font-semibold">{pendingCount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Check className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Approved</p>
-                  <p className="text-2xl font-semibold">{approvedCount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <DollarSign className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Total Paid</p>
-                  <p className="text-2xl font-semibold">${totalEarnings.toFixed(2)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <User className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Paid Submissions</p>
-                  <p className="text-2xl font-semibold">{paidCount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <AlertCircle className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Flagged for Review</p>
-                  <p className="text-2xl font-semibold">{flaggedCount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Compact Stats Bar */}
+        <div className="flex flex-wrap items-center gap-6 mb-6 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Pending:</span>
+            <span className="font-semibold">{pendingCount}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Approved:</span>
+            <span className="font-semibold">{approvedCount}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Paid:</span>
+            <span className="font-semibold">${totalEarnings.toFixed(2)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Paid submissions:</span>
+            <span className="font-semibold">{paidCount}</span>
+          </div>
+          {flaggedCount > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Flagged:</span>
+              <span className="font-semibold">{flaggedCount}</span>
+            </div>
+          )}
         </div>
 
         {/* Filters */}
@@ -465,23 +428,9 @@ export default function AdminSubmissionsPage() {
             <div className="space-y-4">
               {!loading && submissions.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-                    <Target className="h-12 w-12 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">No submissions yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Submissions will appear here once clippers start submitting content to your campaigns.
+                  <p className="text-muted-foreground">
+                    No submissions yet. Submissions will appear here once clippers start submitting.
                   </p>
-                  <div className="flex justify-center gap-2">
-                    <Button variant="outline" asChild>
-                      <Link href="/admin/campaigns">
-                        View Campaigns
-                      </Link>
-                    </Button>
-                    <Button onClick={fetchSubmissions}>
-                      Refresh
-                    </Button>
-                  </div>
                 </div>
               ) : (
                 submissions.map((submission) => (

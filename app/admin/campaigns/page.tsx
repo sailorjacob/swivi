@@ -752,88 +752,68 @@ export default function AdminCampaignsPage() {
           </Card>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Target className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Active Campaigns</p>
-                  <p className="text-2xl font-semibold">{platformStats.activeCampaigns}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Users className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-                  <p className="text-2xl font-semibold">{platformStats.totalUsers}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <TrendingUp className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Total Views</p>
-                  <p className="text-2xl font-semibold">{Number(platformStats.totalViews).toLocaleString()}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <DollarSign className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
-                  <p className="text-2xl font-semibold">${platformStats.totalEarnings.toFixed(2)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Compact Stats Bar */}
+        <div className="flex flex-wrap items-center gap-6 mb-6 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Active:</span>
+            <span className="font-semibold">{platformStats.activeCampaigns}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Users:</span>
+            <span className="font-semibold">{platformStats.totalUsers}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Views:</span>
+            <span className="font-semibold">{Number(platformStats.totalViews).toLocaleString()}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Earnings:</span>
+            <span className="font-semibold">${platformStats.totalEarnings.toFixed(2)}</span>
+          </div>
         </div>
 
         {/* Campaign Status Filter Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <Button
-            variant={statusFilter === 'all' ? 'default' : 'outline'}
-            size="sm"
+        <div className="flex gap-6 border-b border-border mb-6">
+          <button
             onClick={() => setStatusFilter('all')}
+            className={`pb-2 text-sm transition-colors ${
+              statusFilter === 'all' 
+                ? 'text-foreground border-b-2 border-foreground -mb-px' 
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
           >
-            All ({campaigns.length})
-          </Button>
-          <Button
-            variant={statusFilter === 'ACTIVE' ? 'default' : 'outline'}
-            size="sm"
+            All {campaigns.length > 0 && `(${campaigns.length})`}
+          </button>
+          <button
             onClick={() => setStatusFilter('ACTIVE')}
+            className={`pb-2 text-sm transition-colors ${
+              statusFilter === 'ACTIVE' 
+                ? 'text-foreground border-b-2 border-foreground -mb-px' 
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
           >
-            Active ({activeCampaignsCount})
-          </Button>
-          <Button
-            variant={statusFilter === 'COMPLETED' ? 'default' : 'outline'}
-            size="sm"
+            Active {activeCampaignsCount > 0 && `(${activeCampaignsCount})`}
+          </button>
+          <button
             onClick={() => setStatusFilter('COMPLETED')}
+            className={`pb-2 text-sm transition-colors ${
+              statusFilter === 'COMPLETED' 
+                ? 'text-foreground border-b-2 border-foreground -mb-px' 
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
           >
-            <CheckCircle className="w-4 h-4 mr-1" />
-            Completed ({completedCampaignsCount})
-          </Button>
-          <Button
-            variant={statusFilter === 'DRAFT' ? 'default' : 'outline'}
-            size="sm"
+            Completed {completedCampaignsCount > 0 && `(${completedCampaignsCount})`}
+          </button>
+          <button
             onClick={() => setStatusFilter('DRAFT')}
+            className={`pb-2 text-sm transition-colors ${
+              statusFilter === 'DRAFT' 
+                ? 'text-foreground border-b-2 border-foreground -mb-px' 
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
           >
-            Draft ({draftCampaignsCount})
-          </Button>
+            Draft {draftCampaignsCount > 0 && `(${draftCampaignsCount})`}
+          </button>
         </div>
 
         {/* Campaigns List */}
@@ -850,27 +830,12 @@ export default function AdminCampaignsPage() {
             <div className="space-y-4">
               {filteredCampaigns.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-                    <Target className="h-12 w-12 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">
-                    {statusFilter === 'all' ? 'No campaigns yet' :
-                     statusFilter === 'COMPLETED' ? 'No completed campaigns' :
-                     statusFilter === 'ACTIVE' ? 'No active campaigns' :
-                     'No draft campaigns'}
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    {statusFilter === 'all' ? 'Create your first campaign to start working with content creators.' :
-                     statusFilter === 'COMPLETED' ? 'Campaigns will appear here once they are completed.' :
-                     statusFilter === 'ACTIVE' ? 'Activate or create a campaign to see it here.' :
-                     'Create a draft campaign to see it here.'}
+                  <p className="text-muted-foreground">
+                    {statusFilter === 'all' ? 'No campaigns yet.' :
+                     statusFilter === 'COMPLETED' ? 'No completed campaigns.' :
+                     statusFilter === 'ACTIVE' ? 'No active campaigns.' :
+                     'No draft campaigns.'}
                   </p>
-                  {statusFilter === 'all' && (
-                    <Button onClick={() => setShowCreateDialog(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Campaign
-                    </Button>
-                  )}
                 </div>
               ) : (
                 filteredCampaigns.map((campaign) => {

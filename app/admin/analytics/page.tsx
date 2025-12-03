@@ -205,7 +205,9 @@ export default function AdminAnalyticsPage() {
               })}
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-8">No cron job logs found</p>
+            <p className="text-sm text-muted-foreground py-4">
+              No cron logs yet. Logs will appear here when there are active campaigns with approved clips to track.
+            </p>
           )}
         </CardContent>
       </Card>
@@ -424,8 +426,10 @@ export default function AdminAnalyticsPage() {
 
         {campaigns.length === 0 && (
           <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">
-              <p>No campaigns with tracked clips found</p>
+            <CardContent className="py-8">
+              <p className="text-sm text-muted-foreground text-center">
+                No campaigns with tracked clips yet. Tracking data will appear here once there are approved clips in active campaigns.
+              </p>
             </CardContent>
           </Card>
         )}
