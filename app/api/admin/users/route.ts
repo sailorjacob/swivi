@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
       const testQuery = await prisma.user.count()
       console.log("✅ Database connection test passed, found", testQuery, "users")
 
-      // Execute main query with complete select including stats and social accounts
+      // Execute main query with complete select including stats, social accounts, and payout info
       console.log("🔍 Executing main users query...")
       users = await prisma.user.findMany({
         where,
@@ -71,10 +71,15 @@ export async function GET(request: NextRequest) {
           createdAt: true,
           totalViews: true,
           totalEarnings: true,
+          // Payout information
+          paypalEmail: true,
+          walletAddress: true,
+          bitcoinAddress: true,
           // Include submissions count
           _count: {
             select: {
-              clipSubmissions: true
+              clipSubmissions: true,
+              payoutRequests: true
             }
           },
           // Include verified social accounts
@@ -93,6 +98,23 @@ export async function GET(request: NextRequest) {
             orderBy: {
               platform: "asc"
             }
+          },
+          // Include pending payout requests
+          payoutRequests: {
+            where: {
+              status: { in: ['PENDING', 'APPROVED', 'PROCESSING'] }
+            },
+            select: {
+              id: true,
+              amount: true,
+              status: true,
+              paymentMethod: true,
+              requestedAt: true
+            },
+            orderBy: {
+              requestedAt: 'desc'
+            },
+            take: 1
           }
         },
         orderBy: {
@@ -108,6 +130,14 @@ export async function GET(request: NextRequest) {
         ...user,
         totalViews: Number(user.totalViews),
         totalEarnings: Number(user.totalEarnings),
+        pendingPayoutRequest: user.payoutRequests?.[0] ? {
+          id: user.payoutRequests[0].id,
+          amount: Number(user.payoutRequests[0].amount),
+          status: user.payoutRequests[0].status,
+          paymentMethod: user.payoutRequests[0].paymentMethod,
+          requestedAt: user.payoutRequests[0].requestedAt
+        } : null,
+        payoutRequests: undefined // Remove full array from response
       }))
 
       // Get total count

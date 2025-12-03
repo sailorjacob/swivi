@@ -45,17 +45,65 @@ export async function GET(request: NextRequest) {
       })
 
     } else if (status === "processed") {
-      // Get processed payments (would need a Payout model to track this properly)
-      // For now, return empty array as we don't have a full payout tracking system
+      // Get processed payments from the Payout model
+      const payouts = await prisma.payout.findMany({
+        where: {
+          status: 'COMPLETED'
+        },
+        include: {
+          users: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              paypalEmail: true,
+              walletAddress: true,
+              bitcoinAddress: true
+            }
+          }
+        },
+        orderBy: {
+          processedAt: 'desc'
+        },
+        take: limit,
+        skip: offset
+      })
+
+      const totalCount = await prisma.payout.count({
+        where: { status: 'COMPLETED' }
+      })
+
+      const totalProcessedAmount = await prisma.payout.aggregate({
+        where: { status: 'COMPLETED' },
+        _sum: { amount: true }
+      })
+
       return NextResponse.json({
-        payments: [],
-        totalProcessedAmount: 0,
+        payments: payouts.map(p => ({
+          id: p.id,
+          userId: p.userId,
+          amount: Number(p.amount),
+          method: p.method,
+          status: p.status,
+          transactionId: p.transactionId,
+          processedAt: p.processedAt,
+          createdAt: p.createdAt,
+          user: {
+            id: p.users.id,
+            name: p.users.name,
+            email: p.users.email,
+            paypalEmail: p.users.paypalEmail,
+            walletAddress: p.users.walletAddress,
+            bitcoinAddress: p.users.bitcoinAddress
+          }
+        })),
+        totalProcessedAmount: Number(totalProcessedAmount._sum.amount || 0),
         status: "processed",
         pagination: {
           limit,
           offset,
-          total: 0,
-          hasMore: false
+          total: totalCount,
+          hasMore: offset + limit < totalCount
         }
       })
 

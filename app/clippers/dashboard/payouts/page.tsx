@@ -3,7 +3,7 @@
 // Force this page to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { supabase } from "@/lib/supabase-browser"
@@ -20,12 +20,20 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  Loader2
+  Loader2,
+  AlertCircle
 } from "lucide-react"
 import toast from "react-hot-toast"
 
-// Payout history will be loaded from user's actual data
-const payoutHistory: any[] = []
+interface PayoutRequestItem {
+  id: string
+  amount: number
+  status: string
+  paymentMethod: string
+  requestedAt: string
+  processedAt?: string
+  notes?: string
+}
 
 export default function PayoutsPage() {
   const { data: session } = useSession()
@@ -36,6 +44,8 @@ export default function PayoutsPage() {
   const [payoutSuccess, setPayoutSuccess] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [dashboardData, setDashboardData] = useState<any>(null)
+  const [payoutHistory, setPayoutHistory] = useState<PayoutRequestItem[]>([])
+  const [historyLoading, setHistoryLoading] = useState(true)
 
   // Payout settings
   const [payoutData, setPayoutData] = useState({
@@ -50,23 +60,42 @@ export default function PayoutsPage() {
   const minimumPayout = 20.00
 
   // Load dashboard data (earnings)
-  useEffect(() => {
-    const loadDashboard = async () => {
-      if (!session?.user?.id) return
-      
-      try {
-        const response = await authenticatedFetch("/api/clippers/dashboard")
-        if (response.ok) {
-          const data = await response.json()
-          setDashboardData(data)
-        }
-      } catch (error) {
-        console.error("Error loading dashboard data:", error)
+  const loadDashboard = useCallback(async () => {
+    if (!session?.user?.id) return
+    
+    try {
+      const response = await authenticatedFetch("/api/clippers/dashboard")
+      if (response.ok) {
+        const data = await response.json()
+        setDashboardData(data)
       }
+    } catch (error) {
+      console.error("Error loading dashboard data:", error)
     }
-
-    loadDashboard()
   }, [session])
+
+  // Load payout history
+  const loadPayoutHistory = useCallback(async () => {
+    if (!session?.user?.id) return
+    
+    try {
+      setHistoryLoading(true)
+      const response = await authenticatedFetch("/api/clippers/payout-request")
+      if (response.ok) {
+        const data = await response.json()
+        setPayoutHistory(data.payoutRequests || [])
+      }
+    } catch (error) {
+      console.error("Error loading payout history:", error)
+    } finally {
+      setHistoryLoading(false)
+    }
+  }, [session])
+
+  useEffect(() => {
+    loadDashboard()
+    loadPayoutHistory()
+  }, [loadDashboard, loadPayoutHistory])
 
   // Load user profile data for payout settings
   useEffect(() => {
@@ -148,8 +177,9 @@ export default function PayoutsPage() {
         toast.success("Payout request submitted successfully!")
         setPayoutAmount("")
         setPayoutMethod("PAYPAL")
-        // Refresh dashboard data to update available balance
+        // Refresh dashboard data and payout history
         loadDashboard()
+        loadPayoutHistory()
       } else {
         const error = await response.json()
         toast.error(error.error || "Failed to submit payout request")
@@ -415,48 +445,71 @@ export default function PayoutsPage() {
 
       {/* Payout History */}
       <div>
-        {/* Payout History */}
-
-        {/* Payout History */}
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white">Payout History</CardTitle>
+            <CardTitle className="text-white">Payout Requests</CardTitle>
           </CardHeader>
           <CardContent>
-            {payoutHistory.length > 0 ? (
+            {historyLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : payoutHistory.length > 0 ? (
               <div className="space-y-4">
                 {payoutHistory.map((payout) => (
-                  <div key={payout.id} className="p-4 bg-muted/50 rounded-lg">
+                  <div key={payout.id} className={`p-4 rounded-lg border ${
+                    payout.status === 'COMPLETED' ? 'bg-green-500/10 border-green-500/20' :
+                    payout.status === 'PENDING' ? 'bg-yellow-500/10 border-yellow-500/20' :
+                    payout.status === 'APPROVED' || payout.status === 'PROCESSING' ? 'bg-blue-500/10 border-blue-500/20' :
+                    payout.status === 'REJECTED' ? 'bg-red-500/10 border-red-500/20' :
+                    'bg-muted/50 border-border'
+                  }`}>
                     <div className="flex items-center justify-between mb-3">
                       <div className="font-bold text-white text-lg">
                         ${(typeof payout.amount === 'number' ? payout.amount : parseFloat(payout.amount || 0)).toFixed(2)}
                       </div>
-                      <Badge variant="outline" className={getStatusColor(payout.status)}>
-                        {payout.status}
+                      <Badge variant="outline" className={getStatusColor(payout.status?.toLowerCase())}>
+                        <span className="flex items-center gap-1.5">
+                          {payout.status === 'COMPLETED' && <CheckCircle className="w-3 h-3" />}
+                          {payout.status === 'PENDING' && <Clock className="w-3 h-3" />}
+                          {(payout.status === 'APPROVED' || payout.status === 'PROCESSING') && <AlertCircle className="w-3 h-3" />}
+                          {payout.status === 'REJECTED' && <XCircle className="w-3 h-3" />}
+                          {payout.status}
+                        </span>
                       </Badge>
                     </div>
                     
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Method:</span>
-                        <span className="text-white">{payout.method}</span>
+                        <span className="text-white">{payout.paymentMethod || 'N/A'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Requested:</span>
-                        <span className="text-white">{payout.requestedAt}</span>
+                        <span className="text-white">
+                          {new Date(payout.requestedAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </span>
                       </div>
                       {payout.processedAt && (
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Processed:</span>
-                          <span className="text-white">{payout.processedAt}</span>
+                          <span className="text-white">
+                            {new Date(payout.processedAt).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </span>
                         </div>
                       )}
-                      {payout.transactionId && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">TX ID:</span>
-                          <span className="text-white font-mono text-xs">
-                            {payout.transactionId}
-                          </span>
+                      {payout.notes && (
+                        <div className="mt-2 pt-2 border-t border-border">
+                          <span className="text-muted-foreground text-xs">Note: </span>
+                          <span className="text-white text-xs">{payout.notes}</span>
                         </div>
                       )}
                     </div>
@@ -466,7 +519,7 @@ export default function PayoutsPage() {
             ) : (
               <div className="text-center py-8">
                 <DollarSign className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground text-lg mb-2">No payout history yet</p>
+                <p className="text-muted-foreground text-lg mb-2">No payout requests yet</p>
                 <p className="text-muted-foreground text-sm">
                   Complete approved campaigns to start earning and request payouts
                 </p>

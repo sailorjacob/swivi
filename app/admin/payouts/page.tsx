@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogFooter
 } from '@/components/ui/dialog'
-import { DollarSign, Check, X, Clock, AlertCircle, User, Mail, CreditCard, Calendar, FileText, CheckCircle2, XCircle } from 'lucide-react'
+import { DollarSign, Check, X, Clock, AlertCircle, User, Mail, CreditCard, Calendar, FileText, CheckCircle2, XCircle, Wallet, Copy, Users, Target, RefreshCw } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 
 interface PayoutRequest {
@@ -39,6 +39,32 @@ interface PayoutRequest {
   }
 }
 
+interface UserWithBalance {
+  id: string
+  name: string | null
+  email: string | null
+  paypalEmail: string | null
+  walletAddress: string | null
+  bitcoinAddress: string | null
+  totalEarnings: number
+  approvedClips: number
+  hasPendingRequest: boolean
+  pendingRequest: {
+    id: string
+    amount: number
+    status: string
+    requestedAt: string
+  } | null
+}
+
+interface PayoutSummary {
+  totalUserBalances: number
+  pendingRequestsCount: number
+  pendingRequestsTotal: number
+  usersWithBalancesCount: number
+  completedCampaignsCount: number
+}
+
 export default function AdminPayoutsPage() {
   const [payoutRequests, setPayoutRequests] = useState<PayoutRequest[]>([])
   const [loading, setLoading] = useState(true)
@@ -47,11 +73,40 @@ export default function AdminPayoutsPage() {
   const [transactionId, setTransactionId] = useState('')
   const [notes, setNotes] = useState('')
   const [processing, setProcessing] = useState(false)
+  const [summary, setSummary] = useState<PayoutSummary | null>(null)
+  const [usersWithBalances, setUsersWithBalances] = useState<UserWithBalance[]>([])
+  const [summaryLoading, setSummaryLoading] = useState(true)
   const { toast } = useToast()
 
   useEffect(() => {
     fetchPayoutRequests()
+    fetchPayoutSummary()
   }, [])
+
+  const fetchPayoutSummary = async () => {
+    try {
+      setSummaryLoading(true)
+      const response = await fetch('/api/admin/payout-summary')
+      const data = await response.json()
+
+      if (response.ok) {
+        setSummary(data.summary)
+        setUsersWithBalances(data.usersWithBalances || [])
+      }
+    } catch (error) {
+      console.error('Error fetching payout summary:', error)
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text)
+    toast({
+      title: 'Copied!',
+      description: `${label} copied to clipboard`
+    })
+  }
 
   const fetchPayoutRequests = async (status?: string) => {
     try {
@@ -315,7 +370,184 @@ export default function AdminPayoutsPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="space-y-6">
 
-      {/* Stats Cards */}
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Payout Management</h1>
+          <p className="text-muted-foreground">Manage payout requests and user balances</p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => {
+            fetchPayoutRequests()
+            fetchPayoutSummary()
+          }}
+          disabled={loading || summaryLoading}
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${(loading || summaryLoading) ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
+
+      {/* Summary Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-4 mb-8">
+        <Card className="border-2 border-green-500/20 bg-green-500/5">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total User Balances</CardTitle>
+            <DollarSign className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-500">
+              ${summary?.totalUserBalances?.toFixed(2) || '0.00'}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Across {summary?.usersWithBalancesCount || 0} users
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
+            <Clock className="h-4 w-4 text-yellow-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{summary?.pendingRequestsCount || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              ${summary?.pendingRequestsTotal?.toFixed(2) || '0.00'} total requested
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Users with Balance</CardTitle>
+            <Users className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{summary?.usersWithBalancesCount || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Ready to request payout
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completed Campaigns</CardTitle>
+            <Target className="h-4 w-4 text-purple-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{summary?.completedCampaignsCount || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              With finalized earnings
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Users with Balances Section */}
+      {usersWithBalances.length > 0 && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wallet className="w-5 h-5" />
+              Users with Available Balance
+            </CardTitle>
+            <CardDescription>
+              Users who have earned money and can request payouts. Click to copy payment details.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {usersWithBalances.slice(0, 10).map((user) => (
+                <div 
+                  key={user.id} 
+                  className={`p-4 rounded-lg border ${user.hasPendingRequest ? 'bg-yellow-500/5 border-yellow-500/20' : 'bg-muted/30'}`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium">{user.name || user.email || 'Unknown'}</span>
+                        {user.hasPendingRequest && (
+                          <Badge variant="outline" className="text-yellow-500 border-yellow-500/50 text-xs">
+                            <Clock className="w-3 h-3 mr-1" />
+                            Request Pending
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                      
+                      {/* Payment Methods */}
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {user.paypalEmail && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-7 text-xs"
+                            onClick={() => copyToClipboard(user.paypalEmail!, 'PayPal email')}
+                          >
+                            <Mail className="w-3 h-3 mr-1 text-blue-500" />
+                            {user.paypalEmail}
+                            <Copy className="w-3 h-3 ml-1" />
+                          </Button>
+                        )}
+                        {user.walletAddress && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-7 text-xs"
+                            onClick={() => copyToClipboard(user.walletAddress!, 'Wallet address')}
+                          >
+                            <Wallet className="w-3 h-3 mr-1 text-purple-500" />
+                            {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
+                            <Copy className="w-3 h-3 ml-1" />
+                          </Button>
+                        )}
+                        {user.bitcoinAddress && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-7 text-xs"
+                            onClick={() => copyToClipboard(user.bitcoinAddress!, 'Bitcoin address')}
+                          >
+                            <Wallet className="w-3 h-3 mr-1 text-orange-500" />
+                            {user.bitcoinAddress.slice(0, 6)}...{user.bitcoinAddress.slice(-4)}
+                            <Copy className="w-3 h-3 ml-1" />
+                          </Button>
+                        )}
+                        {!user.paypalEmail && !user.walletAddress && !user.bitcoinAddress && (
+                          <Badge variant="outline" className="text-red-500 border-red-500/50 text-xs">
+                            <AlertCircle className="w-3 h-3 mr-1" />
+                            No payment method set
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-green-500">
+                        ${user.totalEarnings.toFixed(2)}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {user.approvedClips} clips
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {usersWithBalances.length > 10 && (
+                <p className="text-sm text-muted-foreground text-center pt-2">
+                  And {usersWithBalances.length - 10} more users with balances...
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Payout Requests Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4 mb-8">
         <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

@@ -8,7 +8,7 @@ import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Search, UserCheck, UserX, Shield, Users, Crown, Eye, RefreshCw, CheckCircle } from "lucide-react"
+import { Search, UserCheck, UserX, Shield, Users, Crown, Eye, RefreshCw, CheckCircle, DollarSign, Wallet, Mail, Clock, AlertCircle, Copy } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,6 +26,14 @@ interface SocialAccount {
   followers: number | null
 }
 
+interface PendingPayoutRequest {
+  id: string
+  amount: number
+  status: string
+  paymentMethod: string | null
+  requestedAt: string
+}
+
 interface User {
   id: string
   name: string | null
@@ -35,10 +43,15 @@ interface User {
   createdAt: string
   totalViews: number
   totalEarnings: number
+  paypalEmail: string | null
+  walletAddress: string | null
+  bitcoinAddress: string | null
   _count?: {
     clipSubmissions: number
+    payoutRequests: number
   }
   socialAccounts?: SocialAccount[]
+  pendingPayoutRequest?: PendingPayoutRequest | null
 }
 
 const roleOptions = [
@@ -558,11 +571,120 @@ export default function AdminUsersPage() {
                     </div>
                     <div>
                       <label className="text-sm font-medium">Total Earnings</label>
-                      <p className="text-lg font-semibold">${(selectedUser.totalEarnings || 0).toFixed(2)}</p>
+                      <p className="text-lg font-semibold text-green-500">${(selectedUser.totalEarnings || 0).toFixed(2)}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium">Submissions</label>
                       <p className="text-lg font-semibold">{selectedUser._count?.clipSubmissions || 0}</p>
+                    </div>
+                  </div>
+
+                  {/* Payout Information */}
+                  <div className="border-t pt-4">
+                    <label className="text-sm font-medium flex items-center gap-2 mb-3">
+                      <DollarSign className="w-4 h-4" />
+                      Payout Information
+                    </label>
+                    
+                    {/* Pending Payout Request Alert */}
+                    {selectedUser.pendingPayoutRequest && (
+                      <div className="mb-3 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                        <div className="flex items-center gap-2 text-yellow-500 mb-1">
+                          <AlertCircle className="w-4 h-4" />
+                          <span className="font-medium text-sm">Pending Payout Request</span>
+                        </div>
+                        <div className="text-sm">
+                          <span className="font-semibold">${selectedUser.pendingPayoutRequest.amount.toFixed(2)}</span>
+                          <span className="text-muted-foreground"> via {selectedUser.pendingPayoutRequest.paymentMethod || 'N/A'}</span>
+                          <span className="text-muted-foreground ml-2">
+                            ({new Date(selectedUser.pendingPayoutRequest.requestedAt).toLocaleDateString()})
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
+                      {/* PayPal */}
+                      <div className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-blue-500" />
+                          <span className="text-sm font-medium">PayPal:</span>
+                        </div>
+                        {selectedUser.paypalEmail ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-mono">{selectedUser.paypalEmail}</span>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-6 w-6 p-0"
+                              onClick={() => {
+                                navigator.clipboard.writeText(selectedUser.paypalEmail || '')
+                                toast.success('PayPal email copied!')
+                              }}
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Not set</span>
+                        )}
+                      </div>
+
+                      {/* USDC Wallet */}
+                      <div className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Wallet className="w-4 h-4 text-purple-500" />
+                          <span className="text-sm font-medium">USDC Wallet:</span>
+                        </div>
+                        {selectedUser.walletAddress ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-mono truncate max-w-[200px]" title={selectedUser.walletAddress}>
+                              {selectedUser.walletAddress.slice(0, 6)}...{selectedUser.walletAddress.slice(-4)}
+                            </span>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-6 w-6 p-0"
+                              onClick={() => {
+                                navigator.clipboard.writeText(selectedUser.walletAddress || '')
+                                toast.success('Wallet address copied!')
+                              }}
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Not set</span>
+                        )}
+                      </div>
+
+                      {/* Bitcoin */}
+                      <div className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Wallet className="w-4 h-4 text-orange-500" />
+                          <span className="text-sm font-medium">Bitcoin:</span>
+                        </div>
+                        {selectedUser.bitcoinAddress ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-mono truncate max-w-[200px]" title={selectedUser.bitcoinAddress}>
+                              {selectedUser.bitcoinAddress.slice(0, 6)}...{selectedUser.bitcoinAddress.slice(-4)}
+                            </span>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-6 w-6 p-0"
+                              onClick={() => {
+                                navigator.clipboard.writeText(selectedUser.bitcoinAddress || '')
+                                toast.success('Bitcoin address copied!')
+                              }}
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Not set</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
