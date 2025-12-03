@@ -7,9 +7,9 @@ import { useEffect, useState } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { BarChart3, Users, Target, DollarSign, Settings, Shield, Activity, Loader2 } from "lucide-react"
+import { BarChart3, Target, Shield, Activity, Loader2 } from "lucide-react"
 import { authenticatedFetch } from "@/lib/supabase-browser"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
@@ -154,62 +154,26 @@ export default function AdminDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Users className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-                  <p className="text-2xl font-semibold">{stats.totalUsers}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Target className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Active Campaigns</p>
-                  <p className="text-2xl font-semibold">{stats.activeCampaigns}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Activity className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Total Views</p>
-                  <p className="text-2xl font-semibold">{Number(stats.totalViews).toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Includes initial views</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
+        {/* Compact Stats Bar */}
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-sm mb-8">
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Users:</span>
+            <span className="font-semibold">{stats.totalUsers}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Active:</span>
+            <span className="font-semibold">{stats.activeCampaigns}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Views:</span>
+            <span className="font-semibold">{Number(stats.totalViews).toLocaleString()}</span>
+          </div>
           <Dialog>
             <DialogTrigger asChild>
-              <Card className="cursor-pointer hover:border-primary transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Activity className="h-8 w-8 text-muted-foreground" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-muted-foreground">Tracked Views</p>
-                        <p className="text-2xl font-semibold">{Number(stats.trackedViews).toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground mt-1">From scrapes • Click for breakdown</p>
-                      </div>
-                    </div>
-                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
+              <button className="flex items-center gap-2 hover:text-foreground transition-colors">
+                <span className="text-muted-foreground">Tracked:</span>
+                <span className="font-semibold underline decoration-dotted">{Number(stats.trackedViews).toLocaleString()}</span>
+              </button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
@@ -277,78 +241,33 @@ export default function AdminDashboard() {
               </div>
             </DialogContent>
           </Dialog>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <DollarSign className="h-8 w-8 text-muted-foreground" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
-                  <p className="text-2xl font-semibold">${stats.totalEarnings.toFixed(2)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Earnings:</span>
+            <span className="font-semibold">${stats.totalEarnings.toFixed(2)}</span>
+          </div>
         </div>
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-2xl font-light mb-6">Quick Actions</h2>
-          <div className="space-y-3">
-            {quickActions.map((action, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {quickActions.map((action) => (
               <Link key={action.href} href={action.href}>
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                >
-                  <Card className="hover:shadow-lg hover:border-primary/50 transition-all duration-300 cursor-pointer group">
-                    <CardContent className="p-5">
-                      <div className="flex items-center gap-4">
-                        <div className="flex-shrink-0">
-                          <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300">
-                            {renderNavIcon(action.icon, "h-7 w-7 text-primary")}
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-lg mb-0.5 group-hover:text-primary transition-colors">
-                            {action.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {action.description}
-                          </p>
-                        </div>
-                        <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <svg 
-                            className="w-5 h-5 text-primary" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            viewBox="0 0 24 24"
-                          >
-                            <path 
-                              strokeLinecap="round" 
-                              strokeLinejoin="round" 
-                              strokeWidth={2} 
-                              d="M9 5l7 7-7 7" 
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                <div className="p-4 rounded-lg border border-border hover:border-foreground/30 transition-colors cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0">
+                      {renderNavIcon(action.icon, "h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors")}
+                    </div>
+                    <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                      {action.title}
+                    </span>
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
         </div>
 
 
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            Admin Dashboard - Manage your clipping platform
-          </p>
-        </div>
       </motion.div>
     </div>
   )

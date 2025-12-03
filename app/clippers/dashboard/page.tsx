@@ -319,6 +319,18 @@ export default function ClipperDashboard() {
   return (
     <div className="container mx-auto px-4 py-8">
 
+      {/* Compact Stats Bar */}
+      {data?.stats && data.stats.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-sm mb-6">
+          {data.stats.map((stat, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <span className="text-muted-foreground">{stat.title}:</span>
+              <span className="font-semibold text-foreground">{stat.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Payout Request Dialog */}
       <Dialog open={payoutDialogOpen} onOpenChange={setPayoutDialogOpen}>
         <DialogContent>
@@ -642,20 +654,6 @@ export default function ClipperDashboard() {
           </Card>
         )}
       </div>
-
-      {/* Compact Stats Summary */}
-      {data?.stats && data.stats.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-border">
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
-            {data.stats.map((stat, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <span className="font-medium text-foreground">{stat.value}</span>
-                <span>{stat.title.toLowerCase()}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
     </div>
   )
