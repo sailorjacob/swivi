@@ -216,28 +216,6 @@ const faqData: FAQItem[] = [
     answer: "If you have a personal account-related question or need help, contact our support team through the help section in your dashboard. Allow up to 24 hours for our response. You can also check our documentation or reach out via email for assistance.",
     category: "support"
   },
-  {
-    question: "What if I have an idea for a feature I want added?",
-    answer: "If you have an idea for something we can change or add to improve the overall experience, feel free to contact support and let us know! We are always open to ideas and love adding stuff for you guys. Literally anything, just let us know and we will look into making it happen!",
-    category: "support"
-  },
-  {
-    question: "Can we add an intro to our edits when participating in audio campaigns?",
-    answer: "Yes! Edits are amazing, and you can do intros on these. This is always welcome and will be approved. If you have issues, just contact support for assistance!",
-    category: "support"
-  },
-  {
-    question: "What's the best way to find clippers for the referral program?",
-    answer: "We have a detailed document showing exactly how to quickly find the best clippers to join the community. Other tactics include reaching out to content creators in similar niches, which works very well also!",
-    category: "support"
-  },
-
-  // Technical
-  {
-    question: "How do I add a sound to my video on TikTok for a campaign?",
-    answer: "We provide screen recordings showing you exactly how to attach an audio to your video! Check the campaign details or ask in support for the latest tutorial.",
-    category: "technical"
-  }
 ]
 
 export function ClippersFAQ() {

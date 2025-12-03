@@ -111,17 +111,28 @@ export function SocialVerificationDialog({ platform, icon, platformName, childre
         }, 2000)
       } else {
         // Enhanced error handling with specific messages
-        if (data.error?.includes('not found in bio')) {
-          toast.error(`Code not found in your ${platformName} bio. Make sure you've added the code exactly as shown and your profile is public.`)
-        } else if (data.error?.includes('No pending verification')) {
+        const errorMsg = data.error || ''
+        const hint = data.hint || ''
+        const expectedCode = data.expectedCode || code
+        
+        if (errorMsg.includes('but we\'re looking for')) {
+          // User has wrong/old code in their bio
+          toast.error(`${errorMsg} ${hint}`, { duration: 10000 })
+        } else if (errorMsg.includes('not found in bio') || errorMsg.includes('not found')) {
+          // Code not found at all
+          const fullMessage = hint 
+            ? `Code "${expectedCode}" not found. ${hint}`
+            : `Code "${expectedCode}" not found in your ${platformName} bio. Make sure you've added it exactly as shown and your profile is public.`
+          toast.error(fullMessage, { duration: 8000 })
+        } else if (errorMsg.includes('No pending verification')) {
           toast.error('No verification code found. Please generate a new code.')
           setStep(1)
-        } else if (data.error?.includes('private')) {
+        } else if (errorMsg.includes('private')) {
           toast.error(`Your ${platformName} profile appears to be private. Please make it public to verify.`)
-        } else if (data.error?.includes('not found') || data.error?.includes('not exist')) {
+        } else if (errorMsg.includes('not exist')) {
           toast.error(`${platformName} profile not found. Please check your username.`)
         } else {
-          toast.error(data.error || `Verification failed. Try generating a new code.`)
+          toast.error(data.message || errorMsg || `Verification failed. Try generating a new code.`, { duration: 6000 })
         }
       }
     } catch (error) {

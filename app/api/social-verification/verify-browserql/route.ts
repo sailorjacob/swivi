@@ -8,18 +8,27 @@ import { prisma } from "@/lib/prisma"
 // Import the working scraping functions directly
 
 
+// Helper to normalize text for comparison (handles whitespace, special chars, case)
+function normalizeForComparison(text: string): string {
+  return text
+    .toUpperCase() // Case insensitive
+    .replace(/[\s\u200B\u200C\u200D\uFEFF]/g, '') // Remove all whitespace including zero-width chars
+    .replace(/[^\w]/g, '') // Keep only alphanumeric
+}
+
 // YouTube channel description checking via Apify (pratikdani/youtube-profile-scraper)
-async function checkYouTubeBio(username: string, code: string): Promise<boolean> {
+// Returns { found: boolean, description?: string } so we can show the user what was found
+async function checkYouTubeBio(username: string, code: string): Promise<{ found: boolean; description?: string }> {
   try {
     const APIFY_API_KEY = process.env.APIFY_API_KEY
     if (!APIFY_API_KEY) {
       console.error('❌ APIFY_API_KEY not configured for YouTube')
-      return false
+      return { found: false }
     }
 
     console.log(`🔍 Checking YouTube channel via Apify: @${username}`)
 
-    // Use pratikdani/youtube-profile-scraper
+    // Use pratikdani/youtube-profile-scraper with forceResponseEncoding to avoid caching
     const runResponse = await fetch('https://api.apify.com/v2/acts/pratikdani~youtube-profile-scraper/runs', {
       method: 'POST',
       headers: {
@@ -27,13 +36,16 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
         'Authorization': `Bearer ${APIFY_API_KEY}`
       },
       body: JSON.stringify({
-        "url": `https://www.youtube.com/@${username}`
+        "url": `https://www.youtube.com/@${username}`,
+        // Force fresh scrape by adding timestamp to avoid Apify caching
+        "forceResponseEncoding": "utf-8",
+        "maxRequestRetries": 3
       })
     })
 
     if (!runResponse.ok) {
       console.error(`❌ YouTube Apify run failed: ${runResponse.status}`)
-      return false
+      return { found: false }
     }
 
     const runData = await runResponse.json()
@@ -63,23 +75,40 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
           headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
         })
 
-        if (!resultsResponse.ok) return false
+        if (!resultsResponse.ok) return { found: false }
 
         const resultsData = await resultsResponse.json()
-        if (!resultsData || resultsData.length === 0) return false
+        if (!resultsData || resultsData.length === 0) return { found: false }
 
         const profile = resultsData[0]
         const description = profile.Description || profile.description || ''
 
         if (!description) {
           console.error(`❌ No description found in YouTube data for: ${username}`)
-          return false
+          return { found: false, description: '' }
         }
 
-        const codeFound = description.includes(code)
+        // Normalize both strings for comparison to handle whitespace, special chars
+        const normalizedDescription = normalizeForComparison(description)
+        const normalizedCode = normalizeForComparison(code)
+        
+        // Also try direct includes as a fallback
+        const codeFoundNormalized = normalizedDescription.includes(normalizedCode)
+        const codeFoundDirect = description.includes(code)
+        // Also try case-insensitive direct match
+        const codeFoundCaseInsensitive = description.toUpperCase().includes(code.toUpperCase())
+        const codeFound = codeFoundNormalized || codeFoundDirect || codeFoundCaseInsensitive
+        
         console.log(`YouTube description check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+        console.log(`📝 Description preview: "${description.substring(0, 200)}..."`)
+        console.log(`📝 Description first 20 chars (hex): ${Buffer.from(description.substring(0, 20)).toString('hex')}`)
+        console.log(`🔍 Looking for code: "${code}"`)
+        console.log(`🔍 Code (hex): ${Buffer.from(code).toString('hex')}`)
+        console.log(`🔍 Normalized description (first 50): "${normalizedDescription.substring(0, 50)}"`)
+        console.log(`🔍 Normalized code: "${normalizedCode}"`)
+        console.log(`🔍 Direct match: ${codeFoundDirect}, Case-insensitive: ${codeFoundCaseInsensitive}, Normalized: ${codeFoundNormalized}`)
 
-        return codeFound
+        return { found: codeFound, description }
 
       } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
         console.error(`❌ YouTube Apify run failed: ${runStatus}`)
@@ -88,22 +117,22 @@ async function checkYouTubeBio(username: string, code: string): Promise<boolean>
     }
 
     console.error(`❌ YouTube Apify run timed out`)
-    return false
+    return { found: false }
 
   } catch (error) {
     console.error(`❌ YouTube bio check failed for ${username}:`, error)
-    return false
+    return { found: false }
   }
 }
 
 
 // TikTok bio checking via Apify (abe/tiktok-profile-scraper)
-async function checkTikTokBio(username: string, code: string): Promise<boolean> {
+async function checkTikTokBio(username: string, code: string): Promise<{ found: boolean; description?: string }> {
   try {
     const APIFY_API_KEY = process.env.APIFY_API_KEY
     if (!APIFY_API_KEY) {
       console.error('❌ APIFY_API_KEY not configured for TikTok')
-      return false
+      return { found: false }
     }
 
     console.log(`🔍 Checking TikTok profile via Apify: @${username}`)
@@ -123,7 +152,7 @@ async function checkTikTokBio(username: string, code: string): Promise<boolean> 
 
     if (!runResponse.ok) {
       console.error(`❌ TikTok Apify run failed: ${runResponse.status}`)
-      return false
+      return { found: false }
     }
 
     const runData = await runResponse.json()
@@ -153,23 +182,34 @@ async function checkTikTokBio(username: string, code: string): Promise<boolean> 
           headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
         })
 
-        if (!resultsResponse.ok) return false
+        if (!resultsResponse.ok) return { found: false }
 
         const resultsData = await resultsResponse.json()
-        if (!resultsData || resultsData.length === 0) return false
+        if (!resultsData || resultsData.length === 0) return { found: false }
 
         const profile = resultsData[0]
         const bio = profile.bio || profile.description || profile.tagline || ''
 
         if (!bio) {
           console.error(`❌ No bio found in TikTok data for: ${username}`)
-          return false
+          return { found: false, description: '' }
         }
 
-        const codeFound = bio.includes(code)
-        console.log(`TikTok bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+        // Use the same normalized matching as YouTube
+        const normalizedBio = normalizeForComparison(bio)
+        const normalizedCode = normalizeForComparison(code)
+        
+        const codeFoundNormalized = normalizedBio.includes(normalizedCode)
+        const codeFoundDirect = bio.includes(code)
+        const codeFoundCaseInsensitive = bio.toUpperCase().includes(code.toUpperCase())
+        const codeFound = codeFoundNormalized || codeFoundDirect || codeFoundCaseInsensitive
 
-        return codeFound
+        console.log(`TikTok bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+        console.log(`📝 Bio preview: "${bio.substring(0, 200)}..."`)
+        console.log(`🔍 Looking for code: "${code}"`)
+        console.log(`🔍 Direct match: ${codeFoundDirect}, Case-insensitive: ${codeFoundCaseInsensitive}, Normalized: ${codeFoundNormalized}`)
+
+        return { found: codeFound, description: bio }
 
       } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
         console.error(`❌ TikTok Apify run failed: ${runStatus}`)
@@ -178,22 +218,22 @@ async function checkTikTokBio(username: string, code: string): Promise<boolean> 
     }
 
     console.error(`❌ TikTok Apify run timed out`)
-    return false
+    return { found: false }
 
   } catch (error) {
     console.error(`❌ TikTok bio check failed for ${username}:`, error)
-    return false
+    return { found: false }
   }
 }
 
 // Twitter/X bio checking via Apify (fastcrawler/twitter-user-profile-fast-cheapest-scraper-2025)
-async function checkTwitterBio(username: string, code: string): Promise<boolean> {
+async function checkTwitterBio(username: string, code: string): Promise<{ found: boolean; description?: string }> {
   try {
     const APIFY_API_KEY = process.env.APIFY_API_KEY
     
     if (!APIFY_API_KEY) {
       console.error('❌ APIFY_API_KEY not configured for Twitter/X')
-      return false
+      return { found: false }
     }
 
     console.log(`🔍 Checking Twitter/X profile via Apify: @${username}`)
@@ -219,7 +259,7 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
     if (!runResponse.ok) {
       const errorText = await runResponse.text()
       console.error(`❌ Twitter Apify run failed: ${runResponse.status} - ${errorText}`)
-      return false
+      return { found: false }
     }
 
     const runData = await runResponse.json()
@@ -249,34 +289,50 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
           headers: { 'Authorization': `Bearer ${APIFY_API_KEY}` }
         })
 
-        if (!resultsResponse.ok) return false
+        if (!resultsResponse.ok) return { found: false }
 
         const resultsData = await resultsResponse.json()
-        if (!resultsData || resultsData.length === 0) return false
+        if (!resultsData || resultsData.length === 0) return { found: false }
 
         // Check multiple profiles if returned (sometimes multiple users match)
         for (const profile of resultsData) {
-          const usernameMatch = profile.username === username || profile.screenName === username
+          // Case-insensitive username matching
+          const usernameMatch = profile.username?.toLowerCase() === username.toLowerCase() || 
+                               profile.screenName?.toLowerCase() === username.toLowerCase()
           if (usernameMatch) {
             const description = profile.description || profile.bio || ''
-            console.log(`✅ Found matching Twitter profile: @${profile.username}`)
+            console.log(`✅ Found matching Twitter profile: @${profile.username || profile.screenName}`)
 
             if (!description) {
               console.error(`❌ No description found in Twitter data for: ${username}`)
               continue
             }
 
-            const codeFound = description.includes(code)
+            // Use normalized matching
+            const normalizedDesc = normalizeForComparison(description)
+            const normalizedCode = normalizeForComparison(code)
+            
+            const codeFoundNormalized = normalizedDesc.includes(normalizedCode)
+            const codeFoundDirect = description.includes(code)
+            const codeFoundCaseInsensitive = description.toUpperCase().includes(code.toUpperCase())
+            const codeFound = codeFoundNormalized || codeFoundDirect || codeFoundCaseInsensitive
+
             console.log(`Twitter bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
+            console.log(`📝 Bio preview: "${description.substring(0, 200)}..."`)
+            console.log(`🔍 Looking for code: "${code}"`)
+            console.log(`🔍 Direct match: ${codeFoundDirect}, Case-insensitive: ${codeFoundCaseInsensitive}, Normalized: ${codeFoundNormalized}`)
 
             if (codeFound) {
-              return true
+              return { found: true, description }
+            } else {
+              // Return the description even on failure for debugging
+              return { found: false, description }
             }
           }
         }
 
         console.error(`❌ No matching Twitter profile found for: ${username}`)
-        return false
+        return { found: false }
 
       } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
         console.error(`❌ Twitter Apify run failed: ${runStatus}`)
@@ -285,16 +341,16 @@ async function checkTwitterBio(username: string, code: string): Promise<boolean>
     }
 
     console.error(`❌ Twitter Apify run timed out`)
-    return false
+    return { found: false }
 
   } catch (error) {
     console.error(`❌ Twitter bio check failed for ${username}:`, error)
-    return false
+    return { found: false }
   }
 }
 
 
-async function checkInstagramBio(username: string, code: string): Promise<boolean> {
+async function checkInstagramBio(username: string, code: string): Promise<{ found: boolean; description?: string }> {
   try {
     const APIFY_API_KEY = process.env.APIFY_API_KEY
     if (!APIFY_API_KEY) {
@@ -326,7 +382,7 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
         console.log('❌ Invalid Apify API key - falling back to manual scraping')
         return await checkInstagramBioManual(username, code)
       }
-      return false
+      return { found: false }
     }
 
     const runData = await runResponse.json()
@@ -370,14 +426,14 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
 
         if (!resultsResponse.ok) {
           console.error(`❌ Failed to get results: ${resultsResponse.status}`)
-          return false
+          return { found: false }
         }
 
         const resultsData = await resultsResponse.json()
 
         if (!resultsData || resultsData.length === 0) {
           console.error(`❌ No profile data returned from Apify for: ${username}`)
-          return false
+          return { found: false }
         }
 
         const profile = resultsData[0]
@@ -385,21 +441,29 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
 
         if (!bio) {
           console.error(`❌ No bio found in Apify data for: ${username}`)
-          return false
+          return { found: false, description: '' }
         }
 
         // Decode Unicode escape sequences
-        const decodedBio = bio.replace(/\u[\dA-F]{4}/gi, (match: string) => {
-          return String.fromCharCode(parseInt(match.replace(/\u/g, ''), 16))
+        const decodedBio = bio.replace(/\\u[\dA-Fa-f]{4}/gi, (match: string) => {
+          return String.fromCharCode(parseInt(match.replace('\\u', ''), 16))
         })
+
+        // Use normalized matching
+        const normalizedBio = normalizeForComparison(decodedBio)
+        const normalizedCode = normalizeForComparison(code)
+        
+        const codeFoundNormalized = normalizedBio.includes(normalizedCode)
+        const codeFoundDirect = decodedBio.includes(code)
+        const codeFoundCaseInsensitive = decodedBio.toUpperCase().includes(code.toUpperCase())
+        const codeFound = codeFoundNormalized || codeFoundDirect || codeFoundCaseInsensitive
 
         console.log(`📝 Bio extracted via Apify: "${decodedBio.substring(0, 100)}${decodedBio.length > 100 ? '...' : ''}"`)
         console.log(`🔍 Looking for code: "${code}"`)
-
-        const codeFound = decodedBio.includes(code)
+        console.log(`🔍 Direct match: ${codeFoundDirect}, Case-insensitive: ${codeFoundCaseInsensitive}, Normalized: ${codeFoundNormalized}`)
         console.log(`Instagram bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
 
-        return codeFound
+        return { found: codeFound, description: decodedBio }
 
       } else if (runStatus === 'FAILED' || runStatus === 'ABORTED' || runStatus === 'TIMED-OUT') {
         console.error(`❌ Apify run failed with status: ${runStatus}`)
@@ -410,7 +474,7 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
     }
 
     console.error(`❌ Apify run timed out after ${maxWaitTime/1000} seconds`)
-    return false
+    return { found: false }
 
   } catch (error) {
     console.error(`❌ Apify Instagram bio check failed for ${username}:`, error)
@@ -419,7 +483,7 @@ async function checkInstagramBio(username: string, code: string): Promise<boolea
 }
 
 // Fallback manual scraping function
-async function checkInstagramBioManual(username: string, code: string): Promise<boolean> {
+async function checkInstagramBioManual(username: string, code: string): Promise<{ found: boolean; description?: string }> {
   try {
     const url = `https://www.instagram.com/${username}/`
     console.log(`🔍 Manual fallback - Checking Instagram profile: ${url}`)
@@ -451,17 +515,17 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
       console.error(`Instagram profile not accessible: ${username} - Status: ${response.status}`)
       if (response.status === 429) {
         console.log(`Rate limited - Instagram is blocking our requests`)
-        return false
+        return { found: false }
       }
       if (response.status === 404) {
         console.log(`Profile not found: ${username}`)
-        return false
+        return { found: false }
       }
       if (response.status === 403) {
         console.log(`Access forbidden for profile: ${username} - may be private or restricted`)
-        return false
+        return { found: false }
       }
-      return false
+      return { found: false }
     }
 
     const html = await response.text()
@@ -510,41 +574,48 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
       console.error(`❌ Could not extract Instagram bio for: ${username} (tried ${patterns.length} patterns)`)
       if (html.includes('This Account is Private') || html.includes('private')) {
         console.log(`❌ Account appears to be private: ${username}`)
-        return false
+        return { found: false }
       }
       if (html.includes('User not found') || html.includes('Page Not Found')) {
         console.log(`❌ Account does not exist: ${username}`)
-        return false
+        return { found: false }
       }
       if (html.includes('challenge') || html.includes('checkpoint')) {
         console.log(`❌ Instagram is challenging our request - may need different approach`)
-        return false
+        return { found: false }
       }
-      return false
+      return { found: false }
     }
 
     // Decode Unicode escape sequences and HTML entities
     let decodedBio = bio
-      .replace(/\u[\dA-F]{4}/gi, (match: string) => {
-        return String.fromCharCode(parseInt(match.replace(/\u/g, ''), 16))
+      .replace(/\\u[\dA-Fa-f]{4}/gi, (match: string) => {
+        return String.fromCharCode(parseInt(match.replace('\\u', ''), 16))
       })
-      .replace(/\n/g, ' ')
-      .replace(/	/g, ' ')
-      .replace(/\"/g, '"')
-      .replace(/\'/g, "'")
+      .replace(/\\n/g, ' ')
+      .replace(/\\t/g, ' ')
+      .replace(/\\"/g, '"')
+      .replace(/\\'/g, "'")
       .replace(/&quot;/g, '"')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
 
+    // Use normalized matching
+    const normalizedBio = normalizeForComparison(decodedBio)
+    const normalizedCode = normalizeForComparison(code)
+    
+    const codeFoundNormalized = normalizedBio.includes(normalizedCode)
+    const codeFoundDirect = decodedBio.includes(code)
+    const codeFoundCaseInsensitive = decodedBio.toUpperCase().includes(code.toUpperCase())
+    const codeFound = codeFoundNormalized || codeFoundDirect || codeFoundCaseInsensitive
+
     console.log(`📝 Bio extracted (pattern ${patternUsed + 1}): "${decodedBio.substring(0, 100)}${decodedBio.length > 100 ? '...' : ''}"`)
     console.log(`🔍 Looking for code: "${code}"`)
-
-    // Case-insensitive search for better matching
-    const codeFound = decodedBio.toLowerCase().includes(code.toLowerCase())
+    console.log(`🔍 Direct match: ${codeFoundDirect}, Case-insensitive: ${codeFoundCaseInsensitive}, Normalized: ${codeFoundNormalized}`)
     console.log(`Instagram bio check for @${username}: ${codeFound ? '✅ FOUND' : '❌ NOT FOUND'}`)
 
-    return codeFound
+    return { found: codeFound, description: decodedBio }
 
   } catch (error) {
     console.error(`❌ Manual Instagram bio check failed for ${username}:`, error)
@@ -555,7 +626,7 @@ async function checkInstagramBioManual(username: string, code: string): Promise<
         console.log(`🔄 Network error for ${username}`)
       }
     }
-    return false
+    return { found: false }
   }
 }
 
@@ -764,19 +835,24 @@ export async function POST(request: NextRequest) {
     // Check the bio using our Apify integration
     let codeFound = false
     let bio = ""
+    let foundDescription = "" // Store the actual description we found for debugging
 
     switch (platform.toLowerCase()) {
       case 'instagram':
         logs.push(`📸 Checking Instagram bio via Apify for @${cleanUsername}`)
-        codeFound = await checkInstagramBio(cleanUsername, verificationCode)
+        const instagramResult = await checkInstagramBio(cleanUsername, verificationCode)
+        codeFound = instagramResult.found
+        foundDescription = instagramResult.description || ''
         if (codeFound) {
-          bio = verificationCode // We know it contains the code since verification succeeded
+          bio = verificationCode
         }
         break
 
       case 'youtube':
         logs.push(`📺 Checking YouTube bio via Apify for @${cleanUsername}`)
-        codeFound = await checkYouTubeBio(cleanUsername, verificationCode)
+        const youtubeResult = await checkYouTubeBio(cleanUsername, verificationCode)
+        codeFound = youtubeResult.found
+        foundDescription = youtubeResult.description || ''
         if (codeFound) {
           bio = verificationCode
         }
@@ -785,7 +861,9 @@ export async function POST(request: NextRequest) {
       case 'twitter':
       case 'x':
         logs.push(`🐦 Checking Twitter bio via Apify for @${cleanUsername}`)
-        codeFound = await checkTwitterBio(cleanUsername, verificationCode)
+        const twitterResult = await checkTwitterBio(cleanUsername, verificationCode)
+        codeFound = twitterResult.found
+        foundDescription = twitterResult.description || ''
         if (codeFound) {
           bio = verificationCode
         }
@@ -793,7 +871,9 @@ export async function POST(request: NextRequest) {
 
       case 'tiktok':
         logs.push(`🎵 Checking TikTok bio via Apify for @${cleanUsername}`)
-        codeFound = await checkTikTokBio(cleanUsername, verificationCode)
+        const tiktokResult = await checkTikTokBio(cleanUsername, verificationCode)
+        codeFound = tiktokResult.found
+        foundDescription = tiktokResult.description || ''
         if (codeFound) {
           bio = verificationCode
         }
@@ -890,22 +970,47 @@ export async function POST(request: NextRequest) {
       })
     } else {
       logs.push(`❌ Verification failed - code not found in bio`)
+      if (foundDescription) {
+        logs.push(`📝 Found description (first 100 chars): "${foundDescription.substring(0, 100)}..."`)
+        logs.push(`🔍 Looking for code: "${verificationCode}"`)
+      }
       logs.push(`📋 Final logs summary:`)
       logs.forEach((log, index) => {
         logs.push(`  ${index + 1}. ${log}`)
       })
 
+      // Build a helpful error message
+      let errorMessage = `Code "${verificationCode}" not found in @${cleanUsername}'s bio.`
+      let hint = ''
+      
+      if (foundDescription) {
+        // Check if there's another code-like pattern in the description (6 alphanumeric characters)
+        const possibleOldCode = foundDescription.match(/\b[A-Z0-9]{6}\b/)
+        if (possibleOldCode && possibleOldCode[0] !== verificationCode) {
+          errorMessage = `Your bio contains "${possibleOldCode[0]}" but we're looking for "${verificationCode}".`
+          hint = 'Please update your bio with the current code and wait 2-3 minutes for YouTube to update before trying again.'
+        } else if (!possibleOldCode) {
+          hint = 'Make sure you added the code exactly as shown (6 characters, uppercase).'
+        }
+      } else {
+        hint = 'YouTube may be caching old data. Please wait 2-3 minutes after updating your description and try again.'
+      }
+
       return NextResponse.json({
         success: false,
         verified: false,
-        error: `Code "${verificationCode}" not found in @${cleanUsername}'s bio`,
-        message: `❌ Code "${verificationCode}" not found in @${cleanUsername}'s bio`,
+        error: errorMessage,
+        hint: hint,
+        message: `❌ ${errorMessage}${hint ? ' ' + hint : ''}`,
         logs,
         bio: bio.substring(0, 500),
+        foundDescription: foundDescription ? foundDescription.substring(0, 300) : undefined,
         platform: platform,
         username: cleanUsername,
+        expectedCode: verificationCode,
         debugInfo: {
           codeSearched: verificationCode,
+          foundDescription: foundDescription ? foundDescription.substring(0, 300) : undefined,
           timestamp: new Date().toISOString()
         }
       }, { status: 400 })
