@@ -29,9 +29,16 @@ export async function GET(request: NextRequest) {
     const where: any = {}
 
     if (status) {
-      where.status = status.toUpperCase()
+      if (status.toLowerCase() === 'all') {
+        // Return all campaigns that clippers can see (ACTIVE + COMPLETED)
+        where.status = { in: ['ACTIVE', 'COMPLETED'] }
+      } else {
+        where.status = status.toUpperCase()
+      }
     } else {
-      where.status = "ACTIVE" // Default to active campaigns
+      // Default: return ACTIVE and COMPLETED campaigns for clippers to see
+      // ACTIVE = can submit to, COMPLETED = view history
+      where.status = { in: ['ACTIVE', 'COMPLETED'] }
     }
 
     if (platform) {

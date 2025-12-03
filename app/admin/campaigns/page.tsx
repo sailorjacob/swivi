@@ -526,7 +526,7 @@ export default function AdminCampaignsPage() {
 
       if (response.ok) {
         const result = await response.json()
-        toast.success(`Campaign completed! ${result.earnings.totalClips} clips finalized with total earnings of $${result.budgetStatus.totalEarnings.toFixed(2)}`)
+        toast.success(`Campaign completed! ${result.stats.approvedSubmissions} approved clips with total earnings of $${result.stats.totalEarnings.toFixed(2)}`)
         await fetchCampaigns()
       } else {
         const error = await response.json()
