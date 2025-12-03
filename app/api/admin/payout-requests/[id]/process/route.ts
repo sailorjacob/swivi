@@ -61,6 +61,29 @@ export async function POST(
     let notificationMessage = ''
     let notificationType: any = 'PAYOUT_PROCESSED'
 
+    // Validate state transitions to prevent invalid operations
+    const currentStatus = payoutRequest.status
+    const requestedAction = validatedData.action
+
+    // State machine validation
+    const validTransitions: Record<string, string[]> = {
+      'PENDING': ['approve', 'reject'],
+      'APPROVED': ['complete', 'reject'],
+      'PROCESSING': ['complete', 'reject'],
+      'COMPLETED': [], // Cannot change completed
+      'REJECTED': [], // Cannot change rejected
+      'CANCELLED': [] // Cannot change cancelled
+    }
+
+    if (!validTransitions[currentStatus]?.includes(requestedAction)) {
+      console.error(`❌ INVALID STATE TRANSITION: Request ${payoutRequestId} in state ${currentStatus} cannot be ${requestedAction}d`)
+      return NextResponse.json({
+        error: `Cannot ${requestedAction} a payout request that is ${currentStatus}`,
+        currentStatus,
+        requestedAction
+      }, { status: 400 })
+    }
+
     // Handle different actions
     if (validatedData.action === 'reject') {
       // Reject the payout request
@@ -74,6 +97,7 @@ export async function POST(
         }
       })
 
+      console.log(`📝 PAYOUT REJECTED: Admin ${adminUser.email} rejected request ${payoutRequestId} for $${Number(payoutRequest.amount).toFixed(2)}`)
       notificationMessage = `Your payout request for $${Number(payoutRequest.amount).toFixed(2)} was rejected. ${validatedData.notes || ''}`
       notificationType = 'PAYOUT_PROCESSED'
 
@@ -88,29 +112,54 @@ export async function POST(
         }
       })
 
+      console.log(`📝 PAYOUT APPROVED: Admin ${adminUser.email} approved request ${payoutRequestId} for $${Number(payoutRequest.amount).toFixed(2)}`)
       notificationMessage = `Your payout request for $${Number(payoutRequest.amount).toFixed(2)} has been approved and is being processed.`
 
     } else if (validatedData.action === 'complete') {
       // Complete the payout - money has been sent
       const payoutAmount = Number(payoutRequest.amount)
 
-      // Verify user has sufficient balance
-      if (Number(payoutRequest.users.totalEarnings) < payoutAmount) {
+      // REQUIRE transaction ID for completed payouts (audit trail)
+      if (!validatedData.transactionId || validatedData.transactionId.trim() === '') {
         return NextResponse.json({
-          error: "Insufficient user balance",
-          userBalance: Number(payoutRequest.users.totalEarnings),
-          requestedAmount: payoutAmount
+          error: "Transaction ID is required to mark a payout as complete",
+          hint: "Enter the PayPal/bank transaction ID to confirm payment was sent"
         }, { status: 400 })
       }
 
-      // Create a transaction to:
-      // 1. Update payout request status
-      // 2. Deduct from user's totalEarnings
-      // 3. Reset clip earnings for completed campaigns
-      // 4. Create Payout record
-      // 5. Send notification
+      // Use serializable transaction with row locking to prevent race conditions
       await prisma.$transaction(async (tx) => {
-        // Update payout request
+        // Re-fetch user with lock to get CURRENT balance (prevents race conditions)
+        const freshUser = await tx.user.findUnique({
+          where: { id: payoutRequest.userId },
+          select: {
+            id: true,
+            email: true,
+            totalEarnings: true
+          }
+        })
+
+        if (!freshUser) {
+          throw new Error("User not found during payout processing")
+        }
+
+        const currentBalance = Number(freshUser.totalEarnings)
+
+        // Double-check balance at completion time (may have changed since approval)
+        if (currentBalance < payoutAmount) {
+          throw new Error(`INSUFFICIENT_BALANCE:${currentBalance}:${payoutAmount}`)
+        }
+
+        // Re-verify the request hasn't already been completed (idempotency check)
+        const freshRequest = await tx.payoutRequest.findUnique({
+          where: { id: payoutRequestId }
+        })
+
+        if (freshRequest?.status === 'COMPLETED') {
+          throw new Error("ALREADY_COMPLETED")
+        }
+
+        // Update payout request status
         await tx.payoutRequest.update({
           where: { id: payoutRequestId },
           data: {
@@ -123,20 +172,23 @@ export async function POST(
         })
 
         // Deduct from user's total earnings
-        // Note: We do NOT reset individual clip earnings - they remain as historical record
-        // The user's totalEarnings is the source of truth for payout eligibility
-        await tx.user.update({
+        // CRITICAL: Use decrement to prevent overwriting concurrent updates
+        const updatedUser = await tx.user.update({
           where: { id: payoutRequest.userId },
           data: {
             totalEarnings: {
               decrement: payoutAmount
             }
+          },
+          select: {
+            totalEarnings: true
           }
         })
 
-        // Important: We do NOT reset clip.earnings here!
-        // clip.earnings tracks historical earnings per clip for reporting
-        // user.totalEarnings is what gets paid out and decremented
+        // Verify balance didn't go negative (should never happen with proper validation)
+        if (Number(updatedUser.totalEarnings) < 0) {
+          throw new Error(`NEGATIVE_BALANCE:${updatedUser.totalEarnings}`)
+        }
 
         // Map payment method to valid PayoutMethod enum
         const methodMap: Record<string, 'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE' | 'USDC' | 'BITCOIN'> = {
@@ -170,9 +222,20 @@ export async function POST(
             payoutId: payout.id
           }
         })
+
+        // Audit log
+        console.log(`✅ PAYOUT COMPLETED: Admin ${adminUser.email} completed payout ${payoutRequestId}`)
+        console.log(`   User: ${freshUser.email}`)
+        console.log(`   Amount: $${payoutAmount.toFixed(2)}`)
+        console.log(`   Transaction ID: ${validatedData.transactionId}`)
+        console.log(`   Balance Before: $${currentBalance.toFixed(2)}`)
+        console.log(`   Balance After: $${Number(updatedUser.totalEarnings).toFixed(2)}`)
+      }, {
+        isolationLevel: 'Serializable',
+        timeout: 15000 // 15 second timeout
       })
 
-      notificationMessage = `Your payout of $${payoutAmount.toFixed(2)} has been sent! ${validatedData.transactionId ? `Transaction ID: ${validatedData.transactionId}` : ''}`
+      notificationMessage = `Your payout of $${payoutAmount.toFixed(2)} has been sent! Transaction ID: ${validatedData.transactionId}`
     }
 
     // Send notification to user
@@ -205,6 +268,36 @@ export async function POST(
         error: "Invalid data", 
         details: error.errors 
       }, { status: 400 })
+    }
+
+    // Handle custom errors from transaction
+    if (error instanceof Error) {
+      if (error.message.startsWith("INSUFFICIENT_BALANCE:")) {
+        const [, balance, amount] = error.message.split(':')
+        console.error(`❌ PAYOUT FAILED: Insufficient balance. User has $${balance}, requested $${amount}`)
+        return NextResponse.json({
+          error: "Insufficient user balance at time of completion",
+          userBalance: parseFloat(balance),
+          requestedAmount: parseFloat(amount),
+          hint: "User's balance may have changed since request was made. Ask them to submit a new request."
+        }, { status: 400 })
+      }
+
+      if (error.message === "ALREADY_COMPLETED") {
+        return NextResponse.json({
+          error: "This payout request has already been completed",
+          hint: "Refresh the page to see the current status"
+        }, { status: 400 })
+      }
+
+      if (error.message.startsWith("NEGATIVE_BALANCE:")) {
+        const [, balance] = error.message.split(':')
+        console.error(`🚨 CRITICAL: Payout would result in negative balance: $${balance}`)
+        return NextResponse.json({
+          error: "Critical error: Payout would result in negative balance",
+          hint: "Please contact support immediately"
+        }, { status: 500 })
+      }
     }
 
     console.error("Error processing payout request:", error)

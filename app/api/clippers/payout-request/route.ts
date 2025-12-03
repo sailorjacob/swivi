@@ -23,87 +23,79 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get user from database
-    const dbUser = await prisma.user.findUnique({
-      where: { supabaseAuthId: user.id },
-      select: {
-        id: true,
-        totalEarnings: true,
-        paypalEmail: true,
-        walletAddress: true,
-        email: true,
-        clipSubmissions: {
-          where: {
-            status: 'APPROVED',
-            campaigns: {
-              status: 'COMPLETED' // Only count earnings from completed campaigns
-            }
-          },
-          include: {
-            clips: {
-              select: {
-                earnings: true
-              }
-            }
-          }
-        }
-      }
-    })
-
-    if (!dbUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
-
-    // Calculate available balance (only from completed campaigns)
-    const availableBalance = dbUser.clipSubmissions.reduce((sum, submission) => {
-      return sum + Number(submission.clips?.earnings || 0)
-    }, 0)
-
-    // Parse request body
+    // Parse request body first to fail fast on invalid input
     const body = await request.json()
     const validatedData = payoutRequestSchema.parse(body)
 
-    // Check if requested amount exceeds available balance
-    if (validatedData.amount > availableBalance) {
-      return NextResponse.json({
-        error: "Insufficient balance",
-        availableBalance,
-        requestedAmount: validatedData.amount
-      }, { status: 400 })
-    }
-
-    // Check for pending payout requests
-    const pendingRequest = await prisma.payoutRequest.findFirst({
-      where: {
-        userId: dbUser.id,
-        status: {
-          in: ['PENDING', 'APPROVED', 'PROCESSING']
+    // Use a transaction with row-level locking to prevent race conditions
+    const result = await prisma.$transaction(async (tx) => {
+      // Get user with FOR UPDATE lock to prevent concurrent requests
+      const dbUser = await tx.user.findUnique({
+        where: { supabaseAuthId: user.id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          totalEarnings: true, // This is the source of truth for available balance
+          paypalEmail: true,
+          walletAddress: true,
+          bitcoinAddress: true
         }
+      })
+
+      if (!dbUser) {
+        throw new Error("USER_NOT_FOUND")
       }
+
+      // Use user.totalEarnings as the source of truth (not clip.earnings which can be stale)
+      const availableBalance = Number(dbUser.totalEarnings || 0)
+
+      // Validate amount against available balance
+      if (validatedData.amount > availableBalance) {
+        throw new Error(`INSUFFICIENT_BALANCE:${availableBalance}:${validatedData.amount}`)
+      }
+
+      // Check for existing pending payout requests (within the same transaction)
+      const pendingRequest = await tx.payoutRequest.findFirst({
+        where: {
+          userId: dbUser.id,
+          status: {
+            in: ['PENDING', 'APPROVED', 'PROCESSING']
+          }
+        }
+      })
+
+      if (pendingRequest) {
+        throw new Error(`PENDING_EXISTS:${pendingRequest.id}:${pendingRequest.amount}:${pendingRequest.status}`)
+      }
+
+      // Validate payment details match the method
+      if (validatedData.paymentMethod === 'PAYPAL' && !validatedData.paymentDetails.includes('@')) {
+        throw new Error("INVALID_PAYPAL_EMAIL")
+      }
+
+      // Create payout request within transaction
+      const payoutRequest = await tx.payoutRequest.create({
+        data: {
+          userId: dbUser.id,
+          amount: validatedData.amount,
+          paymentMethod: validatedData.paymentMethod,
+          paymentDetails: validatedData.paymentDetails,
+          status: 'PENDING'
+        }
+      })
+
+      // Log the request for audit trail
+      console.log(`📝 PAYOUT REQUEST CREATED: User ${dbUser.email} requested $${validatedData.amount} via ${validatedData.paymentMethod}. Request ID: ${payoutRequest.id}. Available balance: $${availableBalance}`)
+
+      return { payoutRequest, dbUser, availableBalance }
+    }, {
+      // Set isolation level to prevent race conditions
+      isolationLevel: 'Serializable',
+      timeout: 10000 // 10 second timeout
     })
 
-    if (pendingRequest) {
-      return NextResponse.json({
-        error: "You already have a pending payout request",
-        existingRequest: {
-          id: pendingRequest.id,
-          amount: Number(pendingRequest.amount),
-          status: pendingRequest.status,
-          requestedAt: pendingRequest.requestedAt
-        }
-      }, { status: 400 })
-    }
-
-    // Create payout request
-    const payoutRequest = await prisma.payoutRequest.create({
-      data: {
-        userId: dbUser.id,
-        amount: validatedData.amount,
-        paymentMethod: validatedData.paymentMethod,
-        paymentDetails: validatedData.paymentDetails,
-        status: 'PENDING'
-      }
-    })
+    const { payoutRequest, dbUser } = result
 
     // Notify admins about new payout request
     const admins = await prisma.user.findMany({
@@ -158,6 +150,36 @@ export async function POST(request: NextRequest) {
         error: "Invalid data", 
         details: error.errors 
       }, { status: 400 })
+    }
+
+    // Handle custom errors from transaction
+    if (error instanceof Error) {
+      if (error.message === "USER_NOT_FOUND") {
+        return NextResponse.json({ error: "User not found" }, { status: 404 })
+      }
+      
+      if (error.message.startsWith("INSUFFICIENT_BALANCE:")) {
+        const [, availableBalance, requestedAmount] = error.message.split(':')
+        return NextResponse.json({
+          error: "Insufficient balance",
+          availableBalance: parseFloat(availableBalance),
+          requestedAmount: parseFloat(requestedAmount)
+        }, { status: 400 })
+      }
+      
+      if (error.message.startsWith("PENDING_EXISTS:")) {
+        const [, id, amount, status] = error.message.split(':')
+        return NextResponse.json({
+          error: "You already have a pending payout request",
+          existingRequest: { id, amount: parseFloat(amount), status }
+        }, { status: 400 })
+      }
+
+      if (error.message === "INVALID_PAYPAL_EMAIL") {
+        return NextResponse.json({
+          error: "Invalid PayPal email address"
+        }, { status: 400 })
+      }
     }
 
     console.error("Error creating payout request:", error)

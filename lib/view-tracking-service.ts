@@ -229,20 +229,23 @@ export class ViewTrackingService {
                 clipId: { not: null }
               },
               include: {
-                clip: {
+                clips: {  // Fixed: was 'clip', should be 'clips' (relation name)
                   select: { earnings: true }
                 }
               }
             })
 
             // Update each submission with its clip's final earnings
+            console.log(`📸 Snapshotting finalEarnings for ${approvedSubmissions.length} submissions in campaign ${campaign.id}`)
             for (const submission of approvedSubmissions) {
+              const earnings = Number(submission.clips?.earnings || 0)
               await tx.clipSubmission.update({
                 where: { id: submission.id },
                 data: {
-                  finalEarnings: submission.clips?.earnings || 0
+                  finalEarnings: earnings
                 }
               })
+              console.log(`   Submission ${submission.id}: $${earnings.toFixed(2)}`)
             }
 
             campaignCompleted = true

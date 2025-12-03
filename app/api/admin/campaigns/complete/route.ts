@@ -124,6 +124,20 @@ export async function POST(request: NextRequest) {
     const spent = Number(campaign.spent || 0)
     const progressPercentage = budget > 0 ? (spent / budget) * 100 : 0
 
+    // Snapshot finalEarnings for all approved submissions BEFORE completing
+    // This preserves the earnings amount at campaign end for historical record
+    console.log(`📸 Snapshotting finalEarnings for ${approvedSubmissions.length} submissions in campaign ${campaignId}`)
+    for (const sub of approvedSubmissions) {
+      const earnings = Number(sub.clips?.earnings || 0)
+      await prisma.clipSubmission.update({
+        where: { id: sub.id },
+        data: {
+          finalEarnings: earnings
+        }
+      })
+      console.log(`   Submission ${sub.id} (${sub.users.email}): $${earnings.toFixed(2)}`)
+    }
+
     // Complete the campaign
     const completedCampaign = await prisma.campaign.update({
       where: { id: campaignId },
@@ -140,6 +154,8 @@ export async function POST(request: NextRequest) {
         }
       }
     })
+
+    console.log(`✅ Campaign ${campaignId} completed. ${approvedSubmissions.length} submissions finalized.`)
 
     // Send notifications to all users who had approved submissions
     for (const sub of approvedSubmissions) {
