@@ -132,19 +132,46 @@ export async function POST(
           }
         })
 
-        // Reset earnings for clips in completed campaigns
-        await tx.$executeRaw`
-          UPDATE clips
-          SET earnings = 0
-          WHERE id IN (
-            SELECT clip_id FROM clip_submissions
-            WHERE user_id = ${payoutRequest.userId}
-            AND status = 'APPROVED'
-            AND campaign_id IN (
-              SELECT id FROM campaigns WHERE status = 'COMPLETED'
-            )
-          )
-        `
+        // Reset earnings for clips in completed campaigns using Prisma query
+        // First, get the clip IDs from approved submissions in completed campaigns
+        const approvedSubmissions = await tx.clipSubmission.findMany({
+          where: {
+            userId: payoutRequest.userId,
+            status: 'APPROVED',
+            clipId: { not: null },
+            campaigns: {
+              status: 'COMPLETED'
+            }
+          },
+          select: {
+            clipId: true
+          }
+        })
+
+        const clipIds = approvedSubmissions
+          .map(s => s.clipId)
+          .filter((id): id is string => id !== null)
+
+        if (clipIds.length > 0) {
+          await tx.clip.updateMany({
+            where: {
+              id: { in: clipIds }
+            },
+            data: {
+              earnings: 0
+            }
+          })
+        }
+
+        // Map payment method to valid PayoutMethod enum
+        const methodMap: Record<string, 'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE' | 'USDC' | 'BITCOIN'> = {
+          'PAYPAL': 'PAYPAL',
+          'BANK_TRANSFER': 'BANK_TRANSFER',
+          'STRIPE': 'STRIPE',
+          'USDC': 'USDC',
+          'BITCOIN': 'BITCOIN'
+        }
+        const payoutMethod = methodMap[payoutRequest.paymentMethod || 'PAYPAL'] || 'PAYPAL'
 
         // Create Payout record for accounting
         const payout = await tx.payout.create({
@@ -152,7 +179,7 @@ export async function POST(
             userId: payoutRequest.userId,
             amount: payoutAmount,
             currency: 'USD',
-            method: payoutRequest.paymentMethod || 'PAYPAL',
+            method: payoutMethod,
             status: 'COMPLETED',
             paypalEmail: payoutRequest.paymentDetails,
             transactionId: validatedData.transactionId,

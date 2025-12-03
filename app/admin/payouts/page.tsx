@@ -605,11 +605,9 @@ export default function AdminPayoutsPage() {
       {/* Payout Requests Cards */}
       <div className="space-y-4">
         <Tabs defaultValue="pending" className="w-full" onValueChange={(value) => {
-          if (value === 'all') {
-            fetchPayoutRequests()
-          } else {
-            fetchPayoutRequests(value.toUpperCase())
-          }
+          // Always fetch all and filter locally to avoid API mismatch
+          // The "processing" tab shows both APPROVED and PROCESSING statuses
+          fetchPayoutRequests()
         }}>
           <TabsList>
             <TabsTrigger value="pending">
