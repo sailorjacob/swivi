@@ -75,6 +75,8 @@ export default function AdminCampaignsPage() {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
   const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set())
+  const [expandedCampaignData, setExpandedCampaignData] = useState<Record<string, any>>({})
+  const [loadingCampaignData, setLoadingCampaignData] = useState<Set<string>>(new Set())
   const [isUpdating, setIsUpdating] = useState(false)
   const [formData, setFormData] = useState({
     title: "",
@@ -887,14 +889,39 @@ export default function AdminCampaignsPage() {
                             {/* Action Buttons */}
                             <div className="flex items-center gap-1 ml-4">
                               <button
-                                onClick={() => {
+                                onClick={async () => {
                                   const newExpanded = new Set(expandedCampaigns)
                                   if (newExpanded.has(campaign.id)) {
                                     newExpanded.delete(campaign.id)
+                                    setExpandedCampaigns(newExpanded)
                                   } else {
                                     newExpanded.add(campaign.id)
+                                    setExpandedCampaigns(newExpanded)
+                                    
+                                    // Fetch full campaign details if not already loaded
+                                    if (!expandedCampaignData[campaign.id]) {
+                                      const newLoading = new Set(loadingCampaignData)
+                                      newLoading.add(campaign.id)
+                                      setLoadingCampaignData(newLoading)
+                                      
+                                      try {
+                                        const response = await authenticatedFetch(`/api/admin/campaigns/${campaign.id}`)
+                                        if (response.ok) {
+                                          const fullCampaign = await response.json()
+                                          setExpandedCampaignData(prev => ({
+                                            ...prev,
+                                            [campaign.id]: fullCampaign
+                                          }))
+                                        }
+                                      } catch (error) {
+                                        console.error('Error fetching campaign details:', error)
+                                      } finally {
+                                        const updatedLoading = new Set(loadingCampaignData)
+                                        updatedLoading.delete(campaign.id)
+                                        setLoadingCampaignData(updatedLoading)
+                                      }
+                                    }
                                   }
-                                  setExpandedCampaigns(newExpanded)
                                 }}
                                 className="p-2 text-muted-foreground hover:text-foreground transition-colors"
                                 title="View details"
@@ -1011,47 +1038,105 @@ export default function AdminCampaignsPage() {
                           {/* Expandable Details */}
                           {expandedCampaigns.has(campaign.id) && (
                             <div className="mt-4 pt-4 border-t border-border space-y-4">
-                              {/* Description */}
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">Description</p>
-                                <p className="text-sm">{campaign.description}</p>
-                              </div>
-
-                              {/* Requirements */}
-                              {campaign.requirements && campaign.requirements.length > 0 && (
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">Requirements</p>
-                                  <ul className="text-sm list-disc list-inside space-y-0.5">
-                                    {campaign.requirements.map((req, idx) => (
-                                      <li key={idx}>{req}</li>
-                                    ))}
-                                  </ul>
+                              {loadingCampaignData.has(campaign.id) ? (
+                                <div className="flex items-center justify-center py-8">
+                                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                                 </div>
+                              ) : (
+                                <>
+                                  {/* Description */}
+                                  <div>
+                                    <p className="text-xs text-muted-foreground mb-1">Description</p>
+                                    <p className="text-sm">{campaign.description}</p>
+                                  </div>
+
+                                  {/* Stats from expanded data */}
+                                  {expandedCampaignData[campaign.id]?.stats && (
+                                    <div className="grid grid-cols-4 gap-3">
+                                      <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                        <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.totalSubmissions || 0}</p>
+                                        <p className="text-xs text-muted-foreground">Submissions</p>
+                                      </div>
+                                      <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                        <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.approvedCount || 0}</p>
+                                        <p className="text-xs text-muted-foreground">Approved</p>
+                                      </div>
+                                      <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                        <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.totalViews?.toLocaleString() || 0}</p>
+                                        <p className="text-xs text-muted-foreground">Views</p>
+                                      </div>
+                                      <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                        <p className="text-lg font-bold">${expandedCampaignData[campaign.id].stats.totalEarnings?.toFixed(2) || '0.00'}</p>
+                                        <p className="text-xs text-muted-foreground">Earnings</p>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Submissions List */}
+                                  {expandedCampaignData[campaign.id]?.clipSubmissions && expandedCampaignData[campaign.id].clipSubmissions.length > 0 && (
+                                    <div>
+                                      <p className="text-xs text-muted-foreground mb-2">
+                                        Submissions ({expandedCampaignData[campaign.id].clipSubmissions.length})
+                                      </p>
+                                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                                        {expandedCampaignData[campaign.id].clipSubmissions.map((sub: any) => (
+                                          <div key={sub.id} className="p-2 rounded-lg border bg-muted/30 text-sm">
+                                            <div className="flex items-start justify-between gap-2">
+                                              <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-1.5 mb-1">
+                                                  <Badge variant="outline" className="text-xs px-1.5 py-0">
+                                                    {sub.platform}
+                                                  </Badge>
+                                                  <Badge variant="outline" className="text-xs px-1.5 py-0">
+                                                    {sub.status}
+                                                  </Badge>
+                                                </div>
+                                                <p className="font-medium text-xs">{sub.user?.name || sub.user?.email || 'Unknown'}</p>
+                                                <a 
+                                                  href={sub.clipUrl} 
+                                                  target="_blank" 
+                                                  rel="noopener noreferrer"
+                                                  className="text-xs text-blue-500 hover:text-blue-700 truncate block"
+                                                >
+                                                  {sub.clipUrl.length > 50 ? `${sub.clipUrl.substring(0, 50)}...` : sub.clipUrl}
+                                                </a>
+                                              </div>
+                                              <div className="text-right flex-shrink-0">
+                                                <p className="font-bold text-xs">${sub.earnings?.toFixed(2) || '0.00'}</p>
+                                                <p className="text-xs text-muted-foreground">{sub.currentViews?.toLocaleString() || 0} views</p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Requirements */}
+                                  {campaign.requirements && campaign.requirements.length > 0 && (
+                                    <div>
+                                      <p className="text-xs text-muted-foreground mb-1">Requirements</p>
+                                      <ul className="text-sm list-disc list-inside space-y-0.5">
+                                        {campaign.requirements.map((req, idx) => (
+                                          <li key={idx}>{req}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+
+                                  {/* Payout Rate & Created */}
+                                  <div className="flex gap-6 text-sm">
+                                    <div>
+                                      <p className="text-xs text-muted-foreground">Payout Rate</p>
+                                      <p className="font-medium">${campaign.payoutRate}/1K views</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-muted-foreground">Created</p>
+                                      <p className="font-medium">{new Date(campaign.createdAt).toLocaleDateString()}</p>
+                                    </div>
+                                  </div>
+                                </>
                               )}
-
-                              {/* All Platforms */}
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">Target Platforms</p>
-                                <div className="flex gap-1 flex-wrap">
-                                  {campaign.targetPlatforms.map((platform) => (
-                                    <Badge key={platform} variant="outline" className="text-xs">
-                                      {platform}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-
-                              {/* Payout Rate */}
-                              <div className="flex gap-6 text-sm">
-                                <div>
-                                  <p className="text-xs text-muted-foreground">Payout Rate</p>
-                                  <p className="font-medium">${campaign.payoutRate}/1K views</p>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-muted-foreground">Created</p>
-                                  <p className="font-medium">{new Date(campaign.createdAt).toLocaleDateString()}</p>
-                                </div>
-                              </div>
                             </div>
                           )}
                         </div>
