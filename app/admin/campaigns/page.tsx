@@ -690,18 +690,28 @@ export default function AdminCampaignsPage() {
     }
   }
 
+  // State for status filter
+  const [statusFilter, setStatusFilter] = useState<'all' | 'ACTIVE' | 'COMPLETED' | 'DRAFT'>('all')
+
   // Calculate campaign stats
   const totalBudget = campaigns.reduce((sum, c) => sum + c.budget, 0)
   const totalSpent = campaigns.reduce((sum, c) => sum + c.spent, 0)
   const totalSubmissions = campaigns.reduce((sum, c) => sum + c._count.clipSubmissions, 0)
-  const activeCampaigns = campaigns.filter(c => c.status === "ACTIVE").length
+  const activeCampaignsCount = campaigns.filter(c => c.status === "ACTIVE").length
+  const completedCampaignsCount = campaigns.filter(c => c.status === "COMPLETED").length
+  const draftCampaignsCount = campaigns.filter(c => c.status === "DRAFT").length
+
+  // Filter campaigns based on status filter
+  const filteredCampaigns = statusFilter === 'all' 
+    ? campaigns 
+    : campaigns.filter(c => c.status === statusFilter)
 
   // Use analytics data if available
   const platformStats = analytics?.overview || {
     totalUsers: 0,
     totalCampaigns: campaigns.length,
     totalSubmissions,
-    activeCampaigns,
+    activeCampaigns: activeCampaignsCount,
     totalViews: 0,
     totalEarnings: 0
   }
@@ -793,29 +803,80 @@ export default function AdminCampaignsPage() {
           </Card>
         </div>
 
+        {/* Campaign Status Filter Tabs */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Button
+            variant={statusFilter === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('all')}
+          >
+            All ({campaigns.length})
+          </Button>
+          <Button
+            variant={statusFilter === 'ACTIVE' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('ACTIVE')}
+            className={statusFilter === 'ACTIVE' ? 'bg-green-600 hover:bg-green-700' : ''}
+          >
+            Active ({activeCampaignsCount})
+          </Button>
+          <Button
+            variant={statusFilter === 'COMPLETED' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('COMPLETED')}
+            className={statusFilter === 'COMPLETED' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+          >
+            <CheckCircle className="w-4 h-4 mr-1" />
+            Completed ({completedCampaignsCount})
+          </Button>
+          <Button
+            variant={statusFilter === 'DRAFT' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('DRAFT')}
+            className={statusFilter === 'DRAFT' ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
+          >
+            Draft ({draftCampaignsCount})
+          </Button>
+        </div>
+
         {/* Campaigns List */}
         <Card>
           <CardHeader>
-            <CardTitle>All Campaigns</CardTitle>
+            <CardTitle>
+              {statusFilter === 'all' ? 'All Campaigns' : 
+               statusFilter === 'ACTIVE' ? 'Active Campaigns' :
+               statusFilter === 'COMPLETED' ? 'Completed Campaigns' :
+               'Draft Campaigns'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {campaigns.length === 0 ? (
+              {filteredCampaigns.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
                     <Target className="h-12 w-12 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-medium mb-2">No campaigns yet</h3>
+                  <h3 className="text-lg font-medium mb-2">
+                    {statusFilter === 'all' ? 'No campaigns yet' :
+                     statusFilter === 'COMPLETED' ? 'No completed campaigns' :
+                     statusFilter === 'ACTIVE' ? 'No active campaigns' :
+                     'No draft campaigns'}
+                  </h3>
                   <p className="text-muted-foreground mb-4">
-                    Create your first campaign to start working with content creators.
+                    {statusFilter === 'all' ? 'Create your first campaign to start working with content creators.' :
+                     statusFilter === 'COMPLETED' ? 'Campaigns will appear here once they are completed.' :
+                     statusFilter === 'ACTIVE' ? 'Activate or create a campaign to see it here.' :
+                     'Create a draft campaign to see it here.'}
                   </p>
-                  <Button onClick={() => setShowCreateDialog(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Campaign
-                  </Button>
+                  {statusFilter === 'all' && (
+                    <Button onClick={() => setShowCreateDialog(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Campaign
+                    </Button>
+                  )}
                 </div>
               ) : (
-                campaigns.map((campaign) => {
+                filteredCampaigns.map((campaign) => {
                   const progressPercentage = campaign.budget > 0 ? Math.min((campaign.spent / campaign.budget) * 100, 100) : 0
                   
                   return (
@@ -1393,16 +1454,21 @@ function CampaignForm({
   )
 }
 
-// Campaign View Component
+// Campaign View Component with full submission details
 function CampaignView({
   campaign,
   onClose,
   onEdit
 }: {
-  campaign: Campaign
+  campaign: any // Using any since it now includes stats and clipSubmissions
   onClose: () => void
   onEdit: () => void
 }) {
+  const [showAllSubmissions, setShowAllSubmissions] = useState(false)
+  const submissions = campaign.clipSubmissions || []
+  const stats = campaign.stats || {}
+  const displayedSubmissions = showAllSubmissions ? submissions : submissions.slice(0, 5)
+
   return (
     <div className="space-y-6">
       {/* Campaign Image */}
@@ -1433,43 +1499,83 @@ function CampaignView({
         <p className="mt-1 text-sm leading-relaxed">{campaign.description}</p>
       </div>
 
-      {/* Budget & Performance */}
-      <div className="grid grid-cols-3 gap-6">
-        <div>
-          <Label className="text-sm font-medium text-muted-foreground">Budget</Label>
-          <p className="text-lg font-medium">${campaign.budget.toLocaleString()}</p>
+      {/* Budget & Performance Stats */}
+      <div className="grid grid-cols-4 gap-4">
+        <Card className="p-4">
+          <p className="text-xs text-muted-foreground">Budget</p>
+          <p className="text-xl font-bold">${Number(campaign.budget).toLocaleString()}</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-xs text-muted-foreground">Spent</p>
+          <p className="text-xl font-bold">${Number(campaign.spent).toLocaleString()}</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-xs text-muted-foreground">Total Earnings</p>
+          <p className="text-xl font-bold text-green-500">${stats.totalEarnings?.toFixed(2) || '0.00'}</p>
+        </Card>
+        <Card className="p-4">
+          <p className="text-xs text-muted-foreground">Total Views</p>
+          <p className="text-xl font-bold">{stats.totalViews?.toLocaleString() || 0}</p>
+        </Card>
+      </div>
+
+      {/* Submission Stats */}
+      <div className="grid grid-cols-4 gap-4">
+        <div className="text-center p-3 bg-muted rounded-lg">
+          <p className="text-2xl font-bold">{stats.totalSubmissions || 0}</p>
+          <p className="text-xs text-muted-foreground">Total Submissions</p>
         </div>
-        <div>
-          <Label className="text-sm font-medium text-muted-foreground">Spent</Label>
-          <p className="text-lg font-medium">${campaign.spent.toLocaleString()}</p>
+        <div className="text-center p-3 bg-green-500/10 rounded-lg">
+          <p className="text-2xl font-bold text-green-500">{stats.approvedCount || 0}</p>
+          <p className="text-xs text-muted-foreground">Approved</p>
         </div>
-        <div>
-          <Label className="text-sm font-medium text-muted-foreground">Payout Rate</Label>
-          <p className="text-lg font-medium">{typeof campaign.payoutRate === 'number' ? `$${campaign.payoutRate}` : campaign.payoutRate}/1K views</p>
+        <div className="text-center p-3 bg-yellow-500/10 rounded-lg">
+          <p className="text-2xl font-bold text-yellow-500">{stats.pendingCount || 0}</p>
+          <p className="text-xs text-muted-foreground">Pending</p>
+        </div>
+        <div className="text-center p-3 bg-red-500/10 rounded-lg">
+          <p className="text-2xl font-bold text-red-500">{stats.rejectedCount || 0}</p>
+          <p className="text-xs text-muted-foreground">Rejected</p>
         </div>
       </div>
 
-      {/* Dates & Status */}
-      <div className="grid grid-cols-3 gap-6">
+      {/* Status & Completion Info */}
+      <div className="grid grid-cols-2 gap-6">
         <div>
           <Label className="text-sm font-medium text-muted-foreground">Status</Label>
           <Badge className={`mt-1 ${
             campaign.status === "ACTIVE" ? "bg-green-600" :
+            campaign.status === "COMPLETED" ? "bg-blue-600" :
             campaign.status === "DRAFT" ? "bg-yellow-600" :
             "bg-gray-600"
           } text-white`}>
             {campaign.status}
           </Badge>
+          {campaign.completedAt && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Completed: {new Date(campaign.completedAt).toLocaleDateString()}
+            </p>
+          )}
+          {campaign.completionReason && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Reason: {campaign.completionReason}
+            </p>
+          )}
         </div>
         <div>
-          <Label className="text-sm font-medium text-muted-foreground">Budget Status</Label>
-          <p className="text-sm">
-            {campaign.spent >= campaign.budget ? "Budget Exhausted" : `$${(campaign.budget - campaign.spent).toFixed(0)} Remaining`}
-          </p>
-        </div>
-        <div>
-          <Label className="text-sm font-medium text-muted-foreground">Submissions</Label>
-          <p className="text-lg font-medium">{campaign._count.clipSubmissions || 0}</p>
+          <Label className="text-sm font-medium text-muted-foreground">Budget Utilization</Label>
+          <div className="mt-2">
+            <div className="w-full bg-muted rounded-full h-3">
+              <div
+                className={`h-3 rounded-full ${
+                  (stats.budgetUtilization || 0) >= 100 ? 'bg-red-500' :
+                  (stats.budgetUtilization || 0) >= 80 ? 'bg-yellow-500' : 'bg-green-500'
+                }`}
+                style={{ width: `${Math.min(stats.budgetUtilization || 0, 100)}%` }}
+              />
+            </div>
+            <p className="text-sm mt-1">{(stats.budgetUtilization || 0).toFixed(1)}%</p>
+          </div>
         </div>
       </div>
 
@@ -1477,7 +1583,7 @@ function CampaignView({
       <div>
         <Label className="text-sm font-medium text-muted-foreground">Target Platforms</Label>
         <div className="flex gap-2 mt-2">
-          {campaign.targetPlatforms.map((platform) => (
+          {campaign.targetPlatforms.map((platform: string) => (
             <Badge key={platform} variant="secondary">
               {platform}
             </Badge>
@@ -1485,18 +1591,58 @@ function CampaignView({
         </div>
       </div>
 
-      {/* Requirements */}
-      {campaign.requirements.length > 0 && (
+      {/* Submissions List */}
+      {submissions.length > 0 && (
         <div>
-          <Label className="text-sm font-medium text-muted-foreground">Requirements</Label>
-          <ul className="mt-2 space-y-1">
-            {campaign.requirements.map((req, index) => (
-              <li key={index} className="text-sm flex items-start gap-2">
-                <span className="text-muted-foreground">•</span>
-                {req}
-              </li>
+          <Label className="text-sm font-medium text-muted-foreground mb-3 block">
+            Submissions ({submissions.length})
+          </Label>
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {displayedSubmissions.map((sub: any) => (
+              <div key={sub.id} className={`p-3 rounded-lg border ${
+                sub.status === 'APPROVED' ? 'bg-green-500/5 border-green-500/20' :
+                sub.status === 'PENDING' ? 'bg-yellow-500/5 border-yellow-500/20' :
+                'bg-red-500/5 border-red-500/20'
+              }`}>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-xs">
+                        {sub.platform}
+                      </Badge>
+                      <Badge className={`text-xs ${
+                        sub.status === 'APPROVED' ? 'bg-green-600' :
+                        sub.status === 'PENDING' ? 'bg-yellow-600' :
+                        'bg-red-600'
+                      }`}>
+                        {sub.status}
+                      </Badge>
+                    </div>
+                    <p className="font-medium text-sm">{sub.user?.name || sub.user?.email || 'Unknown'}</p>
+                    <p className="text-xs text-muted-foreground truncate">{sub.clipUrl}</p>
+                    {sub.user?.paypalEmail && (
+                      <p className="text-xs text-blue-500 mt-1">PayPal: {sub.user.paypalEmail}</p>
+                    )}
+                  </div>
+                  <div className="text-right ml-4">
+                    <p className="font-bold text-green-500">${sub.earnings?.toFixed(2) || '0.00'}</p>
+                    <p className="text-xs text-muted-foreground">{sub.currentViews?.toLocaleString() || 0} views</p>
+                    <p className="text-xs text-muted-foreground">+{sub.viewsGained?.toLocaleString() || 0} gained</p>
+                  </div>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
+          {submissions.length > 5 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-2"
+              onClick={() => setShowAllSubmissions(!showAllSubmissions)}
+            >
+              {showAllSubmissions ? 'Show Less' : `Show All ${submissions.length} Submissions`}
+            </Button>
+          )}
         </div>
       )}
 

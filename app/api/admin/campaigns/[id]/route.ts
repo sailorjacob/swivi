@@ -59,10 +59,48 @@ export async function GET(
         featuredImage: true,
         createdAt: true,
         updatedAt: true,
+        completedAt: true,
+        completionReason: true,
         _count: {
           select: {
             clipSubmissions: true
           }
+        },
+        clipSubmissions: {
+          select: {
+            id: true,
+            clipUrl: true,
+            platform: true,
+            status: true,
+            createdAt: true,
+            initialViews: true,
+            users: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                paypalEmail: true,
+                walletAddress: true,
+                bitcoinAddress: true
+              }
+            },
+            clips: {
+              select: {
+                id: true,
+                earnings: true,
+                views: true,
+                view_tracking: {
+                  orderBy: { date: 'desc' },
+                  take: 1,
+                  select: {
+                    views: true,
+                    date: true
+                  }
+                }
+              }
+            }
+          },
+          orderBy: { createdAt: 'desc' }
         }
       }
     })
@@ -71,7 +109,56 @@ export async function GET(
       return NextResponse.json({ error: "Campaign not found" }, { status: 404 })
     }
 
-    return NextResponse.json(campaign)
+    // Process submissions to include calculated fields
+    const processedSubmissions = campaign.clipSubmissions.map(sub => {
+      const latestViews = sub.clips?.view_tracking?.[0]?.views || sub.clips?.views || 0
+      const initialViews = sub.initialViews || 0
+      const viewsGained = Number(latestViews) - Number(initialViews)
+      const earnings = Number(sub.clips?.earnings || 0)
+
+      return {
+        id: sub.id,
+        clipUrl: sub.clipUrl,
+        platform: sub.platform,
+        status: sub.status,
+        createdAt: sub.createdAt,
+        initialViews: Number(initialViews),
+        currentViews: Number(latestViews),
+        viewsGained,
+        earnings,
+        user: {
+          id: sub.users.id,
+          name: sub.users.name,
+          email: sub.users.email,
+          paypalEmail: sub.users.paypalEmail,
+          walletAddress: sub.users.walletAddress,
+          bitcoinAddress: sub.users.bitcoinAddress
+        }
+      }
+    })
+
+    // Calculate stats
+    const approvedSubmissions = processedSubmissions.filter(s => s.status === 'APPROVED')
+    const totalEarnings = approvedSubmissions.reduce((sum, s) => sum + s.earnings, 0)
+    const totalViews = approvedSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
+    const totalViewsGained = approvedSubmissions.reduce((sum, s) => sum + s.viewsGained, 0)
+
+    return NextResponse.json({
+      ...campaign,
+      clipSubmissions: processedSubmissions,
+      stats: {
+        totalSubmissions: campaign._count.clipSubmissions,
+        approvedCount: approvedSubmissions.length,
+        pendingCount: processedSubmissions.filter(s => s.status === 'PENDING').length,
+        rejectedCount: processedSubmissions.filter(s => s.status === 'REJECTED').length,
+        totalEarnings,
+        totalViews,
+        totalViewsGained,
+        budgetUtilization: Number(campaign.budget) > 0 
+          ? (Number(campaign.spent) / Number(campaign.budget)) * 100 
+          : 0
+      }
+    })
   } catch (error) {
     console.error("Error fetching campaign:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
