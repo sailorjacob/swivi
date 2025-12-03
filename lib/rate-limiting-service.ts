@@ -22,10 +22,13 @@ interface FraudDetectionResult {
 
 export class RateLimitingService {
   private static instance: RateLimitingService
-  private rateLimitStore = new Map<string, { count: number; resetTime: number }>()
+  
+  // In-memory cache with TTL for fast lookups (backed by database for persistence)
+  private memoryCache = new Map<string, { count: number; resetTime: number; lastSync: number }>()
+  private readonly MEMORY_CACHE_TTL = 5000 // 5 seconds - sync with DB every 5s
 
   // Rate limit configurations for different endpoints
-  private static readonly RATE_LIMITS = {
+  private static readonly RATE_LIMITS: Record<string, RateLimitConfig> = {
     // Submission endpoints
     'submission:create': { windowMs: 60 * 1000, maxRequests: 10 }, // 10 per minute
     'submission:update': { windowMs: 60 * 1000, maxRequests: 20 }, // 20 per minute
@@ -34,8 +37,8 @@ export class RateLimitingService {
     'view-tracking:update': { windowMs: 5 * 60 * 1000, maxRequests: 5 }, // 5 per 5 minutes
 
     // Authentication endpoints
-    'auth:login': { windowMs: 15 * 60 * 1000, maxRequests: 5 }, // 5 per 15 minutes
-    'auth:register': { windowMs: 60 * 60 * 1000, maxRequests: 3 }, // 3 per hour
+    'auth:login': { windowMs: 15 * 60 * 1000, maxRequests: 20 }, // 20 per 15 minutes
+    'auth:register': { windowMs: 60 * 60 * 1000, maxRequests: 100 }, // 100 per hour per IP (for shared networks/launch day)
 
     // API endpoints
     'api:general': { windowMs: 60 * 1000, maxRequests: 100 }, // 100 per minute
@@ -61,6 +64,7 @@ export class RateLimitingService {
 
   /**
    * Checks if a request should be rate limited
+   * Uses database for distributed rate limiting across serverless instances
    */
   async checkRateLimit(
     identifier: string,
@@ -68,51 +72,180 @@ export class RateLimitingService {
     config?: Partial<RateLimitConfig>
   ): Promise<RateLimitResult> {
     const rateLimitConfig = {
-      ...this.constructor['RATE_LIMITS'][endpoint],
+      ...RateLimitingService.RATE_LIMITS[endpoint],
       ...config
     }
 
-    if (!rateLimitConfig) {
-      throw new Error(`No rate limit configuration found for endpoint: ${endpoint}`)
+    if (!rateLimitConfig || !rateLimitConfig.windowMs) {
+      // No config found, allow request but log warning
+      console.warn(`No rate limit configuration found for endpoint: ${endpoint}`)
+      return {
+        success: true,
+        limit: 100,
+        remaining: 99,
+        resetTime: Date.now() + 60000
+      }
     }
 
     const key = `${endpoint}:${identifier}`
     const now = Date.now()
     const windowStart = now - rateLimitConfig.windowMs
 
-    // Clean up old entries periodically
-    this.cleanupOldEntries()
+    try {
+      // Try database-backed rate limiting first
+      const result = await this.checkRateLimitDatabase(key, rateLimitConfig, now, windowStart)
+      return result
+    } catch (error) {
+      // Fallback to memory-only if database fails (graceful degradation)
+      console.warn('Database rate limiting failed, using memory fallback:', error)
+      return this.checkRateLimitMemory(key, rateLimitConfig, now)
+    }
+  }
 
-    // Get current rate limit data
-    let rateLimitData = this.rateLimitStore.get(key)
-
-    if (!rateLimitData || rateLimitData.resetTime <= now) {
-      // Reset or create new window
-      rateLimitData = {
-        count: 0,
-        resetTime: now + rateLimitConfig.windowMs
+  /**
+   * Database-backed rate limiting for distributed environments
+   */
+  private async checkRateLimitDatabase(
+    key: string,
+    config: RateLimitConfig,
+    now: number,
+    windowStart: number
+  ): Promise<RateLimitResult> {
+    // Check memory cache first for performance
+    const cached = this.memoryCache.get(key)
+    if (cached && (now - cached.lastSync) < this.MEMORY_CACHE_TTL) {
+      // Use cached value if recent enough
+      if (cached.resetTime <= now) {
+        // Window expired, reset
+        cached.count = 1
+        cached.resetTime = now + config.windowMs
+        cached.lastSync = now
+      } else {
+        cached.count++
       }
-      this.rateLimitStore.set(key, rateLimitData)
+
+      if (cached.count > config.maxRequests) {
+        return {
+          success: false,
+          limit: config.maxRequests,
+          remaining: 0,
+          resetTime: cached.resetTime
+        }
+      }
+
+      return {
+        success: true,
+        limit: config.maxRequests,
+        remaining: Math.max(0, config.maxRequests - cached.count),
+        resetTime: cached.resetTime
+      }
     }
 
-    // Check if limit exceeded
-    if (rateLimitData.count >= rateLimitConfig.maxRequests) {
+    // Query database for rate limit data
+    // Use CronJobLog table to track rate limits (repurposing for now to avoid migration)
+    const recentRequests = await prisma.cronJobLog.count({
+      where: {
+        jobName: key,
+        startedAt: {
+          gte: new Date(windowStart)
+        }
+      }
+    })
+
+    const resetTime = now + config.windowMs
+
+    if (recentRequests >= config.maxRequests) {
+      // Update memory cache
+      this.memoryCache.set(key, { count: recentRequests, resetTime, lastSync: now })
+      
       return {
         success: false,
-        limit: rateLimitConfig.maxRequests,
+        limit: config.maxRequests,
+        remaining: 0,
+        resetTime
+      }
+    }
+
+    // Log this request for rate limiting
+    await prisma.cronJobLog.create({
+      data: {
+        jobName: key,
+        status: 'RATE_LIMIT_CHECK',
+        startedAt: new Date(now),
+        completedAt: new Date(now),
+        duration: 0
+      }
+    })
+
+    // Update memory cache
+    this.memoryCache.set(key, { count: recentRequests + 1, resetTime, lastSync: now })
+
+    // Cleanup old entries periodically (1% chance per request)
+    if (Math.random() < 0.01) {
+      this.cleanupOldRateLimitEntries(windowStart).catch(console.error)
+    }
+
+    return {
+      success: true,
+      limit: config.maxRequests,
+      remaining: Math.max(0, config.maxRequests - recentRequests - 1),
+      resetTime
+    }
+  }
+
+  /**
+   * Memory-only rate limiting fallback
+   */
+  private checkRateLimitMemory(
+    key: string,
+    config: RateLimitConfig,
+    now: number
+  ): RateLimitResult {
+    let rateLimitData = this.memoryCache.get(key)
+
+    if (!rateLimitData || rateLimitData.resetTime <= now) {
+      rateLimitData = {
+        count: 1,
+        resetTime: now + config.windowMs,
+        lastSync: now
+      }
+      this.memoryCache.set(key, rateLimitData)
+    } else {
+      rateLimitData.count++
+    }
+
+    if (rateLimitData.count > config.maxRequests) {
+      return {
+        success: false,
+        limit: config.maxRequests,
         remaining: 0,
         resetTime: rateLimitData.resetTime
       }
     }
 
-    // Increment counter
-    rateLimitData.count++
-
     return {
       success: true,
-      limit: rateLimitConfig.maxRequests,
-      remaining: Math.max(0, rateLimitConfig.maxRequests - rateLimitData.count),
+      limit: config.maxRequests,
+      remaining: Math.max(0, config.maxRequests - rateLimitData.count),
       resetTime: rateLimitData.resetTime
+    }
+  }
+
+  /**
+   * Cleanup old rate limit entries from database
+   */
+  private async cleanupOldRateLimitEntries(windowStart: number): Promise<void> {
+    try {
+      await prisma.cronJobLog.deleteMany({
+        where: {
+          status: 'RATE_LIMIT_CHECK',
+          startedAt: {
+            lt: new Date(windowStart - 3600000) // Clean entries older than 1 hour past window
+          }
+        }
+      })
+    } catch (error) {
+      console.error('Error cleaning up rate limit entries:', error)
     }
   }
 
@@ -126,16 +259,28 @@ export class RateLimitingService {
     ipAddress?: string
   ): Promise<void> {
     try {
-      // In a production system, you might want to store this in a separate table
-      // or send to a logging service
-      console.warn(`Rate limit violation: ${identifier} on ${endpoint}`, {
+      console.warn(`🚨 Rate limit violation: ${identifier} on ${endpoint}`, {
         userAgent,
         ipAddress,
         timestamp: new Date().toISOString()
       })
 
-      // TODO: Implement persistent storage for monitoring rate limit violations
-      // This could be used for fraud detection and user behavior analysis
+      // Log to database for monitoring
+      await prisma.cronJobLog.create({
+        data: {
+          jobName: `violation:${endpoint}:${identifier}`,
+          status: 'RATE_LIMIT_VIOLATION',
+          startedAt: new Date(),
+          completedAt: new Date(),
+          duration: 0,
+          details: {
+            identifier,
+            endpoint,
+            userAgent,
+            ipAddress
+          }
+        }
+      })
 
     } catch (error) {
       console.error('Error recording rate limit violation:', error)
@@ -264,9 +409,6 @@ export class RateLimitingService {
     try {
       const cutoff = new Date(Date.now() - timeWindowMs)
 
-      // In a production system, you might want to store activity in a separate table
-      // For now, we'll derive activity from existing tables
-
       const [
         submissions,
         payouts,
@@ -296,9 +438,9 @@ export class RateLimitingService {
       ])
 
       return [
-        ...submissions.map(s => ({ action: 'submission', timestamp: s.createdAt })),
-        ...payouts.map(p => ({ action: 'payout_request', timestamp: p.createdAt })),
-        ...verifications.map(v => ({ action: 'verification', timestamp: v.createdAt }))
+        ...submissions.map(s => ({ action: 'submission', timestamp: s.createdAt! })),
+        ...payouts.map(p => ({ action: 'payout_request', timestamp: p.createdAt! })),
+        ...verifications.map(v => ({ action: 'verification', timestamp: v.createdAt! }))
       ]
 
     } catch (error) {
@@ -308,50 +450,39 @@ export class RateLimitingService {
   }
 
   /**
-   * Cleans up old rate limit entries to prevent memory leaks
+   * Get rate limit statistics for monitoring
    */
-  private cleanupOldEntries(): void {
-    const now = Date.now()
-    for (const [key, data] of this.rateLimitStore.entries()) {
-      if (data.resetTime <= now) {
-        this.rateLimitStore.delete(key)
-      }
-    }
-  }
+  async getRateLimitStats(): Promise<{
+    totalChecks: number
+    violations: number
+    topEndpoints: Array<{ endpoint: string; count: number }>
+  }> {
+    try {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
 
-  /**
-   * Middleware function for Next.js API routes
-   */
-  static middleware(endpoint: string, config?: Partial<RateLimitConfig>) {
-    return async (req: NextRequest, identifier?: string) => {
-      const service = RateLimitingService.getInstance()
-      const userIdentifier = identifier || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
-
-      const result = await service.checkRateLimit(userIdentifier, endpoint, config)
-
-      if (!result.success) {
-        await service.recordViolation(userIdentifier, endpoint, req.headers.get('user-agent') || undefined)
-
-        return NextResponse.json(
-          {
-            error: 'Rate limit exceeded',
-            limit: result.limit,
-            remaining: result.remaining,
-            resetTime: result.resetTime
-          },
-          {
-            status: 429,
-            headers: {
-              'X-RateLimit-Limit': result.limit.toString(),
-              'X-RateLimit-Remaining': result.remaining.toString(),
-              'X-RateLimit-Reset': result.resetTime.toString(),
-              'Retry-After': Math.ceil((result.resetTime - Date.now()) / 1000).toString()
-            }
+      const [totalChecks, violations] = await Promise.all([
+        prisma.cronJobLog.count({
+          where: {
+            status: 'RATE_LIMIT_CHECK',
+            startedAt: { gte: oneDayAgo }
           }
-        )
-      }
+        }),
+        prisma.cronJobLog.count({
+          where: {
+            status: 'RATE_LIMIT_VIOLATION',
+            startedAt: { gte: oneDayAgo }
+          }
+        })
+      ])
 
-      return null // Continue to next middleware/route handler
+      return {
+        totalChecks,
+        violations,
+        topEndpoints: [] // Would need groupBy for this
+      }
+    } catch (error) {
+      console.error('Error getting rate limit stats:', error)
+      return { totalChecks: 0, violations: 0, topEndpoints: [] }
     }
   }
 }

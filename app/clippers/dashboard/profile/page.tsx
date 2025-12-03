@@ -28,6 +28,7 @@ import {
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { SocialVerificationDialog } from "../../../../components/clippers/social-verification-dialog"
+import { ThemeToggle } from "../../../../components/ui/theme-toggle"
 
 interface UserProfile {
   id: string
@@ -538,7 +539,10 @@ export default function ProfilePage() {
         {/* Account Statistics */}
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-foreground">Account Statistics</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-foreground">Account Statistics</CardTitle>
+              <ThemeToggle />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

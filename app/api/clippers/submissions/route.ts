@@ -261,29 +261,55 @@ export async function POST(request: NextRequest) {
       // Continue with submission but log for manual review
     }
 
-    // Scrape initial views at submission time (CRITICAL: this is the baseline for earnings)
+    // Initial views set to 0 - will be scraped asynchronously to avoid submission timeouts
+    // The first view tracking cron job will capture the baseline
     let initialViews = 0
-    try {
-      const { MultiPlatformScraper } = await import('@/lib/multi-platform-scraper')
-      const scraper = new MultiPlatformScraper(process.env.APIFY_API_KEY || '')
-      console.log(`🔍 Starting initial view scrape for: ${validatedData.clipUrl}`)
-      const scrapedData = await scraper.scrapeContent(validatedData.clipUrl, validatedData.platform)
-      console.log(`🔍 Scraped data:`, scrapedData)
-      
-      // Ensure we have a valid number
-      const rawViews = scrapedData.views || scrapedData.viewCount || 0
-      initialViews = typeof rawViews === 'string' ? parseInt(rawViews, 10) : rawViews
-      
-      // Fallback to 0 if parsing failed
-      if (isNaN(initialViews) || initialViews < 0) {
-        console.warn(`⚠️ Invalid view count detected (${rawViews}), using 0`)
-        initialViews = 0
+    
+    // Trigger async scraping (non-blocking) with a short timeout
+    // This improves UX by not blocking submission on slow scraping
+    const scrapePromise = (async () => {
+      try {
+        const { MultiPlatformScraper } = await import('@/lib/multi-platform-scraper')
+        const scraper = new MultiPlatformScraper(process.env.APIFY_API_KEY || '')
+        console.log(`🔍 Starting async initial view scrape for: ${validatedData.clipUrl}`)
+        
+        // Use Promise.race with a 10-second timeout for initial scrape
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Scrape timeout')), 10000)
+        )
+        
+        const scrapedData = await Promise.race([
+          scraper.scrapeContent(validatedData.clipUrl, validatedData.platform),
+          timeoutPromise
+        ]) as any
+        
+        if (scrapedData && !scrapedData.error) {
+          const rawViews = scrapedData.views || scrapedData.viewCount || 0
+          const views = typeof rawViews === 'string' ? parseInt(rawViews, 10) : rawViews
+          
+          if (!isNaN(views) && views > 0) {
+            console.log(`📊 Async scrape got initial views: ${views}`)
+            return views
+          }
+        }
+        return 0
+      } catch (error) {
+        console.log('⚠️ Async initial scrape failed (will use 0):', error instanceof Error ? error.message : 'Unknown')
+        return 0
       }
-      
-      console.log(`📊 Initial views at submission: ${initialViews} (type: ${typeof initialViews}) for ${validatedData.clipUrl}`)
-    } catch (error) {
-      console.error('⚠️ Error scraping initial views at submission:', error)
-      // Continue with submission even if scraping fails (views can be tracked later)
+    })()
+    
+    // Wait briefly for scrape (max 3 seconds) to get initial views if possible
+    // If it takes longer, continue with 0 and let cron job handle it
+    try {
+      const quickScrapeResult = await Promise.race([
+        scrapePromise,
+        new Promise<number>((resolve) => setTimeout(() => resolve(0), 3000))
+      ])
+      initialViews = quickScrapeResult
+      console.log(`📊 Quick scrape result: ${initialViews} views for ${validatedData.clipUrl}`)
+    } catch {
+      console.log('📊 Quick scrape timed out, using 0 initial views')
       initialViews = 0
     }
 

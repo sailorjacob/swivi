@@ -68,11 +68,13 @@ export async function GET(request: NextRequest) {
               verifiedAt: true,
             }
           },
+          totalEarnings: true,
           clipSubmissions: {
             where: {
               status: 'APPROVED'
             },
             select: {
+              initialViews: true,
               clips: {
                 select: {
                   earnings: true,
@@ -199,20 +201,39 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Calculate real-time totals from actual clip data (not cached User fields)
-    let totalEarnings = 0
-    let totalViews = 0
+    // Calculate real-time totals
+    // Earnings: Use stored balance + completed payouts (same as dashboard)
+    const userCurrentBalance = Number(dbUser.totalEarnings || 0)
+    
+    let totalPaidOut = 0
+    try {
+      const completedPayouts = await prisma.payout.aggregate({
+        where: {
+          userId: dbUser.id,
+          status: 'COMPLETED'
+        },
+        _sum: { amount: true }
+      })
+      totalPaidOut = Number(completedPayouts._sum.amount || 0)
+    } catch (e) {
+      console.error('Error fetching payouts for profile:', e)
+    }
+    
+    // Total lifetime earnings = current balance + already paid out
+    const totalEarnings = userCurrentBalance + totalPaidOut
 
+    // Views: Calculate tracked views (views gained since submission, not raw total)
+    let totalViews = 0
     if (dbUser.clipSubmissions) {
       for (const submission of dbUser.clipSubmissions) {
         if (submission.clips) {
-          // Add earnings
-          totalEarnings += Number(submission.clips.earnings || 0)
-
-          // Add latest view count
-          if (submission.clips.view_tracking && submission.clips.view_tracking.length > 0) {
-            totalViews += Number(submission.clips.view_tracking[0].views || 0)
-          }
+          const latestViews = submission.clips.view_tracking?.[0]
+            ? Number(submission.clips.view_tracking[0].views || 0)
+            : 0
+          const initialViews = submission.initialViews ? Number(submission.initialViews) : 0
+          // Tracked views = views gained since submission
+          const viewsGained = Math.max(0, latestViews - initialViews)
+          totalViews += viewsGained
         }
       }
     }
