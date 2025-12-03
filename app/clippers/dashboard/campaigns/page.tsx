@@ -163,47 +163,47 @@ export default function CampaignsPage() {
       <div className="space-y-6">
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 border-b border-border">
-        <Button
-          variant={filter === 'active' ? 'default' : 'ghost'}
+      <div className="flex gap-6 border-b border-border">
+        <button
           onClick={() => setFilter('active')}
-          className="rounded-b-none"
+          className={`pb-2 text-sm transition-colors ${
+            filter === 'active' 
+              ? 'text-foreground border-b-2 border-foreground -mb-px' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
         >
-          Active ({activeCampaignsCount})
-        </Button>
-        <Button
-          variant={filter === 'completed' ? 'default' : 'ghost'}
+          Active {activeCampaignsCount > 0 && `(${activeCampaignsCount})`}
+        </button>
+        <button
           onClick={() => setFilter('completed')}
-          className="rounded-b-none"
+          className={`pb-2 text-sm transition-colors ${
+            filter === 'completed' 
+              ? 'text-foreground border-b-2 border-foreground -mb-px' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
         >
-          Completed ({completedCampaignsCount})
-        </Button>
-        <Button
-          variant={filter === 'all' ? 'default' : 'ghost'}
+          Completed {completedCampaignsCount > 0 && `(${completedCampaignsCount})`}
+        </button>
+        <button
           onClick={() => setFilter('all')}
-          className="rounded-b-none"
+          className={`pb-2 text-sm transition-colors ${
+            filter === 'all' 
+              ? 'text-foreground border-b-2 border-foreground -mb-px' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
         >
-          All ({campaigns.length})
-        </Button>
+          All {campaigns.length > 0 && `(${campaigns.length})`}
+        </button>
       </div>
 
       {/* Empty State */}
       {filteredCampaigns.length === 0 ? (
-        <div className="text-center py-12">
-          <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-xl font-medium text-foreground mb-2">
-            {filter === 'active' ? 'No Active Campaigns' : 
-             filter === 'completed' ? 'No Completed Campaigns' : 
-             'No Campaigns'}
-          </h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            {filter === 'active' ? 'There are currently no active campaigns available. New campaigns are launched regularly, so check back soon!' :
-             filter === 'completed' ? 'You haven\'t participated in any completed campaigns yet.' :
+        <div className="text-center py-16">
+          <p className="text-muted-foreground">
+            {filter === 'active' ? 'No active campaigns right now. Check back soon.' :
+             filter === 'completed' ? 'No completed campaigns yet.' :
              'No campaigns found.'}
           </p>
-          <Button onClick={fetchCampaigns} variant="outline">
-            Refresh Campaigns
-          </Button>
         </div>
       ) : (
         /* Campaigns Grid */

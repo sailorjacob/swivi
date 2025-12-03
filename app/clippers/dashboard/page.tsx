@@ -319,62 +319,6 @@ export default function ClipperDashboard() {
   return (
     <div className="container mx-auto px-4 py-8">
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
-        {data?.stats?.map((stat, index) => {
-          const Icon = getIcon(stat.icon)
-          return (
-            <Card key={index} className="bg-card border-border">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                    <p className="text-2xl font-bold mt-1 text-foreground">{stat.value}</p>
-                    <p className="text-sm mt-1 text-muted-foreground">{stat.change}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted">
-                    <Icon className="w-6 h-6 text-muted-foreground" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        }) || (
-          // Fallback stats with proper icons
-          <>
-            <Card className="bg-card border-border">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm font-medium">Total Earned</p>
-                    <p className="text-2xl font-bold text-foreground mt-1">$0.00</p>
-                    <p className="text-sm mt-1 text-muted-foreground">Start earning from approved clips</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted">
-                    <DollarSign className="w-6 h-6 text-muted-foreground" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-card border-border">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm font-medium">Active Campaigns</p>
-                    <p className="text-2xl font-bold text-foreground mt-1">0</p>
-                    <p className="text-sm mt-1 text-muted-foreground">Available to join</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted">
-                    <Target className="w-6 h-6 text-muted-foreground" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </>
-        )}
-      </div>
-
-
       {/* Payout Request Dialog */}
       <Dialog open={payoutDialogOpen} onOpenChange={setPayoutDialogOpen}>
         <DialogContent>
@@ -483,8 +427,7 @@ export default function ClipperDashboard() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h4 className="text-foreground font-medium mb-1">Clip Submission</h4>
-                      <p className="text-muted-foreground text-sm mb-2">{clip.campaign}</p>
+                      <h4 className="text-foreground font-medium mb-1">{clip.campaign}</h4>
 
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
                         <span>{clip.views.toLocaleString()} views
@@ -699,6 +642,20 @@ export default function ClipperDashboard() {
           </Card>
         )}
       </div>
+
+      {/* Compact Stats Summary */}
+      {data?.stats && data.stats.length > 0 && (
+        <div className="mt-8 pt-6 border-t border-border">
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+            {data.stats.map((stat, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <span className="font-medium text-foreground">{stat.value}</span>
+                <span>{stat.title.toLowerCase()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
     </div>
   )
