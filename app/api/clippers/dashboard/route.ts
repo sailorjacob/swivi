@@ -216,19 +216,34 @@ export async function GET(request: NextRequest) {
     const approvedSubmissions = userData.clipSubmissions.filter(s => s.status === "APPROVED" || s.status === "PAID").length
     const pendingSubmissions = userData.clipSubmissions.filter(s => s.status === "PENDING").length
 
-    // Use user.totalEarnings as the source of truth for balance
-    // This is the actual balance after payouts have been processed
-    const userTotalEarnings = Number(userData.totalEarnings || 0)
+    // user.totalEarnings = current balance (after payouts deducted)
+    const userCurrentBalance = Number(userData.totalEarnings || 0)
 
-    // Calculate clip-level earnings (may be 0 if reset, but user.totalEarnings is correct)
+    // Calculate clip-level earnings (may be 0 if reset)
     const clipEarningsTotal = userData.clipSubmissions
       .filter(s => s.status === 'APPROVED')
       .reduce((sum, submission) => {
         return sum + Number(submission.clips?.earnings || 0)
       }, 0)
 
-    // Use the higher of user.totalEarnings or clip sum (in case clips were reset)
-    const totalEarned = Math.max(userTotalEarnings, clipEarningsTotal)
+    // Get total amount already paid out to calculate lifetime earnings
+    let totalPaidOut = 0
+    try {
+      const completedPayouts = await prisma.payout.aggregate({
+        where: {
+          userId: userData.id,
+          status: 'COMPLETED'
+        },
+        _sum: { amount: true }
+      })
+      totalPaidOut = Number(completedPayouts._sum.amount || 0)
+    } catch (e) {
+      console.error('Error fetching payouts:', e)
+    }
+
+    // Total Earned (Lifetime) = Current Balance + Already Paid Out
+    // This never decreases - it's your all-time earnings
+    const totalEarned = userCurrentBalance + totalPaidOut
 
     const totalViews = userData.clipSubmissions
       .filter(s => s.status === 'APPROVED' && s.clips?.view_tracking?.[0])
@@ -249,9 +264,9 @@ export async function GET(request: NextRequest) {
         return sum + viewsGained
       }, 0)
 
-    // Available balance: Use user.totalEarnings as the authoritative source
-    // This represents earnings from completed campaigns minus any payouts already processed
-    const availableBalance = userTotalEarnings
+    // Available balance: Current balance that can be requested for payout
+    // This is totalEarnings minus any payouts already processed
+    const availableBalance = userCurrentBalance
 
     // Active campaign earnings: Preview of what will be available when campaigns complete
     const activeCampaignEarnings = userData.clipSubmissions
