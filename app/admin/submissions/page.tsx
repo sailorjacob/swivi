@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Check, X, ExternalLink, Search, Filter, Calendar, User, DollarSign, Loader2, AlertCircle, ArrowUpRight, XCircle } from "lucide-react"
+import { Check, X, ExternalLink, Search, Filter, Calendar, User, DollarSign, Loader2, AlertCircle, ArrowUpRight, XCircle, Trash2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -436,38 +436,36 @@ export default function AdminSubmissionsPage() {
                 submissions.map((submission) => (
                 <div
                   key={submission.id}
-                  className={`flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors ${
+                  className={`flex items-start justify-between gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors ${
                     submission.requiresReview ? 'border-slate-400 bg-slate-100/30 dark:border-slate-600 dark:bg-slate-800/30' : ''
                   }`}
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm text-muted-foreground">
-                          {submission.users.email}
-                          {submission.users.name && ` (${submission.users.name})`}
+                  <div className="flex-1 min-w-0">
+                    {/* Platform, Status, and User info - all left aligned */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
+                        {getPlatformLogo(submission.platform, '', 18)}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {getStatusIcon(submission.status, submission.autoRejected)}
+                        <Badge className={getStatusColor(submission)}>
+                          {submission.requiresReview ? 'Flagged' : submission.status.charAt(0) + submission.status.slice(1).toLowerCase()}
+                        </Badge>
+                      </div>
+                      {submission.requiresReview && (
+                        <AlertCircle className="w-4 h-4 text-slate-500" title="Flagged for review" />
+                      )}
+                      {submission.autoRejected && (
+                        <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded">
+                          Auto-rejected
                         </span>
-                        {submission.requiresReview && (
-                          <AlertCircle className="w-4 h-4 text-slate-500" title="Flagged for review" />
-                        )}
-                        {submission.autoRejected && (
-                          <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded">
-                            Auto-rejected
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
-                          {getPlatformLogo(submission.platform, '', 20)}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {getStatusIcon(submission.status, submission.autoRejected)}
-                          <Badge className={getStatusColor(submission)}>
-                            {submission.requiresReview ? 'Flagged' : submission.status.charAt(0) + submission.status.slice(1).toLowerCase()}
-                          </Badge>
-                        </div>
-                      </div>
+                      )}
+                      <span className="text-xs text-muted-foreground ml-auto">
+                        {submission.users.email}
+                      </span>
                     </div>
+                    
+                    {/* Campaign title and URL */}
                     <div className="mb-2">
                       <p className="font-medium">{submission.campaigns.title}</p>
                       <div className="flex items-center gap-2 mt-1">
@@ -527,16 +525,8 @@ export default function AdminSubmissionsPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                    >
-                      <a href={submission.clipUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    </Button>
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     {submission.status === "PENDING" && (
                       <>
                         <Button
@@ -546,7 +536,7 @@ export default function AdminSubmissionsPage() {
                             updateSubmissionStatus(submission.id, "APPROVED")
                           }}
                         >
-                          <Check className="h-4 w-4" />
+                          Approve
                         </Button>
                         <Button
                           variant="outline"
@@ -556,14 +546,14 @@ export default function AdminSubmissionsPage() {
                             setShowRejectDialog(true)
                           }}
                         >
-                          <X className="h-4 w-4" />
+                          Reject
                         </Button>
                       </>
                     )}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          Delete
+                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>

@@ -724,14 +724,6 @@ export default function AdminCampaignsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Header */}
-        <div className="flex justify-end items-center mb-8">
-          <Button onClick={() => setShowCreateDialog(!showCreateDialog)}>
-            <Plus className="h-4 w-4 mr-2" />
-            {showCreateDialog ? "Cancel" : "Create Campaign"}
-          </Button>
-        </div>
-
         {/* Campaign Creation Form */}
         {showCreateDialog && (
           <Card className="mb-8">
@@ -752,24 +744,30 @@ export default function AdminCampaignsPage() {
           </Card>
         )}
 
-        {/* Compact Stats Bar */}
-        <div className="flex flex-wrap items-center gap-6 mb-6 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Active:</span>
-            <span className="font-semibold">{platformStats.activeCampaigns}</span>
+        {/* Stats Bar with Create Button */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div className="flex flex-wrap items-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Active:</span>
+              <span className="font-semibold">{platformStats.activeCampaigns}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Users:</span>
+              <span className="font-semibold">{platformStats.totalUsers}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Views:</span>
+              <span className="font-semibold">{Number(platformStats.totalViews).toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Earnings:</span>
+              <span className="font-semibold">${platformStats.totalEarnings.toFixed(2)}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Users:</span>
-            <span className="font-semibold">{platformStats.totalUsers}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Views:</span>
-            <span className="font-semibold">{Number(platformStats.totalViews).toLocaleString()}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Earnings:</span>
-            <span className="font-semibold">${platformStats.totalEarnings.toFixed(2)}</span>
-          </div>
+          <Button onClick={() => setShowCreateDialog(!showCreateDialog)} size="sm">
+            <Plus className="h-4 w-4 mr-1" />
+            {showCreateDialog ? "Cancel" : "New Campaign"}
+          </Button>
         </div>
 
         {/* Campaign Status Filter Tabs */}
@@ -886,53 +884,48 @@ export default function AdminCampaignsPage() {
                             </div>
                             
                             {/* Action Buttons */}
-                            <div className="flex items-center gap-2 ml-4">
-                              <Button
-                                variant="outline"
-                                size="sm"
+                            <div className="flex items-center gap-1 ml-4">
+                              <button
                                 onClick={() => handleViewCampaign(campaign)}
-                                className="opacity-70 group-hover:opacity-100 transition-opacity"
+                                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                                title="View details"
                               >
                                 <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
+                              </button>
+                              <button
                                 onClick={() => handleEditCampaign(campaign)}
-                                className="opacity-70 group-hover:opacity-100 transition-opacity"
+                                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                                title="Edit campaign"
                               >
                                 <Edit className="h-4 w-4" />
-                              </Button>
+                              </button>
                               {campaign.status === "DRAFT" && (
                                 <Button
-                                  variant="default"
                                   size="sm"
                                   onClick={() => handlePublishCampaign(campaign.id)}
-                                  className="bg-green-600 hover:bg-green-700 opacity-70 group-hover:opacity-100 transition-opacity"
+                                  className="ml-1"
                                 >
-                                  <span className="text-xs">Publish</span>
+                                  Publish
                                 </Button>
                               )}
                               {campaign.status === "ACTIVE" && progressPercentage >= 50 && (
                                 <Button
-                                  variant="default"
+                                  variant="outline"
                                   size="sm"
                                   onClick={() => handleCompleteCampaign(campaign.id)}
-                                  className="bg-blue-600 hover:bg-blue-700 opacity-70 group-hover:opacity-100 transition-opacity"
+                                  className="ml-1"
                                 >
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  <span className="text-xs">Complete</span>
+                                  Complete
                                 </Button>
                               )}
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    className="opacity-70 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                                  <button
+                                    className="p-2 text-muted-foreground hover:text-destructive transition-colors"
+                                    title="Delete campaign"
                                   >
                                     <Trash2 className="h-4 w-4" />
-                                  </Button>
+                                  </button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
