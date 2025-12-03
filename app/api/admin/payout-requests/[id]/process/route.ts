@@ -123,6 +123,8 @@ export async function POST(
         })
 
         // Deduct from user's total earnings
+        // Note: We do NOT reset individual clip earnings - they remain as historical record
+        // The user's totalEarnings is the source of truth for payout eligibility
         await tx.user.update({
           where: { id: payoutRequest.userId },
           data: {
@@ -132,36 +134,9 @@ export async function POST(
           }
         })
 
-        // Reset earnings for clips in completed campaigns using Prisma query
-        // First, get the clip IDs from approved submissions in completed campaigns
-        const approvedSubmissions = await tx.clipSubmission.findMany({
-          where: {
-            userId: payoutRequest.userId,
-            status: 'APPROVED',
-            clipId: { not: null },
-            campaigns: {
-              status: 'COMPLETED'
-            }
-          },
-          select: {
-            clipId: true
-          }
-        })
-
-        const clipIds = approvedSubmissions
-          .map(s => s.clipId)
-          .filter((id): id is string => id !== null)
-
-        if (clipIds.length > 0) {
-          await tx.clip.updateMany({
-            where: {
-              id: { in: clipIds }
-            },
-            data: {
-              earnings: 0
-            }
-          })
-        }
+        // Important: We do NOT reset clip.earnings here!
+        // clip.earnings tracks historical earnings per clip for reporting
+        // user.totalEarnings is what gets paid out and decremented
 
         // Map payment method to valid PayoutMethod enum
         const methodMap: Record<string, 'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE' | 'USDC' | 'BITCOIN'> = {
