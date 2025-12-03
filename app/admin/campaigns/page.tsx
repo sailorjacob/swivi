@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Plus, Edit, Trash2, Eye, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle } from "lucide-react"
+import { Plus, Edit, Trash2, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle, ChevronDown, ChevronUp } from "lucide-react"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { supabase } from "@/lib/supabase-auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -74,6 +74,7 @@ export default function AdminCampaignsPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showViewDialog, setShowViewDialog] = useState(false)
+  const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set())
   const [isUpdating, setIsUpdating] = useState(false)
   const [formData, setFormData] = useState({
     title: "",
@@ -886,11 +887,23 @@ export default function AdminCampaignsPage() {
                             {/* Action Buttons */}
                             <div className="flex items-center gap-1 ml-4">
                               <button
-                                onClick={() => handleViewCampaign(campaign)}
+                                onClick={() => {
+                                  const newExpanded = new Set(expandedCampaigns)
+                                  if (newExpanded.has(campaign.id)) {
+                                    newExpanded.delete(campaign.id)
+                                  } else {
+                                    newExpanded.add(campaign.id)
+                                  }
+                                  setExpandedCampaigns(newExpanded)
+                                }}
                                 className="p-2 text-muted-foreground hover:text-foreground transition-colors"
                                 title="View details"
                               >
-                                <Eye className="h-4 w-4" />
+                                {expandedCampaigns.has(campaign.id) ? (
+                                  <ChevronUp className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDown className="h-4 w-4" />
+                                )}
                               </button>
                               <button
                                 onClick={() => handleEditCampaign(campaign)}
@@ -955,13 +968,7 @@ export default function AdminCampaignsPage() {
                             </div>
                             <div className="w-full bg-muted rounded-full h-3">
                               <div
-                                className={`h-3 rounded-full transition-all duration-500 ${
-                                  progressPercentage >= 100 
-                                    ? 'bg-red-500' 
-                                    : progressPercentage >= 80 
-                                    ? 'bg-yellow-500' 
-                                    : 'bg-green-500'
-                                }`}
+                                className="h-3 rounded-full transition-all duration-500 bg-foreground/70"
                                 style={{ width: `${progressPercentage}%` }}
                               />
                             </div>
@@ -1000,6 +1007,53 @@ export default function AdminCampaignsPage() {
                               </Badge>
                             )}
                           </div>
+
+                          {/* Expandable Details */}
+                          {expandedCampaigns.has(campaign.id) && (
+                            <div className="mt-4 pt-4 border-t border-border space-y-4">
+                              {/* Description */}
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Description</p>
+                                <p className="text-sm">{campaign.description}</p>
+                              </div>
+
+                              {/* Requirements */}
+                              {campaign.requirements && campaign.requirements.length > 0 && (
+                                <div>
+                                  <p className="text-xs text-muted-foreground mb-1">Requirements</p>
+                                  <ul className="text-sm list-disc list-inside space-y-0.5">
+                                    {campaign.requirements.map((req, idx) => (
+                                      <li key={idx}>{req}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {/* All Platforms */}
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Target Platforms</p>
+                                <div className="flex gap-1 flex-wrap">
+                                  {campaign.targetPlatforms.map((platform) => (
+                                    <Badge key={platform} variant="outline" className="text-xs">
+                                      {platform}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Payout Rate */}
+                              <div className="flex gap-6 text-sm">
+                                <div>
+                                  <p className="text-xs text-muted-foreground">Payout Rate</p>
+                                  <p className="font-medium">${campaign.payoutRate}/1K views</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-muted-foreground">Created</p>
+                                  <p className="font-medium">{new Date(campaign.createdAt).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </motion.div>
