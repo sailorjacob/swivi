@@ -240,7 +240,13 @@ export default function AdminPayoutsPage() {
                     <CreditCard className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="text-xs text-muted-foreground">Payment Method</div>
-                      <div className="font-medium truncate">{request.paymentMethod}</div>
+                      <div className="font-medium truncate">
+                        {request.paymentMethod === 'PAYPAL' ? 'PayPal' :
+                         request.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' :
+                         request.paymentMethod === 'STRIPE' ? 'USDC (Stripe)' :
+                         request.paymentMethod === 'BITCOIN' ? 'Bitcoin' :
+                         request.paymentMethod}
+                      </div>
                       <div className="text-xs text-muted-foreground truncate">{request.paymentDetails}</div>
                     </div>
                   </div>
@@ -488,7 +494,7 @@ export default function AdminPayoutsPage() {
                             className="h-7 text-xs"
                             onClick={() => copyToClipboard(user.paypalEmail!, 'PayPal email')}
                           >
-                            <Mail className="w-3 h-3 mr-1 text-muted-foreground" />
+                            <span className="font-medium mr-1">PayPal:</span>
                             {user.paypalEmail}
                             <Copy className="w-3 h-3 ml-1" />
                           </Button>
@@ -498,9 +504,9 @@ export default function AdminPayoutsPage() {
                             variant="outline" 
                             size="sm" 
                             className="h-7 text-xs"
-                            onClick={() => copyToClipboard(user.walletAddress!, 'Wallet address')}
+                            onClick={() => copyToClipboard(user.walletAddress!, 'USDC wallet')}
                           >
-                            <Wallet className="w-3 h-3 mr-1 text-muted-foreground" />
+                            <span className="font-medium mr-1">USDC:</span>
                             {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
                             <Copy className="w-3 h-3 ml-1" />
                           </Button>
@@ -512,7 +518,7 @@ export default function AdminPayoutsPage() {
                             className="h-7 text-xs"
                             onClick={() => copyToClipboard(user.bitcoinAddress!, 'Bitcoin address')}
                           >
-                            <Wallet className="w-3 h-3 mr-1 text-muted-foreground" />
+                            <span className="font-medium mr-1">Bitcoin:</span>
                             {user.bitcoinAddress.slice(0, 6)}...{user.bitcoinAddress.slice(-4)}
                             <Copy className="w-3 h-3 ml-1" />
                           </Button>
@@ -703,7 +709,13 @@ export default function AdminPayoutsPage() {
                     <CreditCard className="w-4 h-4 text-muted-foreground" />
                     <label className="text-xs font-medium text-muted-foreground">Payment Method</label>
                   </div>
-                  <div className="text-sm font-semibold">{selectedRequest.paymentMethod}</div>
+                  <div className="text-sm font-semibold">
+                    {selectedRequest.paymentMethod === 'PAYPAL' ? 'PayPal' :
+                     selectedRequest.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' :
+                     selectedRequest.paymentMethod === 'STRIPE' ? 'USDC (Stripe)' :
+                     selectedRequest.paymentMethod === 'BITCOIN' ? 'Bitcoin' :
+                     selectedRequest.paymentMethod}
+                  </div>
                 </div>
                 <div className="border rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">

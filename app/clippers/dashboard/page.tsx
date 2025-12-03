@@ -54,6 +54,7 @@ interface DashboardData {
     id: string
     title: string
     campaign: string
+    campaignImage?: string | null
     status: string
     views: number
     earnings: number
@@ -437,8 +438,15 @@ export default function ClipperDashboard() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
+                  <div className="flex items-start gap-3">
+                    {clip.campaignImage && (
+                      <img 
+                        src={clip.campaignImage} 
+                        alt="" 
+                        className="w-10 h-10 rounded object-cover flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
                       <h4 className="text-foreground font-medium mb-1">{clip.campaign}</h4>
 
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">

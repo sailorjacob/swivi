@@ -56,7 +56,8 @@ export async function GET(request: NextRequest) {
                 select: {
                   title: true,
                   creator: true,
-                  status: true
+                  status: true,
+                  featuredImage: true
                 }
               },
               clips: {
@@ -292,6 +293,7 @@ export async function GET(request: NextRequest) {
         id: submission.id,
         title: clip?.title || submission.clipUrl,
         campaign: submission.campaigns?.title || "Unknown Campaign",
+        campaignImage: submission.campaigns?.featuredImage || null,
         status: submission.status?.toLowerCase() || "unknown",
         createdAt: submission.createdAt ? submission.createdAt.toISOString() : new Date().toISOString(),
         views: currentViews,

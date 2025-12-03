@@ -60,6 +60,8 @@ interface Submission {
     title: string
     creator: string
     payoutRate: number
+    featuredImage?: string | null
+    status?: string
   }
 }
 
@@ -466,23 +468,32 @@ export default function AdminSubmissionsPage() {
                     </div>
                     
                     {/* Campaign title and URL */}
-                    <div className="mb-2">
-                      <p className="font-medium">{submission.campaigns.title}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <ExternalLink className="w-3 h-3 text-muted-foreground" />
-                        <button
-                          onClick={() => window.open(submission.clipUrl, '_blank')}
-                          className="text-sm text-blue-500 hover:text-blue-700 underline hover:underline-offset-2 transition-colors"
-                          title={submission.clipUrl}
-                        >
-                          {submission.clipUrl.length > 60 ? `${submission.clipUrl.substring(0, 60)}...` : submission.clipUrl}
-                        </button>
-                      </div>
-                      {submission.requiresReview && submission.reviewReason && (
-                        <p className="text-sm text-muted-foreground bg-muted p-2 rounded mt-2">
-                          <strong>Review Reason:</strong> {submission.reviewReason}
-                        </p>
+                    <div className="mb-2 flex items-start gap-3">
+                      {submission.campaigns.featuredImage && (
+                        <img 
+                          src={submission.campaigns.featuredImage} 
+                          alt="" 
+                          className="w-10 h-10 rounded object-cover flex-shrink-0"
+                        />
                       )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium">{submission.campaigns.title}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                          <button
+                            onClick={() => window.open(submission.clipUrl, '_blank')}
+                            className="text-sm text-blue-500 hover:text-blue-700 underline hover:underline-offset-2 transition-colors"
+                            title={submission.clipUrl}
+                          >
+                            {submission.clipUrl.length > 60 ? `${submission.clipUrl.substring(0, 60)}...` : submission.clipUrl}
+                          </button>
+                        </div>
+                        {submission.requiresReview && submission.reviewReason && (
+                          <p className="text-sm text-muted-foreground bg-muted p-2 rounded mt-2">
+                            <strong>Review Reason:</strong> {submission.reviewReason}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span>Submitted: {(() => {
