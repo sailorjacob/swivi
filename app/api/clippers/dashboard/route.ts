@@ -216,12 +216,19 @@ export async function GET(request: NextRequest) {
     const approvedSubmissions = userData.clipSubmissions.filter(s => s.status === "APPROVED" || s.status === "PAID").length
     const pendingSubmissions = userData.clipSubmissions.filter(s => s.status === "PENDING").length
 
-    // Calculate REAL-TIME totals from actual clip data (not cached User fields)
-    const totalEarned = userData.clipSubmissions
+    // Use user.totalEarnings as the source of truth for balance
+    // This is the actual balance after payouts have been processed
+    const userTotalEarnings = Number(userData.totalEarnings || 0)
+
+    // Calculate clip-level earnings (may be 0 if reset, but user.totalEarnings is correct)
+    const clipEarningsTotal = userData.clipSubmissions
       .filter(s => s.status === 'APPROVED')
       .reduce((sum, submission) => {
         return sum + Number(submission.clips?.earnings || 0)
       }, 0)
+
+    // Use the higher of user.totalEarnings or clip sum (in case clips were reset)
+    const totalEarned = Math.max(userTotalEarnings, clipEarningsTotal)
 
     const totalViews = userData.clipSubmissions
       .filter(s => s.status === 'APPROVED' && s.clips?.view_tracking?.[0])
@@ -242,12 +249,9 @@ export async function GET(request: NextRequest) {
         return sum + viewsGained
       }, 0)
 
-    // Available balance: Only from COMPLETED campaigns (can request payout)
-    const availableBalance = userData.clipSubmissions
-      .filter(s => s.status === 'APPROVED' && s.campaigns.status === 'COMPLETED')
-      .reduce((sum, submission) => {
-        return sum + Number(submission.clips?.earnings || 0)
-      }, 0)
+    // Available balance: Use user.totalEarnings as the authoritative source
+    // This represents earnings from completed campaigns minus any payouts already processed
+    const availableBalance = userTotalEarnings
 
     // Active campaign earnings: Preview of what will be available when campaigns complete
     const activeCampaignEarnings = userData.clipSubmissions
