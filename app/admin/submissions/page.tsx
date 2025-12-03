@@ -344,10 +344,10 @@ export default function AdminSubmissionsPage() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <AlertCircle className="h-8 w-8 text-orange-500" />
+                <AlertCircle className="h-8 w-8 text-muted-foreground" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">Flagged for Review</p>
-                  <p className="text-2xl font-semibold text-orange-600">{flaggedCount}</p>
+                  <p className="text-2xl font-semibold">{flaggedCount}</p>
                 </div>
               </div>
             </CardContent>
@@ -488,7 +488,7 @@ export default function AdminSubmissionsPage() {
                 <div
                   key={submission.id}
                   className={`flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors ${
-                    submission.requiresReview ? 'border-orange-300 bg-orange-50/30' : ''
+                    submission.requiresReview ? 'border-slate-400 bg-slate-100/30 dark:border-slate-600 dark:bg-slate-800/30' : ''
                   }`}
                 >
                   <div className="flex-1">
@@ -532,7 +532,7 @@ export default function AdminSubmissionsPage() {
                         </button>
                       </div>
                       {submission.requiresReview && submission.reviewReason && (
-                        <p className="text-sm text-orange-600 bg-orange-50 p-2 rounded mt-2">
+                        <p className="text-sm text-muted-foreground bg-muted p-2 rounded mt-2">
                           <strong>Review Reason:</strong> {submission.reviewReason}
                         </p>
                       )}
@@ -562,12 +562,12 @@ export default function AdminSubmissionsPage() {
                       {submission.currentViews && Number(submission.currentViews) > 0 && (
                         <span>Views: {Number(submission.currentViews).toLocaleString()}
                           {submission.viewChange && Number(submission.viewChange) > 0 && (
-                            <span className="text-green-600 ml-1">(+{Number(submission.viewChange).toLocaleString()})</span>
+                            <span className="ml-1">(+{Number(submission.viewChange).toLocaleString()})</span>
                           )}
                         </span>
                       )}
                       {submission.campaigns.status === 'COMPLETED' && submission.finalEarnings ? (
-                        <span className="text-green-600 font-bold flex items-center gap-1">
+                        <span className="font-bold flex items-center gap-1">
                           Final Earnings: ${Number(submission.finalEarnings).toFixed(2)} 🔒
                         </span>
                       ) : submission.clips?.earnings && Number(submission.clips.earnings) > 0 ? (

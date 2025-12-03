@@ -816,7 +816,6 @@ export default function AdminCampaignsPage() {
             variant={statusFilter === 'ACTIVE' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setStatusFilter('ACTIVE')}
-            className={statusFilter === 'ACTIVE' ? 'bg-green-600 hover:bg-green-700' : ''}
           >
             Active ({activeCampaignsCount})
           </Button>
@@ -824,7 +823,6 @@ export default function AdminCampaignsPage() {
             variant={statusFilter === 'COMPLETED' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setStatusFilter('COMPLETED')}
-            className={statusFilter === 'COMPLETED' ? 'bg-blue-600 hover:bg-blue-700' : ''}
           >
             <CheckCircle className="w-4 h-4 mr-1" />
             Completed ({completedCampaignsCount})
@@ -833,7 +831,6 @@ export default function AdminCampaignsPage() {
             variant={statusFilter === 'DRAFT' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setStatusFilter('DRAFT')}
-            className={statusFilter === 'DRAFT' ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
           >
             Draft ({draftCampaignsCount})
           </Button>
@@ -1511,7 +1508,7 @@ function CampaignView({
         </Card>
         <Card className="p-4">
           <p className="text-xs text-muted-foreground">Total Earnings</p>
-          <p className="text-xl font-bold text-green-500">${stats.totalEarnings?.toFixed(2) || '0.00'}</p>
+          <p className="text-xl font-bold">${stats.totalEarnings?.toFixed(2) || '0.00'}</p>
         </Card>
         <Card className="p-4">
           <p className="text-xs text-muted-foreground">Total Views</p>
@@ -1521,20 +1518,20 @@ function CampaignView({
 
       {/* Submission Stats */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="text-center p-3 bg-muted rounded-lg">
+        <div className="text-center p-3 bg-muted rounded-lg border">
           <p className="text-2xl font-bold">{stats.totalSubmissions || 0}</p>
           <p className="text-xs text-muted-foreground">Total Submissions</p>
         </div>
-        <div className="text-center p-3 bg-green-500/10 rounded-lg">
-          <p className="text-2xl font-bold text-green-500">{stats.approvedCount || 0}</p>
+        <div className="text-center p-3 bg-muted rounded-lg border">
+          <p className="text-2xl font-bold">{stats.approvedCount || 0}</p>
           <p className="text-xs text-muted-foreground">Approved</p>
         </div>
-        <div className="text-center p-3 bg-yellow-500/10 rounded-lg">
-          <p className="text-2xl font-bold text-yellow-500">{stats.pendingCount || 0}</p>
+        <div className="text-center p-3 bg-muted rounded-lg border">
+          <p className="text-2xl font-bold">{stats.pendingCount || 0}</p>
           <p className="text-xs text-muted-foreground">Pending</p>
         </div>
-        <div className="text-center p-3 bg-red-500/10 rounded-lg">
-          <p className="text-2xl font-bold text-red-500">{stats.rejectedCount || 0}</p>
+        <div className="text-center p-3 bg-muted rounded-lg border">
+          <p className="text-2xl font-bold">{stats.rejectedCount || 0}</p>
           <p className="text-xs text-muted-foreground">Rejected</p>
         </div>
       </div>
@@ -1543,12 +1540,7 @@ function CampaignView({
       <div className="grid grid-cols-2 gap-6">
         <div>
           <Label className="text-sm font-medium text-muted-foreground">Status</Label>
-          <Badge className={`mt-1 ${
-            campaign.status === "ACTIVE" ? "bg-green-600" :
-            campaign.status === "COMPLETED" ? "bg-blue-600" :
-            campaign.status === "DRAFT" ? "bg-yellow-600" :
-            "bg-gray-600"
-          } text-white`}>
+          <Badge variant="outline" className="mt-1">
             {campaign.status}
           </Badge>
           {campaign.completedAt && (
@@ -1567,10 +1559,7 @@ function CampaignView({
           <div className="mt-2">
             <div className="w-full bg-muted rounded-full h-3">
               <div
-                className={`h-3 rounded-full ${
-                  (stats.budgetUtilization || 0) >= 100 ? 'bg-red-500' :
-                  (stats.budgetUtilization || 0) >= 80 ? 'bg-yellow-500' : 'bg-green-500'
-                }`}
+                className="h-3 rounded-full bg-foreground/70"
                 style={{ width: `${Math.min(stats.budgetUtilization || 0, 100)}%` }}
               />
             </div>
@@ -1599,33 +1588,25 @@ function CampaignView({
           </Label>
           <div className="space-y-2 max-h-80 overflow-y-auto">
             {displayedSubmissions.map((sub: any) => (
-              <div key={sub.id} className={`p-3 rounded-lg border ${
-                sub.status === 'APPROVED' ? 'bg-green-500/5 border-green-500/20' :
-                sub.status === 'PENDING' ? 'bg-yellow-500/5 border-yellow-500/20' :
-                'bg-red-500/5 border-red-500/20'
-              }`}>
+              <div key={sub.id} className="p-3 rounded-lg border bg-muted/30">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <Badge variant="outline" className="text-xs">
                         {sub.platform}
                       </Badge>
-                      <Badge className={`text-xs ${
-                        sub.status === 'APPROVED' ? 'bg-green-600' :
-                        sub.status === 'PENDING' ? 'bg-yellow-600' :
-                        'bg-red-600'
-                      }`}>
+                      <Badge variant="outline" className="text-xs">
                         {sub.status}
                       </Badge>
                     </div>
                     <p className="font-medium text-sm">{sub.user?.name || sub.user?.email || 'Unknown'}</p>
                     <p className="text-xs text-muted-foreground truncate">{sub.clipUrl}</p>
                     {sub.user?.paypalEmail && (
-                      <p className="text-xs text-blue-500 mt-1">PayPal: {sub.user.paypalEmail}</p>
+                      <p className="text-xs text-muted-foreground mt-1">PayPal: {sub.user.paypalEmail}</p>
                     )}
                   </div>
                   <div className="text-right ml-4">
-                    <p className="font-bold text-green-500">${sub.earnings?.toFixed(2) || '0.00'}</p>
+                    <p className="font-bold">${sub.earnings?.toFixed(2) || '0.00'}</p>
                     <p className="text-xs text-muted-foreground">{sub.currentViews?.toLocaleString() || 0} views</p>
                     <p className="text-xs text-muted-foreground">+{sub.viewsGained?.toLocaleString() || 0} gained</p>
                   </div>

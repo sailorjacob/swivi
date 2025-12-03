@@ -168,7 +168,7 @@ export default function PayoutsPage() {
         method: "POST",
         body: JSON.stringify({
           amount,
-          paymentMethod,
+          paymentMethod: payoutMethod,
           paymentDetails
         })
       })
@@ -457,13 +457,7 @@ export default function PayoutsPage() {
             ) : payoutHistory.length > 0 ? (
               <div className="space-y-4">
                 {payoutHistory.map((payout) => (
-                  <div key={payout.id} className={`p-4 rounded-lg border ${
-                    payout.status === 'COMPLETED' ? 'bg-green-500/10 border-green-500/20' :
-                    payout.status === 'PENDING' ? 'bg-yellow-500/10 border-yellow-500/20' :
-                    payout.status === 'APPROVED' || payout.status === 'PROCESSING' ? 'bg-blue-500/10 border-blue-500/20' :
-                    payout.status === 'REJECTED' ? 'bg-red-500/10 border-red-500/20' :
-                    'bg-muted/50 border-border'
-                  }`}>
+                  <div key={payout.id} className="p-4 rounded-lg border bg-muted/30 border-border">
                     <div className="flex items-center justify-between mb-3">
                       <div className="font-bold text-white text-lg">
                         ${(typeof payout.amount === 'number' ? payout.amount : parseFloat(payout.amount || 0)).toFixed(2)}

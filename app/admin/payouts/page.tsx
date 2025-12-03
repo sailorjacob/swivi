@@ -392,13 +392,13 @@ export default function AdminPayoutsPage() {
 
       {/* Summary Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4 mb-8">
-        <Card className="border-2 border-green-500/20 bg-green-500/5">
+        <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total User Balances</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-500" />
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">
+            <div className="text-2xl font-bold">
               ${summary?.totalUserBalances?.toFixed(2) || '0.00'}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -410,7 +410,7 @@ export default function AdminPayoutsPage() {
         <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-500" />
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary?.pendingRequestsCount || 0}</div>
@@ -423,7 +423,7 @@ export default function AdminPayoutsPage() {
         <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Users with Balance</CardTitle>
-            <Users className="h-4 w-4 text-blue-500" />
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary?.usersWithBalancesCount || 0}</div>
@@ -436,7 +436,7 @@ export default function AdminPayoutsPage() {
         <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Completed Campaigns</CardTitle>
-            <Target className="h-4 w-4 text-purple-500" />
+            <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary?.completedCampaignsCount || 0}</div>
@@ -464,14 +464,14 @@ export default function AdminPayoutsPage() {
               {usersWithBalances.slice(0, 10).map((user) => (
                 <div 
                   key={user.id} 
-                  className={`p-4 rounded-lg border ${user.hasPendingRequest ? 'bg-yellow-500/5 border-yellow-500/20' : 'bg-muted/30'}`}
+                  className="p-4 rounded-lg border bg-muted/30"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-medium">{user.name || user.email || 'Unknown'}</span>
                         {user.hasPendingRequest && (
-                          <Badge variant="outline" className="text-yellow-500 border-yellow-500/50 text-xs">
+                          <Badge variant="outline" className="text-xs">
                             <Clock className="w-3 h-3 mr-1" />
                             Request Pending
                           </Badge>
@@ -488,7 +488,7 @@ export default function AdminPayoutsPage() {
                             className="h-7 text-xs"
                             onClick={() => copyToClipboard(user.paypalEmail!, 'PayPal email')}
                           >
-                            <Mail className="w-3 h-3 mr-1 text-blue-500" />
+                            <Mail className="w-3 h-3 mr-1 text-muted-foreground" />
                             {user.paypalEmail}
                             <Copy className="w-3 h-3 ml-1" />
                           </Button>
@@ -500,7 +500,7 @@ export default function AdminPayoutsPage() {
                             className="h-7 text-xs"
                             onClick={() => copyToClipboard(user.walletAddress!, 'Wallet address')}
                           >
-                            <Wallet className="w-3 h-3 mr-1 text-purple-500" />
+                            <Wallet className="w-3 h-3 mr-1 text-muted-foreground" />
                             {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
                             <Copy className="w-3 h-3 ml-1" />
                           </Button>
@@ -512,13 +512,13 @@ export default function AdminPayoutsPage() {
                             className="h-7 text-xs"
                             onClick={() => copyToClipboard(user.bitcoinAddress!, 'Bitcoin address')}
                           >
-                            <Wallet className="w-3 h-3 mr-1 text-orange-500" />
+                            <Wallet className="w-3 h-3 mr-1 text-muted-foreground" />
                             {user.bitcoinAddress.slice(0, 6)}...{user.bitcoinAddress.slice(-4)}
                             <Copy className="w-3 h-3 ml-1" />
                           </Button>
                         )}
                         {!user.paypalEmail && !user.walletAddress && !user.bitcoinAddress && (
-                          <Badge variant="outline" className="text-red-500 border-red-500/50 text-xs">
+                          <Badge variant="outline" className="text-muted-foreground text-xs">
                             <AlertCircle className="w-3 h-3 mr-1" />
                             No payment method set
                           </Badge>
@@ -527,7 +527,7 @@ export default function AdminPayoutsPage() {
                     </div>
                     
                     <div className="text-right">
-                      <div className="text-xl font-bold text-green-500">
+                      <div className="text-xl font-bold">
                         ${user.totalEarnings.toFixed(2)}
                       </div>
                       <p className="text-xs text-muted-foreground">
