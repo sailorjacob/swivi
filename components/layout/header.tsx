@@ -68,20 +68,15 @@ export function Header() {
               
               {/* Dropdown Menu */}
               {item.dropdown && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-background/95 backdrop-blur-xl border border-border/50 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                  <div className="py-3">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="flex flex-col items-center gap-1">
                     {item.dropdown.map((dropdownItem) => (
                       <Link
                         key={dropdownItem.name}
                         href={dropdownItem.href}
-                        className="block px-5 py-4 hover:bg-muted/50 transition-all duration-200 rounded-md mx-2 my-1"
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
                       >
-                        <div className="font-light text-sm text-foreground">
-                          {dropdownItem.name}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {dropdownItem.description}
-                        </div>
+                        {dropdownItem.name}
                       </Link>
                     ))}
                   </div>
