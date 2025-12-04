@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
               initialViews: true,
               campaigns: {
                 select: {
+                  id: true,
                   title: true,
                   creator: true,
                   status: true,

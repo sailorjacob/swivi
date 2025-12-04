@@ -439,8 +439,11 @@ export default function ClipperDashboard() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    {/* Campaign Image */}
-                    <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
+                    {/* Campaign Image - Clickable */}
+                    <Link 
+                      href={clip.campaignId ? `/clippers/dashboard/campaigns/${clip.campaignId}` : '#'}
+                      className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-muted hover:opacity-80 transition-opacity"
+                    >
                       {clip.campaignImage ? (
                         <img 
                           src={clip.campaignImage} 
@@ -448,22 +451,25 @@ export default function ClipperDashboard() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs font-medium">
                           {clip.campaign?.charAt(0) || '?'}
                         </div>
                       )}
-                    </div>
+                    </Link>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="text-foreground font-medium">{clip.campaign}</h4>
-                        {clip.campaignId && (
-                          <Link 
-                            href={`/clippers/dashboard/campaigns/${clip.campaignId}`}
-                            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            View →
-                          </Link>
-                        )}
+                        <Link 
+                          href={clip.campaignId ? `/clippers/dashboard/campaigns/${clip.campaignId}` : '#'}
+                          className="text-foreground font-medium hover:underline"
+                        >
+                          {clip.campaign}
+                        </Link>
+                        <Link 
+                          href={clip.campaignId ? `/clippers/dashboard/campaigns/${clip.campaignId}` : '#'}
+                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          View →
+                        </Link>
                       </div>
 
                       <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mb-2">
