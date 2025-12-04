@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "@/lib/supabase-auth-provider"
+import { useSession, useAuth } from "@/lib/supabase-auth-provider"
 import { useRouter, usePathname } from "next/navigation"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import Link from "next/link"
@@ -13,6 +13,7 @@ import {
   Users,
   Settings,
   HelpCircle,
+  LogOut,
   Menu,
   X,
   Trophy,
@@ -75,6 +76,8 @@ interface DatabaseUser {
 
 function Sidebar({ className }: { className?: string }) {
   const { data: session } = useSession()
+  const { logout } = useAuth()
+  const router = useRouter()
   const pathname = usePathname()
   const [dbUser, setDbUser] = useState<DatabaseUser | null>(null)
   
@@ -93,6 +96,15 @@ function Sidebar({ className }: { className?: string }) {
   } : null
 
   const activeSession = session || mockSession
+
+  const handleSignOut = async () => {
+    if (isDemoMode) {
+      router.push("/")
+      return
+    }
+    await logout()
+    router.push("/")
+  }
 
   // Fetch database user profile for accurate navigation display
   const fetchDbUser = async () => {
@@ -194,7 +206,7 @@ function Sidebar({ className }: { className?: string }) {
       <div className="p-4 border-t border-border">
         <Link 
           href="/clippers/dashboard/profile" 
-          className="flex items-center space-x-3 rounded-lg p-2 -m-2 hover:bg-muted transition-colors cursor-pointer"
+          className="flex items-center space-x-3 rounded-lg p-2 -m-2 mb-3 hover:bg-muted transition-colors cursor-pointer"
         >
           <Avatar className="w-8 h-8">
             <AvatarImage src={dbUser?.image || activeSession?.user?.image || ""} />
@@ -214,6 +226,14 @@ function Sidebar({ className }: { className?: string }) {
           </div>
           {/* <NotificationBell /> */}
         </Link>
+
+        <button
+          onClick={handleSignOut}
+          className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
+        >
+          <LogOut className="w-3 h-3" />
+          Sign Out
+        </button>
       </div>
     </div>
   )

@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useTheme } from "next-themes"
 import { Menu, X, ChevronDown } from "lucide-react"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 const navigation = [
   {
@@ -28,9 +27,6 @@ export function Header() {
   const { resolvedTheme } = useTheme()
   const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
-
-  // Hide theme toggle on case-studies page
-  const showThemeToggle = pathname !== '/case-studies'
 
   useEffect(() => {
     setMounted(true)
@@ -58,7 +54,6 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex md:items-center md:space-x-8">
-          {showThemeToggle && <ThemeToggle />}
           {navigation.map((item) => (
             <div key={item.name} className="relative group">
               <Link
@@ -131,7 +126,6 @@ export function Header() {
 
         {/* Mobile controls */}
         <div className="md:hidden flex items-center space-x-3">
-          {showThemeToggle && <ThemeToggle />}
           <button
             type="button"
             className="inline-flex items-center justify-center rounded-full p-2"

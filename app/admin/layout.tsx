@@ -175,12 +175,14 @@ function AdminNav({ className }: { className?: string }) {
           <Avatar className="w-8 h-8">
             <AvatarImage src={activeSession?.user?.image || ""} />
             <AvatarFallback className="bg-foreground text-primary-foreground">
-              {activeSession?.user?.name?.[0] || "A"}
+              {activeSession?.user?.name?.[0] || 
+               activeSession?.user?.email?.[0]?.toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-foreground text-sm font-medium truncate">
-              {activeSession?.user?.name || "Admin"}
+              {activeSession?.user?.name || 
+               activeSession?.user?.email?.split('@')[0] || "User"}
             </p>
             <p className="text-muted-foreground text-xs truncate">
               {activeSession?.user?.email || ""}
