@@ -31,6 +31,7 @@ import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { FloatingBranding } from "@/components/ui/floating-branding"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 // import { NotificationBell } from "@/components/notifications/notification-bell"
 import { ErrorBoundary, DashboardErrorFallback } from "@/components/error-boundary"
 
@@ -228,15 +229,18 @@ function Sidebar({ className }: { className?: string }) {
           {/* <NotificationBell /> */}
         </Link>
 
-        <Button
-          onClick={handleSignOut}
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Sign Out
-        </Button>
+        <div className="flex items-center justify-between gap-2">
+          <Button
+            onClick={handleSignOut}
+            variant="ghost"
+            size="sm"
+            className="flex-1 justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
+          </Button>
+          <ThemeToggle />
+        </div>
       </div>
     </div>
   )

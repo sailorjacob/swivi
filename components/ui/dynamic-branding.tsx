@@ -113,6 +113,10 @@ const pageBranding: Record<string, BrandingConfig[]> = {
 }
 
 export function DynamicBranding() {
+  // Temporarily hidden - floating branding image assets disabled
+  return null
+
+  /* Original implementation - uncomment to restore
   const pathname = usePathname()
 
   // Skip branding on clipper platform pages and admin pages to avoid overlap with navigation
@@ -167,4 +171,5 @@ export function DynamicBranding() {
       ))}
     </>
   )
+  */
 }
