@@ -130,28 +130,21 @@ export default function AdminSupportPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'OPEN':
-        return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/30">Open</Badge>
+        return <Badge variant="outline" className="text-xs">Open</Badge>
       case 'IN_PROGRESS':
-        return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/30">In Progress</Badge>
+        return <Badge variant="outline" className="text-xs">In Progress</Badge>
       case 'RESOLVED':
-        return <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/30">Resolved</Badge>
+        return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">Resolved</Badge>
       case 'CLOSED':
-        return <Badge variant="outline" className="bg-muted text-muted-foreground border-border">Closed</Badge>
+        return <Badge variant="outline" className="text-xs text-muted-foreground">Closed</Badge>
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline" className="text-xs">{status}</Badge>
     }
   }
 
   const getCategoryBadge = (category: string) => {
-    const colors: Record<string, string> = {
-      VERIFICATION: 'bg-purple-500/10 text-purple-500 border-purple-500/30',
-      PAYOUTS: 'bg-green-500/10 text-green-500 border-green-500/30',
-      CAMPAIGN: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
-      BONUS: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30',
-      OTHER: 'bg-muted text-muted-foreground border-border'
-    }
     return (
-      <Badge variant="outline" className={colors[category] || colors.OTHER}>
+      <Badge variant="outline" className="text-xs bg-muted/50">
         {category.charAt(0) + category.slice(1).toLowerCase()}
       </Badge>
     )
@@ -218,7 +211,7 @@ export default function AdminSupportPage() {
             <Card 
               key={ticket.id} 
               className={`bg-card border-border cursor-pointer hover:border-foreground/20 transition-colors ${
-                ticket.status === 'OPEN' ? 'border-l-4 border-l-blue-500' : ''
+                ticket.status === 'OPEN' ? 'border-l-2 border-l-foreground' : ''
               }`}
               onClick={() => {
                 setSelectedTicket(ticket)
@@ -322,8 +315,8 @@ export default function AdminSupportPage() {
 
                 {/* Previous Response */}
                 {selectedTicket.adminResponse && (
-                  <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                    <h4 className="text-sm font-medium text-green-600 mb-2 flex items-center gap-2">
+                  <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                    <h4 className="text-sm font-medium text-primary mb-2 flex items-center gap-2">
                       <CheckCircle className="w-4 h-4" />
                       Previous Response
                     </h4>

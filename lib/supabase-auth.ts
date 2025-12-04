@@ -160,9 +160,12 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
     url
   })
   
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
+  // Don't set Content-Type for FormData - browser will set it with boundary
+  const isFormData = options.body instanceof FormData
+  
+  const headers: Record<string, string> = {
+    ...(!isFormData && { 'Content-Type': 'application/json' }),
+    ...(options.headers as Record<string, string>),
   }
 
   // Add Authorization header if we have a session

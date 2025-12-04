@@ -166,8 +166,8 @@ export function SupportTicketDialog({ children }: SupportTicketDialogProps) {
 
         {success ? (
           <div className="py-8 text-center">
-            <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-6 h-6 text-green-500" />
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-6 h-6 text-primary" />
             </div>
             <h3 className="text-lg font-medium text-foreground mb-2">Ticket Submitted!</h3>
             <p className="text-sm text-muted-foreground">
