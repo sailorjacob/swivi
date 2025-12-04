@@ -96,7 +96,7 @@ export function Header() {
           {/* Platform Access Button */}
           {session ? (
             <Link
-              href={session.user?.role === "ADMIN" ? "/admin" : "/clippers/dashboard"}
+              href={session.user?.role === "ADMIN" ? "/admin" : "/clippers/dashboard/campaigns"}
               className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
             >
               Dashboard
@@ -178,7 +178,7 @@ export function Header() {
             {/* Mobile Platform Access Buttons */}
             {session ? (
               <Link
-                href={session.user?.role === "ADMIN" ? "/admin" : "/clippers/dashboard"}
+                href={session.user?.role === "ADMIN" ? "/admin" : "/clippers/dashboard/campaigns"}
                 className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
                 onClick={() => setMobileMenuOpen(false)}
               >

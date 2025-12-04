@@ -684,7 +684,7 @@ export default function ClipperDashboard() {
                 Start earning by submitting clips to active campaigns
               </p>
               <Link href="/clippers/dashboard/campaigns">
-                <Button>
+                <Button variant="outline" className="rounded-full px-6 border-foreground text-foreground hover:bg-foreground hover:text-background transition-all duration-300">
                   Submit Your First Clip
                 </Button>
               </Link>

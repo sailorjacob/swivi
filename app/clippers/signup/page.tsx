@@ -28,8 +28,8 @@ export default function SignupPage() {
     if (status === "loading") return
 
     if (session) {
-      console.log("🔄 User already authenticated, redirecting to dashboard")
-      router.push("/clippers/dashboard")
+      console.log("🔄 User already authenticated, redirecting to campaigns")
+      router.push("/clippers/dashboard/campaigns")
     }
   }, [session, status, router])
 

@@ -10,6 +10,7 @@ import { Button } from "../../../../components/ui/button"
 import { Progress } from "../../../../components/ui/progress"
 import { CampaignBonusModal } from "../../../../components/campaigns/campaign-bonus-modal"
 import { ErrorBoundary, CampaignErrorFallback } from "../../../../components/error-boundary"
+import { AccountSetupPrompt } from "../../../../components/clippers/account-setup-prompt"
 import Image from "next/image"
 import Link from "next/link"
 import { 
@@ -222,6 +223,8 @@ export default function CampaignsPage() {
     <ErrorBoundary fallback={CampaignErrorFallback}>
       <div className="space-y-6">
 
+      {/* Account Setup Prompt - shown for new users without verified accounts */}
+      <AccountSetupPrompt />
 
       {/* Filter Tabs */}
       <div className="flex gap-6 border-b border-border">
