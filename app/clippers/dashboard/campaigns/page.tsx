@@ -94,7 +94,7 @@ function ScheduledBadge({ startDate }: { startDate?: string }) {
   
   return (
     <div className="absolute top-3 left-3 z-10">
-      <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs px-2 py-1 font-medium flex items-center gap-1.5">
+      <Badge className="bg-muted/80 text-muted-foreground border-border text-xs px-2 py-1 font-medium flex items-center gap-1.5">
         <Calendar className="w-3 h-3" />
         {countdown || 'UPCOMING'}
       </Badge>
@@ -168,12 +168,22 @@ export default function CampaignsPage() {
   }
 
   // Filter campaigns based on selected filter
+  // Active tab now includes both ACTIVE and SCHEDULED (upcoming shown as darkened previews)
   const filteredCampaigns = campaigns.filter(campaign => {
-    if (filter === 'active') return campaign.status === 'ACTIVE'
+    if (filter === 'active') return campaign.status === 'ACTIVE' || campaign.status === 'SCHEDULED'
     if (filter === 'upcoming') return campaign.status === 'SCHEDULED'
     if (filter === 'completed') return campaign.status === 'COMPLETED'
     return true // 'all' shows everything
   })
+  
+  // Sort so ACTIVE campaigns appear first, SCHEDULED at the bottom
+  const sortedFilteredCampaigns = filter === 'active' 
+    ? [...filteredCampaigns].sort((a, b) => {
+        if (a.status === 'ACTIVE' && b.status === 'SCHEDULED') return -1
+        if (a.status === 'SCHEDULED' && b.status === 'ACTIVE') return 1
+        return 0
+      })
+    : filteredCampaigns
 
   // Count campaigns by status
   const activeCampaignsCount = campaigns.filter(c => c.status === 'ACTIVE').length
@@ -253,7 +263,7 @@ export default function CampaignsPage() {
       </div>
 
       {/* Empty State */}
-      {filteredCampaigns.length === 0 ? (
+      {sortedFilteredCampaigns.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-muted-foreground">
             {filter === 'active' ? 'No active campaigns right now. Check back soon.' :
@@ -265,7 +275,7 @@ export default function CampaignsPage() {
       ) : (
         /* Campaigns Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredCampaigns.map((campaign) => {
+          {sortedFilteredCampaigns.map((campaign) => {
           // Calculate progress percentage
           const progress = getProgressPercentage(campaign.spent, campaign.budget)
           const isActive = campaign.status === "ACTIVE"
@@ -284,7 +294,7 @@ export default function CampaignsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Card className={`bg-card border-border hover:shadow-lg transition-all duration-300 cursor-pointer group ${isCompleted ? 'opacity-75 border-green-500/30' : ''}`}>
+            <Card className={`bg-card border-border hover:shadow-lg transition-all duration-300 cursor-pointer group ${isCompleted ? 'opacity-75 border-green-500/30' : ''} ${isScheduled && filter === 'active' ? 'opacity-60' : ''}`}>
               <CardContent className="p-0">
                 {/* Campaign Image */}
                 <div 
@@ -309,7 +319,7 @@ export default function CampaignsPage() {
                   )}
                   {isLaunching && (
                     <div className="absolute top-3 left-3 z-10">
-                      <Badge className="bg-amber-500/20 text-amber-200 border-amber-500/30 text-xs px-2 py-1 font-medium">
+                      <Badge className="bg-muted/80 text-muted-foreground border-border text-xs px-2 py-1 font-medium">
                         LAUNCHING SOON
                       </Badge>
                     </div>

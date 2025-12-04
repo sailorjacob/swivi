@@ -9,7 +9,7 @@ A comprehensive platform connecting content creators (clippers) with brands for 
 - 💰 **Earnings Dashboard** - Track your performance and payments
 - 📊 **Analytics** - Detailed insights on views, engagement, and earnings
 - 🔗 **Social Integration** - Connect multiple platform accounts
-- 💸 **Instant Payouts** - PayPal and bank transfer support
+- 💸 **Flexible Payouts** - PayPal and bank transfer support
 - 📱 **Clip Submission** - Easy submission with drag-and-drop uploads
 
 ### For Creators & Brands

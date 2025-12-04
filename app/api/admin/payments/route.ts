@@ -119,62 +119,17 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// DEPRECATED: This endpoint has been disabled to prevent double-payment issues.
+// Use the payout request system instead:
+// 1. Clippers request payouts via /api/clippers/payout-request
+// 2. Admins process them via /api/admin/payout-requests/[id]/process
 export async function POST(request: NextRequest) {
-  try {
-    const { user, error } = await getServerUserWithRole(request)
-
-    if (!user?.id || error) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  return NextResponse.json({ 
+    error: "This endpoint is deprecated. Use the payout request system instead.",
+    newFlow: {
+      step1: "Clippers request payout at /api/clippers/payout-request",
+      step2: "Admins process requests at /api/admin/payout-requests",
+      step3: "Complete payout at /api/admin/payout-requests/[id]/process"
     }
-
-    // Check if user is admin
-    const userData = await prisma.user.findUnique({
-      where: { supabaseAuthId: user.id }
-    })
-
-    if (!userData || userData.role !== "ADMIN") {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
-    }
-
-    const body = await request.json()
-    const { userIds, paymentMethod, notes } = body
-
-    if (!notes) {
-      return NextResponse.json({ error: "notes parameter is required for payment processing" }, { status: 400 })
-    }
-
-    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
-      return NextResponse.json({ error: "userIds array is required" }, { status: 400 })
-    }
-
-    if (!paymentMethod || !['wallet', 'paypal', 'bank'].includes(paymentMethod)) {
-      return NextResponse.json({ error: "Valid paymentMethod is required" }, { status: 400 })
-    }
-
-    // Mark payments as processed with proper tracking
-    const result = await EnhancedPaymentCalculator.markPaymentsAsPaid(userIds, paymentMethod as 'wallet' | 'paypal' | 'bank', notes)
-
-    if (result.success) {
-      // In a real implementation, you would:
-      // 1. Create payout records in the database
-      // 2. Send notifications to users
-      // 3. Integrate with payment processors (Stripe, crypto APIs, etc.)
-
-      return NextResponse.json({
-        success: true,
-        message: `Successfully marked ${result.paidCount} payments as processed`,
-        paidCount: result.paidCount,
-        paymentMethod,
-        notes
-      })
-    } else {
-      return NextResponse.json({
-        error: result.error || "Failed to process payments"
-      }, { status: 500 })
-    }
-
-  } catch (error) {
-    console.error("Error processing payments:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-  }
+  }, { status: 410 }) // 410 Gone
 }

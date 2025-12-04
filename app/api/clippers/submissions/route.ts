@@ -153,6 +153,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Campaign not found or inactive" }, { status: 404 })
     }
 
+    // Check if campaign budget is exhausted
+    if (campaign.spent >= campaign.budget) {
+      return NextResponse.json({ 
+        error: "Campaign budget exhausted", 
+        details: "This campaign has reached its budget limit and is no longer accepting submissions."
+      }, { status: 400 })
+    }
+
     // Parse the submitted URL to ensure it's valid and get platform info
     const parsedUrl = SocialUrlParser.parseUrl(validatedData.clipUrl)
 

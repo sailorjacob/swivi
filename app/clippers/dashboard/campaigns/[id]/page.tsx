@@ -256,9 +256,10 @@ export default function CampaignDetailPage() {
     )
   }
 
-  const isActive = campaign.status === "ACTIVE"
+  const isBudgetExhausted = campaign.spent >= campaign.budget
+  const isActive = campaign.status === "ACTIVE" && !isBudgetExhausted
   const isScheduled = campaign.status === "SCHEDULED"
-  const isCompleted = campaign.status === "COMPLETED"
+  const isCompleted = campaign.status === "COMPLETED" || isBudgetExhausted
   const progress = campaign.budget > 0 ? (campaign.spent / campaign.budget) * 100 : 0
   const remainingBudget = campaign.budget - campaign.spent
 
@@ -293,7 +294,7 @@ export default function CampaignDetailPage() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 {isScheduled && (
-                  <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30">
+                  <Badge className="bg-muted text-muted-foreground border-border">
                     <Clock className="w-3 h-3 mr-1.5" />
                     UPCOMING
                   </Badge>
@@ -414,18 +415,18 @@ export default function CampaignDetailPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <Card className="border-amber-500/30 bg-amber-500/5">
+              <Card className="border-muted bg-muted/30">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-                      <Clock className="w-6 h-6 text-amber-400" />
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                      <Clock className="w-6 h-6 text-muted-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-foreground">Campaign Coming Soon</h3>
+                      <h3 className="font-medium text-foreground">Upcoming Campaign</h3>
                       <p className="text-sm text-muted-foreground">
                         This campaign hasn't started yet. Check back when it goes live to submit your clips.
                         {campaign.startDate && (
-                          <span className="block mt-1 text-amber-400">
+                          <span className="block mt-1 text-foreground/70">
                             Launches: {new Date(campaign.startDate).toLocaleDateString('en-US', { 
                               month: 'long', 
                               day: 'numeric', 
@@ -435,6 +436,32 @@ export default function CampaignDetailPage() {
                             })}
                           </span>
                         )}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Budget Exhausted Notice */}
+          {isBudgetExhausted && campaign.status !== "COMPLETED" && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="border-muted bg-muted/30">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                      <CheckCircle className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground">Campaign Budget Reached</h3>
+                      <p className="text-sm text-muted-foreground">
+                        This campaign has reached its budget limit and is no longer accepting new submissions.
+                        Your existing submissions will continue to be tracked.
                       </p>
                     </div>
                   </div>

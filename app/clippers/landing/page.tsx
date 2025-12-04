@@ -57,7 +57,7 @@ export default function ClippersLanding() {
       name: "Mike Rodriguez", 
       username: "@mikethemaker",
       earnings: "$2,890",
-      quote: "Super easy to join campaigns and the payouts are instant. Love this platform!",
+      quote: "Super easy to join campaigns and the payouts are reliable. Love this platform!",
       platform: "Instagram"
     },
     {

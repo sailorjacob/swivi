@@ -337,121 +337,25 @@ export class EnhancedPaymentCalculator {
     }
   }
 
-  static async markPaymentsAsPaid(userIds: string[], paymentMethod: 'wallet' | 'paypal' | 'bank', notes?: string): Promise<{
+  /**
+   * @deprecated DO NOT USE - This function resets clip.earnings which breaks the view tracking system.
+   * Use the payout request flow instead:
+   * 1. Clippers request payouts via /api/clippers/payout-request
+   * 2. Admins process via /api/admin/payout-requests/[id]/process
+   * 
+   * The proper flow decrements user.totalEarnings without touching clip.earnings,
+   * preventing double-payment issues when view tracking recalculates.
+   */
+  static async markPaymentsAsPaid(_userIds: string[], _paymentMethod: 'wallet' | 'paypal' | 'bank', _notes?: string): Promise<{
     success: boolean
     paidCount: number
     error?: string
-    payouts?: Array<{
-      id: string
-      userId: string
-      amount: number
-      method: string
-      status: string
-    }>
   }> {
-    try {
-      const payouts = []
-
-      // Process each user payment
-      for (const userId of userIds) {
-        // Get user's pending earnings from all clips
-        const userClips = await prisma.clip.findMany({
-          where: {
-            userId,
-            earnings: { gt: 0 },
-            clipSubmissions: {
-              some: {
-                status: "APPROVED"
-              }
-            }
-          },
-          select: {
-            id: true,
-            earnings: true,
-            userId: true,
-            clipSubmissions: {
-              select: {
-                campaigns: {
-                  select: {
-                    title: true
-                  }
-                }
-              }
-            }
-          }
-        })
-
-        if (userClips.length === 0) {
-          console.log(`No earnings found for user ${userId}`)
-          continue
-        }
-
-        // Calculate total earnings for this user
-        const totalEarnings = userClips.reduce((sum, clip) => sum + Number(clip.earnings), 0)
-
-        if (totalEarnings <= 0) {
-          console.log(`No positive earnings found for user ${userId}`)
-          continue
-        }
-
-        // Create payout record
-        const payout = await prisma.payout.create({
-          data: {
-            userId,
-            amount: totalEarnings,
-            method: paymentMethod.toUpperCase() as any,
-            status: "COMPLETED", // Mark as completed since admin is processing
-            processedAt: new Date(),
-            notes: notes || `Payment processed via ${paymentMethod}`
-          }
-        })
-
-        // Update all clips for this user to reset earnings to 0
-        await prisma.clip.updateMany({
-          where: { userId },
-          data: { earnings: 0 }
-        })
-
-        // Send notification to user about payment
-        await prisma.notification.create({
-          data: {
-            userId,
-            type: "PAYOUT_PROCESSED",
-            title: "Payment Processed!",
-            message: `Your earnings of $${totalEarnings.toFixed(2)} have been processed and sent via ${paymentMethod}.`,
-            data: {
-              amount: totalEarnings,
-              method: paymentMethod,
-              payoutId: payout.id,
-              notes
-            }
-          }
-        })
-
-        payouts.push({
-          id: payout.id,
-          userId,
-          amount: totalEarnings,
-          method: paymentMethod,
-          status: payout.status
-        })
-
-        console.log(`✅ Processed payment for user ${userId}: $${totalEarnings.toFixed(2)} via ${paymentMethod}`)
-      }
-
-      return {
-        success: true,
-        paidCount: payouts.length,
-        payouts
-      }
-
-    } catch (error) {
-      console.error("Error marking payments as paid:", error)
-      return {
-        success: false,
-        paidCount: 0,
-        error: error instanceof Error ? error.message : "Unknown error"
-      }
+    console.error('❌ DEPRECATED: markPaymentsAsPaid should not be used! Use payout request system instead.')
+    return {
+      success: false,
+      paidCount: 0,
+      error: "DEPRECATED: This function has been disabled. Use the payout request system at /api/admin/payout-requests instead."
     }
   }
 }
