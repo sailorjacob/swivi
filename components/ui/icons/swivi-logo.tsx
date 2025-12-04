@@ -22,7 +22,7 @@ export function SwiviLogo({ className = "", size = 40 }: SwiviLogoProps) {
   
   // Use inverted2.png for light theme (dark logo) and SwiviLogo.png for dark theme (white logo)
   const logoSrc = currentTheme === 'light' 
-    ? "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
+    ? "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/invertedlogo.png"
     : "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
 
   return (

@@ -34,7 +34,7 @@ export function Header() {
 
   // Determine logo based on theme
   const logoSrc = mounted && resolvedTheme === 'light'
-    ? "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/inverted2.png"
+    ? "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/invertedlogo.png"
     : "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
 
   return (
