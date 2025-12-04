@@ -25,9 +25,7 @@ import {
   Target,
   Loader2,
   CheckCircle,
-  Trophy,
-  Flame,
-  Sparkles
+  Trophy
 } from "lucide-react"
 
 interface Campaign {
@@ -160,63 +158,6 @@ export default function CampaignsPage() {
     <ErrorBoundary fallback={CampaignErrorFallback}>
       <div className="space-y-6">
 
-      {/* Featured Campaign Banner */}
-      {featuredCampaign && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-xl border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-amber-500/10"
-        >
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Y5NzMxNiIgc3Ryb2tlLW9wYWNpdHk9IjAuMDUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-50" />
-          <div className="relative p-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30">
-                  <Flame className="w-6 h-6 text-amber-500" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-lg font-bold">{featuredCampaign.title}</h2>
-                    <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-xs animate-pulse">
-                      LIVE NOW
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Our biggest campaign ever! ${featuredCampaign.budget.toLocaleString()} total budget + $2,000 in bonus rewards.
-                  </p>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="flex items-center gap-1.5">
-                      <DollarSign className="w-4 h-4 text-green-500" />
-                      <span className="font-medium">${featuredCampaign.payoutRate}/1K views</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Trophy className="w-4 h-4 text-amber-500" />
-                      <span className="font-medium text-amber-600 dark:text-amber-400">$2,000 in Bounties</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Button 
-                  onClick={() => handleViewCampaign(featuredCampaign)}
-                  className="flex-1 sm:flex-none"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Join Now
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setBonusModalOpen(true)}
-                  className="border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
-                >
-                  <Trophy className="w-4 h-4 mr-1" />
-                  View Bonuses
-                </Button>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
 
       {/* Filter Tabs */}
       <div className="flex gap-6 border-b border-border">
@@ -295,9 +236,9 @@ export default function CampaignsPage() {
                         LIVE
                       </Badge>
                       {hasBonuses(campaign) && (
-                        <Badge className="bg-amber-500 text-black text-xs px-2 py-1 flex items-center gap-1 animate-pulse">
+                        <Badge variant="outline" className="bg-background/80 text-foreground text-xs px-2 py-1 flex items-center gap-1">
                           <Trophy className="w-3 h-3" />
-                          BONUSES
+                          BOUNTIES
                         </Badge>
                       )}
                     </div>
@@ -447,10 +388,9 @@ export default function CampaignsPage() {
                           e.stopPropagation()
                           setBonusModalOpen(true)
                         }}
-                        className="border-amber-500/50 text-amber-600 hover:bg-amber-500/10 hover:text-amber-600"
                       >
                         <Trophy className="w-4 h-4 mr-1" />
-                        Bonuses
+                        Bounties
                       </Button>
                     )}
                   </div>
@@ -462,6 +402,32 @@ export default function CampaignsPage() {
         })}
         </div>
       )}
+
+        {/* Featured Campaign Bonus Banner - Bottom */}
+        {featuredCampaign && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="border border-border rounded-lg p-4 bg-muted/30"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-muted">
+                  <Trophy className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="font-medium">Performance Bounties Available</p>
+                  <p className="text-sm text-muted-foreground">
+                    $2,000 in additional rewards for top performers on {featuredCampaign.title}
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setBonusModalOpen(true)}>
+                Learn More
+              </Button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Bonus Modal for Featured Campaigns */}
         <CampaignBonusModal

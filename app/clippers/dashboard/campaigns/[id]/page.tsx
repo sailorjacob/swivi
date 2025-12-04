@@ -304,9 +304,9 @@ export default function CampaignDetailPage() {
                   </Badge>
                 )}
                 {hasBonuses(campaign) && (
-                  <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20">
+                  <Badge variant="outline" className="text-foreground">
                     <Trophy className="w-3 h-3 mr-1" />
-                    BOUNTIES AVAILABLE
+                    BOUNTIES
                   </Badge>
                 )}
               </div>
@@ -332,10 +332,9 @@ export default function CampaignDetailPage() {
               <Button
                 variant="outline"
                 onClick={() => setBonusModalOpen(true)}
-                className="border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
               >
                 <Trophy className="w-4 h-4 mr-2" />
-                View $2K Bounties
+                View Bounties
               </Button>
             )}
           </div>
@@ -597,33 +596,33 @@ export default function CampaignDetailPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <Card className="bg-gradient-to-br from-amber-500/5 to-orange-500/5 border-amber-500/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-amber-600">
-                  <Flame className="w-5 h-5" />
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                  <Target className="w-4 h-4" />
                   Tips to Maximize Earnings
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
+              <CardContent className="pt-0">
+                <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
-                    <span className="text-amber-500">•</span>
+                    <span className="text-foreground">•</span>
                     Post 3-7 clips per day for best results
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-amber-500">•</span>
+                    <span className="text-foreground">•</span>
                     Use a fast hook in the first 0.2 seconds
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-amber-500">•</span>
+                    <span className="text-foreground">•</span>
                     Best clips are 6-15 seconds long
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-amber-500">•</span>
+                    <span className="text-foreground">•</span>
                     Add subtitles and on-screen context
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-amber-500">•</span>
+                    <span className="text-foreground">•</span>
                     Cross-post across all platforms
                   </li>
                 </ul>
@@ -632,6 +631,33 @@ export default function CampaignDetailPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Bonus Banner - Bottom */}
+      {hasBonuses(campaign) && isActive && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="border border-border rounded-lg p-4 bg-muted/30"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-muted">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-medium">Performance Bounties Available</p>
+                <p className="text-sm text-muted-foreground">
+                  $2,000 in additional rewards for top performers
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setBonusModalOpen(true)}>
+              Learn More
+            </Button>
+          </div>
+        </motion.div>
+      )}
 
       {/* Bonus Modal */}
       <CampaignBonusModal
