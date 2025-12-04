@@ -70,6 +70,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Campaign is already completed" }, { status: 400 })
     }
 
+    if (campaign.status === "SCHEDULED" || campaign.status === "DRAFT") {
+      return NextResponse.json({ error: "Cannot complete a campaign that hasn't been active yet" }, { status: 400 })
+    }
+
     // Calculate ACTUAL stats from all submissions
     const allSubmissions = campaign.clipSubmissions
     const approvedSubmissions = allSubmissions.filter(s => s.status === 'APPROVED')
