@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DiscordIcon } from "@/components/ui/icons/discord-icon"
 import { GoogleIcon } from "@/components/ui/icons/google-icon"
-import { SwiviLogo, BackgroundGraphics } from "@/components/ui/icons/swivi-logo"
-import { Loader2, ArrowLeft, Zap, Users, TrendingUp, Target, DollarSign, Gift } from "lucide-react"
+import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
+import { Loader2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import toast from "react-hot-toast"
 import { useAuth } from "@/lib/supabase-auth-provider"
@@ -54,119 +54,86 @@ export default function BecomeAClipperPage() {
     }
   }
 
-  const benefits = [
-    {
-      icon: Target,
-      title: "Master crafting viral clips",
-      description: "Learn proven strategies for creating high-engagement content that drives millions of views."
-    },
-    {
-      icon: DollarSign,
-      title: "Earn instant payouts",
-      description: "Get paid immediately for approved clips based on views, with no upfront costs or hidden fees."
-    },
-    {
-      icon: Gift,
-      title: "Exclusive rewards",
-      description: "Unlock special bonuses and premium opportunities for consistent high-quality submissions."
-    }
-  ]
-
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      <BackgroundGraphics />
+      {/* Animated floating circles background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full bg-white/5"
+            style={{
+              width: `${300 + i * 100}px`,
+              height: `${300 + i * 100}px`,
+            }}
+            initial={{
+              x: `${(i * 25) % 100}%`,
+              y: `${(i * 30) % 100}%`,
+              scale: 0.5 + (i * 0.1),
+            }}
+            animate={{
+              x: [
+                `${(i * 25) % 100}%`,
+                `${(i * 25 + 30) % 100}%`,
+                `${(i * 25) % 100}%`,
+              ],
+              y: [
+                `${(i * 30) % 100}%`,
+                `${(i * 30 + 20) % 100}%`,
+                `${(i * 30) % 100}%`,
+              ],
+            }}
+            transition={{
+              duration: 15 + i * 5,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        ))}
+      </div>
 
       {/* Back to main site - Fixed at top */}
       <div className="absolute top-6 left-6 z-10">
         <Link
           href="/"
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-white transition-colors"
+          className="inline-flex items-center text-sm text-neutral-500 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Swivi
         </Link>
       </div>
 
-      {/* Centered login form */}
+      {/* Centered content */}
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-
-          {/* Benefits Section */}
+        <div className="w-full max-w-md">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex-1 text-center lg:text-left"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-light text-white mb-6">
-              Become a <span className="font-normal text-green-400">Top Clipper</span>
-            </h1>
-            <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto lg:mx-0">
-              Join our network of elite content creators and start earning from viral clips today.
-            </p>
-
-            <div className="space-y-6 mb-8">
-              {benefits.map((benefit, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 + index * 0.1, duration: 0.5 }}
-                  className="flex items-start gap-4 text-left"
-                >
-                  <div className="flex-shrink-0 w-12 h-12 bg-green-500/10 border border-green-500/20 rounded-full flex items-center justify-center">
-                    <benefit.icon className="w-6 h-6 text-green-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-white font-medium mb-2">{benefit.title}</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{benefit.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Users className="w-4 h-4" />
-                <span>Join our active community</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <TrendingUp className="w-4 h-4" />
-                <span>Earn competitive monthly earnings</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Login Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="w-full max-w-md"
-          >
-            <Card className="bg-card border border-border backdrop-blur-sm shadow-2xl text-white">
+            <Card className="bg-neutral-900 border border-neutral-700 backdrop-blur-sm shadow-2xl">
               <CardHeader className="text-center pb-6">
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                   className="mx-auto mb-6 flex items-center justify-center"
                 >
                   <SwiviLogo size={56} />
                 </motion.div>
                 <CardTitle className="text-2xl font-light text-white mb-2">
-                  Get Started Now
+                  Become a Clipper
                 </CardTitle>
-                <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
-                  Join our clipper network and start earning from your content today
+                <p className="text-neutral-400 text-sm leading-relaxed max-w-sm mx-auto">
+                  Create an account to start earning from viral content
                 </p>
               </CardHeader>
 
-              <CardContent className="space-y-4 px-8 pb-8 text-white">
+              <CardContent className="space-y-4 px-8 pb-8">
                 <Button
                   onClick={() => handleSignIn("discord")}
                   disabled={isLoading !== null}
-                  className="w-full bg-muted hover:bg-gray-750 text-white border border-gray-600 h-12 transition-all duration-200 group shadow-sm hover:shadow-md"
+                  className="w-full bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-600 h-12 transition-all duration-200 group shadow-sm hover:shadow-md"
                 >
                   {isLoading === "discord" ? (
                     <Loader2 className="w-5 h-5 animate-spin mr-3" />
@@ -178,10 +145,10 @@ export default function BecomeAClipperPage() {
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border"></div>
+                    <div className="w-full border-t border-neutral-700"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-card text-muted-foreground">or</span>
+                    <span className="px-2 bg-neutral-900 text-neutral-500">or</span>
                   </div>
                 </div>
 
@@ -189,7 +156,7 @@ export default function BecomeAClipperPage() {
                   onClick={() => handleSignIn("google")}
                   disabled={isLoading !== null}
                   variant="outline"
-                  className="w-full border-gray-600 text-muted-foreground hover:bg-muted hover:text-white h-12 transition-all duration-200 group hover:shadow-sm"
+                  className="w-full bg-transparent border-neutral-600 text-neutral-300 hover:bg-neutral-800 hover:text-white h-12 transition-all duration-200 group hover:shadow-sm"
                 >
                   {isLoading === "google" ? (
                     <Loader2 className="w-5 h-5 animate-spin mr-3" />
@@ -199,16 +166,16 @@ export default function BecomeAClipperPage() {
                   <span className="font-medium">Continue with Google</span>
                 </Button>
 
-                <div className="text-center mt-6 pt-4 border-t border-border/50">
-                  <p className="text-sm text-muted-foreground mb-2">
+                <div className="text-center mt-6 pt-4 border-t border-neutral-700/50">
+                  <p className="text-sm text-neutral-400 mb-2">
                     Already have an account?{" "}
-                    <Link href="/clippers/login" className="text-white hover:text-green-300 underline underline-offset-2 transition-colors">
-                      Sign in here
+                    <Link href="/clippers/login" className="text-white hover:text-neutral-300 underline underline-offset-2 transition-colors">
+                      Sign in
                     </Link>
                   </p>
-                  <p className="text-xs text-gray-500 leading-relaxed">
+                  <p className="text-xs text-neutral-500 leading-relaxed">
                     By continuing, you agree to our{" "}
-                    <Link href="/clippers/dashboard/rules" className="text-foreground hover:text-green-300 underline underline-offset-2 transition-colors">
+                    <Link href="/clippers/dashboard/rules" className="text-neutral-300 hover:text-white underline underline-offset-2 transition-colors">
                       rules and guidelines
                     </Link>
                   </p>
