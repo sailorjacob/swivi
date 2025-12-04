@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
-import { useAuth } from "@/lib/supabase-auth-provider"
 import { useRouter, usePathname } from "next/navigation"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import Link from "next/link"
@@ -14,7 +13,6 @@ import {
   Users,
   Settings,
   HelpCircle,
-  LogOut,
   Menu,
   X,
   Trophy,
@@ -77,8 +75,6 @@ interface DatabaseUser {
 
 function Sidebar({ className }: { className?: string }) {
   const { data: session } = useSession()
-  const { logout } = useAuth()
-  const router = useRouter()
   const pathname = usePathname()
   const [dbUser, setDbUser] = useState<DatabaseUser | null>(null)
   
@@ -134,16 +130,6 @@ function Sidebar({ className }: { className?: string }) {
     window.addEventListener('profileUpdated', handleProfileUpdate)
     return () => window.removeEventListener('profileUpdated', handleProfileUpdate)
   }, [session?.user?.id, isDemoMode])
-
-  const handleSignOut = async () => {
-    if (isDemoMode) {
-      // In demo mode, just redirect to homepage
-      router.push("/")
-      return
-    }
-    await logout()
-    router.push("/")
-  }
 
   const isActive = (href: string) => {
     if (href === "/clippers/dashboard") {
@@ -208,7 +194,7 @@ function Sidebar({ className }: { className?: string }) {
       <div className="p-4 border-t border-border">
         <Link 
           href="/clippers/dashboard/profile" 
-          className="flex items-center space-x-3 mb-3 rounded-lg p-2 -m-2 hover:bg-muted transition-colors cursor-pointer"
+          className="flex items-center space-x-3 mb-4 rounded-lg p-2 -m-2 hover:bg-muted transition-colors cursor-pointer"
         >
           <Avatar className="w-8 h-8">
             <AvatarImage src={dbUser?.image || activeSession?.user?.image || ""} />
@@ -229,16 +215,8 @@ function Sidebar({ className }: { className?: string }) {
           {/* <NotificationBell /> */}
         </Link>
 
-        <div className="flex items-center justify-between gap-2">
-          <Button
-            onClick={handleSignOut}
-            variant="ghost"
-            size="sm"
-            className="flex-1 justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">Theme</span>
           <ThemeToggle />
         </div>
       </div>

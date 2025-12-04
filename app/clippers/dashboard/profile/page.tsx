@@ -4,7 +4,8 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from "react"
-import { useSession } from "@/lib/supabase-auth-provider"
+import { useSession, useAuth } from "@/lib/supabase-auth-provider"
+import { useRouter } from "next/navigation"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { supabase } from "@/lib/supabase-browser"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
@@ -24,7 +25,8 @@ import {
   Music,
   CheckCircle,
   Trash2,
-  MessageCircle
+  MessageCircle,
+  LogOut
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { SocialVerificationDialog } from "../../../../components/clippers/social-verification-dialog"
@@ -48,11 +50,18 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const { data: session } = useSession()
+  const { logout } = useAuth()
+  const router = useRouter()
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [connectedAccounts, setConnectedAccounts] = useState<any[]>([])
   const [isFetchingProfile, setIsFetchingProfile] = useState(false)
+
+  const handleSignOut = async () => {
+    await logout()
+    router.push("/")
+  }
 
   // Form data
   const [profileData, setProfileData] = useState({
@@ -559,6 +568,20 @@ export default function ProfilePage() {
                 </span>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Sign Out */}
+        <Card className="bg-card border-border">
+          <CardContent className="pt-6">
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              className="w-full text-muted-foreground hover:text-foreground border-border hover:bg-muted"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
           </CardContent>
         </Card>
       </div>

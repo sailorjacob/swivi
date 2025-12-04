@@ -169,31 +169,9 @@ function AdminNav({ className }: { className?: string }) {
         </div>
       </nav>
 
-      {/* Theme Toggle */}
-      <div className="px-4 pb-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground font-medium">Theme</span>
-          <ThemeToggle />
-        </div>
-      </div>
-
-      {/* Branding Image */}
-      <div className="px-4 pb-2">
-        <div className="flex justify-center">
-          <Image
-            src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/345.png"
-            alt="Swivi Branding"
-            width={80}
-            height={80}
-            className="rounded opacity-90"
-            unoptimized
-          />
-        </div>
-      </div>
-
       {/* User Profile */}
       <div className="p-4 border-t border-border">
-        <div className="flex items-center space-x-3 mb-3">
+        <div className="flex items-center space-x-3 mb-4">
           <Avatar className="w-8 h-8">
             <AvatarImage src={activeSession?.user?.image || ""} />
             <AvatarFallback className="bg-foreground text-primary-foreground">
@@ -210,15 +188,18 @@ function AdminNav({ className }: { className?: string }) {
           </div>
         </div>
 
-        <Button
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs text-muted-foreground">Theme</span>
+          <ThemeToggle />
+        </div>
+
+        <button
           onClick={handleSignOut}
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
+          className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
         >
-          <LogOut className="w-4 h-4 mr-2" />
+          <LogOut className="w-3 h-3" />
           Sign Out
-        </Button>
+        </button>
       </div>
     </div>
   )
