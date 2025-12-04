@@ -293,6 +293,7 @@ export async function GET(request: NextRequest) {
         id: submission.id,
         title: clip?.title || submission.clipUrl,
         campaign: submission.campaigns?.title || "Unknown Campaign",
+        campaignId: submission.campaigns?.id || null,
         campaignImage: submission.campaigns?.featuredImage || null,
         status: submission.status?.toLowerCase() || "unknown",
         createdAt: submission.createdAt ? submission.createdAt.toISOString() : new Date().toISOString(),

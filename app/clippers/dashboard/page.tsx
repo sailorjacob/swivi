@@ -439,17 +439,34 @@ export default function ClipperDashboard() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    {clip.campaignImage && (
-                      <img 
-                        src={clip.campaignImage} 
-                        alt="" 
-                        className="w-10 h-10 rounded object-cover flex-shrink-0"
-                      />
-                    )}
+                    {/* Campaign Image */}
+                    <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
+                      {clip.campaignImage ? (
+                        <img 
+                          src={clip.campaignImage} 
+                          alt={clip.campaign} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                          {clip.campaign?.charAt(0) || '?'}
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-foreground font-medium mb-1">{clip.campaign}</h4>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="text-foreground font-medium">{clip.campaign}</h4>
+                        {clip.campaignId && (
+                          <Link 
+                            href={`/clippers/dashboard/campaigns/${clip.campaignId}`}
+                            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            View →
+                          </Link>
+                        )}
+                      </div>
 
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
+                      <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mb-2">
                         <span>{clip.views.toLocaleString()} views
                           {clip.viewChange && Number(clip.viewChange) > 0 && (
                             <span className="text-green-600 ml-1">(+{Number(clip.viewChange).toLocaleString()})</span>
@@ -458,7 +475,7 @@ export default function ClipperDashboard() {
                         {clip.earnings > 0 && (
                           <span>${clip.earnings.toFixed(2)} earned</span>
                         )}
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span>Submitted {new Date(clip.createdAt).toLocaleDateString('en-US', { 
                           month: 'short', 
                           day: 'numeric', 
