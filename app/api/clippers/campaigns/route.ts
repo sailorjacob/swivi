@@ -26,7 +26,10 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status")
     const platform = searchParams.get("platform")
 
-    const where: any = {}
+    const where: any = {
+      // Never show hidden campaigns to clippers
+      hidden: { not: true }
+    }
 
     if (status) {
       if (status.toLowerCase() === 'all') {

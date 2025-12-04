@@ -440,7 +440,7 @@ export default function CampaignsPage() {
                     <Button
                       className={`flex-1 ${!isCompleted && !isLaunching && !isScheduled ? 'bg-transparent text-foreground border border-foreground hover:bg-foreground hover:text-background' : ''}`}
                       onClick={() => handleViewCampaign(campaign)}
-                      disabled={isLaunching || isScheduled}
+                      disabled={isLaunching}
                       variant={isCompleted ? "secondary" : (isLaunching || isScheduled) ? "default" : "outline"}
                     >
                       {isLaunching ? "Coming Soon" : isScheduled ? "Preview" : isCompleted ? "View Results" : "Join Campaign"}

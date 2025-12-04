@@ -89,6 +89,7 @@ model Campaign {
   startDate       DateTime?        @db.Timestamp(6)
   endDate         DateTime?        @db.Timestamp(6)
   status          CampaignStatus?  @default(ACTIVE)
+  hidden          Boolean          @default(false) // Hide from clippers without changing status
   requirements    String[]         @default([])
   targetPlatforms SocialPlatform[] @default([])
   featuredImage   String? // Campaign image URL

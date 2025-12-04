@@ -257,6 +257,7 @@ export default function CampaignDetailPage() {
   }
 
   const isActive = campaign.status === "ACTIVE"
+  const isScheduled = campaign.status === "SCHEDULED"
   const isCompleted = campaign.status === "COMPLETED"
   const progress = campaign.budget > 0 ? (campaign.spent / campaign.budget) * 100 : 0
   const remainingBudget = campaign.budget - campaign.spent
@@ -291,6 +292,12 @@ export default function CampaignDetailPage() {
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
+                {isScheduled && (
+                  <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30">
+                    <Clock className="w-3 h-3 mr-1.5" />
+                    UPCOMING
+                  </Badge>
+                )}
                 {isActive && (
                   <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
                     <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5 animate-pulse" />
@@ -400,6 +407,42 @@ export default function CampaignDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Submit Form & Requirements */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Scheduled Campaign Notice */}
+          {isScheduled && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="border-amber-500/30 bg-amber-500/5">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
+                      <Clock className="w-6 h-6 text-amber-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground">Campaign Coming Soon</h3>
+                      <p className="text-sm text-muted-foreground">
+                        This campaign hasn't started yet. Check back when it goes live to submit your clips.
+                        {campaign.startDate && (
+                          <span className="block mt-1 text-amber-400">
+                            Launches: {new Date(campaign.startDate).toLocaleDateString('en-US', { 
+                              month: 'long', 
+                              day: 'numeric', 
+                              year: 'numeric',
+                              hour: 'numeric',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
           {/* Submit Form */}
           {isActive && (
             <motion.div

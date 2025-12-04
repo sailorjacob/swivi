@@ -16,6 +16,7 @@ const updateCampaignSchema = z.object({
   startDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
   endDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
   status: z.enum(["DRAFT", "SCHEDULED", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
+  hidden: z.boolean().optional(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])).optional(),
   requirements: z.array(z.string()).optional(),
   featuredImage: z.string().url().optional().nullable(),
@@ -54,6 +55,7 @@ export async function GET(
         payoutRate: true,
         startDate: true,
         status: true,
+        hidden: true,
         targetPlatforms: true,
         requirements: true,
         featuredImage: true,
@@ -222,6 +224,7 @@ export async function PUT(
     if (validatedData.targetPlatforms !== undefined) updateData.targetPlatforms = validatedData.targetPlatforms
     if (validatedData.requirements !== undefined) updateData.requirements = validatedData.requirements
     if (body.featuredImage !== undefined) updateData.featuredImage = validatedData.featuredImage
+    if (validatedData.hidden !== undefined) updateData.hidden = validatedData.hidden
 
     console.log("📊 Final update data to apply:", JSON.stringify(updateData, null, 2))
 

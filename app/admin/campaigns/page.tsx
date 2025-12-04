@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Plus, Edit, Trash2, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle, ChevronDown, ChevronUp } from "lucide-react"
+import { Plus, Edit, Trash2, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle, ChevronDown, ChevronUp, EyeOff, Eye } from "lucide-react"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { supabase } from "@/lib/supabase-auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,6 +29,7 @@ interface Campaign {
   payoutRate: number
   startDate?: string | Date | null
   status: "DRAFT" | "SCHEDULED" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
+  hidden?: boolean
   targetPlatforms: string[]
   requirements: string[]
   featuredImage?: string | null
@@ -484,6 +485,32 @@ export default function AdminCampaignsPage() {
     }
   }
 
+  // Toggle campaign visibility
+  const handleToggleHidden = async (campaignId: string, currentlyHidden: boolean) => {
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          hidden: !currentlyHidden
+        })
+      })
+
+      if (response.ok) {
+        toast.success(currentlyHidden ? "Campaign is now visible to clippers" : "Campaign hidden from clippers")
+        await fetchCampaigns()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to update campaign visibility")
+      }
+    } catch (error) {
+      console.error("Error toggling campaign visibility:", error)
+      toast.error("Failed to update campaign visibility")
+    }
+  }
+
   // Publish/Activate campaign
   const handlePublishCampaign = async (campaignId: string) => {
     try {
@@ -866,7 +893,7 @@ export default function AdminCampaignsPage() {
                     >
                       <div className="flex">
                         {/* Campaign Image */}
-                        <div className="relative w-32 h-32 flex-shrink-0">
+                        <div className={`relative w-32 h-32 flex-shrink-0 ${campaign.hidden ? 'opacity-50' : ''}`}>
                           {campaign.featuredImage ? (
                             <img
                               src={campaign.featuredImage}
@@ -879,10 +906,15 @@ export default function AdminCampaignsPage() {
                             </div>
                           )}
                           {/* Status Badge Overlay */}
-                          <div className="absolute top-2 left-2">
+                          <div className="absolute top-2 left-2 flex gap-1">
                             <Badge className={getStatusColor(campaign.status)}>
                               {campaign.status}
                             </Badge>
+                            {campaign.hidden && (
+                              <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+                                <EyeOff className="w-3 h-3" />
+                              </Badge>
+                            )}
                           </div>
                         </div>
 
@@ -953,6 +985,13 @@ export default function AdminCampaignsPage() {
                                 title="Edit campaign"
                               >
                                 <Edit className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleToggleHidden(campaign.id, campaign.hidden || false)}
+                                className={`p-2 transition-colors ${campaign.hidden ? 'text-red-400 hover:text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                title={campaign.hidden ? "Show to clippers" : "Hide from clippers"}
+                              >
+                                {campaign.hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                               </button>
                               {campaign.status === "DRAFT" && (
                                 <Button
