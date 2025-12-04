@@ -235,7 +235,7 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
         </motion.h1>
         <motion.p
           variants={itemVariants}
-          className="text-lg sm:text-xl text-neutral-300 max-w-4xl mx-auto mb-8 sm:mb-12 leading-relaxed px-4 sm:px-0"
+          className="text-lg sm:text-xl text-muted-foreground max-w-4xl mx-auto mb-8 sm:mb-12 leading-relaxed px-4 sm:px-0"
         >
           We work with creators across all niches, from entrepreneurs and content creators
             to musicians, TV series, and athletes. Here are some of our most successful campaigns.
@@ -259,8 +259,8 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
               variants={itemVariants}
               className="relative"
             >
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-neutral-900/40 border-neutral-800/50">
-                <CardHeader className="border-b border-neutral-800/30 pb-8">
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-card border-border">
+                <CardHeader className="border-b border-border pb-8">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 mb-6">
                         {campaign.clientLogo && (
                           <div className="flex-shrink-0 mx-auto sm:mx-0">
@@ -269,7 +269,7 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
                               alt={campaign.clientName}
                               width={280}
                               height={280}
-                              className="w-20 h-20 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-xl object-cover ring-2 ring-neutral-800/40"
+                              className="w-20 h-20 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-xl object-cover ring-2 ring-border"
                               unoptimized
                             />
                           </div>
@@ -281,7 +281,7 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
                         </CardTitle>
                         <span className="text-3xl sm:text-4xl opacity-60">{getCampaignIcon(campaign)}</span>
                       </div>
-                      <p className="text-neutral-300 leading-relaxed text-base sm:text-lg">
+                      <p className="text-muted-foreground leading-relaxed text-base sm:text-lg">
                         {campaign.description}
                       </p>
                     </div>
@@ -291,19 +291,19 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
                 <CardContent className="p-4 sm:p-6 lg:p-8">
                   {/* Key Metrics - Large and Prominent */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
-                    <div className="text-center p-4 sm:p-6 lg:p-8 bg-neutral-800/30 rounded-xl border border-neutral-700/30">
+                    <div className="text-center p-4 sm:p-6 lg:p-8 bg-muted/50 rounded-xl border border-border">
                       <div className="text-3xl sm:text-4xl lg:text-5xl font-light text-foreground mb-2 sm:mb-3">
                         {formatNumber(campaign.viewsGenerated)}
                       </div>
-                      <div className="text-xs sm:text-sm font-medium text-neutral-400 uppercase tracking-wider">
+                      <div className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">
                         Views Generated
                       </div>
                     </div>
-                    <div className="text-center p-4 sm:p-6 lg:p-8 bg-neutral-800/30 rounded-xl border border-neutral-700/30">
+                    <div className="text-center p-4 sm:p-6 lg:p-8 bg-muted/50 rounded-xl border border-border">
                       <div className="text-3xl sm:text-4xl lg:text-5xl font-light text-foreground mb-2 sm:mb-3">
                         {campaign.clipsDistributed}
                       </div>
-                      <div className="text-xs sm:text-sm font-medium text-neutral-400 uppercase tracking-wider">
+                      <div className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">
                         Submitted Clips
                       </div>
                     </div>
@@ -312,21 +312,21 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
                   {/* Campaign Details - Condensed */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
                     <div className="space-y-3 sm:space-y-4">
-                      <h4 className="font-medium text-neutral-400 uppercase tracking-wider text-xs sm:text-sm">
+                      <h4 className="font-medium text-muted-foreground uppercase tracking-wider text-xs sm:text-sm">
                         Campaign Overview
                       </h4>
                       <div className="space-y-3 sm:space-y-4">
-                        <div className="flex justify-between items-center py-2 sm:py-3 border-b border-neutral-700/30">
-                          <span className="text-sm sm:text-base text-neutral-400">Budget:</span>
+                        <div className="flex justify-between items-center py-2 sm:py-3 border-b border-border">
+                          <span className="text-sm sm:text-base text-muted-foreground">Budget:</span>
                           <span className="font-medium text-foreground text-sm sm:text-base">${campaign.budget.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between items-center py-2 sm:py-3 border-b border-neutral-700/30">
-                          <span className="text-sm sm:text-base text-neutral-400">Timeline:</span>
+                        <div className="flex justify-between items-center py-2 sm:py-3 border-b border-border">
+                          <span className="text-sm sm:text-base text-muted-foreground">Timeline:</span>
                           <span className="font-medium text-foreground text-sm sm:text-base">{campaign.timeline}</span>
                         </div>
                         <div className="flex justify-between items-center py-2 sm:py-3">
-                          <span className="text-sm sm:text-base text-neutral-400">Submitted Clips:</span>
-                          <span className="font-medium text-green-400 text-sm sm:text-base">
+                          <span className="text-sm sm:text-base text-muted-foreground">Submitted Clips:</span>
+                          <span className="font-medium text-foreground text-sm sm:text-base">
                             {campaign.clipsDistributed}
                           </span>
                         </div>
@@ -334,26 +334,26 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
                     </div>
 
                     <div className="space-y-3 sm:space-y-4">
-                      <h4 className="font-medium text-neutral-400 uppercase tracking-wider text-xs sm:text-sm">
+                      <h4 className="font-medium text-muted-foreground uppercase tracking-wider text-xs sm:text-sm">
                         Key Highlights
                       </h4>
                       <div className="space-y-2 sm:space-y-3">
                         {campaign.highlights.slice(0, 3).map((highlight, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 sm:p-4 bg-neutral-800/30 rounded-lg border border-neutral-700/30">
-                            <Award className="h-4 w-4 sm:h-5 sm:w-5 text-neutral-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-xs sm:text-sm text-neutral-300 leading-relaxed">{highlight}</span>
+                          <div key={idx} className="flex items-start gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg border border-border">
+                            <Award className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                            <span className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{highlight}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-4 sm:pt-6 border-t border-neutral-700/30 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                  <div className="pt-4 sm:pt-6 border-t border-border flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                     <Link
                       href={campaign.exampleContent}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm sm:text-base font-medium text-neutral-300 hover:text-foreground transition-colors"
+                      className="inline-flex items-center gap-2 text-sm sm:text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <Play className="h-4 w-4" />
                       View Example Content
@@ -383,13 +383,13 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="py-20 md:py-32 border-t border-neutral-800/30"
+        className="py-20 md:py-32 border-t border-border"
       >
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-6 text-white">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-6 text-foreground">
             Ready to Scale Your Brand?
           </h2>
-          <p className="text-neutral-300 mb-8">
+          <p className="text-muted-foreground mb-8">
             Book a call with our team to discuss how we can help you create
             viral content that drives real results.
           </p>
@@ -398,7 +398,7 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
             href="https://calendly.com/bykevingeorge/30min?month=2025-05"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center text-sm font-normal bg-white text-black px-8 py-4 rounded-full hover:bg-neutral-200 transition-all duration-300 group"
+            className="inline-flex items-center text-sm font-normal bg-transparent text-foreground border border-foreground px-8 py-4 rounded-full hover:bg-foreground hover:text-background transition-all duration-300 group"
           >
             Schedule a Call
             <svg className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -406,7 +406,7 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
             </svg>
           </a>
 
-          <p className="mt-8 text-xs text-neutral-400">
+          <p className="mt-8 text-xs text-muted-foreground">
             Free consultation • No commitment required • Start scaling today
           </p>
         </div>

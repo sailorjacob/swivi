@@ -7,7 +7,6 @@ import { motion, easeOut } from "framer-motion"
 import { TrendingUp, DollarSign, Users, BarChart3, ArrowRight } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { DarkThemeWrapper } from "../layout-wrapper"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -81,7 +80,7 @@ const itemVariants = {
 
 export default function BrandsPage() {
   return (
-    <DarkThemeWrapper>
+    <>
       <Header />
       <main className="flex min-h-screen flex-col pt-16">
         {/* Hero Section */}
@@ -334,6 +333,6 @@ export default function BrandsPage() {
         </section>
       </main>
       <Footer />
-    </DarkThemeWrapper>
+    </>
   )
 }

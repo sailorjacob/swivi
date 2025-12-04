@@ -6,11 +6,10 @@ export const dynamic = 'force-dynamic'
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { CampaignsShowcase } from "@/components/marketing/campaigns-showcase"
-import { DarkThemeWrapper } from "../layout-wrapper"
 
 export default function CaseStudiesPage() {
   return (
-    <DarkThemeWrapper>
+    <>
       <Header />
       <main className="flex min-h-screen flex-col pt-16">
         <section className="py-12 sm:py-16 md:py-20 lg:py-32">
@@ -20,6 +19,6 @@ export default function CaseStudiesPage() {
         </section>
       </main>
       <Footer />
-    </DarkThemeWrapper>
+    </>
   )
 }
