@@ -19,11 +19,18 @@ import {
   ChevronDown,
   ChevronUp,
   Copy,
-  ExternalLink
+  ExternalLink,
+  MessageSquare,
+  Loader2,
+  CheckCircle,
+  XCircle
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import toast from "react-hot-toast"
+import { authenticatedFetch } from "@/lib/supabase-browser"
+import { SupportTicketDialog } from "@/components/clippers/support-ticket-dialog"
 
 // Guide Section Component
 function GuideSection({ 
@@ -105,19 +112,162 @@ function TipBox({ type, children }: { type: 'info' | 'warning' | 'success'; chil
   )
 }
 
+interface SupportTicket {
+  id: string
+  category: string
+  subject: string
+  message: string
+  status: string
+  adminResponse: string | null
+  respondedAt: string | null
+  createdAt: string
+}
+
 export default function SupportPage() {
+  const [tickets, setTickets] = useState<SupportTicket[]>([])
+  const [loadingTickets, setLoadingTickets] = useState(true)
+  const [expandedTicket, setExpandedTicket] = useState<string | null>(null)
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     toast.success('Copied to clipboard!')
   }
 
+  // Fetch user's tickets
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const response = await authenticatedFetch('/api/support-tickets')
+        if (response.ok) {
+          const data = await response.json()
+          setTickets(data)
+        }
+      } catch (error) {
+        console.error('Error fetching tickets:', error)
+      } finally {
+        setLoadingTickets(false)
+      }
+    }
+    fetchTickets()
+  }, [])
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'OPEN':
+        return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/30 text-xs">Open</Badge>
+      case 'IN_PROGRESS':
+        return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/30 text-xs">In Progress</Badge>
+      case 'RESOLVED':
+        return <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/30 text-xs">Resolved</Badge>
+      case 'CLOSED':
+        return <Badge variant="outline" className="bg-muted text-muted-foreground border-border text-xs">Closed</Badge>
+      default:
+        return <Badge variant="outline" className="text-xs">{status}</Badge>
+    }
+  }
+
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-light text-foreground mb-2">Help & Support</h1>
-        <p className="text-muted-foreground">Guides, troubleshooting, and answers to common questions.</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-light text-foreground mb-2">Help & Support</h1>
+          <p className="text-muted-foreground">Guides, troubleshooting, and answers to common questions.</p>
+        </div>
+        <SupportTicketDialog>
+          <Button className="gap-2">
+            <MessageSquare className="w-4 h-4" />
+            Contact Support
+          </Button>
+        </SupportTicketDialog>
       </div>
+
+      {/* My Tickets Section */}
+      {(tickets.length > 0 || loadingTickets) && (
+        <div>
+          <h2 className="text-xl font-medium text-foreground mb-4 flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-primary" />
+            My Tickets
+          </h2>
+          
+          {loadingTickets ? (
+            <Card className="bg-card border-border">
+              <CardContent className="py-8 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {tickets.map((ticket) => (
+                <Card 
+                  key={ticket.id} 
+                  className={`bg-card border-border cursor-pointer transition-colors hover:border-border/80 ${
+                    ticket.adminResponse ? 'border-l-4 border-l-green-500' : ''
+                  }`}
+                  onClick={() => setExpandedTicket(expandedTicket === ticket.id ? null : ticket.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span className="font-medium text-foreground">{ticket.subject}</span>
+                          {getStatusBadge(ticket.status)}
+                          {ticket.adminResponse && (
+                            <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/30 text-xs gap-1">
+                              <CheckCircle className="w-3 h-3" />
+                              Replied
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {ticket.category} • {new Date(ticket.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                      <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${
+                        expandedTicket === ticket.id ? 'rotate-180' : ''
+                      }`} />
+                    </div>
+                    
+                    {expandedTicket === ticket.id && (
+                      <div className="mt-4 pt-4 border-t border-border space-y-4">
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-1">Your Message</p>
+                          <p className="text-sm text-foreground whitespace-pre-wrap">{ticket.message}</p>
+                        </div>
+                        
+                        {ticket.adminResponse && (
+                          <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                            <p className="text-xs font-medium text-green-600 mb-1 flex items-center gap-1">
+                              <CheckCircle className="w-3 h-3" />
+                              Support Response
+                            </p>
+                            <p className="text-sm text-foreground whitespace-pre-wrap">{ticket.adminResponse}</p>
+                            {ticket.respondedAt && (
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {new Date(ticket.respondedAt).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Quick Links */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

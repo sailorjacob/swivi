@@ -55,10 +55,10 @@ export function SupportTicketDialog({ children }: SupportTicketDialogProps) {
       }
       reader.readAsDataURL(file)
 
-      // Upload to Supabase Storage
+      // Upload to Supabase Storage (using images bucket)
       const formDataUpload = new FormData()
       formDataUpload.append('file', file)
-      formDataUpload.append('bucket', 'support-tickets')
+      formDataUpload.append('bucket', 'images')
 
       const response = await authenticatedFetch('/api/upload', {
         method: 'POST',
