@@ -34,7 +34,6 @@ import { ThemeToggle } from "@/components/ui/theme-toggle"
 // import { NotificationBell } from "@/components/notifications/notification-bell"
 import { ErrorBoundary, DashboardErrorFallback } from "@/components/error-boundary"
 import { AccountSetupPrompt } from "@/components/clippers/account-setup-prompt"
-import { SupportTicketDialog } from "@/components/clippers/support-ticket-dialog"
 
 interface NavItem {
   label: string
@@ -228,13 +227,6 @@ function Sidebar({ className }: { className?: string }) {
           </div>
           {/* <NotificationBell /> */}
         </Link>
-
-        <SupportTicketDialog>
-          <button className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors py-2 mb-2">
-            <HelpCircle className="w-3 h-3" />
-            Support
-          </button>
-        </SupportTicketDialog>
 
         <button
           onClick={handleSignOut}

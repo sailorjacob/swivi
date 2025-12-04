@@ -30,6 +30,7 @@ import {
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { SocialVerificationDialog } from "../../../../components/clippers/social-verification-dialog"
+import { SupportTicketDialog } from "../../../../components/clippers/support-ticket-dialog"
 
 interface UserProfile {
   id: string
@@ -571,8 +572,18 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Sign Out */}
-        <div className="mt-auto pt-6">
+        {/* Support & Sign Out */}
+        <div className="mt-auto pt-6 space-y-3">
+          <SupportTicketDialog>
+            <Button
+              variant="outline"
+              className="w-full text-muted-foreground hover:text-foreground border-border hover:bg-muted"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Contact Support
+            </Button>
+          </SupportTicketDialog>
+          
           <Button
             onClick={handleSignOut}
             variant="outline"
