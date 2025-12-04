@@ -38,7 +38,7 @@ export function Header() {
     : "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
 
   return (
-    <header className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-sm border-b border-black/5">
+    <header className="fixed top-0 z-50 w-full bg-background border-b border-border/50">
       <nav className="max-width-wrapper section-padding flex h-24 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center">
@@ -138,7 +138,7 @@ export function Header() {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-background border-b border-black/5">
+        <div className="md:hidden bg-background border-b border-border/50">
           <div className="space-y-1 px-6 py-4">
             {navigation.map((item) => (
               <div key={item.name} className="space-y-1">
