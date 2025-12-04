@@ -332,6 +332,13 @@ export default function PayoutsPage() {
                         PayPal
                       </div>
                     </SelectItem>
+                    <SelectItem value="USDC" disabled>
+                      <div className="flex items-center gap-2 opacity-50">
+                        <Wallet className="w-4 h-4" />
+                        USDC
+                        <span className="text-xs text-muted-foreground ml-1">(Coming Soon)</span>
+                      </div>
+                    </SelectItem>
                     <SelectItem value="BITCOIN" disabled>
                       <div className="flex items-center gap-2 opacity-50">
                         <Wallet className="w-4 h-4" />
@@ -380,6 +387,26 @@ export default function PayoutsPage() {
                     className="pl-10"
                   />
                 </div>
+              </div>
+
+              <div className="opacity-60">
+                <Label htmlFor="wallet" className="flex items-center gap-2">
+                  USDC Wallet Address
+                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground">Coming Soon</span>
+                </Label>
+                <div className="relative mt-1">
+                  <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="wallet"
+                    placeholder="0x742d35Cc6635C0532925a3b8D951D9C9..."
+                    value={payoutData.walletAddress}
+                    onChange={(e) => setPayoutData(prev => ({ ...prev, walletAddress: e.target.value }))}
+                    className="pl-10 font-mono text-sm"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Save your Ethereum address for future USDC payouts
+                </p>
               </div>
 
               <div className="opacity-60">
