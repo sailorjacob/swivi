@@ -169,7 +169,8 @@ const initialSteps: OnboardingStep[] = [
             </div>
           </Button>
 
-          <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800 p-6 h-auto group">
+          {/* X/Twitter hidden - re-enable when Apify actors are working */}
+          {/* <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800 p-6 h-auto group">
             <div className="text-center">
               <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:bg-white/20 group-hover:scale-110 transition-all">
                 <span className="text-white font-bold text-sm">X</span>
@@ -177,7 +178,7 @@ const initialSteps: OnboardingStep[] = [
               <p className="font-medium">Twitter/X</p>
               <p className="text-sm text-gray-400">Videos</p>
             </div>
-          </Button>
+          </Button> */}
         </div>
 
         <div className="p-4 bg-green-900/20 border border-green-700/50 rounded-lg">

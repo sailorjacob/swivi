@@ -23,7 +23,7 @@ import {
   Clock,
   Instagram,
   Youtube,
-  Twitter,
+  // Twitter, // Hidden - re-enable when Apify actors are working
   Music,
   Target,
   Loader2,
@@ -103,16 +103,17 @@ const platformIcons: Record<string, any> = {
   tiktok: Music,
   instagram: Instagram, 
   youtube: Youtube,
-  twitter: Twitter,
+  // twitter: Twitter, // Hidden - re-enable when Apify actors are working
   TIKTOK: Music,
   INSTAGRAM: Instagram,
   YOUTUBE: Youtube,
-  TWITTER: Twitter,
+  // TWITTER: Twitter, // Hidden - re-enable when Apify actors are working
 }
 
 const submitSchema = z.object({
   clipUrl: z.string().url("Please enter a valid URL"),
-  platform: z.enum(["TIKTOK", "INSTAGRAM", "YOUTUBE", "TWITTER"], {
+  // TWITTER hidden - re-enable when Apify actors are working
+  platform: z.enum(["TIKTOK", "INSTAGRAM", "YOUTUBE"], {
     errorMap: () => ({ message: "Please select a platform" }),
   }),
 })
@@ -550,7 +551,9 @@ export default function CampaignDetailPage() {
                             <SelectValue placeholder="Select platform" />
                           </SelectTrigger>
                           <SelectContent>
-                            {campaign.targetPlatforms.map((platform) => {
+                            {campaign.targetPlatforms
+                              .filter(p => p !== 'TWITTER' && p !== 'twitter') // Twitter hidden - re-enable when Apify actors are working
+                              .map((platform) => {
                               const Icon = platformIcons[platform]
                               return (
                                 <SelectItem key={platform} value={platform}>

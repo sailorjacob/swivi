@@ -19,7 +19,7 @@ import {
   Clock,
   Instagram,
   Youtube,
-  Twitter,
+  // Twitter, // Hidden - re-enable when Apify actors are working
   Music,
   Eye,
   Target,
@@ -111,7 +111,7 @@ const platformIcons = {
   tiktok: Music,
   instagram: Instagram, 
   youtube: Youtube,
-  twitter: Twitter,
+  // twitter: Twitter, // Hidden - re-enable when Apify actors are working
 }
 
 // Helper to check if a campaign has special bonuses

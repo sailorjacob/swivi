@@ -441,8 +441,8 @@ export default function ProfilePage() {
                   </div>
                 </SocialVerificationDialog>
 
-                {/* X (Twitter) */}
-                <SocialVerificationDialog
+                {/* X (Twitter) - HIDDEN: Apify actors not working, re-enable when ready */}
+                {/* <SocialVerificationDialog
                   platform="twitter"
                   icon={<span className="text-slate-300 font-bold text-lg">𝕏</span>}
                   platformName="X (Twitter)"
@@ -460,7 +460,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   </div>
-                </SocialVerificationDialog>
+                </SocialVerificationDialog> */}
               </div>
             </CardContent>
           </Card>

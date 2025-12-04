@@ -72,7 +72,7 @@ export default function SupportPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Currently, we support clips posted on TikTok, YouTube Shorts, Instagram Reels, and X (formerly Twitter). We might add Snapchat, Facebook, and Threads later, depending on campaign needs.
+                      Currently, we support clips posted on TikTok, YouTube Shorts, and Instagram Reels. We might add more platforms later, depending on campaign needs.
                     </p>
                   </CardContent>
                 </Card>

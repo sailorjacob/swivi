@@ -26,7 +26,7 @@ import {
   Music,
   Instagram,
   Youtube,
-  Twitter,
+  // Twitter, // Hidden - re-enable when Apify actors are working
   CheckCircle,
   Clock,
   AlertCircle
@@ -36,7 +36,8 @@ import { authenticatedFetch } from "@/lib/supabase-browser"
 
 const submitSchema = z.object({
   clipUrl: z.string().url("Please enter a valid URL"),
-  platform: z.enum(["tiktok", "instagram", "youtube", "twitter"], {
+  // Twitter hidden - re-enable when Apify actors are working
+  platform: z.enum(["tiktok", "instagram", "youtube"], {
     errorMap: () => ({ message: "Please select a platform" }),
   }),
 })
@@ -68,7 +69,7 @@ const platformIcons = {
   tiktok: Music,
   instagram: Instagram,
   youtube: Youtube,
-  twitter: Twitter,
+  // twitter: Twitter, // Hidden - re-enable when Apify actors are working
 }
 
 export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDetailModalProps) {
@@ -214,12 +215,14 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
                       <SelectValue placeholder="Select platform" />
                     </SelectTrigger>
                     <SelectContent>
-                      {campaign.platforms.map((platform) => {
+                      {campaign.platforms
+                        .filter(p => p !== 'twitter') // Twitter hidden - re-enable when Apify actors are working
+                        .map((platform) => {
                         const Icon = platformIcons[platform as keyof typeof platformIcons]
                         return (
                           <SelectItem key={platform} value={platform}>
                             <div className="flex items-center gap-2">
-                              <Icon className="w-3 h-3" />
+                              {Icon && <Icon className="w-3 h-3" />}
                               <span className="capitalize text-xs">{platform}</span>
                             </div>
                           </SelectItem>

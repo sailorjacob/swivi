@@ -137,12 +137,13 @@ const onboardingSteps: OnboardingStep[] = [
             </p>
           </div>
           
-          <div className="p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
+          {/* X/Twitter hidden - re-enable when Apify actors are working */}
+          {/* <div className="p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
             <h4 className="font-medium mb-2 text-white">X (Twitter)</h4>
             <p className="text-sm text-neutral-400">
               Perfect for news, commentary, and trending topics. Fast virality potential.
             </p>
-          </div>
+          </div> */}
         </div>
         
         <div className="p-4 bg-neutral-800 border border-neutral-700 rounded-lg">

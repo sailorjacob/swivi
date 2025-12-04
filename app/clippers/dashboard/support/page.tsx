@@ -155,7 +155,7 @@ export default function SupportPage() {
               
               <div className="space-y-0">
                 <Step number={1} title="Enter Your Username">
-                  Go to your Account Settings and click on the platform you want to verify (YouTube, TikTok, Instagram, or X/Twitter). 
+                  Go to your Account Settings and click on the platform you want to verify (YouTube, TikTok, or Instagram). 
                   Enter your username without the @ symbol.
                 </Step>
                 
@@ -171,7 +171,7 @@ export default function SupportPage() {
                       <li><strong>YouTube:</strong> Channel description (Customize channel → Basic info)</li>
                       <li><strong>TikTok:</strong> Profile bio (Edit profile → Bio)</li>
                       <li><strong>Instagram:</strong> Profile bio (Edit profile → Bio)</li>
-                      <li><strong>X/Twitter:</strong> Profile bio (Edit profile → Bio)</li>
+                      {/* X/Twitter hidden - re-enable when Apify actors are working */}
                     </ul>
                   </div>
                 </Step>

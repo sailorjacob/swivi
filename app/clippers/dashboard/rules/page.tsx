@@ -36,7 +36,7 @@ const rulesSections = [
       },
       {
         title: "Platform Compliance",
-        description: "Ensure all content complies with the platform's terms of service (TikTok, YouTube, Instagram, Twitter)."
+        description: "Ensure all content complies with the platform's terms of service (TikTok, YouTube, Instagram)."
       }
     ]
   },
@@ -230,9 +230,7 @@ function FTCCompliance() {
                 <div>
                   <strong className="text-foreground">YouTube:</strong> Include disclosure in video and description
                 </div>
-                <div>
-                  <strong className="text-foreground">Twitter:</strong> Use appropriate disclosure language in tweet
-                </div>
+                {/* Twitter hidden - re-enable when Apify actors are working */}
               </div>
             </AccordionContent>
           </AccordionItem>

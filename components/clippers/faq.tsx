@@ -24,7 +24,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: "What platforms can I clip on?",
-    answer: "Currently, we support clips posted on TikTok, YouTube Shorts, Instagram Reels, and X (formerly Twitter). We might add Snapchat, Facebook, and Threads later, depending on campaign needs.",
+    answer: "Currently, we support clips posted on TikTok, YouTube Shorts, and Instagram Reels. We might add more platforms later, depending on campaign needs.",
     category: "getting-started"
   },
   {
