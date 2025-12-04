@@ -1,16 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bell, Check, X } from "lucide-react"
+import { Bell, Check, X, DollarSign, Target, Rocket, Link2, AlertCircle, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { formatDistanceToNow } from "date-fns"
 
@@ -93,27 +91,28 @@ export function NotificationBell() {
     }
   }
 
-  // Get notification icon based on type
-  const getNotificationIcon = (type: string) => {
+  // Get notification icon based on type - minimal icons
+  const NotificationIcon = ({ type }: { type: string }) => {
+    const iconClass = "h-3.5 w-3.5 text-muted-foreground"
+    
     switch (type) {
       case 'SUBMISSION_APPROVED':
-        return '✅'
+        return <Check className={iconClass} />
       case 'SUBMISSION_REJECTED':
-        return '❌'
+        return <X className={iconClass} />
       case 'PAYOUT_PROCESSED':
-        return '💰'
-      case 'CAMPAIGN_COMPLETED':
-        return '🎯'
-      case 'NEW_CAMPAIGN_AVAILABLE':
-        return '🚀'
       case 'PAYOUT_READY':
-        return '💸'
+        return <DollarSign className={iconClass} />
+      case 'CAMPAIGN_COMPLETED':
+        return <Target className={iconClass} />
+      case 'NEW_CAMPAIGN_AVAILABLE':
+        return <Rocket className={iconClass} />
       case 'VERIFICATION_SUCCESS':
-        return '🔗'
+        return <Link2 className={iconClass} />
       case 'VERIFICATION_FAILED':
-        return '⚠️'
+        return <AlertCircle className={iconClass} />
       default:
-        return '📢'
+        return <MessageSquare className={iconClass} />
     }
   }
 
@@ -141,75 +140,71 @@ export function NotificationBell() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className="relative h-9 w-9">
+          <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-            >
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </Badge>
+            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-foreground text-background text-[10px] font-medium rounded-full flex items-center justify-center">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="p-4 border-b">
+      <PopoverContent className="w-72 p-0 shadow-lg" align="end">
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-border">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">Notifications</h3>
+            <span className="text-sm font-medium">Notifications</span>
             {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={markAllAsRead}
-                className="text-xs"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 Mark all read
-              </Button>
+              </button>
             )}
           </div>
         </div>
 
-        <ScrollArea className="h-96">
+        {/* Content */}
+        <ScrollArea className="max-h-80">
           {loading ? (
-            <div className="p-4 text-center text-muted-foreground">
-              Loading notifications...
+            <div className="px-4 py-8 text-center">
+              <p className="text-xs text-muted-foreground">Loading...</p>
             </div>
           ) : notifications.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>No notifications yet</p>
-              <p className="text-sm">You'll see updates about your submissions here</p>
+            <div className="px-4 py-8 text-center">
+              <Bell className="h-8 w-8 mx-auto mb-2 text-muted-foreground/30" />
+              <p className="text-xs text-muted-foreground">No notifications</p>
             </div>
           ) : (
-            <div className="divide-y">
-              {notifications.map((notification) => (
+            <div>
+              {notifications.map((notification, index) => (
                 <div
                   key={notification.id}
-                  className={`p-3 hover:bg-muted/50 transition-colors cursor-pointer ${
-                    !notification.read ? 'bg-muted/20' : ''
+                  className={`px-4 py-3 cursor-pointer transition-colors hover:bg-muted/50 ${
+                    index !== notifications.length - 1 ? 'border-b border-border/50' : ''
                   }`}
                   onClick={() => !notification.read && markAsRead(notification.id)}
                 >
-                  <div className="flex gap-2 items-start">
-                    <div className="text-base flex-shrink-0 mt-0.5">
-                      {getNotificationIcon(notification.type)}
+                  <div className="flex gap-3 items-start">
+                    {/* Icon */}
+                    <div className="mt-0.5 flex-shrink-0">
+                      <NotificationIcon type={notification.type} />
                     </div>
+                    
+                    {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-0.5">
-                        <h4 className={`text-xs font-medium leading-tight ${
+                      <div className="flex items-start justify-between gap-2">
+                        <p className={`text-xs leading-snug ${
                           !notification.read ? 'text-foreground' : 'text-muted-foreground'
                         }`}>
-                          {notification.title}
-                        </h4>
+                          {notification.message}
+                        </p>
                         {!notification.read && (
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0 mt-1" />
+                          <span className="w-1.5 h-1.5 bg-foreground rounded-full flex-shrink-0 mt-1" />
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground leading-tight line-clamp-2">
-                        {notification.message}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground/70 mt-1">
+                      <p className="text-[10px] text-muted-foreground/60 mt-1">
                         {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                       </p>
                     </div>
@@ -219,14 +214,6 @@ export function NotificationBell() {
             </div>
           )}
         </ScrollArea>
-
-        {notifications.length > 0 && (
-          <div className="p-3 border-t">
-            <Button variant="ghost" size="sm" className="w-full text-xs">
-              View all notifications
-            </Button>
-          </div>
-        )}
       </PopoverContent>
     </Popover>
   )

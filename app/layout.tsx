@@ -111,11 +111,46 @@ export default function RootLayout({
               <Toaster
                 position="bottom-right"
                 toastOptions={{
-                  duration: 5000,
+                  duration: 4000,
                   style: {
                     background: "hsl(var(--background))",
                     color: "hsl(var(--foreground))",
                     border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                    padding: "12px 16px",
+                    fontSize: "13px",
+                    fontWeight: "400",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+                    maxWidth: "320px",
+                  },
+                  success: {
+                    style: {
+                      background: "hsl(var(--background))",
+                      color: "hsl(var(--foreground))",
+                      border: "1px solid hsl(var(--border))",
+                    },
+                    iconTheme: {
+                      primary: "hsl(var(--foreground))",
+                      secondary: "hsl(var(--background))",
+                    },
+                  },
+                  error: {
+                    style: {
+                      background: "hsl(var(--background))",
+                      color: "hsl(var(--foreground))",
+                      border: "1px solid hsl(var(--border))",
+                    },
+                    iconTheme: {
+                      primary: "hsl(var(--foreground))",
+                      secondary: "hsl(var(--background))",
+                    },
+                  },
+                  loading: {
+                    style: {
+                      background: "hsl(var(--background))",
+                      color: "hsl(var(--muted-foreground))",
+                      border: "1px solid hsl(var(--border))",
+                    },
                   },
                 }}
               />
