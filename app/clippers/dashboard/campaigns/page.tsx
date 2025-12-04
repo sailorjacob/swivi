@@ -93,11 +93,16 @@ function ScheduledBadge({ startDate }: { startDate?: string }) {
   const countdown = useCountdown(startDate)
   
   return (
-    <div className="absolute top-3 left-3 z-10">
-      <Badge className="bg-muted/80 text-muted-foreground border-border text-xs px-2 py-1 font-medium flex items-center gap-1.5">
-        <Calendar className="w-3 h-3" />
-        {countdown || 'UPCOMING'}
+    <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+      <Badge className="bg-muted/90 text-muted-foreground border-border text-xs px-2 py-1 font-medium flex items-center gap-1.5">
+        <Clock className="w-3 h-3" />
+        UPCOMING
       </Badge>
+      {countdown && (
+        <Badge variant="outline" className="bg-background/80 text-foreground text-xs px-2 py-1 font-mono">
+          {countdown}
+        </Badge>
+      )}
     </div>
   )
 }
