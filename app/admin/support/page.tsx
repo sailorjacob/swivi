@@ -20,7 +20,9 @@ import {
   Send,
   Image as ImageIcon,
   X,
-  ArrowLeft
+  ArrowLeft,
+  Reply,
+  User
 } from "lucide-react"
 import toast from "react-hot-toast"
 import Link from "next/link"
@@ -34,6 +36,8 @@ interface SupportTicket {
   status: string
   adminResponse: string | null
   respondedAt: string | null
+  userReply: string | null
+  userReplyAt: string | null
   createdAt: string
   users: {
     id: string
@@ -238,10 +242,20 @@ export default function AdminSupportPage() {
                       </div>
                       <h3 className="font-medium text-foreground mb-1">{ticket.subject}</h3>
                       <p className="text-sm text-muted-foreground line-clamp-2">{ticket.message}</p>
-                      {ticket.imageUrl && (
-                        <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                          <ImageIcon className="w-3 h-3" />
-                          Has attachment
+                      {(ticket.imageUrl || ticket.userReply) && (
+                        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                          {ticket.imageUrl && (
+                            <span className="flex items-center gap-1">
+                              <ImageIcon className="w-3 h-3" />
+                              Attachment
+                            </span>
+                          )}
+                          {ticket.userReply && (
+                            <span className="flex items-center gap-1 text-primary">
+                              <Reply className="w-3 h-3" />
+                              User replied
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>
@@ -313,18 +327,39 @@ export default function AdminSupportPage() {
                   </div>
                 )}
 
-                {/* Previous Response */}
+                {/* Conversation Thread */}
                 {selectedTicket.adminResponse && (
-                  <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
-                    <h4 className="text-sm font-medium text-primary mb-2 flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4" />
-                      Previous Response
-                    </h4>
-                    <p className="text-foreground whitespace-pre-wrap">{selectedTicket.adminResponse}</p>
-                    {selectedTicket.respondedAt && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Responded {new Date(selectedTicket.respondedAt).toLocaleString()}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-muted-foreground">Conversation</h4>
+                    
+                    {/* Admin's Response */}
+                    <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                      <p className="text-xs font-medium text-primary mb-1 flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" />
+                        Your Response
                       </p>
+                      <p className="text-sm text-foreground whitespace-pre-wrap">{selectedTicket.adminResponse}</p>
+                      {selectedTicket.respondedAt && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {new Date(selectedTicket.respondedAt).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* User's Reply */}
+                    {selectedTicket.userReply && (
+                      <div className="p-3 bg-muted/30 border border-border/50 rounded-lg">
+                        <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
+                          <User className="w-3 h-3" />
+                          User Reply
+                        </p>
+                        <p className="text-sm text-foreground whitespace-pre-wrap">{selectedTicket.userReply}</p>
+                        {selectedTicket.userReplyAt && (
+                          <p className="text-xs text-muted-foreground mt-2">
+                            {new Date(selectedTicket.userReplyAt).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}

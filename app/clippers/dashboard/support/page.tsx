@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic'
 import { ClippersFAQ } from "../../../../components/clippers/faq"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { 
+import {
   CheckCircle2, 
   AlertCircle, 
   Clock, 
@@ -23,8 +23,12 @@ import {
   MessageSquare,
   Loader2,
   CheckCircle,
-  Info
+  Info,
+  Send,
+  ImageIcon
 } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -94,9 +98,12 @@ interface SupportTicket {
   category: string
   subject: string
   message: string
+  imageUrl: string | null
   status: string
   adminResponse: string | null
   respondedAt: string | null
+  userReply: string | null
+  userReplyAt: string | null
   createdAt: string
 }
 
@@ -104,10 +111,47 @@ export default function SupportPage() {
   const [tickets, setTickets] = useState<SupportTicket[]>([])
   const [loadingTickets, setLoadingTickets] = useState(true)
   const [expandedTicket, setExpandedTicket] = useState<string | null>(null)
+  const [replyingTo, setReplyingTo] = useState<string | null>(null)
+  const [replyText, setReplyText] = useState('')
+  const [submittingReply, setSubmittingReply] = useState(false)
+  const [imageModalUrl, setImageModalUrl] = useState<string | null>(null)
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     toast.success('Copied to clipboard!')
+  }
+
+  const handleSubmitReply = async (ticketId: string) => {
+    if (!replyText.trim()) {
+      toast.error('Please enter a reply')
+      return
+    }
+
+    setSubmittingReply(true)
+    try {
+      const response = await authenticatedFetch(`/api/support-tickets/${ticketId}/reply`, {
+        method: 'POST',
+        body: JSON.stringify({ reply: replyText.trim() })
+      })
+
+      if (response.ok) {
+        toast.success('Reply sent!')
+        setReplyText('')
+        setReplyingTo(null)
+        // Refresh tickets
+        const ticketsResponse = await authenticatedFetch('/api/support-tickets')
+        if (ticketsResponse.ok) {
+          setTickets(await ticketsResponse.json())
+        }
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Failed to send reply')
+      }
+    } catch (error) {
+      toast.error('Failed to send reply')
+    } finally {
+      setSubmittingReply(false)
+    }
   }
 
   // Fetch user's tickets
@@ -208,11 +252,32 @@ export default function SupportPage() {
                     
                     {expandedTicket === ticket.id && (
                       <div className="mt-4 pt-4 border-t border-border/50 space-y-4">
+                        {/* Original Message */}
                         <div>
                           <p className="text-xs font-medium text-muted-foreground mb-1">Your Message</p>
                           <p className="text-sm text-foreground whitespace-pre-wrap">{ticket.message}</p>
                         </div>
+
+                        {/* Original Image */}
+                        {ticket.imageUrl && (
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
+                              <ImageIcon className="w-3 h-3" />
+                              Attachment
+                            </p>
+                            <img 
+                              src={ticket.imageUrl} 
+                              alt="Ticket attachment"
+                              className="max-w-full h-auto max-h-48 rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setImageModalUrl(ticket.imageUrl)
+                              }}
+                            />
+                          </div>
+                        )}
                         
+                        {/* Admin Response */}
                         {ticket.adminResponse && (
                           <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
                             <p className="text-xs font-medium text-primary mb-1 flex items-center gap-1">
@@ -230,6 +295,87 @@ export default function SupportPage() {
                                   minute: '2-digit'
                                 })}
                               </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* User Reply */}
+                        {ticket.userReply && (
+                          <div className="p-3 bg-muted/30 border border-border/50 rounded-lg">
+                            <p className="text-xs font-medium text-muted-foreground mb-1">Your Reply</p>
+                            <p className="text-sm text-foreground whitespace-pre-wrap">{ticket.userReply}</p>
+                            {ticket.userReplyAt && (
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {new Date(ticket.userReplyAt).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Reply Form - show if admin has responded and ticket is not closed/resolved and no reply yet */}
+                        {ticket.adminResponse && !ticket.userReply && 
+                         ticket.status !== 'CLOSED' && ticket.status !== 'RESOLVED' && (
+                          <div className="pt-2">
+                            {replyingTo === ticket.id ? (
+                              <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+                                <Textarea
+                                  value={replyText}
+                                  onChange={(e) => setReplyText(e.target.value)}
+                                  placeholder="Type your follow-up..."
+                                  className="min-h-[80px] text-sm"
+                                  maxLength={1000}
+                                />
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setReplyingTo(null)
+                                      setReplyText('')
+                                    }}
+                                    disabled={submittingReply}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleSubmitReply(ticket.id)
+                                    }}
+                                    disabled={submittingReply || !replyText.trim()}
+                                  >
+                                    {submittingReply ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <>
+                                        <Send className="w-3 h-3 mr-1" />
+                                        Send
+                                      </>
+                                    )}
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setReplyingTo(ticket.id)
+                                }}
+                                className="text-xs"
+                              >
+                                <MessageSquare className="w-3 h-3 mr-1" />
+                                Reply to Support
+                              </Button>
                             )}
                           </div>
                         )}
@@ -553,6 +699,19 @@ export default function SupportPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Image Modal */}
+      <Dialog open={!!imageModalUrl} onOpenChange={() => setImageModalUrl(null)}>
+        <DialogContent className="sm:max-w-4xl bg-card border-border p-2">
+          {imageModalUrl && (
+            <img 
+              src={imageModalUrl} 
+              alt="Full size attachment"
+              className="w-full h-auto rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
