@@ -5,10 +5,12 @@
 /**
  * Recursively converts BigInt values to strings for JSON serialization
  * This is necessary because JSON.stringify() cannot handle BigInt values
+ * Also converts Date objects to ISO strings for proper serialization
  */
 export const convertBigIntToString = (obj: any): any => {
   if (obj === null || obj === undefined) return obj
   if (typeof obj === 'bigint') return obj.toString()
+  if (obj instanceof Date) return obj.toISOString()
   if (Array.isArray(obj)) return obj.map(convertBigIntToString)
   if (typeof obj === 'object') {
     const converted: any = {}
@@ -23,10 +25,12 @@ export const convertBigIntToString = (obj: any): any => {
 /**
  * Converts BigInt values to numbers for frontend consumption
  * Use this when you need actual numbers instead of strings
+ * Also converts Date objects to ISO strings for proper serialization
  */
 export const convertBigIntToNumber = (obj: any): any => {
   if (obj === null || obj === undefined) return obj
   if (typeof obj === 'bigint') return Number(obj)
+  if (obj instanceof Date) return obj.toISOString()
   if (Array.isArray(obj)) return obj.map(convertBigIntToNumber)
   if (typeof obj === 'object') {
     const converted: any = {}
