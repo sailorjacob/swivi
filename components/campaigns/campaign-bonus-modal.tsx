@@ -113,8 +113,8 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
               {/* Header */}
               <div className="px-6 pt-6 pb-5">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500/20 to-yellow-600/20 border border-amber-500/30">
-                    <Trophy className="w-6 h-6 text-amber-500" />
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-zinc-400/20 to-zinc-500/20 border border-zinc-400/30">
+                    <Trophy className="w-6 h-6 text-zinc-300" />
                   </div>
                   <div>
                     <h2 className="text-xl font-bold">Performance Bounties</h2>
@@ -123,15 +123,15 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
                 </div>
                 
                 {/* Total Bounty Amount */}
-                <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/10 border border-amber-500/20">
+                <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-zinc-400/10 via-zinc-300/10 to-zinc-400/10 border border-zinc-400/20">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Total Bounty Pool</p>
-                      <p className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
+                      <p className="text-3xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent">
                         ${campaign.bonusBudget.toLocaleString()}
                       </p>
                     </div>
-                    <Sparkles className="w-8 h-8 text-amber-500/50" />
+                    <Sparkles className="w-8 h-8 text-zinc-400/50" />
                   </div>
                 </div>
               </div>
@@ -146,12 +146,12 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
                     transition={{ delay: index * 0.1 }}
                     className={`rounded-xl border overflow-hidden ${
                       tier.highlight 
-                        ? 'border-amber-500/40 bg-gradient-to-br from-amber-500/5 to-transparent' 
+                        ? 'border-zinc-400/40 bg-gradient-to-br from-zinc-400/5 to-transparent' 
                         : 'border-border bg-muted/20'
                     }`}
                   >
                     {tier.highlight && (
-                      <div className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-xs font-bold flex items-center gap-2">
+                      <div className="px-4 py-2 bg-gradient-to-r from-zinc-300 to-zinc-400 text-black text-xs font-bold flex items-center gap-2">
                         <Sparkles className="w-3.5 h-3.5" />
                         LIMITED SPOTS — FIRST COME, FIRST SERVED
                       </div>
@@ -162,7 +162,7 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
                       <div className="flex items-start gap-3 mb-4">
                         <div className={`p-2.5 rounded-lg ${
                           tier.highlight 
-                            ? 'bg-gradient-to-br from-amber-500/20 to-yellow-600/20 border border-amber-500/30' 
+                            ? 'bg-gradient-to-br from-zinc-400/20 to-zinc-500/20 border border-zinc-400/30' 
                             : 'bg-muted border border-border'
                         }`}>
                           {tier.icon}
@@ -194,7 +194,7 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
                           </div>
                           <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
                             <div 
-                              className="bg-gradient-to-r from-amber-500 to-yellow-500 h-2.5 rounded-full transition-all"
+                              className="bg-gradient-to-r from-zinc-300 to-zinc-500 h-2.5 rounded-full transition-all"
                               style={{ width: `${((tier.spots - (tier.spotsRemaining || 0)) / tier.spots) * 100}%` }}
                             />
                           </div>

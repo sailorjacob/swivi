@@ -337,16 +337,15 @@ export default function CampaignDetailPage() {
             </div>
 
             {hasBonuses(campaign) && (
-              <Button
-                variant="outline"
+              <button
                 onClick={() => setBonusModalOpen(true)}
-                className="group border-amber-500/30 hover:border-amber-500/50 hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-yellow-500/10 transition-all duration-300"
+                className="group inline-flex items-center px-4 py-2 rounded-md text-sm font-medium border border-zinc-400/30 bg-transparent hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20 transition-all duration-300"
               >
-                <Trophy className="w-4 h-4 mr-2 text-amber-500 group-hover:text-amber-400" />
-                <span className="group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-yellow-500 group-hover:bg-clip-text group-hover:text-transparent">
+                <Trophy className="w-4 h-4 mr-2 text-zinc-400 group-hover:text-zinc-200" />
+                <span className="text-foreground group-hover:text-zinc-100">
                   View Bounties
                 </span>
-              </Button>
+              </button>
             )}
           </div>
 
