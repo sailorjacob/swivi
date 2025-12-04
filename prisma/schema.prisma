@@ -43,6 +43,7 @@ model User {
   socialVerifications SocialVerification[]
   viewTracking        ViewTracking[]
   notifications       Notification[]
+  supportTickets      SupportTicket[]
 
   @@map("users")
 }
@@ -277,6 +278,26 @@ model PayoutRequest {
   @@map("payout_requests")
 }
 
+model SupportTicket {
+  id            String                @id @default(cuid())
+  userId        String
+  category      SupportTicketCategory
+  subject       String
+  message       String
+  imageUrl      String?               // Optional screenshot/image
+  status        SupportTicketStatus   @default(OPEN)
+  adminResponse String?               // Admin's reply
+  respondedBy   String?               // Admin user ID who responded
+  respondedAt   DateTime?             @db.Timestamp(6)
+  createdAt     DateTime              @default(now()) @db.Timestamp(6)
+  updatedAt     DateTime              @default(now()) @db.Timestamp(6)
+  users         User                  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("support_tickets")
+}
+
 enum UserRole {
   CLIPPER
   ADMIN
@@ -355,4 +376,18 @@ enum PayoutRequestStatus {
   COMPLETED
   REJECTED
   CANCELLED
+}
+
+enum SupportTicketCategory {
+  VERIFICATION
+  PAYOUTS
+  CAMPAIGN
+  OTHER
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
 }

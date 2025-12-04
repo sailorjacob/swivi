@@ -7,7 +7,7 @@ import { useEffect, useState } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { BarChart3, Target, Shield, Activity, Loader2, UserPlus, FileVideo, DollarSign, Eye, CheckCircle, XCircle, Clock } from "lucide-react"
+import { BarChart3, Target, Shield, Activity, Loader2, UserPlus, FileVideo, DollarSign, Eye, CheckCircle, XCircle, Clock, MessageSquare } from "lucide-react"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -217,6 +217,13 @@ export default function AdminDashboard() {
       description: "Manage users and permissions",
       href: "/admin/users",
       icon: "https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/342.png",
+      color: "bg-muted border border-border"
+    },
+    {
+      title: "Support Tickets",
+      description: "View and respond to support requests",
+      href: "/admin/support",
+      icon: MessageSquare,
       color: "bg-muted border border-border"
     }
   ]
