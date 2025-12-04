@@ -316,27 +316,27 @@ export default function PayoutsPage() {
 
               <div>
                 <Label htmlFor="method">Payout Method</Label>
-                <Select value={payoutMethod} onValueChange={setPayoutMethod} required>
+                <Select value={payoutMethod} onValueChange={(value) => {
+                  // Only allow PayPal for now
+                  if (value === 'PAYPAL') {
+                    setPayoutMethod(value)
+                  }
+                }} required>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select payout method" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USDC">
-                      <div className="flex items-center gap-2">
-                        <Wallet className="w-4 h-4" />
-                        USDC Wallet
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="BITCOIN">
-                      <div className="flex items-center gap-2">
-                        <Wallet className="w-4 h-4" />
-                        Bitcoin
-                      </div>
-                    </SelectItem>
                     <SelectItem value="PAYPAL">
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4" />
                         PayPal
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="BITCOIN" disabled>
+                      <div className="flex items-center gap-2 opacity-50">
+                        <Wallet className="w-4 h-4" />
+                        Bitcoin
+                        <span className="text-xs text-muted-foreground ml-1">(Coming Soon)</span>
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -344,9 +344,7 @@ export default function PayoutsPage() {
               </div>
 
               <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
-                <p className="font-medium text-foreground mb-1">Processing Times:</p>
-                <p>• USDC: 1-2 hours</p>
-                <p>• Bitcoin: 1-2 hours</p>
+                <p className="font-medium text-foreground mb-1">Processing Time:</p>
                 <p>• PayPal: 1-3 business days</p>
               </div>
 
@@ -370,41 +368,7 @@ export default function PayoutsPage() {
           <CardContent>
             <form onSubmit={handlePayoutSettingsSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="wallet">Ethereum Address for USDC</Label>
-                <div className="relative mt-1">
-                  <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="wallet"
-                    placeholder="0x742d35Cc6635C0532925a3b8D951D9C9..."
-                    value={payoutData.walletAddress}
-                    onChange={(e) => setPayoutData(prev => ({ ...prev, walletAddress: e.target.value }))}
-                    className="pl-10 font-mono text-sm"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Enter your Ethereum address for USDC payments
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="bitcoin">Bitcoin Address</Label>
-                <div className="relative mt-1">
-                  <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="bitcoin"
-                    placeholder="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
-                    value={payoutData.bitcoinAddress}
-                    onChange={(e) => setPayoutData(prev => ({ ...prev, bitcoinAddress: e.target.value }))}
-                    className="pl-10 font-mono text-sm"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Enter your Bitcoin address for Bitcoin payments
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="paypal">PayPal Email</Label>
+                <Label htmlFor="paypal">PayPal Email <span className="text-xs text-muted-foreground font-normal">(Required for payouts)</span></Label>
                 <div className="relative mt-1">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -416,6 +380,26 @@ export default function PayoutsPage() {
                     className="pl-10"
                   />
                 </div>
+              </div>
+
+              <div className="opacity-60">
+                <Label htmlFor="bitcoin" className="flex items-center gap-2">
+                  Bitcoin Address 
+                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground">Coming Soon</span>
+                </Label>
+                <div className="relative mt-1">
+                  <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="bitcoin"
+                    placeholder="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+                    value={payoutData.bitcoinAddress}
+                    onChange={(e) => setPayoutData(prev => ({ ...prev, bitcoinAddress: e.target.value }))}
+                    className="pl-10 font-mono text-sm"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Save your Bitcoin address for future payouts
+                </p>
               </div>
 
               <Button 

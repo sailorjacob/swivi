@@ -27,6 +27,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = payoutRequestSchema.parse(body)
 
+    // Currently only PayPal is supported for payouts
+    if (validatedData.paymentMethod !== 'PAYPAL') {
+      return NextResponse.json({ 
+        error: "Payment method not available",
+        details: "Only PayPal payouts are currently supported. Bitcoin and other methods coming soon."
+      }, { status: 400 })
+    }
+
     // Use a transaction with row-level locking to prevent race conditions
     const result = await prisma.$transaction(async (tx) => {
       // Get user with FOR UPDATE lock to prevent concurrent requests
