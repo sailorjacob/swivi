@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
 const createTicketSchema = z.object({
-  category: z.enum(["VERIFICATION", "PAYOUTS", "CAMPAIGN", "OTHER"]),
+  category: z.enum(["VERIFICATION", "PAYOUTS", "CAMPAIGN", "BONUS", "OTHER"]),
   subject: z.string().min(5, "Subject must be at least 5 characters").max(200),
   message: z.string().min(10, "Message must be at least 10 characters").max(2000),
   imageUrl: z.string().url().optional().nullable(),

@@ -189,6 +189,7 @@ export function SupportTicketDialog({ children }: SupportTicketDialogProps) {
                   <SelectItem value="VERIFICATION">Verification Issue</SelectItem>
                   <SelectItem value="PAYOUTS">Payouts</SelectItem>
                   <SelectItem value="CAMPAIGN">Campaign Question</SelectItem>
+                  <SelectItem value="BONUS">Bonus Question</SelectItem>
                   <SelectItem value="OTHER">Other</SelectItem>
                 </SelectContent>
               </Select>

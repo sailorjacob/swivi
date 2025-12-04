@@ -147,6 +147,7 @@ export default function AdminSupportPage() {
       VERIFICATION: 'bg-purple-500/10 text-purple-500 border-purple-500/30',
       PAYOUTS: 'bg-green-500/10 text-green-500 border-green-500/30',
       CAMPAIGN: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
+      BONUS: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30',
       OTHER: 'bg-muted text-muted-foreground border-border'
     }
     return (

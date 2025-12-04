@@ -382,6 +382,7 @@ enum SupportTicketCategory {
   VERIFICATION
   PAYOUTS
   CAMPAIGN
+  BONUS
   OTHER
 }
 

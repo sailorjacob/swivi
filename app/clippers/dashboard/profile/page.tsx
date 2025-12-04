@@ -378,26 +378,18 @@ export default function ProfilePage() {
                 Connect your accounts to participate in campaigns
               </p>
 
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              <div className="flex flex-wrap gap-2">
                 {/* YouTube */}
                 <SocialVerificationDialog
                   platform="youtube"
                   icon={<Youtube className="w-5 h-5 text-red-400" />}
                   platformName="YouTube"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60 group">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-10 h-10 bg-red-500/10 rounded-full flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
-                        <Youtube className="w-5 h-5 text-red-400" />
-                      </div>
-                      <div className="text-center">
-                        <h3 className="font-medium text-foreground text-sm hidden sm:block">YouTube</h3>
-                        <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 mt-1">
-                          Verify
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                  <Button variant="outline" size="sm" className="h-9 px-3 text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 gap-2">
+                    <Youtube className="w-4 h-4 text-red-400" />
+                    <span className="hidden sm:inline">YouTube</span>
+                    <span className="sm:hidden">YT</span>
+                  </Button>
                 </SocialVerificationDialog>
 
                 {/* Instagram */}
@@ -406,19 +398,11 @@ export default function ProfilePage() {
                   icon={<Instagram className="w-5 h-5 text-purple-400" />}
                   platformName="Instagram"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60 group">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500/8 to-pink-500/8 rounded-full flex items-center justify-center group-hover:from-purple-500/12 group-hover:to-pink-500/12 transition-all">
-                        <Instagram className="w-5 h-5 text-purple-400" />
-                      </div>
-                      <div className="text-center">
-                        <h3 className="font-medium text-foreground text-sm hidden sm:block">Instagram</h3>
-                        <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 mt-1">
-                          Verify
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                  <Button variant="outline" size="sm" className="h-9 px-3 text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 gap-2">
+                    <Instagram className="w-4 h-4 text-purple-400" />
+                    <span className="hidden sm:inline">Instagram</span>
+                    <span className="sm:hidden">IG</span>
+                  </Button>
                 </SocialVerificationDialog>
 
                 {/* TikTok */}
@@ -427,19 +411,11 @@ export default function ProfilePage() {
                   icon={<Music className="w-5 h-5 text-slate-300" />}
                   platformName="TikTok"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60 group">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-10 h-10 bg-slate-500/10 rounded-full flex items-center justify-center group-hover:bg-slate-500/20 transition-colors">
-                        <Music className="w-5 h-5 text-slate-300" />
-                      </div>
-                      <div className="text-center">
-                        <h3 className="font-medium text-foreground text-sm hidden sm:block">TikTok</h3>
-                        <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 mt-1">
-                          Verify
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                  <Button variant="outline" size="sm" className="h-9 px-3 text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 gap-2">
+                    <Music className="w-4 h-4 text-slate-300" />
+                    <span className="hidden sm:inline">TikTok</span>
+                    <span className="sm:hidden">TT</span>
+                  </Button>
                 </SocialVerificationDialog>
 
                 {/* X (Twitter) - HIDDEN: Apify actors not working, re-enable when ready */}
@@ -448,19 +424,10 @@ export default function ProfilePage() {
                   icon={<span className="text-slate-300 font-bold text-lg">𝕏</span>}
                   platformName="X (Twitter)"
                 >
-                  <div className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer hover:border-border/60 group">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-10 h-10 bg-slate-500/10 rounded-full flex items-center justify-center group-hover:bg-slate-500/20 transition-colors">
-                        <span className="text-slate-300 font-bold text-lg">𝕏</span>
-                      </div>
-                      <div className="text-center">
-                        <h3 className="font-medium text-foreground text-sm hidden sm:block">X (Twitter)</h3>
-                        <Button variant="outline" size="sm" className="w-full text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 mt-1">
-                          Verify
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                  <Button variant="outline" size="sm" className="h-9 px-3 text-xs border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border/60 gap-2">
+                    <span className="font-bold">𝕏</span>
+                    <span className="hidden sm:inline">X</span>
+                  </Button>
                 </SocialVerificationDialog> */}
               </div>
             </CardContent>
