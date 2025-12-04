@@ -462,9 +462,12 @@ export default function CampaignsPage() {
                           e.stopPropagation()
                           setBonusModalOpen(true)
                         }}
+                        className="group border-amber-500/30 hover:border-amber-500/50 hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-yellow-500/10 transition-all duration-300"
                       >
-                        <Trophy className="w-4 h-4 mr-1" />
-                        Bounties
+                        <Trophy className="w-4 h-4 mr-1 text-amber-500 group-hover:text-amber-400" />
+                        <span className="group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-yellow-500 group-hover:bg-clip-text group-hover:text-transparent">
+                          Bounties
+                        </span>
                       </Button>
                     )}
                   </div>
