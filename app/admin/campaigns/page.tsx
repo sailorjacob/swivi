@@ -253,13 +253,24 @@ export default function AdminCampaignsPage() {
       }
 
       console.log("✅ Validation passed, creating request body...")
+      
+      // Convert datetime-local value (local time) to ISO string for API
+      // datetime-local gives us "YYYY-MM-DDTHH:MM" in local time
+      // We need to create a Date object and convert to ISO for proper UTC storage
+      let startDateISO = null
+      if (formData.startDate) {
+        const localDate = new Date(formData.startDate)
+        startDateISO = localDate.toISOString()
+        console.log("📅 Converting startDate:", formData.startDate, "→", startDateISO)
+      }
+      
       const requestBody: any = {
         title: formData.title.trim(),
         description: formData.description.trim(),
         creator: formData.creator.trim(),
         budget,
         payoutRate,
-        startDate: formData.startDate || null,
+        startDate: startDateISO,
         targetPlatforms: formData.targetPlatforms,
         requirements: formData.requirements || [],
         status: formData.status,
@@ -417,13 +428,21 @@ export default function AdminCampaignsPage() {
         }
       }
 
+      // Convert datetime-local value (local time) to ISO string for API
+      let updateStartDateISO = null
+      if (formData.startDate) {
+        const localDate = new Date(formData.startDate)
+        updateStartDateISO = localDate.toISOString()
+        console.log("📅 Converting update startDate:", formData.startDate, "→", updateStartDateISO)
+      }
+      
       const updatePayload: any = {
           title: formData.title,
           description: formData.description,
           creator: formData.creator,
         budget: parseFloat(formData.budget) || 0,
         payoutRate: parseFloat(formData.payoutRate) || 0,
-          startDate: formData.startDate || null,
+          startDate: updateStartDateISO,
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
@@ -619,7 +638,7 @@ export default function AdminCampaignsPage() {
       // Store the campaign ID for updating
       setEditingCampaignId(campaign.id)
       
-      // Safe date formatting with extensive error handling
+      // Safe date formatting with LOCAL timezone handling for datetime-local input
       const formatDateForInput = (dateValue: string | Date | undefined | null, fieldName: string) => {
         console.log(`📅 Formatting ${fieldName}:`, dateValue, typeof dateValue)
         
@@ -648,17 +667,17 @@ export default function AdminCampaignsPage() {
             return ""
           }
           
-          const isoString = date.toISOString()
-          console.log(`📅 ${fieldName} ISO string:`, isoString)
+          // Format as LOCAL time for datetime-local input (not UTC!)
+          // datetime-local expects: YYYY-MM-DDTHH:MM in local time
+          const year = date.getFullYear()
+          const month = String(date.getMonth() + 1).padStart(2, '0')
+          const day = String(date.getDate()).padStart(2, '0')
+          const hours = String(date.getHours()).padStart(2, '0')
+          const minutes = String(date.getMinutes()).padStart(2, '0')
           
-          if (!isoString || typeof isoString !== 'string') {
-            console.log(`📅 ${fieldName} toISOString failed`)
-            return ""
-          }
-          
-          const sliced = isoString.slice(0, 16)
-          console.log(`📅 ${fieldName} sliced:`, sliced)
-          return sliced
+          const localString = `${year}-${month}-${day}T${hours}:${minutes}`
+          console.log(`📅 ${fieldName} local string:`, localString)
+          return localString
         } catch (error) {
           console.error(`📅 Error formatting ${fieldName}:`, error, 'Value:', dateValue)
           return ""
@@ -1590,7 +1609,7 @@ function CampaignForm({
           {formData.status === 'SCHEDULED' && (
             <div>
               <label htmlFor="campaign-startDate" className="block text-sm font-medium mb-1">
-                Launch Date & Time *
+                Launch Date & Time * <span className="text-muted-foreground font-normal">({Intl.DateTimeFormat().resolvedOptions().timeZone})</span>
               </label>
               <Input
                 id="campaign-startDate"
@@ -1602,7 +1621,7 @@ function CampaignForm({
                 min={new Date().toISOString().slice(0, 16)}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Campaign will automatically go live at this time
+                Campaign will automatically go live at this time (your local timezone)
               </p>
             </div>
           )}

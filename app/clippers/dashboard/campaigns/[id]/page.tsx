@@ -427,12 +427,13 @@ export default function CampaignDetailPage() {
                         This campaign hasn't started yet. Check back when it goes live to submit your clips.
                         {campaign.startDate && (
                           <span className="block mt-1 text-foreground/70">
-                            Launches: {new Date(campaign.startDate).toLocaleDateString('en-US', { 
+                            Launches: {new Date(campaign.startDate).toLocaleString('en-US', { 
                               month: 'long', 
                               day: 'numeric', 
                               year: 'numeric',
                               hour: 'numeric',
-                              minute: '2-digit'
+                              minute: '2-digit',
+                              timeZoneName: 'short'
                             })}
                           </span>
                         )}
