@@ -1,16 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { supabase, authenticatedFetch } from "@/lib/supabase-browser"
 import { motion } from "framer-motion"
 import { Card, CardContent } from "../../../../components/ui/card"
 import { Badge } from "../../../../components/ui/badge"
 import { Button } from "../../../../components/ui/button"
 import { Progress } from "../../../../components/ui/progress"
-import { CampaignDetailModal } from "../../../../components/clippers/campaign-detail-modal"
 import { CampaignBonusModal } from "../../../../components/campaigns/campaign-bonus-modal"
 import { ErrorBoundary, CampaignErrorFallback } from "../../../../components/error-boundary"
 import Image from "next/image"
+import Link from "next/link"
 import { 
   TrendingUp, 
   DollarSign, 
@@ -67,11 +68,10 @@ const isFeaturedCampaign = (campaign: Campaign) => {
 }
 
 export default function CampaignsPage() {
+  const router = useRouter()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
-  const [modalOpen, setModalOpen] = useState(false)
   const [bonusModalOpen, setBonusModalOpen] = useState(false)
   const [filter, setFilter] = useState<'active' | 'completed' | 'all'>('active')
 
@@ -102,29 +102,8 @@ export default function CampaignsPage() {
     fetchCampaigns()
   }, [])
 
-  const handleJoinCampaign = (campaign: Campaign) => {
-    setSelectedCampaign(campaign)
-    setModalOpen(true)
-  }
-
-  // Transform API campaign data to match CampaignDetailModal interface
-  const transformCampaignForModal = (campaign: Campaign) => {
-    return {
-      id: campaign.id,
-      title: campaign.title,
-      creator: campaign.creator,
-      description: campaign.description,
-      image: campaign.featuredImage || null,
-      pool: Number(campaign.budget),
-      spent: Number(campaign.spent || 0),
-      cpm: Number(campaign.payoutRate), // Payout rate per 1K views
-      platforms: campaign.targetPlatforms.map(p => p.toLowerCase()),
-      totalSubmissions: campaign._count.clipSubmissions,
-      totalViews: 0, // We don't track total views in current schema
-      status: campaign.status,
-      requirements: campaign.requirements,
-      contentSources: [] // We don't have content sources in current schema
-    }
+  const handleViewCampaign = (campaign: Campaign) => {
+    router.push(`/clippers/dashboard/campaigns/${campaign.id}`)
   }
 
   const getProgressPercentage = (spent: number, budget: number) => {
@@ -219,7 +198,7 @@ export default function CampaignsPage() {
               </div>
               <div className="flex gap-2 w-full sm:w-auto">
                 <Button 
-                  onClick={() => handleJoinCampaign(featuredCampaign)}
+                  onClick={() => handleViewCampaign(featuredCampaign)}
                   className="flex-1 sm:flex-none"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
@@ -308,7 +287,7 @@ export default function CampaignsPage() {
                 {/* Campaign Image */}
                 <div 
                   className="relative h-48 bg-muted rounded-t-lg overflow-hidden cursor-pointer group-hover:scale-105 transition-transform duration-300"
-                  onClick={() => handleJoinCampaign(campaign)}
+                  onClick={() => handleViewCampaign(campaign)}
                 >
                   {isActive && (
                     <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
@@ -455,11 +434,11 @@ export default function CampaignsPage() {
                   <div className="flex gap-2">
                     <Button
                       className="flex-1"
-                      onClick={() => handleJoinCampaign(campaign)}
-                      disabled={isLaunching || isCompleted}
+                      onClick={() => handleViewCampaign(campaign)}
+                      disabled={isLaunching}
                       variant={isCompleted ? "secondary" : "default"}
                     >
-                      {isLaunching ? "Coming Soon" : isCompleted ? "Campaign Ended" : "Join Campaign"}
+                      {isLaunching ? "Coming Soon" : isCompleted ? "View Results" : "Join Campaign"}
                     </Button>
                     {hasBonuses(campaign) && !isCompleted && (
                       <Button
@@ -483,13 +462,6 @@ export default function CampaignsPage() {
         })}
         </div>
       )}
-
-        {/* Campaign Detail Modal */}
-        <CampaignDetailModal
-          campaign={selectedCampaign ? transformCampaignForModal(selectedCampaign) : null}
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-        />
 
         {/* Bonus Modal for Featured Campaigns */}
         <CampaignBonusModal
