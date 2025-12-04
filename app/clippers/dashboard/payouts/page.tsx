@@ -39,7 +39,7 @@ export default function PayoutsPage() {
   const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(false)
   const [payoutAmount, setPayoutAmount] = useState("")
-  const [payoutMethod, setPayoutMethod] = useState<'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE' | 'USDC' | 'BITCOIN'>('PAYPAL')
+  const [payoutMethod, setPayoutMethod] = useState<'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE' | 'ETHEREUM' | 'BITCOIN'>('PAYPAL')
   const [payoutSaving, setPayoutSaving] = useState(false)
   const [payoutSuccess, setPayoutSuccess] = useState(false)
   const [user, setUser] = useState<any>(null)
@@ -150,7 +150,7 @@ export default function PayoutsPage() {
     let paymentDetails = ''
     if (payoutMethod === 'PAYPAL') {
       paymentDetails = payoutData.paypalEmail || ''
-    } else if (payoutMethod === 'USDC') {
+    } else if (payoutMethod === 'ETHEREUM') {
       paymentDetails = payoutData.walletAddress || ''
     } else if (payoutMethod === 'BITCOIN') {
       paymentDetails = payoutData.bitcoinAddress || ''
@@ -332,10 +332,10 @@ export default function PayoutsPage() {
                         PayPal
                       </div>
                     </SelectItem>
-                    <SelectItem value="USDC" disabled>
+                    <SelectItem value="ETHEREUM" disabled>
                       <div className="flex items-center gap-2 opacity-50">
                         <Wallet className="w-4 h-4" />
-                        USDC
+                        Ethereum
                         <span className="text-xs text-muted-foreground ml-1">(Coming Soon)</span>
                       </div>
                     </SelectItem>
@@ -391,7 +391,7 @@ export default function PayoutsPage() {
 
               <div className="opacity-60">
                 <Label htmlFor="wallet" className="flex items-center gap-2">
-                  USDC Wallet Address
+                  Ethereum Wallet Address
                   <span className="text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground">Coming Soon</span>
                 </Label>
                 <div className="relative mt-1">
@@ -405,7 +405,7 @@ export default function PayoutsPage() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Save your Ethereum address for future USDC payouts
+                  Save your Ethereum address for future payouts
                 </p>
               </div>
 

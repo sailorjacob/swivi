@@ -191,11 +191,11 @@ export async function POST(
         }
 
         // Map payment method to valid PayoutMethod enum
-        const methodMap: Record<string, 'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE' | 'USDC' | 'BITCOIN'> = {
+        const methodMap: Record<string, 'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE' | 'ETHEREUM' | 'BITCOIN'> = {
           'PAYPAL': 'PAYPAL',
           'BANK_TRANSFER': 'BANK_TRANSFER',
           'STRIPE': 'STRIPE',
-          'USDC': 'USDC',
+          'ETHEREUM': 'ETHEREUM',
           'BITCOIN': 'BITCOIN'
         }
         const payoutMethod = methodMap[payoutRequest.paymentMethod || 'PAYPAL'] || 'PAYPAL'

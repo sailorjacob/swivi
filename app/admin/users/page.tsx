@@ -651,11 +651,11 @@ export default function AdminUsersPage() {
                         )}
                       </div>
 
-                      {/* USDC Wallet */}
+                      {/* Ethereum Wallet */}
                       <div className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
                         <div className="flex items-center gap-2">
                           <Wallet className="w-4 h-4 text-purple-500" />
-                          <span className="text-sm font-medium">USDC Wallet:</span>
+                          <span className="text-sm font-medium">Ethereum:</span>
                         </div>
                         {selectedUser.walletAddress ? (
                           <div className="flex items-center gap-2">

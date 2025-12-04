@@ -266,7 +266,7 @@ export default function AdminPayoutsPage() {
                       <div className="font-medium truncate">
                         {request.paymentMethod === 'PAYPAL' ? 'PayPal' :
                          request.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' :
-                         request.paymentMethod === 'STRIPE' ? 'USDC (Stripe)' :
+                         request.paymentMethod === 'ETHEREUM' ? 'Ethereum' :
                          request.paymentMethod === 'BITCOIN' ? 'Bitcoin' :
                          request.paymentMethod}
                       </div>
@@ -527,9 +527,9 @@ export default function AdminPayoutsPage() {
                             variant="outline" 
                             size="sm" 
                             className="h-7 text-xs"
-                            onClick={() => copyToClipboard(user.walletAddress!, 'USDC wallet')}
+                            onClick={() => copyToClipboard(user.walletAddress!, 'Ethereum wallet')}
                           >
-                            <span className="font-medium mr-1">USDC:</span>
+                            <span className="font-medium mr-1">ETH:</span>
                             {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
                             <Copy className="w-3 h-3 ml-1" />
                           </Button>
@@ -735,7 +735,7 @@ export default function AdminPayoutsPage() {
                   <div className="text-sm font-semibold">
                     {selectedRequest.paymentMethod === 'PAYPAL' ? 'PayPal' :
                      selectedRequest.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' :
-                     selectedRequest.paymentMethod === 'STRIPE' ? 'USDC (Stripe)' :
+                     selectedRequest.paymentMethod === 'ETHEREUM' ? 'Ethereum' :
                      selectedRequest.paymentMethod === 'BITCOIN' ? 'Bitcoin' :
                      selectedRequest.paymentMethod}
                   </div>
