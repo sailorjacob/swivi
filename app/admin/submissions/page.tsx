@@ -462,7 +462,7 @@ export default function AdminSubmissionsPage() {
                   ref={isHighlighted ? highlightedRef : undefined}
                   className={`flex items-start justify-between gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-all duration-500 ${
                     submission.requiresReview ? 'border-slate-400 bg-slate-100/30 dark:border-slate-600 dark:bg-slate-800/30' : ''
-                  } ${isHighlighted ? 'ring-2 ring-primary ring-offset-2 bg-primary/5' : ''}`}
+                  } ${isHighlighted ? 'bg-muted/80 border-foreground/20' : ''}`}
                 >
                   <div className="flex-1 min-w-0">
                     {/* Platform, Status, and User info - all left aligned */}

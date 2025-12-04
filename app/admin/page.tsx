@@ -404,7 +404,7 @@ export default function AdminDashboard() {
                     <Link
                       key={`${activity.type}-${activity.timestamp}-${index}`}
                       href={activityLink}
-                      className="flex items-center gap-3 py-2 px-2 rounded-md hover:bg-muted/50 transition-colors cursor-pointer group"
+                      className="flex items-center gap-3 py-2 px-2 rounded-md hover:bg-muted/50 transition-colors cursor-pointer group hover:underline decoration-muted-foreground/50 underline-offset-2"
                     >
                       {content}
                     </Link>

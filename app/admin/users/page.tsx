@@ -453,7 +453,7 @@ export default function AdminUsersPage() {
                     key={user.id}
                     ref={isHighlighted ? highlightedRef : undefined}
                     className={`flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-all duration-500 ${
-                      isHighlighted ? 'ring-2 ring-primary ring-offset-2 bg-primary/5' : ''
+                      isHighlighted ? 'bg-muted/80 border-foreground/20' : ''
                     }`}
                   >
                     <div className="flex items-center space-x-4 flex-1">

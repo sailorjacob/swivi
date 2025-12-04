@@ -224,7 +224,7 @@ export default function AdminPayoutsPage() {
               key={request.id}
               ref={isHighlighted ? highlightedRef : undefined}
               className={`hover:shadow-md transition-all duration-500 ${
-                isHighlighted ? 'ring-2 ring-primary ring-offset-2 bg-primary/5' : ''
+                isHighlighted ? 'bg-muted/80 border-foreground/20' : ''
               }`}
             >
               <CardHeader className="pb-3">
