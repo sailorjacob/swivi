@@ -420,8 +420,15 @@ export default function ClipperDashboard() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
-                        {getPlatformLogo(clip.platform, '', 20)}
+                      <div className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-md">
+                        {getPlatformLogo(clip.platform, '', 16)}
+                        <span className="text-xs font-medium capitalize">
+                          {clip.platform?.toLowerCase() === 'youtube' ? 'YouTube' : 
+                           clip.platform?.toLowerCase() === 'tiktok' ? 'TikTok' :
+                           clip.platform?.toLowerCase() === 'instagram' ? 'Instagram' :
+                           clip.platform?.toLowerCase() === 'twitter' ? 'X' :
+                           clip.platform}
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

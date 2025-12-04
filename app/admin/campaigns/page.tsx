@@ -1085,7 +1085,11 @@ export default function AdminCampaignsPage() {
                                               <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-1.5 mb-1">
                                                   <Badge variant="outline" className="text-xs px-1.5 py-0">
-                                                    {sub.platform}
+                                                    {sub.platform === 'YOUTUBE' ? 'YouTube' : 
+                                                     sub.platform === 'TIKTOK' ? 'TikTok' :
+                                                     sub.platform === 'INSTAGRAM' ? 'Instagram' :
+                                                     sub.platform === 'TWITTER' ? 'X' :
+                                                     sub.platform}
                                                   </Badge>
                                                   <Badge variant="outline" className="text-xs px-1.5 py-0">
                                                     {sub.status}
@@ -1098,7 +1102,7 @@ export default function AdminCampaignsPage() {
                                                   rel="noopener noreferrer"
                                                   className="text-xs text-blue-500 hover:text-blue-700 truncate block"
                                                 >
-                                                  {sub.clipUrl.length > 50 ? `${sub.clipUrl.substring(0, 50)}...` : sub.clipUrl}
+                                                  {sub.clipUrl?.length > 50 ? `${sub.clipUrl.substring(0, 50)}...` : sub.clipUrl}
                                                 </a>
                                               </div>
                                               <div className="text-right flex-shrink-0">
@@ -1689,15 +1693,26 @@ function CampaignView({
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="outline" className="text-xs">
-                        {sub.platform}
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {sub.platform === 'YOUTUBE' ? 'YouTube' : 
+                         sub.platform === 'TIKTOK' ? 'TikTok' :
+                         sub.platform === 'INSTAGRAM' ? 'Instagram' :
+                         sub.platform === 'TWITTER' ? 'X' :
+                         sub.platform}
                       </Badge>
                       <Badge variant="outline" className="text-xs">
                         {sub.status}
                       </Badge>
                     </div>
                     <p className="font-medium text-sm">{sub.user?.name || sub.user?.email || 'Unknown'}</p>
-                    <p className="text-xs text-muted-foreground truncate">{sub.clipUrl}</p>
+                    <a 
+                      href={sub.clipUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-500 hover:text-blue-700 truncate block"
+                    >
+                      {sub.clipUrl?.length > 50 ? `${sub.clipUrl.substring(0, 50)}...` : sub.clipUrl}
+                    </a>
                     {sub.user?.paypalEmail && (
                       <p className="text-xs text-muted-foreground mt-1">PayPal: {sub.user.paypalEmail}</p>
                     )}

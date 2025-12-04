@@ -445,8 +445,15 @@ export default function AdminSubmissionsPage() {
                   <div className="flex-1 min-w-0">
                     {/* Platform, Status, and User info - all left aligned */}
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
-                        {getPlatformLogo(submission.platform, '', 18)}
+                      <div className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-md">
+                        {getPlatformLogo(submission.platform, '', 16)}
+                        <span className="text-xs font-medium">
+                          {submission.platform === 'YOUTUBE' ? 'YouTube' : 
+                           submission.platform === 'TIKTOK' ? 'TikTok' :
+                           submission.platform === 'INSTAGRAM' ? 'Instagram' :
+                           submission.platform === 'TWITTER' ? 'X' :
+                           submission.platform}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         {getStatusIcon(submission.status, submission.autoRejected)}
@@ -469,15 +476,29 @@ export default function AdminSubmissionsPage() {
                     
                     {/* Campaign title and URL */}
                     <div className="mb-2 flex items-start gap-3">
-                      {submission.campaigns.featuredImage && (
-                        <img 
-                          src={submission.campaigns.featuredImage} 
-                          alt="" 
-                          className="w-10 h-10 rounded object-cover flex-shrink-0"
-                        />
-                      )}
+                      <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
+                        {submission.campaigns.featuredImage ? (
+                          <img 
+                            src={submission.campaigns.featuredImage} 
+                            alt={submission.campaigns.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs font-medium">
+                            {submission.campaigns.title?.charAt(0) || '?'}
+                          </div>
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium">{submission.campaigns.title}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{submission.campaigns.title}</p>
+                          <a 
+                            href={`/admin/campaigns?id=${submission.campaigns.id}`}
+                            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            View →
+                          </a>
+                        </div>
                         <div className="flex items-center gap-2 mt-1">
                           <ExternalLink className="w-3 h-3 text-muted-foreground" />
                           <button
