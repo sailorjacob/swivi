@@ -315,14 +315,14 @@ export default function PayoutsPage() {
               </div>
 
               <div>
-                <Label htmlFor="method">Payout Method</Label>
+                <Label htmlFor="payout-method">Payout Method</Label>
                 <Select value={payoutMethod} onValueChange={(value) => {
                   // Only allow PayPal for now
                   if (value === 'PAYPAL') {
                     setPayoutMethod(value)
                   }
                 }} required>
-                  <SelectTrigger className="mt-1">
+                  <SelectTrigger id="payout-method" className="mt-1">
                     <SelectValue placeholder="Select payout method" />
                   </SelectTrigger>
                   <SelectContent>
