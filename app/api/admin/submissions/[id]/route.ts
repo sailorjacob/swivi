@@ -175,7 +175,7 @@ export async function PUT(
       }
     })
 
-    // Send notifications based on status change
+    // Send notifications based on status change (non-blocking - don't fail if notification fails)
     const notificationService = new NotificationService()
 
     // If approved, send approval notification and create clip
@@ -201,30 +201,45 @@ export async function PUT(
         clipId = clip.id
       }
 
-      await notificationService.notifySubmissionApproved(
-        params.id,
-        submission.userId,
-        submission.campaigns.title
-      )
+      try {
+        await notificationService.notifySubmissionApproved(
+          params.id,
+          submission.userId,
+          submission.campaigns.title
+        )
+      } catch (notifyError) {
+        console.error("Failed to send approval notification:", notifyError)
+        // Don't fail the whole operation if notification fails
+      }
     }
 
     // If rejected, send rejection notification
     if (validatedData.status === "REJECTED" && submission.status !== "REJECTED") {
-      await notificationService.notifySubmissionRejected(
-        params.id,
-        submission.userId,
-        submission.campaigns.title,
-        validatedData.rejectionReason
-      )
+      try {
+        await notificationService.notifySubmissionRejected(
+          params.id,
+          submission.userId,
+          submission.campaigns.title,
+          validatedData.rejectionReason
+        )
+      } catch (notifyError) {
+        console.error("Failed to send rejection notification:", notifyError)
+        // Don't fail the whole operation if notification fails
+      }
     }
 
     // If paid, send payout notification and update campaign
     if (validatedData.status === "PAID" && validatedData.payout) {
-      await notificationService.notifyPayoutProcessed(
-        submission.userId,
-        validatedData.payout,
-        `payout-${params.id}`
-      )
+      try {
+        await notificationService.notifyPayoutProcessed(
+          submission.userId,
+          validatedData.payout,
+          `payout-${params.id}`
+        )
+      } catch (notifyError) {
+        console.error("Failed to send payout notification:", notifyError)
+        // Don't fail the whole operation if notification fails
+      }
 
       // Update campaign spent amount
       await prisma.campaign.update({
