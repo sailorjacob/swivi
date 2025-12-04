@@ -175,7 +175,7 @@ export default function ClippersLoginPage() {
                 </p>
                 <p className="text-xs text-neutral-500 leading-relaxed">
                   By continuing, you agree to our{" "}
-                  <Link href="/clippers/dashboard/rules" className="text-neutral-300 hover:text-green-300 underline underline-offset-2 transition-colors">
+                  <Link href="/clippers/rules" className="text-neutral-300 hover:text-white underline underline-offset-2 transition-colors">
                     rules and guidelines
                   </Link>
                 </p>

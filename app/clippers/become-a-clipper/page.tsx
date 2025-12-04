@@ -175,9 +175,9 @@ export default function BecomeAClipperPage() {
                   </p>
                   <p className="text-xs text-neutral-500 leading-relaxed">
                     By continuing, you agree to our{" "}
-                    <Link href="/clippers/dashboard/rules" className="text-neutral-300 hover:text-white underline underline-offset-2 transition-colors">
-                      rules and guidelines
-                    </Link>
+                  <Link href="/clippers/rules" className="text-neutral-300 hover:text-white underline underline-offset-2 transition-colors">
+                    rules and guidelines
+                  </Link>
                   </p>
                 </div>
               </CardContent>
