@@ -15,7 +15,7 @@ const updateCampaignSchema = z.object({
   payoutRate: z.number().positive("Payout rate must be positive").optional(),
   startDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
   endDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
-  status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
+  status: z.enum(["DRAFT", "SCHEDULED", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])).optional(),
   requirements: z.array(z.string()).optional(),
   featuredImage: z.string().url().optional().nullable(),
