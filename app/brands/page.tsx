@@ -131,7 +131,7 @@ export default function BrandsPage() {
                   href="https://calendly.com/bykevingeorge/30min?month=2025-05"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center text-sm font-normal bg-foreground text-background px-8 py-4 rounded-full hover:bg-foreground/90 transition-all duration-300 group"
+                  className="inline-flex items-center text-sm font-normal bg-foreground text-background px-8 py-4 rounded-full border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300 group"
                 >
                   Launch Your Campaign
                   <motion.span
@@ -320,7 +320,7 @@ export default function BrandsPage() {
                 href="https://calendly.com/bykevingeorge/30min?month=2025-05"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center text-sm font-normal bg-foreground text-background px-8 py-4 rounded-full hover:bg-foreground/90 transition-all duration-300 group"
+                className="inline-flex items-center text-sm font-normal bg-foreground text-background px-8 py-4 rounded-full border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300 group"
               >
                 Schedule a Call
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

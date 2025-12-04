@@ -22,7 +22,7 @@ export default function HomePage() {
       <main className="flex min-h-screen flex-col pt-16">
         <Hero />
         <Founder />
-        <CreatorViewsCalculator />
+        {/* <CreatorViewsCalculator /> */}
         {/* <CampaignsPreview /> */}
         {/* <MusicHubPreview /> */}
         {/* <Testimonials /> */}

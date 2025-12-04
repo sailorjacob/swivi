@@ -66,7 +66,7 @@ export default function AboutPage() {
       <Header />
       <main className="flex min-h-screen flex-col pt-16">
         {/* Hero Section */}
-        <section className="py-20 md:py-32">
+        <section className="py-12 md:py-16">
           <div className="max-width-wrapper section-padding">
             <motion.div
               variants={containerVariants}
@@ -104,7 +104,7 @@ export default function AboutPage() {
               {/* Description below video */}
               <motion.p
                 variants={itemVariants}
-                className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mt-8"
+                className="text-sm text-muted-foreground text-center max-w-2xl mx-auto mt-4"
               >
                 Understanding the landscape of traditional advertising costs and how clipper marketing revolutionizes brand reach.
               </motion.p>
@@ -113,7 +113,7 @@ export default function AboutPage() {
         </section>
 
         {/* CPM Article Section */}
-        <section className="py-12 md:py-16 border-t border-black/5">
+        <section className="py-8 md:py-12 border-t border-black/5">
           <div className="max-width-wrapper section-padding">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
