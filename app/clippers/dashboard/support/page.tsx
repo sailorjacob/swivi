@@ -115,7 +115,7 @@ export default function SupportPage() {
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-light text-white mb-2">Help & Support</h1>
+        <h1 className="text-3xl font-light text-foreground mb-2">Help & Support</h1>
         <p className="text-muted-foreground">Guides, troubleshooting, and answers to common questions.</p>
       </div>
 
@@ -141,7 +141,7 @@ export default function SupportPage() {
 
       {/* Social Verification Guide */}
       <div id="verification">
-        <h2 className="text-xl font-medium text-white mb-4 flex items-center gap-2">
+        <h2 className="text-xl font-medium text-foreground mb-4 flex items-center gap-2">
           <Shield className="h-5 w-5 text-primary" />
           Social Account Verification
         </h2>
@@ -263,7 +263,7 @@ export default function SupportPage() {
 
       {/* Payouts Guide */}
       <div id="payouts">
-        <h2 className="text-xl font-medium text-white mb-4 flex items-center gap-2">
+        <h2 className="text-xl font-medium text-foreground mb-4 flex items-center gap-2">
           <DollarSign className="h-5 w-5 text-green-500" />
           How Payouts Work
         </h2>
@@ -393,7 +393,7 @@ export default function SupportPage() {
 
       {/* Clip Submissions Guide */}
       <div id="submissions">
-        <h2 className="text-xl font-medium text-white mb-4 flex items-center gap-2">
+        <h2 className="text-xl font-medium text-foreground mb-4 flex items-center gap-2">
           <Eye className="h-5 w-5 text-blue-500" />
           Submitting Clips
         </h2>
@@ -463,7 +463,7 @@ export default function SupportPage() {
 
       {/* FAQ Section */}
       <div id="faq">
-        <h2 className="text-xl font-medium text-white mb-4 flex items-center gap-2">
+        <h2 className="text-xl font-medium text-foreground mb-4 flex items-center gap-2">
           <HelpCircle className="h-5 w-5 text-amber-500" />
           Frequently Asked Questions
         </h2>

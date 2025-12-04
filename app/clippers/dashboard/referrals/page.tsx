@@ -146,11 +146,11 @@ function ReferralCard({ referral }: { referral: typeof recentReferrals[0] }) {
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-foreground rounded-full flex items-center justify-center text-white font-medium">
+            <div className="w-10 h-10 bg-foreground rounded-full flex items-center justify-center text-foreground font-medium">
               {referral.avatar}
             </div>
             <div>
-              <p className="text-white font-medium">{referral.name}</p>
+              <p className="text-foreground font-medium">{referral.name}</p>
               <p className="text-muted-foreground text-sm">{referral.email}</p>
             </div>
           </div>
@@ -185,7 +185,7 @@ function TierCard({ tier }: { tier: typeof referralTiers[0] }) {
           <div className="flex items-center space-x-3">
             <Icon className={`w-6 h-6 ${tier.current ? 'text-foreground' : 'text-muted-foreground'}`} />
             <div>
-              <h3 className={`font-medium ${tier.current ? 'text-foreground' : 'text-white'}`}>
+              <h3 className={`font-medium ${tier.current ? 'text-foreground' : 'text-foreground'}`}>
                 {tier.name}
               </h3>
               <p className="text-muted-foreground text-sm">{tier.referrals} referrals</p>
@@ -199,7 +199,7 @@ function TierCard({ tier }: { tier: typeof referralTiers[0] }) {
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
-            <span className="text-white">{Math.round(tier.progress)}%</span>
+            <span className="text-foreground">{Math.round(tier.progress)}%</span>
           </div>
           <Progress value={tier.progress} className="h-2" />
           <p className="text-foreground text-sm font-medium">{tier.bonus}</p>
@@ -216,7 +216,7 @@ function RewardCard({ reward }: { reward: typeof rewards[0] }) {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2">
             <Gift className={`w-4 h-4 ${reward.status === 'available' ? 'text-foreground' : 'text-muted-foreground'}`} />
-            <span className="text-white font-medium capitalize">
+            <span className="text-foreground font-medium capitalize">
               {reward.type.replace('_', ' ')}
             </span>
           </div>
@@ -257,7 +257,7 @@ export default function ReferralsPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-light text-white mb-2">Referrals</h1>
+        <h1 className="text-3xl font-light text-foreground mb-2">Referrals</h1>
         <p className="text-muted-foreground">Invite friends and earn bonuses for each successful referral.</p>
       </div>
 
@@ -268,9 +268,9 @@ export default function ReferralsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-muted-foreground text-sm">Total Referrals</p>
-                <p className="text-2xl font-bold text-white">{referralStats.totalReferrals}</p>
+                <p className="text-2xl font-bold text-foreground">{referralStats.totalReferrals}</p>
               </div>
-              <Users className="w-8 h-8 text-white" />
+              <Users className="w-8 h-8 text-foreground" />
             </div>
           </CardContent>
         </Card>
@@ -315,7 +315,7 @@ export default function ReferralsPage() {
       {/* Referral Link Section */}
       <Card className="bg-card border-gray-800">
         <CardHeader>
-          <CardTitle className="text-white">Your Referral Link</CardTitle>
+          <CardTitle className="text-foreground">Your Referral Link</CardTitle>
           <p className="text-muted-foreground text-sm">
             Share this link with friends to start earning referral bonuses.
           </p>
@@ -327,7 +327,7 @@ export default function ReferralsPage() {
               <Input
                 value={referralStats.referralCode}
                 readOnly
-                className="bg-muted border-border text-white font-mono"
+                className="bg-muted border-border text-foreground font-mono"
               />
               <Button
                 onClick={() => copyToClipboard(referralStats.referralCode, 'code')}
@@ -345,7 +345,7 @@ export default function ReferralsPage() {
               <Input
                 value={referralStats.referralLink}
                 readOnly
-                className="bg-muted border-border text-white font-mono"
+                className="bg-muted border-border text-foreground font-mono"
               />
               <Button
                 onClick={() => copyToClipboard(referralStats.referralLink, 'link')}
@@ -373,13 +373,13 @@ export default function ReferralsPage() {
       {/* Main Content */}
       <Tabs defaultValue="referrals" className="space-y-6">
         <TabsList className="bg-muted border border-border">
-          <TabsTrigger value="referrals" className="text-muted-foreground data-[state=active]:text-white">
+          <TabsTrigger value="referrals" className="text-muted-foreground data-[state=active]:text-foreground">
             My Referrals
           </TabsTrigger>
-          <TabsTrigger value="tiers" className="text-muted-foreground data-[state=active]:text-white">
+          <TabsTrigger value="tiers" className="text-muted-foreground data-[state=active]:text-foreground">
             Achievement Tiers
           </TabsTrigger>
-          <TabsTrigger value="rewards" className="text-muted-foreground data-[state=active]:text-white">
+          <TabsTrigger value="rewards" className="text-muted-foreground data-[state=active]:text-foreground">
             Reward System
           </TabsTrigger>
         </TabsList>
@@ -412,15 +412,15 @@ export default function ReferralsPage() {
       {/* How It Works */}
       <Card className="bg-card border-gray-800">
         <CardHeader>
-          <CardTitle className="text-white">How Referral Program Works</CardTitle>
+          <CardTitle className="text-foreground">How Referral Program Works</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Share2 className="w-6 h-6 text-white" />
+                <Share2 className="w-6 h-6 text-foreground" />
               </div>
-              <h3 className="text-white font-medium mb-2">1. Share Your Link</h3>
+              <h3 className="text-foreground font-medium mb-2">1. Share Your Link</h3>
               <p className="text-muted-foreground text-sm">
                 Share your unique referral link with friends interested in content creation.
               </p>
@@ -428,9 +428,9 @@ export default function ReferralsPage() {
 
             <div className="text-center">
               <div className="w-12 h-12 bg-foreground rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-6 h-6 text-white" />
+                <Users className="w-6 h-6 text-foreground" />
               </div>
-              <h3 className="text-white font-medium mb-2">2. They Join & Earn</h3>
+              <h3 className="text-foreground font-medium mb-2">2. They Join & Earn</h3>
               <p className="text-muted-foreground text-sm">
                 When they sign up and start earning, you get rewarded for each milestone.
               </p>
@@ -438,9 +438,9 @@ export default function ReferralsPage() {
 
             <div className="text-center">
               <div className="w-12 h-12 bg-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="w-6 h-6 text-white" />
+                <DollarSign className="w-6 h-6 text-foreground" />
               </div>
-              <h3 className="text-white font-medium mb-2">3. You Get Paid</h3>
+              <h3 className="text-foreground font-medium mb-2">3. You Get Paid</h3>
               <p className="text-muted-foreground text-sm">
                 Earn bonuses for each successful referral and unlock higher reward tiers.
               </p>

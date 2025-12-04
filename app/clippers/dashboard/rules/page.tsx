@@ -157,7 +157,7 @@ function RuleCard({ rule }: { rule: typeof rulesSections[0]['rules'][0] }) {
     <Card className="bg-card border-border">
       <CardContent className="p-6">
         <div className="mb-3">
-          <h4 className="text-white font-medium">{rule.title}</h4>
+          <h4 className="text-foreground font-medium">{rule.title}</h4>
         </div>
         <p className="text-muted-foreground text-sm leading-relaxed">{rule.description}</p>
       </CardContent>
@@ -169,7 +169,7 @@ function ConsequencesSection() {
   return (
     <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle className="text-white flex items-center">
+        <CardTitle className="text-foreground flex items-center">
           <AlertTriangle className="w-5 h-5 mr-2 text-muted-foreground" />
           Violations & Consequences
         </CardTitle>
@@ -182,7 +182,7 @@ function ConsequencesSection() {
               <div key={index} className="flex items-start space-x-4 p-4 border border-border rounded-lg">
                 <Icon className="w-6 h-6 mt-0.5 text-muted-foreground" />
                 <div className="flex-1">
-                  <h4 className="text-white font-medium mb-1">{item.violation}</h4>
+                  <h4 className="text-foreground font-medium mb-1">{item.violation}</h4>
                   <p className="text-muted-foreground text-sm">{item.consequence}</p>
                 </div>
               </div>
@@ -198,14 +198,14 @@ function FTCCompliance() {
   return (
     <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle className="text-white flex items-center">
+        <CardTitle className="text-foreground flex items-center">
           <Shield className="w-5 h-5 mr-2 text-muted-foreground" />
           FTC Compliance & Disclosures
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="p-4 bg-muted/50 border border-border/50 rounded-lg">
-          <h4 className="text-white font-medium mb-2">Federal Trade Commission Guidelines</h4>
+          <h4 className="text-foreground font-medium mb-2">Federal Trade Commission Guidelines</h4>
           <ul className="text-muted-foreground text-sm space-y-1">
             <li>• Clearly disclose sponsored content and brand partnerships</li>
             <li>• Use appropriate hashtags (#ad, #sponsored, #partner) when required</li>
@@ -216,29 +216,29 @@ function FTCCompliance() {
 
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="disclosure" className="border-border">
-            <AccordionTrigger className="text-white hover:text-muted-foreground">
+            <AccordionTrigger className="text-foreground hover:text-muted-foreground">
               Disclosure Requirements by Platform
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground">
               <div className="space-y-3">
                 <div>
-                  <strong className="text-white">TikTok:</strong> Use #ad or #sponsored in caption for paid partnerships
+                  <strong className="text-foreground">TikTok:</strong> Use #ad or #sponsored in caption for paid partnerships
                 </div>
                 <div>
-                  <strong className="text-white">Instagram:</strong> Use "Paid partnership with [brand]" or relevant emoji
+                  <strong className="text-foreground">Instagram:</strong> Use "Paid partnership with [brand]" or relevant emoji
                 </div>
                 <div>
-                  <strong className="text-white">YouTube:</strong> Include disclosure in video and description
+                  <strong className="text-foreground">YouTube:</strong> Include disclosure in video and description
                 </div>
                 <div>
-                  <strong className="text-white">Twitter:</strong> Use appropriate disclosure language in tweet
+                  <strong className="text-foreground">Twitter:</strong> Use appropriate disclosure language in tweet
                 </div>
               </div>
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="compliance" className="border-border">
-            <AccordionTrigger className="text-white hover:text-muted-foreground">
+            <AccordionTrigger className="text-foreground hover:text-muted-foreground">
               Why Compliance Matters
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground">
@@ -262,7 +262,7 @@ export default function RulesPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-light text-white mb-2">Rules & Guidelines</h1>
+        <h1 className="text-3xl font-light text-foreground mb-2">Rules & Guidelines</h1>
         <p className="text-muted-foreground">
           Important rules and policies for all Swivi Clippers. Please read carefully and follow all guidelines.
         </p>
@@ -273,7 +273,7 @@ export default function RulesPage() {
         <CardContent className="p-6">
           <div className="flex items-center space-x-3 mb-4">
             <CheckCircle className="w-6 h-6 text-foreground" />
-            <h2 className="text-xl font-medium text-white">Welcome to Swivi Clippers</h2>
+            <h2 className="text-xl font-medium text-foreground">Welcome to Swivi Clippers</h2>
           </div>
           <p className="text-muted-foreground leading-relaxed">
             These rules ensure fair play, quality content, and a positive community for all clippers.
@@ -290,8 +290,8 @@ export default function RulesPage() {
           return (
             <div key={section.id} className="space-y-4">
               <div className="flex items-center space-x-3">
-                <Icon className="w-6 h-6 text-white" />
-                <h2 className="text-2xl font-light text-white">{section.title}</h2>
+                <Icon className="w-6 h-6 text-foreground" />
+                <h2 className="text-2xl font-light text-foreground">{section.title}</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {section.rules.map((rule, index) => (

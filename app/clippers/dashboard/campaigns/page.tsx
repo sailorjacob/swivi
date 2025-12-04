@@ -366,10 +366,10 @@ export default function CampaignsPage() {
                   {/* Action Buttons */}
                   <div className="flex gap-2">
                     <Button
-                      className="flex-1"
+                      className={`flex-1 ${!isCompleted && !isLaunching ? 'bg-transparent text-foreground border border-foreground hover:bg-foreground hover:text-background' : ''}`}
                       onClick={() => handleViewCampaign(campaign)}
                       disabled={isLaunching}
-                      variant={isCompleted ? "secondary" : "default"}
+                      variant={isCompleted ? "secondary" : isLaunching ? "default" : "outline"}
                     >
                       {isLaunching ? "Coming Soon" : isCompleted ? "View Results" : "Join Campaign"}
                     </Button>

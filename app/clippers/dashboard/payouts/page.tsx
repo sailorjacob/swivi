@@ -291,7 +291,7 @@ export default function PayoutsPage() {
         {/* Request Payout */}
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white">Request Payout</CardTitle>
+            <CardTitle className="text-foreground">Request Payout</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePayoutRequest} className="space-y-4">
@@ -365,7 +365,7 @@ export default function PayoutsPage() {
         {/* Payout Settings */}
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white">Payout Settings</CardTitle>
+            <CardTitle className="text-foreground">Payout Settings</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePayoutSettingsSubmit} className="space-y-4">
@@ -447,7 +447,7 @@ export default function PayoutsPage() {
       <div>
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white">Payout Requests</CardTitle>
+            <CardTitle className="text-foreground">Payout Requests</CardTitle>
           </CardHeader>
           <CardContent>
             {historyLoading ? (
@@ -459,7 +459,7 @@ export default function PayoutsPage() {
                 {payoutHistory.map((payout) => (
                   <div key={payout.id} className="p-4 rounded-lg border bg-muted/30 border-border">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="font-bold text-white text-lg">
+                      <div className="font-bold text-foreground text-lg">
                         ${(typeof payout.amount === 'number' ? payout.amount : parseFloat(payout.amount || 0)).toFixed(2)}
                       </div>
                       <Badge variant="outline" className={getStatusColor(payout.status?.toLowerCase())}>
@@ -476,11 +476,11 @@ export default function PayoutsPage() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Method:</span>
-                        <span className="text-white">{payout.paymentMethod || 'N/A'}</span>
+                        <span className="text-foreground">{payout.paymentMethod || 'N/A'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Requested:</span>
-                        <span className="text-white">
+                        <span className="text-foreground">
                           {new Date(payout.requestedAt).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
@@ -491,7 +491,7 @@ export default function PayoutsPage() {
                       {payout.processedAt && (
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Processed:</span>
-                          <span className="text-white">
+                          <span className="text-foreground">
                             {new Date(payout.processedAt).toLocaleDateString('en-US', {
                               month: 'short',
                               day: 'numeric',
@@ -503,7 +503,7 @@ export default function PayoutsPage() {
                       {payout.notes && (
                         <div className="mt-2 pt-2 border-t border-border">
                           <span className="text-muted-foreground text-xs">Note: </span>
-                          <span className="text-white text-xs">{payout.notes}</span>
+                          <span className="text-foreground text-xs">{payout.notes}</span>
                         </div>
                       )}
                     </div>

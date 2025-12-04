@@ -553,15 +553,15 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div className="flex justify-between py-3 border-b border-border">
                 <span className="text-muted-foreground">Total Earnings</span>
-                <span className="text-white font-medium">${(typeof user?.totalEarnings === 'number' ? user.totalEarnings : parseFloat(user?.totalEarnings || 0)).toFixed(2)}</span>
+                <span className="text-foreground font-medium">${(typeof user?.totalEarnings === 'number' ? user.totalEarnings : parseFloat(user?.totalEarnings || 0)).toFixed(2)}</span>
               </div>
               <div className="flex justify-between py-3 border-b border-border">
                 <span className="text-muted-foreground">Total Views</span>
-                <span className="text-white font-medium">{user?.totalViews?.toLocaleString() || "0"}</span>
+                <span className="text-foreground font-medium">{user?.totalViews?.toLocaleString() || "0"}</span>
               </div>
               <div className="flex justify-between py-3">
                 <span className="text-muted-foreground">Member Since</span>
-                <span className="text-white font-medium">
+                <span className="text-foreground font-medium">
                   {user?.createdAt && !isNaN(new Date(user.createdAt).getTime()) 
                     ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
                     : "N/A"}
