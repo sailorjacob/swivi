@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/view-tracking",
       "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/campaign-activation",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

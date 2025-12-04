@@ -28,7 +28,7 @@ interface Campaign {
   spent: number
   payoutRate: number
   startDate?: string | Date | null
-  status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
+  status: "DRAFT" | "SCHEDULED" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
   targetPlatforms: string[]
   requirements: string[]
   featuredImage?: string | null
@@ -60,6 +60,7 @@ const platformOptions = [
 
 const statusOptions = [
   { value: "DRAFT", label: "Draft" },
+  { value: "SCHEDULED", label: "Scheduled" },
   { value: "ACTIVE", label: "Active" },
   { value: "PAUSED", label: "Paused" },
   { value: "COMPLETED", label: "Completed" },
@@ -685,6 +686,7 @@ export default function AdminCampaignsPage() {
   const getStatusColor = (status: Campaign["status"]) => {
     switch (status) {
       case "ACTIVE": return "bg-muted border border-border text-foreground"
+      case "SCHEDULED": return "bg-amber-500/20 text-amber-600 border-amber-500/30"
       case "DRAFT": return "bg-muted border border-border text-foreground"
       case "PAUSED": return "bg-muted border border-border text-foreground"
       case "COMPLETED": return "bg-muted border border-border text-foreground"
@@ -694,13 +696,14 @@ export default function AdminCampaignsPage() {
   }
 
   // State for status filter
-  const [statusFilter, setStatusFilter] = useState<'all' | 'ACTIVE' | 'COMPLETED' | 'DRAFT'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'ACTIVE' | 'SCHEDULED' | 'COMPLETED' | 'DRAFT'>('all')
 
   // Calculate campaign stats
   const totalBudget = campaigns.reduce((sum, c) => sum + c.budget, 0)
   const totalSpent = campaigns.reduce((sum, c) => sum + c.spent, 0)
   const totalSubmissions = campaigns.reduce((sum, c) => sum + c._count.clipSubmissions, 0)
   const activeCampaignsCount = campaigns.filter(c => c.status === "ACTIVE").length
+  const scheduledCampaignsCount = campaigns.filter(c => c.status === "SCHEDULED").length
   const completedCampaignsCount = campaigns.filter(c => c.status === "COMPLETED").length
   const draftCampaignsCount = campaigns.filter(c => c.status === "DRAFT").length
 
@@ -796,6 +799,16 @@ export default function AdminCampaignsPage() {
             Active {activeCampaignsCount > 0 && `(${activeCampaignsCount})`}
           </button>
           <button
+            onClick={() => setStatusFilter('SCHEDULED')}
+            className={`pb-2 text-sm transition-colors ${
+              statusFilter === 'SCHEDULED' 
+                ? 'text-foreground border-b-2 border-foreground -mb-px' 
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Scheduled {scheduledCampaignsCount > 0 && `(${scheduledCampaignsCount})`}
+          </button>
+          <button
             onClick={() => setStatusFilter('COMPLETED')}
             className={`pb-2 text-sm transition-colors ${
               statusFilter === 'COMPLETED' 
@@ -823,6 +836,7 @@ export default function AdminCampaignsPage() {
             <CardTitle>
               {statusFilter === 'all' ? 'All Campaigns' : 
                statusFilter === 'ACTIVE' ? 'Active Campaigns' :
+               statusFilter === 'SCHEDULED' ? 'Scheduled Campaigns' :
                statusFilter === 'COMPLETED' ? 'Completed Campaigns' :
                'Draft Campaigns'}
             </CardTitle>
@@ -835,6 +849,7 @@ export default function AdminCampaignsPage() {
                     {statusFilter === 'all' ? 'No campaigns yet.' :
                      statusFilter === 'COMPLETED' ? 'No completed campaigns.' :
                      statusFilter === 'ACTIVE' ? 'No active campaigns.' :
+                     statusFilter === 'SCHEDULED' ? 'No scheduled campaigns.' :
                      'No draft campaigns.'}
                   </p>
                 </div>
@@ -1512,20 +1527,46 @@ function CampaignForm({
       {/* Status */}
       <fieldset className="space-y-4">
         <legend className="text-lg font-medium">Campaign Status</legend>
-        <div>
-          <Select 
-            value={formData.status || 'ACTIVE'} 
-            onValueChange={(value) => setFormData({ ...formData, status: value })}
-            name="status"
-          >
-            <SelectTrigger id="campaign-status" aria-label="Campaign Status">
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="DRAFT">Draft</SelectItem>
-              <SelectItem value="ACTIVE">Active</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="campaign-status" className="block text-sm font-medium mb-1">
+              Status
+            </label>
+            <Select 
+              value={formData.status || 'ACTIVE'} 
+              onValueChange={(value) => setFormData({ ...formData, status: value })}
+              name="status"
+            >
+              <SelectTrigger id="campaign-status" aria-label="Campaign Status">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="DRAFT">Draft</SelectItem>
+                <SelectItem value="SCHEDULED">Scheduled (goes live at start date)</SelectItem>
+                <SelectItem value="ACTIVE">Active (live now)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {formData.status === 'SCHEDULED' && (
+            <div>
+              <label htmlFor="campaign-startDate" className="block text-sm font-medium mb-1">
+                Launch Date & Time *
+              </label>
+              <Input
+                id="campaign-startDate"
+                name="startDate"
+                type="datetime-local"
+                value={formData.startDate || ''}
+                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                required={formData.status === 'SCHEDULED'}
+                min={new Date().toISOString().slice(0, 16)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Campaign will automatically go live at this time
+              </p>
+            </div>
+          )}
         </div>
       </fieldset>
 

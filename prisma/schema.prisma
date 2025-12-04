@@ -290,6 +290,7 @@ enum SocialPlatform {
 
 enum CampaignStatus {
   DRAFT
+  SCHEDULED
   ACTIVE
   PAUSED
   COMPLETED

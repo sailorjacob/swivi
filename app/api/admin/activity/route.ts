@@ -17,15 +17,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 
-    // Get recent activities from various sources
-    const [
-      recentUsers,
-      recentSubmissions,
-      recentPayouts,
-      recentViewTracking
-    ] = await Promise.all([
-      // Recent user signups (last 20)
-      prisma.user.findMany({
+    // Get recent activities from various sources - wrap each in try/catch for resilience
+    let recentUsers: any[] = []
+    let recentSubmissions: any[] = []
+    let recentPayouts: any[] = []
+    let recentViewTracking: any[] = []
+
+    try {
+      recentUsers = await prisma.user.findMany({
         orderBy: { createdAt: 'desc' },
         take: 20,
         select: {
@@ -35,10 +34,13 @@ export async function GET(request: NextRequest) {
           createdAt: true,
           role: true
         }
-      }),
-      
-      // Recent clip submissions (last 20)
-      prisma.clipSubmission.findMany({
+      })
+    } catch (e) {
+      console.error("Error fetching recent users:", e)
+    }
+
+    try {
+      recentSubmissions = await prisma.clipSubmission.findMany({
         orderBy: { createdAt: 'desc' },
         take: 20,
         select: {
@@ -56,10 +58,13 @@ export async function GET(request: NextRequest) {
             select: { url: true, platform: true }
           }
         }
-      }),
-      
-      // Recent payout requests (last 20)
-      prisma.payout.findMany({
+      })
+    } catch (e) {
+      console.error("Error fetching recent submissions:", e)
+    }
+
+    try {
+      recentPayouts = await prisma.payout.findMany({
         orderBy: { createdAt: 'desc' },
         take: 20,
         select: {
@@ -73,18 +78,20 @@ export async function GET(request: NextRequest) {
             select: { name: true, email: true }
           }
         }
-      }),
-      
-      // Recent view tracking updates (last 20)
-      prisma.viewTracking.findMany({
+      })
+    } catch (e) {
+      console.error("Error fetching recent payouts:", e)
+    }
+
+    try {
+      recentViewTracking = await prisma.viewTracking.findMany({
         orderBy: { scrapedAt: 'desc' },
-        take: 20,
+        take: 15,
         select: {
           id: true,
           views: true,
           platform: true,
           scrapedAt: true,
-          createdAt: true,
           clips: {
             select: { url: true }
           },
@@ -93,7 +100,9 @@ export async function GET(request: NextRequest) {
           }
         }
       })
-    ])
+    } catch (e) {
+      console.error("Error fetching recent view tracking:", e)
+    }
 
     // Combine and sort all activities by date
     const activities: Array<{
@@ -182,14 +191,23 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Add view tracking (scrapes)
+    // Add view tracking (scrapes) - limit to avoid spam
+    const uniqueViewTrackings = new Map()
     recentViewTracking.forEach(tracking => {
+      // Dedupe by clip URL to avoid spam from multiple scrapes
+      const key = tracking.clips?.url
+      if (key && !uniqueViewTrackings.has(key)) {
+        uniqueViewTrackings.set(key, tracking)
+      }
+    })
+    
+    Array.from(uniqueViewTrackings.values()).slice(0, 10).forEach(tracking => {
       if (tracking.scrapedAt) {
         activities.push({
           type: 'VIEW_SCRAPE',
           timestamp: tracking.scrapedAt,
           data: {
-            views: Number(tracking.views),
+            views: tracking.views ? Number(tracking.views) : 0,
             platform: tracking.platform,
             url: tracking.clips?.url,
             userName: tracking.users?.name || tracking.users?.email?.split('@')[0]

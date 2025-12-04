@@ -30,15 +30,15 @@ export async function GET(request: NextRequest) {
 
     if (status) {
       if (status.toLowerCase() === 'all') {
-        // Return all campaigns that clippers can see (ACTIVE + COMPLETED)
-        where.status = { in: ['ACTIVE', 'COMPLETED'] }
+        // Return all campaigns that clippers can see (ACTIVE + SCHEDULED + COMPLETED)
+        where.status = { in: ['ACTIVE', 'SCHEDULED', 'COMPLETED'] }
       } else {
         where.status = status.toUpperCase()
       }
     } else {
-      // Default: return ACTIVE and COMPLETED campaigns for clippers to see
-      // ACTIVE = can submit to, COMPLETED = view history
-      where.status = { in: ['ACTIVE', 'COMPLETED'] }
+      // Default: return ACTIVE, SCHEDULED, and COMPLETED campaigns for clippers to see
+      // ACTIVE = can submit to, SCHEDULED = upcoming with countdown, COMPLETED = view history
+      where.status = { in: ['ACTIVE', 'SCHEDULED', 'COMPLETED'] }
     }
 
     if (platform) {

@@ -25,7 +25,8 @@ import {
   Target,
   Loader2,
   CheckCircle,
-  Trophy
+  Trophy,
+  Calendar
 } from "lucide-react"
 
 interface Campaign {
@@ -47,6 +48,60 @@ interface Campaign {
   }
 }
 
+// Countdown hook for scheduled campaigns
+function useCountdown(targetDate: string | undefined) {
+  const [timeLeft, setTimeLeft] = useState<string>('')
+  
+  useEffect(() => {
+    if (!targetDate) return
+    
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime()
+      const target = new Date(targetDate).getTime()
+      const difference = target - now
+      
+      if (difference <= 0) {
+        setTimeLeft('Launching soon...')
+        return
+      }
+      
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24))
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000)
+      
+      if (days > 0) {
+        setTimeLeft(`${days}d ${hours}h ${minutes}m`)
+      } else if (hours > 0) {
+        setTimeLeft(`${hours}h ${minutes}m ${seconds}s`)
+      } else {
+        setTimeLeft(`${minutes}m ${seconds}s`)
+      }
+    }
+    
+    calculateTimeLeft()
+    const timer = setInterval(calculateTimeLeft, 1000)
+    
+    return () => clearInterval(timer)
+  }, [targetDate])
+  
+  return timeLeft
+}
+
+// Scheduled Badge Component with Countdown
+function ScheduledBadge({ startDate }: { startDate?: string }) {
+  const countdown = useCountdown(startDate)
+  
+  return (
+    <div className="absolute top-3 left-3 z-10">
+      <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs px-2 py-1 font-medium flex items-center gap-1.5">
+        <Calendar className="w-3 h-3" />
+        {countdown || 'UPCOMING'}
+      </Badge>
+    </div>
+  )
+}
+
 const platformIcons = {
   tiktok: Music,
   instagram: Instagram, 
@@ -66,7 +121,7 @@ export default function CampaignsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [bonusModalOpen, setBonusModalOpen] = useState(false)
-  const [filter, setFilter] = useState<'active' | 'completed' | 'all'>('active')
+  const [filter, setFilter] = useState<'active' | 'upcoming' | 'completed' | 'all'>('active')
 
   const fetchCampaigns = async () => {
     try {
@@ -115,12 +170,14 @@ export default function CampaignsPage() {
   // Filter campaigns based on selected filter
   const filteredCampaigns = campaigns.filter(campaign => {
     if (filter === 'active') return campaign.status === 'ACTIVE'
+    if (filter === 'upcoming') return campaign.status === 'SCHEDULED'
     if (filter === 'completed') return campaign.status === 'COMPLETED'
     return true // 'all' shows everything
   })
 
   // Count campaigns by status
   const activeCampaignsCount = campaigns.filter(c => c.status === 'ACTIVE').length
+  const upcomingCampaignsCount = campaigns.filter(c => c.status === 'SCHEDULED').length
   const completedCampaignsCount = campaigns.filter(c => c.status === 'COMPLETED').length
 
   if (error) {
@@ -164,6 +221,16 @@ export default function CampaignsPage() {
           Active {activeCampaignsCount > 0 && `(${activeCampaignsCount})`}
         </button>
         <button
+          onClick={() => setFilter('upcoming')}
+          className={`pb-2 text-sm transition-colors ${
+            filter === 'upcoming' 
+              ? 'text-foreground border-b-2 border-foreground -mb-px' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Upcoming {upcomingCampaignsCount > 0 && `(${upcomingCampaignsCount})`}
+        </button>
+        <button
           onClick={() => setFilter('completed')}
           className={`pb-2 text-sm transition-colors ${
             filter === 'completed' 
@@ -190,6 +257,7 @@ export default function CampaignsPage() {
         <div className="text-center py-16">
           <p className="text-muted-foreground">
             {filter === 'active' ? 'No active campaigns right now. Check back soon.' :
+             filter === 'upcoming' ? 'No upcoming campaigns scheduled.' :
              filter === 'completed' ? 'No completed campaigns yet.' :
              'No campaigns found.'}
           </p>
@@ -201,6 +269,7 @@ export default function CampaignsPage() {
           // Calculate progress percentage
           const progress = getProgressPercentage(campaign.spent, campaign.budget)
           const isActive = campaign.status === "ACTIVE"
+          const isScheduled = campaign.status === "SCHEDULED"
           const isLaunching = campaign.status === "DRAFT"
           const isCompleted = campaign.status === "COMPLETED"
 
@@ -234,6 +303,9 @@ export default function CampaignsPage() {
                         </Badge>
                       )}
                     </div>
+                  )}
+                  {isScheduled && (
+                    <ScheduledBadge startDate={campaign.startDate} />
                   )}
                   {isLaunching && (
                     <div className="absolute top-3 left-3 z-10">
@@ -366,12 +438,12 @@ export default function CampaignsPage() {
                   {/* Action Buttons */}
                   <div className="flex gap-2">
                     <Button
-                      className={`flex-1 ${!isCompleted && !isLaunching ? 'bg-transparent text-foreground border border-foreground hover:bg-foreground hover:text-background' : ''}`}
+                      className={`flex-1 ${!isCompleted && !isLaunching && !isScheduled ? 'bg-transparent text-foreground border border-foreground hover:bg-foreground hover:text-background' : ''}`}
                       onClick={() => handleViewCampaign(campaign)}
-                      disabled={isLaunching}
-                      variant={isCompleted ? "secondary" : isLaunching ? "default" : "outline"}
+                      disabled={isLaunching || isScheduled}
+                      variant={isCompleted ? "secondary" : (isLaunching || isScheduled) ? "default" : "outline"}
                     >
-                      {isLaunching ? "Coming Soon" : isCompleted ? "View Results" : "Join Campaign"}
+                      {isLaunching ? "Coming Soon" : isScheduled ? "Preview" : isCompleted ? "View Results" : "Join Campaign"}
                     </Button>
                     {hasBonuses(campaign) && !isCompleted && (
                       <Button
