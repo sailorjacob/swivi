@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -38,6 +38,33 @@ import {
   Send,
   FileVideo
 } from "lucide-react"
+
+// Countdown hook
+function useCountdown(targetDate: string | undefined) {
+  const calculateTimeLeft = useCallback(() => {
+    if (!targetDate) return null
+    const difference = new Date(targetDate).getTime() - new Date().getTime()
+    if (difference <= 0) return null
+    
+    return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / 1000 / 60) % 60),
+      seconds: Math.floor((difference / 1000) % 60)
+    }
+  }, [targetDate])
+
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [calculateTimeLeft])
+
+  return timeLeft
+}
 
 interface Campaign {
   id: string
@@ -106,6 +133,9 @@ export default function CampaignDetailPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [bonusModalOpen, setBonusModalOpen] = useState(false)
+  
+  // Countdown timer for scheduled campaigns
+  const countdown = useCountdown(campaign?.startDate)
 
   const {
     register,
@@ -337,15 +367,16 @@ export default function CampaignDetailPage() {
             </div>
 
             {hasBonuses(campaign) && (
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setBonusModalOpen(true)}
-                className="group inline-flex items-center px-4 py-2 rounded-md text-sm font-medium border border-zinc-400/30 bg-transparent hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20 transition-all duration-300"
+                className="group border-zinc-400/30 hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20"
               >
                 <Trophy className="w-4 h-4 mr-2 text-zinc-400 group-hover:text-zinc-200" />
-                <span className="text-foreground group-hover:text-zinc-100">
+                <span className="group-hover:text-zinc-100">
                   View Bounties
                 </span>
-              </button>
+              </Button>
             )}
           </div>
 
@@ -419,27 +450,49 @@ export default function CampaignDetailPage() {
             >
               <Card className="border-muted bg-muted/30">
                 <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                       <Clock className="w-6 h-6 text-muted-foreground" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <h3 className="font-medium text-foreground">Upcoming Campaign</h3>
                       <p className="text-sm text-muted-foreground">
                         This campaign hasn't started yet. Check back when it goes live to submit your clips.
-                        {campaign.startDate && (
-                          <span className="block mt-1 text-foreground/70">
-                            Launches: {new Date(campaign.startDate).toLocaleString('en-US', { 
-                              month: 'long', 
-                              day: 'numeric', 
-                              year: 'numeric',
-                              hour: 'numeric',
-                              minute: '2-digit',
-                              timeZoneName: 'short'
-                            })}
-                          </span>
-                        )}
                       </p>
+                      {campaign.startDate && (
+                        <p className="text-sm text-foreground/70 mt-1">
+                          Launches: {new Date(campaign.startDate).toLocaleString('en-US', { 
+                            month: 'long', 
+                            day: 'numeric', 
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            timeZoneName: 'short'
+                          })}
+                        </p>
+                      )}
+                      
+                      {/* Countdown Timer */}
+                      {countdown && (
+                        <div className="mt-4 grid grid-cols-4 gap-2 max-w-xs">
+                          <div className="text-center p-2 rounded-lg bg-background border border-border">
+                            <div className="text-xl font-bold tabular-nums">{countdown.days}</div>
+                            <div className="text-xs text-muted-foreground">days</div>
+                          </div>
+                          <div className="text-center p-2 rounded-lg bg-background border border-border">
+                            <div className="text-xl font-bold tabular-nums">{countdown.hours}</div>
+                            <div className="text-xs text-muted-foreground">hours</div>
+                          </div>
+                          <div className="text-center p-2 rounded-lg bg-background border border-border">
+                            <div className="text-xl font-bold tabular-nums">{countdown.minutes}</div>
+                            <div className="text-xs text-muted-foreground">mins</div>
+                          </div>
+                          <div className="text-center p-2 rounded-lg bg-background border border-border">
+                            <div className="text-xl font-bold tabular-nums">{countdown.seconds}</div>
+                            <div className="text-xs text-muted-foreground">secs</div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>

@@ -456,18 +456,19 @@ export default function CampaignsPage() {
                       {isLaunching ? "Coming Soon" : isScheduled ? "Preview" : isCompleted ? "View Results" : "Join Campaign"}
                     </Button>
                     {hasBonuses(campaign) && !isCompleted && (
-                      <button
+                      <Button
+                        variant="outline"
                         onClick={(e) => {
                           e.stopPropagation()
                           setBonusModalOpen(true)
                         }}
-                        className="group inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium border border-zinc-400/30 bg-transparent hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20 transition-all duration-300"
+                        className="group border-zinc-400/30 hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20"
                       >
                         <Trophy className="w-4 h-4 mr-1 text-zinc-400 group-hover:text-zinc-200" />
-                        <span className="text-foreground group-hover:text-zinc-100">
+                        <span className="group-hover:text-zinc-100">
                           Bounties
                         </span>
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </div>
