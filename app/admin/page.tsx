@@ -7,9 +7,9 @@ import { useEffect, useState } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { BarChart3, Target, Shield, Activity, Loader2 } from "lucide-react"
+import { BarChart3, Target, Shield, Activity, Loader2, UserPlus, FileVideo, DollarSign, Eye, CheckCircle, XCircle, Clock } from "lucide-react"
 import { authenticatedFetch } from "@/lib/supabase-browser"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
@@ -17,12 +17,20 @@ import Link from "next/link"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 
+interface ActivityItem {
+  type: string
+  timestamp: string
+  data: any
+}
+
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [analytics, setAnalytics] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [activities, setActivities] = useState<ActivityItem[]>([])
+  const [activitiesLoading, setActivitiesLoading] = useState(true)
 
   useEffect(() => {
     if (status === "loading") return
@@ -38,6 +46,7 @@ export default function AdminDashboard() {
     }
 
     fetchAnalytics()
+    fetchActivities()
   }, [session, status, router])
 
   const fetchAnalytics = async () => {
@@ -64,6 +73,72 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const fetchActivities = async () => {
+    try {
+      setActivitiesLoading(true)
+      const response = await authenticatedFetch("/api/admin/activity")
+      if (response.ok) {
+        const data = await response.json()
+        setActivities(data.activities || [])
+      }
+    } catch (error) {
+      console.error("Error fetching activities:", error)
+    } finally {
+      setActivitiesLoading(false)
+    }
+  }
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'USER_SIGNUP':
+        return <UserPlus className="h-4 w-4 text-blue-500" />
+      case 'SUBMISSION':
+        return <FileVideo className="h-4 w-4 text-purple-500" />
+      case 'SUBMISSION_UPDATE':
+        return <CheckCircle className="h-4 w-4 text-green-500" />
+      case 'PAYOUT_REQUEST':
+        return <DollarSign className="h-4 w-4 text-amber-500" />
+      case 'PAYOUT_COMPLETED':
+        return <CheckCircle className="h-4 w-4 text-green-500" />
+      case 'VIEW_SCRAPE':
+        return <Eye className="h-4 w-4 text-cyan-500" />
+      default:
+        return <Activity className="h-4 w-4 text-muted-foreground" />
+    }
+  }
+
+  const getActivityText = (activity: ActivityItem) => {
+    const { type, data } = activity
+    switch (type) {
+      case 'USER_SIGNUP':
+        return <><span className="font-medium">{data.name || data.email}</span> signed up</>
+      case 'SUBMISSION':
+        return <><span className="font-medium">{data.userName}</span> submitted a clip to <span className="font-medium">{data.campaignTitle}</span></>
+      case 'SUBMISSION_UPDATE':
+        return <>Submission by <span className="font-medium">{data.userName}</span> was <span className={data.status === 'APPROVED' ? 'text-green-500' : 'text-red-500'}>{data.status?.toLowerCase()}</span></>
+      case 'PAYOUT_REQUEST':
+        return <><span className="font-medium">{data.userName}</span> requested <span className="font-medium">${data.amount?.toFixed(2)}</span> payout</>
+      case 'PAYOUT_COMPLETED':
+        return <>Payout of <span className="font-medium">${data.amount?.toFixed(2)}</span> to <span className="font-medium">{data.userName}</span> completed</>
+      case 'VIEW_SCRAPE':
+        return <>View count updated: <span className="font-medium">{data.views?.toLocaleString()}</span> views on {data.platform}</>
+      default:
+        return 'Unknown activity'
+    }
+  }
+
+  const formatTimeAgo = (timestamp: string) => {
+    const now = new Date()
+    const date = new Date(timestamp)
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+    
+    if (seconds < 60) return 'just now'
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
 
@@ -267,6 +342,47 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* Recent Activity */}
+        <Card className="border-border">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Recent Activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {activitiesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : activities.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No recent activity</p>
+            ) : (
+              <div className="space-y-1">
+                {activities.slice(0, 25).map((activity, index) => (
+                  <div 
+                    key={`${activity.type}-${activity.timestamp}-${index}`}
+                    className="flex items-center gap-3 py-2 px-2 rounded-md hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex-shrink-0">
+                      {getActivityIcon(activity.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-foreground truncate">
+                        {getActivityText(activity)}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <span className="text-xs text-muted-foreground">
+                        {formatTimeAgo(activity.timestamp)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
       </motion.div>
     </div>

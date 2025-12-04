@@ -572,18 +572,16 @@ export default function ProfilePage() {
         </Card>
 
         {/* Sign Out */}
-        <Card className="bg-card border-border">
-          <CardContent className="pt-6">
-            <Button
-              onClick={handleSignOut}
-              variant="outline"
-              className="w-full text-muted-foreground hover:text-foreground border-border hover:bg-muted"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="mt-auto pt-6">
+          <Button
+            onClick={handleSignOut}
+            variant="outline"
+            className="w-full text-muted-foreground hover:text-foreground border-border hover:bg-muted"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
+          </Button>
+        </div>
       </div>
     </div>
   )
