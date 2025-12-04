@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DiscordIcon } from "@/components/ui/icons/discord-icon"
 import { GoogleIcon } from "@/components/ui/icons/google-icon"
-import { SwiviLogo, BackgroundGraphics } from "@/components/ui/icons/swivi-logo"
+import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
 import { Loader2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import toast from "react-hot-toast"
@@ -56,7 +56,41 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      <BackgroundGraphics />
+      {/* Animated floating circles background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full bg-white/5"
+            style={{
+              width: `${300 + i * 100}px`,
+              height: `${300 + i * 100}px`,
+            }}
+            initial={{
+              x: `${(i * 25) % 100}%`,
+              y: `${(i * 30) % 100}%`,
+              scale: 0.5 + (i * 0.1),
+            }}
+            animate={{
+              x: [
+                `${(i * 25) % 100}%`,
+                `${(i * 25 + 30) % 100}%`,
+                `${(i * 25) % 100}%`,
+              ],
+              y: [
+                `${(i * 30) % 100}%`,
+                `${(i * 30 + 20) % 100}%`,
+                `${(i * 30) % 100}%`,
+              ],
+            }}
+            transition={{
+              duration: 15 + i * 5,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        ))}
+      </div>
 
       {/* Back to main site - Fixed at top */}
       <div className="absolute top-6 left-6 z-10">
