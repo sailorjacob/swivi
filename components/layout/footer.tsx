@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 import { useState, useEffect } from "react"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 export function Footer() {
   const { resolvedTheme } = useTheme()
@@ -56,6 +57,8 @@ export function Footer() {
                 <Link href="/support" className="text-muted-foreground hover:text-foreground transition-colors">
                   Support
                 </Link>
+                <span className="text-muted-foreground">•</span>
+                <ThemeToggle size="sm" />
               </div>
             </div>
           </div>

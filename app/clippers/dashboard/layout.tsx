@@ -194,7 +194,7 @@ function Sidebar({ className }: { className?: string }) {
       <div className="p-4 border-t border-border">
         <Link 
           href="/clippers/dashboard/profile" 
-          className="flex items-center space-x-3 mb-4 rounded-lg p-2 -m-2 hover:bg-muted transition-colors cursor-pointer"
+          className="flex items-center space-x-3 rounded-lg p-2 -m-2 hover:bg-muted transition-colors cursor-pointer"
         >
           <Avatar className="w-8 h-8">
             <AvatarImage src={dbUser?.image || activeSession?.user?.image || ""} />
@@ -214,11 +214,6 @@ function Sidebar({ className }: { className?: string }) {
           </div>
           {/* <NotificationBell /> */}
         </Link>
-
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Theme</span>
-          <ThemeToggle />
-        </div>
       </div>
     </div>
   )
@@ -316,16 +311,19 @@ export default function DashboardLayout({
 
         {/* Footer */}
         <footer className="border-t border-border bg-card flex-shrink-0">
-          <div className="px-6 py-4 flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Swivi. All rights reserved.
+          <div className="px-6 py-3 flex items-center justify-between">
+            <div className="text-xs text-muted-foreground">
+              © {new Date().getFullYear()} Swivi
             </div>
-            <Link href="/clippers/dashboard/support">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                <HelpCircle className="w-4 h-4 mr-2" />
-                Support
-              </Button>
-            </Link>
+            <div className="flex items-center gap-1">
+              <Link href="/clippers/dashboard/support">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-7 text-xs px-2">
+                  <HelpCircle className="w-3.5 h-3.5 mr-1" />
+                  Support
+                </Button>
+              </Link>
+              <ThemeToggle size="sm" />
+            </div>
           </div>
         </footer>
       </div>

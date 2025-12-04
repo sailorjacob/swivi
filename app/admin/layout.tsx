@@ -171,7 +171,7 @@ function AdminNav({ className }: { className?: string }) {
 
       {/* User Profile */}
       <div className="p-4 border-t border-border">
-        <div className="flex items-center space-x-3 mb-4">
+        <div className="flex items-center space-x-3 mb-3">
           <Avatar className="w-8 h-8">
             <AvatarImage src={activeSession?.user?.image || ""} />
             <AvatarFallback className="bg-foreground text-primary-foreground">
@@ -186,11 +186,6 @@ function AdminNav({ className }: { className?: string }) {
               {activeSession?.user?.email || ""}
             </p>
           </div>
-        </div>
-
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-muted-foreground">Theme</span>
-          <ThemeToggle />
         </div>
 
         <button
@@ -266,6 +261,16 @@ export default function AdminLayout({
             {children}
           </motion.div>
         </main>
+
+        {/* Footer */}
+        <footer className="border-t border-border bg-card flex-shrink-0">
+          <div className="px-6 py-3 flex items-center justify-between">
+            <div className="text-xs text-muted-foreground">
+              © {new Date().getFullYear()} Swivi Admin
+            </div>
+            <ThemeToggle size="sm" />
+          </div>
+        </footer>
       </div>
     </div>
   )
