@@ -54,15 +54,10 @@ const platformIcons = {
   twitter: Twitter,
 }
 
-// Helper to check if a campaign has special bonuses (featured campaigns)
+// Helper to check if a campaign has special bonuses
 const hasBonuses = (campaign: Campaign) => {
   return campaign.title.toLowerCase().includes('owning manhattan') && 
          campaign.title.toLowerCase().includes('season 2')
-}
-
-// Helper to check if campaign is featured/kickoff
-const isFeaturedCampaign = (campaign: Campaign) => {
-  return campaign.budget >= 10000 && hasBonuses(campaign)
 }
 
 export default function CampaignsPage() {
@@ -150,9 +145,6 @@ export default function CampaignsPage() {
       </div>
     )
   }
-
-  // Get featured campaign if any
-  const featuredCampaign = campaigns.find(c => isFeaturedCampaign(c) && c.status === 'ACTIVE')
 
   return (
     <ErrorBoundary fallback={CampaignErrorFallback}>
@@ -402,40 +394,6 @@ export default function CampaignsPage() {
         })}
         </div>
       )}
-
-        {/* Featured Campaign Bonus Banner - Bottom */}
-        {featuredCampaign && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="mt-2"
-          >
-            <div className="border-t border-border pt-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-1">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-md bg-muted border border-border">
-                    <Trophy className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">$2,000 in Performance Bounties</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Tier 1: $150/creator (8 spots) · Tier 2: $40/winning clip (20 winners)
-                    </p>
-                  </div>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setBonusModalOpen(true)}
-                  className="shrink-0"
-                >
-                  View Details
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
 
         {/* Bonus Modal for Featured Campaigns */}
         <CampaignBonusModal

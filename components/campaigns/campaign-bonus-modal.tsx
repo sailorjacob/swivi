@@ -17,7 +17,6 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
 
 interface BonusTier {
   name: string
@@ -237,14 +236,9 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
                     </div>
 
                     {/* CTA */}
-                    <div className="flex gap-3 pt-2">
-                      <Button className="flex-1" onClick={onClose}>
+                    <div className="pt-2">
+                      <Button className="w-full" onClick={onClose}>
                         Start Posting
-                      </Button>
-                      <Button variant="outline" asChild>
-                        <Link href="https://discord.gg/CtZ4tecJ7Y" target="_blank">
-                          Join Discord
-                        </Link>
                       </Button>
                     </div>
                   </motion.div>
