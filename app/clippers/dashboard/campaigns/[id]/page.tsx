@@ -645,10 +645,10 @@ export default function CampaignDetailPage() {
               </CardHeader>
               <CardContent>
                 {campaign.requirements.length > 0 ? (
-                  <ul className="space-y-3">
+                  <ul className="space-y-2 ml-1">
                     {campaign.requirements.map((req, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm">
-                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <li key={index} className="flex items-start gap-3 text-sm text-muted-foreground">
+                        <span className="text-foreground mt-1.5">•</span>
                         <span>{req}</span>
                       </li>
                     ))}
