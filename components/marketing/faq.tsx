@@ -46,7 +46,7 @@ export function FAQ() {
             href="https://calendly.com/bykevingeorge/30min?month=2025-05"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center text-sm font-normal bg-foreground text-background px-6 py-3 rounded-full hover:bg-foreground/90 transition-all duration-300"
+            className="inline-flex items-center text-sm font-normal border border-foreground bg-transparent text-foreground px-6 py-3 rounded-full hover:bg-foreground hover:text-background transition-all duration-300"
           >
             Book a Call to Learn More
           </a>
