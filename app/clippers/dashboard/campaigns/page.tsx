@@ -406,25 +406,33 @@ export default function CampaignsPage() {
         {/* Featured Campaign Bonus Banner - Bottom */}
         {featuredCampaign && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="border border-border rounded-lg p-4 bg-muted/30"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mt-2"
           >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-muted">
-                  <Trophy className="w-5 h-5" />
+            <div className="border-t border-border pt-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-1">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-md bg-muted border border-border">
+                    <Trophy className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">$2,000 in Performance Bounties</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Tier 1: $150/creator (8 spots) · Tier 2: $40/winning clip (20 winners)
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium">Performance Bounties Available</p>
-                  <p className="text-sm text-muted-foreground">
-                    $2,000 in additional rewards for top performers on {featuredCampaign.title}
-                  </p>
-                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setBonusModalOpen(true)}
+                  className="shrink-0"
+                >
+                  View Details
+                </Button>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setBonusModalOpen(true)}>
-                Learn More
-              </Button>
             </div>
           </motion.div>
         )}

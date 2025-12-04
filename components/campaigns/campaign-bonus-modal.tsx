@@ -12,7 +12,8 @@ import {
   CheckCircle2, 
   Target,
   Crown,
-  Award
+  Award,
+  Sparkles
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -138,7 +139,7 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
               {/* Header */}
               <div className="px-6 pt-6 pb-4 border-b border-border">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-lg bg-muted">
+                  <div className="p-2.5 rounded-lg bg-muted border border-border">
                     <Trophy className="w-5 h-5" />
                   </div>
                   <div>
@@ -149,15 +150,18 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
 
                 {/* Key Stats */}
                 <div className="grid grid-cols-3 gap-3 mt-4">
-                  <div className="p-3 rounded-lg bg-muted/50 text-center">
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/50 text-center">
                     <div className="text-lg font-semibold">${campaign.totalBudget.toLocaleString()}</div>
                     <p className="text-xs text-muted-foreground">Total Budget</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-muted/50 text-center">
-                    <div className="text-lg font-semibold">${campaign.bonusBudget.toLocaleString()}</div>
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/50 text-center">
+                    <div className="text-lg font-semibold flex items-center justify-center gap-1">
+                      <Sparkles className="w-4 h-4" />
+                      ${campaign.bonusBudget.toLocaleString()}
+                    </div>
                     <p className="text-xs text-muted-foreground">In Bounties</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-muted/50 text-center">
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/50 text-center">
                     <div className="text-lg font-semibold">{campaign.payoutRate}</div>
                     <p className="text-xs text-muted-foreground">Payout Rate</p>
                   </div>
@@ -202,28 +206,28 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
 
                     {/* Quick Stats Grid */}
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center gap-3 p-3 rounded-lg border border-border">
+                      <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
                         <DollarSign className="w-4 h-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">$1 per 1K views</p>
                           <p className="text-xs text-muted-foreground">TikTok / Reels / Shorts</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg border border-border">
+                      <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
                         <Users className="w-4 h-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Unlimited Accounts</p>
                           <p className="text-xs text-muted-foreground">Post from all accounts</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg border border-border">
+                      <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
                         <Clock className="w-4 h-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Weekly Payouts</p>
                           <p className="text-xs text-muted-foreground">PayPal / Bitcoin</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg border border-border">
+                      <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
                         <Trophy className="w-4 h-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">$2,000 in Bounties</p>
@@ -256,18 +260,23 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
                     {bonusTiers.map((tier, index) => (
                       <div
                         key={index}
-                        className={`rounded-lg border ${tier.highlight ? 'border-foreground/20' : 'border-border'} overflow-hidden`}
+                        className={`rounded-lg border overflow-hidden ${
+                          tier.highlight 
+                            ? 'border-foreground/30 bg-muted/20' 
+                            : 'border-border'
+                        }`}
                       >
                         {tier.highlight && (
-                          <div className="px-4 py-1.5 bg-muted text-xs font-medium">
-                            LIMITED SPOTS
+                          <div className="px-4 py-1.5 bg-foreground text-background text-xs font-medium flex items-center gap-1.5">
+                            <Sparkles className="w-3 h-3" />
+                            LIMITED SPOTS — FIRST COME, FIRST SERVED
                           </div>
                         )}
                         
                         <div className="p-4">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-2">
-                              <div className="p-1.5 rounded bg-muted">
+                              <div className="p-1.5 rounded bg-muted border border-border">
                                 {tier.icon}
                               </div>
                               <div>
@@ -278,25 +287,25 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
                           </div>
 
                           <div className="grid grid-cols-2 gap-3 mb-3">
-                            <div className="p-2 rounded bg-muted/50">
+                            <div className="p-2.5 rounded bg-muted/50 border border-border/50">
                               <p className="text-xs text-muted-foreground">Reward</p>
-                              <p className="font-medium text-sm">{tier.reward}</p>
+                              <p className="font-semibold text-sm">{tier.reward}</p>
                             </div>
-                            <div className="p-2 rounded bg-muted/50">
+                            <div className="p-2.5 rounded bg-muted/50 border border-border/50">
                               <p className="text-xs text-muted-foreground">Total Payout</p>
-                              <p className="font-medium text-sm">{tier.totalPayout}</p>
+                              <p className="font-semibold text-sm">{tier.totalPayout}</p>
                             </div>
                           </div>
 
                           {tier.spots && (
-                            <div className="mb-3">
-                              <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                                <span>Spots Available</span>
-                                <span>{tier.spotsRemaining} / {tier.spots}</span>
+                            <div className="mb-3 p-2.5 rounded bg-muted/30 border border-border/50">
+                              <div className="flex justify-between text-xs mb-1.5">
+                                <span className="font-medium">Spots Available</span>
+                                <span className="text-muted-foreground">{tier.spotsRemaining} / {tier.spots} remaining</span>
                               </div>
-                              <div className="w-full bg-muted rounded-full h-1.5">
+                              <div className="w-full bg-muted rounded-full h-2">
                                 <div 
-                                  className="bg-foreground h-1.5 rounded-full transition-all"
+                                  className="bg-foreground h-2 rounded-full transition-all"
                                   style={{ width: `${((tier.spots - (tier.spotsRemaining || 0)) / tier.spots) * 100}%` }}
                                 />
                               </div>
@@ -304,20 +313,22 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
                           )}
 
                           <div className="space-y-1.5">
-                            <p className="text-xs text-muted-foreground">Requirements:</p>
+                            <p className="text-xs font-medium">Requirements:</p>
                             {tier.requirements.map((req, i) => (
-                              <div key={i} className="flex items-start gap-2 text-xs">
-                                <CheckCircle2 className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                              <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                                <CheckCircle2 className="w-3 h-3 mt-0.5 flex-shrink-0 text-foreground" />
                                 <span>{req}</span>
                               </div>
                             ))}
                           </div>
 
                           {tier.deadline && (
-                            <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {tier.deadline}
-                            </p>
+                            <div className="mt-3 pt-3 border-t border-border/50">
+                              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                <Clock className="w-3 h-3" />
+                                {tier.deadline}
+                              </p>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -334,16 +345,16 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
                   >
                     {/* Content Rules */}
                     <div className="rounded-lg border border-border overflow-hidden">
-                      <div className="px-4 py-2 bg-muted/50 border-b border-border">
+                      <div className="px-4 py-2.5 bg-muted/50 border-b border-border">
                         <h3 className="text-sm font-medium flex items-center gap-2">
                           <Target className="w-4 h-4" />
                           Content Rules
                         </h3>
                       </div>
-                      <div className="p-4 space-y-2">
+                      <div className="p-4 space-y-2.5">
                         {contentRules.map((rule, index) => (
-                          <div key={index} className="flex items-start gap-2 text-sm">
-                            <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+                          <div key={index} className="flex items-start gap-2.5 text-sm">
+                            <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
                             <span>{rule}</span>
                           </div>
                         ))}
@@ -352,35 +363,35 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
 
                     {/* Tips */}
                     <div className="rounded-lg border border-border overflow-hidden">
-                      <div className="px-4 py-2 bg-muted/50 border-b border-border">
+                      <div className="px-4 py-2.5 bg-muted/50 border-b border-border">
                         <h3 className="text-sm font-medium flex items-center gap-2">
                           <Zap className="w-4 h-4" />
                           Maximize Earnings
                         </h3>
                       </div>
-                      <div className="p-4 space-y-2">
+                      <div className="p-4 space-y-2.5">
                         {maximizeTips.map((tip, index) => (
-                          <div key={index} className="flex items-start gap-2 text-sm">
-                            <span className="text-muted-foreground">•</span>
+                          <div key={index} className="flex items-start gap-2.5 text-sm">
+                            <span className="text-muted-foreground">→</span>
                             <span>{tip}</span>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    {/* Action Banner */}
-                    <div className="p-4 rounded-lg bg-foreground text-background text-center">
-                      <p className="font-medium mb-1">Start Posting. Start Earning.</p>
-                      <p className="text-sm opacity-80 mb-3">
-                        Move fast. Secure your Tier 1 spot. Submit your best edits for Tier 2.
-                      </p>
-                      <Button 
-                        variant="secondary" 
-                        size="sm"
-                        onClick={onClose}
-                      >
-                        Join Campaign
-                      </Button>
+                    {/* CTA - Fixed: no more white fill */}
+                    <div className="p-4 rounded-lg border border-border bg-muted/30">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-sm">Ready to start?</p>
+                          <p className="text-xs text-muted-foreground">
+                            Move fast. Secure your Tier 1 spot.
+                          </p>
+                        </div>
+                        <Button size="sm" onClick={onClose}>
+                          Join Campaign
+                        </Button>
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -392,4 +403,3 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
     </AnimatePresence>
   )
 }
-
