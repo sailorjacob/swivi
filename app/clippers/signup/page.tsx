@@ -77,7 +77,7 @@ export default function SignupPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-          <Card className="bg-card border border-border backdrop-blur-sm shadow-2xl">
+          <Card className="bg-neutral-900 border border-neutral-700 backdrop-blur-sm shadow-2xl">
             <CardHeader className="text-center pb-6">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -90,7 +90,7 @@ export default function SignupPage() {
               <CardTitle className="text-2xl font-light text-white mb-2">
                 Join Swivi Clippers
               </CardTitle>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-neutral-400 text-sm">
                 Connect your account to start earning from viral clips
               </p>
             </CardHeader>
@@ -100,7 +100,7 @@ export default function SignupPage() {
               <Button
                 onClick={() => handleOAuthSignup("discord")}
                 disabled={isLoading !== null}
-                className="w-full bg-muted hover:bg-gray-750 text-white border border-gray-600 h-12"
+                className="w-full bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-600 h-12"
               >
                 {isLoading === "discord" ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-3" />
@@ -114,7 +114,7 @@ export default function SignupPage() {
                 onClick={() => handleOAuthSignup("google")}
                 disabled={isLoading !== null}
                 variant="outline"
-                className="w-full border-gray-600 text-muted-foreground hover:bg-muted hover:text-white h-12"
+                className="w-full bg-transparent border-neutral-600 text-neutral-300 hover:bg-neutral-800 hover:text-white h-12"
               >
                 {isLoading === "google" ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-3" />
@@ -125,8 +125,8 @@ export default function SignupPage() {
               </Button>
 
 
-              <div className="text-center pt-4 border-t border-border/50">
-                <p className="text-sm text-muted-foreground">
+              <div className="text-center pt-4 border-t border-neutral-700/50">
+                <p className="text-sm text-neutral-400">
                   Already have an account?{" "}
                   <Link href="/clippers/login" className="text-white hover:text-green-300 underline underline-offset-2 transition-colors">
                     Sign in

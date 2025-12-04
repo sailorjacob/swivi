@@ -77,7 +77,7 @@ export default function ClippersLoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-          <Card className="bg-card border border-border backdrop-blur-sm shadow-2xl text-white">
+          <Card className="bg-neutral-900 border border-neutral-700 backdrop-blur-sm shadow-2xl">
             <CardHeader className="text-center pb-6">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -90,16 +90,16 @@ export default function ClippersLoginPage() {
               <CardTitle className="text-2xl font-light text-white mb-2">
                 Welcome Back
               </CardTitle>
-              <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
+              <p className="text-neutral-400 text-sm leading-relaxed max-w-sm mx-auto">
                 Sign in to access your clipper dashboard and continue earning
               </p>
             </CardHeader>
 
-            <CardContent className="space-y-4 px-8 pb-8 text-white">
+            <CardContent className="space-y-4 px-8 pb-8">
               <Button
                 onClick={() => handleSignIn("discord")}
                 disabled={isLoading !== null}
-                className="w-full bg-muted hover:bg-gray-750 text-white border border-gray-600 h-12 transition-all duration-200 group shadow-sm hover:shadow-md"
+                className="w-full bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-600 h-12 transition-all duration-200 group shadow-sm hover:shadow-md"
               >
                 {isLoading === "discord" ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-3" />
@@ -111,10 +111,10 @@ export default function ClippersLoginPage() {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border"></div>
+                  <div className="w-full border-t border-neutral-700"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-card text-muted-foreground">or</span>
+                  <span className="px-2 bg-neutral-900 text-neutral-500">or</span>
                 </div>
               </div>
 
@@ -122,7 +122,7 @@ export default function ClippersLoginPage() {
                 onClick={() => handleSignIn("google")}
                 disabled={isLoading !== null}
                 variant="outline"
-                className="w-full border-gray-600 text-muted-foreground hover:bg-muted hover:text-white h-12 transition-all duration-200 group hover:shadow-sm"
+                className="w-full bg-transparent border-neutral-600 text-neutral-300 hover:bg-neutral-800 hover:text-white h-12 transition-all duration-200 group hover:shadow-sm"
               >
                 {isLoading === "google" ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-3" />
@@ -132,16 +132,16 @@ export default function ClippersLoginPage() {
                 <span className="font-medium">Continue with Google</span>
               </Button>
 
-              <div className="text-center mt-6 pt-4 border-t border-border/50">
-                <p className="text-sm text-muted-foreground mb-2">
+              <div className="text-center mt-6 pt-4 border-t border-neutral-700/50">
+                <p className="text-sm text-neutral-400 mb-2">
                   Don't have an account?{" "}
                   <Link href="/clippers/signup" className="text-white hover:text-green-300 underline underline-offset-2 transition-colors">
                     Sign up
                   </Link>
                 </p>
-                <p className="text-xs text-gray-500 leading-relaxed">
+                <p className="text-xs text-neutral-500 leading-relaxed">
                   By continuing, you agree to our{" "}
-                  <Link href="/clippers/dashboard/rules" className="text-foreground hover:text-green-300 underline underline-offset-2 transition-colors">
+                  <Link href="/clippers/dashboard/rules" className="text-neutral-300 hover:text-green-300 underline underline-offset-2 transition-colors">
                     rules and guidelines
                   </Link>
                 </p>
