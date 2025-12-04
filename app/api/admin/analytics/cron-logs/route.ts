@@ -29,8 +29,14 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const jobName = searchParams.get('jobName')
 
-    // Build where clause
-    const where: any = {}
+    // Build where clause - filter out rate limit entries which pollute the cron logs
+    const where: any = {
+      NOT: {
+        status: {
+          in: ['RATE_LIMIT_CHECK', 'RATE_LIMIT_VIOLATION']
+        }
+      }
+    }
     if (jobName) {
       where.jobName = jobName
     }

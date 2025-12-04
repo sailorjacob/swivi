@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from "next/server"
 import { ViewTrackingService } from "@/lib/view-tracking-service"
+import { prisma } from "@/lib/prisma"
 
 // This endpoint is called by Vercel Cron Jobs every 4 hours
 // It handles: view tracking → earnings calculation → budget updates → campaign completion
@@ -57,6 +58,31 @@ export async function GET(request: NextRequest) {
       console.warn('⚠️ Errors during tracking:', result.errors)
     }
 
+    // Log successful cron job run to database
+    try {
+      await prisma.cronJobLog.create({
+        data: {
+          jobName: 'view-tracking',
+          status: result.failed > 0 ? 'PARTIAL_SUCCESS' : 'SUCCESS',
+          startedAt: new Date(Date.now() - duration),
+          completedAt: new Date(),
+          duration: Math.round(duration / 1000), // Convert to seconds
+          clipsProcessed: result.processed,
+          clipsSuccessful: result.successful,
+          clipsFailed: result.failed,
+          earningsCalculated: result.totalEarningsAdded,
+          campaignsCompleted: result.campaignsCompleted.length,
+          errorMessage: result.errors.length > 0 ? result.errors.slice(0, 5).join('; ') : null,
+          details: {
+            campaignsCompleted: result.campaignsCompleted,
+            errorCount: result.errors.length
+          }
+        }
+      })
+    } catch (logError) {
+      console.error('Failed to log cron job run:', logError)
+    }
+
     return NextResponse.json({
       success: true,
       message: "View tracking and earnings calculation completed successfully",
@@ -73,6 +99,25 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error("❌ Error in view tracking cron job:", error)
+
+    // Log failed cron job run to database
+    try {
+      await prisma.cronJobLog.create({
+        data: {
+          jobName: 'view-tracking',
+          status: 'FAILED',
+          startedAt: new Date(),
+          completedAt: new Date(),
+          duration: 0,
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          details: {
+            stack: error instanceof Error ? error.stack : undefined
+          }
+        }
+      })
+    } catch (logError) {
+      console.error('Failed to log cron job failure:', logError)
+    }
 
     return NextResponse.json(
       { 
