@@ -33,6 +33,7 @@ import { FloatingBranding } from "@/components/ui/floating-branding"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 // import { NotificationBell } from "@/components/notifications/notification-bell"
 import { ErrorBoundary, DashboardErrorFallback } from "@/components/error-boundary"
+import { AccountSetupPrompt } from "@/components/clippers/account-setup-prompt"
 
 interface NavItem {
   label: string
@@ -326,7 +327,8 @@ export default function DashboardLayout({
             </AnimatePresence>
           </ErrorBoundary>
 
-          {/* Removed overlapping branding element */}
+          {/* Account Setup Prompt - floating at bottom for new users */}
+          <AccountSetupPrompt />
         </main>
 
         {/* Footer */}

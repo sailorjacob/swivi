@@ -23,22 +23,41 @@ export function AccountSetupPrompt({ className = "" }: AccountSetupPromptProps) 
       return
     }
 
-    // Check if user has verified accounts
+    // Check if user has verified social accounts (not OAuth login)
     const checkAccounts = async () => {
       try {
         const response = await authenticatedFetch("/api/user/connected-accounts")
         if (response.ok) {
           const accounts = await response.json()
-          // Filter to only social accounts (not OAuth login accounts)
-          const socialAccounts = accounts.filter((acc: any) => acc.type === 'social' && !acc.isOAuth)
-          // Show prompt only if no verified social accounts
-          if (socialAccounts.length === 0) {
+          
+          // Only count actual verified social media accounts (TikTok, YouTube, Instagram)
+          // NOT the OAuth provider used to log in (Discord, Google, etc.)
+          const verifiedSocialAccounts = Array.isArray(accounts) 
+            ? accounts.filter((acc: any) => {
+                // Must be a social account type, not OAuth
+                const isSocialType = acc.type === 'social'
+                // Must not be the OAuth login provider
+                const notOAuth = !acc.isOAuth
+                // Platform should be one of the content platforms
+                const isContentPlatform = ['TIKTOK', 'YOUTUBE', 'INSTAGRAM', 'TWITTER'].includes(acc.platform?.toUpperCase())
+                
+                return isSocialType && notOAuth && isContentPlatform
+              })
+            : []
+          
+          // Show prompt if no verified content platform accounts
+          if (verifiedSocialAccounts.length === 0) {
             setShow(true)
           }
+        } else {
+          // API error - show prompt as a safe default for new users
+          console.log("Connected accounts API returned non-OK:", response.status)
+          setShow(true)
         }
       } catch (error) {
-        // Don't show on error
+        // On error, show prompt as safe default
         console.log("Could not check accounts:", error)
+        setShow(true)
       } finally {
         setLoading(false)
       }
@@ -58,39 +77,34 @@ export function AccountSetupPrompt({ className = "" }: AccountSetupPromptProps) 
   }
 
   return (
-    <div className={`relative bg-muted/50 border border-border rounded-lg p-4 mb-6 ${className}`}>
-      <button
-        onClick={handleDismiss}
-        className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
-        aria-label="Dismiss"
-      >
-        <X className="w-4 h-4" />
-      </button>
-      
-      <div className="flex items-start gap-4 pr-8">
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <UserCircle className="w-5 h-5 text-primary" />
+    <div className={`fixed bottom-20 left-1/2 -translate-x-1/2 z-50 max-w-md w-[calc(100%-2rem)] bg-card border border-border rounded-full shadow-lg px-4 py-2.5 ${className}`}>
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <UserCircle className="w-4 h-4 text-primary" />
         </div>
         
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-foreground mb-1">
-            Complete your profile to start earning
-          </h3>
-          <p className="text-xs text-muted-foreground mb-3">
-            Verify at least one social account to submit clips to campaigns.
-          </p>
-          
-          <Link href="/clippers/dashboard/profile">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-8 text-xs rounded-full px-4 border-foreground/30 hover:bg-foreground hover:text-background transition-all"
-            >
-              Verify Account
-              <ArrowRight className="w-3 h-3 ml-1.5" />
-            </Button>
-          </Link>
-        </div>
+        <p className="text-xs text-muted-foreground flex-1">
+          Verify a social account to submit clips
+        </p>
+        
+        <Link href="/clippers/dashboard/profile">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-7 text-xs rounded-full px-3 border-foreground/30 hover:bg-foreground hover:text-background transition-all"
+          >
+            Verify
+            <ArrowRight className="w-3 h-3 ml-1" />
+          </Button>
+        </Link>
+        
+        <button
+          onClick={handleDismiss}
+          className="text-muted-foreground hover:text-foreground transition-colors p-1"
+          aria-label="Dismiss"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
     </div>
   )
