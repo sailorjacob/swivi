@@ -26,8 +26,12 @@ import {
   CheckCircle,
   Trash2,
   MessageCircle,
-  LogOut
+  LogOut,
+  MessageSquare,
+  ChevronRight,
+  Bell
 } from "lucide-react"
+import Link from "next/link"
 import toast from "react-hot-toast"
 import { SocialVerificationDialog } from "../../../../components/clippers/social-verification-dialog"
 import { SupportTicketDialog } from "../../../../components/clippers/support-ticket-dialog"
@@ -49,6 +53,13 @@ interface UserProfile {
   updatedAt?: string
 }
 
+interface SupportTicket {
+  id: string
+  status: string
+  adminResponse: string | null
+  createdAt: string
+}
+
 export default function ProfilePage() {
   const { data: session } = useSession()
   const { logout } = useAuth()
@@ -58,6 +69,8 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false)
   const [connectedAccounts, setConnectedAccounts] = useState<any[]>([])
   const [isFetchingProfile, setIsFetchingProfile] = useState(false)
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([])
+  const [ticketsWithReplies, setTicketsWithReplies] = useState(0)
 
   const handleSignOut = async () => {
     await logout()
@@ -109,6 +122,16 @@ export default function ProfilePage() {
             } else {
               console.warn("Failed to load connected accounts:", accountsResponse.status)
               // Don't show error toast for accounts failing, it's not critical
+            }
+
+            // Load support tickets
+            const ticketsResponse = await authenticatedFetch("/api/support-tickets")
+            if (ticketsResponse.ok) {
+              const ticketsData = await ticketsResponse.json()
+              setSupportTickets(ticketsData)
+              // Count tickets with admin replies
+              const withReplies = ticketsData.filter((t: SupportTicket) => t.adminResponse).length
+              setTicketsWithReplies(withReplies)
             }
           } else if (profileResponse.status === 401) {
             toast.error("Please log in to view your profile")
@@ -554,6 +577,38 @@ export default function ProfilePage() {
 
         {/* Support & Sign Out */}
         <div className="mt-auto pt-6 space-y-3">
+          {/* Support Tickets Status */}
+          {supportTickets.length > 0 && (
+            <Link href="/clippers/dashboard/support">
+              <div className="p-3 rounded-lg border border-border bg-card/50 hover:bg-card/70 transition-colors cursor-pointer group">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                      {ticketsWithReplies > 0 && (
+                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm text-foreground">
+                        {supportTickets.length} {supportTickets.length === 1 ? 'ticket' : 'tickets'}
+                        {ticketsWithReplies > 0 && (
+                          <span className="text-primary ml-1">
+                            • {ticketsWithReplies} {ticketsWithReplies === 1 ? 'reply' : 'replies'}
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {ticketsWithReplies > 0 ? 'View responses' : 'View your tickets'}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </div>
+              </div>
+            </Link>
+          )}
+          
           <SupportTicketDialog>
             <Button
               variant="outline"
