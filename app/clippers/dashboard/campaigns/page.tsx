@@ -8,6 +8,7 @@ import { Badge } from "../../../../components/ui/badge"
 import { Button } from "../../../../components/ui/button"
 import { Progress } from "../../../../components/ui/progress"
 import { CampaignDetailModal } from "../../../../components/clippers/campaign-detail-modal"
+import { CampaignBonusModal } from "../../../../components/campaigns/campaign-bonus-modal"
 import { ErrorBoundary, CampaignErrorFallback } from "../../../../components/error-boundary"
 import Image from "next/image"
 import { 
@@ -22,7 +23,10 @@ import {
   Eye,
   Target,
   Loader2,
-  CheckCircle
+  CheckCircle,
+  Trophy,
+  Flame,
+  Sparkles
 } from "lucide-react"
 
 interface Campaign {
@@ -51,12 +55,24 @@ const platformIcons = {
   twitter: Twitter,
 }
 
+// Helper to check if a campaign has special bonuses (featured campaigns)
+const hasBonuses = (campaign: Campaign) => {
+  return campaign.title.toLowerCase().includes('owning manhattan') && 
+         campaign.title.toLowerCase().includes('season 2')
+}
+
+// Helper to check if campaign is featured/kickoff
+const isFeaturedCampaign = (campaign: Campaign) => {
+  return campaign.budget >= 10000 && hasBonuses(campaign)
+}
+
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [bonusModalOpen, setBonusModalOpen] = useState(false)
   const [filter, setFilter] = useState<'active' | 'completed' | 'all'>('active')
 
   const fetchCampaigns = async () => {
@@ -158,9 +174,70 @@ export default function CampaignsPage() {
     )
   }
 
+  // Get featured campaign if any
+  const featuredCampaign = campaigns.find(c => isFeaturedCampaign(c) && c.status === 'ACTIVE')
+
   return (
     <ErrorBoundary fallback={CampaignErrorFallback}>
       <div className="space-y-6">
+
+      {/* Featured Campaign Banner */}
+      {featuredCampaign && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-xl border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-amber-500/10"
+        >
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Y5NzMxNiIgc3Ryb2tlLW9wYWNpdHk9IjAuMDUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-50" />
+          <div className="relative p-5 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30">
+                  <Flame className="w-6 h-6 text-amber-500" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-lg font-bold">{featuredCampaign.title}</h2>
+                    <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-xs animate-pulse">
+                      LIVE NOW
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Our biggest campaign ever! ${featuredCampaign.budget.toLocaleString()} total budget + $2,000 in bonus rewards.
+                  </p>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="flex items-center gap-1.5">
+                      <DollarSign className="w-4 h-4 text-green-500" />
+                      <span className="font-medium">${featuredCampaign.payoutRate}/1K views</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Trophy className="w-4 h-4 text-amber-500" />
+                      <span className="font-medium text-amber-600 dark:text-amber-400">$2,000 in Bounties</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button 
+                  onClick={() => handleJoinCampaign(featuredCampaign)}
+                  className="flex-1 sm:flex-none"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Join Now
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setBonusModalOpen(true)}
+                  className="border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
+                >
+                  <Trophy className="w-4 h-4 mr-1" />
+                  View Bonuses
+                </Button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Filter Tabs */}
       <div className="flex gap-6 border-b border-border">
@@ -234,10 +311,16 @@ export default function CampaignsPage() {
                   onClick={() => handleJoinCampaign(campaign)}
                 >
                   {isActive && (
-                    <div className="absolute top-3 left-3 z-10">
+                    <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
                       <Badge className="bg-foreground text-background text-xs px-2 py-1">
                         LIVE
                       </Badge>
+                      {hasBonuses(campaign) && (
+                        <Badge className="bg-amber-500 text-black text-xs px-2 py-1 flex items-center gap-1 animate-pulse">
+                          <Trophy className="w-3 h-3" />
+                          BONUSES
+                        </Badge>
+                      )}
                     </div>
                   )}
                   {isLaunching && (
@@ -368,15 +451,30 @@ export default function CampaignsPage() {
                     </div>
                   </div>
 
-                  {/* Join Button */}
-                  <Button
-                    className="w-full"
-                    onClick={() => handleJoinCampaign(campaign)}
-                    disabled={isLaunching || isCompleted}
-                    variant={isCompleted ? "secondary" : "default"}
-                  >
-                    {isLaunching ? "Coming Soon" : isCompleted ? "Campaign Ended" : "Join Campaign"}
-                  </Button>
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1"
+                      onClick={() => handleJoinCampaign(campaign)}
+                      disabled={isLaunching || isCompleted}
+                      variant={isCompleted ? "secondary" : "default"}
+                    >
+                      {isLaunching ? "Coming Soon" : isCompleted ? "Campaign Ended" : "Join Campaign"}
+                    </Button>
+                    {hasBonuses(campaign) && !isCompleted && (
+                      <Button
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setBonusModalOpen(true)
+                        }}
+                        className="border-amber-500/50 text-amber-600 hover:bg-amber-500/10 hover:text-amber-600"
+                      >
+                        <Trophy className="w-4 h-4 mr-1" />
+                        Bonuses
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -391,6 +489,18 @@ export default function CampaignsPage() {
           campaign={selectedCampaign ? transformCampaignForModal(selectedCampaign) : null}
           open={modalOpen}
           onOpenChange={setModalOpen}
+        />
+
+        {/* Bonus Modal for Featured Campaigns */}
+        <CampaignBonusModal
+          isOpen={bonusModalOpen}
+          onClose={() => setBonusModalOpen(false)}
+          campaign={{
+            title: "Owning Manhattan Season 2",
+            totalBudget: 20000,
+            bonusBudget: 2000,
+            payoutRate: "$1 per 1,000 views"
+          }}
         />
       </div>
     </ErrorBoundary>

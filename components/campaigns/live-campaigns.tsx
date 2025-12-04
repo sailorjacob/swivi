@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Clock, DollarSign, Users, TrendingUp, Eye, Filter, Search, Play, ExternalLink, Calendar, Target, Globe, Loader2 } from "lucide-react"
+import { Clock, DollarSign, Users, TrendingUp, Eye, Filter, Search, Play, ExternalLink, Calendar, Target, Globe, Loader2, Trophy, Flame, Sparkles, Gift } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CampaignDetailModal } from "./campaign-detail-modal"
+import { CampaignBonusModal } from "./campaign-bonus-modal"
 import Link from "next/link"
 import Image from "next/image"
 import { toast } from "sonner"
@@ -45,6 +47,17 @@ interface LiveCampaign {
   clientLogo?: string
 }
 
+// Helper to check if a campaign has special bonuses
+const hasBonuses = (campaign: LiveCampaign) => {
+  return campaign.title.toLowerCase().includes('owning manhattan') && 
+         campaign.title.toLowerCase().includes('season 2')
+}
+
+// Helper to check if campaign is featured/kickoff
+const isFeaturedCampaign = (campaign: LiveCampaign) => {
+  return campaign.budget >= 10000 && hasBonuses(campaign)
+}
+
 export function LiveCampaigns() {
   const [campaigns, setCampaigns] = useState<LiveCampaign[]>([])
   const [campaignStats, setCampaignStats] = useState<any>(null)
@@ -54,6 +67,7 @@ export function LiveCampaigns() {
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedDifficulty, setSelectedDifficulty] = useState("all")
   const [selectedCampaign, setSelectedCampaign] = useState<LiveCampaign | null>(null)
+  const [bonusModalOpen, setBonusModalOpen] = useState(false)
 
   // Fetch campaigns from API
   const fetchCampaigns = async () => {
@@ -260,6 +274,81 @@ export function LiveCampaigns() {
           </motion.p>
       </motion.div>
 
+      {/* Featured Campaign Hero */}
+      {liveCampaigns.find(c => isFeaturedCampaign(c) && c.status === "active") && (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-12"
+        >
+          <div className="relative overflow-hidden rounded-2xl border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-amber-500/10">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Y5NzMxNiIgc3Ryb2tlLW9wYWNpdHk9IjAuMDUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-50" />
+            <div className="relative p-8 md:p-10">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30">
+                      <Flame className="w-7 h-7 text-amber-500" />
+                    </div>
+                    <Badge className="bg-red-500 text-white text-xs px-3 py-1 animate-pulse">
+                      🔥 LIVE NOW — BIGGEST EVER
+                    </Badge>
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                    Owning Manhattan Season 2
+                  </h2>
+                  <p className="text-muted-foreground mb-6 max-w-2xl">
+                    Season 2 is LIVE on Netflix! Post clips, drive views, and earn $1 per 1,000 views automatically. 
+                    Plus $2,000 in bounties for performance-based bonuses.
+                  </p>
+                  
+                  {/* Key Stats */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="p-3 rounded-lg bg-background/50 border border-border/50 text-center">
+                      <div className="text-2xl font-bold text-foreground">$20K</div>
+                      <p className="text-xs text-muted-foreground">Total Budget</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center">
+                      <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1">
+                        <Gift className="w-5 h-5" />
+                        $2K
+                      </div>
+                      <p className="text-xs text-amber-600/80 dark:text-amber-400/80">In Bounties</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-background/50 border border-border/50 text-center">
+                      <div className="text-2xl font-bold text-foreground">$1</div>
+                      <p className="text-xs text-muted-foreground">Per 1K Views</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-background/50 border border-border/50 text-center">
+                      <div className="text-2xl font-bold text-foreground">3</div>
+                      <p className="text-xs text-muted-foreground">Platforms</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button size="lg" asChild>
+                      <Link href="/clippers/signup">
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Start Earning Now
+                      </Link>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      onClick={() => setBonusModalOpen(true)}
+                      className="border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
+                    >
+                      <Trophy className="w-4 h-4 mr-2" />
+                      View $2K Bounties
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+      )}
+
       {/* Stats - Hidden */}
       {/*
       <motion.section
@@ -301,13 +390,21 @@ export function LiveCampaigns() {
               whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
             >
-              <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+              <Card className={`h-full hover:shadow-lg transition-shadow duration-300 ${hasBonuses(campaign) ? 'border-amber-500/30' : ''}`}>
                 <CardHeader>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <CardTitle className="text-xl font-normal mb-2">
-                        {campaign.title}
-                      </CardTitle>
+                      <div className="flex items-center gap-2 mb-2">
+                        <CardTitle className="text-xl font-normal">
+                          {campaign.title}
+                        </CardTitle>
+                        {hasBonuses(campaign) && (
+                          <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-xs">
+                            <Trophy className="w-3 h-3 mr-1" />
+                            BONUSES
+                          </Badge>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 mb-1">
                         {campaign.clientLogo && (
                           <div className="flex-shrink-0">
@@ -394,9 +491,22 @@ export function LiveCampaigns() {
                       size="sm"
                       className="flex-1"
                       disabled={campaign.status === "DRAFT"}
+                      asChild
                     >
-                      {campaign.status === "DRAFT" ? "Coming Soon" : "Join Campaign"}
+                      <Link href="/clippers/signup">
+                        {campaign.status === "DRAFT" ? "Coming Soon" : "Join Campaign"}
+                      </Link>
                     </Button>
+                    {hasBonuses(campaign) && (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setBonusModalOpen(true)}
+                        className="border-amber-500/50 text-amber-600 hover:bg-amber-500/10 hover:text-amber-600"
+                      >
+                        <Trophy className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button 
                       size="sm" 
                       variant="outline"
@@ -481,6 +591,18 @@ export function LiveCampaigns() {
           onClose={() => setSelectedCampaign(null)}
         />
       )}
+
+      {/* Bonus Modal */}
+      <CampaignBonusModal
+        isOpen={bonusModalOpen}
+        onClose={() => setBonusModalOpen(false)}
+        campaign={{
+          title: "Owning Manhattan Season 2",
+          totalBudget: 20000,
+          bonusBudget: 2000,
+          payoutRate: "$1 per 1,000 views"
+        }}
+      />
     </div>
   )
 }
