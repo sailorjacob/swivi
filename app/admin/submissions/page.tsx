@@ -3,8 +3,9 @@
 // Force this page to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { Check, X, ExternalLink, Search, Filter, Calendar, User, DollarSign, Loader2, AlertCircle, ArrowUpRight, XCircle, Trash2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -107,6 +108,11 @@ const getStatusIcon = (status: string, autoRejected?: boolean) => {
 }
 
 export default function AdminSubmissionsPage() {
+  const searchParams = useSearchParams()
+  const highlightId = searchParams.get('highlight')
+  const highlightedRef = useRef<HTMLDivElement>(null)
+  const [hasScrolled, setHasScrolled] = useState(false)
+  
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [campaigns, setCampaigns] = useState<Array<{id: string, title: string, creator: string}>>([])
   const [loading, setLoading] = useState(true)
@@ -129,6 +135,19 @@ export default function AdminSubmissionsPage() {
     offset: 0,
     hasMore: false
   })
+
+  // Scroll to highlighted submission when data loads
+  useEffect(() => {
+    if (highlightId && !loading && submissions.length > 0 && !hasScrolled) {
+      // Small delay to ensure DOM is rendered
+      setTimeout(() => {
+        if (highlightedRef.current) {
+          highlightedRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          setHasScrolled(true)
+        }
+      }, 100)
+    }
+  }, [highlightId, loading, submissions, hasScrolled])
 
   // Fetch campaigns for filtering
   const fetchCampaigns = useCallback(async () => {
@@ -435,12 +454,15 @@ export default function AdminSubmissionsPage() {
                   </p>
                 </div>
               ) : (
-                submissions.map((submission) => (
+                submissions.map((submission) => {
+                  const isHighlighted = highlightId === submission.id
+                  return (
                 <div
                   key={submission.id}
-                  className={`flex items-start justify-between gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors ${
+                  ref={isHighlighted ? highlightedRef : undefined}
+                  className={`flex items-start justify-between gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-all duration-500 ${
                     submission.requiresReview ? 'border-slate-400 bg-slate-100/30 dark:border-slate-600 dark:bg-slate-800/30' : ''
-                  }`}
+                  } ${isHighlighted ? 'ring-2 ring-primary ring-offset-2 bg-primary/5' : ''}`}
                 >
                   <div className="flex-1 min-w-0">
                     {/* Platform, Status, and User info - all left aligned */}
@@ -607,7 +629,7 @@ export default function AdminSubmissionsPage() {
                     </AlertDialog>
                   </div>
                 </div>
-              ))
+              )})
               )}
             </div>
 

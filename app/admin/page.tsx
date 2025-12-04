@@ -129,6 +129,27 @@ export default function AdminDashboard() {
     }
   }
 
+  // Get the link URL for an activity item
+  const getActivityLink = (activity: ActivityItem): string | null => {
+    const { type, data } = activity
+    switch (type) {
+      case 'USER_SIGNUP':
+        return data.id ? `/admin/users?highlight=${data.id}` : '/admin/users'
+      case 'SUBMISSION':
+      case 'SUBMISSION_UPDATE':
+        return data.id ? `/admin/submissions?highlight=${data.id}` : '/admin/submissions'
+      case 'PAYOUT_REQUEST':
+      case 'PAYOUT_COMPLETED':
+        return data.id ? `/admin/payouts?highlight=${data.id}` : '/admin/payouts'
+      case 'VIEW_SCRAPE':
+        // Link to the submission if available
+        if (data.submissionId) return `/admin/submissions?highlight=${data.submissionId}`
+        return '/admin/analytics'
+      default:
+        return null
+    }
+  }
+
   const formatTimeAgo = (timestamp: string) => {
     const now = new Date()
     const date = new Date(timestamp)
@@ -359,26 +380,43 @@ export default function AdminDashboard() {
               <p className="text-sm text-muted-foreground text-center py-8">No recent activity</p>
             ) : (
               <div className="space-y-1">
-                {activities.slice(0, 25).map((activity, index) => (
-                  <div 
-                    key={`${activity.type}-${activity.timestamp}-${index}`}
-                    className="flex items-center gap-3 py-2 px-2 rounded-md hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex-shrink-0">
-                      {getActivityIcon(activity.type)}
+                {activities.slice(0, 25).map((activity, index) => {
+                  const activityLink = getActivityLink(activity)
+                  const content = (
+                    <>
+                      <div className="flex-shrink-0">
+                        {getActivityIcon(activity.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground truncate">
+                          {getActivityText(activity)}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <span className="text-xs text-muted-foreground">
+                          {formatTimeAgo(activity.timestamp)}
+                        </span>
+                      </div>
+                    </>
+                  )
+
+                  return activityLink ? (
+                    <Link
+                      key={`${activity.type}-${activity.timestamp}-${index}`}
+                      href={activityLink}
+                      className="flex items-center gap-3 py-2 px-2 rounded-md hover:bg-muted/50 transition-colors cursor-pointer group"
+                    >
+                      {content}
+                    </Link>
+                  ) : (
+                    <div 
+                      key={`${activity.type}-${activity.timestamp}-${index}`}
+                      className="flex items-center gap-3 py-2 px-2 rounded-md hover:bg-muted/50 transition-colors"
+                    >
+                      {content}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-foreground truncate">
-                        {getActivityText(activity)}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <span className="text-xs text-muted-foreground">
-                        {formatTimeAgo(activity.timestamp)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </CardContent>

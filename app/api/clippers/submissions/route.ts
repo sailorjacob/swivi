@@ -2,6 +2,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from "next/server"
+import { waitUntil } from "@vercel/functions"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 import { RateLimitingService } from "@/lib/rate-limiting-service"
@@ -261,67 +262,10 @@ export async function POST(request: NextRequest) {
       // Continue with submission but log for manual review
     }
 
-    // Initial views set to 0 - will be scraped asynchronously to avoid submission timeouts
-    // The first view tracking cron job will capture the baseline
-    let initialViews = 0
-    
-    // Trigger async scraping (non-blocking) with a short timeout
-    // This improves UX by not blocking submission on slow scraping
-    const scrapePromise = (async () => {
-      try {
-        const { MultiPlatformScraper } = await import('@/lib/multi-platform-scraper')
-        const scraper = new MultiPlatformScraper(process.env.APIFY_API_KEY || '')
-        console.log(`🔍 Starting async initial view scrape for: ${validatedData.clipUrl}`)
-        
-        // Use Promise.race with a 10-second timeout for initial scrape
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Scrape timeout')), 10000)
-        )
-        
-        const scrapedData = await Promise.race([
-          scraper.scrapeContent(validatedData.clipUrl, validatedData.platform),
-          timeoutPromise
-        ]) as any
-        
-        if (scrapedData && !scrapedData.error) {
-          const rawViews = scrapedData.views || scrapedData.viewCount || 0
-          const views = typeof rawViews === 'string' ? parseInt(rawViews, 10) : rawViews
-          
-          if (!isNaN(views) && views > 0) {
-            console.log(`📊 Async scrape got initial views: ${views}`)
-            return views
-          }
-        }
-        return 0
-      } catch (error) {
-        console.log('⚠️ Async initial scrape failed (will use 0):', error instanceof Error ? error.message : 'Unknown')
-        return 0
-      }
-    })()
-    
-    // Wait briefly for scrape (max 3 seconds) to get initial views if possible
-    // If it takes longer, continue with 0 and let cron job handle it
-    try {
-      const quickScrapeResult = await Promise.race([
-        scrapePromise,
-        new Promise<number>((resolve) => setTimeout(() => resolve(0), 3000))
-      ])
-      initialViews = quickScrapeResult
-      console.log(`📊 Quick scrape result: ${initialViews} views for ${validatedData.clipUrl}`)
-    } catch {
-      console.log('📊 Quick scrape timed out, using 0 initial views')
-      initialViews = 0
-    }
-
-    // Create the submission for verified content (or admin bypass)
+    // Create the submission first, then scrape in background
+    // This ensures fast UX while still capturing accurate initial views
     let submission
     try {
-      console.log(`🔍 About to create submission with initialViews: ${initialViews} (type: ${typeof initialViews})`)
-      
-      // Ensure initialViews is a valid integer before converting to BigInt
-      const viewsToStore = Math.max(0, Math.floor(Number(initialViews)))
-      console.log(`🔍 Converting to BigInt: ${viewsToStore}`)
-      
       submission = await prisma.clipSubmission.create({
         data: {
           userId: dbUser.id,
@@ -329,8 +273,8 @@ export async function POST(request: NextRequest) {
           clipUrl: validatedData.clipUrl,
           platform: validatedData.platform,
           mediaFileUrl: validatedData.mediaFileUrl,
-          status: "PENDING", // Still PENDING for admin approval, but verified
-          initialViews: BigInt(viewsToStore) // SET AT SUBMISSION TIME - earnings baseline!
+          status: "PENDING",
+          initialViews: BigInt(0) // Temporary - will be updated by background scrape
         },
         include: {
           campaigns: true
@@ -338,6 +282,59 @@ export async function POST(request: NextRequest) {
       })
       
       console.log(`✅ Submission created successfully with ID: ${submission.id}`)
+      
+      // Start background scrape to get initial views (doesn't block response)
+      // This runs AFTER submission is created, so we can update it with real views
+      const submissionId = submission.id
+      const clipUrl = validatedData.clipUrl
+      const platform = validatedData.platform
+      
+      // Background scrape function - will be kept alive by waitUntil
+      const backgroundScrape = async () => {
+        try {
+          const { MultiPlatformScraper } = await import('@/lib/multi-platform-scraper')
+          const scraper = new MultiPlatformScraper(process.env.APIFY_API_KEY || '')
+          console.log(`🔍 Starting background initial view scrape for submission ${submissionId}`)
+          
+          const scrapedData = await Promise.race([
+            scraper.scrapeContent(clipUrl, platform),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Scrape timeout')), 60000)) // 60 seconds
+          ]) as any
+          
+          if (scrapedData && !scrapedData.error) {
+            const rawViews = scrapedData.views || scrapedData.viewCount || 0
+            const views = typeof rawViews === 'string' ? parseInt(rawViews, 10) : rawViews
+            
+            if (!isNaN(views) && views > 0) {
+              // Update the submission with actual initial views
+              // Only update if initialViews is still 0 (hasn't been set by another process)
+              await prisma.clipSubmission.updateMany({
+                where: { 
+                  id: submissionId,
+                  initialViews: BigInt(0) // Only update if still 0
+                },
+                data: {
+                  initialViews: BigInt(views)
+                }
+              })
+              console.log(`📊 Background scrape updated submission ${submissionId} with ${views} initial views`)
+            } else {
+              console.log(`📊 Background scrape got 0 views for submission ${submissionId}`)
+            }
+          } else {
+            console.log(`⚠️ Background scrape failed for ${submissionId}: ${scrapedData?.error || 'Unknown error'}`)
+          }
+        } catch (error) {
+          console.log(`⚠️ Background scrape error for ${submissionId}:`, error instanceof Error ? error.message : 'Unknown')
+          // Don't throw - submission already succeeded
+        }
+      }
+      
+      // waitUntil tells Vercel: "keep this function alive until this promise resolves"
+      // This ensures the background scrape completes even after the response is sent
+      waitUntil(backgroundScrape())
+      
+      console.log(`🚀 Background scrape started for submission ${submissionId} (response returning immediately)`)
       
       // Convert BigInt to string for JSON serialization
       const submissionResponse = {

@@ -3,9 +3,9 @@
 // Force this page to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useSession } from "@/lib/supabase-auth-provider"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Search, UserCheck, UserX, Shield, Users, Crown, Eye, RefreshCw, CheckCircle, DollarSign, Wallet, Mail, Clock, AlertCircle, Copy } from "lucide-react"
@@ -63,6 +63,11 @@ const roleOptions = [
 export default function AdminUsersPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const highlightId = searchParams.get('highlight')
+  const highlightedRef = useRef<HTMLDivElement>(null)
+  const [hasScrolled, setHasScrolled] = useState(false)
+  
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [slowLoading, setSlowLoading] = useState(false)
@@ -182,6 +187,18 @@ export default function AdminUsersPage() {
       fetchUsers()
     }
   }, [status, session, fetchUsers])
+
+  // Scroll to highlighted user when data loads
+  useEffect(() => {
+    if (highlightId && !loading && users.length > 0 && !hasScrolled) {
+      setTimeout(() => {
+        if (highlightedRef.current) {
+          highlightedRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          setHasScrolled(true)
+        }
+      }, 100)
+    }
+  }, [highlightId, loading, users, hasScrolled])
 
   // Handle role filter change
   const handleRoleChange = (newRole: string) => {
@@ -430,10 +447,14 @@ export default function AdminUsersPage() {
               <div className="space-y-4">
                 {filteredUsers.map((user) => {
                 const RoleIcon = getRoleIcon(user.role)
+                const isHighlighted = highlightId === user.id
                 return (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    ref={isHighlighted ? highlightedRef : undefined}
+                    className={`flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-all duration-500 ${
+                      isHighlighted ? 'ring-2 ring-primary ring-offset-2 bg-primary/5' : ''
+                    }`}
                   >
                     <div className="flex items-center space-x-4 flex-1">
                       <div className="flex-shrink-0">

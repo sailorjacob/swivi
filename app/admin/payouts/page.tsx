@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -66,6 +67,11 @@ interface PayoutSummary {
 }
 
 export default function AdminPayoutsPage() {
+  const searchParams = useSearchParams()
+  const highlightId = searchParams.get('highlight')
+  const highlightedRef = useRef<HTMLDivElement>(null)
+  const [hasScrolled, setHasScrolled] = useState(false)
+  
   const [payoutRequests, setPayoutRequests] = useState<PayoutRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedRequest, setSelectedRequest] = useState<PayoutRequest | null>(null)
@@ -82,6 +88,18 @@ export default function AdminPayoutsPage() {
     fetchPayoutRequests()
     fetchPayoutSummary()
   }, [])
+
+  // Scroll to highlighted payout when data loads
+  useEffect(() => {
+    if (highlightId && !loading && payoutRequests.length > 0 && !hasScrolled) {
+      setTimeout(() => {
+        if (highlightedRef.current) {
+          highlightedRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          setHasScrolled(true)
+        }
+      }, 100)
+    }
+  }, [highlightId, loading, payoutRequests, hasScrolled])
 
   const fetchPayoutSummary = async () => {
     try {
@@ -199,10 +217,15 @@ export default function AdminPayoutsPage() {
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {requests.map((request) => (
+          {requests.map((request) => {
+            const isHighlighted = highlightId === request.id
+            return (
             <Card 
-              key={request.id} 
-              className="hover:shadow-md transition-shadow"
+              key={request.id}
+              ref={isHighlighted ? highlightedRef : undefined}
+              className={`hover:shadow-md transition-all duration-500 ${
+                isHighlighted ? 'ring-2 ring-primary ring-offset-2 bg-primary/5' : ''
+              }`}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
@@ -361,7 +384,7 @@ export default function AdminPayoutsPage() {
                 )}
               </CardContent>
             </Card>
-          ))}
+          )})}
         </div>
       )}
     </div>

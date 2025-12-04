@@ -89,11 +89,19 @@ export async function GET(request: NextRequest) {
         take: 15,
         select: {
           id: true,
+          clipId: true,
           views: true,
           platform: true,
           scrapedAt: true,
           clips: {
-            select: { url: true }
+            select: { 
+              id: true,
+              url: true,
+              clipSubmissions: {
+                take: 1,
+                select: { id: true }
+              }
+            }
           },
           users: {
             select: { name: true, email: true }
@@ -118,6 +126,7 @@ export async function GET(request: NextRequest) {
           type: 'USER_SIGNUP',
           timestamp: user.createdAt,
           data: {
+            id: user.id,
             name: user.name,
             email: user.email,
             role: user.role
@@ -210,6 +219,8 @@ export async function GET(request: NextRequest) {
             views: tracking.views ? Number(tracking.views) : 0,
             platform: tracking.platform,
             url: tracking.clips?.url,
+            clipId: tracking.clipId,
+            submissionId: tracking.clips?.clipSubmissions?.[0]?.id,
             userName: tracking.users?.name || tracking.users?.email?.split('@')[0]
           }
         })
