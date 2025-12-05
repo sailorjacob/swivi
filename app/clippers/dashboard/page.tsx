@@ -36,9 +36,9 @@ import {
 // Get status icon component
 const getStatusIcon = (status: string) => {
   if (status === "approved" || status === "APPROVED") {
-    return <ArrowUpRight className="w-3 h-3 text-green-600" />
+    return <ArrowUpRight className="w-3 h-3 text-foreground" />
   } else if (status === "rejected" || status === "REJECTED") {
-    return <XCircle className="w-3 h-3 text-red-600" />
+    return <XCircle className="w-3 h-3 text-muted-foreground" />
   }
   return null
 }
@@ -482,7 +482,7 @@ export default function ClipperDashboard() {
                       <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mb-2">
                         <span>{clip.views.toLocaleString()} views
                           {clip.viewChange && Number(clip.viewChange) > 0 && (
-                            <span className="text-green-600 ml-1">(+{Number(clip.viewChange).toLocaleString()})</span>
+                            <span className="text-foreground ml-1">(+{Number(clip.viewChange).toLocaleString()})</span>
                           )}
                         </span>
                         {clip.earnings > 0 && (
@@ -649,9 +649,9 @@ export default function ClipperDashboard() {
                                     title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
                                   >
                                     {point.success ? (
-                                      <CheckCircle className="w-3 h-3 text-green-600" />
+                                      <CheckCircle className="w-3 h-3 text-foreground" />
                                     ) : (
-                                      <XCircle className="w-3 h-3 text-red-600" />
+                                      <XCircle className="w-3 h-3 text-muted-foreground" />
                                     )}
                                   </div>
                                 ))}

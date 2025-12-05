@@ -149,8 +149,12 @@ export async function GET(
     const totalViews = approvedSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
     const totalViewsGained = approvedSubmissions.reduce((sum, s) => sum + s.viewsGained, 0)
 
+    // Convert Prisma Decimal types to numbers for proper client-side comparison
     return NextResponse.json({
       ...campaign,
+      budget: Number(campaign.budget),
+      spent: Number(campaign.spent ?? 0),
+      payoutRate: Number(campaign.payoutRate),
       clipSubmissions: processedSubmissions,
       stats: {
         totalSubmissions: campaign._count.clipSubmissions,
@@ -161,7 +165,7 @@ export async function GET(
         totalViews,
         totalViewsGained,
         budgetUtilization: Number(campaign.budget) > 0 
-          ? (Number(campaign.spent) / Number(campaign.budget)) * 100 
+          ? (Number(campaign.spent ?? 0) / Number(campaign.budget)) * 100 
           : 0
       }
     })

@@ -120,8 +120,12 @@ export function LiveCampaigns() {
 
   // Transform API data to UI format
   const transformCampaignForUI = (campaign: any): LiveCampaign => {
-    const remainingBudget = campaign.budget - (campaign.spent || 0)
-    const budgetProgress = campaign.budget > 0 ? ((campaign.spent || 0) / campaign.budget) * 100 : 0
+    // CRITICAL: Convert to numbers for proper calculations
+    // Prisma Decimal types may be serialized as strings
+    const budgetNum = Number(campaign.budget ?? 0)
+    const spentNum = Number(campaign.spent ?? 0)
+    const remainingBudget = budgetNum - spentNum
+    const budgetProgress = budgetNum > 0 ? (spentNum / budgetNum) * 100 : 0
     const isBudgetFull = budgetProgress >= 100
 
     return {

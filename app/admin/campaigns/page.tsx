@@ -1143,7 +1143,11 @@ export default function AdminCampaignsPage() {
                 </div>
               ) : (
                 filteredCampaigns.map((campaign) => {
-                  const progressPercentage = campaign.budget > 0 ? Math.min((campaign.spent / campaign.budget) * 100, 100) : 0
+                  // CRITICAL: Convert to numbers for proper calculations
+                  // Prisma Decimal types may be serialized as strings
+                  const budgetNum = Number(campaign.budget ?? 0)
+                  const spentNum = Number(campaign.spent ?? 0)
+                  const progressPercentage = budgetNum > 0 ? Math.min((spentNum / budgetNum) * 100, 100) : 0
                   
                   return (
                     <motion.div

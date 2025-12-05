@@ -125,8 +125,8 @@ const rewards = [
 function ReferralCard({ referral }: { referral: typeof recentReferrals[0] }) {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'text-foreground bg-green-400/10'
-      case 'pending': return 'text-yellow-400 bg-yellow-400/10'
+      case 'active': return 'text-foreground bg-foreground/10'
+      case 'pending': return 'text-muted-foreground bg-muted'
       default: return 'text-muted-foreground bg-muted/20'
     }
   }
@@ -304,9 +304,9 @@ export default function ReferralsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-muted-foreground text-sm">Pending Rewards</p>
-                <p className="text-2xl font-bold text-yellow-400">${referralStats.pendingRewards}</p>
+                <p className="text-2xl font-bold text-muted-foreground">${referralStats.pendingRewards}</p>
               </div>
-              <Clock className="w-8 h-8 text-yellow-400" />
+              <Clock className="w-8 h-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
@@ -437,8 +437,8 @@ export default function ReferralsPage() {
             </div>
 
             <div className="text-center">
-              <div className="w-12 h-12 bg-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="w-6 h-6 text-foreground" />
+              <div className="w-12 h-12 bg-foreground rounded-full flex items-center justify-center mx-auto mb-4">
+                <DollarSign className="w-6 h-6 text-background" />
               </div>
               <h3 className="text-foreground font-medium mb-2">3. You Get Paid</h3>
               <p className="text-muted-foreground text-sm">

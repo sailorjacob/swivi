@@ -48,7 +48,7 @@ export default function AnalyticsPage() {
                   <div>
                     <p className="text-muted-foreground text-sm font-medium">{stat.label}</p>
                     <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
-                    <p className="text-sm mt-1 text-green-500">{stat.change}</p>
+                    <p className="text-sm mt-1 text-muted-foreground">{stat.change}</p>
                   </div>
                   <div className="p-3 rounded-lg bg-muted">
                     <Icon className="w-6 h-6 text-muted-foreground" />
@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
                   <p className="text-sm text-muted-foreground">{campaign.clips} clips submitted</p>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-green-500">{campaign.earnings}</div>
+                  <div className="text-lg font-bold text-foreground">{campaign.earnings}</div>
                   <div className="text-sm text-muted-foreground">{campaign.views} views</div>
                 </div>
               </div>
@@ -98,7 +98,7 @@ export default function AnalyticsPage() {
               ].map((item, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-foreground rounded-full"></div>
                     <span className="text-white">{item.platform}</span>
                   </div>
                   <div className="text-right">

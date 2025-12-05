@@ -46,7 +46,17 @@ export async function GET(
       return NextResponse.json({ error: "Campaign not found" }, { status: 404 })
     }
 
-    return NextResponse.json(campaign)
+    // Convert Prisma Decimal types to numbers for proper client-side comparison
+    // This fixes the "budget exhausted" false positive bug where Decimal objects
+    // were being compared incorrectly
+    const responseData = {
+      ...campaign,
+      budget: Number(campaign.budget),
+      spent: Number(campaign.spent ?? 0),
+      payoutRate: Number(campaign.payoutRate)
+    }
+
+    return NextResponse.json(responseData)
   } catch (error) {
     console.error("Error fetching campaign:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

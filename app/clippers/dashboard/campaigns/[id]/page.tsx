@@ -251,11 +251,11 @@ export default function CampaignDetailPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "APPROVED":
-        return <Badge className="bg-green-500/10 text-green-600 border-green-500/20"><CheckCircle className="w-3 h-3 mr-1" />Approved</Badge>
+        return <Badge className="bg-foreground/10 text-foreground border-foreground/20"><CheckCircle className="w-3 h-3 mr-1" />Approved</Badge>
       case "PENDING":
-        return <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20"><Clock className="w-3 h-3 mr-1" />Pending Review</Badge>
+        return <Badge className="bg-muted text-muted-foreground border-border"><Clock className="w-3 h-3 mr-1" />Pending</Badge>
       case "REJECTED":
-        return <Badge className="bg-red-500/10 text-red-600 border-red-500/20"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>
+        return <Badge className="bg-muted text-muted-foreground/70 border-border"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
     }
@@ -290,12 +290,18 @@ export default function CampaignDetailPage() {
     )
   }
 
-  const isBudgetExhausted = campaign.spent >= campaign.budget
+  // CRITICAL: Ensure budget/spent are numbers for proper comparison
+  // Prisma Decimal types can be serialized as strings in JSON, causing
+  // lexicographic comparison bugs (e.g., "6.00" >= "20000.00" is TRUE alphabetically!)
+  const spentNum = Number(campaign.spent ?? 0)
+  const budgetNum = Number(campaign.budget ?? 0)
+  
+  const isBudgetExhausted = spentNum >= budgetNum
   const isActive = campaign.status === "ACTIVE" && !isBudgetExhausted
   const isScheduled = campaign.status === "SCHEDULED"
   const isCompleted = campaign.status === "COMPLETED" || isBudgetExhausted
-  const progress = campaign.budget > 0 ? (campaign.spent / campaign.budget) * 100 : 0
-  const remainingBudget = campaign.budget - campaign.spent
+  const progress = budgetNum > 0 ? (spentNum / budgetNum) * 100 : 0
+  const remainingBudget = budgetNum - spentNum
 
   return (
     <div className="space-y-6">
@@ -334,8 +340,8 @@ export default function CampaignDetailPage() {
                   </Badge>
                 )}
                 {isActive && (
-                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-                    <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5 animate-pulse" />
+                  <Badge className="bg-foreground/10 text-foreground border-foreground/20">
+                    <span className="w-2 h-2 bg-foreground rounded-full mr-1.5 animate-pulse" />
                     LIVE
                   </Badge>
                 )}
@@ -688,7 +694,7 @@ export default function CampaignDetailPage() {
                             <div className="text-right">
                               {submission.status === "APPROVED" && (
                                 <>
-                                  <p className="font-bold text-green-600">{formatCurrency(earnings)}</p>
+                                  <p className="font-bold text-foreground">{formatCurrency(earnings)}</p>
                                   <p className="text-xs text-muted-foreground">earned</p>
                                 </>
                               )}

@@ -282,16 +282,21 @@ export default function CampaignsPage() {
         /* Campaigns Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {sortedFilteredCampaigns.map((campaign) => {
-          // Calculate progress percentage
-          const progress = getProgressPercentage(campaign.spent, campaign.budget)
+          // CRITICAL: Convert budget/spent to numbers for proper calculations
+          // Prisma Decimal types may be serialized as strings, causing comparison bugs
+          const budgetNum = Number(campaign.budget ?? 0)
+          const spentNum = Number(campaign.spent ?? 0)
+          
+          // Calculate progress percentage with numeric values
+          const progress = getProgressPercentage(spentNum, budgetNum)
           const isActive = campaign.status === "ACTIVE"
           const isScheduled = campaign.status === "SCHEDULED"
           const isLaunching = campaign.status === "DRAFT"
           const isCompleted = campaign.status === "COMPLETED"
 
           // Campaign runs until budget is exhausted
-          const remainingBudget = campaign.budget - campaign.spent
-          const budgetText = remainingBudget > 0 ? `$${(typeof remainingBudget === 'number' ? remainingBudget : parseFloat(remainingBudget || 0)).toFixed(0)} left` : "Budget Full"
+          const remainingBudget = budgetNum - spentNum
+          const budgetText = remainingBudget > 0 ? `$${remainingBudget.toFixed(0)} left` : "Budget Full"
 
           return (
           <motion.div

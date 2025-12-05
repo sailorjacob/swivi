@@ -228,9 +228,9 @@ export default function PayoutsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'text-green-500 bg-green-500/10 border-green-500/20'
-      case 'processing': return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20'
-      case 'failed': return 'text-red-500 bg-red-500/10 border-red-500/20'
+      case 'completed': return 'text-foreground bg-foreground/10 border-foreground/20'
+      case 'processing': return 'text-muted-foreground bg-muted border-border'
+      case 'failed': return 'text-muted-foreground/70 bg-muted border-border'
       default: return 'text-muted-foreground bg-muted border-border'
     }
   }

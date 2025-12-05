@@ -89,7 +89,17 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json(campaigns)
+    // Convert Prisma Decimal types to numbers for proper client-side comparison
+    // This fixes the "budget exhausted" false positive bug where Decimal objects
+    // were being compared incorrectly as strings (lexicographic comparison)
+    const campaignsWithNumbers = campaigns.map(campaign => ({
+      ...campaign,
+      budget: Number(campaign.budget),
+      spent: Number(campaign.spent ?? 0),
+      payoutRate: Number(campaign.payoutRate)
+    }))
+
+    return NextResponse.json(campaignsWithNumbers)
   } catch (error) {
     console.error("Error fetching campaigns:", error)
     console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace')

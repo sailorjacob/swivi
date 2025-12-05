@@ -154,7 +154,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if campaign budget is exhausted
-    if (campaign.spent >= campaign.budget) {
+    // CRITICAL: Convert Decimal objects to numbers for proper comparison
+    // Prisma Decimal types don't support direct JS comparison operators
+    const spentAmount = Number(campaign.spent ?? 0)
+    const budgetAmount = Number(campaign.budget)
+    
+    console.log(`💰 Budget check: spent=${spentAmount}, budget=${budgetAmount}, exhausted=${spentAmount >= budgetAmount}`)
+    
+    if (spentAmount >= budgetAmount) {
       return NextResponse.json({ 
         error: "Campaign budget exhausted", 
         details: "This campaign has reached its budget limit and is no longer accepting submissions."
