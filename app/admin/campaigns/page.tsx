@@ -36,6 +36,7 @@ interface Campaign {
   targetPlatforms: string[]
   requirements: string[]
   featuredImage?: string | null
+  contentFolderUrl?: string | null
   createdAt: string | Date
   updatedAt?: string | Date
   _count: {
@@ -93,7 +94,8 @@ export default function AdminCampaignsPage() {
     targetPlatforms: [] as string[],
     requirements: [] as string[],
     status: "ACTIVE" as Campaign["status"],
-    featuredImage: ""
+    featuredImage: "",
+    contentFolderUrl: ""
   })
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -287,6 +289,12 @@ export default function AdminCampaignsPage() {
         console.log("❌ No valid image URL, omitting featuredImage field")
       }
 
+      // Include contentFolderUrl if provided
+      if (formData.contentFolderUrl && formData.contentFolderUrl.trim() !== '') {
+        requestBody.contentFolderUrl = formData.contentFolderUrl.trim()
+        console.log("✅ Including contentFolderUrl in request:", requestBody.contentFolderUrl)
+      }
+
       console.log("🚀 Sending campaign creation request:", JSON.stringify(requestBody, null, 2))
 
       console.log("📡 Calling authenticatedFetch...")
@@ -449,6 +457,7 @@ export default function AdminCampaignsPage() {
           targetPlatforms: formData.targetPlatforms,
           requirements: formData.requirements,
           status: formData.status,
+          contentFolderUrl: formData.contentFolderUrl?.trim() || null,
       }
 
       // Handle featuredImage in update payload
@@ -861,6 +870,7 @@ export default function AdminCampaignsPage() {
         requirements: campaign.requirements || [],
         status: campaign.status || "DRAFT",
         featuredImage: campaign.featuredImage || "",
+        contentFolderUrl: campaign.contentFolderUrl || "",
       }
       
       console.log('📝 Setting form data:', formDataToSet)
@@ -887,7 +897,8 @@ export default function AdminCampaignsPage() {
       targetPlatforms: [],
       requirements: [],
       status: "ACTIVE",
-      featuredImage: ""
+      featuredImage: "",
+      contentFolderUrl: ""
     })
     setUploadedFile(null)
     setSelectedCampaign(null)
@@ -1806,6 +1817,24 @@ function CampaignForm({
             )}
           </div>
         )}
+
+        {/* Content Folder URL */}
+        <div>
+          <label htmlFor="campaign-content-folder" className="block text-sm font-medium mb-1">
+            Content Folder URL (Optional)
+          </label>
+          <Input
+            id="campaign-content-folder"
+            name="contentFolderUrl"
+            type="url"
+            value={formData.contentFolderUrl || ''}
+            onChange={(e) => setFormData({ ...formData, contentFolderUrl: e.target.value })}
+            placeholder="https://drive.google.com/drive/folders/..."
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Link to a Google Drive, Dropbox, or other folder with campaign content for clippers
+          </p>
+        </div>
       </fieldset>
 
       {/* Budget */}

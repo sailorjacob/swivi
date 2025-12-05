@@ -97,6 +97,7 @@ model Campaign {
   requirements    String[]         @default([])
   targetPlatforms SocialPlatform[] @default([])
   featuredImage   String? // Campaign image URL
+  contentFolderUrl String? // Link to content folder (Google Drive, etc.)
   completionReason String? // Reason campaign was completed (budget reached, manual, etc.)
   completedAt     DateTime?        @db.Timestamp(6)
   createdAt          DateTime?           @default(now()) @db.Timestamp(6)

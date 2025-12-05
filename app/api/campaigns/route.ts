@@ -19,6 +19,7 @@ const createCampaignSchema = z.object({
   requirements: z.array(z.string()).optional().default([]),
   status: z.enum(["DRAFT", "SCHEDULED", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional().default("ACTIVE"),
   featuredImage: z.string().url().optional().nullable(),
+  contentFolderUrl: z.string().url().optional().nullable(),
 })
 
 export async function GET(request: NextRequest) {
@@ -149,6 +150,7 @@ export async function POST(request: NextRequest) {
     // Add optional fields if provided
     if (validatedData.startDate) campaignData.startDate = validatedData.startDate
     if (body.featuredImage !== undefined) campaignData.featuredImage = validatedData.featuredImage
+    if (validatedData.contentFolderUrl !== undefined) campaignData.contentFolderUrl = validatedData.contentFolderUrl
 
     console.log("📊 Creating campaign with data:", JSON.stringify(campaignData, null, 2))
 

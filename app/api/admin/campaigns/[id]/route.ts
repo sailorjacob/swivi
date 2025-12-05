@@ -22,6 +22,7 @@ const updateCampaignSchema = z.object({
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])).optional(),
   requirements: z.array(z.string()).optional(),
   featuredImage: z.string().url().optional().nullable(),
+  contentFolderUrl: z.string().url().optional().nullable(),
   completionReason: z.string().optional(),
 })
 
@@ -61,6 +62,7 @@ export async function GET(
         targetPlatforms: true,
         requirements: true,
         featuredImage: true,
+        contentFolderUrl: true,
         createdAt: true,
         updatedAt: true,
         completedAt: true,
@@ -265,6 +267,7 @@ export async function PUT(
     if (validatedData.targetPlatforms !== undefined) updateData.targetPlatforms = validatedData.targetPlatforms
     if (validatedData.requirements !== undefined) updateData.requirements = validatedData.requirements
     if (body.featuredImage !== undefined) updateData.featuredImage = validatedData.featuredImage
+    if (validatedData.contentFolderUrl !== undefined) updateData.contentFolderUrl = validatedData.contentFolderUrl
     if (validatedData.hidden !== undefined) updateData.hidden = validatedData.hidden
     if (validatedData.isTest !== undefined) updateData.isTest = validatedData.isTest
     

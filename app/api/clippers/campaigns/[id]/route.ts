@@ -31,6 +31,7 @@ export async function GET(
         targetPlatforms: true,
         requirements: true,
         featuredImage: true,
+        contentFolderUrl: true,
         createdAt: true,
         updatedAt: true,
         _count: {

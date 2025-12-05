@@ -37,7 +37,8 @@ import {
   Eye,
   AlertCircle,
   Send,
-  FileVideo
+  FileVideo,
+  FolderOpen
 } from "lucide-react"
 
 // Countdown hook
@@ -80,6 +81,7 @@ interface Campaign {
   targetPlatforms: string[]
   requirements: string[]
   featuredImage?: string
+  contentFolderUrl?: string
   createdAt: string
   _count: {
     clipSubmissions: number
@@ -368,18 +370,34 @@ export default function CampaignDetailPage() {
               </div>
             </div>
 
-            {hasBonuses(campaign) && (
-              <Button
-                variant="outline"
-                onClick={() => setBonusModalOpen(true)}
-                className="group border-zinc-400/30 hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20"
-              >
-                <Trophy className="w-4 h-4 mr-2 text-zinc-400 group-hover:text-zinc-200" />
-                <span className="group-hover:text-zinc-100">
-                  View Bounties
-                </span>
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {campaign.contentFolderUrl && (
+                <Button
+                  variant="outline"
+                  asChild
+                  className="group border-zinc-400/30 hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20"
+                >
+                  <a href={campaign.contentFolderUrl} target="_blank" rel="noopener noreferrer">
+                    <FolderOpen className="w-4 h-4 mr-2 text-zinc-400 group-hover:text-zinc-200" />
+                    <span className="group-hover:text-zinc-100">
+                      Content Folder
+                    </span>
+                  </a>
+                </Button>
+              )}
+              {hasBonuses(campaign) && (
+                <Button
+                  variant="outline"
+                  onClick={() => setBonusModalOpen(true)}
+                  className="group border-zinc-400/30 hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20"
+                >
+                  <Trophy className="w-4 h-4 mr-2 text-zinc-400 group-hover:text-zinc-200" />
+                  <span className="group-hover:text-zinc-100">
+                    View Bounties
+                  </span>
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Stats Grid */}
