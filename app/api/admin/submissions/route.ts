@@ -133,6 +133,7 @@ export async function GET(request: NextRequest) {
           rejectionReason: true,
           requiresReview: true,
           reviewReason: true,
+          processingStatus: true,
           clipId: true,
           initialViews: true,
           finalEarnings: true,

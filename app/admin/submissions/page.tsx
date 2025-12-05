@@ -32,7 +32,7 @@ interface Submission {
   requiresReview?: boolean
   reviewReason?: string
   autoRejected?: boolean
-  processingStatus?: string
+  processingStatus?: string // SCRAPING, COMPLETE, SCRAPE_FAILED, SCRAPE_ERROR, etc.
   createdAt: string
   updatedAt: string
   initialViews?: string
@@ -64,6 +64,17 @@ interface Submission {
     featuredImage?: string | null
     status?: string
   }
+}
+
+// Helper to get processing status display
+const getProcessingStatusDisplay = (status?: string) => {
+  if (!status) return null
+  if (status === 'SCRAPING') return { text: 'Scraping views...', color: 'text-blue-500' }
+  if (status === 'COMPLETE') return { text: 'Scraped', color: 'text-green-600' }
+  if (status.startsWith('SCRAPE_FAILED') || status.startsWith('SCRAPE_ERROR')) {
+    return { text: 'Scrape failed', color: 'text-red-500', tooltip: status }
+  }
+  return { text: status, color: 'text-muted-foreground' }
 }
 
 const statusOptions = [
@@ -561,33 +572,71 @@ export default function AdminSubmissionsPage() {
                       {submission.payout && (
                         <span>Payout: ${submission.payout.toFixed(2)}</span>
                       )}
-                      {/* View tracking data */}
-                      {(submission.initialViews && Number(submission.initialViews) > 0) || 
-                       (submission.currentViews && Number(submission.currentViews) > 0) ? (
-                        <span className="flex items-center gap-1">
-                          <span className="font-medium">Views:</span>
-                          {submission.initialViews && Number(submission.initialViews) > 0 && (
-                            <span title="Initial scraped views">
-                              {Number(submission.initialViews).toLocaleString()} initial
+                      {/* View tracking data with processing status */}
+                      {(() => {
+                        const processingStatus = getProcessingStatusDisplay(submission.processingStatus)
+                        const hasInitialViews = submission.initialViews && Number(submission.initialViews) > 0
+                        const hasCurrentViews = submission.currentViews && Number(submission.currentViews) > 0
+                        const isScraping = submission.processingStatus === 'SCRAPING'
+                        const scrapeFailed = submission.processingStatus?.startsWith('SCRAPE_FAILED') || 
+                                            submission.processingStatus?.startsWith('SCRAPE_ERROR')
+                        
+                        if (isScraping) {
+                          return (
+                            <span className="flex items-center gap-1 text-blue-500">
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                              Scraping initial views...
                             </span>
-                          )}
-                          {submission.currentViews && Number(submission.currentViews) > 0 && (
-                            <>
-                              <span className="mx-1">→</span>
-                              <span title="Current views">
-                                {Number(submission.currentViews).toLocaleString()} current
-                              </span>
-                            </>
-                          )}
-                          {submission.viewChange && Number(submission.viewChange) > 0 && (
-                            <span className="text-green-600 dark:text-green-400" title="View change">
-                              (+{Number(submission.viewChange).toLocaleString()})
+                          )
+                        }
+                        
+                        if (hasInitialViews || hasCurrentViews) {
+                          return (
+                            <span className="flex items-center gap-1">
+                              <span className="font-medium">Views:</span>
+                              {hasInitialViews && (
+                                <span title="Initial scraped views at submission time" className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                  {Number(submission.initialViews).toLocaleString()} initial
+                                </span>
+                              )}
+                              {hasCurrentViews && (
+                                <>
+                                  <span className="mx-1">→</span>
+                                  <span title="Current views from tracking">
+                                    {Number(submission.currentViews).toLocaleString()} current
+                                  </span>
+                                </>
+                              )}
+                              {submission.viewChange && Number(submission.viewChange) > 0 && (
+                                <span className="text-green-600 dark:text-green-400 font-medium" title="View change (earnings based on this)">
+                                  (+{Number(submission.viewChange).toLocaleString()})
+                                </span>
+                              )}
                             </span>
-                          )}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground/60">No view data</span>
-                      )}
+                          )
+                        }
+                        
+                        if (scrapeFailed) {
+                          return (
+                            <span className="flex items-center gap-1 text-red-500" title={submission.processingStatus}>
+                              <AlertCircle className="w-3 h-3" />
+                              Scrape failed
+                            </span>
+                          )
+                        }
+                        
+                        if (submission.processingStatus === 'COMPLETE') {
+                          return (
+                            <span className="text-muted-foreground/60" title="Scraping completed but returned 0 views">
+                              0 views (scraped)
+                            </span>
+                          )
+                        }
+                        
+                        return (
+                          <span className="text-muted-foreground/60">No view data</span>
+                        )
+                      })()}
                       {submission.campaigns.status === 'COMPLETED' && submission.finalEarnings ? (
                         <span className="font-bold flex items-center gap-1">
                           Final Earnings: ${Number(submission.finalEarnings).toFixed(2)} 🔒

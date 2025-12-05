@@ -282,6 +282,7 @@ export async function POST(request: NextRequest) {
           platform: validatedData.platform,
           mediaFileUrl: validatedData.mediaFileUrl,
           status: "PENDING",
+          processingStatus: "SCRAPING", // Track that we're scraping initial views
           initialViews: BigInt(0) // Temporary - will be updated by background scrape
         },
         include: {
@@ -301,40 +302,59 @@ export async function POST(request: NextRequest) {
       const backgroundScrape = async () => {
         try {
           const { MultiPlatformScraper } = await import('@/lib/multi-platform-scraper')
-          const scraper = new MultiPlatformScraper(process.env.APIFY_API_KEY || '')
+          const apifyKey = process.env.APIFY_API_KEY || ''
+          
+          if (!apifyKey) {
+            console.error(`❌ APIFY_API_KEY not set - cannot scrape initial views for ${submissionId}`)
+            await prisma.clipSubmission.update({
+              where: { id: submissionId },
+              data: { processingStatus: "SCRAPE_FAILED_NO_API_KEY" }
+            })
+            return
+          }
+          
+          const scraper = new MultiPlatformScraper(apifyKey)
           console.log(`🔍 Starting background initial view scrape for submission ${submissionId}`)
           
           const scrapedData = await Promise.race([
             scraper.scrapeContent(clipUrl, platform),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Scrape timeout')), 60000)) // 60 seconds
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Scrape timeout after 90s')), 90000)) // 90 seconds
           ]) as any
           
           if (scrapedData && !scrapedData.error) {
             const rawViews = scrapedData.views || scrapedData.viewCount || 0
             const views = typeof rawViews === 'string' ? parseInt(rawViews, 10) : rawViews
             
-            if (!isNaN(views) && views > 0) {
-              // Update the submission with actual initial views
-              // Only update if initialViews is still 0 (hasn't been set by another process)
-              await prisma.clipSubmission.updateMany({
-                where: { 
-                  id: submissionId,
-                  initialViews: BigInt(0) // Only update if still 0
-                },
-                data: {
-                  initialViews: BigInt(views)
-                }
-              })
-              console.log(`📊 Background scrape updated submission ${submissionId} with ${views} initial views`)
-            } else {
-              console.log(`📊 Background scrape got 0 views for submission ${submissionId}`)
-            }
+            // Update even if views is 0 - this means scraping worked but content has 0 views
+            const finalViews = !isNaN(views) ? views : 0
+            
+            await prisma.clipSubmission.update({
+              where: { id: submissionId },
+              data: {
+                initialViews: BigInt(finalViews),
+                processingStatus: "COMPLETE"
+              }
+            })
+            console.log(`📊 Background scrape updated submission ${submissionId} with ${finalViews} initial views`)
           } else {
-            console.log(`⚠️ Background scrape failed for ${submissionId}: ${scrapedData?.error || 'Unknown error'}`)
+            console.error(`⚠️ Background scrape failed for ${submissionId}: ${scrapedData?.error || 'Unknown error'}`)
+            await prisma.clipSubmission.update({
+              where: { id: submissionId },
+              data: { processingStatus: `SCRAPE_FAILED: ${scrapedData?.error || 'Unknown error'}`.substring(0, 100) }
+            })
           }
         } catch (error) {
-          console.log(`⚠️ Background scrape error for ${submissionId}:`, error instanceof Error ? error.message : 'Unknown')
-          // Don't throw - submission already succeeded
+          const errorMsg = error instanceof Error ? error.message : 'Unknown'
+          console.error(`⚠️ Background scrape error for ${submissionId}:`, errorMsg)
+          // Update status so we know it failed
+          try {
+            await prisma.clipSubmission.update({
+              where: { id: submissionId },
+              data: { processingStatus: `SCRAPE_ERROR: ${errorMsg}`.substring(0, 100) }
+            })
+          } catch (updateError) {
+            console.error(`Failed to update scrape error status:`, updateError)
+          }
         }
       }
       
@@ -358,9 +378,7 @@ export async function POST(request: NextRequest) {
       console.error('❌ Error details:', {
         message: dbError.message,
         code: dbError.code,
-        meta: dbError.meta,
-        initialViewsValue: initialViews,
-        initialViewsType: typeof initialViews
+        meta: dbError.meta
       })
       
       // Check if it's a missing column error
@@ -376,8 +394,7 @@ export async function POST(request: NextRequest) {
       if (dbError.message?.includes('BigInt')) {
         return NextResponse.json({
           error: "Invalid view count",
-          details: `Could not process view count: ${initialViews}`,
-          debugInfo: `Type: ${typeof initialViews}, Value: ${initialViews}`
+          details: "Could not process view count for submission"
         }, { status: 500 })
       }
       
