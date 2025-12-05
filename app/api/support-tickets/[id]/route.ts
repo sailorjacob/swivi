@@ -25,10 +25,27 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const dbUser = await prisma.user.findUnique({
+    // Get the internal user ID - try by supabaseAuthId first, then by email
+    let dbUser = await prisma.user.findUnique({
       where: { supabaseAuthId: user.id },
       select: { id: true, role: true }
     })
+
+    // If not found by supabaseAuthId, try by email (handles OAuth provider changes)
+    if (!dbUser && user.email) {
+      dbUser = await prisma.user.findUnique({
+        where: { email: user.email },
+        select: { id: true, role: true }
+      })
+      
+      // If found by email, update their supabaseAuthId
+      if (dbUser) {
+        await prisma.user.update({
+          where: { id: dbUser.id },
+          data: { supabaseAuthId: user.id }
+        })
+      }
+    }
 
     if (!dbUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
@@ -79,10 +96,27 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const dbUser = await prisma.user.findUnique({
+    // Get the internal user ID - try by supabaseAuthId first, then by email
+    let dbUser = await prisma.user.findUnique({
       where: { supabaseAuthId: user.id },
       select: { id: true, role: true }
     })
+
+    // If not found by supabaseAuthId, try by email (handles OAuth provider changes)
+    if (!dbUser && user.email) {
+      dbUser = await prisma.user.findUnique({
+        where: { email: user.email },
+        select: { id: true, role: true }
+      })
+      
+      // If found by email, update their supabaseAuthId
+      if (dbUser) {
+        await prisma.user.update({
+          where: { id: dbUser.id },
+          data: { supabaseAuthId: user.id }
+        })
+      }
+    }
 
     if (!dbUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })

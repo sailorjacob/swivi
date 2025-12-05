@@ -26,14 +26,32 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get the internal user ID
-    const dbUser = await prisma.user.findUnique({
+    // Get the internal user ID - try by supabaseAuthId first, then by email
+    let dbUser = await prisma.user.findUnique({
       where: { supabaseAuthId: user.id },
       select: { id: true, email: true }
     })
 
+    // If not found by supabaseAuthId, try by email (handles OAuth provider changes)
+    if (!dbUser && user.email) {
+      console.log("⚠️ User not found by supabaseAuthId, trying email lookup...")
+      dbUser = await prisma.user.findUnique({
+        where: { email: user.email },
+        select: { id: true, email: true }
+      })
+      
+      // If found by email, update their supabaseAuthId
+      if (dbUser) {
+        console.log("✅ Found user by email, updating supabaseAuthId...")
+        await prisma.user.update({
+          where: { id: dbUser.id },
+          data: { supabaseAuthId: user.id }
+        })
+      }
+    }
+
     if (!dbUser) {
-      console.log("❌ User not found in DB for supabaseAuthId:", user.id)
+      console.log("❌ User not found in DB for supabaseAuthId:", user.id, "or email:", user.email)
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
