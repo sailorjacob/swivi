@@ -9,6 +9,7 @@ import { Badge } from "../../../../components/ui/badge"
 import { Button } from "../../../../components/ui/button"
 import { Progress } from "../../../../components/ui/progress"
 import { CampaignBonusModal } from "../../../../components/campaigns/campaign-bonus-modal"
+import { LinkifyText } from "../../../../components/ui/linkify-text"
 import { ErrorBoundary, CampaignErrorFallback } from "../../../../components/error-boundary"
 import Image from "next/image"
 import Link from "next/link"
@@ -126,6 +127,7 @@ export default function CampaignsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [bonusModalOpen, setBonusModalOpen] = useState(false)
+  const [selectedBountyCampaign, setSelectedBountyCampaign] = useState<Campaign | null>(null)
   const [filter, setFilter] = useState<'active' | 'upcoming' | 'completed' | 'all'>('active')
 
   const fetchCampaigns = async () => {
@@ -392,7 +394,7 @@ export default function CampaignsPage() {
                   </h3>
 
                   <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {campaign.description}
+                    <LinkifyText text={campaign.description} />
                   </p>
 
                   {/* Budget Progress Bar */}
@@ -464,6 +466,7 @@ export default function CampaignsPage() {
                         variant="outline"
                         onClick={(e) => {
                           e.stopPropagation()
+                          setSelectedBountyCampaign(campaign)
                           setBonusModalOpen(true)
                         }}
                         className="group border-zinc-400/30 hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20"
@@ -487,13 +490,17 @@ export default function CampaignsPage() {
         {/* Bonus Modal for Featured Campaigns */}
         <CampaignBonusModal
           isOpen={bonusModalOpen}
-          onClose={() => setBonusModalOpen(false)}
-          campaign={{
-            title: "Owning Manhattan Season 2",
-            totalBudget: 20000,
-            bonusBudget: 2000,
-            payoutRate: "$1 per 1,000 views"
+          onClose={() => {
+            setBonusModalOpen(false)
+            setSelectedBountyCampaign(null)
           }}
+          campaign={selectedBountyCampaign ? {
+            id: selectedBountyCampaign.id,
+            title: selectedBountyCampaign.title,
+            totalBudget: selectedBountyCampaign.budget,
+            bonusBudget: 2000,
+            payoutRate: `$${selectedBountyCampaign.payoutRate} per 1,000 views`
+          } : undefined}
         />
       </div>
     </ErrorBoundary>

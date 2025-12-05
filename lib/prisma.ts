@@ -10,9 +10,6 @@ const getDatabaseUrl = () => {
   const env = validateEnvironment()
 
   // For Supabase with connection pooling, we need to disable prepared statements
-  console.log('🔍 DATABASE_URL length:', env.DATABASE_URL.length)
-  console.log('🔍 DATABASE_URL preview:', env.DATABASE_URL.substring(0, 50) + '...')
-
   // Parse the URL and add pgbouncer-compatible parameters
   const url = new URL(env.DATABASE_URL)
   

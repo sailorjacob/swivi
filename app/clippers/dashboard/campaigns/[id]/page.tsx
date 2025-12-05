@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CampaignBonusModal } from "@/components/campaigns/campaign-bonus-modal"
+import { LinkifyParagraph } from "@/components/ui/linkify-text"
 import toast from "react-hot-toast"
 import Link from "next/link"
 import { 
@@ -351,7 +352,7 @@ export default function CampaignDetailPage() {
               </div>
               
               <h1 className="text-2xl font-bold mb-2">{campaign.title}</h1>
-              <p className="text-muted-foreground mb-4">{campaign.description}</p>
+              <LinkifyParagraph text={campaign.description} className="text-muted-foreground mb-4" />
               
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
@@ -798,10 +799,11 @@ export default function CampaignDetailPage() {
         isOpen={bonusModalOpen}
         onClose={() => setBonusModalOpen(false)}
         campaign={{
-          title: "Owning Manhattan Season 2",
-          totalBudget: 20000,
+          id: campaignId,
+          title: campaign?.title || "Campaign",
+          totalBudget: campaign?.budget || 20000,
           bonusBudget: 2000,
-          payoutRate: "$1 per 1,000 views"
+          payoutRate: `$${campaign?.payoutRate || 1} per 1,000 views`
         }}
       />
     </div>

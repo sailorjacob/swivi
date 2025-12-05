@@ -44,6 +44,7 @@ model User {
   viewTracking        ViewTracking[]
   notifications       Notification[]
   supportTickets      SupportTicket[]
+  bountyApplications  BountyApplication[]
 
   @@map("users")
 }
@@ -98,9 +99,10 @@ model Campaign {
   featuredImage   String? // Campaign image URL
   completionReason String? // Reason campaign was completed (budget reached, manual, etc.)
   completedAt     DateTime?        @db.Timestamp(6)
-  createdAt       DateTime?        @default(now()) @db.Timestamp(6)
-  updatedAt       DateTime?        @default(now()) @db.Timestamp(6)
-  clipSubmissions ClipSubmission[]
+  createdAt          DateTime?           @default(now()) @db.Timestamp(6)
+  updatedAt          DateTime?           @default(now()) @db.Timestamp(6)
+  clipSubmissions    ClipSubmission[]
+  bountyApplications BountyApplication[]
 
   @@index([deletedAt]) // For filtering soft-deleted campaigns
   @@index([isTest]) // For filtering test campaigns
@@ -397,4 +399,43 @@ enum SupportTicketStatus {
   IN_PROGRESS
   RESOLVED
   CLOSED
+}
+
+enum BountyTier {
+  TIER_1_HIGH_VOLUME
+  TIER_2_QUALITY
+}
+
+enum BountyApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model BountyApplication {
+  id                    String                   @id @default(cuid())
+  userId                String
+  campaignId            String
+  fullName              String
+  email                 String
+  platform              SocialPlatform
+  profileLink           String
+  tier                  BountyTier
+  followerCount         Int?
+  followerScreenshotUrl String?                  // URL to uploaded screenshot
+  clipLinks             String[]                 // Array of clip URLs
+  paymentAddress        String                   // PayPal email or BTC address
+  status                BountyApplicationStatus  @default(PENDING)
+  adminNotes            String?
+  reviewedBy            String?
+  reviewedAt            DateTime?                @db.Timestamp(6)
+  createdAt             DateTime                 @default(now()) @db.Timestamp(6)
+  updatedAt             DateTime                 @default(now()) @db.Timestamp(6)
+  users                 User                     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  campaigns             Campaign                 @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, campaignId, tier]) // One application per tier per campaign per user
+  @@index([campaignId, status])
+  @@index([userId])
+  @@map("bounty_applications")
 }

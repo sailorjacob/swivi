@@ -10,7 +10,6 @@ export async function launchBrowser() {
   if (browserlessToken) {
     // Use Browserless.io cloud service
     console.log(`🌐 Connecting to Browserless.io cloud browser...`)
-    console.log(`🔑 Using API key: ${browserlessToken.substring(0, 10)}...${browserlessToken.slice(-5)}`)
     
     try {
       const wsEndpoint = `wss://production-sfo.browserless.io?token=${browserlessToken}&stealth&blockAds`
