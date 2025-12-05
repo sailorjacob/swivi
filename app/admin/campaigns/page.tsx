@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { FileUpload } from "@/components/ui/file-upload"
+import { CampaignStatusGuide } from "@/components/admin/campaign-status-guide"
 import toast from "react-hot-toast"
 
 interface Campaign {
@@ -989,10 +990,13 @@ export default function AdminCampaignsPage() {
               <span className="font-semibold">${platformStats.totalEarnings.toFixed(2)}</span>
             </div>
           </div>
-          <Button onClick={() => setShowCreateDialog(!showCreateDialog)} size="sm">
-            <Plus className="h-4 w-4 mr-1" />
-            {showCreateDialog ? "Cancel" : "New Campaign"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <CampaignStatusGuide />
+            <Button onClick={() => setShowCreateDialog(!showCreateDialog)} size="sm">
+              <Plus className="h-4 w-4 mr-1" />
+              {showCreateDialog ? "Cancel" : "New Campaign"}
+            </Button>
+          </div>
         </div>
 
         {/* Campaign Status Filter Tabs */}
