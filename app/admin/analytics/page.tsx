@@ -217,7 +217,7 @@ export default function AdminAnalyticsPage() {
           <p className="text-sm text-muted-foreground">Platform-wide performance and campaign insights</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <span className="w-2 h-2 bg-foreground/50 rounded-full animate-pulse" />
           Auto-refreshing
           <Button variant="ghost" size="sm" onClick={fetchAllData}>
             <RefreshCw className="w-4 h-4" />
@@ -355,7 +355,7 @@ export default function AdminAnalyticsPage() {
                             </div>
                             <Link 
                               href={`/admin/submissions?campaignId=${campaign.campaignId}`}
-                              className="text-sm text-blue-500 hover:text-blue-700 flex items-center gap-1"
+                              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
                             >
                               See submissions ({campaign.totalSubmissions})
                               <ExternalLink className="w-3 h-3" />
@@ -371,7 +371,7 @@ export default function AdminAnalyticsPage() {
                           </div>
                           <div className="w-full bg-muted rounded-full h-2">
                             <div
-                              className="h-2 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-500"
+                              className="h-2 rounded-full bg-foreground/70 transition-all duration-500"
                               style={{ width: `${Math.min(progressPercent, 100)}%` }}
                             />
                           </div>
@@ -389,7 +389,7 @@ export default function AdminAnalyticsPage() {
                           </div>
                           <div>
                             <p className="text-muted-foreground text-xs">Views Gained</p>
-                            <p className="font-medium text-green-600">+{campaign.trackedViews.toLocaleString()}</p>
+                            <p className="font-medium">+{campaign.trackedViews.toLocaleString()}</p>
                           </div>
                           <div>
                             <p className="text-muted-foreground text-xs">Submissions</p>
@@ -477,7 +477,7 @@ export default function AdminAnalyticsPage() {
                                     href={clip.clipUrl} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
-                                    className="text-xs text-blue-500 hover:text-blue-700 break-all"
+                                    className="text-xs text-muted-foreground hover:text-foreground underline break-all transition-colors"
                                   >
                                     {clip.clipUrl.length > 60 ? `${clip.clipUrl.substring(0, 60)}...` : clip.clipUrl}
                                   </a>
@@ -488,7 +488,7 @@ export default function AdminAnalyticsPage() {
                                 <div className="text-right ml-4">
                                   <p className="font-bold">{clip.currentViews.toLocaleString()} views</p>
                                   {viewGrowth > 0 && (
-                                    <p className="text-xs text-green-600">+{viewGrowth.toLocaleString()}</p>
+                                    <p className="text-xs font-medium">+{viewGrowth.toLocaleString()}</p>
                                   )}
                                   <p className="text-xs text-muted-foreground">${clip.earnings.toFixed(2)}</p>
                                 </div>
@@ -502,9 +502,10 @@ export default function AdminAnalyticsPage() {
                                       <Line 
                                         type="monotone" 
                                         dataKey="views" 
-                                        stroke="#22c55e" 
+                                        stroke="currentColor" 
                                         strokeWidth={2}
                                         dot={false}
+                                        className="text-foreground/60"
                                       />
                                     </LineChart>
                                   </ResponsiveContainer>
@@ -520,9 +521,9 @@ export default function AdminAnalyticsPage() {
                                     title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
                                   >
                                     {point.success ? (
-                                      <CheckCircle className="w-3 h-3 text-green-600" />
+                                      <CheckCircle className="w-3 h-3 text-foreground/70" />
                                     ) : (
-                                      <XCircle className="w-3 h-3 text-red-600" />
+                                      <XCircle className="w-3 h-3 text-foreground/40" />
                                     )}
                                   </div>
                                 ))}
@@ -666,9 +667,9 @@ export default function AdminAnalyticsPage() {
                     >
                       <div className="flex items-center gap-2">
                         {isSuccess ? (
-                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <CheckCircle className="w-4 h-4 text-foreground/70" />
                         ) : (
-                          <XCircle className="w-4 h-4 text-red-600" />
+                          <XCircle className="w-4 h-4 text-foreground/50" />
                         )}
                         <span className="text-muted-foreground">
                           {new Date(log.startedAt).toLocaleString()}
@@ -677,10 +678,10 @@ export default function AdminAnalyticsPage() {
                       </div>
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <span>{log.clipsProcessed} processed</span>
-                        <span className="text-green-600">✓{log.clipsSuccessful}</span>
-                        {log.clipsFailed > 0 && <span className="text-red-600">✗{log.clipsFailed}</span>}
+                        <span className="font-medium">✓{log.clipsSuccessful}</span>
+                        {log.clipsFailed > 0 && <span className="opacity-60">✗{log.clipsFailed}</span>}
                         {log.earningsCalculated > 0 && (
-                          <span className="text-blue-600">${log.earningsCalculated.toFixed(2)}</span>
+                          <span className="font-medium">${log.earningsCalculated.toFixed(2)}</span>
                         )}
                       </div>
                     </div>

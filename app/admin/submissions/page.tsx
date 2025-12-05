@@ -77,10 +77,10 @@ interface Submission {
 // Helper to get processing status display
 const getProcessingStatusDisplay = (status?: string) => {
   if (!status) return null
-  if (status === 'SCRAPING') return { text: 'Scraping views...', color: 'text-blue-500' }
-  if (status === 'COMPLETE') return { text: 'Scraped', color: 'text-green-600' }
+  if (status === 'SCRAPING') return { text: 'Scraping views...', color: 'text-muted-foreground' }
+  if (status === 'COMPLETE') return { text: 'Scraped', color: 'text-foreground' }
   if (status.startsWith('SCRAPE_FAILED') || status.startsWith('SCRAPE_ERROR')) {
-    return { text: 'Scrape failed', color: 'text-red-500', tooltip: status }
+    return { text: 'Scrape failed', color: 'text-muted-foreground/60', tooltip: status }
   }
   return { text: status, color: 'text-muted-foreground' }
 }
@@ -119,9 +119,9 @@ const payoutStatusOptions = [
 // Get status icon component
 const getStatusIcon = (status: string, autoRejected?: boolean) => {
   if (status === "APPROVED") {
-    return <ArrowUpRight className="w-3 h-3 text-green-600" />
+    return <ArrowUpRight className="w-3 h-3 text-foreground" />
   } else if (status === "REJECTED") {
-    return <XCircle className="w-3 h-3 text-red-600" />
+    return <XCircle className="w-3 h-3 text-muted-foreground" />
   }
   return null
 }
@@ -301,7 +301,7 @@ export default function AdminSubmissionsPage() {
   const getStatusColor = (submission: Submission) => {
     // Pending gets inverted blue pill
     if (submission.status === "PENDING" && !submission.requiresReview) {
-      return "bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:text-white font-medium"
+      return "bg-foreground text-background border-foreground font-medium"
     }
     // Everything else monochromatic
     return "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 font-medium"
@@ -321,7 +321,7 @@ export default function AdminSubmissionsPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <p className="text-lg text-red-600 mb-4">{error}</p>
+            <p className="text-lg text-destructive mb-4">{error}</p>
             <Button onClick={fetchSubmissions} variant="outline">
               Try Again
             </Button>
@@ -339,7 +339,7 @@ export default function AdminSubmissionsPage() {
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         )}
         <span className="text-xs text-muted-foreground bg-muted/80 px-2 py-1 rounded-full flex items-center gap-1">
-          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+          <span className="w-1.5 h-1.5 bg-foreground/50 rounded-full animate-pulse" />
           Auto-refreshing
         </span>
       </div>
@@ -497,10 +497,11 @@ export default function AdminSubmissionsPage() {
                 <div
                   key={submission.id}
                   ref={isHighlighted ? highlightedRef : undefined}
-                  className={`flex items-start justify-between gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-all duration-500 ${
+                  className={`p-4 border rounded-lg hover:bg-muted/50 transition-all duration-500 ${
                     submission.requiresReview ? 'border-slate-400 bg-slate-100/30 dark:border-slate-600 dark:bg-slate-800/30' : ''
                   } ${isHighlighted ? 'bg-muted/80 border-foreground/20' : ''}`}
                 >
+                  <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     {/* Platform, Status, and User info - all left aligned */}
                     <div className="flex items-center gap-2 mb-2">
@@ -524,7 +525,7 @@ export default function AdminSubmissionsPage() {
                         <AlertCircle className="w-4 h-4 text-slate-500" title="Flagged for review" />
                       )}
                       {submission.autoRejected && (
-                        <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded">
+                        <span className="text-xs px-2 py-1 bg-muted text-muted-foreground border border-border rounded">
                           Auto-rejected
                         </span>
                       )}
@@ -562,7 +563,7 @@ export default function AdminSubmissionsPage() {
                           <ExternalLink className="w-3 h-3 text-muted-foreground" />
                           <button
                             onClick={() => window.open(submission.clipUrl, '_blank')}
-                            className="text-sm text-blue-500 hover:text-blue-700 underline hover:underline-offset-2 transition-colors"
+                            className="text-sm text-muted-foreground hover:text-foreground underline hover:underline-offset-2 transition-colors"
                             title={submission.clipUrl}
                           >
                             {submission.clipUrl.length > 60 ? `${submission.clipUrl.substring(0, 60)}...` : submission.clipUrl}
@@ -576,19 +577,19 @@ export default function AdminSubmissionsPage() {
                         {/* Verified Account Display for cross-referencing */}
                         {submission.socialAccount && (
                           <div className="flex items-center gap-2 mt-2 p-2 bg-muted/50 border border-border rounded">
-                            <User className="w-3 h-3 text-foreground" />
+                            <User className="w-3 h-3 text-muted-foreground" />
                             <span className="text-sm text-foreground">
-                              <span className="text-muted-foreground">Verified Account:</span>{' '}
+                              <span className="text-muted-foreground">Verified:</span>{' '}
                               <span className="font-mono font-medium">@{submission.socialAccount.username}</span>
                               {submission.socialAccount.verified && (
-                                <Check className="w-3 h-3 inline-block ml-1 text-green-500" />
+                                <Check className="w-3 h-3 inline-block ml-1 text-foreground" />
                               )}
                             </span>
                           </div>
                         )}
                         {!submission.socialAccount && (
-                          <p className="text-xs text-muted-foreground mt-2 italic">
-                            Legacy submission — verify account ownership manually via the post URL
+                          <p className="text-xs text-muted-foreground/70 mt-2">
+                            Legacy submission
                           </p>
                         )}
                       </div>
@@ -626,7 +627,7 @@ export default function AdminSubmissionsPage() {
                         
                         if (isScraping) {
                           return (
-                            <span className="flex items-center gap-1 text-blue-500">
+                            <span className="flex items-center gap-1 text-muted-foreground">
                               <Loader2 className="w-3 h-3 animate-spin" />
                               Scraping initial views...
                             </span>
@@ -651,7 +652,7 @@ export default function AdminSubmissionsPage() {
                                 </>
                               )}
                               {submission.viewChange && Number(submission.viewChange) > 0 && (
-                                <span className="text-green-600 dark:text-green-400 font-medium" title="View change (earnings based on this)">
+                                <span className="font-medium" title="View change (earnings based on this)">
                                   (+{Number(submission.viewChange).toLocaleString()})
                                 </span>
                               )}
@@ -661,7 +662,7 @@ export default function AdminSubmissionsPage() {
                         
                         if (scrapeFailed) {
                           return (
-                            <span className="flex items-center gap-1 text-red-500" title={submission.processingStatus}>
+                            <span className="flex items-center gap-1 text-muted-foreground/60" title={submission.processingStatus}>
                               <AlertCircle className="w-3 h-3" />
                               Scrape failed
                             </span>
@@ -769,7 +770,7 @@ export default function AdminSubmissionsPage() {
                       </AlertDialogContent>
                     </AlertDialog>
                   </div>
-                </div>
+                  </div>
                 
                 {/* Expandable Tracking Details */}
                 {expandedSubmissions.has(submission.id) && submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 && (
@@ -790,14 +791,14 @@ export default function AdminSubmissionsPage() {
                             <p className="text-lg font-bold">{Number(submission.currentViews || 0).toLocaleString()}</p>
                             <p className="text-xs text-muted-foreground">Current</p>
                           </div>
-                          <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded">
-                            <p className="text-lg font-bold text-green-600">+{Number(submission.viewChange || 0).toLocaleString()}</p>
+                          <div className="p-2 bg-muted/80 rounded border border-foreground/10">
+                            <p className="text-lg font-bold">+{Number(submission.viewChange || 0).toLocaleString()}</p>
                             <p className="text-xs text-muted-foreground">Gained</p>
                           </div>
                         </div>
                         
                         {/* Earnings calculation */}
-                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="p-3 bg-muted/50 rounded-lg border border-border">
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-xs text-muted-foreground">Rate: ${submission.campaigns.payoutRate}/1K views</p>
@@ -806,7 +807,7 @@ export default function AdminSubmissionsPage() {
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-xl font-bold text-blue-600">
+                              <p className="text-xl font-bold">
                                 ${((Number(submission.viewChange || 0) / 1000) * submission.campaigns.payoutRate).toFixed(2)}
                               </p>
                             </div>
@@ -856,7 +857,7 @@ export default function AdminSubmissionsPage() {
                         </div>
                         <a 
                           href={`/admin/users?email=${encodeURIComponent(submission.users.email || '')}`}
-                          className="text-xs text-blue-500 hover:text-blue-700"
+                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                         >
                           View User Profile →
                         </a>
@@ -865,7 +866,8 @@ export default function AdminSubmissionsPage() {
                   </div>
                 )}
               </div>
-              )})
+              )
+                })
               )}
             </div>
 
