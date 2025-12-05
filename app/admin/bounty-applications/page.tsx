@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import { motion, Reorder } from "framer-motion"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import toast from "react-hot-toast"
 import Link from "next/link"
 import { 
@@ -25,8 +26,13 @@ import {
   Eye,
   Image as ImageIcon,
   Link2,
-  DollarSign,
-  Filter
+  LayoutGrid,
+  List,
+  Columns,
+  ArrowRight,
+  Search,
+  Users,
+  GripVertical
 } from "lucide-react"
 
 interface BountyApplication {
@@ -60,31 +66,27 @@ interface BountyApplication {
 interface Stats {
   total: number
   byStatus: Record<string, number>
-  byTier: Array<{
-    tier: string
-    status: string
-    _count: { tier: number }
-  }>
 }
+
+type ViewMode = "kanban" | "list" | "compare"
 
 export default function BountyApplicationsPage() {
   const [applications, setApplications] = useState<BountyApplication[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedApplication, setSelectedApplication] = useState<BountyApplication | null>(null)
+  const [compareApplications, setCompareApplications] = useState<BountyApplication[]>([])
   const [showDetailModal, setShowDetailModal] = useState(false)
-  const [updating, setUpdating] = useState(false)
+  const [updating, setUpdating] = useState<string | null>(null)
   const [adminNotes, setAdminNotes] = useState("")
-  
-  // Filters
-  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [viewMode, setViewMode] = useState<ViewMode>("kanban")
+  const [searchQuery, setSearchQuery] = useState("")
   const [tierFilter, setTierFilter] = useState<string>("all")
 
   const fetchApplications = async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
-      if (statusFilter !== "all") params.set("status", statusFilter)
       if (tierFilter !== "all") params.set("tier", tierFilter)
       
       const response = await authenticatedFetch(`/api/admin/bounty-applications?${params}`)
@@ -105,17 +107,17 @@ export default function BountyApplicationsPage() {
 
   useEffect(() => {
     fetchApplications()
-  }, [statusFilter, tierFilter])
+  }, [tierFilter])
 
-  const handleStatusUpdate = async (applicationId: string, newStatus: "APPROVED" | "REJECTED") => {
-    setUpdating(true)
+  const handleStatusUpdate = async (applicationId: string, newStatus: "APPROVED" | "REJECTED", notes?: string) => {
+    setUpdating(applicationId)
     try {
       const response = await authenticatedFetch(`/api/admin/bounty-applications/${applicationId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: newStatus,
-          adminNotes: adminNotes || undefined
+          adminNotes: notes || adminNotes || undefined
         })
       })
 
@@ -133,7 +135,7 @@ export default function BountyApplicationsPage() {
       console.error("Error updating application:", error)
       toast.error("Failed to update application")
     } finally {
-      setUpdating(false)
+      setUpdating(null)
     }
   }
 
@@ -143,24 +145,31 @@ export default function BountyApplicationsPage() {
     setShowDetailModal(true)
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30"><Clock className="w-3 h-3 mr-1" />Pending</Badge>
-      case "APPROVED":
-        return <Badge className="bg-green-500/20 text-green-600 border-green-500/30"><CheckCircle className="w-3 h-3 mr-1" />Approved</Badge>
-      case "REJECTED":
-        return <Badge className="bg-red-500/20 text-red-600 border-red-500/30"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>
-      default:
-        return <Badge>{status}</Badge>
+  const toggleCompare = (app: BountyApplication) => {
+    if (compareApplications.find(a => a.id === app.id)) {
+      setCompareApplications(compareApplications.filter(a => a.id !== app.id))
+    } else if (compareApplications.length < 4) {
+      setCompareApplications([...compareApplications, app])
+    } else {
+      toast.error("Maximum 4 applications can be compared")
     }
   }
 
-  const getTierBadge = (tier: string) => {
-    if (tier === "TIER_1_HIGH_VOLUME") {
-      return <Badge variant="outline" className="border-foreground/30"><Crown className="w-3 h-3 mr-1" />Tier 1 - High Volume</Badge>
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "PENDING": return "bg-amber-500/10 border-amber-500/30 text-amber-600"
+      case "APPROVED": return "bg-green-500/10 border-green-500/30 text-green-600"
+      case "REJECTED": return "bg-red-500/10 border-red-500/30 text-red-600"
+      default: return ""
     }
-    return <Badge variant="outline"><Award className="w-3 h-3 mr-1" />Tier 2 - Quality</Badge>
+  }
+
+  const getTierIcon = (tier: string) => {
+    return tier === "TIER_1_HIGH_VOLUME" ? <Crown className="w-4 h-4" /> : <Award className="w-4 h-4" />
+  }
+
+  const getTierLabel = (tier: string) => {
+    return tier === "TIER_1_HIGH_VOLUME" ? "Tier 1 - High Volume" : "Tier 2 - Quality"
   }
 
   const getPlatformName = (platform: string) => {
@@ -168,14 +177,259 @@ export default function BountyApplicationsPage() {
       TIKTOK: "TikTok",
       INSTAGRAM: "Instagram",
       YOUTUBE: "YouTube",
-      TWITTER: "X/Twitter"
+      TWITTER: "X"
     }
     return names[platform] || platform
   }
 
-  const pendingCount = stats?.byStatus?.PENDING || 0
-  const approvedCount = stats?.byStatus?.APPROVED || 0
-  const rejectedCount = stats?.byStatus?.REJECTED || 0
+  // Filter applications by search
+  const filteredApplications = applications.filter(app => {
+    if (!searchQuery) return true
+    const query = searchQuery.toLowerCase()
+    return (
+      app.fullName.toLowerCase().includes(query) ||
+      app.email.toLowerCase().includes(query) ||
+      app.campaigns.title.toLowerCase().includes(query) ||
+      app.platform.toLowerCase().includes(query)
+    )
+  })
+
+  // Group by status for kanban
+  const pendingApps = filteredApplications.filter(a => a.status === "PENDING")
+  const approvedApps = filteredApplications.filter(a => a.status === "APPROVED")
+  const rejectedApps = filteredApplications.filter(a => a.status === "REJECTED")
+
+  // Group by tier
+  const tier1Apps = filteredApplications.filter(a => a.tier === "TIER_1_HIGH_VOLUME")
+  const tier2Apps = filteredApplications.filter(a => a.tier === "TIER_2_QUALITY")
+
+  const ApplicationCard = ({ app, compact = false }: { app: BountyApplication; compact?: boolean }) => {
+    const isComparing = compareApplications.find(a => a.id === app.id)
+    
+    return (
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`border rounded-lg p-3 bg-card hover:shadow-md transition-all cursor-pointer ${
+          isComparing ? 'ring-2 ring-foreground' : ''
+        }`}
+        onClick={() => openDetail(app)}
+      >
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
+              {app.fullName.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <p className="font-medium text-sm">{app.fullName}</p>
+              <p className="text-xs text-muted-foreground">{getPlatformName(app.platform)}</p>
+            </div>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              toggleCompare(app)
+            }}
+            className={`p-1 rounded transition-colors ${
+              isComparing ? 'bg-foreground text-background' : 'hover:bg-muted'
+            }`}
+            title={isComparing ? "Remove from compare" : "Add to compare"}
+          >
+            <Columns className="w-4 h-4" />
+          </button>
+        </div>
+
+        {!compact && (
+          <>
+            <div className="flex items-center gap-2 mb-2">
+              <Badge variant="outline" className="text-xs">
+                {getTierIcon(app.tier)}
+                <span className="ml-1">{app.tier === "TIER_1_HIGH_VOLUME" ? "T1" : "T2"}</span>
+              </Badge>
+              <span className="text-xs text-muted-foreground">{app.clipLinks.length} clips</span>
+              {app.followerScreenshotUrl && (
+                <ImageIcon className="w-3 h-3 text-muted-foreground" />
+              )}
+            </div>
+
+            <p className="text-xs text-muted-foreground truncate mb-2">
+              {app.campaigns.title}
+            </p>
+          </>
+        )}
+
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">
+            {new Date(app.createdAt).toLocaleDateString()}
+          </span>
+          {app.status === "PENDING" && (
+            <div className="flex gap-1">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleStatusUpdate(app.id, "APPROVED")
+                }}
+                disabled={updating === app.id}
+                className="p-1 rounded bg-green-500/20 text-green-600 hover:bg-green-500/30 transition-colors"
+                title="Approve"
+              >
+                {updating === app.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleStatusUpdate(app.id, "REJECTED")
+                }}
+                disabled={updating === app.id}
+                className="p-1 rounded bg-red-500/20 text-red-600 hover:bg-red-500/30 transition-colors"
+                title="Reject"
+              >
+                <XCircle className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    )
+  }
+
+  const KanbanColumn = ({ 
+    title, 
+    apps, 
+    status,
+    icon 
+  }: { 
+    title: string
+    apps: BountyApplication[]
+    status: string
+    icon: React.ReactNode
+  }) => (
+    <div className="flex-1 min-w-[280px] max-w-[350px]">
+      <div className={`rounded-t-lg p-3 border-b-2 ${getStatusColor(status)}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {icon}
+            <span className="font-medium">{title}</span>
+          </div>
+          <Badge variant="secondary">{apps.length}</Badge>
+        </div>
+      </div>
+      <div className="bg-muted/30 rounded-b-lg p-2 min-h-[400px] space-y-2">
+        {apps.map(app => (
+          <ApplicationCard key={app.id} app={app} />
+        ))}
+        {apps.length === 0 && (
+          <p className="text-center text-muted-foreground text-sm py-8">No applications</p>
+        )}
+      </div>
+    </div>
+  )
+
+  const CompareView = () => {
+    if (compareApplications.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <Columns className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="font-medium mb-2">Compare Applications</h3>
+          <p className="text-muted-foreground text-sm mb-4">
+            Click the compare icon on any application card to add it to the comparison view.
+          </p>
+          <p className="text-xs text-muted-foreground">Up to 4 applications can be compared</p>
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium">Comparing {compareApplications.length} Applications</h3>
+          <Button variant="outline" size="sm" onClick={() => setCompareApplications([])}>
+            Clear All
+          </Button>
+        </div>
+
+        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${compareApplications.length}, 1fr)` }}>
+          {compareApplications.map(app => (
+            <Card key={app.id} className="relative">
+              <button
+                onClick={() => toggleCompare(app)}
+                className="absolute top-2 right-2 p-1 rounded hover:bg-muted"
+              >
+                <XCircle className="w-4 h-4" />
+              </button>
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-medium">
+                    {app.fullName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">{app.fullName}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{app.email}</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Tier</span>
+                  <Badge variant="outline">{getTierLabel(app.tier)}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Platform</span>
+                  <span>{getPlatformName(app.platform)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Clips</span>
+                  <span>{app.clipLinks.length}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Screenshot</span>
+                  <span>{app.followerScreenshotUrl ? "✓" : "—"}</span>
+                </div>
+                <div className="pt-2 border-t">
+                  <a 
+                    href={app.profileLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-foreground hover:underline"
+                  >
+                    <Link2 className="w-3 h-3" />
+                    Profile
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                {app.status === "PENDING" && (
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                      onClick={() => handleStatusUpdate(app.id, "APPROVED")}
+                      disabled={updating === app.id}
+                    >
+                      {updating === app.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Approve"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="flex-1"
+                      onClick={() => handleStatusUpdate(app.id, "REJECTED")}
+                      disabled={updating === app.id}
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -185,63 +439,63 @@ export default function BountyApplicationsPage() {
         transition={{ duration: 0.6 }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold">Bounty Applications</h1>
-            <p className="text-muted-foreground">Review and manage bounty tier applications</p>
+            <p className="text-muted-foreground">Organize and review bounty tier applications</p>
           </div>
-          <Link href="/admin/campaigns">
-            <Button variant="outline">← Back to Campaigns</Button>
-          </Link>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{stats?.total || 0}</div>
-              <p className="text-sm text-muted-foreground">Total Applications</p>
-            </CardContent>
-          </Card>
-          <Card className="border-amber-500/30">
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold text-amber-600">{pendingCount}</div>
-              <p className="text-sm text-muted-foreground">Pending Review</p>
-            </CardContent>
-          </Card>
-          <Card className="border-green-500/30">
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold text-green-600">{approvedCount}</div>
-              <p className="text-sm text-muted-foreground">Approved</p>
-            </CardContent>
-          </Card>
-          <Card className="border-red-500/30">
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold text-red-600">{rejectedCount}</div>
-              <p className="text-sm text-muted-foreground">Rejected</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filters */}
-        <div className="flex gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
-                <SelectItem value="APPROVED">Approved</SelectItem>
-                <SelectItem value="REJECTED">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
+            <Link href="/admin/campaigns">
+              <Button variant="outline" size="sm">← Campaigns</Button>
+            </Link>
           </div>
+        </div>
+
+        {/* Stats Bar */}
+        <div className="flex flex-wrap items-center gap-6 mb-6 p-4 bg-muted/30 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Total:</span>
+            <span className="font-semibold">{stats?.total || 0}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-amber-500" />
+            <span className="text-sm text-muted-foreground">Pending:</span>
+            <span className="font-semibold text-amber-600">{stats?.byStatus?.PENDING || 0}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-500" />
+            <span className="text-sm text-muted-foreground">Approved:</span>
+            <span className="font-semibold text-green-600">{stats?.byStatus?.APPROVED || 0}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <XCircle className="w-4 h-4 text-red-500" />
+            <span className="text-sm text-muted-foreground">Rejected:</span>
+            <span className="font-semibold text-red-600">{stats?.byStatus?.REJECTED || 0}</span>
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <Crown className="w-4 h-4" />
+            <span className="text-sm">T1: {tier1Apps.length}</span>
+            <Award className="w-4 h-4 ml-2" />
+            <span className="text-sm">T2: {tier2Apps.length}</span>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="flex flex-wrap items-center gap-4 mb-6">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, email, campaign..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+
           <Select value={tierFilter} onValueChange={setTierFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Tier" />
+              <SelectValue placeholder="Filter by tier" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Tiers</SelectItem>
@@ -249,119 +503,107 @@ export default function BountyApplicationsPage() {
               <SelectItem value="TIER_2_QUALITY">Tier 2 - Quality</SelectItem>
             </SelectContent>
           </Select>
+
+          <div className="flex items-center border rounded-lg p-1">
+            <button
+              onClick={() => setViewMode("kanban")}
+              className={`p-2 rounded ${viewMode === "kanban" ? "bg-foreground text-background" : "hover:bg-muted"}`}
+              title="Kanban View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 rounded ${viewMode === "list" ? "bg-foreground text-background" : "hover:bg-muted"}`}
+              title="List View"
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("compare")}
+              className={`p-2 rounded relative ${viewMode === "compare" ? "bg-foreground text-background" : "hover:bg-muted"}`}
+              title="Compare View"
+            >
+              <Columns className="w-4 h-4" />
+              {compareApplications.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-foreground text-background text-xs rounded-full flex items-center justify-center">
+                  {compareApplications.length}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Applications List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Applications ({applications.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin" />
-              </div>
-            ) : applications.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                No applications found
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {applications.map((app) => (
-                  <motion.div
-                    key={app.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="border rounded-lg p-4 hover:bg-muted/30 transition-colors"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="font-medium">{app.fullName}</span>
-                          {getStatusBadge(app.status)}
-                          {getTierBadge(app.tier)}
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm text-muted-foreground mb-2">
-                          <div className="flex items-center gap-1">
-                            <Mail className="w-3 h-3" />
-                            {app.email}
-                          </div>
-                          <div>
-                            Platform: <span className="text-foreground">{getPlatformName(app.platform)}</span>
-                          </div>
-                          <div>
-                            Campaign: <Link href={`/admin/campaigns`} className="text-foreground hover:underline">{app.campaigns.title}</Link>
-                          </div>
-                          <div>
-                            Applied: {new Date(app.createdAt).toLocaleDateString()}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 text-sm">
-                          <a 
-                            href={app.profileLink} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-foreground hover:underline"
-                          >
-                            <Link2 className="w-3 h-3" />
-                            Profile
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                          <span className="text-muted-foreground">
-                            {app.clipLinks.length} clip(s) submitted
-                          </span>
-                          {app.followerScreenshotUrl && (
-                            <span className="flex items-center gap-1 text-muted-foreground">
-                              <ImageIcon className="w-3 h-3" />
-                              Screenshot attached
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => openDetail(app)}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Review
-                        </Button>
-                        {app.status === "PENDING" && (
-                          <>
-                            <Button 
-                              size="sm"
-                              onClick={() => handleStatusUpdate(app.id, "APPROVED")}
-                              disabled={updating}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <CheckCircle className="w-4 h-4 mr-1" />
-                              Approve
-                            </Button>
-                            <Button 
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => {
-                                openDetail(app)
-                              }}
-                              disabled={updating}
-                            >
-                              <XCircle className="w-4 h-4 mr-1" />
-                              Reject
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+        {/* Main Content */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        ) : (
+          <>
+            {/* Kanban View */}
+            {viewMode === "kanban" && (
+              <div className="flex gap-4 overflow-x-auto pb-4">
+                <KanbanColumn 
+                  title="Pending Review" 
+                  apps={pendingApps} 
+                  status="PENDING"
+                  icon={<Clock className="w-4 h-4" />}
+                />
+                <KanbanColumn 
+                  title="Approved" 
+                  apps={approvedApps} 
+                  status="APPROVED"
+                  icon={<CheckCircle className="w-4 h-4" />}
+                />
+                <KanbanColumn 
+                  title="Rejected" 
+                  apps={rejectedApps} 
+                  status="REJECTED"
+                  icon={<XCircle className="w-4 h-4" />}
+                />
               </div>
             )}
-          </CardContent>
-        </Card>
+
+            {/* List View */}
+            {viewMode === "list" && (
+              <Tabs defaultValue="all" className="w-full">
+                <TabsList>
+                  <TabsTrigger value="all">All ({filteredApplications.length})</TabsTrigger>
+                  <TabsTrigger value="tier1">Tier 1 ({tier1Apps.length})</TabsTrigger>
+                  <TabsTrigger value="tier2">Tier 2 ({tier2Apps.length})</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="all" className="mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {filteredApplications.map(app => (
+                      <ApplicationCard key={app.id} app={app} />
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="tier1" className="mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {tier1Apps.map(app => (
+                      <ApplicationCard key={app.id} app={app} />
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="tier2" className="mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {tier2Apps.map(app => (
+                      <ApplicationCard key={app.id} app={app} />
+                    ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            )}
+
+            {/* Compare View */}
+            {viewMode === "compare" && <CompareView />}
+          </>
+        )}
 
         {/* Detail Modal */}
         <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
@@ -374,8 +616,11 @@ export default function BountyApplicationsPage() {
               <div className="space-y-6">
                 {/* Status & Tier */}
                 <div className="flex items-center gap-3">
-                  {getStatusBadge(selectedApplication.status)}
-                  {getTierBadge(selectedApplication.tier)}
+                  <Badge className={getStatusColor(selectedApplication.status)}>{selectedApplication.status}</Badge>
+                  <Badge variant="outline">
+                    {getTierIcon(selectedApplication.tier)}
+                    <span className="ml-1">{getTierLabel(selectedApplication.tier)}</span>
+                  </Badge>
                 </div>
 
                 {/* Applicant Info */}
@@ -481,19 +726,19 @@ export default function BountyApplicationsPage() {
                   <div className="flex gap-3 pt-4 border-t">
                     <Button
                       onClick={() => handleStatusUpdate(selectedApplication.id, "APPROVED")}
-                      disabled={updating}
+                      disabled={updating === selectedApplication.id}
                       className="flex-1 bg-green-600 hover:bg-green-700"
                     >
-                      {updating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                      {updating === selectedApplication.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
                       Approve Application
                     </Button>
                     <Button
                       variant="destructive"
                       onClick={() => handleStatusUpdate(selectedApplication.id, "REJECTED")}
-                      disabled={updating}
+                      disabled={updating === selectedApplication.id}
                       className="flex-1"
                     >
-                      {updating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <XCircle className="w-4 h-4 mr-2" />}
+                      {updating === selectedApplication.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <XCircle className="w-4 h-4 mr-2" />}
                       Reject Application
                     </Button>
                   </div>
@@ -521,4 +766,3 @@ export default function BountyApplicationsPage() {
 
 // Force this page to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
-
