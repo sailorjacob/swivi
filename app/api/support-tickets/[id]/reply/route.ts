@@ -13,12 +13,16 @@ const replySchema = z.object({
 // POST - Submit a reply to a ticket (for clippers)
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await params for Next.js 15 compatibility
+    const { id: ticketId } = await params
+    
     const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
+      console.log("❌ Reply auth failed:", error?.message)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -29,10 +33,10 @@ export async function POST(
     })
 
     if (!dbUser) {
+      console.log("❌ User not found in DB for supabaseAuthId:", user.id)
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    const ticketId = params.id
     const body = await request.json()
     const { reply } = replySchema.parse(body)
 
@@ -42,12 +46,16 @@ export async function POST(
     })
 
     if (!ticket) {
+      console.log("❌ Ticket not found:", ticketId)
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 })
     }
 
-    // Verify ownership
+    // Verify ownership - compare internal DB user IDs
     if (ticket.userId !== dbUser.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+      console.log("❌ Ownership mismatch - ticket userId:", ticket.userId, "dbUser.id:", dbUser.id)
+      return NextResponse.json({ 
+        error: "You can only reply to your own tickets" 
+      }, { status: 403 })
     }
 
     // Check if ticket is still open for replies

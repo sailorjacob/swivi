@@ -14,9 +14,11 @@ const updateTicketSchema = z.object({
 // GET - Get a single ticket
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: ticketId } = await params
+    
     const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
@@ -33,7 +35,7 @@ export async function GET(
     }
 
     const ticket = await prisma.supportTicket.findUnique({
-      where: { id: params.id },
+      where: { id: ticketId },
       include: {
         users: {
           select: {
@@ -66,9 +68,11 @@ export async function GET(
 // PATCH - Update ticket (admin respond, change status)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: ticketId } = await params
+    
     const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
@@ -90,7 +94,7 @@ export async function PATCH(
     }
 
     const ticket = await prisma.supportTicket.findUnique({
-      where: { id: params.id }
+      where: { id: ticketId }
     })
 
     if (!ticket) {
@@ -121,7 +125,7 @@ export async function PATCH(
     }
 
     const updatedTicket = await prisma.supportTicket.update({
-      where: { id: params.id },
+      where: { id: ticketId },
       data: updateData,
       include: {
         users: {
