@@ -102,6 +102,15 @@ interface Submission {
   }
 }
 
+interface VerifiedAccount {
+  id: string
+  platform: string
+  username: string
+  displayName: string | null
+  verified: boolean
+  verifiedAt: string | null
+}
+
 const platformIcons: Record<string, any> = {
   tiktok: Music,
   instagram: Instagram, 
@@ -119,6 +128,7 @@ const submitSchema = z.object({
   platform: z.enum(["TIKTOK", "INSTAGRAM", "YOUTUBE"], {
     errorMap: () => ({ message: "Please select a platform" }),
   }),
+  socialAccountId: z.string().min(1, "Please select a verified account"),
 })
 
 // Helper to check if a campaign has special bonuses
@@ -134,6 +144,7 @@ export default function CampaignDetailPage() {
 
   const [campaign, setCampaign] = useState<Campaign | null>(null)
   const [submissions, setSubmissions] = useState<Submission[]>([])
+  const [verifiedAccounts, setVerifiedAccounts] = useState<VerifiedAccount[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [bonusModalOpen, setBonusModalOpen] = useState(false)
@@ -176,6 +187,13 @@ export default function CampaignDetailPage() {
         )
         setSubmissions(allSubmissions) // We'll filter in render
       }
+
+      // Fetch user's verified social accounts
+      const accountsRes = await authenticatedFetch("/api/user/verified-accounts")
+      if (accountsRes.ok) {
+        const accounts = await accountsRes.json()
+        setVerifiedAccounts(accounts)
+      }
     } catch (error) {
       console.error("Error fetching data:", error)
       toast.error("Failed to load campaign")
@@ -189,6 +207,20 @@ export default function CampaignDetailPage() {
       fetchData()
     }
   }, [campaignId])
+
+  // Auto-refresh data every 30 seconds to show real-time view tracking updates
+  useEffect(() => {
+    if (!campaignId) return
+    
+    const interval = setInterval(() => {
+      // Only refresh if not currently loading to avoid race conditions
+      if (!loading) {
+        fetchData()
+      }
+    }, 30000) // 30 seconds
+
+    return () => clearInterval(interval)
+  }, [campaignId, loading])
 
   // Re-filter submissions when campaign loads
   const campaignSubmissions = submissions.filter(s => {
@@ -207,6 +239,7 @@ export default function CampaignDetailPage() {
           campaignId: campaign.id,
           clipUrl: data.clipUrl,
           platform: data.platform,
+          socialAccountId: data.socialAccountId,
         }),
       })
 
@@ -571,7 +604,11 @@ export default function CampaignDetailPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="platform">Platform</Label>
-                        <Select onValueChange={(value) => setValue("platform", value as any)}>
+                        <Select onValueChange={(value) => {
+                          setValue("platform", value as any)
+                          // Reset account selection when platform changes
+                          setValue("socialAccountId", "")
+                        }}>
                           <SelectTrigger className="mt-1.5">
                             <SelectValue placeholder="Select platform" />
                           </SelectTrigger>
@@ -597,23 +634,62 @@ export default function CampaignDetailPage() {
                       </div>
 
                       <div>
-                        <Label htmlFor="clipUrl">Video URL</Label>
-                        <Input
-                          id="clipUrl"
-                          placeholder={getPlatformPlaceholder(selectedPlatform)}
-                          className="mt-1.5"
-                          {...register("clipUrl")}
-                        />
-                        {errors.clipUrl && (
-                          <p className="text-destructive text-sm mt-1">{errors.clipUrl.message}</p>
+                        <Label htmlFor="socialAccountId">Your Verified Account</Label>
+                        <Select 
+                          onValueChange={(value) => setValue("socialAccountId", value)}
+                          disabled={!selectedPlatform}
+                        >
+                          <SelectTrigger className="mt-1.5">
+                            <SelectValue placeholder={selectedPlatform ? "Select your account" : "Select platform first"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {verifiedAccounts
+                              .filter(acc => acc.platform === selectedPlatform && acc.verified)
+                              .map((account) => {
+                                const Icon = platformIcons[account.platform]
+                                return (
+                                  <SelectItem key={account.id} value={account.id}>
+                                    <div className="flex items-center gap-2">
+                                      {Icon && <Icon className="w-4 h-4" />}
+                                      <span>@{account.username}</span>
+                                    </div>
+                                  </SelectItem>
+                                )
+                              })}
+                            {selectedPlatform && verifiedAccounts.filter(acc => acc.platform === selectedPlatform && acc.verified).length === 0 && (
+                              <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                No verified {selectedPlatform.toLowerCase()} accounts
+                              </div>
+                            )}
+                          </SelectContent>
+                        </Select>
+                        {errors.socialAccountId && (
+                          <p className="text-destructive text-sm mt-1">{errors.socialAccountId.message}</p>
                         )}
                       </div>
                     </div>
 
-                    {selectedPlatform && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <div>
+                      <Label htmlFor="clipUrl">Video URL</Label>
+                      <Input
+                        id="clipUrl"
+                        placeholder={getPlatformPlaceholder(selectedPlatform)}
+                        className="mt-1.5"
+                        {...register("clipUrl")}
+                      />
+                      {errors.clipUrl && (
+                        <p className="text-destructive text-sm mt-1">{errors.clipUrl.message}</p>
+                      )}
+                    </div>
+
+                    {selectedPlatform && verifiedAccounts.filter(acc => acc.platform === selectedPlatform && acc.verified).length === 0 && (
+                      <p className="text-xs text-amber-500 flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" />
-                        Make sure you've verified your {selectedPlatform.toLowerCase()} account in your profile settings.
+                        You need to verify a {selectedPlatform.toLowerCase()} account in your{' '}
+                        <Link href="/clippers/dashboard/settings" className="underline hover:text-amber-400">
+                          profile settings
+                        </Link>{' '}
+                        before submitting.
                       </p>
                     )}
 

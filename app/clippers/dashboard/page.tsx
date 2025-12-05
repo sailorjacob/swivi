@@ -161,6 +161,20 @@ export default function ClipperDashboard() {
     }
   }, [status, session])
 
+  // Auto-refresh dashboard every 30 seconds to show real-time view tracking updates
+  useEffect(() => {
+    if (status !== "authenticated" || !session?.user) return
+    
+    const interval = setInterval(() => {
+      // Only refresh if not currently loading to avoid race conditions
+      if (!loading) {
+        fetchDashboardData()
+      }
+    }, 30000) // 30 seconds
+
+    return () => clearInterval(interval)
+  }, [status, session, loading])
+
   const fetchDashboardData = async () => {
     try {
       setLoading(true)

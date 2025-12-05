@@ -64,6 +64,14 @@ interface Submission {
     featuredImage?: string | null
     status?: string
   }
+  socialAccount?: {
+    id: string
+    platform: string
+    username: string
+    displayName?: string | null
+    verified?: boolean
+    verifiedAt?: string | null
+  } | null
 }
 
 // Helper to get processing status display
@@ -225,6 +233,18 @@ export default function AdminSubmissionsPage() {
     fetchSubmissions()
   }, [fetchCampaigns, fetchSubmissions])
 
+  // Auto-refresh submissions every 30 seconds to show real-time view tracking updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Only refresh if not currently loading to avoid race conditions
+      if (!loading) {
+        fetchSubmissions()
+      }
+    }, 30000) // 30 seconds
+
+    return () => clearInterval(interval)
+  }, [fetchSubmissions, loading])
+
   // Update submission status
   const updateSubmissionStatus = async (submissionId: string, status: Submission["status"], reason?: string, payout?: number) => {
     try {
@@ -312,12 +332,16 @@ export default function AdminSubmissionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Subtle loading indicator */}
-      {loading && (
-        <div className="fixed top-4 right-4 z-50">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      )}
+      {/* Subtle loading indicator + auto-refresh badge */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+        {loading && (
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        )}
+        <span className="text-xs text-muted-foreground bg-muted/80 px-2 py-1 rounded-full flex items-center gap-1">
+          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+          Auto-refreshing
+        </span>
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -548,6 +572,27 @@ export default function AdminSubmissionsPage() {
                             <strong>Review Reason:</strong> {submission.reviewReason}
                           </p>
                         )}
+                        {/* Verified Account Display for cross-referencing */}
+                        {submission.socialAccount && (
+                          <div className="flex items-center gap-2 mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded">
+                            <User className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                            <span className="text-sm text-blue-700 dark:text-blue-300">
+                              <strong>Verified Account:</strong>{' '}
+                              <span className="font-mono">@{submission.socialAccount.username}</span>
+                              {submission.socialAccount.verified && (
+                                <Check className="w-3 h-3 inline-block ml-1 text-green-600" />
+                              )}
+                            </span>
+                          </div>
+                        )}
+                        {!submission.socialAccount && (
+                          <div className="flex items-center gap-2 mt-2 p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded">
+                            <AlertCircle className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                            <span className="text-sm text-amber-700 dark:text-amber-300">
+                              No verified account linked (submitted before this feature)
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
@@ -645,7 +690,12 @@ export default function AdminSubmissionsPage() {
                         <span>Current Earnings: ${Number(submission.clips.earnings).toFixed(2)}</span>
                       ) : null}
                       {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 && (
-                        <span>Last Tracked: {new Date(submission.clips.view_tracking[0].date).toLocaleDateString()}</span>
+                        <span>Last Tracked: {new Date(submission.clips.view_tracking[0].date).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit'
+                        })}</span>
                       )}
                     </div>
                   </div>
