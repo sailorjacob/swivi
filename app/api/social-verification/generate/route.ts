@@ -75,21 +75,7 @@ export async function POST(request: NextRequest) {
     
     const platformEnum = platformMap[platform.toLowerCase()]
     
-    // Check if user already has 5 verified accounts for this platform
-    const verifiedCount = await prisma.socialAccount.count({
-      where: {
-        userId: dbUser.id,
-        platform: platformEnum as any,
-        verified: true
-      }
-    })
-
-    if (verifiedCount >= 5) {
-      return NextResponse.json(
-        { error: `You can only have up to 5 verified ${platform} accounts` },
-        { status: 400 }
-      )
-    }
+    // No limit on verified accounts per platform - users can have as many as they need
 
     // Check if user already has a pending verification for this platform
     const existingVerification = await prisma.socialVerification.findFirst({
