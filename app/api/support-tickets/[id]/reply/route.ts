@@ -29,7 +29,7 @@ export async function POST(
     // Get the internal user ID
     const dbUser = await prisma.user.findUnique({
       where: { supabaseAuthId: user.id },
-      select: { id: true }
+      select: { id: true, email: true }
     })
 
     if (!dbUser) {
@@ -37,12 +37,19 @@ export async function POST(
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
+    console.log("📧 Reply attempt by:", dbUser.email, "dbUser.id:", dbUser.id)
+
     const body = await request.json()
     const { reply } = replySchema.parse(body)
 
-    // Get the ticket
+    // Get the ticket with user info
     const ticket = await prisma.supportTicket.findUnique({
-      where: { id: ticketId }
+      where: { id: ticketId },
+      include: {
+        users: {
+          select: { email: true }
+        }
+      }
     })
 
     if (!ticket) {
@@ -50,9 +57,15 @@ export async function POST(
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 })
     }
 
+    console.log("🎫 Ticket owner:", ticket.users?.email, "ticket.userId:", ticket.userId)
+
     // Verify ownership - compare internal DB user IDs
     if (ticket.userId !== dbUser.id) {
-      console.log("❌ Ownership mismatch - ticket userId:", ticket.userId, "dbUser.id:", dbUser.id)
+      console.log("❌ Ownership mismatch!")
+      console.log("   - Ticket userId:", ticket.userId)
+      console.log("   - Ticket owner email:", ticket.users?.email)
+      console.log("   - Current user dbId:", dbUser.id)
+      console.log("   - Current user email:", dbUser.email)
       return NextResponse.json({ 
         error: "You can only reply to your own tickets" 
       }, { status: 403 })
@@ -73,6 +86,8 @@ export async function POST(
       return NextResponse.json({ error: "You have already replied to this ticket" }, { status: 400 })
     }
 
+    console.log("✅ Ownership verified, updating ticket...")
+
     // Update the ticket with user reply
     const updatedTicket = await prisma.supportTicket.update({
       where: { id: ticketId },
@@ -82,6 +97,8 @@ export async function POST(
         status: 'OPEN' // Reopen if it was IN_PROGRESS
       }
     })
+
+    console.log("✅ Reply saved successfully")
 
     // Notify admins about the reply
     const admins = await prisma.user.findMany({
