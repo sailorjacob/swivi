@@ -62,7 +62,7 @@ export async function GET(
         targetPlatforms: true,
         requirements: true,
         featuredImage: true,
-        // contentFolderUrl: true, // Uncomment after running migration
+        contentFolderUrl: true,
         createdAt: true,
         updatedAt: true,
         completedAt: true,
