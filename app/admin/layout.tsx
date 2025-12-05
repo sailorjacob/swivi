@@ -17,7 +17,8 @@ import {
   LogOut,
   Menu,
   ArrowLeft,
-  Wallet
+  Wallet,
+  Trophy
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -44,6 +45,11 @@ const navItems: NavItem[] = [
     label: "Review Submissions",
     href: "/admin/submissions",
     icon: Shield
+  },
+  {
+    label: "Bounty Applications",
+    href: "/admin/bounty-applications",
+    icon: Trophy
   },
   {
     label: "Payout Management",
