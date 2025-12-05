@@ -215,15 +215,15 @@ export default function AdminAnalyticsPage() {
         <div>
           <h1 className="text-2xl font-bold">Analytics</h1>
           <p className="text-sm text-muted-foreground">Platform-wide performance and campaign insights</p>
-        </div>
+            </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="w-2 h-2 bg-foreground/50 rounded-full animate-pulse" />
           Auto-refreshing
           <Button variant="ghost" size="sm" onClick={fetchAllData}>
             <RefreshCw className="w-4 h-4" />
           </Button>
-        </div>
-      </div>
+                          </div>
+                        </div>
 
       {/* Whop-Style Platform Stats - Top Section */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -261,7 +261,7 @@ export default function AdminAnalyticsPage() {
             <p className="text-3xl font-bold">{(platformStats?.overview.totalSubmissions || 0).toLocaleString()}</p>
           </CardContent>
         </Card>
-      </div>
+                      </div>
 
       {/* Secondary Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -271,11 +271,11 @@ export default function AdminAnalyticsPage() {
               <div>
                 <p className="text-xs text-muted-foreground">Active Campaigns</p>
                 <p className="text-xl font-bold">{platformStats?.overview.activeCampaigns || 0}</p>
-              </div>
+                      </div>
               <TrendingUp className="w-5 h-5 text-muted-foreground" />
             </div>
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
 
         <Card>
           <CardContent className="pt-4 pb-4">
@@ -413,140 +413,140 @@ export default function AdminAnalyticsPage() {
 
         {/* Clip Tracking Tab */}
         <TabsContent value="clips" className="mt-6">
-          <div className="space-y-4">
+      <div className="space-y-4">
             {campaigns.length > 0 ? campaigns.map((campaignGroup) => {
-              const isExpanded = expandedCampaigns.has(campaignGroup.campaign.id)
-              const totalViews = campaignGroup.clips.reduce((sum, clip) => sum + clip.currentViews, 0)
-              const totalEarnings = campaignGroup.clips.reduce((sum, clip) => sum + clip.earnings, 0)
+          const isExpanded = expandedCampaigns.has(campaignGroup.campaign.id)
+          const totalViews = campaignGroup.clips.reduce((sum, clip) => sum + clip.currentViews, 0)
+          const totalEarnings = campaignGroup.clips.reduce((sum, clip) => sum + clip.earnings, 0)
 
-              return (
-                <Card key={campaignGroup.campaign.id}>
+          return (
+            <Card key={campaignGroup.campaign.id}>
                   <CardHeader className="py-4">
-                    <div 
-                      className="flex items-center justify-between cursor-pointer"
-                      onClick={() => toggleCampaign(campaignGroup.campaign.id)}
-                    >
-                      <div className="flex items-center gap-3">
-                        {isExpanded ? (
-                          <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                        ) : (
-                          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                        )}
-                        <div>
+                <div 
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => toggleCampaign(campaignGroup.campaign.id)}
+                >
+                  <div className="flex items-center gap-3">
+                    {isExpanded ? (
+                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    )}
+                    <div>
                           <CardTitle className="text-base">{campaignGroup.campaign.title}</CardTitle>
                           <CardDescription className="text-xs">
                             {campaignGroup.clips.length} clips • {totalViews.toLocaleString()} views • ${totalEarnings.toFixed(2)} earned
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <Badge variant="outline">{campaignGroup.campaign.status}</Badge>
+                      </CardDescription>
                     </div>
-                  </CardHeader>
+                  </div>
+                      <Badge variant="outline">{campaignGroup.campaign.status}</Badge>
+                </div>
+              </CardHeader>
 
-                  {isExpanded && (
+              {isExpanded && (
                     <CardContent className="pt-0">
                       <div className="space-y-4">
-                        {campaignGroup.clips.map((clip) => {
-                          const chartData = clip.viewHistory.map(point => ({
-                            date: formatDate(point.date),
-                            views: point.views,
-                            success: point.success
-                          }))
+                    {campaignGroup.clips.map((clip) => {
+                      const chartData = clip.viewHistory.map(point => ({
+                        date: formatDate(point.date),
+                        views: point.views,
+                        success: point.success
+                      }))
 
-                          if (chartData.length > 0 && clip.initialViews > 0) {
-                            chartData.unshift({
-                              date: formatDate(clip.submittedAt),
-                              views: clip.initialViews,
-                              success: true
-                            })
-                          }
+                      if (chartData.length > 0 && clip.initialViews > 0) {
+                        chartData.unshift({
+                          date: formatDate(clip.submittedAt),
+                          views: clip.initialViews,
+                          success: true
+                        })
+                      }
 
-                          const viewGrowth = clip.currentViews - clip.initialViews
+                      const viewGrowth = clip.currentViews - clip.initialViews
 
-                          return (
+                      return (
                             <div key={clip.submissionId} className="p-4 bg-muted/30 rounded-lg border">
                               {/* User & Clip Info */}
                               <div className="flex items-start justify-between mb-3">
-                                <div className="flex-1">
+                            <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-1">
                                     {getPlatformLogo(clip.platform, '', 16)}
                                     <span className="font-medium text-sm">{clip.user.name || clip.user.email}</span>
                                     <Badge variant="outline" className="text-xs">{clip.status}</Badge>
-                                  </div>
-                                  <a 
-                                    href={clip.clipUrl} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
+                              </div>
+                              <a 
+                                href={clip.clipUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
                                     className="text-xs text-muted-foreground hover:text-foreground underline break-all transition-colors"
-                                  >
+                              >
                                     {clip.clipUrl.length > 60 ? `${clip.clipUrl.substring(0, 60)}...` : clip.clipUrl}
-                                  </a>
+                              </a>
                                   <p className="text-xs text-muted-foreground mt-1">
                                     Submitted: {new Date(clip.submittedAt).toLocaleDateString()}
                                   </p>
-                                </div>
-                                <div className="text-right ml-4">
+                            </div>
+                            <div className="text-right ml-4">
                                   <p className="font-bold">{clip.currentViews.toLocaleString()} views</p>
-                                  {viewGrowth > 0 && (
+                              {viewGrowth > 0 && (
                                     <p className="text-xs font-medium">+{viewGrowth.toLocaleString()}</p>
-                                  )}
+                              )}
                                   <p className="text-xs text-muted-foreground">${clip.earnings.toFixed(2)}</p>
-                                </div>
-                              </div>
+                            </div>
+                          </div>
 
                               {/* Mini Chart */}
                               {chartData.length > 1 && (
                                 <div className="h-16">
                                   <ResponsiveContainer width="100%" height="100%">
-                                    <LineChart data={chartData}>
-                                      <Line 
-                                        type="monotone" 
-                                        dataKey="views" 
+                                <LineChart data={chartData}>
+                                  <Line 
+                                    type="monotone" 
+                                    dataKey="views" 
                                         stroke="currentColor" 
-                                        strokeWidth={2}
+                                    strokeWidth={2}
                                         dot={false}
                                         className="text-foreground/60"
-                                      />
-                                    </LineChart>
-                                  </ResponsiveContainer>
-                                </div>
-                              )}
+                                  />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
+                          )}
 
                               {/* Scrape Status */}
                               <div className="flex items-center gap-1 mt-2">
-                                <span className="text-xs text-muted-foreground">Scrapes:</span>
+                            <span className="text-xs text-muted-foreground">Scrapes:</span>
                                 {clip.viewHistory.slice(0, 10).map((point, idx) => (
-                                  <div 
-                                    key={idx}
-                                    title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
-                                  >
-                                    {point.success ? (
+                              <div 
+                                key={idx}
+                                title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
+                              >
+                                {point.success ? (
                                       <CheckCircle className="w-3 h-3 text-foreground/70" />
-                                    ) : (
+                                ) : (
                                       <XCircle className="w-3 h-3 text-foreground/40" />
-                                    )}
-                                  </div>
-                                ))}
-                                {clip.viewHistory.length > 10 && (
-                                  <span className="text-xs text-muted-foreground">+{clip.viewHistory.length - 10} more</span>
                                 )}
                               </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </CardContent>
-                  )}
-                </Card>
-              )
+                            ))}
+                                {clip.viewHistory.length > 10 && (
+                                  <span className="text-xs text-muted-foreground">+{clip.viewHistory.length - 10} more</span>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          )
             }) : (
-              <Card>
+          <Card>
                 <CardContent className="py-8 text-center">
                   <p className="text-muted-foreground">No clips being tracked yet.</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
         </TabsContent>
 
         {/* Platform Breakdown Tab */}

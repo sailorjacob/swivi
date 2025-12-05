@@ -128,7 +128,7 @@ const submitSchema = z.object({
   platform: z.enum(["TIKTOK", "INSTAGRAM", "YOUTUBE"], {
     errorMap: () => ({ message: "Please select a platform" }),
   }),
-  socialAccountId: z.string().min(1, "Please select a verified account"),
+  socialAccountId: z.string().min(1, "Please select your verified account"),
 })
 
 // Helper to check if a campaign has special bonuses
@@ -634,7 +634,7 @@ export default function CampaignDetailPage() {
                       </div>
 
                       <div>
-                        <Label htmlFor="socialAccountId">Your Verified Account</Label>
+                        <Label htmlFor="socialAccountId">Your Verified Account <span className="text-destructive">*</span></Label>
                         <Select 
                           onValueChange={(value) => setValue("socialAccountId", value)}
                           disabled={!selectedPlatform}
@@ -658,7 +658,7 @@ export default function CampaignDetailPage() {
                               })}
                             {selectedPlatform && verifiedAccounts.filter(acc => acc.platform === selectedPlatform && acc.verified).length === 0 && (
                               <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                                No verified {selectedPlatform.toLowerCase()} accounts
+                                No verified accounts — <Link href="/clippers/dashboard/settings" className="underline">verify one</Link>
                               </div>
                             )}
                           </SelectContent>
@@ -683,12 +683,10 @@ export default function CampaignDetailPage() {
                     </div>
 
                     {selectedPlatform && verifiedAccounts.filter(acc => acc.platform === selectedPlatform && acc.verified).length === 0 && (
-                      <p className="text-xs text-amber-500 flex items-center gap-1">
+                      <p className="text-xs text-destructive flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" />
-                        You need to verify a {selectedPlatform.toLowerCase()} account in your{' '}
-                        <Link href="/clippers/dashboard/settings" className="underline hover:text-amber-400">
-                          profile settings
-                        </Link>{' '}
+                        You must verify a {selectedPlatform.toLowerCase()} account in{' '}
+                        <Link href="/clippers/dashboard/settings" className="underline">settings</Link>{' '}
                         before submitting.
                       </p>
                     )}

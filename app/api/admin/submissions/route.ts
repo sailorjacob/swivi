@@ -137,6 +137,7 @@ export async function GET(request: NextRequest) {
           clipId: true,
           initialViews: true,
           finalEarnings: true,
+          socialAccountId: true,
           users: {
             select: {
               id: true,
@@ -154,6 +155,16 @@ export async function GET(request: NextRequest) {
               payoutRate: true,
               featuredImage: true,
               status: true
+            }
+          },
+          socialAccount: {
+            select: {
+              id: true,
+              platform: true,
+              username: true,
+              displayName: true,
+              verified: true,
+              verifiedAt: true
             }
           }
         },
@@ -176,8 +187,13 @@ export async function GET(request: NextRequest) {
                   views: true,
                   earnings: true,
                   view_tracking: {
-                    orderBy: { date: "desc" },
-                    take: 2
+                    orderBy: { scrapedAt: "desc" }, // Order by actual scrape time, not date
+                    take: 2,
+                    select: {
+                      views: true,
+                      date: true,
+                      scrapedAt: true // Include actual scrape timestamp
+                    }
                   }
                 }
               })
@@ -242,7 +258,7 @@ export async function GET(request: NextRequest) {
               view_tracking: submission.clips.view_tracking?.map((vt: any) => ({
                 ...vt,
                 views: vt.views.toString(),
-                date: vt.date.toISOString()
+                date: vt.scrapedAt ? vt.scrapedAt.toISOString() : vt.date.toISOString() // Use scrapedAt for accurate time
               })) || []
             } : null,
             users: {
@@ -301,7 +317,7 @@ export async function GET(request: NextRequest) {
               view_tracking: submission.clips.view_tracking?.map((vt: any) => ({
                 ...vt,
                 views: vt.views.toString(),
-                date: vt.date.toISOString()
+                date: vt.scrapedAt ? vt.scrapedAt.toISOString() : vt.date.toISOString() // Use scrapedAt for accurate time
               })) || []
             } : null,
             users: {

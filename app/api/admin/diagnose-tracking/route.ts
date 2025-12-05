@@ -143,9 +143,9 @@ export async function GET(request: NextRequest) {
         views: true,
         earnings: true,
         view_tracking: {
-          orderBy: { date: 'desc' },
+          orderBy: { scrapedAt: 'desc' },
           take: 1,
-          select: { date: true, views: true }
+          select: { date: true, scrapedAt: true, views: true }
         },
         clipSubmissions: {
           where: { status: 'APPROVED' },
@@ -159,18 +159,21 @@ export async function GET(request: NextRequest) {
       take: 20
     })
 
-    diagnostics.clipsNeedingTracking = clipsToTrack.map(clip => ({
-      id: clip.id,
-      url: clip.url.substring(0, 60) + '...',
-      platform: clip.platform,
-      views: Number(clip.views || 0),
-      earnings: Number(clip.earnings || 0),
-      lastTracked: clip.view_tracking[0]?.date?.toISOString() || 'NEVER',
-      hoursSinceTracked: clip.view_tracking[0]?.date 
-        ? Math.round((Date.now() - clip.view_tracking[0].date.getTime()) / (1000 * 60 * 60))
-        : null,
-      campaign: clip.clipSubmissions[0]?.campaigns?.title || 'Unknown'
-    }))
+    diagnostics.clipsNeedingTracking = clipsToTrack.map(clip => {
+      const lastScrapedAt = clip.view_tracking[0]?.scrapedAt || clip.view_tracking[0]?.date
+      return {
+        id: clip.id,
+        url: clip.url.substring(0, 60) + '...',
+        platform: clip.platform,
+        views: Number(clip.views || 0),
+        earnings: Number(clip.earnings || 0),
+        lastTracked: lastScrapedAt?.toISOString() || 'NEVER',
+        hoursSinceTracked: lastScrapedAt 
+          ? Math.round((Date.now() - lastScrapedAt.getTime()) / (1000 * 60 * 60))
+          : null,
+        campaign: clip.clipSubmissions[0]?.campaigns?.title || 'Unknown'
+      }
+    })
 
     if (clipsToTrack.length === 0) {
       diagnostics.issues.push("⚠️ No clips eligible for tracking!")

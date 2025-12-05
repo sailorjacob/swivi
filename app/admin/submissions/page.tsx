@@ -335,9 +335,9 @@ export default function AdminSubmissionsPage() {
     <div className="container mx-auto px-4 py-8">
       {/* Subtle loading indicator + auto-refresh badge */}
       <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-        {loading && (
+      {loading && (
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        )}
+      )}
         <span className="text-xs text-muted-foreground bg-muted/80 px-2 py-1 rounded-full flex items-center gap-1">
           <span className="w-1.5 h-1.5 bg-foreground/50 rounded-full animate-pulse" />
           Auto-refreshing
@@ -770,7 +770,7 @@ export default function AdminSubmissionsPage() {
                       </AlertDialogContent>
                     </AlertDialog>
                   </div>
-                  </div>
+                </div>
                 
                 {/* Expandable Tracking Details */}
                 {expandedSubmissions.has(submission.id) && submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 && (

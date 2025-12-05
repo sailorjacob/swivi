@@ -124,14 +124,16 @@ export class ViewTrackingService {
           }
         },
         update: {
-          views: BigInt(currentViews)
+          views: BigInt(currentViews),
+          scrapedAt: new Date() // Update the actual scrape timestamp
         },
         create: {
             userId: clip.userId,
             clipId,
             views: BigInt(currentViews),
             date: today,
-            platform: clip.platform
+            platform: clip.platform,
+            scrapedAt: new Date()
           }
         })
 

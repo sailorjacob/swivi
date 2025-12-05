@@ -15,6 +15,7 @@ const createSubmissionSchema = z.object({
   clipUrl: z.string().url(),
   platform: z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER", "FACEBOOK"]),
   mediaFileUrl: z.string().url().optional(),
+  socialAccountId: z.string().optional(), // Links to verified social account used for submission
 })
 
 export async function GET(request: NextRequest) {
@@ -228,6 +229,7 @@ export async function POST(request: NextRequest) {
             clipUrl: validatedData.clipUrl,
             platform: validatedData.platform,
             mediaFileUrl: validatedData.mediaFileUrl,
+            socialAccountId: validatedData.socialAccountId, // Link to verified social account
             status: submissionStatus,
             rejectionReason: verificationResult.reason
           },
@@ -288,6 +290,7 @@ export async function POST(request: NextRequest) {
           clipUrl: validatedData.clipUrl,
           platform: validatedData.platform,
           mediaFileUrl: validatedData.mediaFileUrl,
+          socialAccountId: validatedData.socialAccountId, // Link to verified social account
           status: "PENDING",
           processingStatus: "SCRAPING", // Track that we're scraping initial views
           initialViews: BigInt(0) // Temporary - will be updated by background scrape

@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import Link from "next/link"
 import {
   Dialog,
   DialogContent,
@@ -34,12 +35,22 @@ import {
 import toast from "react-hot-toast"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 
+interface VerifiedAccount {
+  id: string
+  platform: string
+  username: string
+  displayName: string | null
+  verified: boolean
+  verifiedAt: string | null
+}
+
 const submitSchema = z.object({
   clipUrl: z.string().url("Please enter a valid URL"),
   // Twitter hidden - re-enable when Apify actors are working
   platform: z.enum(["tiktok", "instagram", "youtube"], {
     errorMap: () => ({ message: "Please select a platform" }),
   }),
+  socialAccountId: z.string().min(1, "Please select your verified account"),
 })
 
 interface Campaign {
@@ -74,6 +85,7 @@ const platformIcons = {
 
 export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDetailModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [verifiedAccounts, setVerifiedAccounts] = useState<VerifiedAccount[]>([])
   
   const {
     register,
@@ -88,6 +100,24 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
 
   const selectedPlatform = watch("platform")
 
+  // Fetch verified accounts when modal opens
+  useEffect(() => {
+    if (open) {
+      const fetchAccounts = async () => {
+        try {
+          const response = await authenticatedFetch("/api/user/verified-accounts")
+          if (response.ok) {
+            const accounts = await response.json()
+            setVerifiedAccounts(accounts)
+          }
+        } catch (error) {
+          console.error("Error fetching verified accounts:", error)
+        }
+      }
+      fetchAccounts()
+    }
+  }, [open])
+
   const onSubmit = async (data: z.infer<typeof submitSchema>) => {
     setIsSubmitting(true)
     
@@ -96,6 +126,7 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
         campaignId: campaign?.id,
         clipUrl: data.clipUrl,
         platform: data.platform.toUpperCase(),
+        socialAccountId: data.socialAccountId,
       }
 
       const response = await authenticatedFetch("/api/clippers/submissions", {
@@ -118,6 +149,11 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
       setIsSubmitting(false)
     }
   }
+
+  // Get filtered accounts for the selected platform
+  const filteredAccounts = verifiedAccounts.filter(
+    acc => acc.platform.toLowerCase() === selectedPlatform?.toLowerCase() && acc.verified
+  )
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -210,7 +246,11 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="platform" className="text-sm text-foreground">Platform</Label>
-                  <Select onValueChange={(value) => setValue("platform", value as any)}>
+                  <Select onValueChange={(value) => {
+                    setValue("platform", value as any)
+                    // Reset account selection when platform changes
+                    setValue("socialAccountId", "")
+                  }}>
                     <SelectTrigger className="mt-1 h-9">
                       <SelectValue placeholder="Select platform" />
                     </SelectTrigger>
@@ -235,21 +275,61 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="clipUrl" className="text-sm text-foreground">Content URL</Label>
-                  <div className="relative mt-1">
-                    <Input
-                      id="clipUrl"
-                      placeholder={getPlatformPlaceholder(selectedPlatform)}
-                      className="h-9 text-sm"
-                      {...register("clipUrl")}
-                    />
-                  </div>
-                  {errors.clipUrl && (
-                    <p className="text-destructive text-xs mt-1">{errors.clipUrl.message}</p>
+                  <Label htmlFor="socialAccountId" className="text-sm text-foreground">Your Account <span className="text-destructive">*</span></Label>
+                  <Select 
+                    onValueChange={(value) => setValue("socialAccountId", value)}
+                    disabled={!selectedPlatform}
+                  >
+                    <SelectTrigger className="mt-1 h-9">
+                      <SelectValue placeholder={selectedPlatform ? "Select account" : "Select platform first"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredAccounts.map((account) => {
+                        const Icon = platformIcons[account.platform.toLowerCase() as keyof typeof platformIcons]
+                        return (
+                          <SelectItem key={account.id} value={account.id}>
+                            <div className="flex items-center gap-2">
+                              {Icon && <Icon className="w-3 h-3" />}
+                              <span className="text-xs">@{account.username}</span>
+                            </div>
+                          </SelectItem>
+                        )
+                      })}
+                      {selectedPlatform && filteredAccounts.length === 0 && (
+                        <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                          No verified accounts — <Link href="/clippers/dashboard/settings" className="underline">verify one</Link>
+                        </div>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {errors.socialAccountId && (
+                    <p className="text-destructive text-xs mt-1">{errors.socialAccountId.message}</p>
                   )}
                 </div>
               </div>
-              {selectedPlatform && (
+              <div>
+                <Label htmlFor="clipUrl" className="text-sm text-foreground">Content URL</Label>
+                <div className="relative mt-1">
+                  <Input
+                    id="clipUrl"
+                    placeholder={getPlatformPlaceholder(selectedPlatform)}
+                    className="h-9 text-sm"
+                    {...register("clipUrl")}
+                  />
+                </div>
+                {errors.clipUrl && (
+                  <p className="text-destructive text-xs mt-1">{errors.clipUrl.message}</p>
+                )}
+              </div>
+              {selectedPlatform && filteredAccounts.length === 0 && (
+                <p className="text-xs text-destructive flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  Verify a {selectedPlatform} account in{' '}
+                  <Link href="/clippers/dashboard/settings" className="underline">settings</Link>{' '}
+                  first.
+                </p>
+              )}
+              {selectedPlatform && filteredAccounts.length > 0 && (
                 <p className="text-xs text-muted-foreground">
                   {getPlatformHint(selectedPlatform)}
                 </p>
