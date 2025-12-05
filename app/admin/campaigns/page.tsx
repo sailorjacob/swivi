@@ -1943,7 +1943,6 @@ function CampaignForm({
                 value={formData.startDate || ''}
                 onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                 required={formData.status === 'SCHEDULED'}
-                min={new Date().toISOString().slice(0, 16)}
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Campaign will automatically go live at this time (your local timezone)
