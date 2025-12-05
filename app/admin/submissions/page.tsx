@@ -120,6 +120,7 @@ export default function AdminSubmissionsPage() {
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null)
   const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [rejectionReason, setRejectionReason] = useState("")
+  const [customRejectionReason, setCustomRejectionReason] = useState("")
   const [payoutAmount, setPayoutAmount] = useState("")
   const [filters, setFilters] = useState({
     status: "all",
@@ -538,7 +539,7 @@ export default function AdminSubmissionsPage() {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                       <span>Submitted: {(() => {
                         try {
                           const date = new Date(submission.createdAt)
@@ -560,12 +561,32 @@ export default function AdminSubmissionsPage() {
                       {submission.payout && (
                         <span>Payout: ${submission.payout.toFixed(2)}</span>
                       )}
-                      {submission.currentViews && Number(submission.currentViews) > 0 && (
-                        <span>Views: {Number(submission.currentViews).toLocaleString()}
+                      {/* View tracking data */}
+                      {(submission.initialViews && Number(submission.initialViews) > 0) || 
+                       (submission.currentViews && Number(submission.currentViews) > 0) ? (
+                        <span className="flex items-center gap-1">
+                          <span className="font-medium">Views:</span>
+                          {submission.initialViews && Number(submission.initialViews) > 0 && (
+                            <span title="Initial scraped views">
+                              {Number(submission.initialViews).toLocaleString()} initial
+                            </span>
+                          )}
+                          {submission.currentViews && Number(submission.currentViews) > 0 && (
+                            <>
+                              <span className="mx-1">→</span>
+                              <span title="Current views">
+                                {Number(submission.currentViews).toLocaleString()} current
+                              </span>
+                            </>
+                          )}
                           {submission.viewChange && Number(submission.viewChange) > 0 && (
-                            <span className="ml-1">(+{Number(submission.viewChange).toLocaleString()})</span>
+                            <span className="text-green-600 dark:text-green-400" title="View change">
+                              (+{Number(submission.viewChange).toLocaleString()})
+                            </span>
                           )}
                         </span>
+                      ) : (
+                        <span className="text-muted-foreground/60">No view data</span>
                       )}
                       {submission.campaigns.status === 'COMPLETED' && submission.finalEarnings ? (
                         <span className="font-bold flex items-center gap-1">
@@ -648,17 +669,31 @@ export default function AdminSubmissionsPage() {
       </motion.div>
 
       {/* Reject Submission Dialog */}
-      <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <DialogContent>
+      <Dialog open={showRejectDialog} onOpenChange={(open) => {
+        setShowRejectDialog(open)
+        if (!open) {
+          setRejectionReason("")
+          setCustomRejectionReason("")
+        }
+      }}>
+        <DialogContent aria-describedby="reject-dialog-description">
           <DialogHeader>
             <DialogTitle>Reject Submission</DialogTitle>
+            <p id="reject-dialog-description" className="text-sm text-muted-foreground">
+              Select a reason for rejecting this submission. The clipper will be notified.
+            </p>
           </DialogHeader>
           <div className="space-y-4">
             <div>
               <Label htmlFor="rejection-reason">Rejection Reason</Label>
               <Select
                 value={rejectionReason}
-                onValueChange={setRejectionReason}
+                onValueChange={(value) => {
+                  setRejectionReason(value)
+                  if (value !== 'other') {
+                    setCustomRejectionReason("")
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a reason" />
@@ -680,8 +715,8 @@ export default function AdminSubmissionsPage() {
                 <Textarea
                   id="custom-reason"
                   placeholder="Enter custom rejection reason..."
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
+                  value={customRejectionReason}
+                  onChange={(e) => setCustomRejectionReason(e.target.value)}
                 />
               </div>
             )}
@@ -692,6 +727,7 @@ export default function AdminSubmissionsPage() {
               onClick={() => {
                 setShowRejectDialog(false)
                 setRejectionReason("")
+                setCustomRejectionReason("")
               }}
             >
               Cancel
@@ -699,11 +735,14 @@ export default function AdminSubmissionsPage() {
             <Button
               variant="destructive"
               onClick={() => {
-                if (selectedSubmission && rejectionReason) {
-                  updateSubmissionStatus(selectedSubmission.id, "REJECTED", rejectionReason)
+                if (selectedSubmission) {
+                  const finalReason = rejectionReason === 'other' ? customRejectionReason : rejectionReason
+                  if (finalReason) {
+                    updateSubmissionStatus(selectedSubmission.id, "REJECTED", finalReason)
+                  }
                 }
               }}
-              disabled={!rejectionReason}
+              disabled={!rejectionReason || (rejectionReason === 'other' && !customRejectionReason)}
             >
               Reject
             </Button>

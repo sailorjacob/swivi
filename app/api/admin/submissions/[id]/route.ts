@@ -18,6 +18,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log("🔍 GET /api/admin/submissions/[id] called with id:", params.id)
+    
     const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
@@ -88,33 +90,51 @@ export async function GET(
     }
 
     // Get latest view count and calculate change
-    const latestViews = submission.clips?.view_tracking[0]?.views || BigInt(0)
+    const latestViews = submission.clips?.view_tracking?.[0]?.views || BigInt(0)
     const initialViews = submission.initialViews || BigInt(0)
-    const viewChange = latestViews - initialViews
+    const viewChange = BigInt(latestViews) - BigInt(initialViews)
 
-    // Convert BigInt values to strings for JSON serialization
+    // Convert all values for JSON serialization
     const submissionResponse = {
-      ...submission,
+      id: submission.id,
+      clipUrl: submission.clipUrl,
+      platform: submission.platform,
+      status: submission.status,
+      rejectionReason: submission.rejectionReason,
+      clipId: submission.clipId,
+      createdAt: submission.createdAt?.toISOString() || null,
+      updatedAt: submission.updatedAt?.toISOString() || null,
+      paidAt: submission.paidAt?.toISOString() || null,
       initialViews: submission.initialViews?.toString() || "0",
       finalEarnings: submission.finalEarnings?.toString() || "0",
       payout: submission.payout?.toString() || null,
       currentViews: latestViews.toString(),
       viewChange: viewChange.toString(),
       earnings: submission.clips?.earnings?.toString() || "0",
+      users: submission.users,
+      campaigns: {
+        ...submission.campaigns,
+        budget: submission.campaigns.budget?.toString() || "0",
+        spent: submission.campaigns.spent?.toString() || "0"
+      },
       clips: submission.clips ? {
-        ...submission.clips,
+        id: submission.clips.id,
         earnings: submission.clips.earnings?.toString() || "0",
-        view_tracking: submission.clips.view_tracking.map(vt => ({
-          ...vt,
-          views: vt.views.toString()
-        }))
+        view_tracking: submission.clips.view_tracking?.map(vt => ({
+          views: vt.views.toString(),
+          date: vt.date?.toISOString() || null
+        })) || []
       } : null
     }
 
     return NextResponse.json(submissionResponse)
   } catch (error) {
-    console.error("Error fetching submission:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("❌ Error fetching submission:", error)
+    console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack trace')
+    return NextResponse.json({ 
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+    }, { status: 500 })
   }
 }
 
@@ -123,6 +143,8 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log("🔍 PUT /api/admin/submissions/[id] called with id:", params.id)
+    
     const { user, error } = await getServerUserWithRole(request)
 
     if (!user?.id || error) {
@@ -139,7 +161,10 @@ export async function PUT(
     }
 
     const body = await request.json()
+    console.log("🔍 Request body:", body)
+    
     const validatedData = updateSubmissionSchema.parse(body)
+    console.log("✅ Validated data:", validatedData)
 
     // Get current submission
     const submission = await prisma.clipSubmission.findUnique({
@@ -154,6 +179,8 @@ export async function PUT(
       return NextResponse.json({ error: "Submission not found" }, { status: 404 })
     }
 
+    console.log("🔍 Current submission status:", submission.status, "-> New status:", validatedData.status)
+
     // Update submission
     const updatedSubmission = await prisma.clipSubmission.update({
       where: { id: params.id },
@@ -161,7 +188,7 @@ export async function PUT(
         status: validatedData.status,
         rejectionReason: validatedData.rejectionReason,
         payout: validatedData.payout,
-        paidAt: validatedData.status === "PAID" ? new Date() : null
+        paidAt: validatedData.status === "PAID" ? new Date() : undefined
       },
       include: {
         users: {
@@ -175,11 +202,14 @@ export async function PUT(
       }
     })
 
+    console.log("✅ Submission updated successfully")
+
     // Send notifications based on status change (non-blocking - don't fail if notification fails)
     const notificationService = new NotificationService()
 
     // If approved, send approval notification and create clip
     if (validatedData.status === "APPROVED" && submission.status !== "APPROVED") {
+      console.log("🔍 Creating clip for approved submission...")
       // Create or link to clip for view tracking
       let clipId = submission.clipId
       if (!clipId) {
@@ -199,6 +229,7 @@ export async function PUT(
         })
         
         clipId = clip.id
+        console.log("✅ Clip created with id:", clipId)
       }
 
       try {
@@ -207,6 +238,7 @@ export async function PUT(
           submission.userId,
           submission.campaigns.title
         )
+        console.log("✅ Approval notification sent")
       } catch (notifyError) {
         console.error("Failed to send approval notification:", notifyError)
         // Don't fail the whole operation if notification fails
@@ -215,6 +247,7 @@ export async function PUT(
 
     // If rejected, send rejection notification
     if (validatedData.status === "REJECTED" && submission.status !== "REJECTED") {
+      console.log("🔍 Sending rejection notification...")
       try {
         await notificationService.notifySubmissionRejected(
           params.id,
@@ -222,6 +255,7 @@ export async function PUT(
           submission.campaigns.title,
           validatedData.rejectionReason
         )
+        console.log("✅ Rejection notification sent")
       } catch (notifyError) {
         console.error("Failed to send rejection notification:", notifyError)
         // Don't fail the whole operation if notification fails
@@ -252,22 +286,44 @@ export async function PUT(
       })
     }
 
-    // Convert BigInt for response
+    // Convert all values for JSON serialization
     const responseData = {
-      ...updatedSubmission,
+      id: updatedSubmission.id,
+      clipUrl: updatedSubmission.clipUrl,
+      platform: updatedSubmission.platform,
+      status: updatedSubmission.status,
+      rejectionReason: updatedSubmission.rejectionReason,
+      clipId: updatedSubmission.clipId,
+      createdAt: updatedSubmission.createdAt?.toISOString() || null,
+      updatedAt: updatedSubmission.updatedAt?.toISOString() || null,
+      paidAt: updatedSubmission.paidAt?.toISOString() || null,
       initialViews: updatedSubmission.initialViews?.toString() || "0",
       finalEarnings: updatedSubmission.finalEarnings?.toString() || "0",
       payout: updatedSubmission.payout?.toString() || null,
+      users: updatedSubmission.users,
+      campaigns: {
+        id: updatedSubmission.campaigns.id,
+        title: updatedSubmission.campaigns.title,
+        creator: updatedSubmission.campaigns.creator,
+        budget: updatedSubmission.campaigns.budget?.toString() || "0",
+        spent: updatedSubmission.campaigns.spent?.toString() || "0"
+      }
     }
 
+    console.log("✅ Returning response")
     return NextResponse.json(responseData)
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error("❌ Validation error:", error.errors)
       return NextResponse.json({ error: "Invalid data", details: error.errors }, { status: 400 })
     }
 
-    console.error("Error updating submission:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("❌ Error updating submission:", error)
+    console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack trace')
+    return NextResponse.json({ 
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+    }, { status: 500 })
   }
 }
 
