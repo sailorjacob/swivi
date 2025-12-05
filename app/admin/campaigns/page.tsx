@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Plus, Edit, Trash2, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle, ChevronDown, ChevronUp, EyeOff, Eye } from "lucide-react"
+import { Plus, Edit, Trash2, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle, ChevronDown, ChevronUp, EyeOff, Eye, FlaskConical, ArchiveRestore, Archive } from "lucide-react"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { supabase } from "@/lib/supabase-auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -30,6 +30,8 @@ interface Campaign {
   startDate?: string | Date | null
   status: "DRAFT" | "SCHEDULED" | "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED"
   hidden?: boolean
+  isTest?: boolean
+  deletedAt?: string | Date | null
   targetPlatforms: string[]
   requirements: string[]
   featuredImage?: string | null
@@ -588,16 +590,127 @@ export default function AdminCampaignsPage() {
     }
   }
 
-  // Delete campaign
-  const handleDeleteCampaign = async (campaignId: string) => {
+  // Pause campaign
+  const handlePauseCampaign = async (campaignId: string) => {
     try {
-      const response = await fetch(`/api/admin/campaigns/${campaignId}`, {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: "PAUSED"
+        })
+      })
+
+      if (response.ok) {
+        toast.success("Campaign paused. No new submissions will be accepted.")
+        await fetchCampaigns()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to pause campaign")
+      }
+    } catch (error) {
+      console.error("Error pausing campaign:", error)
+      toast.error("Failed to pause campaign")
+    }
+  }
+
+  // Resume paused campaign
+  const handleResumeCampaign = async (campaignId: string) => {
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: "ACTIVE"
+        })
+      })
+
+      if (response.ok) {
+        toast.success("Campaign resumed and accepting submissions again!")
+        await fetchCampaigns()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to resume campaign")
+      }
+    } catch (error) {
+      console.error("Error resuming campaign:", error)
+      toast.error("Failed to resume campaign")
+    }
+  }
+
+  // Reactivate completed campaign
+  const handleReactivateCampaign = async (campaignId: string) => {
+    if (!confirm("Are you sure you want to reactivate this completed campaign? This will allow new submissions and resume earnings tracking. Consider increasing the budget first.")) {
+      return
+    }
+
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: "ACTIVE"
+        })
+      })
+
+      if (response.ok) {
+        toast.success("Campaign reactivated! Earnings tracking will resume.")
+        await fetchCampaigns()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to reactivate campaign")
+      }
+    } catch (error) {
+      console.error("Error reactivating campaign:", error)
+      toast.error("Failed to reactivate campaign")
+    }
+  }
+
+  // Archive campaign (soft delete)
+  const handleDeleteCampaign = async (campaignId: string, isTest?: boolean) => {
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}`, {
         method: "DELETE"
       })
 
       if (response.ok) {
-        toast.success("Campaign deleted successfully")
-        fetchCampaigns()
+        const result = await response.json()
+        if (result.archived) {
+          toast.success(`Campaign archived. ${result.earningsPreserved > 0 ? `$${result.earningsPreserved.toFixed(2)} in earnings preserved.` : ''}`)
+        } else {
+          toast.success("Campaign deleted")
+        }
+        await fetchCampaigns()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to archive campaign")
+      }
+    } catch (error) {
+      console.error("Error archiving campaign:", error)
+      toast.error("Failed to archive campaign")
+    }
+  }
+
+  // Permanently delete campaign (hard delete - only for test campaigns)
+  const handlePermanentDelete = async (campaignId: string) => {
+    if (!confirm("PERMANENTLY DELETE this campaign and ALL its data? This cannot be undone. Only use for test campaigns.")) {
+      return
+    }
+
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}?hard=true`, {
+        method: "DELETE"
+      })
+
+      if (response.ok) {
+        toast.success("Campaign permanently deleted")
+        await fetchCampaigns()
       } else {
         const error = await response.json()
         toast.error(error.error || "Failed to delete campaign")
@@ -605,6 +718,58 @@ export default function AdminCampaignsPage() {
     } catch (error) {
       console.error("Error deleting campaign:", error)
       toast.error("Failed to delete campaign")
+    }
+  }
+
+  // Restore archived campaign
+  const handleRestoreCampaign = async (campaignId: string) => {
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          restore: true
+        })
+      })
+
+      if (response.ok) {
+        toast.success("Campaign restored to draft status")
+        await fetchCampaigns()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to restore campaign")
+      }
+    } catch (error) {
+      console.error("Error restoring campaign:", error)
+      toast.error("Failed to restore campaign")
+    }
+  }
+
+  // Toggle test campaign status
+  const handleToggleTest = async (campaignId: string, currentlyTest: boolean) => {
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isTest: !currentlyTest
+        })
+      })
+
+      if (response.ok) {
+        toast.success(currentlyTest ? "Campaign marked as real (included in stats)" : "Campaign marked as test (excluded from stats)")
+        await fetchCampaigns()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to update campaign")
+      }
+    } catch (error) {
+      console.error("Error toggling test status:", error)
+      toast.error("Failed to update campaign")
     }
   }
 
@@ -728,35 +893,43 @@ export default function AdminCampaignsPage() {
     setEditingCampaignId(null)
   }
 
-  // Get status badge color
+  // Get status badge color - minimal monochrome design
   const getStatusColor = (status: Campaign["status"]) => {
     switch (status) {
-      case "ACTIVE": return "bg-muted border border-border text-foreground"
-      case "SCHEDULED": return "bg-amber-500/20 text-amber-600 border-amber-500/30"
-      case "DRAFT": return "bg-muted border border-border text-foreground"
-      case "PAUSED": return "bg-muted border border-border text-foreground"
-      case "COMPLETED": return "bg-muted border border-border text-foreground"
-      case "CANCELLED": return "bg-muted border border-border text-foreground"
+      case "ACTIVE": return "bg-foreground text-background font-medium"
+      case "SCHEDULED": return "bg-muted border border-foreground/20 text-foreground"
+      case "DRAFT": return "bg-muted border border-dashed border-border text-muted-foreground"
+      case "PAUSED": return "bg-muted border-2 border-foreground/40 text-foreground"
+      case "COMPLETED": return "bg-muted border border-border text-muted-foreground"
+      case "CANCELLED": return "bg-muted border border-border text-muted-foreground line-through"
       default: return "bg-muted border border-border text-foreground"
     }
   }
 
   // State for status filter
-  const [statusFilter, setStatusFilter] = useState<'all' | 'ACTIVE' | 'SCHEDULED' | 'COMPLETED' | 'DRAFT'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'ACTIVE' | 'SCHEDULED' | 'PAUSED' | 'COMPLETED' | 'DRAFT' | 'CANCELLED' | 'ARCHIVED' | 'TEST'>('all')
 
   // Calculate campaign stats
   const totalBudget = campaigns.reduce((sum, c) => sum + c.budget, 0)
   const totalSpent = campaigns.reduce((sum, c) => sum + c.spent, 0)
   const totalSubmissions = campaigns.reduce((sum, c) => sum + c._count.clipSubmissions, 0)
-  const activeCampaignsCount = campaigns.filter(c => c.status === "ACTIVE").length
-  const scheduledCampaignsCount = campaigns.filter(c => c.status === "SCHEDULED").length
-  const completedCampaignsCount = campaigns.filter(c => c.status === "COMPLETED").length
-  const draftCampaignsCount = campaigns.filter(c => c.status === "DRAFT").length
+  const activeCampaignsCount = campaigns.filter(c => c.status === "ACTIVE" && !c.deletedAt).length
+  const scheduledCampaignsCount = campaigns.filter(c => c.status === "SCHEDULED" && !c.deletedAt).length
+  const pausedCampaignsCount = campaigns.filter(c => c.status === "PAUSED" && !c.deletedAt).length
+  const completedCampaignsCount = campaigns.filter(c => c.status === "COMPLETED" && !c.deletedAt).length
+  const draftCampaignsCount = campaigns.filter(c => c.status === "DRAFT" && !c.deletedAt).length
+  const cancelledCampaignsCount = campaigns.filter(c => c.status === "CANCELLED" && !c.deletedAt).length
+  const archivedCampaignsCount = campaigns.filter(c => c.deletedAt).length
+  const testCampaignsCount = campaigns.filter(c => c.isTest && !c.deletedAt).length
 
   // Filter campaigns based on status filter
   const filteredCampaigns = statusFilter === 'all' 
-    ? campaigns 
-    : campaigns.filter(c => c.status === statusFilter)
+    ? campaigns.filter(c => !c.deletedAt) // Don't show archived in "all"
+    : statusFilter === 'ARCHIVED'
+    ? campaigns.filter(c => c.deletedAt)
+    : statusFilter === 'TEST'
+    ? campaigns.filter(c => c.isTest && !c.deletedAt)
+    : campaigns.filter(c => c.status === statusFilter && !c.deletedAt)
 
   // Use analytics data if available
   const platformStats = analytics?.overview || {
@@ -823,7 +996,7 @@ export default function AdminCampaignsPage() {
         </div>
 
         {/* Campaign Status Filter Tabs */}
-        <div className="flex gap-6 border-b border-border mb-6">
+        <div className="flex flex-wrap gap-4 border-b border-border mb-6">
           <button
             onClick={() => setStatusFilter('all')}
             className={`pb-2 text-sm transition-colors ${
@@ -855,6 +1028,16 @@ export default function AdminCampaignsPage() {
             Scheduled {scheduledCampaignsCount > 0 && `(${scheduledCampaignsCount})`}
           </button>
           <button
+            onClick={() => setStatusFilter('PAUSED')}
+            className={`pb-2 text-sm transition-colors ${
+              statusFilter === 'PAUSED' 
+                ? 'text-foreground border-b-2 border-foreground -mb-px' 
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Paused {pausedCampaignsCount > 0 && `(${pausedCampaignsCount})`}
+          </button>
+          <button
             onClick={() => setStatusFilter('COMPLETED')}
             className={`pb-2 text-sm transition-colors ${
               statusFilter === 'COMPLETED' 
@@ -874,6 +1057,42 @@ export default function AdminCampaignsPage() {
           >
             Draft {draftCampaignsCount > 0 && `(${draftCampaignsCount})`}
           </button>
+          {cancelledCampaignsCount > 0 && (
+            <button
+              onClick={() => setStatusFilter('CANCELLED')}
+              className={`pb-2 text-sm transition-colors ${
+                statusFilter === 'CANCELLED' 
+                  ? 'text-foreground border-b-2 border-foreground -mb-px' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Cancelled ({cancelledCampaignsCount})
+            </button>
+          )}
+          {testCampaignsCount > 0 && (
+            <button
+              onClick={() => setStatusFilter('TEST')}
+              className={`pb-2 text-sm transition-colors ${
+                statusFilter === 'TEST' 
+                  ? 'text-foreground border-b-2 border-foreground -mb-px' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Test ({testCampaignsCount})
+            </button>
+          )}
+          {archivedCampaignsCount > 0 && (
+            <button
+              onClick={() => setStatusFilter('ARCHIVED')}
+              className={`pb-2 text-sm transition-colors ${
+                statusFilter === 'ARCHIVED' 
+                  ? 'text-foreground border-b-2 border-foreground -mb-px' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Archived ({archivedCampaignsCount})
+            </button>
+          )}
         </div>
 
         {/* Campaigns List */}
@@ -883,7 +1102,11 @@ export default function AdminCampaignsPage() {
               {statusFilter === 'all' ? 'All Campaigns' : 
                statusFilter === 'ACTIVE' ? 'Active Campaigns' :
                statusFilter === 'SCHEDULED' ? 'Scheduled Campaigns' :
+               statusFilter === 'PAUSED' ? 'Paused Campaigns' :
                statusFilter === 'COMPLETED' ? 'Completed Campaigns' :
+               statusFilter === 'CANCELLED' ? 'Cancelled Campaigns' :
+               statusFilter === 'ARCHIVED' ? 'Archived Campaigns' :
+               statusFilter === 'TEST' ? 'Test Campaigns' :
                'Draft Campaigns'}
             </CardTitle>
           </CardHeader>
@@ -896,6 +1119,10 @@ export default function AdminCampaignsPage() {
                      statusFilter === 'COMPLETED' ? 'No completed campaigns.' :
                      statusFilter === 'ACTIVE' ? 'No active campaigns.' :
                      statusFilter === 'SCHEDULED' ? 'No scheduled campaigns.' :
+                     statusFilter === 'PAUSED' ? 'No paused campaigns.' :
+                     statusFilter === 'CANCELLED' ? 'No cancelled campaigns.' :
+                     statusFilter === 'ARCHIVED' ? 'No archived campaigns.' :
+                     statusFilter === 'TEST' ? 'No test campaigns.' :
                      'No draft campaigns.'}
                   </p>
                 </div>
@@ -925,12 +1152,17 @@ export default function AdminCampaignsPage() {
                             </div>
                           )}
                           {/* Status Badge Overlay */}
-                          <div className="absolute top-2 left-2 flex gap-1">
+                          <div className="absolute top-2 left-2 flex flex-wrap gap-1 max-w-[90%]">
                             <Badge className={getStatusColor(campaign.status)}>
-                              {campaign.status}
+                              {campaign.deletedAt ? 'ARCHIVED' : campaign.status}
                             </Badge>
-                            {campaign.hidden && (
-                              <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+                            {campaign.isTest && (
+                              <Badge className="bg-foreground/60 text-background text-[10px]">
+                                TEST
+                              </Badge>
+                            )}
+                            {campaign.hidden && !campaign.deletedAt && (
+                              <Badge className="bg-foreground/80 text-background">
                                 <EyeOff className="w-3 h-3" />
                               </Badge>
                             )}
@@ -1005,13 +1237,35 @@ export default function AdminCampaignsPage() {
                               >
                                 <Edit className="h-4 w-4" />
                               </button>
-                              <button
-                                onClick={() => handleToggleHidden(campaign.id, campaign.hidden || false)}
-                                className={`p-2 transition-colors ${campaign.hidden ? 'text-red-400 hover:text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                                title={campaign.hidden ? "Show to clippers" : "Hide from clippers"}
-                              >
-                                {campaign.hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                              </button>
+                              {!campaign.deletedAt && (
+                                <button
+                                  onClick={() => handleToggleHidden(campaign.id, campaign.hidden || false)}
+                                  className={`p-2 transition-colors ${campaign.hidden ? 'text-foreground hover:text-muted-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                  title={campaign.hidden ? "Show to clippers" : "Hide from clippers"}
+                                >
+                                  {campaign.hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                                </button>
+                              )}
+                              {!campaign.deletedAt && (
+                                <button
+                                  onClick={() => handleToggleTest(campaign.id, campaign.isTest || false)}
+                                  className={`p-2 transition-colors ${campaign.isTest ? 'text-foreground hover:text-muted-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                  title={campaign.isTest ? "Mark as real campaign" : "Mark as test (exclude from stats)"}
+                                >
+                                  <FlaskConical className="h-4 w-4" />
+                                </button>
+                              )}
+                              {campaign.deletedAt && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRestoreCampaign(campaign.id)}
+                                  className="ml-1"
+                                >
+                                  <ArchiveRestore className="h-4 w-4 mr-1" />
+                                  Restore
+                                </Button>
+                              )}
                               {campaign.status === "DRAFT" && (
                                 <Button
                                   size="sm"
@@ -1019,6 +1273,34 @@ export default function AdminCampaignsPage() {
                                   className="ml-1"
                                 >
                                   Publish
+                                </Button>
+                              )}
+                              {campaign.status === "SCHEDULED" && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handlePublishCampaign(campaign.id)}
+                                  className="ml-1"
+                                >
+                                  Go Live Now
+                                </Button>
+                              )}
+                              {campaign.status === "ACTIVE" && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handlePauseCampaign(campaign.id)}
+                                  className="ml-1"
+                                >
+                                  Pause
+                                </Button>
+                              )}
+                              {campaign.status === "PAUSED" && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleResumeCampaign(campaign.id)}
+                                  className="ml-1"
+                                >
+                                  Resume
                                 </Button>
                               )}
                               {campaign.status === "ACTIVE" && progressPercentage >= 50 && (
@@ -1031,29 +1313,63 @@ export default function AdminCampaignsPage() {
                                   Complete
                                 </Button>
                               )}
+                              {campaign.status === "COMPLETED" && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleReactivateCampaign(campaign.id)}
+                                  className="ml-1"
+                                >
+                                  Reactivate
+                                </Button>
+                              )}
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <button
                                     className="p-2 text-muted-foreground hover:text-destructive transition-colors"
-                                    title="Delete campaign"
+                                    title={campaign.deletedAt ? "Permanently delete" : "Archive campaign"}
                                   >
-                                    <Trash2 className="h-4 w-4" />
+                                    {campaign.deletedAt ? <Trash2 className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
                                   </button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to delete &quot;{campaign.title}&quot;? This action cannot be undone.
+                                    <AlertDialogTitle>
+                                      {campaign.deletedAt ? 'Permanently Delete Campaign' : 'Archive Campaign'}
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription className="space-y-2">
+                                      {campaign.deletedAt ? (
+                                        <>
+                                          <p>Permanently delete &quot;{campaign.title}&quot; and ALL its data?</p>
+                                          <p className="font-medium">This action cannot be undone. All submissions and earnings data will be lost.</p>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <p>Archive &quot;{campaign.title}&quot;?</p>
+                                          <p>The campaign will be hidden but all data (submissions, earnings, view tracking) will be preserved for historical records.</p>
+                                          {campaign._count.clipSubmissions > 0 && (
+                                            <p className="text-sm">This campaign has {campaign._count.clipSubmissions} submission(s).</p>
+                                          )}
+                                        </>
+                                      )}
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => handleDeleteCampaign(campaign.id)}
-                                    >
-                                      Delete
-                                    </AlertDialogAction>
+                                    {campaign.deletedAt ? (
+                                      <AlertDialogAction
+                                        onClick={() => handlePermanentDelete(campaign.id)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Permanently Delete
+                                      </AlertDialogAction>
+                                    ) : (
+                                      <AlertDialogAction
+                                        onClick={() => handleDeleteCampaign(campaign.id, campaign.isTest)}
+                                      >
+                                        Archive
+                                      </AlertDialogAction>
+                                    )}
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
@@ -1602,8 +1918,17 @@ function CampaignForm({
                 <SelectItem value="DRAFT">Draft</SelectItem>
                 <SelectItem value="SCHEDULED">Scheduled (goes live at start date)</SelectItem>
                 <SelectItem value="ACTIVE">Active (live now)</SelectItem>
+                <SelectItem value="PAUSED">Paused (temporarily hidden)</SelectItem>
+                {/* Show CANCELLED option only when editing an existing campaign */}
+                {isEdit && (
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                )}
               </SelectContent>
             </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              {formData.status === 'PAUSED' && 'Campaign is temporarily paused. Clippers cannot submit but existing submissions continue earning.'}
+              {formData.status === 'CANCELLED' && 'Campaign is cancelled. No new submissions or earnings.'}
+            </p>
           </div>
           
           {formData.status === 'SCHEDULED' && (

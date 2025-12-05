@@ -358,10 +358,14 @@ export class ViewTrackingService {
     lastTracked?: Date
     campaignId: string
   }>> {
-    // First, get all ACTIVE campaigns that haven't exceeded budget
+    // Get all ACTIVE and PAUSED campaigns that haven't exceeded budget
+    // PAUSED campaigns continue earning but don't accept new submissions
+    // Exclude test and deleted campaigns from view tracking
     const activeCampaigns = await prisma.campaign.findMany({
       where: {
-        status: 'ACTIVE',
+        status: { in: ['ACTIVE', 'PAUSED'] },
+        isTest: false, // Don't track test campaigns
+        deletedAt: null, // Don't track archived campaigns
         // Only track campaigns that still have budget left
         OR: [
           { spent: { lt: prisma.campaign.fields.budget } },

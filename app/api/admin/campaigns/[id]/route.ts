@@ -17,6 +17,8 @@ const updateCampaignSchema = z.object({
   endDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
   status: z.enum(["DRAFT", "SCHEDULED", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
   hidden: z.boolean().optional(),
+  isTest: z.boolean().optional(),
+  restore: z.boolean().optional(), // Set to true to restore an archived campaign
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])).optional(),
   requirements: z.array(z.string()).optional(),
   featuredImage: z.string().url().optional().nullable(),
@@ -213,18 +215,68 @@ export async function PUT(
     if (validatedData.payoutRate !== undefined) updateData.payoutRate = validatedData.payoutRate
     if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate
     if (validatedData.endDate !== undefined) updateData.endDate = validatedData.endDate
+    
+    // Handle status transitions with proper safeguards
     if (validatedData.status !== undefined) {
-      updateData.status = validatedData.status
+      const currentStatus = existingCampaign.status
+      const newStatus = validatedData.status
+      
+      // Define valid status transitions
+      const validTransitions: Record<string, string[]> = {
+        'DRAFT': ['SCHEDULED', 'ACTIVE', 'CANCELLED'],
+        'SCHEDULED': ['DRAFT', 'ACTIVE', 'CANCELLED'],
+        'ACTIVE': ['PAUSED', 'COMPLETED', 'CANCELLED'],
+        'PAUSED': ['ACTIVE', 'COMPLETED', 'CANCELLED'],
+        'COMPLETED': ['ACTIVE'], // Allow reactivating completed campaigns (e.g., budget increase)
+        'CANCELLED': ['DRAFT'], // Allow moving cancelled back to draft for editing
+      }
+      
+      // Check if transition is valid (or if status is unchanged)
+      if (currentStatus !== newStatus) {
+        const allowedTransitions = validTransitions[currentStatus || 'DRAFT'] || []
+        if (!allowedTransitions.includes(newStatus)) {
+          return NextResponse.json({ 
+            error: `Invalid status transition: ${currentStatus} → ${newStatus}. Allowed: ${allowedTransitions.join(', ')}` 
+          }, { status: 400 })
+        }
+      }
+      
+      updateData.status = newStatus
+      
       // If status is being set to COMPLETED, set completedAt timestamp
-      if (validatedData.status === "COMPLETED") {
+      if (newStatus === "COMPLETED") {
         updateData.completedAt = new Date()
         updateData.completionReason = validatedData.completionReason || "Campaign completed by admin"
       }
+      
+      // If reactivating from COMPLETED, clear the completion fields
+      if (currentStatus === "COMPLETED" && newStatus === "ACTIVE") {
+        updateData.completedAt = null
+        updateData.completionReason = null
+        console.log("🔄 Reactivating completed campaign - clearing completion fields")
+      }
+      
+      // If moving from CANCELLED back to DRAFT, reset for fresh start
+      if (currentStatus === "CANCELLED" && newStatus === "DRAFT") {
+        console.log("🔄 Moving cancelled campaign back to draft for editing")
+      }
     }
+    
     if (validatedData.targetPlatforms !== undefined) updateData.targetPlatforms = validatedData.targetPlatforms
     if (validatedData.requirements !== undefined) updateData.requirements = validatedData.requirements
     if (body.featuredImage !== undefined) updateData.featuredImage = validatedData.featuredImage
     if (validatedData.hidden !== undefined) updateData.hidden = validatedData.hidden
+    if (validatedData.isTest !== undefined) updateData.isTest = validatedData.isTest
+    
+    // Handle restore from archive
+    if (validatedData.restore === true) {
+      if (!existingCampaign.deletedAt) {
+        return NextResponse.json({ error: "Campaign is not archived" }, { status: 400 })
+      }
+      updateData.deletedAt = null
+      updateData.status = 'DRAFT' // Restore to draft status for review
+      console.log("🔄 Restoring archived campaign to draft status")
+    }
 
     console.log("📊 Final update data to apply:", JSON.stringify(updateData, null, 2))
 
@@ -280,21 +332,85 @@ export async function DELETE(
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 
-    // Check if campaign exists
+    // Check URL params for hard delete option
+    const { searchParams } = new URL(request.url)
+    const hardDelete = searchParams.get('hard') === 'true'
+
+    // Get campaign with submission stats
     const existingCampaign = await prisma.campaign.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
+      include: {
+        _count: {
+          select: { clipSubmissions: true }
+        },
+        clipSubmissions: {
+          where: { status: 'APPROVED' },
+          select: {
+            clips: {
+              select: { earnings: true }
+            }
+          }
+        }
+      }
     })
 
     if (!existingCampaign) {
       return NextResponse.json({ error: "Campaign not found" }, { status: 404 })
     }
 
-    // Delete the campaign (submissions will be cascade deleted)
-    await prisma.campaign.delete({
-      where: { id: params.id }
+    // Calculate if campaign has real earnings
+    const totalEarnings = existingCampaign.clipSubmissions.reduce((sum, sub) => {
+      return sum + Number(sub.clips?.earnings || 0)
+    }, 0)
+    const hasEarnings = totalEarnings > 0
+    const hasSubmissions = existingCampaign._count.clipSubmissions > 0
+
+    // Determine delete behavior
+    if (hardDelete) {
+      // Hard delete requested - only allow for test campaigns or campaigns with no earnings
+      if (hasEarnings && !existingCampaign.isTest) {
+        return NextResponse.json({ 
+          error: "Cannot permanently delete campaign with earnings",
+          details: `This campaign has $${totalEarnings.toFixed(2)} in earnings. Use soft delete (archive) instead, or mark as test campaign first.`,
+          totalEarnings,
+          submissionCount: existingCampaign._count.clipSubmissions
+        }, { status: 400 })
+      }
+
+      // Proceed with hard delete (cascades to submissions)
+      await prisma.campaign.delete({
+        where: { id: params.id }
+      })
+
+      console.log(`🗑️ Hard deleted campaign ${params.id} (test: ${existingCampaign.isTest}, earnings: $${totalEarnings})`)
+
+      return NextResponse.json({ 
+        message: "Campaign permanently deleted",
+        deletedSubmissions: existingCampaign._count.clipSubmissions,
+        wasTestCampaign: existingCampaign.isTest
+      })
+    }
+
+    // Default: Soft delete (archive)
+    await prisma.campaign.update({
+      where: { id: params.id },
+      data: {
+        deletedAt: new Date(),
+        status: 'CANCELLED' // Also set status to cancelled
+      }
     })
 
-    return NextResponse.json({ message: "Campaign deleted successfully" })
+    console.log(`📦 Soft deleted (archived) campaign ${params.id}`)
+
+    return NextResponse.json({ 
+      message: "Campaign archived successfully",
+      archived: true,
+      submissionCount: existingCampaign._count.clipSubmissions,
+      earningsPreserved: totalEarnings,
+      hint: hasEarnings 
+        ? "Campaign data preserved for historical records and user earnings" 
+        : "Use ?hard=true to permanently delete if needed"
+    })
   } catch (error) {
     console.error("Error deleting campaign:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

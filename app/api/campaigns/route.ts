@@ -28,6 +28,18 @@ export async function GET(request: NextRequest) {
     const platform = searchParams.get("platform")
 
     const where: any = {}
+    
+    // Filter out soft-deleted campaigns by default
+    const includeDeleted = searchParams.get("includeDeleted") === "true"
+    const includeTest = searchParams.get("includeTest") === "true"
+    
+    if (!includeDeleted) {
+      where.deletedAt = null
+    }
+    
+    if (!includeTest) {
+      where.isTest = false
+    }
 
     if (status) {
       if (status.toLowerCase() === "all") {
@@ -60,6 +72,9 @@ export async function GET(request: NextRequest) {
         payoutRate: true,
         startDate: true,
         status: true,
+        hidden: true,
+        isTest: true,
+        deletedAt: true,
         targetPlatforms: true,
         requirements: true,
         featuredImage: true,

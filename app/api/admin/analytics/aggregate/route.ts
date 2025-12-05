@@ -41,32 +41,65 @@ export async function GET(request: NextRequest) {
     const campaignId = searchParams.get("campaignId")
     const userId = searchParams.get("userId")
 
+    // Check if we should include test/deleted data
+    const includeTest = searchParams.get("includeTest") === "true"
+    const includeDeleted = searchParams.get("includeDeleted") === "true"
+    
+    // Base filter for real campaigns (exclude test and deleted by default)
+    const realCampaignFilter = {
+      ...(includeDeleted ? {} : { deletedAt: null }),
+      ...(includeTest ? {} : { isTest: false })
+    }
+
     // Get overall platform statistics
     const [
       totalUsers,
       totalCampaigns,
       totalSubmissions,
-      activeCampaigns
+      activeCampaigns,
+      testCampaigns,
+      archivedCampaigns
     ] = await Promise.all([
       // Total users
       prisma.user.count(),
 
-      // Total campaigns
-      prisma.campaign.count(),
+      // Total campaigns (only real, non-deleted)
+      prisma.campaign.count({
+        where: realCampaignFilter
+      }),
 
-      // Total submissions
-      prisma.clipSubmission.count(),
+      // Total submissions (from real campaigns only)
+      prisma.clipSubmission.count({
+        where: {
+          campaigns: realCampaignFilter
+        }
+      }),
 
       // Active campaigns
       prisma.campaign.count({
-        where: { status: "ACTIVE" }
+        where: { 
+          status: "ACTIVE",
+          ...realCampaignFilter
+        }
+      }),
+      
+      // Test campaigns count (for admin info)
+      prisma.campaign.count({
+        where: { isTest: true, deletedAt: null }
+      }),
+      
+      // Archived campaigns count
+      prisma.campaign.count({
+        where: { deletedAt: { not: null } }
       })
     ])
 
     // Calculate REAL-TIME totals from actual clips (not cached User values)
+    // Only from real campaigns (exclude test and deleted)
     const allApprovedSubmissions = await prisma.clipSubmission.findMany({
       where: {
-        status: 'APPROVED'
+        status: 'APPROVED',
+        campaigns: realCampaignFilter
       },
       select: {
         clips: {
@@ -96,8 +129,9 @@ export async function GET(request: NextRequest) {
       return sum
     }, 0)
 
-    // Get top performing campaigns
+    // Get top performing campaigns (real campaigns only)
     const topCampaigns = await prisma.campaign.findMany({
+      where: realCampaignFilter,
       take: 10,
       orderBy: {
         spent: "desc"
@@ -106,6 +140,7 @@ export async function GET(request: NextRequest) {
         id: true,
         title: true,
         status: true,
+        isTest: true,
         budget: true,
         spent: true,
         _count: {
@@ -116,12 +151,14 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Get tracked views per campaign
+    // Get tracked views per campaign (real campaigns only)
     const campaignsWithTrackedViews = await prisma.campaign.findMany({
+      where: realCampaignFilter,
       select: {
         id: true,
         title: true,
         status: true,
+        isTest: true,
         clipSubmissions: {
           where: {
             status: 'APPROVED'
@@ -175,9 +212,12 @@ export async function GET(request: NextRequest) {
     }).filter(c => c.totalSubmissions > 0) // Only include campaigns with submissions
       .sort((a, b) => b.trackedViews - a.trackedViews) // Sort by tracked views
 
-    // Get platform breakdown
+    // Get platform breakdown (from real campaigns only)
     const platformBreakdown = await prisma.clipSubmission.groupBy({
       by: ['platform'],
+      where: {
+        campaigns: realCampaignFilter
+      },
       _count: {
         platform: true
       }
@@ -220,6 +260,8 @@ export async function GET(request: NextRequest) {
         totalCampaigns,
         totalSubmissions,
         activeCampaigns,
+        testCampaigns, // Test campaigns (excluded from stats)
+        archivedCampaigns, // Archived/deleted campaigns
         totalViews: totalViews, // Real-time from clips
         trackedViews: totalTrackedViews, // Total tracked views (current - initial)
         totalEarnings: totalEarnings, // Real-time from clips

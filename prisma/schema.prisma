@@ -91,6 +91,8 @@ model Campaign {
   endDate         DateTime?        @db.Timestamp(6)
   status          CampaignStatus?  @default(ACTIVE)
   hidden          Boolean          @default(false) // Hide from clippers without changing status
+  isTest          Boolean          @default(false) // Test campaigns excluded from real statistics
+  deletedAt       DateTime?        @db.Timestamp(6) // Soft delete - null means active
   requirements    String[]         @default([])
   targetPlatforms SocialPlatform[] @default([])
   featuredImage   String? // Campaign image URL
@@ -100,6 +102,8 @@ model Campaign {
   updatedAt       DateTime?        @default(now()) @db.Timestamp(6)
   clipSubmissions ClipSubmission[]
 
+  @@index([deletedAt]) // For filtering soft-deleted campaigns
+  @@index([isTest]) // For filtering test campaigns
   @@map("campaigns")
 }
 

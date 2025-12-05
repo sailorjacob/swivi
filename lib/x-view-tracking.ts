@@ -41,12 +41,15 @@ export class XViewTrackingService {
    */
   async updateAllPlatformViews(): Promise<void> {
     try {
-      console.log('🚀 Starting view tracking update for active campaigns only...')
+      console.log('🚀 Starting view tracking update for active and paused campaigns...')
       
-      // Get all ACTIVE campaigns first
+      // Get all ACTIVE and PAUSED campaigns (PAUSED still earns but doesn't accept new submissions)
+      // Exclude test and archived campaigns
       const activeCampaigns = await prisma.campaign.findMany({
         where: {
-          status: 'ACTIVE'
+          status: { in: ['ACTIVE', 'PAUSED'] },
+          isTest: false,
+          deletedAt: null
         },
         select: {
           id: true,
