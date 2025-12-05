@@ -1241,9 +1241,9 @@ export default function AdminCampaignsPage() {
                                 <button
                                   onClick={() => handleToggleHidden(campaign.id, campaign.hidden || false)}
                                   className={`p-2 transition-colors ${campaign.hidden ? 'text-foreground hover:text-muted-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                                  title={campaign.hidden ? "Show to clippers" : "Hide from clippers"}
+                                  title={campaign.hidden ? "Hidden from clippers - click to show" : "Visible to clippers - click to hide"}
                                 >
-                                  {campaign.hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                                  {campaign.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
                               )}
                               {!campaign.deletedAt && (
