@@ -6,10 +6,16 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, CheckCircle, XCircle, ChevronDown, ChevronRight, TrendingUp, Eye, DollarSign } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { 
+  Loader2, CheckCircle, XCircle, ChevronDown, ChevronRight, ChevronUp,
+  TrendingUp, Eye, DollarSign, Users, FileVideo, BarChart3, 
+  Clock, ExternalLink, RefreshCw
+} from 'lucide-react'
 import { authenticatedFetch } from '@/lib/supabase-browser'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Dot } from 'recharts'
 import Link from 'next/link'
+import { getPlatformLogo } from '@/components/ui/icons/platform-logos'
 
 interface ViewHistoryPoint {
   date: string
@@ -65,17 +71,80 @@ interface CronLog {
   errorMessage: string | null
 }
 
+interface PlatformStats {
+  overview: {
+    totalUsers: number
+    totalCampaigns: number
+    totalSubmissions: number
+    activeCampaigns: number
+    totalViews: number
+    trackedViews: number
+    totalEarnings: number
+    pendingSubmissions: number
+    approvedSubmissions: number
+    paidSubmissions: number
+  }
+  topCampaigns: Array<{
+    id: string
+    title: string
+    status: string
+    submissions: number
+    views: number
+    earnings: number
+  }>
+  platformBreakdown: Record<string, number>
+  payoutStats: {
+    totalPaid: number
+    pendingPayouts: number
+    averagePayout: number
+  }
+  campaignTrackedViews?: Array<{
+    campaignId: string
+    campaignTitle: string
+    campaignStatus: string
+    totalSubmissions: number
+    trackedViews: number
+    initialViews: number
+    currentViews: number
+  }>
+}
+
 export default function AdminAnalyticsPage() {
   const [campaigns, setCampaigns] = useState<CampaignGroup[]>([])
   const [cronLogs, setCronLogs] = useState<CronLog[]>([])
+  const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [logsLoading, setLogsLoading] = useState(true)
   const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set())
+  const [showCronLogs, setShowCronLogs] = useState(false)
+  const [activeTab, setActiveTab] = useState('overview')
 
   useEffect(() => {
-    fetchViewHistory()
-    fetchCronLogs()
+    fetchAllData()
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchAllData, 30000)
+    return () => clearInterval(interval)
   }, [])
+
+  const fetchAllData = async () => {
+    await Promise.all([
+      fetchPlatformStats(),
+      fetchViewHistory(),
+      fetchCronLogs()
+    ])
+  }
+
+  const fetchPlatformStats = async () => {
+    try {
+      const response = await authenticatedFetch('/api/admin/analytics/aggregate')
+      if (response.ok) {
+        const data = await response.json()
+        setPlatformStats(data)
+      }
+    } catch (error) {
+      console.error('Error fetching platform stats:', error)
+    }
+  }
 
   const fetchViewHistory = async () => {
     try {
@@ -85,12 +154,6 @@ export default function AdminAnalyticsPage() {
 
       if (response.ok) {
         setCampaigns(data.campaigns)
-        // Auto-expand first campaign
-        if (data.campaigns.length > 0) {
-          setExpandedCampaigns(new Set([data.campaigns[0].campaign.id]))
-        }
-      } else {
-        console.error('Failed to fetch view history:', data.error)
       }
     } catch (error) {
       console.error('Error fetching view history:', error)
@@ -102,14 +165,12 @@ export default function AdminAnalyticsPage() {
   const fetchCronLogs = async () => {
     try {
       setLogsLoading(true)
-      const response = await authenticatedFetch('/api/admin/analytics/cron-logs?limit=20')
+      const response = await authenticatedFetch('/api/admin/analytics/cron-logs?limit=10')
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch cron logs')
+      if (response.ok) {
+        const data = await response.json()
+        setCronLogs(data.logs || [])
       }
-
-      const data = await response.json()
-      setCronLogs(data.logs || [])
     } catch (error) {
       console.error('Failed to fetch cron logs:', error)
     } finally {
@@ -132,7 +193,12 @@ export default function AdminAnalyticsPage() {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
-  if (loading) {
+  // Calculate effective CPM
+  const effectiveCPM = platformStats?.overview.trackedViews && platformStats.overview.trackedViews > 0
+    ? (platformStats.overview.totalEarnings / platformStats.overview.trackedViews) * 1000
+    : 0
+
+  if (loading && !platformStats) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center h-64">
@@ -143,297 +209,490 @@ export default function AdminAnalyticsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 space-y-6">
+      {/* Header with refresh indicator */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Analytics</h1>
+          <p className="text-sm text-muted-foreground">Platform-wide performance and campaign insights</p>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          Auto-refreshing
+          <Button variant="ghost" size="sm" onClick={fetchAllData}>
+            <RefreshCw className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
 
-      {/* Cron Job Logs */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="text-lg">Recent Cron Job Runs</CardTitle>
-          <CardDescription>View tracking and earnings calculation job history</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {logsLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : cronLogs.length > 0 ? (
-            <div className="space-y-3">
-              {cronLogs.map((log) => {
-                const isSuccess = log.status === 'SUCCESS'
-                const duration = log.duration ? `${(log.duration / 1000).toFixed(1)}s` : 'N/A'
-                
-                return (
-                  <div 
-                    key={log.id} 
-                    className="p-3 bg-muted/30 rounded-lg border border-border"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3 flex-1">
-                        {isSuccess ? (
-                          <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                        ) : (
-                          <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                        )}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium">{log.jobName}</span>
-                            <Badge className={isSuccess ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-300" : "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-300"}>
-                              {log.status}
-                            </Badge>
-                          </div>
-                          <div className="text-xs text-muted-foreground space-x-3">
-                            <span>{new Date(log.startedAt).toLocaleString()}</span>
-                            <span>•</span>
-                            <span>Duration: {duration}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right text-xs text-muted-foreground ml-4">
-                        <div>Processed: {log.clipsProcessed}</div>
-                        <div className="text-green-600">✓ {log.clipsSuccessful}</div>
-                        {log.clipsFailed > 0 && <div className="text-red-600">✗ {log.clipsFailed}</div>}
-                        {log.earningsCalculated > 0 && <div className="text-blue-600">${log.earningsCalculated.toFixed(2)}</div>}
-                      </div>
-                    </div>
-                    {log.errorMessage && (
-                      <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs text-red-800 dark:text-red-300">
-                        {log.errorMessage}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground py-4">
-              No cron logs yet. Logs will appear here when there are active campaigns with approved clips to track.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Summary Stats */}
-      <div className="grid gap-4 md:grid-cols-3 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{campaigns.length}</div>
-            <p className="text-xs text-muted-foreground">Being tracked</p>
+      {/* Whop-Style Platform Stats - Top Section */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <Card className="bg-card">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground mb-1">Total views generated</p>
+            <p className="text-3xl font-bold">{(platformStats?.overview.trackedViews || 0).toLocaleString()}</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Clips</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {campaigns.reduce((sum, c) => sum + c.clips.length, 0)}
-            </div>
-            <p className="text-xs text-muted-foreground">Submissions tracked</p>
+        <Card className="bg-card">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground mb-1">Total amount paid out</p>
+            <p className="text-3xl font-bold">${(platformStats?.payoutStats.totalPaid || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${campaigns.reduce((sum, c) => 
-                sum + c.clips.reduce((clipSum, clip) => clipSum + clip.earnings, 0), 0
-              ).toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground">Across all campaigns</p>
+        <Card className="bg-card">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground mb-1">Effective CPM</p>
+            <p className="text-3xl font-bold">${effectiveCPM.toFixed(2)}</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground mb-1">Approved submissions</p>
+            <p className="text-3xl font-bold">{(platformStats?.overview.approvedSubmissions || 0).toLocaleString()}</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground mb-1">Total submissions</p>
+            <p className="text-3xl font-bold">{(platformStats?.overview.totalSubmissions || 0).toLocaleString()}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Campaign Groups */}
-      <div className="space-y-4">
-        {campaigns.map((campaignGroup) => {
-          const isExpanded = expandedCampaigns.has(campaignGroup.campaign.id)
-          const totalViews = campaignGroup.clips.reduce((sum, clip) => sum + clip.currentViews, 0)
-          const totalEarnings = campaignGroup.clips.reduce((sum, clip) => sum + clip.earnings, 0)
+      {/* Secondary Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Active Campaigns</p>
+                <p className="text-xl font-bold">{platformStats?.overview.activeCampaigns || 0}</p>
+              </div>
+              <TrendingUp className="w-5 h-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
 
-          return (
-            <Card key={campaignGroup.campaign.id}>
-              <CardHeader>
-                <div 
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleCampaign(campaignGroup.campaign.id)}
-                >
-                  <div className="flex items-center gap-3">
-                    {isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                    )}
-                    <div>
-                      <CardTitle className="text-lg">{campaignGroup.campaign.title}</CardTitle>
-                      <CardDescription>
-                        {campaignGroup.clips.length} clips • {totalViews.toLocaleString()} total views • ${totalEarnings.toFixed(2)} earned
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <Badge className="bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300">
-                    {campaignGroup.campaign.status}
-                  </Badge>
-                </div>
-              </CardHeader>
+        <Card>
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Total Clippers</p>
+                <p className="text-xl font-bold">{platformStats?.overview.totalUsers || 0}</p>
+              </div>
+              <Users className="w-5 h-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
 
-              {isExpanded && (
-                <CardContent>
-                  <div className="space-y-6">
-                    {campaignGroup.clips.map((clip) => {
-                      // Prepare chart data
-                      const chartData = clip.viewHistory.map(point => ({
-                        date: formatDate(point.date),
-                        views: point.views,
-                        fullDate: point.date,
-                        success: point.success
-                      }))
+        <Card>
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Pending Review</p>
+                <p className="text-xl font-bold">{platformStats?.overview.pendingSubmissions || 0}</p>
+              </div>
+              <Clock className="w-5 h-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
 
-                      // Add initial views as first data point if we have history
-                      if (chartData.length > 0 && clip.initialViews > 0) {
-                        chartData.unshift({
-                          date: formatDate(clip.submittedAt),
-                          views: clip.initialViews,
-                          fullDate: clip.submittedAt,
-                          success: true
-                        })
-                      }
+        <Card>
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Pending Payouts</p>
+                <p className="text-xl font-bold">${(platformStats?.payoutStats.pendingPayouts || 0).toFixed(2)}</p>
+              </div>
+              <DollarSign className="w-5 h-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-                      const viewGrowth = clip.currentViews - clip.initialViews
+      {/* Tabs for different views */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList>
+          <TabsTrigger value="overview">Campaign Overview</TabsTrigger>
+          <TabsTrigger value="clips">Clip Tracking</TabsTrigger>
+          <TabsTrigger value="platform">Platform Breakdown</TabsTrigger>
+        </TabsList>
 
-                      return (
-                        <div key={clip.submissionId} className="p-4 bg-muted/30 rounded-lg">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge className="bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 capitalize">
-                                  {clip.status.toLowerCase()}
-                                </Badge>
-                                <span className="text-sm text-muted-foreground">{clip.platform}</span>
-                                <span className="text-sm text-muted-foreground">•</span>
-                                <span className="text-sm text-muted-foreground">{clip.user.email}</span>
-                              </div>
-                              <a 
-                                href={clip.clipUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-sm text-blue-500 hover:text-blue-700 underline break-all"
-                              >
-                                {clip.clipUrl.length > 80 ? `${clip.clipUrl.substring(0, 80)}...` : clip.clipUrl}
-                              </a>
+        {/* Campaign Overview Tab */}
+        <TabsContent value="overview" className="mt-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Campaign Performance</h2>
+              <Link href="/admin/submissions">
+                <Button variant="outline" size="sm">
+                  Review Submissions →
+                </Button>
+              </Link>
+            </div>
+
+            {/* Campaign Cards - Whop Style */}
+            {platformStats?.campaignTrackedViews && platformStats.campaignTrackedViews.length > 0 ? (
+              <div className="space-y-4">
+                {platformStats.campaignTrackedViews.map((campaign) => {
+                  const progressPercent = campaign.currentViews > 0 
+                    ? Math.min(100, (campaign.trackedViews / campaign.currentViews) * 100) 
+                    : 0
+                  
+                  return (
+                    <Card key={campaign.campaignId} className="overflow-hidden">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold text-lg">{campaign.campaignTitle}</h3>
+                              <Badge variant={campaign.campaignStatus === 'ACTIVE' ? 'default' : 'secondary'}>
+                                {campaign.campaignStatus}
+                              </Badge>
                             </div>
-                            <div className="text-right ml-4">
-                              <div className="text-sm font-semibold">{clip.currentViews.toLocaleString()} views</div>
-                              {viewGrowth > 0 && (
-                                <div className="text-xs text-green-600">+{viewGrowth.toLocaleString()}</div>
-                              )}
-                              {clip.earnings > 0 && (
-                                <div className="text-xs text-muted-foreground mt-1">${clip.earnings.toFixed(2)} earned</div>
-                              )}
-                            </div>
+                            <Link 
+                              href={`/admin/submissions?campaignId=${campaign.campaignId}`}
+                              className="text-sm text-blue-500 hover:text-blue-700 flex items-center gap-1"
+                            >
+                              See submissions ({campaign.totalSubmissions})
+                              <ExternalLink className="w-3 h-3" />
+                            </Link>
                           </div>
+                        </div>
 
-                          {/* View Growth Chart */}
-                          {chartData.length > 0 && (
-                            <div className="mb-3">
-                              <ResponsiveContainer width="100%" height={80}>
-                                <LineChart data={chartData}>
-                                  <XAxis 
-                                    dataKey="date" 
-                                    tick={{ fontSize: 10 }}
-                                    stroke="#888"
-                                  />
-                                  <YAxis 
-                                    tick={{ fontSize: 10 }}
-                                    stroke="#888"
-                                  />
-                                  <Tooltip 
-                                    content={({ active, payload }) => {
-                                      if (active && payload && payload.length) {
-                                        return (
-                                          <div className="bg-background border rounded-lg p-2 shadow-lg">
-                                            <p className="text-sm font-semibold">{payload[0].value?.toLocaleString()} views</p>
-                                            <p className="text-xs text-muted-foreground">{payload[0].payload.date}</p>
-                                          </div>
-                                        )
-                                      }
-                                      return null
-                                    }}
-                                  />
-                                  <Line 
-                                    type="monotone" 
-                                    dataKey="views" 
-                                    stroke="#22c55e" 
-                                    strokeWidth={2}
-                                    dot={(props: any) => {
-                                      const { cx, cy, payload } = props
-                                      return (
-                                        <Dot
-                                          cx={cx}
-                                          cy={cy}
-                                          r={4}
-                                          fill={payload.success ? '#22c55e' : '#ef4444'}
-                                          stroke="white"
-                                          strokeWidth={2}
-                                        />
-                                      )
-                                    }}
-                                  />
-                                </LineChart>
-                              </ResponsiveContainer>
-                            </div>
-                          )}
+                        {/* Progress Bar */}
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-muted-foreground">Views Generated</span>
+                            <span className="font-medium">{campaign.trackedViews.toLocaleString()}</span>
+                          </div>
+                          <div className="w-full bg-muted rounded-full h-2">
+                            <div
+                              className="h-2 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-500"
+                              style={{ width: `${Math.min(progressPercent, 100)}%` }}
+                            />
+                          </div>
+                        </div>
 
-                          {/* Scrape Log */}
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-muted-foreground">Scrapes:</span>
-                            {clip.viewHistory.map((point, idx) => (
-                              <div 
-                                key={idx}
-                                className="flex items-center gap-1"
-                                title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
-                              >
-                                {point.success ? (
-                                  <CheckCircle className="w-3 h-3 text-green-600" />
-                                ) : (
-                                  <XCircle className="w-3 h-3 text-red-600" />
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="text-muted-foreground text-xs">Initial Views</p>
+                            <p className="font-medium">{campaign.initialViews.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground text-xs">Current Views</p>
+                            <p className="font-medium">{campaign.currentViews.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground text-xs">Views Gained</p>
+                            <p className="font-medium text-green-600">+{campaign.trackedViews.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground text-xs">Submissions</p>
+                            <p className="font-medium">{campaign.totalSubmissions}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <p className="text-muted-foreground">No campaigns with tracked views yet.</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Clip Tracking Tab */}
+        <TabsContent value="clips" className="mt-6">
+          <div className="space-y-4">
+            {campaigns.length > 0 ? campaigns.map((campaignGroup) => {
+              const isExpanded = expandedCampaigns.has(campaignGroup.campaign.id)
+              const totalViews = campaignGroup.clips.reduce((sum, clip) => sum + clip.currentViews, 0)
+              const totalEarnings = campaignGroup.clips.reduce((sum, clip) => sum + clip.earnings, 0)
+
+              return (
+                <Card key={campaignGroup.campaign.id}>
+                  <CardHeader className="py-4">
+                    <div 
+                      className="flex items-center justify-between cursor-pointer"
+                      onClick={() => toggleCampaign(campaignGroup.campaign.id)}
+                    >
+                      <div className="flex items-center gap-3">
+                        {isExpanded ? (
+                          <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                        )}
+                        <div>
+                          <CardTitle className="text-base">{campaignGroup.campaign.title}</CardTitle>
+                          <CardDescription className="text-xs">
+                            {campaignGroup.clips.length} clips • {totalViews.toLocaleString()} views • ${totalEarnings.toFixed(2)} earned
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <Badge variant="outline">{campaignGroup.campaign.status}</Badge>
+                    </div>
+                  </CardHeader>
+
+                  {isExpanded && (
+                    <CardContent className="pt-0">
+                      <div className="space-y-4">
+                        {campaignGroup.clips.map((clip) => {
+                          const chartData = clip.viewHistory.map(point => ({
+                            date: formatDate(point.date),
+                            views: point.views,
+                            success: point.success
+                          }))
+
+                          if (chartData.length > 0 && clip.initialViews > 0) {
+                            chartData.unshift({
+                              date: formatDate(clip.submittedAt),
+                              views: clip.initialViews,
+                              success: true
+                            })
+                          }
+
+                          const viewGrowth = clip.currentViews - clip.initialViews
+
+                          return (
+                            <div key={clip.submissionId} className="p-4 bg-muted/30 rounded-lg border">
+                              {/* User & Clip Info */}
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {getPlatformLogo(clip.platform, '', 16)}
+                                    <span className="font-medium text-sm">{clip.user.name || clip.user.email}</span>
+                                    <Badge variant="outline" className="text-xs">{clip.status}</Badge>
+                                  </div>
+                                  <a 
+                                    href={clip.clipUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-blue-500 hover:text-blue-700 break-all"
+                                  >
+                                    {clip.clipUrl.length > 60 ? `${clip.clipUrl.substring(0, 60)}...` : clip.clipUrl}
+                                  </a>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Submitted: {new Date(clip.submittedAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <div className="text-right ml-4">
+                                  <p className="font-bold">{clip.currentViews.toLocaleString()} views</p>
+                                  {viewGrowth > 0 && (
+                                    <p className="text-xs text-green-600">+{viewGrowth.toLocaleString()}</p>
+                                  )}
+                                  <p className="text-xs text-muted-foreground">${clip.earnings.toFixed(2)}</p>
+                                </div>
+                              </div>
+
+                              {/* Mini Chart */}
+                              {chartData.length > 1 && (
+                                <div className="h-16">
+                                  <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={chartData}>
+                                      <Line 
+                                        type="monotone" 
+                                        dataKey="views" 
+                                        stroke="#22c55e" 
+                                        strokeWidth={2}
+                                        dot={false}
+                                      />
+                                    </LineChart>
+                                  </ResponsiveContainer>
+                                </div>
+                              )}
+
+                              {/* Scrape Status */}
+                              <div className="flex items-center gap-1 mt-2">
+                                <span className="text-xs text-muted-foreground">Scrapes:</span>
+                                {clip.viewHistory.slice(0, 10).map((point, idx) => (
+                                  <div 
+                                    key={idx}
+                                    title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
+                                  >
+                                    {point.success ? (
+                                      <CheckCircle className="w-3 h-3 text-green-600" />
+                                    ) : (
+                                      <XCircle className="w-3 h-3 text-red-600" />
+                                    )}
+                                  </div>
+                                ))}
+                                {clip.viewHistory.length > 10 && (
+                                  <span className="text-xs text-muted-foreground">+{clip.viewHistory.length - 10} more</span>
                                 )}
                               </div>
-                            ))}
-                            {clip.viewHistory.length === 0 && (
-                              <span className="text-xs text-muted-foreground italic">No tracking data yet</span>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              )
+            }) : (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <p className="text-muted-foreground">No clips being tracked yet.</p>
                 </CardContent>
-              )}
-            </Card>
-          )
-        })}
+              </Card>
+            )}
+          </div>
+        </TabsContent>
 
-        {campaigns.length === 0 && (
-          <Card>
-            <CardContent className="py-8">
-              <p className="text-sm text-muted-foreground text-center">
-                No campaigns with tracked clips yet. Tracking data will appear here once there are approved clips in active campaigns.
-              </p>
-            </CardContent>
-          </Card>
+        {/* Platform Breakdown Tab */}
+        <TabsContent value="platform" className="mt-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Platform Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Submissions by Platform</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {platformStats?.platformBreakdown && Object.keys(platformStats.platformBreakdown).length > 0 ? (
+                  <div className="space-y-3">
+                    {Object.entries(platformStats.platformBreakdown)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([platform, count]) => {
+                        const total = Object.values(platformStats.platformBreakdown).reduce((a, b) => a + b, 0)
+                        const percent = total > 0 ? (count / total) * 100 : 0
+                        
+                        return (
+                          <div key={platform}>
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                {getPlatformLogo(platform, '', 16)}
+                                <span className="text-sm font-medium">
+                                  {platform === 'YOUTUBE' ? 'YouTube' : 
+                                   platform === 'TIKTOK' ? 'TikTok' :
+                                   platform === 'INSTAGRAM' ? 'Instagram' :
+                                   platform === 'TWITTER' ? 'X' : platform}
+                                </span>
+                              </div>
+                              <span className="text-sm text-muted-foreground">{count} ({percent.toFixed(1)}%)</span>
+                            </div>
+                            <div className="w-full bg-muted rounded-full h-2">
+                              <div
+                                className="h-2 rounded-full bg-foreground/70"
+                                style={{ width: `${percent}%` }}
+                              />
+                            </div>
+                          </div>
+                        )
+                      })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No platform data yet.</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Top Campaigns */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Top Campaigns by Spend</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {platformStats?.topCampaigns && platformStats.topCampaigns.length > 0 ? (
+                  <div className="space-y-2">
+                    {platformStats.topCampaigns.slice(0, 5).map((campaign, idx) => (
+                      <div key={campaign.id} className="flex items-center justify-between p-2 rounded bg-muted/50">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground w-4">{idx + 1}.</span>
+                          <span className="text-sm font-medium truncate max-w-[180px]">{campaign.title}</span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold">${campaign.earnings.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">{campaign.submissions} subs</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No campaigns yet.</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Collapsible Cron Logs Section */}
+      <Card>
+        <CardHeader 
+          className="cursor-pointer py-4" 
+          onClick={() => setShowCronLogs(!showCronLogs)}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {showCronLogs ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              <CardTitle className="text-sm font-medium">Cron Job History</CardTitle>
+              {cronLogs.length > 0 && (
+                <Badge variant="outline" className="text-xs">
+                  Last run: {new Date(cronLogs[0].startedAt).toLocaleTimeString()}
+                </Badge>
+              )}
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {cronLogs.filter(l => l.status === 'SUCCESS').length}/{cronLogs.length} successful
+            </span>
+          </div>
+        </CardHeader>
+        
+        {showCronLogs && (
+          <CardContent className="pt-0">
+            {logsLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : cronLogs.length > 0 ? (
+              <div className="space-y-2">
+                {cronLogs.map((log) => {
+                  const isSuccess = log.status === 'SUCCESS'
+                  const duration = log.duration ? `${(log.duration / 1000).toFixed(1)}s` : 'N/A'
+                  
+                  return (
+                    <div 
+                      key={log.id} 
+                      className="flex items-center justify-between p-2 bg-muted/30 rounded text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        {isSuccess ? (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-red-600" />
+                        )}
+                        <span className="text-muted-foreground">
+                          {new Date(log.startedAt).toLocaleString()}
+                        </span>
+                        <span>• {duration}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-muted-foreground">
+                        <span>{log.clipsProcessed} processed</span>
+                        <span className="text-green-600">✓{log.clipsSuccessful}</span>
+                        {log.clipsFailed > 0 && <span className="text-red-600">✗{log.clipsFailed}</span>}
+                        {log.earningsCalculated > 0 && (
+                          <span className="text-blue-600">${log.earningsCalculated.toFixed(2)}</span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground py-2">No cron logs yet.</p>
+            )}
+          </CardContent>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

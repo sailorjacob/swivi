@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { Check, X, ExternalLink, Search, Filter, Calendar, User, DollarSign, Loader2, AlertCircle, ArrowUpRight, XCircle, Trash2 } from "lucide-react"
+import { Check, X, ExternalLink, Search, Filter, Calendar, User, DollarSign, Loader2, AlertCircle, ArrowUpRight, XCircle, Trash2, ChevronDown, ChevronUp, TrendingUp, Eye } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -155,6 +155,7 @@ export default function AdminSubmissionsPage() {
     offset: 0,
     hasMore: false
   })
+  const [expandedSubmissions, setExpandedSubmissions] = useState<Set<string>>(new Set())
 
   // Scroll to highlighted submission when data loads
   useEffect(() => {
@@ -574,24 +575,21 @@ export default function AdminSubmissionsPage() {
                         )}
                         {/* Verified Account Display for cross-referencing */}
                         {submission.socialAccount && (
-                          <div className="flex items-center gap-2 mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded">
-                            <User className="w-3 h-3 text-blue-600 dark:text-blue-400" />
-                            <span className="text-sm text-blue-700 dark:text-blue-300">
-                              <strong>Verified Account:</strong>{' '}
-                              <span className="font-mono">@{submission.socialAccount.username}</span>
+                          <div className="flex items-center gap-2 mt-2 p-2 bg-muted/50 border border-border rounded">
+                            <User className="w-3 h-3 text-foreground" />
+                            <span className="text-sm text-foreground">
+                              <span className="text-muted-foreground">Verified Account:</span>{' '}
+                              <span className="font-mono font-medium">@{submission.socialAccount.username}</span>
                               {submission.socialAccount.verified && (
-                                <Check className="w-3 h-3 inline-block ml-1 text-green-600" />
+                                <Check className="w-3 h-3 inline-block ml-1 text-green-500" />
                               )}
                             </span>
                           </div>
                         )}
                         {!submission.socialAccount && (
-                          <div className="flex items-center gap-2 mt-2 p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded">
-                            <AlertCircle className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                            <span className="text-sm text-amber-700 dark:text-amber-300">
-                              No verified account linked (submitted before this feature)
-                            </span>
-                          </div>
+                          <p className="text-xs text-muted-foreground mt-2 italic">
+                            Legacy submission — verify account ownership manually via the post URL
+                          </p>
                         )}
                       </div>
                     </div>
@@ -701,6 +699,29 @@ export default function AdminSubmissionsPage() {
                   </div>
                   {/* Action buttons */}
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* Expand/Collapse Button for tracking details */}
+                    {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newExpanded = new Set(expandedSubmissions)
+                          if (newExpanded.has(submission.id)) {
+                            newExpanded.delete(submission.id)
+                          } else {
+                            newExpanded.add(submission.id)
+                          }
+                          setExpandedSubmissions(newExpanded)
+                        }}
+                        className="text-muted-foreground"
+                      >
+                        {expandedSubmissions.has(submission.id) ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
                     {submission.status === "PENDING" && (
                       <>
                         <Button
@@ -749,6 +770,101 @@ export default function AdminSubmissionsPage() {
                     </AlertDialog>
                   </div>
                 </div>
+                
+                {/* Expandable Tracking Details */}
+                {expandedSubmissions.has(submission.id) && submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* View Tracking Stats */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-medium flex items-center gap-2">
+                          <Eye className="w-4 h-4" />
+                          View Tracking History
+                        </h4>
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          <div className="p-2 bg-muted/50 rounded">
+                            <p className="text-lg font-bold">{Number(submission.initialViews || 0).toLocaleString()}</p>
+                            <p className="text-xs text-muted-foreground">Initial</p>
+                          </div>
+                          <div className="p-2 bg-muted/50 rounded">
+                            <p className="text-lg font-bold">{Number(submission.currentViews || 0).toLocaleString()}</p>
+                            <p className="text-xs text-muted-foreground">Current</p>
+                          </div>
+                          <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                            <p className="text-lg font-bold text-green-600">+{Number(submission.viewChange || 0).toLocaleString()}</p>
+                            <p className="text-xs text-muted-foreground">Gained</p>
+                          </div>
+                        </div>
+                        
+                        {/* Earnings calculation */}
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Rate: ${submission.campaigns.payoutRate}/1K views</p>
+                              <p className="text-sm font-medium">
+                                Calculated: {Number(submission.viewChange || 0).toLocaleString()} × ${submission.campaigns.payoutRate}/1K
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xl font-bold text-blue-600">
+                                ${((Number(submission.viewChange || 0) / 1000) * submission.campaigns.payoutRate).toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Tracking Timeline */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-medium flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4" />
+                          Scrape Timeline
+                        </h4>
+                        <div className="space-y-1 max-h-32 overflow-y-auto">
+                          {submission.clips.view_tracking.slice(0, 10).map((tracking, idx) => (
+                            <div 
+                              key={idx}
+                              className="flex items-center justify-between text-xs p-1.5 bg-muted/30 rounded"
+                            >
+                              <span className="text-muted-foreground">
+                                {new Date(tracking.date).toLocaleString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: 'numeric',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                              <span className="font-medium">{Number(tracking.views).toLocaleString()} views</span>
+                            </div>
+                          ))}
+                        </div>
+                        {submission.clips.view_tracking.length > 10 && (
+                          <p className="text-xs text-muted-foreground">
+                            + {submission.clips.view_tracking.length - 10} more scrapes
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* User Stats Summary */}
+                    <div className="mt-3 pt-3 border-t border-dashed">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-4">
+                          <span className="text-muted-foreground">User Total:</span>
+                          <span>{Number(submission.users.totalViews || 0).toLocaleString()} views</span>
+                          <span>${Number(submission.users.totalEarnings || 0).toFixed(2)} earned</span>
+                        </div>
+                        <a 
+                          href={`/admin/users?email=${encodeURIComponent(submission.users.email || '')}`}
+                          className="text-xs text-blue-500 hover:text-blue-700"
+                        >
+                          View User Profile →
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
               )})
               )}
             </div>
