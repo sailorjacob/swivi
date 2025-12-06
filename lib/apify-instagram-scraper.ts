@@ -118,11 +118,9 @@ export class ApifyInstagramScraper {
       }
 
       // Log key metrics for debugging view discrepancies
-      console.log(`📊 Instagram scrape result for ${postUrl.substring(0, 50)}...`)
-      console.log(`   videoViewCount: ${result.videoViewCount}`)
-      console.log(`   videoPlayCount: ${result.videoPlayCount}`)
-      console.log(`   likesCount: ${result.likesCount}`)
-      console.log(`   type: ${result.type}, productType: ${result.productType}`)
+      // We use videoPlayCount (actual plays) over videoViewCount (unique viewers)
+      const viewsUsed = result.videoPlayCount || result.videoViewCount || 0
+      console.log(`📊 Instagram scrape: ${viewsUsed.toLocaleString()} views (playCount: ${result.videoPlayCount}, viewCount: ${result.videoViewCount})`)
 
       return result
 

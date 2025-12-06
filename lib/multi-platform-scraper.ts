@@ -227,9 +227,11 @@ export class MultiPlatformScraper {
         }
 
       case 'INSTAGRAM':
+        // IMPORTANT: Use videoPlayCount first - that's the actual play count users see
+        // videoViewCount is a different metric (possibly unique viewers)
         return {
           ...baseData,
-          views: rawData.videoViewCount || rawData.videoPlayCount,
+          views: rawData.videoPlayCount || rawData.videoViewCount || 0,
           likes: rawData.likesCount,
           comments: rawData.commentsCount,
           shares: 0, // Instagram doesn't provide share count in this format
