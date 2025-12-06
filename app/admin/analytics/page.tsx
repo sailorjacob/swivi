@@ -104,6 +104,7 @@ interface PlatformStats {
     campaignId: string
     campaignTitle: string
     campaignStatus: string
+    campaignImage?: string | null
     totalSubmissions: number
     approvedSubmissions: number
     trackedViews: number
@@ -222,24 +223,24 @@ export default function AdminAnalyticsPage() {
 
       {/* Key Metrics - Large Hero Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20">
+        <Card className="bg-green-500/5 border-green-500/20">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-emerald-500/20">
-                <Eye className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <div className="p-2 rounded-lg bg-green-500/10">
+                <Eye className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <span className="text-sm text-muted-foreground">Views Generated</span>
             </div>
-            <p className="text-4xl font-bold">{(platformStats?.overview.trackedViews || 0).toLocaleString()}</p>
+            <p className="text-4xl font-bold text-green-600 dark:text-green-400">{(platformStats?.overview.trackedViews || 0).toLocaleString()}</p>
             <p className="text-xs text-muted-foreground mt-1">Total tracked view growth</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+        <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-blue-500/20">
-                <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 rounded-lg bg-muted">
+                <DollarSign className="w-5 h-5 text-foreground" />
               </div>
               <span className="text-sm text-muted-foreground">Total Paid Out</span>
             </div>
@@ -248,11 +249,11 @@ export default function AdminAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+        <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-purple-500/20">
-                <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              <div className="p-2 rounded-lg bg-muted">
+                <Zap className="w-5 h-5 text-foreground" />
               </div>
               <span className="text-sm text-muted-foreground">Effective CPM</span>
             </div>
@@ -261,11 +262,11 @@ export default function AdminAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
+        <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-orange-500/20">
-                <FileVideo className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              <div className="p-2 rounded-lg bg-muted">
+                <FileVideo className="w-5 h-5 text-foreground" />
               </div>
               <span className="text-sm text-muted-foreground">Submissions</span>
             </div>
@@ -365,8 +366,22 @@ export default function AdminAnalyticsPage() {
                       <CardContent className="p-0">
                         {/* Campaign Header */}
                         <div className="p-5 border-b border-border/50">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1">
+                          <div className="flex items-start gap-4 mb-4">
+                            {/* Campaign Image */}
+                            <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
+                              {campaign.campaignImage ? (
+                                <img 
+                                  src={campaign.campaignImage} 
+                                  alt={campaign.campaignTitle}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xl font-semibold">
+                                  {campaign.campaignTitle?.charAt(0) || '?'}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-3 mb-1">
                                 <h3 className="font-semibold text-lg">{campaign.campaignTitle}</h3>
                                 <Badge variant={campaign.campaignStatus === 'ACTIVE' ? 'default' : 'secondary'}>
@@ -397,9 +412,9 @@ export default function AdminAnalyticsPage() {
                               <p className="text-xs text-muted-foreground mb-1">Current Views</p>
                               <p className="text-lg font-bold">{campaign.currentViews.toLocaleString()}</p>
                             </div>
-                            <div className="p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-                              <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">Views Generated</p>
-                              <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">+{campaign.trackedViews.toLocaleString()}</p>
+                            <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                              <p className="text-xs text-green-600 dark:text-green-400 mb-1">Views Generated</p>
+                              <p className="text-lg font-bold text-green-600 dark:text-green-400">+{campaign.trackedViews.toLocaleString()}</p>
                             </div>
                             <div className="p-3 bg-muted/50 rounded-lg">
                               <p className="text-xs text-muted-foreground mb-1">Growth</p>
@@ -461,7 +476,7 @@ export default function AdminAnalyticsPage() {
                                           <p className="font-bold">{clip.currentViews.toLocaleString()}</p>
                                           <p className="text-xs text-muted-foreground">views</p>
                                           {viewGrowth > 0 && (
-                                            <p className="text-xs text-emerald-600 dark:text-emerald-400">+{viewGrowth.toLocaleString()}</p>
+                                            <p className="text-xs text-green-600 dark:text-green-400">+{viewGrowth.toLocaleString()}</p>
                                           )}
                                           {clip.status === 'APPROVED' && clip.earnings > 0 && (
                                             <p className="text-xs font-medium mt-1">${clip.earnings.toFixed(2)}</p>
@@ -477,11 +492,10 @@ export default function AdminAnalyticsPage() {
                                               <Area 
                                                 type="monotone" 
                                                 dataKey="views" 
-                                                stroke="currentColor"
-                                                fill="currentColor"
+                                                stroke="hsl(var(--foreground))"
+                                                fill="hsl(var(--foreground))"
                                                 fillOpacity={0.1}
                                                 strokeWidth={1.5}
-                                                className="text-emerald-500"
                                               />
                                             </AreaChart>
                                           </ResponsiveContainer>
@@ -634,9 +648,12 @@ export default function AdminAnalyticsPage() {
                   Last run: {new Date(cronLogs[0].startedAt).toLocaleTimeString()}
                 </Badge>
               )}
-              {cronLogs.length > 0 && cronLogs[0].status === 'SUCCESS' && (
-                <CheckCircle className="w-4 h-4 text-emerald-500" />
-              )}
+              {cronLogs.length > 0 && (() => {
+                const successRate = cronLogs.filter(l => l.status === 'SUCCESS').length / cronLogs.length
+                if (successRate >= 0.9) return <CheckCircle className="w-4 h-4 text-green-500" />
+                if (successRate >= 0.5) return <CheckCircle className="w-4 h-4 text-amber-500" />
+                return <XCircle className="w-4 h-4 text-red-500" />
+              })()}
             </div>
             <span className="text-xs text-muted-foreground">
               {cronLogs.filter(l => l.status === 'SUCCESS').length}/{cronLogs.length} successful
@@ -649,15 +666,23 @@ export default function AdminAnalyticsPage() {
             {cronLogs.length > 0 ? (
               <div className="space-y-2">
                 {cronLogs.map((log) => {
-                  const isSuccess = log.status === 'SUCCESS'
+                  // Calculate success rate for this individual log
+                  const totalClips = log.clipsProcessed || 0
+                  const successfulClips = log.clipsSuccessful || 0
+                  const clipSuccessRate = totalClips > 0 ? successfulClips / totalClips : 1
+                  const isFullSuccess = log.status === 'SUCCESS' && clipSuccessRate >= 0.95
+                  const isMostlySuccess = log.status === 'SUCCESS' && clipSuccessRate >= 0.5
+                  
                   return (
                     <div 
                       key={log.id} 
                       className="flex items-center justify-between p-3 bg-muted/30 rounded-lg text-sm"
                     >
                       <div className="flex items-center gap-3">
-                        {isSuccess ? (
-                          <CheckCircle className="w-4 h-4 text-emerald-500" />
+                        {isFullSuccess ? (
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                        ) : isMostlySuccess ? (
+                          <CheckCircle className="w-4 h-4 text-amber-500" />
                         ) : (
                           <XCircle className="w-4 h-4 text-red-500" />
                         )}
@@ -670,8 +695,12 @@ export default function AdminAnalyticsPage() {
                       </div>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span>{log.clipsProcessed} clips</span>
-                        <span className="text-emerald-600">✓{log.clipsSuccessful}</span>
-                        {log.clipsFailed > 0 && <span className="text-red-500">✗{log.clipsFailed}</span>}
+                        <span className="text-green-600 dark:text-green-400">✓{log.clipsSuccessful}</span>
+                        {log.clipsFailed > 0 && (
+                          <span className={log.clipsFailed <= 2 ? "text-amber-500" : "text-red-500"}>
+                            ✗{log.clipsFailed}
+                          </span>
+                        )}
                         {log.earningsCalculated > 0 && (
                           <span className="font-medium text-foreground">${log.earningsCalculated.toFixed(2)}</span>
                         )}

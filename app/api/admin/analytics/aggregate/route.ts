@@ -160,6 +160,7 @@ export async function GET(request: NextRequest) {
         title: true,
         status: true,
         isTest: true,
+        featuredImage: true,
         _count: {
           select: {
             clipSubmissions: true // Total ALL submissions count
@@ -210,6 +211,7 @@ export async function GET(request: NextRequest) {
         campaignId: campaign.id,
         campaignTitle: campaign.title,
         campaignStatus: campaign.status,
+        campaignImage: campaign.featuredImage,
         totalSubmissions: campaign._count.clipSubmissions, // ALL submissions, not just approved
         approvedSubmissions: campaign.clipSubmissions.length, // Approved only (for view tracking)
         trackedViews: totalTrackedViews,
