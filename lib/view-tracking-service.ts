@@ -652,15 +652,9 @@ export class ViewTrackingService {
         const previousViews = Number(submission.initialViews || 0)
         const viewGrowth = currentViews - previousViews
 
-        // Update the submission with the latest scraped views
-        // We store this in initialViews since it represents the current state
-        // When approved, initialViews becomes the baseline for earnings
-        await prisma.clipSubmission.update({
-          where: { id: submission.id },
-          data: {
-            initialViews: BigInt(currentViews)
-          }
-        })
+        // DON'T update initialViews - keep it at 0 so ALL views count for earnings
+        // The clipper earns from all views, not just views gained after submission
+        // We only track views in the clip table and view_tracking table
 
         console.log(`✅ Pending "${submission.campaigns.title}" by ${submission.users.name || 'Unknown'}: ${currentViews.toLocaleString()} views (+${viewGrowth.toLocaleString()} growth)`)
         successful++
@@ -770,11 +764,11 @@ export class ViewTrackingService {
 
         const currentViews = scrapedData.views
 
-        // Update the submission with initial views
+        // Update the submission - keep initialViews at 0 so ALL views count for earnings
         await prisma.clipSubmission.update({
           where: { id: submission.id },
           data: {
-            initialViews: BigInt(currentViews),
+            initialViews: BigInt(0), // Always 0 - clipper earns from ALL views
             processingStatus: 'COMPLETE'
           }
         })

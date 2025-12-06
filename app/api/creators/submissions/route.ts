@@ -453,11 +453,12 @@ export async function POST(request: NextRequest) {
               select: { clipId: true, userId: true }
             })
             
-            // Update submission with initial views
+            // Update submission - keep initialViews at 0 so ALL views count for earnings
+            // The clipper earns from all views, not just views gained after submission
             await prisma.clipSubmission.update({
               where: { id: submissionId },
               data: {
-                initialViews: BigInt(finalViews),
+                initialViews: BigInt(0), // Always 0 - clipper earns from ALL views
                 processingStatus: "COMPLETE"
               }
             })

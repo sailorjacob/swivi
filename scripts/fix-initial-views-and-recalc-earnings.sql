@@ -29,20 +29,20 @@ WHERE cs.status = 'APPROVED'
   AND cs."initialViews" > 0
 ORDER BY cs."initialViews" DESC;
 
--- STEP 2: Reset ALL initialViews to 0 for approved submissions
-SELECT '=== FIXING: Reset initialViews to 0 ===' as section;
+-- STEP 2: Reset ALL initialViews to 0 for ALL submissions (PENDING, APPROVED, etc.)
+-- This ensures ALL views count for earnings when clips get approved
+SELECT '=== FIXING: Reset initialViews to 0 for ALL submissions ===' as section;
 
 UPDATE clip_submissions
 SET "initialViews" = 0
-WHERE status = 'APPROVED'
-  AND "initialViews" IS NOT NULL
+WHERE "initialViews" IS NOT NULL
   AND "initialViews" > 0;
 
 -- Show how many were updated
-SELECT 'Updated ' || COUNT(*) || ' submissions' as result
+SELECT 'Updated submissions with initialViews reset to 0' as result,
+       COUNT(*) as count
 FROM clip_submissions
-WHERE status = 'APPROVED'
-  AND "initialViews" = 0;
+WHERE "initialViews" = 0;
 
 -- STEP 3: Recalculate earnings for ALL approved clips
 -- Formula: earnings = (views / 1000) * payoutRate
