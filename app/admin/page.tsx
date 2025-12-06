@@ -123,7 +123,15 @@ export default function AdminDashboard() {
       case 'PAYOUT_COMPLETED':
         return <>Payout of <span className="font-medium">${data.amount?.toFixed(2)}</span> to <span className="font-medium">{data.userName}</span> completed</>
       case 'VIEW_SCRAPE':
-        return <>View count updated: <span className="font-medium">{data.views?.toLocaleString()}</span> views on {data.platform}</>
+        // Show clipper name, view growth, and shortened clip URL
+        const viewGrowthDisplay = data.viewGrowth > 0 ? `+${data.viewGrowth.toLocaleString()}` : data.views?.toLocaleString()
+        return <>
+          <span className="font-medium">{data.userName || 'Clipper'}</span>
+          {' '}{data.viewGrowth > 0 ? 'gained' : 'at'}{' '}
+          <span className="font-medium text-cyan-500">{viewGrowthDisplay}</span>
+          {' '}views on{' '}
+          <span className="text-muted-foreground">{data.shortUrl || data.platform}</span>
+        </>
       default:
         return 'Unknown activity'
     }

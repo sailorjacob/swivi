@@ -97,9 +97,16 @@ export async function GET(request: NextRequest) {
             select: { 
               id: true,
               url: true,
+              views: true,
               clipSubmissions: {
                 take: 1,
-                select: { id: true }
+                select: { 
+                  id: true,
+                  initialViews: true,
+                  campaigns: {
+                    select: { title: true }
+                  }
+                }
               }
             }
           },
@@ -212,15 +219,36 @@ export async function GET(request: NextRequest) {
     
     Array.from(uniqueViewTrackings.values()).slice(0, 10).forEach(tracking => {
       if (tracking.scrapedAt) {
+        const submission = tracking.clips?.clipSubmissions?.[0]
+        const initialViews = submission?.initialViews ? Number(submission.initialViews) : 0
+        const currentViews = tracking.views ? Number(tracking.views) : 0
+        const viewGrowth = Math.max(0, currentViews - initialViews)
+        
+        // Create a short display URL (e.g., "instagram.com/reel/abc...")
+        const fullUrl = tracking.clips?.url || ''
+        let shortUrl = fullUrl
+        try {
+          const urlObj = new URL(fullUrl)
+          const path = urlObj.pathname.length > 20 
+            ? urlObj.pathname.substring(0, 20) + '...' 
+            : urlObj.pathname
+          shortUrl = urlObj.hostname.replace('www.', '') + path
+        } catch {
+          shortUrl = fullUrl.length > 40 ? fullUrl.substring(0, 40) + '...' : fullUrl
+        }
+        
         activities.push({
           type: 'VIEW_SCRAPE',
           timestamp: tracking.scrapedAt,
           data: {
-            views: tracking.views ? Number(tracking.views) : 0,
+            views: currentViews,
+            viewGrowth: viewGrowth,
             platform: tracking.platform,
             url: tracking.clips?.url,
+            shortUrl: shortUrl,
             clipId: tracking.clipId,
-            submissionId: tracking.clips?.clipSubmissions?.[0]?.id,
+            submissionId: submission?.id,
+            campaignTitle: submission?.campaigns?.title,
             userName: tracking.users?.name || tracking.users?.email?.split('@')[0]
           }
         })

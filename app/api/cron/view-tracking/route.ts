@@ -78,14 +78,18 @@ export async function GET(request: NextRequest) {
     // 4. Check budget limits and complete campaigns if needed
     // 5. Send notifications when campaigns complete
     // 6. Handle large campaigns (>100 clips) by processing them alone
+    // 7. Track completed campaigns for analytics (views only, no earnings)
     const result = await viewTrackingService.processViewTracking(100, 5)
+
+    // Also track pending submissions for pre-approval analytics
+    // This helps admins see view growth before approving
+    const pendingResult = await viewTrackingService.trackPendingSubmissions(20)
 
     const duration = Date.now() - startTime
 
     console.log(`✅ View tracking completed in ${duration}ms`)
-    console.log(`   Processed: ${result.processed}`)
-    console.log(`   Successful: ${result.successful}`)
-    console.log(`   Failed: ${result.failed}`)
+    console.log(`   Approved clips: ${result.processed} processed, ${result.successful} successful`)
+    console.log(`   Pending submissions: ${pendingResult.processed} processed, ${pendingResult.successful} successful`)
     console.log(`   Earnings Added: $${result.totalEarningsAdded.toFixed(2)}`)
     
     if (result.campaignsCompleted.length > 0) {

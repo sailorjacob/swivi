@@ -466,22 +466,7 @@ export default function CampaignsPage() {
                     >
                       {isLaunching ? "Coming Soon" : isScheduled ? "Preview" : isCompleted ? "View Results" : "Join Campaign"}
                     </Button>
-                    {hasBonuses(campaign) && !isCompleted && (
-                      <Button
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSelectedBountyCampaign(campaign)
-                          setBonusModalOpen(true)
-                        }}
-                        className="group border-zinc-400/30 hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20"
-                      >
-                        <Trophy className="w-4 h-4 mr-1 text-zinc-400 group-hover:text-zinc-200" />
-                        <span className="group-hover:text-zinc-100">
-                          Bounties
-                        </span>
-                      </Button>
-                    )}
+                    {/* Bounties button moved to campaign details page only */}
                   </div>
                 </div>
               </CardContent>

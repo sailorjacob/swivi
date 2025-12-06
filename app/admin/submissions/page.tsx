@@ -155,6 +155,7 @@ export default function AdminSubmissionsPage() {
     offset: 0,
     hasMore: false
   })
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [expandedSubmissions, setExpandedSubmissions] = useState<Set<string>>(new Set())
 
   // Scroll to highlighted submission when data loads
@@ -184,13 +185,19 @@ export default function AdminSubmissionsPage() {
   }, [])
 
   // Fetch submissions
-  const fetchSubmissions = useCallback(async () => {
+  const fetchSubmissions = useCallback(async (loadMore = false) => {
     try {
-      setLoading(true)
+      if (loadMore) {
+        setIsLoadingMore(true)
+      } else {
+        setLoading(true)
+      }
       setError(null)
+      
+      const offset = loadMore ? pagination.offset + pagination.limit : 0
       const params = new URLSearchParams({
         limit: pagination.limit.toString(),
-        offset: pagination.offset.toString()
+        offset: offset.toString()
       })
 
       if (filters.status !== "all") {
@@ -216,8 +223,17 @@ export default function AdminSubmissionsPage() {
       const response = await authenticatedFetch(`/api/admin/submissions?${params}`)
       if (response.ok) {
         const data = await response.json()
-        setSubmissions(data.submissions)
-        setPagination(data.pagination)
+        if (loadMore) {
+          // Append new submissions to existing ones
+          setSubmissions(prev => [...prev, ...data.submissions])
+        } else {
+          // Replace submissions for fresh fetch
+          setSubmissions(data.submissions)
+        }
+        setPagination({
+          ...data.pagination,
+          offset: offset
+        })
       } else {
         setError("Failed to load submissions")
       }
@@ -226,6 +242,7 @@ export default function AdminSubmissionsPage() {
       setError("Failed to load submissions")
     } finally {
       setLoading(false)
+      setIsLoadingMore(false)
     }
   }, [filters, pagination.limit, pagination.offset])
 
@@ -574,23 +591,14 @@ export default function AdminSubmissionsPage() {
                             <strong>Review Reason:</strong> {submission.reviewReason}
                           </p>
                         )}
-                        {/* Verified Account Display for cross-referencing */}
+                        {/* Verified Account - compact inline display */}
                         {submission.socialAccount && (
-                          <div className="flex items-center gap-2 mt-2 p-2 bg-muted/50 border border-border rounded">
-                            <User className="w-3 h-3 text-muted-foreground" />
-                            <span className="text-sm text-foreground">
-                              <span className="text-muted-foreground">Verified:</span>{' '}
-                              <span className="font-mono font-medium">@{submission.socialAccount.username}</span>
-                              {submission.socialAccount.verified && (
-                                <Check className="w-3 h-3 inline-block ml-1 text-foreground" />
-                              )}
-                            </span>
-                          </div>
-                        )}
-                        {!submission.socialAccount && (
-                          <p className="text-xs text-muted-foreground/70 mt-2">
-                            Legacy submission
-                          </p>
+                          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                            <span className="font-mono text-foreground">@{submission.socialAccount.username}</span>
+                            {submission.socialAccount.verified && (
+                              <Check className="w-3 h-3 text-foreground" />
+                            )}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -875,9 +883,17 @@ export default function AdminSubmissionsPage() {
               <div className="text-center mt-6">
                 <Button
                   variant="outline"
-                  onClick={() => setPagination(prev => ({ ...prev, offset: prev.offset + prev.limit }))}
+                  onClick={() => fetchSubmissions(true)}
+                  disabled={isLoadingMore}
                 >
-                  Load More
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    `Load More (${pagination.total - submissions.length} remaining)`
+                  )}
                 </Button>
               </div>
             )}

@@ -146,15 +146,20 @@ export class ViewTrackingService {
         const initialViews = Number(activeSubmission.initialViews || 0)
         const totalViewGrowth = currentViews - initialViews
         const payoutRate = Number(campaign.payoutRate)
+        const campaignBudget = Number(campaign.budget)
         
         // Calculate total earnings that should exist for this clip
         const totalEarningsShouldBe = (totalViewGrowth / 1000) * payoutRate
+        
+        // Per-clip cap: maximum 30% of campaign budget per single clip
+        const maxClipEarnings = campaignBudget * 0.30
+        const cappedEarnings = Math.min(totalEarningsShouldBe, maxClipEarnings)
+        
         const currentClipEarnings = Number(clip.earnings || 0)
-        const earningsDelta = Math.max(0, totalEarningsShouldBe - currentClipEarnings)
+        const earningsDelta = Math.max(0, cappedEarnings - currentClipEarnings)
 
         // Budget enforcement - only add earnings if budget allows
         const campaignSpent = Number(campaign.spent || 0)
-        const campaignBudget = Number(campaign.budget)
         const remainingBudget = Math.max(0, campaignBudget - campaignSpent)
         earningsToAdd = Math.min(earningsDelta, remainingBudget)
       }
@@ -352,6 +357,9 @@ export class ViewTrackingService {
   /**
    * Gets all active clips that need view tracking, grouped by campaign for fairness
    * CRITICAL: All clips in a campaign are tracked together to ensure fair competition
+   * 
+   * Now also tracks COMPLETED campaigns for analytics (views only, no earnings)
+   * Similar to Whop analytics - continue monitoring performance after budget exhaustion
    */
   async getClipsNeedingTracking(limit: number = 100): Promise<Array<{
     id: string
@@ -360,23 +368,20 @@ export class ViewTrackingService {
     lastTracked?: Date
     campaignId: string
   }>> {
-    // Get all ACTIVE and PAUSED campaigns that haven't exceeded budget
-    // PAUSED campaigns continue earning but don't accept new submissions
+    // Get campaigns that need view tracking:
+    // - ACTIVE/PAUSED: Full tracking with earnings calculation
+    // - COMPLETED: Analytics only (track views, no earnings added)
     // Exclude test and deleted campaigns from view tracking
     const activeCampaigns = await prisma.campaign.findMany({
       where: {
-        status: { in: ['ACTIVE', 'PAUSED'] },
+        status: { in: ['ACTIVE', 'PAUSED', 'COMPLETED'] },
         isTest: false, // Don't track test campaigns
         deletedAt: null, // Don't track archived campaigns
-        // Only track campaigns that still have budget left
-        OR: [
-          { spent: { lt: prisma.campaign.fields.budget } },
-          { spent: null }
-        ]
       },
       select: {
         id: true,
         title: true,
+        status: true,
         createdAt: true,
         spent: true,
         budget: true,
@@ -410,6 +415,7 @@ export class ViewTrackingService {
     interface CampaignWithPriority {
       campaignId: string
       campaignName: string
+      campaignStatus: string | null
       clips: Array<{
         id: string
         url: string
@@ -450,10 +456,18 @@ export class ViewTrackingService {
         if (campaignAgeDays < 7) {
           priority *= 1.5
         }
+        
+        // Deprioritize COMPLETED campaigns (analytics only, not earning)
+        // Track less frequently to save API costs
+        const isCompleted = campaign.status === 'COMPLETED'
+        if (isCompleted) {
+          priority *= 0.3 // Lower priority for completed campaigns
+        }
 
         return {
           campaignId: campaign.id,
           campaignName: campaign.title,
+          campaignStatus: campaign.status,
           clips,
           priority,
           budgetRemaining: Number(campaign.budget) - Number(campaign.spent || 0)
@@ -496,7 +510,8 @@ export class ViewTrackingService {
       // Case 2: Normal campaign - add if it fits
       if (selectedClips.length + campaignSize <= limit) {
         selectedClips.push(...campaign.clips)
-        console.log(`📦 Including campaign "${campaign.campaignName}" (${campaignSize} clips, $${campaign.budgetRemaining.toFixed(2)} remaining)`)
+        const statusNote = campaign.campaignStatus === 'COMPLETED' ? ' [analytics only]' : ''
+        console.log(`📦 Including campaign "${campaign.campaignName}" (${campaignSize} clips, $${campaign.budgetRemaining.toFixed(2)} remaining)${statusNote}`)
       } else {
         // Would exceed limit, stop here
         console.log(`⏸️  Stopping at ${selectedClips.length} clips (adding "${campaign.campaignName}" would exceed ${limit} limit)`)
@@ -572,6 +587,96 @@ export class ViewTrackingService {
     })
     
     return result
+  }
+
+  /**
+   * Tracks views for PENDING submissions (pre-approval analytics)
+   * This allows admins to see view growth before approving a submission
+   * NOTE: This does NOT calculate earnings - only updates view counts for visibility
+   */
+  async trackPendingSubmissions(limit: number = 20): Promise<{
+    processed: number
+    successful: number
+    failed: number
+  }> {
+    console.log(`📊 Tracking pending submissions for pre-approval analytics...`)
+    
+    // Get pending submissions from active campaigns that don't have clips yet
+    const pendingSubmissions = await prisma.clipSubmission.findMany({
+      where: {
+        status: 'PENDING',
+        clipId: null, // Only submissions without clips (not yet approved)
+        campaigns: {
+          status: 'ACTIVE',
+          isTest: false,
+          deletedAt: null
+        }
+      },
+      select: {
+        id: true,
+        clipUrl: true,
+        platform: true,
+        initialViews: true,
+        users: {
+          select: { id: true, name: true }
+        },
+        campaigns: {
+          select: { title: true }
+        }
+      },
+      take: limit,
+      orderBy: { createdAt: 'desc' }
+    })
+
+    if (pendingSubmissions.length === 0) {
+      console.log(`✨ No pending submissions to track`)
+      return { processed: 0, successful: 0, failed: 0 }
+    }
+
+    console.log(`🔍 Found ${pendingSubmissions.length} pending submissions to track`)
+
+    let successful = 0
+    let failed = 0
+
+    // Process each pending submission
+    for (const submission of pendingSubmissions) {
+      try {
+        // Scrape current views
+        const scrapedData = await this.scraper.scrapeContent(submission.clipUrl, submission.platform)
+        
+        if (scrapedData.error || !scrapedData.views) {
+          console.log(`⚠️  Could not scrape views for pending submission ${submission.id}: ${scrapedData.error || 'no views returned'}`)
+          failed++
+          continue
+        }
+
+        const currentViews = scrapedData.views
+        const previousViews = Number(submission.initialViews || 0)
+        const viewGrowth = currentViews - previousViews
+
+        // Update the submission with the latest scraped views
+        // We store this in initialViews since it represents the current state
+        // When approved, initialViews becomes the baseline for earnings
+        await prisma.clipSubmission.update({
+          where: { id: submission.id },
+          data: {
+            initialViews: BigInt(currentViews)
+          }
+        })
+
+        console.log(`✅ Pending "${submission.campaigns.title}" by ${submission.users.name || 'Unknown'}: ${currentViews.toLocaleString()} views (+${viewGrowth.toLocaleString()} growth)`)
+        successful++
+
+        // Small delay to avoid overwhelming Apify
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      } catch (error) {
+        console.error(`❌ Error tracking pending submission ${submission.id}:`, error)
+        failed++
+      }
+    }
+
+    console.log(`✅ Pending tracking complete: ${successful}/${pendingSubmissions.length} successful`)
+    return { processed: pendingSubmissions.length, successful, failed }
   }
 
   /**
