@@ -460,7 +460,7 @@ export default function CampaignDetailPage() {
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Views</p>
                 </div>
                 <div className="text-center py-3 px-2 border border-border rounded-md">
-                  <p className="text-xl font-semibold">${activityData.totals.remainingBudget.toFixed(0)}</p>
+                  <p className="text-xl font-semibold">${activityData.totals.remainingBudget.toLocaleString('en-US', { maximumFractionDigits: 0 })}</p>
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Remaining</p>
                 </div>
               </div>
@@ -1121,6 +1121,33 @@ export default function CampaignDetailPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Bonus Banner - Bottom */}
+      {hasBonuses(campaign) && isActive && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="border border-border rounded-lg p-4 bg-muted/30"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-muted">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-medium">Performance Bounties Available</p>
+                <p className="text-sm text-muted-foreground">
+                  $2,000 in additional rewards for top performers
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setBonusModalOpen(true)}>
+              Learn More
+            </Button>
+          </div>
+        </motion.div>
+      )}
 
       {/* Bonus Modal */}
       <CampaignBonusModal

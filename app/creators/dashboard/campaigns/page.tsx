@@ -567,10 +567,10 @@ export default function CampaignsPage() {
                   {/* Action Buttons */}
                   <div className="flex gap-2">
                     <Button
-                      className={`flex-1 ${!isCompleted && !isLaunching && !isScheduled ? 'bg-transparent text-foreground border border-foreground hover:bg-foreground hover:text-background' : ''}`}
+                      className={`flex-1 ${!isCompleted && !isLaunching && !isScheduled ? 'bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground' : ''}`}
                       onClick={() => handleViewCampaign(campaign)}
                       disabled={isLaunching}
-                      variant={isCompleted ? "secondary" : (isLaunching || isScheduled) ? "default" : "outline"}
+                      variant={isCompleted ? "secondary" : (isLaunching || isScheduled) ? "default" : "default"}
                     >
                       {isLaunching ? "Coming Soon" : isScheduled ? "Preview" : isCompleted ? "View Results" : "Join Campaign"}
                     </Button>
@@ -602,7 +602,7 @@ export default function CampaignsPage() {
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Views</p>
                   </div>
                   <div>
-                    <p className="text-lg font-semibold">${activityData.totals.totalRemainingBudget.toFixed(0)}</p>
+                    <p className="text-lg font-semibold">${activityData.totals.totalRemainingBudget.toLocaleString('en-US', { maximumFractionDigits: 0 })}</p>
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Remaining</p>
                   </div>
                 </div>
