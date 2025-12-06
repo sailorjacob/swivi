@@ -66,35 +66,49 @@ export async function GET(request: NextRequest) {
 
     console.log('🚀 Starting integrated view tracking and earnings calculation...')
     const startTime = Date.now()
+    
+    // Time budget management - stop before Vercel's 300s timeout
+    const MAX_DURATION_MS = 270000 // 270 seconds (leave 30s buffer)
+    const getElapsed = () => Date.now() - startTime
+    const hasTimeLeft = (minRequired: number = 30000) => (MAX_DURATION_MS - getElapsed()) > minRequired
 
     // Initialize the view tracking service
     const viewTrackingService = new ViewTrackingService()
 
-    // Process view tracking with integrated earnings calculation
-    // This will:
-    // 1. Scrape views for active clips (in smaller batches for Apify)
-    // 2. Calculate earnings from view growth
-    // 3. Update clip, user, and campaign earnings
-    // 4. Check budget limits and complete campaigns if needed
-    // 5. Send notifications when campaigns complete
-    // 6. Handle large campaigns (>100 clips) by processing them alone
-    // 7. Track completed campaigns for analytics (views only, no earnings)
-    const result = await viewTrackingService.processViewTracking(100, 5)
+    // PRIORITY 1: Process approved clips (these generate earnings)
+    // Reduced batch size for faster completion
+    console.log(`⏱️ Time budget: ${MAX_DURATION_MS / 1000}s max, starting approved clips...`)
+    const result = await viewTrackingService.processViewTracking(50, 5) // Reduced from 100 to 50 clips
+    console.log(`⏱️ Approved clips done in ${getElapsed() / 1000}s`)
 
-    // Also track pending submissions for pre-approval analytics
-    // This helps admins see view growth before approving
-    const pendingResult = await viewTrackingService.trackPendingSubmissions(20)
+    // PRIORITY 2: Rescrape failed submissions (fixes initialViews = 0)
+    // Only run if we have time left
+    let rescrapeResult = { processed: 0, successful: 0, failed: 0 }
+    if (hasTimeLeft(60000)) { // Need at least 60s for rescrapes
+      console.log(`⏱️ Time remaining: ${(MAX_DURATION_MS - getElapsed()) / 1000}s, running rescrapes...`)
+      rescrapeResult = await viewTrackingService.rescrapeFailedSubmissions(5) // Reduced to 5
+      console.log(`⏱️ Rescrapes done in ${getElapsed() / 1000}s`)
+    } else {
+      console.log(`⚠️ Skipping rescrapes - not enough time (${(MAX_DURATION_MS - getElapsed()) / 1000}s remaining)`)
+    }
 
-    // Rescrape submissions that failed their initial scrape
-    // This fixes clips with initialViews = 0 that should have values
-    const rescrapeResult = await viewTrackingService.rescrapeFailedSubmissions(10)
+    // PRIORITY 3: Track pending submissions (nice to have, not critical)
+    // Only run if we have time left
+    let pendingResult = { processed: 0, successful: 0, failed: 0 }
+    if (hasTimeLeft(60000)) { // Need at least 60s for pending
+      console.log(`⏱️ Time remaining: ${(MAX_DURATION_MS - getElapsed()) / 1000}s, running pending tracking...`)
+      pendingResult = await viewTrackingService.trackPendingSubmissions(10) // Reduced from 20 to 10
+      console.log(`⏱️ Pending tracking done in ${getElapsed() / 1000}s`)
+    } else {
+      console.log(`⚠️ Skipping pending tracking - not enough time (${(MAX_DURATION_MS - getElapsed()) / 1000}s remaining)`)
+    }
 
     const duration = Date.now() - startTime
 
-    console.log(`✅ View tracking completed in ${duration}ms`)
+    console.log(`✅ View tracking completed in ${duration}ms (${(duration / 1000).toFixed(1)}s)`)
     console.log(`   Approved clips: ${result.processed} processed, ${result.successful} successful`)
-    console.log(`   Pending submissions: ${pendingResult.processed} processed, ${pendingResult.successful} successful`)
     console.log(`   Rescrapes: ${rescrapeResult.processed} processed, ${rescrapeResult.successful} successful`)
+    console.log(`   Pending submissions: ${pendingResult.processed} processed, ${pendingResult.successful} successful`)
     console.log(`   Earnings Added: $${result.totalEarningsAdded.toFixed(2)}`)
     
     if (result.campaignsCompleted.length > 0) {

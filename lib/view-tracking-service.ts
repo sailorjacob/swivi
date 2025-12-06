@@ -301,10 +301,10 @@ export class ViewTrackingService {
         }
       })
       
-      // Longer delay between batches to let Apify complete previous runs
+      // Shorter delay between batches - Apify handles concurrency well
       if (i + batchSize < clipIds.length) {
-        console.log(`⏸️  Pausing 5s before next batch...`)
-        await new Promise(resolve => setTimeout(resolve, 5000))
+        console.log(`⏸️  Pausing 2s before next batch...`)
+        await new Promise(resolve => setTimeout(resolve, 2000))
       }
     }
     
@@ -665,8 +665,8 @@ export class ViewTrackingService {
         console.log(`✅ Pending "${submission.campaigns.title}" by ${submission.users.name || 'Unknown'}: ${currentViews.toLocaleString()} views (+${viewGrowth.toLocaleString()} growth)`)
         successful++
 
-        // Small delay to avoid overwhelming Apify
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Small delay between scrapes
+        await new Promise(resolve => setTimeout(resolve, 500))
       } catch (error) {
         console.error(`❌ Error tracking pending submission ${submission.id}:`, error)
         failed++
@@ -812,8 +812,8 @@ export class ViewTrackingService {
         console.log(`✅ Rescrape successful for "${submission.campaigns.title}" by ${submission.users.name || 'Unknown'}: ${currentViews.toLocaleString()} views`)
         successful++
 
-        // Delay between rescrapes to avoid overwhelming Apify
-        await new Promise(resolve => setTimeout(resolve, 3000))
+        // Short delay between rescrapes
+        await new Promise(resolve => setTimeout(resolve, 1500))
       } catch (error) {
         console.error(`❌ Error rescraping submission ${submission.id}:`, error)
         failed++
