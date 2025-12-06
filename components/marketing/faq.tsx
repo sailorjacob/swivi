@@ -5,11 +5,11 @@ import { motion } from "framer-motion"
 const faqs = [
   {
     question: "How Do I Get Started?",
-    answer: "Send content via Google Drive or Dropbox links; we build & manage your clipping community to boost your brand's reach.",
+    answer: "Send content via Google Drive or Dropbox links; we build & manage your creator community to boost your brand's reach.",
   },
   {
     question: "Do I Need To Do Anything Else?",
-    answer: "No, just send us your content. We handle building, coaching, and managing your clipping community daily to scale your brand.",
+    answer: "No, just send us your content. We handle building, coaching, and managing your creator community daily to scale your brand.",
   },
 ]
 

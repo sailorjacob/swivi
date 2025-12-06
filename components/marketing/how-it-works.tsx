@@ -2,7 +2,7 @@ const steps = [
   {
     number: "01",
     title: "Send Us Your Content",
-    description: "We build a private clipping community tailored for your brand. Just send us your content (ideally via Google Drive), and we'll handle everything, including recruiting creators from your audience and our extensive network.",
+    description: "We build a private creator community tailored for your brand. Just send us your content (ideally via Google Drive), and we'll handle everything, including recruiting creators from your audience and our extensive network.",
   },
   {
     number: "02",
@@ -25,7 +25,7 @@ export function HowItWorks() {
             How It Works
           </h2>
           <p className="text-muted-foreground max-w-2xl">
-            We build and manage your clipping community to boost your brand's reach.
+            We build and manage your creator community to boost your brand's reach.
           </p>
         </div>
 

@@ -20,7 +20,7 @@ export function MusicHubPreview() {
             <div className="flex items-center justify-center gap-2 mb-4">
               <Music className="h-8 w-8 text-primary" />
               <h2 className="text-3xl md:text-4xl font-light">
-                NEW: Music Clipping Hub
+                NEW: Music Creator Hub
               </h2>
             </div>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

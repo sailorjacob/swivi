@@ -21,7 +21,7 @@ const campaignHighlights = [
     roi: "211% ROI",
     views: "1.9M views",
     budget: "$900",
-    highlight: "258 clips in 5 days",
+    highlight: "258 posts in 5 days",
     color: "text-purple-600"
   },
   {

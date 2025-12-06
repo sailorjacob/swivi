@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 interface CalculatorValues {
-  numberOfClippers: number
+  numberOfCreators: number
   postsPerDay: number
   platforms: number
   daysPerWeek: number
@@ -20,7 +20,7 @@ interface CalculatorValues {
 
 export function CreatorViewsCalculator() {
   const [values, setValues] = useState<CalculatorValues>({
-    numberOfClippers: 20,
+    numberOfCreators: 20,
     postsPerDay: 2,
     platforms: 3,
     daysPerWeek: 5,
@@ -37,7 +37,7 @@ export function CreatorViewsCalculator() {
   // Calculate views and savings whenever values change
   useEffect(() => {
     // Calculate total posts per week
-    const postsPerWeek = values.numberOfClippers * values.postsPerDay * values.platforms * values.daysPerWeek
+    const postsPerWeek = values.numberOfCreators * values.postsPerDay * values.platforms * values.daysPerWeek
 
     // Calculate monthly views (assuming 4.33 weeks per month)
     const monthlyPosts = postsPerWeek * 4.33
@@ -47,14 +47,14 @@ export function CreatorViewsCalculator() {
     const annualViews = totalMonthlyViews * 12
 
     // Calculate how much of the budget would be used for these views
-    const clipperCostPer1000 = values.paymentPer1000Views
-    const annualClipperCost = (annualViews / 1000) * clipperCostPer1000
+    const creatorCostPer1000 = values.paymentPer1000Views
+    const annualCreatorCost = (annualViews / 1000) * creatorCostPer1000
 
     // Calculate savings vs traditional paid ads
     // Assuming $5 CPM (cost per thousand views) for traditional ads
     const traditionalCPM = 5
     const annualAdCost = (annualViews / 1000) * traditionalCPM
-    const savings = annualAdCost - annualClipperCost
+    const savings = annualAdCost - annualCreatorCost
 
     setMonthlyViews(Math.round(totalMonthlyViews))
     setAnnualSavings(Math.round(savings))
@@ -149,12 +149,12 @@ export function CreatorViewsCalculator() {
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium">Creator Army Size</label>
                   <span className="text-xl font-light transition-all duration-200 ease-out">
-                    {values.numberOfClippers}
+                    {values.numberOfCreators}
                   </span>
                 </div>
                 <Slider
-                  value={[values.numberOfClippers]}
-                  onValueChange={(value: number[]) => handleSliderChange('numberOfClippers', value)}
+                  value={[values.numberOfCreators]}
+                  onValueChange={(value: number[]) => handleSliderChange('numberOfCreators', value)}
                   min={5}
                   max={100}
                   step={1}
@@ -304,7 +304,7 @@ export function CreatorViewsCalculator() {
                   <Video className="h-3 w-3 text-muted-foreground" />
                 </div>
                 <p className="text-lg font-light">
-                  {formatNumber(values.numberOfClippers * values.postsPerDay * values.platforms * values.daysPerWeek)}
+                  {formatNumber(values.numberOfCreators * values.postsPerDay * values.platforms * values.daysPerWeek)}
                 </p>
               </CardContent>
             </Card>
@@ -444,7 +444,7 @@ export function CreatorViewsCalculator() {
                     <div className="p-3 bg-blue-100/50 rounded-lg border border-blue-200">
                       <p className="text-sm text-blue-800">
                         Your {formatCurrency(values.budget)} budget supports up to {formatNumber(calculateBudgetAllocation().totalPossibleViews)} views at ${values.paymentPer1000Views.toFixed(2)} per 1,000 views. 
-                        With {values.numberOfClippers} creators generating {formatNumber(monthlyViews * 12)} annual views, you'll use {calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of your budget.
+                        With {values.numberOfCreators} creators generating {formatNumber(monthlyViews * 12)} annual views, you'll use {calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of your budget.
                       </p>
                     </div>
                   </CardContent>

@@ -16,8 +16,8 @@ interface CampaignResult {
   budgetStructure: string
   goal: string
   timeline: string
-  clipsDistributed: number
-  clipsPaid: number
+  postsDistributed: number
+  postsPaid: number
   viewsGenerated: number
   roi: number
   exampleContent: string
@@ -37,8 +37,8 @@ const campaignResults: CampaignResult[] = [
     budgetStructure: "$100 per 100,000 views",
     goal: "6,700,000 views",
     timeline: "2 days",
-    clipsDistributed: 60,
-    clipsPaid: 60,
+    postsDistributed: 60,
+    postsPaid: 60,
     viewsGenerated: 6700000,
     roi: 593,
     exampleContent: "https://www.instagram.com/reel/DOKGK_ciO-9/",
@@ -47,7 +47,7 @@ const campaignResults: CampaignResult[] = [
     highlights: [
       "6.7M views generated",
       "Completed in just 2 days",
-      "60 clips submitted",
+      "60 posts submitted",
       "$968 budget delivered"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
@@ -61,8 +61,8 @@ const campaignResults: CampaignResult[] = [
     budgetStructure: "$100 per 100,000 views",
     goal: "864,000 views",
     timeline: "3 days",
-    clipsDistributed: 720,
-    clipsPaid: 720,
+    postsDistributed: 720,
+    postsPaid: 720,
     viewsGenerated: 840000,
     roi: 0,
     exampleContent: "https://www.instagram.com/reel/example-rod-khlief/",
@@ -70,7 +70,7 @@ const campaignResults: CampaignResult[] = [
     status: "completed",
     highlights: [
       "840K views generated",
-      "720 clips submitted",
+      "720 posts submitted",
       "3-day timeline",
       "Real estate education focus"
     ],
@@ -85,8 +85,8 @@ const campaignResults: CampaignResult[] = [
     budgetStructure: "$1 per 1,000 views",
     goal: "900,000 views",
     timeline: "5 days",
-    clipsDistributed: 258,
-    clipsPaid: 155,
+    postsDistributed: 258,
+    postsPaid: 155,
     viewsGenerated: 1900000,
     roi: 211,
     exampleContent: "https://www.tiktok.com/@shvftysclips/video/7521097192539557151",
@@ -94,7 +94,7 @@ const campaignResults: CampaignResult[] = [
     status: "completed",
     highlights: [
       "1.9M views generated",
-      "429 clips submitted",
+      "429 posts submitted",
       "5-day timeline"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/shvty.jpeg"
@@ -108,8 +108,8 @@ const campaignResults: CampaignResult[] = [
     budgetStructure: "$100 per 1,000,000 views",
     goal: "2,490,000 views",
     timeline: "2 weeks",
-    clipsDistributed: 98,
-    clipsPaid: 98,
+    postsDistributed: 98,
+    postsPaid: 98,
     viewsGenerated: 9500000,
     roi: 3717,
     exampleContent: "https://www.instagram.com/reel/DNVx_F0OKAx/",
@@ -117,7 +117,7 @@ const campaignResults: CampaignResult[] = [
     status: "completed",
     highlights: [
       "9.5M views generated",
-      "98 clips submitted",
+      "98 posts submitted",
       "2-week timeline",
       "Exceeded expectations"
     ],
@@ -301,10 +301,10 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
                     </div>
                     <div className="text-center p-4 sm:p-6 lg:p-8 bg-muted/50 rounded-xl border border-border">
                       <div className="text-3xl sm:text-4xl lg:text-5xl font-light text-foreground mb-2 sm:mb-3">
-                        {campaign.clipsDistributed}
+                        {campaign.postsDistributed}
                       </div>
                       <div className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                        Submitted Clips
+                        Submitted Posts
                       </div>
                     </div>
                   </div>
@@ -325,9 +325,9 @@ export function CampaignsShowcase({ showHeader = true }: CampaignsShowcaseProps)
                           <span className="font-medium text-foreground text-sm sm:text-base">{campaign.timeline}</span>
                         </div>
                         <div className="flex justify-between items-center py-2 sm:py-3">
-                          <span className="text-sm sm:text-base text-muted-foreground">Submitted Clips:</span>
+                          <span className="text-sm sm:text-base text-muted-foreground">Submitted Posts:</span>
                           <span className="font-medium text-foreground text-sm sm:text-base">
-                            {campaign.clipsDistributed}
+                            {campaign.postsDistributed}
                           </span>
                         </div>
                       </div>
