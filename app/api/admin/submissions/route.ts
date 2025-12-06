@@ -186,9 +186,9 @@ export async function GET(request: NextRequest) {
                   title: true,
                   views: true,
                   earnings: true,
+                  status: true, // Clip status (PENDING or ACTIVE)
                   view_tracking: {
-                    orderBy: { scrapedAt: "desc" }, // Order by actual scrape time, not date
-                    take: 2,
+                    orderBy: { scrapedAt: "desc" }, // Order by actual scrape time, most recent first
                     select: {
                       views: true,
                       date: true,
@@ -197,7 +197,10 @@ export async function GET(request: NextRequest) {
                   }
                 }
               })
-              return { ...submission, clips: clipData }
+              
+              // Add scrape count for easy access
+              const scrapeCount = clipData?.view_tracking?.length || 0
+              return { ...submission, clips: clipData, scrapeCount }
             } catch (clipError) {
               console.error(`❌ Error fetching clip data for submission ${submission.id}:`, clipError)
               return { ...submission, clips: null }

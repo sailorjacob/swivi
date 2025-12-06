@@ -73,7 +73,7 @@ export class ClipCreationService {
         }
       }
 
-      // Scrape initial content data from the platform
+      // Scrape current content data from the platform
       const scrapedData = await this.scraper.scrapeContent(createData.clipUrl, createData.platform)
 
       if (scrapedData.error) {
@@ -81,22 +81,42 @@ export class ClipCreationService {
         // Continue with clip creation even if scraping fails
       }
 
-      // Create the Clip record
-      const clip = await prisma.clip.create({
-        data: {
-          userId: createData.userId,
-          url: createData.clipUrl,
-          platform: createData.platform,
-          title: scrapedData.title || `Content from ${createData.platform}`,
-          description: scrapedData.description || '',
-          views: BigInt(scrapedData.views || 0),
-          likes: BigInt(scrapedData.likes || 0),
-          shares: BigInt(scrapedData.shares || 0),
-          status: 'ACTIVE'
-        }
-      })
+      let clip
+      
+      // Check if clip already exists (created at submission time)
+      if (submission.clipId) {
+        // Clip exists - just update its status to ACTIVE
+        clip = await prisma.clip.update({
+          where: { id: submission.clipId },
+          data: {
+            status: 'ACTIVE',
+            title: scrapedData.title || `Content from ${createData.platform}`,
+            description: scrapedData.description || '',
+            views: BigInt(scrapedData.views || 0),
+            likes: BigInt(scrapedData.likes || 0),
+            shares: BigInt(scrapedData.shares || 0)
+          }
+        })
+        console.log(`✅ Updated existing clip ${clip.id} to ACTIVE status`)
+      } else {
+        // Backwards compatibility: Create new clip if none exists
+        clip = await prisma.clip.create({
+          data: {
+            userId: createData.userId,
+            url: createData.clipUrl,
+            platform: createData.platform,
+            title: scrapedData.title || `Content from ${createData.platform}`,
+            description: scrapedData.description || '',
+            views: BigInt(scrapedData.views || 0),
+            likes: BigInt(scrapedData.likes || 0),
+            shares: BigInt(scrapedData.shares || 0),
+            status: 'ACTIVE'
+          }
+        })
+        console.log(`✅ Created new clip ${clip.id}`)
+      }
 
-      // Update submission to link to the clip and mark as approved
+      // Update submission to link to the clip (if not already linked) and mark as approved
       // NOTE: initialViews was already set at submission time - preserve it!
       await prisma.clipSubmission.update({
         where: { id: createData.submissionId },
@@ -108,7 +128,7 @@ export class ClipCreationService {
         }
       })
 
-      // Create initial view tracking record for today
+      // Create view tracking record for the approval moment
       if (scrapedData.views && scrapedData.views > 0) {
         await this.createInitialViewTracking(clip.id, createData.userId, scrapedData.views, createData.platform)
       }

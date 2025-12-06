@@ -207,12 +207,64 @@ export async function PUT(
     // Send notifications based on status change (non-blocking - don't fail if notification fails)
     const notificationService = new NotificationService()
 
-    // If approved, send approval notification and create clip
+    // If reverting to PENDING from APPROVED, deactivate the clip and reset earnings
+    if (validatedData.status === "PENDING" && submission.status === "APPROVED") {
+      console.log("🔄 Reverting submission to PENDING, deactivating clip...")
+      if (submission.clipId) {
+        // Get current clip earnings to deduct from campaign spent
+        const clip = await prisma.clip.findUnique({
+          where: { id: submission.clipId },
+          select: { earnings: true }
+        })
+        const clipEarnings = Number(clip?.earnings || 0)
+        
+        // Deactivate clip and reset earnings
+        await prisma.clip.update({
+          where: { id: submission.clipId },
+          data: { 
+            status: 'PENDING',
+            earnings: 0 // Reset earnings since no longer approved
+          }
+        })
+        
+        // Deduct earnings from campaign spent
+        if (clipEarnings > 0) {
+          await prisma.campaign.update({
+            where: { id: submission.campaignId },
+            data: {
+              spent: { decrement: clipEarnings }
+            }
+          })
+          
+          // Deduct from user earnings
+          await prisma.user.update({
+            where: { id: submission.userId },
+            data: {
+              totalEarnings: { decrement: clipEarnings }
+            }
+          })
+          
+          console.log(`✅ Deducted $${clipEarnings.toFixed(2)} from campaign and user`)
+        }
+        
+        console.log("✅ Clip deactivated and earnings reset")
+      }
+    }
+
+    // If approved, send approval notification and activate clip
     if (validatedData.status === "APPROVED" && submission.status !== "APPROVED") {
-      console.log("🔍 Creating clip for approved submission...")
-      // Create or link to clip for view tracking
+      console.log("🔍 Activating clip for approved submission...")
+      // Create or update clip for view tracking
       let clipId = submission.clipId
-      if (!clipId) {
+      if (clipId) {
+        // Clip exists (created at submission time) - update status to ACTIVE
+        await prisma.clip.update({
+          where: { id: clipId },
+          data: { status: 'ACTIVE' }
+        })
+        console.log("✅ Clip activated with id:", clipId)
+      } else {
+        // Backwards compatibility: create clip if none exists
         const clip = await prisma.clip.create({
           data: {
             userId: submission.userId,

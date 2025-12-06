@@ -2350,7 +2350,12 @@ function CampaignView({
                   <div className="text-right ml-4">
                     <p className="font-bold">${sub.earnings?.toFixed(2) || '0.00'}</p>
                     <p className="text-xs text-muted-foreground">{sub.currentViews?.toLocaleString() || 0} views</p>
-                    <p className="text-xs text-muted-foreground">+{sub.viewsGained?.toLocaleString() || 0} gained</p>
+                    {sub.viewsGained > 0 && (
+                      <p className="text-xs text-green-600 dark:text-green-400">+{sub.viewsGained?.toLocaleString() || 0} gained</p>
+                    )}
+                    {sub.scrapeCount > 0 && (
+                      <p className="text-xs text-muted-foreground">{sub.scrapeCount} scrape{sub.scrapeCount !== 1 ? 's' : ''}</p>
+                    )}
                   </div>
                 </div>
               </div>

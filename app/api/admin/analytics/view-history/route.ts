@@ -35,7 +35,8 @@ export async function GET(request: NextRequest) {
       whereClause.campaignId = campaignId
     }
 
-    // Fetch all clips with their view tracking history
+    // Fetch ALL submissions with their view tracking history
+    // This includes PENDING submissions so admins can see clip performance before approval
     const submissions = await prisma.clipSubmission.findMany({
       where: whereClause,
       select: {
@@ -45,6 +46,7 @@ export async function GET(request: NextRequest) {
         status: true,
         createdAt: true,
         initialViews: true,
+        processingStatus: true,
         campaigns: {
           select: {
             id: true,
@@ -56,9 +58,11 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             earnings: true,
+            status: true, // Clip status (PENDING or ACTIVE)
+            views: true,
             view_tracking: {
               orderBy: {
-                date: 'asc'
+                scrapedAt: 'asc' // Order by actual scrape time for complete history
               },
               select: {
                 id: true,
@@ -82,20 +86,30 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Process data for charting
+    // Process data for charting - include ALL submissions for admin visibility
     const chartData = submissions.map(submission => {
       const viewHistory = submission.clips?.view_tracking || []
+      
+      // Get current views from clip if available, otherwise from last tracking record or initial
+      const currentViews = submission.clips?.views 
+        ? Number(submission.clips.views)
+        : viewHistory.length > 0 
+          ? Number(viewHistory[viewHistory.length - 1].views) 
+          : Number(submission.initialViews || 0)
       
       return {
         submissionId: submission.id,
         clipId: submission.clips?.id,
         clipUrl: submission.clipUrl,
         platform: submission.platform,
-        status: submission.status,
+        status: submission.status, // PENDING, APPROVED, REJECTED, etc.
+        clipStatus: submission.clips?.status || null, // PENDING, ACTIVE (clip level)
+        processingStatus: submission.processingStatus,
         submittedAt: submission.createdAt,
         initialViews: Number(submission.initialViews || 0),
-        currentViews: viewHistory.length > 0 ? Number(viewHistory[viewHistory.length - 1].views) : Number(submission.initialViews || 0),
-        earnings: Number(submission.clips?.earnings || 0),
+        currentViews,
+        // Only show earnings for approved clips
+        earnings: submission.status === 'APPROVED' ? Number(submission.clips?.earnings || 0) : 0,
         campaign: {
           id: submission.campaigns.id,
           title: submission.campaigns.title,
@@ -112,7 +126,9 @@ export async function GET(request: NextRequest) {
           scrapedAt: track.scrapedAt,
           // Determine if this scrape was successful (has views > 0 or is not first entry)
           success: Number(track.views) > 0 || viewHistory.indexOf(track) > 0
-        }))
+        })),
+        // Add scrape count for quick reference
+        scrapeCount: viewHistory.length
       }
     })
 

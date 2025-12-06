@@ -104,11 +104,21 @@ interface Submission {
   platform: string
   status: string
   initialViews: string
+  currentViews?: string
+  viewChange?: string
   finalEarnings: string
   createdAt: string
+  scrapeCount?: number
+  lastTracked?: string
   campaigns: {
     title: string
     payoutRate: number
+  }
+  clips?: {
+    id: string
+    views?: string
+    earnings?: string
+    status?: string
   }
 }
 
@@ -996,8 +1006,10 @@ export default function CampaignDetailPage() {
                   <div className="space-y-3">
                     {campaignSubmissions.map((submission) => {
                       const Icon = platformIcons[submission.platform]
-                      const earnings = parseFloat(submission.finalEarnings || "0")
-                      const views = parseInt(submission.initialViews || "0")
+                      const earnings = parseFloat(submission.finalEarnings || submission.clips?.earnings || "0")
+                      const initialViews = parseInt(submission.initialViews || "0")
+                      const currentViews = parseInt(submission.currentViews || submission.clips?.views || submission.initialViews || "0")
+                      const viewGrowth = currentViews - initialViews
                       
                       return (
                         <div
@@ -1011,6 +1023,11 @@ export default function CampaignDetailPage() {
                                   {Icon && <Icon className="w-4 h-4" />}
                                 </div>
                                 {getStatusBadge(submission.status)}
+                                {submission.scrapeCount !== undefined && submission.scrapeCount > 0 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {submission.scrapeCount} scrape{submission.scrapeCount !== 1 ? 's' : ''}
+                                  </span>
+                                )}
                               </div>
                               <a
                                 href={submission.clipUrl}
@@ -1023,20 +1040,36 @@ export default function CampaignDetailPage() {
                                   : submission.clipUrl}
                                 <ExternalLink className="w-3 h-3 flex-shrink-0" />
                               </a>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Submitted {new Date(submission.createdAt).toLocaleDateString()}
-                              </p>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                <span>Submitted {new Date(submission.createdAt).toLocaleDateString()}</span>
+                                {currentViews > 0 && (
+                                  <span className="font-medium text-foreground">
+                                    {currentViews.toLocaleString()} views
+                                    {viewGrowth > 0 && (
+                                      <span className="text-green-600 dark:text-green-400 ml-1">
+                                        (+{viewGrowth.toLocaleString()})
+                                      </span>
+                                    )}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             <div className="text-right">
-                              {submission.status === "APPROVED" && (
+                              {submission.status === "APPROVED" && earnings > 0 ? (
                                 <>
                                   <p className="font-bold text-foreground">{formatCurrency(earnings)}</p>
                                   <p className="text-xs text-muted-foreground">earned</p>
                                 </>
-                              )}
-                              {submission.status === "PENDING" && (
-                                <p className="text-xs text-muted-foreground">Awaiting review</p>
-                              )}
+                              ) : submission.status === "APPROVED" ? (
+                                <p className="text-xs text-muted-foreground">Tracking views...</p>
+                              ) : submission.status === "PENDING" ? (
+                                <>
+                                  <p className="text-xs text-muted-foreground">Awaiting review</p>
+                                  {currentViews > 0 && (
+                                    <p className="text-xs text-muted-foreground/70 italic">views being tracked</p>
+                                  )}
+                                </>
+                              ) : null}
                             </div>
                           </div>
                         </div>

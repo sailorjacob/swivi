@@ -29,7 +29,9 @@ interface ClipData {
   clipId: string
   clipUrl: string
   platform: string
-  status: string
+  status: string // Submission status: PENDING, APPROVED, REJECTED
+  clipStatus?: string // Clip status: PENDING, ACTIVE
+  processingStatus?: string
   submittedAt: string
   initialViews: number
   currentViews: number
@@ -45,6 +47,7 @@ interface ClipData {
     email: string
   }
   viewHistory: ViewHistoryPoint[]
+  scrapeCount?: number
 }
 
 interface CampaignGroup {
@@ -486,7 +489,15 @@ export default function AdminAnalyticsPage() {
                                   <div className="flex items-center gap-2 mb-1">
                                     {getPlatformLogo(clip.platform, '', 16)}
                                     <span className="font-medium text-sm">{clip.user.name || clip.user.email}</span>
-                                    <Badge variant="outline" className="text-xs">{clip.status}</Badge>
+                                    <Badge 
+                                      variant={clip.status === 'APPROVED' ? 'default' : clip.status === 'PENDING' ? 'secondary' : 'outline'} 
+                                      className="text-xs"
+                                    >
+                                      {clip.status}
+                                    </Badge>
+                                    {clip.status === 'PENDING' && (
+                                      <span className="text-xs text-muted-foreground">(no earnings until approved)</span>
+                                    )}
                               </div>
                               <a 
                                 href={clip.clipUrl} 
@@ -503,9 +514,11 @@ export default function AdminAnalyticsPage() {
                             <div className="text-right ml-4">
                                   <p className="font-bold">{clip.currentViews.toLocaleString()} views</p>
                               {viewGrowth > 0 && (
-                                    <p className="text-xs font-medium">+{viewGrowth.toLocaleString()}</p>
+                                    <p className="text-xs font-medium text-green-600 dark:text-green-400">+{viewGrowth.toLocaleString()}</p>
                               )}
-                                  <p className="text-xs text-muted-foreground">${clip.earnings.toFixed(2)}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {clip.status === 'APPROVED' ? `$${clip.earnings.toFixed(2)}` : 'No earnings yet'}
+                                  </p>
                             </div>
                           </div>
 
@@ -529,8 +542,10 @@ export default function AdminAnalyticsPage() {
 
                               {/* Scrape Status */}
                               <div className="flex items-center gap-1 mt-2">
-                            <span className="text-xs text-muted-foreground">Scrapes:</span>
-                                {clip.viewHistory.slice(0, 10).map((point, idx) => (
+                            <span className="text-xs text-muted-foreground">
+                              {clip.viewHistory.length} scrape{clip.viewHistory.length !== 1 ? 's' : ''}:
+                            </span>
+                                {clip.viewHistory.slice(-10).map((point, idx) => (
                               <div 
                                 key={idx}
                                 title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
@@ -543,8 +558,11 @@ export default function AdminAnalyticsPage() {
                               </div>
                             ))}
                                 {clip.viewHistory.length > 10 && (
-                                  <span className="text-xs text-muted-foreground">+{clip.viewHistory.length - 10} more</span>
+                                  <span className="text-xs text-muted-foreground">(showing last 10)</span>
                             )}
+                                {clip.viewHistory.length === 0 && (
+                                  <span className="text-xs text-muted-foreground italic">No scrapes yet</span>
+                                )}
                           </div>
                         </div>
                       )

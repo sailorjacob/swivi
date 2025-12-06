@@ -66,9 +66,16 @@ export async function GET(request: NextRequest) {
                   id: true,
                   title: true,
                   earnings: true,
+                  views: true,
+                  status: true,
                   view_tracking: {
-                    orderBy: { date: "desc" },
-                    take: 2
+                    orderBy: { scrapedAt: "desc" },
+                    select: {
+                      id: true,
+                      views: true,
+                      date: true,
+                      scrapedAt: true
+                    }
                   }
                 }
               }
@@ -277,26 +284,39 @@ export async function GET(request: NextRequest) {
         return sum + Number(submission.clips?.earnings || 0)
       }, 0)
 
-    // Get recent clips with detailed view tracking
+    // Get recent clips with detailed view tracking including full scrape history
     const recentClips = userData.clipSubmissions.map(submission => {
       const clip = submission.clips
-      const latestTracking = clip?.view_tracking?.[0]
+      const viewTrackingRecords = clip?.view_tracking || []
+      const latestTracking = viewTrackingRecords[0]
       const initialViews = submission.initialViews ? Number(submission.initialViews) : 0
 
       // Calculate current views and view change since submission
-      const currentViews = latestTracking ? Number(latestTracking.views) : initialViews
+      const currentViews = clip?.views ? Number(clip.views) : (latestTracking ? Number(latestTracking.views) : initialViews)
       const viewChange = currentViews - initialViews
 
       // Get earnings from clip (not submission.payout which is deprecated)
-      const earnings = clip?.earnings ? Number(clip.earnings) : 0
+      // Only show earnings if submission is approved
+      const earnings = submission.status === 'APPROVED' && clip?.earnings ? Number(clip.earnings) : 0
+
+      // Build scrape history for display
+      const scrapeHistory = viewTrackingRecords.slice(0, 20).map((track: any) => ({
+        views: Number(track.views),
+        date: track.date,
+        scrapedAt: track.scrapedAt,
+        success: Number(track.views) > 0
+      }))
 
       return {
         id: submission.id,
+        clipId: clip?.id || null,
         title: clip?.title || submission.clipUrl,
         campaign: submission.campaigns?.title || "Unknown Campaign",
         campaignId: submission.campaigns?.id || null,
         campaignImage: submission.campaigns?.featuredImage || null,
+        campaignStatus: submission.campaigns?.status || null,
         status: submission.status?.toLowerCase() || "unknown",
+        clipStatus: clip?.status || null,
         createdAt: submission.createdAt ? submission.createdAt.toISOString() : new Date().toISOString(),
         views: currentViews,
         initialViews: initialViews.toString(),
@@ -305,7 +325,9 @@ export async function GET(request: NextRequest) {
         earnings: earnings,
         clipUrl: submission.clipUrl,
         platform: submission.platform,
-        lastTracked: latestTracking?.date ? latestTracking.date.toISOString().split('T')[0] : null
+        lastTracked: latestTracking?.scrapedAt ? new Date(latestTracking.scrapedAt).toISOString() : null,
+        scrapeCount: viewTrackingRecords.length,
+        scrapeHistory: scrapeHistory
       }
     })
 

@@ -60,17 +60,49 @@ export async function GET(request: NextRequest) {
             creator: true,
             payoutRate: true
           }
+        },
+        clips: {
+          select: {
+            id: true,
+            views: true,
+            earnings: true,
+            status: true,
+            view_tracking: {
+              orderBy: { scrapedAt: "desc" },
+              select: {
+                views: true,
+                scrapedAt: true
+              }
+            }
+          }
         }
       }
     })
 
-    // Convert BigInt values to strings for JSON serialization
-    const submissionsResponse = submissions.map(sub => ({
-      ...sub,
-      initialViews: sub.initialViews ? sub.initialViews.toString() : "0",
-      finalEarnings: sub.finalEarnings ? sub.finalEarnings.toString() : "0",
-      payout: sub.payout ? sub.payout.toString() : null,
-    }))
+    // Convert BigInt values to strings for JSON serialization and add tracking data
+    const submissionsResponse = submissions.map(sub => {
+      const viewTracking = sub.clips?.view_tracking || []
+      const currentViews = sub.clips?.views ? Number(sub.clips.views) : 
+                          (viewTracking[0] ? Number(viewTracking[0].views) : Number(sub.initialViews || 0))
+      const initialViews = Number(sub.initialViews || 0)
+      
+      return {
+        ...sub,
+        initialViews: sub.initialViews ? sub.initialViews.toString() : "0",
+        currentViews: currentViews.toString(),
+        viewChange: Math.max(0, currentViews - initialViews).toString(),
+        finalEarnings: sub.finalEarnings ? sub.finalEarnings.toString() : "0",
+        payout: sub.payout ? sub.payout.toString() : null,
+        scrapeCount: viewTracking.length,
+        lastTracked: viewTracking[0]?.scrapedAt ? new Date(viewTracking[0].scrapedAt).toISOString() : null,
+        clips: sub.clips ? {
+          id: sub.clips.id,
+          views: sub.clips.views ? sub.clips.views.toString() : "0",
+          earnings: sub.clips.earnings ? sub.clips.earnings.toString() : "0",
+          status: sub.clips.status
+        } : null
+      }
+    })
 
     return NextResponse.json(submissionsResponse)
   } catch (error) {
@@ -279,14 +311,29 @@ export async function POST(request: NextRequest) {
       // Continue with submission but log for manual review
     }
 
-    // Create the submission first, then scrape in background
+    // Create the submission AND clip together, then scrape in background
+    // Creating clip immediately allows view tracking to start right away
     // This ensures fast UX while still capturing accurate initial views
     let submission
+    let clip
     try {
+      // Create clip record first - this enables immediate view tracking
+      clip = await prisma.clip.create({
+        data: {
+          userId: dbUser.id,
+          url: validatedData.clipUrl,
+          platform: validatedData.platform,
+          status: 'PENDING', // Mark as pending until submission is approved
+          views: BigInt(0)
+        }
+      })
+      console.log(`✅ Clip created with ID: ${clip.id}`)
+
       submission = await prisma.clipSubmission.create({
         data: {
           userId: dbUser.id,
           campaignId: validatedData.campaignId,
+          clipId: clip.id, // Link clip immediately
           clipUrl: validatedData.clipUrl,
           platform: validatedData.platform,
           mediaFileUrl: validatedData.mediaFileUrl,
@@ -338,6 +385,13 @@ export async function POST(request: NextRequest) {
             // Update even if views is 0 - this means scraping worked but content has 0 views
             const finalViews = !isNaN(views) ? views : 0
             
+            // Get the submission to find its clipId
+            const sub = await prisma.clipSubmission.findUnique({
+              where: { id: submissionId },
+              select: { clipId: true, userId: true }
+            })
+            
+            // Update submission with initial views
             await prisma.clipSubmission.update({
               where: { id: submissionId },
               data: {
@@ -345,6 +399,34 @@ export async function POST(request: NextRequest) {
                 processingStatus: "COMPLETE"
               }
             })
+            
+            // Update clip with current views and create initial tracking record
+            if (sub?.clipId) {
+              await prisma.clip.update({
+                where: { id: sub.clipId },
+                data: {
+                  views: BigInt(finalViews),
+                  likes: BigInt(scrapedData.likes || 0),
+                  shares: BigInt(scrapedData.shares || 0)
+                }
+              })
+              
+              // Create initial view tracking record
+              const today = new Date()
+              today.setHours(0, 0, 0, 0)
+              await prisma.viewTracking.create({
+                data: {
+                  userId: sub.userId,
+                  clipId: sub.clipId,
+                  views: BigInt(finalViews),
+                  date: today,
+                  platform: platform,
+                  scrapedAt: new Date()
+                }
+              })
+              console.log(`📊 Created initial view tracking for clip ${sub.clipId}`)
+            }
+            
             console.log(`📊 Background scrape updated submission ${submissionId} with ${finalViews} initial views`)
           } else {
             console.error(`⚠️ Background scrape failed for ${submissionId}: ${scrapedData?.error || 'Unknown error'}`)

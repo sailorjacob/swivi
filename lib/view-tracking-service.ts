@@ -357,6 +357,7 @@ export class ViewTrackingService {
     platform: SocialPlatform
     lastTracked?: Date
     campaignId: string
+    isApproved?: boolean
   }>> {
     // Get campaigns that need view tracking:
     // - ACTIVE/PAUSED: Full tracking with earnings calculation
@@ -377,11 +378,14 @@ export class ViewTrackingService {
         budget: true,
         clipSubmissions: {
           where: {
-            status: 'APPROVED',
+            // Track ALL submissions with clips (not just approved)
+            // This gives admins visibility into pending clips' performance
+            // Earnings are only calculated for APPROVED clips (see trackClipViews)
             clipId: { not: null }
           },
           select: {
             clipId: true,
+            status: true, // Include status to know if approved
             clips: {
               select: {
                 id: true,
@@ -389,9 +393,9 @@ export class ViewTrackingService {
                 platform: true,
                 status: true,
                 view_tracking: {
-                  orderBy: { date: 'desc' },
+                  orderBy: { scrapedAt: 'desc' },
                   take: 1,
-                  select: { date: true }
+                  select: { scrapedAt: true }
                 }
               }
             }
@@ -412,6 +416,7 @@ export class ViewTrackingService {
         platform: SocialPlatform
         lastTracked?: Date
         campaignId: string
+        isApproved?: boolean
       }>
       priority: number
       budgetRemaining: number
@@ -419,14 +424,17 @@ export class ViewTrackingService {
 
     const campaignsWithClips: CampaignWithPriority[] = activeCampaigns
       .map(campaign => {
+        // Include all clips (ACTIVE and PENDING status) for tracking
+        // This ensures pending submissions are also tracked for admin visibility
         const clips = campaign.clipSubmissions
-          .filter(sub => sub.clips?.status === 'ACTIVE')
+          .filter(sub => sub.clips && (sub.clips.status === 'ACTIVE' || sub.clips.status === 'PENDING'))
           .map(sub => ({
             id: sub.clips!.id,
             url: sub.clips!.url,
             platform: sub.clips!.platform,
-            lastTracked: sub.clips!.view_tracking[0]?.date,
-            campaignId: campaign.id
+            lastTracked: sub.clips!.view_tracking[0]?.scrapedAt,
+            campaignId: campaign.id,
+            isApproved: sub.status === 'APPROVED' // Track approval status for earnings calc
           }))
 
         if (clips.length === 0) return null

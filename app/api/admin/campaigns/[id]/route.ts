@@ -95,12 +95,13 @@ export async function GET(
                 id: true,
                 earnings: true,
                 views: true,
+                status: true,
                 view_tracking: {
-                  orderBy: { date: 'desc' },
-                  take: 1,
+                  orderBy: { scrapedAt: 'desc' },
                   select: {
                     views: true,
-                    date: true
+                    date: true,
+                    scrapedAt: true
                   }
                 }
               }
@@ -115,23 +116,28 @@ export async function GET(
       return NextResponse.json({ error: "Campaign not found" }, { status: 404 })
     }
 
-    // Process submissions to include calculated fields
+    // Process submissions to include calculated fields and scrape tracking
     const processedSubmissions = campaign.clipSubmissions.map(sub => {
-      const latestViews = sub.clips?.view_tracking?.[0]?.views || sub.clips?.views || 0
+      const viewTracking = sub.clips?.view_tracking || []
+      const latestViews = viewTracking[0]?.views || sub.clips?.views || 0
       const initialViews = sub.initialViews || 0
       const viewsGained = Number(latestViews) - Number(initialViews)
       const earnings = Number(sub.clips?.earnings || 0)
+      const scrapeCount = viewTracking.length
 
       return {
         id: sub.id,
         clipUrl: sub.clipUrl,
         platform: sub.platform,
         status: sub.status,
+        clipStatus: sub.clips?.status || null,
         createdAt: sub.createdAt,
         initialViews: Number(initialViews),
         currentViews: Number(latestViews),
         viewsGained,
         earnings,
+        scrapeCount,
+        lastTracked: viewTracking[0]?.scrapedAt || null,
         user: {
           id: sub.users.id,
           name: sub.users.name,

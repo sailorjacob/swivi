@@ -45,6 +45,13 @@ const getStatusIcon = (status: string) => {
   return null
 }
 
+interface ScrapeRecord {
+  views: number
+  date: string
+  scrapedAt: string
+  success: boolean
+}
+
 interface DashboardData {
   stats: Array<{
     title: string
@@ -54,10 +61,14 @@ interface DashboardData {
   }>
   recentClips: Array<{
     id: string
+    clipId?: string | null
     title: string
     campaign: string
+    campaignId?: string | null
     campaignImage?: string | null
+    campaignStatus?: string | null
     status: string
+    clipStatus?: string | null
     views: number
     earnings: number
     clipUrl: string
@@ -66,10 +77,14 @@ interface DashboardData {
     initialViews?: string
     currentViews?: string
     viewChange?: string
+    lastTracked?: string | null
+    scrapeCount?: number
+    scrapeHistory?: ScrapeRecord[]
   }>
   activeCampaigns: number
   availableBalance?: number
   totalEarnings?: number
+  trackedViews?: number
 }
 
 export default function ClipperDashboard() {
@@ -532,22 +547,31 @@ export default function ClipperDashboard() {
                       </div>
 
                       <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mb-2">
-                        <span>{clip.views.toLocaleString()} views
-                          {clip.viewChange && Number(clip.viewChange) > 0 && (
-                            <span className="text-foreground ml-1">(+{Number(clip.viewChange).toLocaleString()})</span>
-                          )}
-                        </span>
-                        {clip.earnings > 0 && (
-                          <span>${clip.earnings.toFixed(2)} earned</span>
+                        <span className="font-medium text-foreground">{clip.views.toLocaleString()} views</span>
+                        {clip.viewChange && Number(clip.viewChange) > 0 && (
+                          <span className="text-green-600 dark:text-green-400">+{Number(clip.viewChange).toLocaleString()}</span>
                         )}
+                        {clip.status === 'approved' && clip.earnings > 0 ? (
+                          <span className="font-medium">${clip.earnings.toFixed(2)} earned</span>
+                        ) : clip.status === 'pending' ? (
+                          <span className="text-xs italic">earnings start after approval</span>
+                        ) : null}
                         <span className="hidden sm:inline">•</span>
-                        <span>Submitted {new Date(clip.createdAt).toLocaleDateString('en-US', { 
+                        {clip.scrapeCount !== undefined && clip.scrapeCount > 0 && (
+                          <span className="text-xs">{clip.scrapeCount} scrape{clip.scrapeCount !== 1 ? 's' : ''}</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground mb-2">
+                        Submitted {new Date(clip.createdAt).toLocaleDateString('en-US', { 
                           month: 'short', 
                           day: 'numeric', 
                           year: new Date(clip.createdAt).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
                           hour: '2-digit',
                           minute: '2-digit'
-                        })}</span>
+                        })}
+                        {clip.lastTracked && (
+                          <span> • Last tracked {new Date(clip.lastTracked).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                        )}
                       </div>
 
                       {/* Clean clickable clip URL - just the essential link */}
