@@ -36,7 +36,7 @@ const onboardingSteps: OnboardingStep[] = [
           <div className="text-center p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
             <DollarSign className="h-8 w-8 mx-auto mb-2 text-green-400" />
             <h4 className="font-medium mb-1 text-white">Earn $20-100+</h4>
-            <p className="text-sm text-neutral-400">Per approved clip</p>
+            <p className="text-sm text-neutral-400">Per approved post</p>
           </div>
           <div className="text-center p-4 border border-neutral-700 rounded-lg bg-neutral-800/50">
             <TrendingUp className="h-8 w-8 mx-auto mb-2 text-white" />
@@ -55,11 +55,11 @@ const onboardingSteps: OnboardingStep[] = [
   {
     id: "requirements",
     title: "Understanding the Requirements",
-    description: "Learn what makes a successful clip",
+    description: "Learn what makes a successful post",
     completed: false,
     content: (
       <div className="space-y-6">
-        <h3 className="text-2xl font-light mb-4">Clip Requirements & Guidelines</h3>
+        <h3 className="text-2xl font-light mb-4">Post Requirements & Guidelines</h3>
         
         <div className="space-y-4">
           <div className="flex items-start gap-4 p-4 border border-neutral-700 rounded-lg">
@@ -199,7 +199,7 @@ const onboardingSteps: OnboardingStep[] = [
               <h4 className="font-medium mb-1">Submit for Review</h4>
               <p className="text-sm text-muted-foreground">
                 Submit your clips immediately after posting. Use "scan account" for automatic 
-                detection or manually submit clip links.
+                detection or manually submit post links.
               </p>
             </div>
           </div>
@@ -265,7 +265,7 @@ const onboardingSteps: OnboardingStep[] = [
   }
 ]
 
-export function ClippersOnboarding() {
+export function CreatorsOnboarding() {
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
 

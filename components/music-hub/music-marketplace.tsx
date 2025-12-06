@@ -131,7 +131,7 @@ export function MusicMarketplace() {
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-2 mb-4">
               <Music className="h-8 w-8 text-primary" />
-              <h2 className="text-3xl md:text-4xl font-light">Music Clipping Hub</h2>
+              <h2 className="text-3xl md:text-4xl font-light">Music Creator Hub</h2>
             </div>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Earn extra income by using sponsored music in your videos. Get paid ${priceRange[0]}-${priceRange[1]} per 1,000 views!

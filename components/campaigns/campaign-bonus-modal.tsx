@@ -67,7 +67,7 @@ const applicationSchema = z.object({
   }),
   profileLink: z.string().url("Valid profile URL is required"),
   tier: z.enum(["TIER_1_HIGH_VOLUME", "TIER_2_QUALITY"]),
-  clipLinks: z.string().min(1, "At least one clip link is required"),
+  clipLinks: z.string().min(1, "At least one post link is required"),
   paymentAddress: z.string().min(1, "PayPal email or BTC address is required"),
 })
 
@@ -112,7 +112,7 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
     {
       name: "Tier 2 — Quality Bounty",
       icon: <Award className="w-5 h-5" />,
-      reward: "$40 per winning clip",
+      reward: "$40 per winning post",
       totalPayout: "$800",
       requirements: [
         "Focus on strongest editing and viewer retention",
@@ -170,7 +170,7 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
   const onSubmit = async (data: ApplicationFormData) => {
     setIsSubmitting(true)
     try {
-      // Parse clip links (one per line)
+      // Parse post links (one per line)
       const clipLinks = data.clipLinks
         .split('\n')
         .map(link => link.trim())
@@ -368,13 +368,13 @@ export function CampaignBonusModal({ isOpen, onClose, campaign = defaultCampaign
                       </div>
                     )}
 
-                    {/* Clip Links */}
+                    {/* Post Links */}
                     <div>
                       <Label htmlFor="clipLinks">Link to Posted Clips *</Label>
                       <Textarea
                         id="clipLinks"
                         {...register("clipLinks")}
-                        placeholder="Paste your clip URLs (one per line)&#10;https://tiktok.com/...&#10;https://tiktok.com/..."
+                        placeholder="Paste your post URLs (one per line)&#10;https://tiktok.com/...&#10;https://tiktok.com/..."
                         className="mt-1 min-h-[100px]"
                       />
                       {errors.clipLinks && (

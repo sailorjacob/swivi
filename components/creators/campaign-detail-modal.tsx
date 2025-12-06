@@ -136,15 +136,15 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to submit clip")
+        throw new Error(errorData.error || "Failed to submit post")
       }
       
-      toast.success("Clip submitted successfully! View tracking has started. You'll be notified once it's reviewed.")
+      toast.success("Post submitted successfully! View tracking has started. You'll be notified once it's reviewed.")
       reset()
       onOpenChange(false)
     } catch (error) {
       console.error("Submission error:", error)
-      toast.error(error instanceof Error ? error.message : "Failed to submit clip. Please try again.")
+      toast.error(error instanceof Error ? error.message : "Failed to submit post. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -240,7 +240,7 @@ export function CampaignDetailModal({ campaign, open, onOpenChange }: CampaignDe
           <div className="border border-border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
               <Link2 className="w-4 h-4 text-foreground" />
-              <h3 className="text-base font-medium text-foreground">Submit Your Clip</h3>
+              <h3 className="text-base font-medium text-foreground">Submit Your Post</h3>
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">

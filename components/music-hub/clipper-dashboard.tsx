@@ -52,7 +52,7 @@ const mockSubmissions: VideoSubmission[] = [
   }
 ]
 
-export function ClipperDashboard() {
+export function CreatorDashboard() {
   const [submissions, setSubmissions] = useState<VideoSubmission[]>(mockSubmissions)
   const [newVideoUrl, setNewVideoUrl] = useState("")
   const [selectedCampaignId, setSelectedCampaignId] = useState("")

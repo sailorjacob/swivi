@@ -39,7 +39,7 @@ export function CampaignStatusGuide() {
                   <span className="px-2 py-0.5 text-xs border rounded">SCHEDULED</span>
                   <span className="font-medium">Scheduled</span>
                 </div>
-                <p className="text-muted-foreground">Visible to clippers but no submissions accepted until the launch date. Clippers can see it's "coming soon".</p>
+                <p className="text-muted-foreground">Visible to creators but no submissions accepted until the launch date. Creators can see it's "coming soon".</p>
               </div>
               
               <div className="p-3 border rounded-lg bg-foreground/5">
@@ -47,7 +47,7 @@ export function CampaignStatusGuide() {
                   <span className="px-2 py-0.5 text-xs bg-foreground text-background rounded">ACTIVE</span>
                   <span className="font-medium">Active (Live)</span>
                 </div>
-                <p className="text-muted-foreground">Fully live. Visible to clippers. Accepting submissions. View tracking is running. Earnings are being calculated.</p>
+                <p className="text-muted-foreground">Fully live. Visible to creators. Accepting submissions. View tracking is running. Earnings are being calculated.</p>
               </div>
               
               <div className="p-3 border rounded-lg">
@@ -63,7 +63,7 @@ export function CampaignStatusGuide() {
                   <span className="px-2 py-0.5 text-xs bg-muted rounded">COMPLETED</span>
                   <span className="font-medium">Completed</span>
                 </div>
-                <p className="text-muted-foreground">Campaign ended (budget exhausted or manually completed). Shows in clippers' "completed" tab. No new submissions. View tracking stopped.</p>
+                <p className="text-muted-foreground">Campaign ended (budget exhausted or manually completed). Shows in creators' "completed" tab. No new submissions. View tracking stopped.</p>
               </div>
               
               <div className="p-3 border rounded-lg">
@@ -122,9 +122,9 @@ export function CampaignStatusGuide() {
                   <EyeOff className="w-4 h-4" />
                   <span className="font-medium">Hidden</span>
                 </div>
-                <p className="text-muted-foreground mb-2">Campaign is invisible to clippers but still fully functional.</p>
+                <p className="text-muted-foreground mb-2">Campaign is invisible to creators but still fully functional.</p>
                 <ul className="text-muted-foreground list-disc list-inside space-y-1">
-                  <li>Clippers cannot see or find this campaign</li>
+                  <li>Creators cannot see or find this campaign</li>
                   <li>If ACTIVE, submissions ARE accepted (admin must share direct link)</li>
                   <li>View tracking IS running normally</li>
                   <li>Earnings ARE being calculated</li>
@@ -155,7 +155,7 @@ export function CampaignStatusGuide() {
                 </div>
                 <p className="text-muted-foreground mb-2">Campaign removed but data preserved.</p>
                 <ul className="text-muted-foreground list-disc list-inside space-y-1">
-                  <li>Hidden from everyone (admin and clippers)</li>
+                  <li>Hidden from everyone (admin and creators)</li>
                   <li>No submissions, no tracking</li>
                   <li>All historical data preserved</li>
                   <li>Can be restored back to DRAFT</li>
@@ -169,7 +169,7 @@ export function CampaignStatusGuide() {
           <section className="p-4 bg-muted/50 rounded-lg">
             <h3 className="font-semibold text-base mb-3">🧪 How to Test Submissions (Ghost Campaign)</h3>
             <p className="text-muted-foreground mb-3">
-              To test the submission flow without affecting real data or being visible to clippers:
+              To test the submission flow without affecting real data or being visible to creators:
             </p>
             <ol className="space-y-2 text-muted-foreground list-decimal list-inside">
               <li>Create a new campaign with any title (e.g., "Test Campaign - Delete Later")</li>
@@ -178,7 +178,7 @@ export function CampaignStatusGuide() {
               <li>Save the campaign</li>
               <li>The campaign is now:
                 <ul className="list-disc list-inside ml-6 mt-1">
-                  <li>Invisible to all clippers</li>
+                  <li>Invisible to all creators</li>
                   <li>Accepting submissions (admins can submit via direct URL)</li>
                   <li>NOT being tracked for views (saves API calls)</li>
                   <li>NOT included in any analytics</li>

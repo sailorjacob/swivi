@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 
 import { MusicMarketplace } from "@/components/music-hub/music-marketplace"
 import { ArtistSubmission } from "@/components/music-hub/artist-submission"
-import { ClipperDashboard } from "@/components/music-hub/clipper-dashboard"
+import { CreatorDashboard } from "@/components/music-hub/clipper-dashboard"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { DarkThemeWrapper } from "../layout-wrapper"
@@ -20,7 +20,7 @@ export default function MusicHubPage() {
             <div className="text-center mb-12">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Music className="h-10 w-10 text-primary" />
-                <h1 className="text-4xl md:text-5xl font-light">Music Clipping Hub</h1>
+                <h1 className="text-4xl md:text-5xl font-light">Music Creator Hub</h1>
               </div>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                 The revolutionary platform where creators earn extra income and artists get viral exposure.
@@ -63,7 +63,7 @@ export default function MusicHubPage() {
               </TabsContent>
 
               <TabsContent value="dashboard" className="mt-8">
-                <ClipperDashboard />
+                <CreatorDashboard />
               </TabsContent>
 
               <TabsContent value="submit" className="mt-8">

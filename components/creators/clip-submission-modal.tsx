@@ -113,17 +113,17 @@ export function ClipSubmissionModal({ open, onOpenChange, campaign }: ClipSubmis
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to submit clip")
+        throw new Error(errorData.error || "Failed to submit post")
       }
 
       const result = await response.json()
-      toast.success("Clip submitted successfully! View tracking has started. You'll be notified once it's reviewed.")
+      toast.success("Post submitted successfully! View tracking has started. You'll be notified once it's reviewed.")
       reset()
       setUploadedFile(null)
       onOpenChange(false)
     } catch (error) {
       console.error("Submission error:", error)
-      toast.error("Failed to submit clip. Please try again.")
+      toast.error("Failed to submit post. Please try again.")
     } finally {
       setIsLoading(false)
     }

@@ -61,7 +61,7 @@ const initialSteps: OnboardingStep[] = [
               <DollarSign className="w-5 h-5 text-green-400" />
             </div>
             <p className="text-white font-medium text-sm">$20-100+</p>
-            <p className="text-gray-400 text-xs">per clip</p>
+            <p className="text-gray-400 text-xs">per post</p>
           </div>
           <div className="group p-4 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-gray-700 hover:border-green-500/30 transition-all duration-300">
             <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-green-500/20 transition-colors">
@@ -126,7 +126,7 @@ const initialSteps: OnboardingStep[] = [
   {
     id: "social",
     title: "Connect Social Accounts",
-    description: "Link your accounts to start clipping",
+    description: "Link your accounts to start posting",
     icon: LinkIcon,
     completed: false,
     content: (

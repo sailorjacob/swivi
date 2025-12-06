@@ -56,7 +56,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: "When is the best time to submit my posts after posting?",
-    answer: "Right away is ideal — the sooner you submit, the faster your views get counted and the more money you can make. Submitting early also gives your clip the best chance to rank on leaderboards and get approved in time.",
+    answer: "Right away is ideal — the sooner you submit, the faster your views get counted and the more money you can make. Submitting early also gives your post the best chance to rank on leaderboards and get approved in time.",
     category: "campaigns"
   },
   {
@@ -83,7 +83,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: "How is engagement rate calculated?",
-    answer: "Engagement rate = (Likes + Comments + Shares) ÷ Views × 100. For example: A clip with 1,000 views and 7 total engagements has a 0.7% engagement rate and qualifies. A clip with 2,000 views and 5 total engagements has a 0.25% engagement rate and does not qualify.",
+    answer: "Engagement rate = (Likes + Comments + Shares) ÷ Views × 100. For example: A post with 1,000 views and 7 total engagements has a 0.7% engagement rate and qualifies. A post with 2,000 views and 5 total engagements has a 0.25% engagement rate and does not qualify.",
     category: "requirements"
   },
   {
@@ -130,12 +130,12 @@ const faqData: FAQItem[] = [
   },
   {
     question: "Do my views carry over to the next campaign?",
-    answer: "No. Your views only count towards the current active campaign. If your clip didn't reach the minimum views for payout, those views won't roll over to the next campaign.",
+    answer: "No. Your views only count towards the current active campaign. If your post didn't reach the minimum views for payout, those views won't roll over to the next campaign.",
     category: "earnings"
   },
   {
-    question: "Do I need to hit 10K views on each individual clip, or do the views add up?",
-    answer: "All the views from your clips get added up together — it doesn't have to be 10K per clip.",
+    question: "Do I need to hit 10K views on each individual post, or do the views add up?",
+    answer: "All the views from your posts get added up together — it doesn't have to be 10K per post.",
     category: "earnings"
   },
 
@@ -181,17 +181,17 @@ const faqData: FAQItem[] = [
   // Troubleshooting
   {
     question: "Why did my video get denied?",
-    answer: "If your clip was denied, the reason will be clearly mentioned in the response. Common reasons include incorrect video length, missing hashtags, or improper sound usage.",
+    answer: "If your post was denied, the reason will be clearly mentioned in the response. Common reasons include incorrect video length, missing hashtags, or improper sound usage.",
     category: "troubleshooting"
   },
   {
-    question: "What should I do if I accidentally submitted the wrong clip or account?",
+    question: "What should I do if I accidentally submitted the wrong post or account?",
     answer: "Go to the campaign dashboard, click \"Remove Clip,\" and paste the link to the video you want to remove.",
     category: "troubleshooting"
   },
   {
-    question: "Can I edit or change a clip after it has been approved?",
-    answer: "No. Editing your clip after approval is not allowed. We check for any changes that might violate campaign rules. If needed, you can remove the clip completely instead.",
+    question: "Can I edit or change a post after it has been approved?",
+    answer: "No. Editing your post after approval is not allowed. We check for any changes that might violate campaign rules. If needed, you can remove the post completely instead.",
     category: "troubleshooting"
   },
   {
@@ -201,7 +201,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: "Can I delete or archive my clips after submission?",
-    answer: "Yes. To remove your clips from tracking, use the \"Remove Clip\" button in the campaign dashboard. If you delete your video from the social platform directly, it will automatically disappear from our system.",
+    answer: "Yes. To remove your posts from tracking, use the \"Remove Clip\" button in the campaign dashboard. If you delete your video from the social platform directly, it will automatically disappear from our system.",
     category: "troubleshooting"
   },
   {

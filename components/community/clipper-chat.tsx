@@ -65,7 +65,7 @@ const mockMessages: Message[] = [
     id: "1",
     userId: "user1",
     userName: "Alex Thompson",
-    content: "Just hit 1M views on my latest clip! 🎉",
+    content: "Just hit 1M views on my latest post! 🎉",
     timestamp: new Date(Date.now() - 1000 * 60 * 5),
     channel: "general"
   },
