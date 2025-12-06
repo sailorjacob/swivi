@@ -417,7 +417,7 @@ export default function CampaignsPage() {
               <CardContent className="p-0">
                 {/* Campaign Image */}
                 <div 
-                  className="relative h-48 bg-muted rounded-t-lg overflow-hidden cursor-pointer group-hover:scale-105 transition-transform duration-300"
+                  className="relative h-48 bg-muted rounded-t-lg overflow-hidden cursor-pointer"
                   onClick={() => handleViewCampaign(campaign)}
                 >
                   {isActive && (
@@ -463,7 +463,7 @@ export default function CampaignsPage() {
                         <img
                           src={campaign.featuredImage}
                           alt={campaign.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           onError={(e) => {
                             console.log('Image failed to load:', campaign.featuredImage)
                             // Hide the image and show the gradient fallback
@@ -477,12 +477,12 @@ export default function CampaignsPage() {
                             console.log('Image loaded successfully:', campaign.featuredImage)
                           }}
                         />
-                        <div className="gradient-fallback hidden w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center absolute inset-0">
+                        <div className="gradient-fallback hidden w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center absolute inset-0 group-hover:scale-110 transition-transform duration-500">
                           <span className="text-white text-lg font-medium">{campaign.title}</span>
                         </div>
                       </>
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
                         <span className="text-white text-lg font-medium">{campaign.title}</span>
                         {/* Debug info */}
                         <div className="absolute bottom-0 left-0 text-xs text-white/50 p-1">
