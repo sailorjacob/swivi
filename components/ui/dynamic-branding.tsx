@@ -150,7 +150,7 @@ export function DynamicBranding() {
     return pageBranding['/'] || []
   }, [pathname])
 
-  // Skip rendering if no branding configs or if on clipper/admin pages
+  // Skip rendering if no branding configs or if on creator/admin pages
   if (!brandingConfigs || brandingConfigs.length === 0 || isCreatorPage || isAdminPage) {
     return null
   }

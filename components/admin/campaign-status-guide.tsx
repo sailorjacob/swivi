@@ -274,7 +274,7 @@ export function CampaignStatusGuide() {
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               * Admin must share direct campaign URL for submissions<br />
-              ** Shows in clippers' "completed campaigns" tab
+              ** Shows in creators' "completed campaigns" tab
             </p>
           </section>
         </div>
