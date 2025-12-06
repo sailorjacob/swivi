@@ -31,9 +31,10 @@ export async function GET(request: NextRequest) {
       totalCampaigns,
       activeCampaigns,
       totalSubmissions,
-      totalViews,
       totalEarnings,
-      recentSubmissions
+      recentSubmissions,
+      // Get real-time view counts from view_tracking records
+      approvedSubmissionsWithViews
     ] = await Promise.all([
       // Total campaigns
       prisma.campaign.count(),
@@ -46,17 +47,17 @@ export async function GET(request: NextRequest) {
       // Total submissions
       prisma.clipSubmission.count(),
 
-      // Total views across all users
-      prisma.user.aggregate({
+      // Total earnings from clip.earnings (not user.totalEarnings which includes deducted payouts)
+      prisma.clip.aggregate({
+        where: {
+          clipSubmissions: {
+            some: {
+              status: { in: ['APPROVED', 'PAID'] }
+            }
+          }
+        },
         _sum: {
-          totalViews: true
-        }
-      }),
-
-      // Total earnings across all users
-      prisma.user.aggregate({
-        _sum: {
-          totalEarnings: true
+          earnings: true
         }
       }),
 
@@ -81,15 +82,46 @@ export async function GET(request: NextRequest) {
           createdAt: "desc"
         },
         take: 10
+      }),
+
+      // Real-time views calculation from view_tracking
+      prisma.clipSubmission.findMany({
+        where: {
+          status: { in: ['APPROVED', 'PAID'] }
+        },
+        select: {
+          initialViews: true,
+          clips: {
+            select: {
+              view_tracking: {
+                orderBy: { date: 'desc' },
+                take: 1,
+                select: {
+                  views: true
+                }
+              }
+            }
+          }
+        }
       })
     ])
+
+    // Calculate real-time tracked views (views gained since submission)
+    const totalTrackedViews = approvedSubmissionsWithViews.reduce((sum, submission) => {
+      const latestViews = submission.clips?.view_tracking?.[0]
+        ? Number(submission.clips.view_tracking[0].views || 0)
+        : 0
+      const initialViews = Number(submission.initialViews || 0)
+      const viewsGained = Math.max(0, latestViews - initialViews)
+      return sum + viewsGained
+    }, 0)
 
     const analytics: {
       overview: {
         totalCampaigns: number
         activeCampaigns: number
         totalSubmissions: number
-        totalViews: number | bigint
+        totalViews: number
         totalEarnings: number
       }
       recentSubmissions: any[]
@@ -99,8 +131,8 @@ export async function GET(request: NextRequest) {
         totalCampaigns,
         activeCampaigns,
         totalSubmissions,
-        totalViews: totalViews._sum.totalViews || 0,
-        totalEarnings: Number(totalEarnings._sum.totalEarnings || 0)
+        totalViews: totalTrackedViews,
+        totalEarnings: Number(totalEarnings._sum.earnings || 0)
       },
       recentSubmissions
     }
