@@ -242,10 +242,6 @@ export async function GET(request: NextRequest) {
       })
     ])
 
-    const pendingSubmissions = await prisma.clipSubmission.count({
-      where: { status: 'APPROVED' }
-    })
-
     // Calculate total tracked views from campaign breakdown (sum of all tracked views)
     const totalTrackedViews = campaignTrackedViews.reduce((sum, campaign) => sum + campaign.trackedViews, 0)
 
@@ -274,6 +270,7 @@ export async function GET(request: NextRequest) {
         totalEarnings: totalEarnings, // Real-time from clips
         pendingSubmissions: 0, // We'll calculate these from submissions
         approvedSubmissions: 0,
+        rejectedSubmissions: 0,
         paidSubmissions: 0
       },
       topCampaigns: topCampaigns.map(campaign => ({
@@ -310,6 +307,9 @@ export async function GET(request: NextRequest) {
           break
         case 'APPROVED':
           platformStats.overview.approvedSubmissions = item._count.status
+          break
+        case 'REJECTED':
+          platformStats.overview.rejectedSubmissions = item._count.status
           break
         case 'PAID':
           platformStats.overview.paidSubmissions = item._count.status

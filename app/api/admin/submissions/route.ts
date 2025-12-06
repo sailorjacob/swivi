@@ -225,10 +225,44 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Calculate pagination info - handle database errors
+    // Calculate pagination info and status counts - handle database errors
     let total
+    let statusCounts = {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      paid: 0,
+      flagged: 0,
+      total: 0
+    }
     try {
-      total = await prisma.clipSubmission.count({ where })
+      // Get total and status counts in parallel for accuracy
+      const [
+        totalCount,
+        pendingCount,
+        approvedCount,
+        rejectedCount,
+        paidCount,
+        flaggedCount
+      ] = await Promise.all([
+        prisma.clipSubmission.count({ where }),
+        prisma.clipSubmission.count({ where: { ...where, status: 'PENDING', requiresReview: false } }),
+        prisma.clipSubmission.count({ where: { ...where, status: 'APPROVED' } }),
+        prisma.clipSubmission.count({ where: { ...where, status: 'REJECTED' } }),
+        prisma.clipSubmission.count({ where: { ...where, status: 'PAID' } }),
+        prisma.clipSubmission.count({ where: { ...where, requiresReview: true } })
+      ])
+      
+      total = totalCount
+      statusCounts = {
+        pending: pendingCount,
+        approved: approvedCount,
+        rejected: rejectedCount,
+        paid: paidCount,
+        flagged: flaggedCount,
+        total: totalCount
+      }
+      
       const hasMore = offset + limit < total
 
       // Convert dates to ISO strings and BigInt to strings
@@ -288,7 +322,8 @@ export async function GET(request: NextRequest) {
           limit: limit,
           offset: offset,
           hasMore
-        }
+        },
+        statusCounts
       })
     } catch (dbError) {
       console.error("❌ Database error counting submissions:", dbError)

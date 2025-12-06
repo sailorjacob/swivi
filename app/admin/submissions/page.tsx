@@ -155,6 +155,14 @@ export default function AdminSubmissionsPage() {
     offset: 0,
     hasMore: false
   })
+  const [statusCounts, setStatusCounts] = useState({
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+    paid: 0,
+    flagged: 0,
+    total: 0
+  })
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [expandedSubmissions, setExpandedSubmissions] = useState<Set<string>>(new Set())
 
@@ -234,6 +242,10 @@ export default function AdminSubmissionsPage() {
           ...data.pagination,
           offset: offset
         })
+        // Update status counts from API (accurate totals, not from paginated data)
+        if (data.statusCounts) {
+          setStatusCounts(data.statusCounts)
+        }
       } else {
         setError("Failed to load submissions")
       }
@@ -324,11 +336,15 @@ export default function AdminSubmissionsPage() {
     return "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 font-medium"
   }
 
-  // Calculate stats
-  const pendingCount = submissions.filter(s => s.status === "PENDING" && !s.requiresReview).length
-  const approvedCount = submissions.filter(s => s.status === "APPROVED").length
-  const paidCount = submissions.filter(s => s.status === "PAID").length
-  const flaggedCount = submissions.filter(s => s.requiresReview).length
+  // Use accurate status counts from API (not calculated from paginated data)
+  const pendingCount = statusCounts.pending
+  const approvedCount = statusCounts.approved
+  const rejectedCount = statusCounts.rejected
+  const paidCount = statusCounts.paid
+  const flaggedCount = statusCounts.flagged
+  const totalCount = statusCounts.total
+  
+  // Calculate total paid earnings from loaded submissions (for display purposes)
   const totalEarnings = submissions
     .filter(s => s.status === "PAID" && s.payout)
     .reduce((sum, s) => sum + (s.payout || 0), 0)
@@ -369,6 +385,10 @@ export default function AdminSubmissionsPage() {
         {/* Compact Stats Bar */}
         <div className="flex flex-wrap items-center gap-6 mb-6 text-sm">
           <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Total:</span>
+            <span className="font-semibold">{totalCount}</span>
+          </div>
+          <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Pending:</span>
             <span className="font-semibold">{pendingCount}</span>
           </div>
@@ -376,6 +396,12 @@ export default function AdminSubmissionsPage() {
             <span className="text-muted-foreground">Approved:</span>
             <span className="font-semibold">{approvedCount}</span>
           </div>
+          {rejectedCount > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Rejected:</span>
+              <span className="font-semibold">{rejectedCount}</span>
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Paid:</span>
             <span className="font-semibold">${totalEarnings.toFixed(2)}</span>
