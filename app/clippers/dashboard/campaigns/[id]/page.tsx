@@ -656,6 +656,17 @@ export default function CampaignDetailPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Activity Button */}
+              <Button
+                variant="outline"
+                onClick={() => setActivityModalOpen(true)}
+                className="group border-zinc-400/30 hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20"
+              >
+                <Activity className="w-4 h-4 mr-2 text-zinc-400 group-hover:text-zinc-200" />
+                <span className="group-hover:text-zinc-100">
+                  Activity
+                </span>
+              </Button>
               {campaign.contentFolderUrl && (
                 <Button
                   variant="outline"
@@ -1105,62 +1116,6 @@ export default function CampaignDetailPage() {
           </motion.div>
         </div>
       </div>
-
-      {/* Bottom Actions Bar */}
-      {isActive && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="border-t border-border pt-6"
-        >
-          {hasBonuses(campaign) ? (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-md bg-muted border border-border">
-                <Trophy className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">$2,000 in Performance Bounties</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Tier 1: $150/creator (8 spots) · Tier 2: $40/winning clip (20 winners)
-                </p>
-              </div>
-            </div>
-              <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setBonusModalOpen(true)}
-                >
-                  View Bounties
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setActivityModalOpen(true)}
-                  className="gap-1.5"
-            >
-                  <Activity className="w-3.5 h-3.5" />
-                  Activity
-            </Button>
-          </div>
-            </div>
-          ) : (
-            <div className="flex justify-end">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setActivityModalOpen(true)}
-                className="gap-1.5"
-              >
-                <Activity className="w-3.5 h-3.5" />
-                Activity & Leaderboard
-              </Button>
-            </div>
-          )}
-        </motion.div>
-      )}
 
       {/* Bonus Modal */}
       <CampaignBonusModal
