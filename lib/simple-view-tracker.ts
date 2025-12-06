@@ -168,7 +168,6 @@ export class SimpleViewTracker {
         orderBy: { scrapedAt: 'desc' }
       })
       const previousViews = lastTracking ? Number(lastTracking.views) : 0
-      const viewsGained = Math.max(0, currentViews - previousViews)
 
       // 3. Use initialViews directly - 0 means clipper earns from ALL views
       let initialViewsFixed = false
@@ -191,11 +190,25 @@ export class SimpleViewTracker {
         }
       })
 
-      // 5. Update clip's current views
+      // 5. Update clip's current views - only if higher (views should never decrease)
+      const existingClip = await prisma.clip.findUnique({
+        where: { id: clip.clipId },
+        select: { views: true }
+      })
+      const existingViews = Number(existingClip?.views || 0)
+      
+      // Only update if new views are higher (protects against scraper returning lower values)
+      const newViews = Math.max(existingViews, currentViews)
+      const viewsGained = Math.max(0, newViews - previousViews)
+      
+      if (newViews > existingViews) {
+        console.log(`   📈 Views updated: ${existingViews.toLocaleString()} → ${newViews.toLocaleString()} (+${viewsGained.toLocaleString()})`)
+      }
+      
       await prisma.clip.update({
         where: { id: clip.clipId },
         data: {
-          views: BigInt(currentViews),
+          views: BigInt(newViews),
           likes: BigInt(scrapedData.likes || 0),
           shares: BigInt(scrapedData.shares || 0)
         }
@@ -204,7 +217,8 @@ export class SimpleViewTracker {
       // 6. Calculate and add earnings (only for approved clips)
       let earningsAdded = 0
       if (clip.isApproved) {
-        const totalViewGrowth = Math.max(0, currentViews - effectiveInitialViews)
+        // Use the higher view count (newViews) for earnings calculation
+        const totalViewGrowth = Math.max(0, newViews - effectiveInitialViews)
         const totalEarningsShouldBe = (totalViewGrowth / 1000) * clip.payoutRate
 
         // Cap at 30% of campaign budget per clip
@@ -249,7 +263,7 @@ export class SimpleViewTracker {
 
       return {
         success: true,
-        views: currentViews,
+        views: newViews,
         viewsGained,
         earningsAdded,
         initialViewsFixed
