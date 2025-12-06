@@ -351,22 +351,24 @@ export default function ClipperDashboard() {
   return (
     <div className="container mx-auto px-4 py-8">
 
-      {/* Info Notice - Dismissable */}
+      {/* Info Notice - Floating at bottom center */}
       {showInfoNotice && (
-        <div className="mb-6 flex items-center justify-between gap-4 px-4 py-3 bg-muted/50 border border-border rounded-lg text-sm">
-          <div className="flex items-center gap-3">
-            <Info className="w-4 h-4 text-muted-foreground shrink-0" />
-            <p className="text-muted-foreground">
-              Clips are generally approved within 24 hours. Tracking starts as soon as clips are submitted.
-            </p>
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-xl w-full mx-4">
+          <div className="flex items-center justify-between gap-4 px-4 py-3 bg-background border border-border rounded-lg shadow-lg text-sm">
+            <div className="flex items-center gap-3">
+              <Info className="w-4 h-4 text-muted-foreground shrink-0" />
+              <p className="text-muted-foreground">
+                Clips are generally approved within 24 hours. Tracking starts as soon as clips are submitted.
+              </p>
+            </div>
+            <button
+              onClick={dismissInfoNotice}
+              className="p-1 hover:bg-muted rounded transition-colors shrink-0"
+              aria-label="Dismiss"
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
           </div>
-          <button
-            onClick={dismissInfoNotice}
-            className="p-1 hover:bg-muted rounded transition-colors shrink-0"
-            aria-label="Dismiss"
-          >
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
         </div>
       )}
 
