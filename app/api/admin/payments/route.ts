@@ -121,13 +121,13 @@ export async function GET(request: NextRequest) {
 
 // DEPRECATED: This endpoint has been disabled to prevent double-payment issues.
 // Use the payout request system instead:
-// 1. Clippers request payouts via /api/clippers/payout-request
+// 1. Creators request payouts via /api/creators/payout-request
 // 2. Admins process them via /api/admin/payout-requests/[id]/process
 export async function POST(request: NextRequest) {
   return NextResponse.json({ 
     error: "This endpoint is deprecated. Use the payout request system instead.",
     newFlow: {
-      step1: "Clippers request payout at /api/clippers/payout-request",
+      step1: "Creators request payout at /api/creators/payout-request",
       step2: "Admins process requests at /api/admin/payout-requests",
       step3: "Complete payout at /api/admin/payout-requests/[id]/process"
     }

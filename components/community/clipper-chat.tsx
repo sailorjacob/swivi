@@ -32,7 +32,7 @@ const channels: Channel[] = [
   {
     id: "general",
     name: "general",
-    description: "General discussion for all clippers",
+    description: "General discussion for all creators",
     isPrivate: false,
     memberCount: 1234
   },
@@ -146,7 +146,7 @@ export function ClipperChat() {
         >
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-light mb-4">
-              Clipper Community Chat
+              Creator Community Chat
             </h2>
             <p className="text-lg text-muted-foreground">
               Connect with fellow creators and share strategies

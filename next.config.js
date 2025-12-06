@@ -1,5 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Redirects from old /clippers/* URLs to new /creators/* URLs
+  async redirects() {
+    return [
+      {
+        source: '/clippers/:path*',
+        destination: '/creators/:path*',
+        permanent: true,
+      },
+      {
+        source: '/api/clippers/:path*',
+        destination: '/api/creators/:path*',
+        permanent: true,
+      },
+    ]
+  },
   // Disable ESLint entirely during builds to prevent any linting issues
   eslint: {
     ignoreDuringBuilds: true,

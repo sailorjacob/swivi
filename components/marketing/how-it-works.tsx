@@ -2,17 +2,17 @@ const steps = [
   {
     number: "01",
     title: "Send Us Your Content",
-    description: "We build a private clipping community tailored for your brand. Just send us your content (ideally via Google Drive), and we'll handle everything, including recruiting clippers from your audience and our extensive network.",
+    description: "We build a private clipping community tailored for your brand. Just send us your content (ideally via Google Drive), and we'll handle everything, including recruiting creators from your audience and our extensive network.",
   },
   {
     number: "02",
     title: "Launch & Coach",
-    description: "Once in your community, clippers follow our streamlined launch process. We coach them to create high-quality content that matches your brand's vision, guidelines, and platform strategy.",
+    description: "Once in your community, creators follow our streamlined launch process. We coach them to create high-quality content that matches your brand's vision, guidelines, and platform strategy.",
   },
   {
     number: "03",
     title: "Manage & Scale",
-    description: "Our team manages your community daily, engaging clippers, answering questions, and keeping momentum strong. Every post is manually reviewed for quality before approval, ensuring only the best content earns payouts. As your top clippers thrive, your brand's reach and impact grow.",
+    description: "Our team manages your community daily, engaging creators, answering questions, and keeping momentum strong. Every post is manually reviewed for quality before approval, ensuring only the best content earns payouts. As your top creators thrive, your brand's reach and impact grow.",
   },
 ]
 

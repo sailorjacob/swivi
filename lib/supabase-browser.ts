@@ -28,8 +28,8 @@ export interface SupabaseSession extends Session {
 // Clean OAuth login functions
 export const signInWithDiscord = async () => {
   const redirectTo = process.env.NODE_ENV === 'production'
-    ? `https://www.swivimedia.com/clippers/dashboard`
-    : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/clippers/dashboard`
+    ? `https://www.swivimedia.com/creators/dashboard`
+    : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/creators/dashboard`
 
   return supabase.auth.signInWithOAuth({
     provider: 'discord',
@@ -39,8 +39,8 @@ export const signInWithDiscord = async () => {
 
 export const signInWithGoogle = async () => {
   const redirectTo = process.env.NODE_ENV === 'production'
-    ? `https://www.swivimedia.com/clippers/dashboard`
-    : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/clippers/dashboard`
+    ? `https://www.swivimedia.com/creators/dashboard`
+    : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/creators/dashboard`
 
   return supabase.auth.signInWithOAuth({
     provider: 'google',

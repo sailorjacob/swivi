@@ -116,7 +116,7 @@ export function CreatorViewsCalculator() {
               Creator Views Calculator
             </h2>
             <p className="text-base text-muted-foreground">
-              See the massive reach and savings potential of clipper marketing
+              See the massive reach and savings potential of creator marketing
             </p>
           </div>
 
@@ -140,14 +140,14 @@ export function CreatorViewsCalculator() {
                   className="w-full"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Total budget for your clipper campaign
+                  Total budget for your creator campaign
                 </p>
               </div>
 
-              {/* Number of Clippers */}
+              {/* Number of Creators */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-medium">Clipper Army Size</label>
+                  <label className="text-sm font-medium">Creator Army Size</label>
                   <span className="text-xl font-light transition-all duration-200 ease-out">
                     {values.numberOfClippers}
                   </span>
@@ -352,7 +352,7 @@ export function CreatorViewsCalculator() {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-normal flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                Why Clipper Marketing Works
+                Why Creator Marketing Works
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -368,7 +368,7 @@ export function CreatorViewsCalculator() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium mb-1.5">Clipper Marketing</h4>
+                    <h4 className="text-sm font-medium mb-1.5">Creator Marketing</h4>
                     <ul className="space-y-1 text-xs text-muted-foreground">
                       <li>• ${values.paymentPer1000Views.toFixed(2)} CPM costs</li>
                       <li>• 3x higher engagement</li>
@@ -378,7 +378,7 @@ export function CreatorViewsCalculator() {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground pt-2 border-t">
-                  Performance-based pricing ensures you only pay for actual results, making clipper marketing {Math.round(((5 - values.paymentPer1000Views) / 5) * 100)}% more cost-effective than traditional advertising.
+                  Performance-based pricing ensures you only pay for actual results, making creator marketing {Math.round(((5 - values.paymentPer1000Views) / 5) * 100)}% more cost-effective than traditional advertising.
                 </p>
               </div>
             </CardContent>
@@ -444,7 +444,7 @@ export function CreatorViewsCalculator() {
                     <div className="p-3 bg-blue-100/50 rounded-lg border border-blue-200">
                       <p className="text-sm text-blue-800">
                         Your {formatCurrency(values.budget)} budget supports up to {formatNumber(calculateBudgetAllocation().totalPossibleViews)} views at ${values.paymentPer1000Views.toFixed(2)} per 1,000 views. 
-                        With {values.numberOfClippers} clippers generating {formatNumber(monthlyViews * 12)} annual views, you'll use {calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of your budget.
+                        With {values.numberOfClippers} creators generating {formatNumber(monthlyViews * 12)} annual views, you'll use {calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of your budget.
                       </p>
                     </div>
                   </CardContent>
@@ -474,7 +474,7 @@ export function CreatorViewsCalculator() {
                   </div>
 
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-foreground">Clipper Network</h4>
+                    <h4 className="text-sm font-medium text-foreground">Creator Network</h4>
                     <Card className="border border-border/50 bg-card/50">
                       <CardContent className="p-4">
                         <div className="space-y-3">
@@ -579,7 +579,7 @@ export function CreatorViewsCalculator() {
                           </div>
 
                           <div className="space-y-3">
-                            <h6 className="text-xs font-medium text-foreground">Clipper Marketing</h6>
+                            <h6 className="text-xs font-medium text-foreground">Creator Marketing</h6>
                             <Card className="border border-border/30 bg-card/30">
                               <CardContent className="p-4">
                                 <div className="space-y-3">
@@ -622,7 +622,7 @@ export function CreatorViewsCalculator() {
                         </div>
 
                         <div className="text-xs text-muted-foreground text-center pt-4 border-t border-border/30 mt-4">
-                          Your {formatCurrency(values.budget)} budget supports {values.numberOfClippers} clippers earning ${values.paymentPer1000Views.toFixed(2)} per 1,000 views. This generates {formatNumber(monthlyViews)} monthly views while using only {calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of your budget—saving {formatCurrency(annualSavings)} annually vs traditional advertising.
+                          Your {formatCurrency(values.budget)} budget supports {values.numberOfCreators} creators earning ${values.paymentPer1000Views.toFixed(2)} per 1,000 views. This generates {formatNumber(monthlyViews)} monthly views while using only {calculateBudgetAllocation().budgetUtilization.toFixed(1)}% of your budget—saving {formatCurrency(annualSavings)} annually vs traditional advertising.
                         </div>
                       </div>
                     </motion.div>

@@ -38,7 +38,7 @@ export default function SupportPage() {
 
             {/* Clippers FAQ Section */}
             <section className="mb-16">
-              <h2 className="text-3xl font-light mb-8">For Clippers</h2>
+              <h2 className="text-3xl font-light mb-8">For Creators</h2>
               <p className="text-muted-foreground mb-8">
                 Everything you need to know about participating in campaigns and earning money as a content creator.
               </p>
@@ -46,11 +46,11 @@ export default function SupportPage() {
               <div className="space-y-4">
                 <Card className="bg-neutral-900/40 border-neutral-800/50">
                   <CardHeader>
-                    <CardTitle className="text-lg">How do I join Swivi Clippers?</CardTitle>
+                    <CardTitle className="text-lg">How do I join Swivi Creators?</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Apply through our platform. Get instant access to creator content and our clipper dashboard. There's no minimum follower count needed - we welcome all clippers, whether you're brand new or experienced.
+                      Apply through our platform. Get instant access to creator content and our creator dashboard. There's no minimum follower count needed - we welcome all creators, whether you're brand new or experienced.
                     </p>
                   </CardContent>
                 </Card>
@@ -61,7 +61,7 @@ export default function SupportPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      No, there's no minimum follower count needed. We want to give all clippers—whether you're brand new or experienced, the chance to earn money.
+                      No, there's no minimum follower count needed. We want to give all creators—whether you're brand new or experienced, the chance to earn money.
                     </p>
                   </CardContent>
                 </Card>
@@ -148,7 +148,7 @@ export default function SupportPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Swivi connects your brand with thousands of content creators who create authentic, viral content for your campaigns. Our network of clippers amplifies your message across TikTok, Instagram, YouTube, and other platforms.
+                      Swivi connects your brand with thousands of content creators who create authentic, viral content for your campaigns. Our network of creators amplifies your message across TikTok, Instagram, YouTube, and other platforms.
                     </p>
                   </CardContent>
                 </Card>

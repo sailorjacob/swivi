@@ -81,13 +81,13 @@ export default function AdminUsersPage() {
 
     if (status === "unauthenticated" || !session) {
       console.log("❌ User not authenticated, redirecting to login")
-      router.push("/clippers/login?error=AccessDenied")
+      router.push("/creators/login?error=AccessDenied")
       return
     }
 
     if (session.user?.role !== "ADMIN") {
       console.log("❌ User is not admin, redirecting to dashboard")
-      router.push("/clippers/dashboard?error=AdminAccessRequired")
+      router.push("/creators/dashboard?error=AdminAccessRequired")
       return
     }
 
@@ -141,7 +141,7 @@ export default function AdminUsersPage() {
       } else if (response.status === 403) {
         console.error("❌ Admin access denied")
         toast.error("Admin access required")
-        window.location.href = "/clippers/dashboard?error=AdminAccessRequired"
+        window.location.href = "/creators/dashboard?error=AdminAccessRequired"
         return
       } else {
         let errorData
@@ -529,7 +529,7 @@ export default function AdminUsersPage() {
                   </Button>
                   {session?.user?.role !== "ADMIN" && (
                     <Button
-                      onClick={() => window.location.href = "/clippers/login"}
+                      onClick={() => window.location.href = "/creators/login"}
                       variant="outline"
                     >
                       Sign In as Admin

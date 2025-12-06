@@ -545,7 +545,7 @@ export default function AdminCampaignsPage() {
       })
 
       if (response.ok) {
-        toast.success(currentlyHidden ? "Campaign is now visible to clippers" : "Campaign hidden from clippers")
+        toast.success(currentlyHidden ? "Campaign is now visible to creators" : "Campaign hidden from creators")
         await fetchCampaigns()
       } else {
         const error = await response.json()
@@ -1302,7 +1302,7 @@ export default function AdminCampaignsPage() {
                                 <button
                                   onClick={() => handleToggleHidden(campaign.id, campaign.hidden || false)}
                                   className={`p-2 transition-colors ${campaign.hidden ? 'text-foreground hover:text-muted-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                                  title={campaign.hidden ? "Hidden from clippers - click to show" : "Visible to clippers - click to hide"}
+                                  title={campaign.hidden ? "Hidden from creators - click to show" : "Visible to creators - click to hide"}
                                 >
                                   {campaign.hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>

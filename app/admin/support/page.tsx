@@ -62,11 +62,11 @@ export default function AdminSupportPage() {
   useEffect(() => {
     if (authStatus === "loading") return
     if (!session?.user) {
-      router.push("/clippers/login")
+      router.push("/creators/login")
       return
     }
     if (session.user.role !== "ADMIN") {
-      router.push("/clippers/dashboard")
+      router.push("/creators/dashboard")
       return
     }
     fetchTickets()

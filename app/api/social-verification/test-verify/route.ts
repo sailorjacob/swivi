@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: "Not authenticated - please log in first",
-          login_url: "https://www.swivimedia.com/clippers/login",
+          login_url: "https://www.swivimedia.com/creators/login",
           session_status: "missing"
         },
         { status: 401 }

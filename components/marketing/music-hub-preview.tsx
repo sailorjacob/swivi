@@ -38,7 +38,7 @@ export function MusicHubPreview() {
                   Earn $0.50-$5.00 per 1,000 views on top of your regular brand deals
                 </p>
                 <p className="text-2xl font-light text-primary">+$500-2K/month</p>
-                <p className="text-xs text-muted-foreground">Average clipper earnings</p>
+                <p className="text-xs text-muted-foreground">Average creator earnings</p>
               </CardContent>
             </Card>
 
@@ -70,7 +70,7 @@ export function MusicHubPreview() {
           {/* How It Works */}
           <Card className="border-primary mb-12">
             <CardContent className="p-8">
-              <h3 className="text-xl font-medium mb-6 text-center">How Clippers Earn Extra</h3>
+              <h3 className="text-xl font-medium mb-6 text-center">How Creators Earn Extra</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="text-center">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">

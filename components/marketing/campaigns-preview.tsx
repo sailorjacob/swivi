@@ -91,7 +91,7 @@ export function CampaignsPreview() {
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               From Netflix series to gaming streamers, see how we've helped clients 
-              achieve exceptional ROI through our clipper network.
+              achieve exceptional ROI through our creator network.
             </p>
           </motion.div>
 

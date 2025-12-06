@@ -43,8 +43,8 @@ const features = [
     description: "Work with verified creators who have millions of followers and proven track records of viral content."
   },
   {
-    title: "Expert Clipper Network",
-    description: "Our community of professional clippers knows exactly how to create engaging, viral-worthy content."
+    title: "Expert Creator Network",
+    description: "Our community of professional creators knows exactly how to create engaging, viral-worthy content."
   },
   {
     title: "Performance Analytics",
@@ -121,7 +121,7 @@ export default function BrandsPage() {
                 variants={itemVariants}
                 className="mb-10 text-base sm:text-lg text-muted-foreground max-w-xl"
               >
-                Partner with top creators and our expert clipper network to create
+                Partner with top creators and our expert creator network to create
                 viral content that drives real engagement and growth for your brand.
               </motion.p>
 
@@ -216,7 +216,7 @@ export default function BrandsPage() {
                 </div>
                 <p className="text-muted-foreground">
                   Music and food collide in this viral collaboration featuring Ed Sheeran and pizza reviews.
-                  Our clipper network transformed authentic content into millions of views across platforms.
+                  Our creator network transformed authentic content into millions of views across platforms.
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-center text-sm">

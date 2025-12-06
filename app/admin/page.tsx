@@ -36,12 +36,12 @@ export default function AdminDashboard() {
     if (status === "loading") return
 
     if (!session) {
-      router.push("/clippers/login?error=AccessDenied")
+      router.push("/creators/login?error=AccessDenied")
       return
     }
 
     if (session.user?.role !== "ADMIN") {
-      router.push("/clippers/dashboard?error=AdminAccessRequired")
+      router.push("/creators/dashboard?error=AdminAccessRequired")
       return
     }
 
@@ -59,7 +59,7 @@ export default function AdminDashboard() {
         setAnalytics(data)
       } else if (response.status === 401) {
         setError("Authentication required")
-        router.push("/clippers/login?error=SessionExpired")
+        router.push("/creators/login?error=SessionExpired")
       } else if (response.status >= 500) {
         console.log('🔍 Server error loading admin analytics - showing empty state')
         setAnalytics(null)

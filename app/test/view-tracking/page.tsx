@@ -162,7 +162,7 @@ export default function ViewTrackingTestPage() {
             </div>
             
             <div className="flex gap-3">
-              <Link href="/clippers/login" className="flex-1">
+              <Link href="/creators/login" className="flex-1">
                 <Button className="w-full" size="lg">
                   <LogIn className="w-4 h-4 mr-2" />
                   Login to Test

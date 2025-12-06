@@ -23,7 +23,7 @@ export default function MusicHubPage() {
                 <h1 className="text-4xl md:text-5xl font-light">Music Clipping Hub</h1>
               </div>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                The revolutionary platform where clippers earn extra income and artists get viral exposure.
+                The revolutionary platform where creators earn extra income and artists get viral exposure.
                 Pay-per-view campaigns that benefit everyone.
               </p>
             </div>
@@ -34,7 +34,7 @@ export default function MusicHubPage() {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <DollarSign className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-medium mb-2">For Clippers</h3>
+                <h3 className="text-xl font-medium mb-2">For Creators</h3>
                 <p className="text-muted-foreground">
                   Earn $0.50-$5.00 per 1,000 views by using sponsored music in videos you're already making
                 </p>

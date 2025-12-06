@@ -340,7 +340,7 @@ export class EnhancedPaymentCalculator {
   /**
    * @deprecated DO NOT USE - This function resets clip.earnings which breaks the view tracking system.
    * Use the payout request flow instead:
-   * 1. Clippers request payouts via /api/clippers/payout-request
+   * 1. Creators request payouts via /api/creators/payout-request
    * 2. Admins process via /api/admin/payout-requests/[id]/process
    * 
    * The proper flow decrements user.totalEarnings without touching clip.earnings,

@@ -60,7 +60,7 @@ export default function ViewTrackingTestPage() {
 
   const fetchClips = async () => {
     try {
-      const response = await authenticatedFetch("/api/clippers/dashboard")
+      const response = await authenticatedFetch("/api/creators/dashboard")
       if (response.ok) {
         const data = await response.json()
         if (data.recentClips && data.recentClips.length > 0) {

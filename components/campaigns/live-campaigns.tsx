@@ -167,7 +167,7 @@ export function LiveCampaigns() {
       icon: Users,
       label: "Total Participants",
       value: (campaignStats?.summary?.totalSubmissions || campaigns.reduce((sum, c) => sum + c._count.clipSubmissions, 0)).toString() + "+",
-      description: "Clippers earning"
+      description: "Creators earning"
     },
     {
       icon: DollarSign,
@@ -330,7 +330,7 @@ export function LiveCampaigns() {
 
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button size="lg" asChild>
-                      <Link href="/clippers/signup">
+                      <Link href="/creators/signup">
                         Start Earning Now
                       </Link>
                     </Button>
@@ -494,7 +494,7 @@ export function LiveCampaigns() {
                       disabled={campaign.status === "DRAFT"}
                       asChild
                     >
-                      <Link href="/clippers/signup">
+                      <Link href="/creators/signup">
                         {campaign.status === "DRAFT" ? "Coming Soon" : "Join Campaign"}
                       </Link>
                     </Button>
@@ -570,7 +570,7 @@ export function LiveCampaigns() {
           </h2>
           <p className="text-muted-foreground mb-8">
             Join our Discord community to get access to all live campaigns, 
-            connect with other clippers, and start building your earnings today.
+            connect with other creators, and start building your earnings today.
           </p>
           <div className="flex justify-center">
             <Button asChild size="lg">

@@ -96,7 +96,7 @@ export function Header() {
           {/* Platform Access Button */}
           {session ? (
             <Link
-              href={session.user?.role === "ADMIN" ? "/admin" : "/clippers/dashboard/campaigns"}
+              href={session.user?.role === "ADMIN" ? "/admin" : "/creators/dashboard/campaigns"}
               className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
             >
               Dashboard
@@ -104,13 +104,13 @@ export function Header() {
           ) : (
             <>
               <Link
-                href="/clippers/become-a-clipper"
+                href="/creators/become-a-creator"
                 className="text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300"
               >
-                Become a Clipper
+                Become a Creator
               </Link>
               <Link
-                href="/clippers/login"
+                href="/creators/login"
                 className="text-sm font-normal px-6 py-3 rounded-full bg-transparent text-foreground hover:text-foreground/80 transition-all duration-300"
               >
                 Sign In
@@ -178,7 +178,7 @@ export function Header() {
             {/* Mobile Platform Access Buttons */}
             {session ? (
               <Link
-                href={session.user?.role === "ADMIN" ? "/admin" : "/clippers/dashboard/campaigns"}
+                href={session.user?.role === "ADMIN" ? "/admin" : "/creators/dashboard/campaigns"}
                 className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -187,14 +187,14 @@ export function Header() {
             ) : (
               <>
                 <Link
-                  href="/clippers/become-a-clipper"
+                  href="/creators/become-a-creator"
                   className="block mt-2 text-sm font-normal border border-foreground px-6 py-3 rounded-full bg-transparent text-foreground hover:bg-foreground hover:text-background transition-all duration-300 text-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Become a Clipper
+                  Become a Creator
                 </Link>
                 <Link
-                  href="/clippers/login"
+                  href="/creators/login"
                   className="block mt-2 text-sm font-normal px-6 py-3 rounded-full bg-transparent text-foreground hover:text-foreground/80 transition-all duration-300 text-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >

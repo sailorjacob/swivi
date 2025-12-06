@@ -1,0 +1,269 @@
+"use client"
+
+import { useState } from "react"
+import { ChevronDown, ChevronUp } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
+interface FAQItem {
+  question: string
+  answer: string
+  category: string
+}
+
+const faqData: FAQItem[] = [
+  // Getting Started
+  {
+    question: "How do I join Swivi Creators?",
+    answer: "Apply through our platform. Get instant access to creator content and our creator dashboard. There's no minimum follower count needed - we welcome all creators, whether you're brand new or experienced.",
+    category: "getting-started"
+  },
+  {
+    question: "Is there a minimum follower requirement to join campaigns?",
+    answer: "No, there's no minimum follower count needed. We want to give all creators—whether you're brand new or experienced, the chance to earn money.",
+    category: "getting-started"
+  },
+  {
+    question: "What platforms can I post on?",
+    answer: "Currently, we support posts on TikTok, YouTube Shorts, and Instagram Reels. We might add more platforms later, depending on campaign needs.",
+    category: "getting-started"
+  },
+  {
+    question: "Can I link multiple social accounts?",
+    answer: "Yes, you can connect as many social accounts as you want. There's no maximum limit, so feel free to add multiple accounts.",
+    category: "getting-started"
+  },
+
+  // Campaigns & Submissions
+  {
+    question: "How do I know if a campaign is still active?",
+    answer: "If you see the campaign listed under the \"Active Campaigns\" category, it's active, and you can participate.",
+    category: "campaigns"
+  },
+  {
+    question: "Can I participate in multiple campaigns at the same time?",
+    answer: "Yes, you can join as many campaigns as you want. There's currently no limit.",
+    category: "campaigns"
+  },
+  {
+    question: "When do campaigns end?",
+    answer: "Campaigns run until the budget is fully spent, which depends on both the size of the budget and the number of creators involved. On average, campaigns last 2-3 days, but some have finished in under 6 hours.",
+    category: "campaigns"
+  },
+  {
+    question: "How do I know how much budget is left for campaigns?",
+    answer: "You can see how much budget is left by looking at the leaderboard. It will show you what percentage of the budget is used and how much money is up for grabs.",
+    category: "campaigns"
+  },
+  {
+    question: "When is the best time to submit my posts after posting?",
+    answer: "Right away is ideal — the sooner you submit, the faster your views get counted and the more money you can make. Submitting early also gives your clip the best chance to rank on leaderboards and get approved in time.",
+    category: "campaigns"
+  },
+  {
+    question: "Can I repost the same content in multiple campaigns?",
+    answer: "It depends on the specific campaign. We often look for ways to help you reuse content to make more money without extra effort. Always check the campaign details to confirm if this is allowed.",
+    category: "campaigns"
+  },
+  {
+    question: "Are logos allowed on campaigns?",
+    answer: "Yes, they are allowed unless stated otherwise. If they aren't allowed, it will be mentioned in campaign details.",
+    category: "campaigns"
+  },
+  {
+    question: "Do I need to use specific hashtags or mentions in my clips?",
+    answer: "Only if clearly specified in the campaign details. If nothing is mentioned, you don't need to worry about using special hashtags or mentions.",
+    category: "campaigns"
+  },
+
+  // Requirements & Guidelines
+  {
+    question: "What is the engagement rate requirement?",
+    answer: "All posts must have a minimum of 0.5% engagement rate to qualify for campaigns. Any video with less than 0.5% engagement rate will not be eligible for payout. We lowered the requirement from 1% to 0.5% so more clips can qualify, while still keeping a fair standard for quality and performance.",
+    category: "requirements"
+  },
+  {
+    question: "How is engagement rate calculated?",
+    answer: "Engagement rate = (Likes + Comments + Shares) ÷ Views × 100. For example: A clip with 1,000 views and 7 total engagements has a 0.7% engagement rate and qualifies. A clip with 2,000 views and 5 total engagements has a 0.25% engagement rate and does not qualify.",
+    category: "requirements"
+  },
+  {
+    question: "What does \"minimum clip duration\" mean?",
+    answer: "When submitting videos for campaigns, make sure your post is more than 7 seconds long, or else it will get denied. This is standard in all of our campaigns. If you submit one below 7 seconds and it's your first time, contact support, and we will help you bypass it!",
+    category: "requirements"
+  },
+  {
+    question: "Do I need to leave my likes & comments public on my clips?",
+    answer: "Yes, when submitting clips, please keep all your engagement stats public so we can properly track your views. If they are private videos, they may be ineligible for payment.",
+    category: "requirements"
+  },
+  {
+    question: "Is there a maximum limit to how many posts I can submit?",
+    answer: "You can submit up to 30 posts per day. This limit helps prevent spam and keeps our system running smoothly. Need a higher limit? Contact support, and we'll help you out.",
+    category: "requirements"
+  },
+  {
+    question: "Are all posts allowed?",
+    answer: "Post requirements and content guidelines will always be clearly specified for each campaign. Generally, no illegal, NSFW, or content that portrays the client negatively is allowed.",
+    category: "requirements"
+  },
+
+  // Earnings & Payments
+  {
+    question: "How much can I get paid?",
+    answer: "Each campaign has different payouts. To see exactly how much you can get paid for a specific campaign, check the payouts in the campaign details.",
+    category: "earnings"
+  },
+  {
+    question: "Is there a max payout per campaign?",
+    answer: "Yes. Each creator can earn a maximum of 30% of the total campaign budget. This ensures fairness, helps new creators participate, and guarantees our clients get maximum reach from their budget. Important: If we detect view botting or artificial boosting of views, you'll receive a permanent ban.",
+    category: "earnings"
+  },
+  {
+    question: "When do I get paid?",
+    answer: "Payments are sent within one week after the campaign finishes, often quicker. Throughout the campaign, we regularly review and approve clips. Once the campaign budget is fully spent, we finalize who gets paid and how much. You will receive an email notification once the payment has been sent.",
+    category: "earnings"
+  },
+  {
+    question: "How do I get paid?",
+    answer: "We pay all creators using PayPal. You initially provide your PayPal email during sign-up, but you can always update or change your payment email later in your account settings",
+    category: "earnings"
+  },
+  {
+    question: "Do my views carry over to the next campaign?",
+    answer: "No. Your views only count towards the current active campaign. If your clip didn't reach the minimum views for payout, those views won't roll over to the next campaign.",
+    category: "earnings"
+  },
+  {
+    question: "Do I need to hit 10K views on each individual clip, or do the views add up?",
+    answer: "All the views from your clips get added up together — it doesn't have to be 10K per clip.",
+    category: "earnings"
+  },
+
+  // Tracking & Analytics
+  {
+    question: "How are my post views tracked?",
+    answer: "After posting, submit your content through the campaign dashboard. Here, you can either click \"scan account\" to automatically fetch your recent posts, or manually submit the links by clicking \"submit clips.\" Make sure you submit posts regularly because we close campaigns when the budget is almost reached to avoid overspending.",
+    category: "tracking"
+  },
+  {
+    question: "How often do my stats update?",
+    answer: "After your posts are approved, stats automatically update every 2 hours. We also run one final update right before the campaign ends to ensure everyone gets paid accurately. If your clips haven't updated yet, make sure that it has been approved. You will receive a notification once it's been approved.",
+    category: "tracking"
+  },
+  {
+    question: "What does \"video under review\" mean?",
+    answer: "When your video says it's under review, it means our team is manually checking it to confirm it follows campaign guidelines. Once reviewed, it'll either get approved or rejected and you will receive a notification.",
+    category: "tracking"
+  },
+
+  // Account & Demographics
+  {
+    question: "How do I verify my account demographics?",
+    answer: "Go to your account settings and use the verification feature. You'll need to upload a screen recording clearly showing your account's demographics. Our team reviews submissions within 48 hours.",
+    category: "account"
+  },
+  {
+    question: "Where do I find my demographics for my page?",
+    answer: "On Instagram, locate your \"professional dashboard\" & from there find \"audience.\" On TikTok, go to \"TikTok Studio\" \"Analytics\" \"Viewers\" then \"Locations.\" Other platforms are similar but generally your demographic information is located in your analytics. If your account is new & doesn't yet show this information, first connect your account then contact support with your username, niche, and proof of location, so we can manually verify you!",
+    category: "account"
+  },
+  {
+    question: "What are country tiers?",
+    answer: "Country tiers are a standard system used widely in digital advertising. They group countries based on their general economic situation and market purchasing power. Sometimes clients want to target specific country tiers. Tier 1 includes US, Canada, UK, Germany, Australia, etc. Tier 2 includes Italy, Spain, UAE, Brazil, etc. Tier 3 includes all other countries.",
+    category: "account"
+  },
+  {
+    question: "How do I hide my username from the leaderboards?",
+    answer: "First go to your account settings, then click analytics, then click hide username!",
+    category: "account"
+  },
+
+  // Troubleshooting
+  {
+    question: "Why did my video get denied?",
+    answer: "If your clip was denied, the reason will be clearly mentioned in the response. Common reasons include incorrect video length, missing hashtags, or improper sound usage.",
+    category: "troubleshooting"
+  },
+  {
+    question: "What should I do if I accidentally submitted the wrong clip or account?",
+    answer: "Go to the campaign dashboard, click \"Remove Clip,\" and paste the link to the video you want to remove.",
+    category: "troubleshooting"
+  },
+  {
+    question: "Can I edit or change a clip after it has been approved?",
+    answer: "No. Editing your clip after approval is not allowed. We check for any changes that might violate campaign rules. If needed, you can remove the clip completely instead.",
+    category: "troubleshooting"
+  },
+  {
+    question: "What happens if my video is flagged or removed by the platform after approval?",
+    answer: "If your video gets removed during an active campaign, you won't get paid for those views. However, if it happens after the campaign ends and you've already been paid, it's no problem.",
+    category: "troubleshooting"
+  },
+  {
+    question: "Can I delete or archive my clips after submission?",
+    answer: "Yes. To remove your clips from tracking, use the \"Remove Clip\" button in the campaign dashboard. If you delete your video from the social platform directly, it will automatically disappear from our system.",
+    category: "troubleshooting"
+  },
+  {
+    question: "What counts as suspicious or \"boosted\" views?",
+    answer: "Examples include extremely low engagement rates (under 1%), comments from brand-new accounts, unusual engagement ratios, or new accounts with just one viral video. Many factors go into detecting this. If we're unsure, we'll reach out directly to ask for proof.",
+    category: "troubleshooting"
+  },
+
+  // Support & Community
+  {
+    question: "How can I get help if I have questions?",
+    answer: "If you have a personal account-related question or need help, contact our support team through the help section in your dashboard. Allow up to 24 hours for our response. You can also check our documentation or reach out via email for assistance.",
+    category: "support"
+  },
+]
+
+export function CreatorsFAQ() {
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set())
+
+  const toggleExpanded = (index: number) => {
+    const newExpanded = new Set(expandedItems)
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index)
+    } else {
+      newExpanded.add(index)
+    }
+    setExpandedItems(newExpanded)
+  }
+
+  return (
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="space-y-4">
+        {faqData.map((faq, index) => {
+          const isExpanded = expandedItems.has(index)
+          return (
+            <Card key={index} className="transition-all duration-200 hover:shadow-md">
+              <CardHeader
+                className="cursor-pointer"
+                onClick={() => toggleExpanded(index)}
+              >
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-normal text-left pr-4">
+                    {faq.question}
+                  </CardTitle>
+                  {isExpanded ? (
+                    <ChevronUp className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  )}
+                </div>
+              </CardHeader>
+              {isExpanded && (
+                <CardContent className="pt-0">
+                  <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {faq.answer}
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

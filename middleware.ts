@@ -23,6 +23,6 @@ export const config = {
   matcher: [
     // Only match OAuth callbacks to avoid interfering with auth flow
     "/auth/v1/callback",
-    "/clippers/signup",
+    "/creators/signup",
   ],
 }

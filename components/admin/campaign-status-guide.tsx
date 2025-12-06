@@ -31,7 +31,7 @@ export function CampaignStatusGuide() {
                   <span className="px-2 py-0.5 text-xs border border-dashed rounded">DRAFT</span>
                   <span className="font-medium">Draft</span>
                 </div>
-                <p className="text-muted-foreground">Work in progress. Hidden from clippers. No submissions accepted. Use this to prepare campaigns before launch.</p>
+                <p className="text-muted-foreground">Work in progress. Hidden from creators. No submissions accepted. Use this to prepare campaigns before launch.</p>
               </div>
               
               <div className="p-3 border rounded-lg">
@@ -55,7 +55,7 @@ export function CampaignStatusGuide() {
                   <span className="px-2 py-0.5 text-xs border-2 rounded">PAUSED</span>
                   <span className="font-medium">Paused</span>
                 </div>
-                <p className="text-muted-foreground">Temporarily stopped. Hidden from new clippers. Existing submissions still tracked but no new submissions accepted.</p>
+                <p className="text-muted-foreground">Temporarily stopped. Hidden from new creators. Existing submissions still tracked but no new submissions accepted.</p>
               </div>
               
               <div className="p-3 border rounded-lg">
@@ -71,7 +71,7 @@ export function CampaignStatusGuide() {
                   <span className="px-2 py-0.5 text-xs bg-muted line-through rounded">CANCELLED</span>
                   <span className="font-medium">Cancelled</span>
                 </div>
-                <p className="text-muted-foreground">Campaign terminated. Hidden from clippers. No submissions or tracking. Can be moved back to DRAFT for editing.</p>
+                <p className="text-muted-foreground">Campaign terminated. Hidden from creators. No submissions or tracking. Can be moved back to DRAFT for editing.</p>
               </div>
             </div>
           </section>
@@ -139,7 +139,7 @@ export function CampaignStatusGuide() {
                 </div>
                 <p className="text-muted-foreground mb-2">Flagged as test data - excluded from analytics and tracking.</p>
                 <ul className="text-muted-foreground list-disc list-inside space-y-1">
-                  <li>Hidden from clippers (like hidden flag)</li>
+                  <li>Hidden from creators (like hidden flag)</li>
                   <li>If ACTIVE, submissions ARE accepted</li>
                   <li>View tracking is DISABLED (won't scrape views)</li>
                   <li>Excluded from all analytics and reports</li>

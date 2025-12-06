@@ -106,7 +106,7 @@ export default function AboutPage() {
                 variants={itemVariants}
                 className="text-sm text-muted-foreground text-center max-w-2xl mx-auto mt-4"
               >
-                Understanding the landscape of traditional advertising costs and how clipper marketing revolutionizes brand reach.
+                Understanding the landscape of traditional advertising costs and how creator marketing revolutionizes brand reach.
               </motion.p>
             </motion.div>
           </div>

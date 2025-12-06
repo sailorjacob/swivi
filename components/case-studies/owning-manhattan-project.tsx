@@ -195,7 +195,7 @@ export default function OwningManhattanProject() {
 
         <motion.p variants={itemVariants} className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto text-center mb-8 px-4">
           Netflix series promotion campaign targeting real estate and lifestyle audiences. 
-          Our clipper network created viral content showcasing the luxury real estate and drama 
+          Our creator network created viral content showcasing the luxury real estate and drama 
           from Netflix's hit series, achieving exceptional reach and engagement.
         </motion.p>
 
@@ -228,7 +228,7 @@ export default function OwningManhattanProject() {
               <h4 className="font-medium mb-2">ROI Achievement</h4>
               <p className="text-sm text-muted-foreground">
                 Delivered exceptional 610% return on investment within just 2 days, 
-                demonstrating the power of our clipper network.
+                demonstrating the power of our creator network.
               </p>
             </div>
           </motion.div>

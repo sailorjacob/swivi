@@ -27,7 +27,7 @@ export default function TermsOfServicePage() {
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold mb-4">2. Description of Service</h2>
                 <p className="mb-4">
-                  Swivi is a platform that connects content creators ("Clippers") with opportunities to create viral video clips 
+                  Swivi is a platform that connects content creators ("Creators") with opportunities to create viral video clips 
                   for campaigns. The Service allows users to:
                 </p>
                 <ul className="list-disc pl-6 mb-4">
