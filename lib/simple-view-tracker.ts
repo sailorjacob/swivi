@@ -170,35 +170,13 @@ export class SimpleViewTracker {
       const previousViews = lastTracking ? Number(lastTracking.views) : 0
       const viewsGained = Math.max(0, currentViews - previousViews)
 
-      // 3. FIX: If initialViews is 0, use the oldest tracking record or current views
+      // 3. Use initialViews directly - 0 means clipper earns from ALL views
       let initialViewsFixed = false
-      let effectiveInitialViews = Number(clip.initialViews)
+      const effectiveInitialViews = Number(clip.initialViews)
       
-      if (effectiveInitialViews === 0 && clip.isApproved) {
-        // Try to get the oldest tracking record as the baseline
-        const oldestTracking = await prisma.viewTracking.findFirst({
-          where: { clipId: clip.clipId },
-          orderBy: { scrapedAt: 'asc' }
-        })
-        
-        if (oldestTracking) {
-          effectiveInitialViews = Number(oldestTracking.views)
-          console.log(`   🔧 Fixed initialViews: 0 → ${effectiveInitialViews} (from oldest tracking)`)
-        } else {
-          // No tracking history, use current views as initial (no earnings for this clip until next scrape)
-          effectiveInitialViews = currentViews
-          console.log(`   🔧 Fixed initialViews: 0 → ${currentViews} (first scrape)`)
-        }
-        
-        // Update the submission with the correct initialViews
-        await prisma.clipSubmission.update({
-          where: { id: clip.submissionId },
-          data: { 
-            initialViews: BigInt(effectiveInitialViews),
-            processingStatus: 'COMPLETE'
-          }
-        })
-        initialViewsFixed = true
+      // Log if this is a first-time scrape with no tracking history
+      if (!lastTracking && effectiveInitialViews === 0) {
+        console.log(`   📊 First scrape - clipper earns from all ${currentViews.toLocaleString()} views`)
       }
 
       // 4. Create new tracking record (ALWAYS creates, never updates - preserves history)
@@ -388,9 +366,7 @@ export class SimpleViewTracker {
 
     const totalSeconds = Math.round((Date.now() - startTime) / 1000)
     console.log(`\n📊 Tracking complete in ${totalSeconds}s: ${successful}/${processed} successful`)
-    if (initialViewsFixed > 0) {
-      console.log(`   🔧 Fixed ${initialViewsFixed} clips with initialViews = 0`)
-    }
+    console.log(`   💰 Total earnings added: $${totalEarningsAdded.toFixed(2)}`)
 
     return {
       processed,
