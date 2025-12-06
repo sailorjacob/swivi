@@ -85,11 +85,16 @@ export async function GET(request: NextRequest) {
     // This helps admins see view growth before approving
     const pendingResult = await viewTrackingService.trackPendingSubmissions(20)
 
+    // Rescrape submissions that failed their initial scrape
+    // This fixes clips with initialViews = 0 that should have values
+    const rescrapeResult = await viewTrackingService.rescrapeFailedSubmissions(10)
+
     const duration = Date.now() - startTime
 
     console.log(`✅ View tracking completed in ${duration}ms`)
     console.log(`   Approved clips: ${result.processed} processed, ${result.successful} successful`)
     console.log(`   Pending submissions: ${pendingResult.processed} processed, ${pendingResult.successful} successful`)
+    console.log(`   Rescrapes: ${rescrapeResult.processed} processed, ${rescrapeResult.successful} successful`)
     console.log(`   Earnings Added: $${result.totalEarningsAdded.toFixed(2)}`)
     
     if (result.campaignsCompleted.length > 0) {

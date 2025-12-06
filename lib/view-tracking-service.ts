@@ -678,6 +678,153 @@ export class ViewTrackingService {
   }
 
   /**
+   * Re-scrapes submissions that failed their initial view scrape
+   * This handles NEEDS_RESCRAPE, SCRAPE_FAILED, SCRAPE_ERROR statuses
+   * Critical for fixing clips that have initialViews = 0 incorrectly
+   */
+  async rescrapeFailedSubmissions(limit: number = 10): Promise<{
+    processed: number
+    successful: number
+    failed: number
+  }> {
+    console.log(`🔄 Re-scraping failed submissions...`)
+    
+    // Find submissions that need rescraping
+    const failedSubmissions = await prisma.clipSubmission.findMany({
+      where: {
+        OR: [
+          { processingStatus: 'NEEDS_RESCRAPE' },
+          { processingStatus: { startsWith: 'SCRAPE_FAILED' } },
+          { processingStatus: { startsWith: 'SCRAPE_ERROR' } },
+          // Also catch submissions with 0 initial views that might have been missed
+          {
+            AND: [
+              { initialViews: 0 },
+              { processingStatus: 'COMPLETE' },
+              { clipId: { not: null } }
+            ]
+          }
+        ],
+        // Only from active campaigns
+        campaigns: {
+          status: 'ACTIVE',
+          isTest: false,
+          deletedAt: null
+        }
+      },
+      select: {
+        id: true,
+        clipUrl: true,
+        platform: true,
+        clipId: true,
+        userId: true,
+        initialViews: true,
+        processingStatus: true,
+        users: {
+          select: { id: true, name: true }
+        },
+        campaigns: {
+          select: { title: true }
+        }
+      },
+      take: limit,
+      orderBy: { createdAt: 'desc' }
+    })
+
+    if (failedSubmissions.length === 0) {
+      console.log(`✨ No failed submissions to rescrape`)
+      return { processed: 0, successful: 0, failed: 0 }
+    }
+
+    console.log(`🔍 Found ${failedSubmissions.length} submissions to rescrape`)
+
+    let successful = 0
+    let failed = 0
+
+    // Process each failed submission
+    for (const submission of failedSubmissions) {
+      try {
+        console.log(`🔄 Rescraping ${submission.id} (${submission.processingStatus})...`)
+        
+        // Scrape current views
+        const scrapedData = await this.scraper.scrapeContent(submission.clipUrl, submission.platform)
+        
+        if (scrapedData.error || scrapedData.views === undefined) {
+          console.log(`⚠️  Rescrape still failed for ${submission.id}: ${scrapedData.error || 'no views returned'}`)
+          
+          // Update status to track retry count
+          const currentStatus = submission.processingStatus || ''
+          const retryMatch = currentStatus.match(/RETRY_(\d+)/)
+          const retryCount = retryMatch ? parseInt(retryMatch[1]) + 1 : 1
+          
+          await prisma.clipSubmission.update({
+            where: { id: submission.id },
+            data: {
+              processingStatus: `SCRAPE_FAILED_RETRY_${retryCount}: ${scrapedData.error || 'no views'}`.substring(0, 100)
+            }
+          })
+          
+          failed++
+          continue
+        }
+
+        const currentViews = scrapedData.views
+
+        // Update the submission with initial views
+        await prisma.clipSubmission.update({
+          where: { id: submission.id },
+          data: {
+            initialViews: BigInt(currentViews),
+            processingStatus: 'COMPLETE'
+          }
+        })
+
+        // If there's a clip, update it too
+        if (submission.clipId) {
+          // Update clip views
+          await prisma.clip.update({
+            where: { id: submission.clipId },
+            data: {
+              views: BigInt(currentViews),
+              likes: BigInt(scrapedData.likes || 0),
+              shares: BigInt(scrapedData.shares || 0)
+            }
+          })
+
+          // Create or update tracking record
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+          
+          await prisma.viewTracking.create({
+            data: {
+              userId: submission.userId,
+              clipId: submission.clipId,
+              views: BigInt(currentViews),
+              date: today,
+              platform: submission.platform,
+              scrapedAt: new Date()
+            }
+          })
+          
+          console.log(`📊 Created tracking record for rescrape of ${submission.clipId}`)
+        }
+
+        console.log(`✅ Rescrape successful for "${submission.campaigns.title}" by ${submission.users.name || 'Unknown'}: ${currentViews.toLocaleString()} views`)
+        successful++
+
+        // Delay between rescrapes to avoid overwhelming Apify
+        await new Promise(resolve => setTimeout(resolve, 3000))
+      } catch (error) {
+        console.error(`❌ Error rescraping submission ${submission.id}:`, error)
+        failed++
+      }
+    }
+
+    console.log(`✅ Rescrape complete: ${successful}/${failedSubmissions.length} successful`)
+    return { processed: failedSubmissions.length, successful, failed }
+  }
+
+  /**
    * Gets view tracking statistics for a clip
    */
   async getClipViewStats(clipId: string): Promise<{

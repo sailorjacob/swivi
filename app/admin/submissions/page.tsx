@@ -900,20 +900,29 @@ export default function AdminSubmissionsPage() {
                       {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 ? (
                         <>
                           <div>
-                            <h4 className="text-sm font-medium mb-3">View History</h4>
+                            <h4 className="text-sm font-medium mb-3">View History ({submission.clips.view_tracking.length} scrapes)</h4>
                             <div className="h-48 w-full">
                               <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={submission.clips.view_tracking.map((t, idx) => ({
-                                  date: new Date(t.scrapedAt || t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                                  views: Number(t.views),
-                                  scrapedAt: t.scrapedAt || t.date,
-                                  success: Number(t.views) > 0 || idx > 0
-                                }))}>
+                                <LineChart data={
+                                  // IMPORTANT: Sort by scrapedAt ASCENDING (oldest first, newest last)
+                                  // so the chart shows growth over time from left to right
+                                  [...submission.clips.view_tracking]
+                                    .sort((a, b) => new Date(a.scrapedAt || a.date).getTime() - new Date(b.scrapedAt || b.date).getTime())
+                                    .map((t, idx) => ({
+                                      date: new Date(t.scrapedAt || t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric' }),
+                                      views: Number(t.views),
+                                      scrapedAt: t.scrapedAt || t.date,
+                                      success: Number(t.views) > 0 || idx > 0
+                                    }))
+                                }>
                                   <XAxis
                                     dataKey="date"
                                     stroke="hsl(var(--muted-foreground))"
-                                    fontSize={12}
+                                    fontSize={10}
                                     tickLine={false}
+                                    angle={-45}
+                                    textAnchor="end"
+                                    height={60}
                                   />
                                   <YAxis
                                     stroke="hsl(var(--muted-foreground))"
@@ -947,22 +956,32 @@ export default function AdminSubmissionsPage() {
                             </div>
                           </div>
 
-                          {/* Scrape Log - horizontal icons like creator dashboard */}
+                          {/* Scrape Log - horizontal icons in chronological order */}
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-muted-foreground">Tracking History:</span>
-                            {submission.clips.view_tracking.map((tracking, idx) => (
-                              <div 
-                                key={idx}
-                                className="flex items-center gap-1"
-                                title={`${new Date(tracking.scrapedAt || tracking.date).toLocaleString()} - ${Number(tracking.views).toLocaleString()} views`}
-                              >
-                                {Number(tracking.views) > 0 || idx > 0 ? (
-                                  <CheckCircle className="w-3 h-3 text-foreground" />
-                                ) : (
-                                  <XCircle className="w-3 h-3 text-muted-foreground" />
-                                )}
-                              </div>
-                            ))}
+                            <span className="text-xs text-muted-foreground">Tracking History (oldest → newest):</span>
+                            {[...submission.clips.view_tracking]
+                              .sort((a, b) => new Date(a.scrapedAt || a.date).getTime() - new Date(b.scrapedAt || b.date).getTime())
+                              .map((tracking, idx, arr) => {
+                                const prevViews = idx > 0 ? Number(arr[idx-1].views) : 0
+                                const currViews = Number(tracking.views)
+                                const viewChange = currViews - prevViews
+                                const isGrowth = viewChange > 0
+                                return (
+                                  <div 
+                                    key={idx}
+                                    className="flex items-center gap-1"
+                                    title={`${new Date(tracking.scrapedAt || tracking.date).toLocaleString()}\nViews: ${currViews.toLocaleString()}${idx > 0 ? `\nChange: ${viewChange >= 0 ? '+' : ''}${viewChange.toLocaleString()}` : ' (first scrape)'}`}
+                                  >
+                                    {isGrowth ? (
+                                      <TrendingUp className="w-3 h-3 text-green-500" />
+                                    ) : currViews > 0 ? (
+                                      <CheckCircle className="w-3 h-3 text-foreground" />
+                                    ) : (
+                                      <XCircle className="w-3 h-3 text-muted-foreground" />
+                                    )}
+                                  </div>
+                                )
+                              })}
                           </div>
                         </>
                       ) : (
