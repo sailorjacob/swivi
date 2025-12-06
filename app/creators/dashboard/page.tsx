@@ -661,9 +661,9 @@ export default function ClipperDashboard() {
                                 {clipAnalytics[clip.id].currentViews.toLocaleString()}
                               </div>
                             </div>
-                            <div className="bg-primary/10 p-3 rounded-lg">
+                            <div className="bg-green-500/10 p-3 rounded-lg">
                               <div className="text-xs text-muted-foreground mb-1">Tracked Views</div>
-                              <div className="text-lg font-semibold text-primary">
+                              <div className="text-lg font-semibold text-green-600 dark:text-green-400">
                                 +{clipAnalytics[clip.id].trackedViews.toLocaleString()}
                               </div>
                             </div>
@@ -715,22 +715,39 @@ export default function ClipperDashboard() {
                                 </div>
                               </div>
 
-                              {/* Scrape Log */}
+                              {/* Scrape Log - max 10 icons shown */}
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs text-muted-foreground">Tracking History:</span>
-                                {clipAnalytics[clip.id].viewHistory.map((point: any, idx: number) => (
-                                  <div 
-                                    key={idx}
-                                    className="flex items-center gap-1"
-                                    title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
-                                  >
-                                    {point.success ? (
-                                      <CheckCircle className="w-3 h-3 text-foreground" />
-                                    ) : (
-                                      <XCircle className="w-3 h-3 text-muted-foreground" />
-                                    )}
-                                  </div>
-                                ))}
+                                {(() => {
+                                  const viewHistory = clipAnalytics[clip.id].viewHistory
+                                  const totalCount = viewHistory.length
+                                  const maxIcons = 10
+                                  const displayItems = totalCount > maxIcons ? viewHistory.slice(-maxIcons) : viewHistory
+                                  const hiddenCount = totalCount - displayItems.length
+                                  
+                                  return (
+                                    <>
+                                      {hiddenCount > 0 && (
+                                        <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-muted rounded">
+                                          +{hiddenCount} more
+                                        </span>
+                                      )}
+                                      {displayItems.map((point: any, idx: number) => (
+                                        <div 
+                                          key={idx}
+                                          className="flex items-center gap-1"
+                                          title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
+                                        >
+                                          {point.success ? (
+                                            <CheckCircle className="w-3 h-3 text-foreground" />
+                                          ) : (
+                                            <XCircle className="w-3 h-3 text-muted-foreground" />
+                                          )}
+                                        </div>
+                                      ))}
+                                    </>
+                                  )
+                                })()}
                               </div>
                             </>
                           ) : (

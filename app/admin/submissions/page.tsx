@@ -215,11 +215,16 @@ export default function AdminSubmissionsPage() {
       }
       if (!isBackgroundRefresh) setError(null)
       
-      // Use ref for offset to avoid dependency issues
+      // For background refresh, maintain current offset + limit to refresh all loaded submissions
+      // For load more, add to current offset
+      // For fresh fetch, reset to 0
       const offset = loadMore ? currentOffsetRef.current + pagination.limit : 0
+      const limit = isBackgroundRefresh && currentOffsetRef.current > 0 
+        ? currentOffsetRef.current + pagination.limit  // Fetch all currently loaded items
+        : pagination.limit
       const params = new URLSearchParams({
-        limit: pagination.limit.toString(),
-        offset: offset.toString()
+        limit: limit.toString(),
+        offset: isBackgroundRefresh ? '0' : offset.toString()  // Background refresh always starts from 0
       })
 
       if (filters.status !== "all") {
@@ -248,16 +253,32 @@ export default function AdminSubmissionsPage() {
         if (loadMore) {
           // Append new submissions to existing ones
           setSubmissions(prev => [...prev, ...data.submissions])
+          // Update ref and state for load more
+          currentOffsetRef.current = offset
+          setPagination({
+            ...data.pagination,
+            offset: offset
+          })
+        } else if (isBackgroundRefresh) {
+          // Background refresh: preserve expanded state by updating in place
+          setSubmissions(data.submissions)
+          // Keep current offset ref position - important for "load more" to work correctly
+          // Also preserve the original limit (50) so offset calculations stay correct
+          setPagination(prev => ({
+            total: data.pagination.total,
+            hasMore: data.submissions.length < data.pagination.total, // Recalculate based on loaded items
+            limit: prev.limit,  // Keep original limit (50) for correct offset calculation
+            offset: currentOffsetRef.current  // Use the ref value which tracks actual loaded position
+          }))
         } else {
-          // Replace submissions for fresh fetch
-        setSubmissions(data.submissions)
+          // Fresh fetch: replace submissions and reset offset
+          setSubmissions(data.submissions)
+          currentOffsetRef.current = offset
+          setPagination({
+            ...data.pagination,
+            offset: offset
+          })
         }
-        // Update ref and state
-        currentOffsetRef.current = offset
-        setPagination({
-          ...data.pagination,
-          offset: offset
-        })
         // Update status counts from API (accurate totals, not from paginated data)
         if (data.statusCounts) {
           setStatusCounts(data.statusCounts)
@@ -888,9 +909,9 @@ export default function AdminSubmissionsPage() {
                             {Number(submission.currentViews || submission.initialViews || 0).toLocaleString()}
                           </div>
                         </div>
-                        <div className="bg-primary/10 p-3 rounded-lg">
+                        <div className="bg-green-500/10 p-3 rounded-lg">
                           <div className="text-xs text-muted-foreground mb-1">Tracked Views</div>
-                          <div className="text-lg font-semibold text-primary">
+                          <div className="text-lg font-semibold text-green-600 dark:text-green-400">
                             +{Number(submission.viewChange || 0).toLocaleString()}
                           </div>
                         </div>
@@ -956,32 +977,50 @@ export default function AdminSubmissionsPage() {
                             </div>
                           </div>
 
-                          {/* Scrape Log - horizontal icons in chronological order */}
+                          {/* Scrape Log - horizontal icons in chronological order (max 10 shown) */}
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-muted-foreground">Tracking History (oldest → newest):</span>
-                            {[...submission.clips.view_tracking]
-                              .sort((a, b) => new Date(a.scrapedAt || a.date).getTime() - new Date(b.scrapedAt || b.date).getTime())
-                              .map((tracking, idx, arr) => {
-                                const prevViews = idx > 0 ? Number(arr[idx-1].views) : 0
-                                const currViews = Number(tracking.views)
-                                const viewChange = currViews - prevViews
-                                const isGrowth = viewChange > 0
-                                return (
-                                  <div 
-                                    key={idx}
-                                    className="flex items-center gap-1"
-                                    title={`${new Date(tracking.scrapedAt || tracking.date).toLocaleString()}\nViews: ${currViews.toLocaleString()}${idx > 0 ? `\nChange: ${viewChange >= 0 ? '+' : ''}${viewChange.toLocaleString()}` : ' (first scrape)'}`}
-                                  >
-                                    {isGrowth ? (
-                                      <TrendingUp className="w-3 h-3 text-green-500" />
-                                    ) : currViews > 0 ? (
-                                      <CheckCircle className="w-3 h-3 text-foreground" />
-                                    ) : (
-                                      <XCircle className="w-3 h-3 text-muted-foreground" />
-                                    )}
-                                  </div>
-                                )
-                              })}
+                            <span className="text-xs text-muted-foreground">Tracking History:</span>
+                            {(() => {
+                              const sorted = [...submission.clips.view_tracking]
+                                .sort((a, b) => new Date(a.scrapedAt || a.date).getTime() - new Date(b.scrapedAt || b.date).getTime())
+                              const totalCount = sorted.length
+                              const maxIcons = 10
+                              const displayItems = totalCount > maxIcons ? sorted.slice(-maxIcons) : sorted // Show most recent 10
+                              const hiddenCount = totalCount - displayItems.length
+                              
+                              return (
+                                <>
+                                  {hiddenCount > 0 && (
+                                    <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-muted rounded">
+                                      +{hiddenCount} more
+                                    </span>
+                                  )}
+                                  {displayItems.map((tracking, idx) => {
+                                    // Calculate based on original array position
+                                    const originalIdx = hiddenCount + idx
+                                    const prevViews = originalIdx > 0 ? Number(sorted[originalIdx - 1].views) : 0
+                                    const currViews = Number(tracking.views)
+                                    const viewChange = currViews - prevViews
+                                    const isGrowth = viewChange > 0
+                                    return (
+                                      <div 
+                                        key={idx}
+                                        className="flex items-center gap-1"
+                                        title={`${new Date(tracking.scrapedAt || tracking.date).toLocaleString()}\nViews: ${currViews.toLocaleString()}${originalIdx > 0 ? `\nChange: ${viewChange >= 0 ? '+' : ''}${viewChange.toLocaleString()}` : ' (first scrape)'}`}
+                                      >
+                                        {isGrowth ? (
+                                          <TrendingUp className="w-3 h-3 text-green-500" />
+                                        ) : currViews > 0 ? (
+                                          <CheckCircle className="w-3 h-3 text-foreground" />
+                                        ) : (
+                                          <XCircle className="w-3 h-3 text-muted-foreground" />
+                                        )}
+                                      </div>
+                                    )
+                                  })}
+                                </>
+                              )
+                            })()}
                           </div>
                         </>
                       ) : (
@@ -1013,8 +1052,8 @@ export default function AdminSubmissionsPage() {
                       )}
                       
                       {submission.status === 'PENDING' && (
-                        <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20 text-sm">
-                          <p className="text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                        <div className="p-3 bg-muted/50 rounded-lg border border-border text-sm">
+                          <p className="text-muted-foreground flex items-center gap-2">
                             <Clock className="w-4 h-4" />
                             Awaiting approval. Views are being tracked but earnings won't calculate until approved.
                           </p>
@@ -1022,34 +1061,13 @@ export default function AdminSubmissionsPage() {
                       )}
                       
                       {submission.status === 'REJECTED' && (
-                        <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20 text-sm">
-                          <p className="text-red-600 dark:text-red-400 flex items-center gap-2">
+                        <div className="p-3 bg-muted/50 rounded-lg border border-border text-sm">
+                          <p className="text-muted-foreground flex items-center gap-2">
                             <XCircle className="w-4 h-4" />
                             Rejected. {submission.rejectionReason ? `Reason: ${submission.rejectionReason}` : 'No earnings will be calculated.'}
                           </p>
                         </div>
                       )}
-
-                      {/* User Stats Summary - clean bottom bar */}
-                      <div className="pt-3 border-t border-dashed flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-4">
-                          <span className="text-muted-foreground">User:</span>
-                          <span className="font-medium">{submission.users.name || submission.users.email}</span>
-                          <span className="text-muted-foreground">•</span>
-                          <span>{Number(submission.users.totalViews || 0).toLocaleString()} total views</span>
-                          <span className="text-muted-foreground">•</span>
-                          <span className="font-medium text-green-600 dark:text-green-400">${Number(submission.users.totalEarnings || 0).toFixed(2)} earned</span>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setSelectedUserModal(submission.users)
-                            setUserSubmissions(submissions.filter(s => s.users.id === submission.users.id))
-                          }}
-                          className="text-xs text-primary hover:underline"
-                        >
-                          View Profile →
-                        </button>
-                      </div>
                     </div>
                   </div>
                 )}
