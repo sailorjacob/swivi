@@ -475,7 +475,7 @@ export default function CampaignDetailPage() {
           <div className="mt-4">
             <div className="w-full bg-muted rounded-full h-2">
               <div
-                className="bg-foreground h-2 rounded-full transition-all duration-500"
+                className="bg-green-500 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(progress, 100)}%` }}
               />
             </div>

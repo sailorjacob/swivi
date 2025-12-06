@@ -1292,50 +1292,6 @@ export default function AdminCampaignsPage() {
                             {/* Action Buttons */}
                             <div className="flex items-center gap-1 ml-4">
                               <button
-                                onClick={async () => {
-                                  const newExpanded = new Set(expandedCampaigns)
-                                  if (newExpanded.has(campaign.id)) {
-                                    newExpanded.delete(campaign.id)
-                                    setExpandedCampaigns(newExpanded)
-                                  } else {
-                                    newExpanded.add(campaign.id)
-                                    setExpandedCampaigns(newExpanded)
-                                    
-                                    // Fetch full campaign details if not already loaded
-                                    if (!expandedCampaignData[campaign.id]) {
-                                      const newLoading = new Set(loadingCampaignData)
-                                      newLoading.add(campaign.id)
-                                      setLoadingCampaignData(newLoading)
-                                      
-                                      try {
-                                        const response = await authenticatedFetch(`/api/admin/campaigns/${campaign.id}`)
-                                        if (response.ok) {
-                                          const fullCampaign = await response.json()
-                                          setExpandedCampaignData(prev => ({
-                                            ...prev,
-                                            [campaign.id]: fullCampaign
-                                          }))
-                                        }
-                                      } catch (error) {
-                                        console.error('Error fetching campaign details:', error)
-                                      } finally {
-                                        const updatedLoading = new Set(loadingCampaignData)
-                                        updatedLoading.delete(campaign.id)
-                                        setLoadingCampaignData(updatedLoading)
-                                      }
-                                    }
-                                  }
-                                }}
-                                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                                title="View details"
-                              >
-                                {expandedCampaigns.has(campaign.id) ? (
-                                  <ChevronUp className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDown className="h-4 w-4" />
-                                )}
-                              </button>
-                              <button
                                 onClick={() => handleEditCampaign(campaign)}
                                 className="p-2 text-muted-foreground hover:text-foreground transition-colors"
                                 title="Edit campaign"
@@ -1489,34 +1445,14 @@ export default function AdminCampaignsPage() {
                             </div>
                             <div className="w-full bg-muted rounded-full h-3">
                               <div
-                                className="h-3 rounded-full transition-all duration-500 bg-foreground/70"
+                                className="h-3 rounded-full transition-all duration-500 bg-green-500"
                                 style={{ width: `${progressPercentage}%` }}
                               />
                             </div>
                           </div>
 
-                          {/* Campaign Stats */}
-                          <div className="grid grid-cols-4 gap-4 text-sm">
-                            <div>
-                              <p className="text-muted-foreground">Budget</p>
-                              <p className="font-medium">${campaign.budget.toLocaleString()}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Spent</p>
-                              <p className="font-medium">${campaign.spent.toLocaleString()}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Remaining</p>
-                              <p className="font-medium">${(campaign.budget - campaign.spent).toLocaleString()}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Submissions</p>
-                              <p className="font-medium">{campaign._count.clipSubmissions}</p>
-                            </div>
-                          </div>
-
                           {/* Platform Tags */}
-                          <div className="flex gap-1 mt-3">
+                          <div className="flex gap-1 mb-4">
                             {campaign.targetPlatforms.slice(0, 3).map((platform) => (
                               <Badge key={platform} variant="secondary" className="text-xs">
                                 {platform}
@@ -1527,6 +1463,79 @@ export default function AdminCampaignsPage() {
                                 +{campaign.targetPlatforms.length - 3} more
                               </Badge>
                             )}
+                          </div>
+
+                          {/* Campaign Stats */}
+                          <div className="grid grid-cols-4 gap-4 text-sm">
+                            <div className="text-center p-2 bg-muted/50 rounded-lg">
+                              <p className="text-2xl font-bold">{campaign._count.clipSubmissions}</p>
+                              <p className="text-xs text-muted-foreground">Submissions</p>
+                            </div>
+                            <div className="text-center p-2 bg-muted/50 rounded-lg">
+                              <p className="text-2xl font-bold">${campaign.spent.toLocaleString()}</p>
+                              <p className="text-xs text-muted-foreground">Earnings</p>
+                            </div>
+                            <div className="text-center p-2 bg-muted/50 rounded-lg">
+                              <p className="text-2xl font-bold">${campaign.budget.toLocaleString()}</p>
+                              <p className="text-xs text-muted-foreground">Budget</p>
+                            </div>
+                            <div className="text-center p-2 bg-muted/50 rounded-lg">
+                              <p className="text-2xl font-bold">${(campaign.budget - campaign.spent).toLocaleString()}</p>
+                              <p className="text-xs text-muted-foreground">Remaining</p>
+                            </div>
+                          </div>
+
+                          {/* Expand/Collapse Button - Bottom Center */}
+                          <div className="flex justify-center mt-4">
+                            <button
+                              onClick={async () => {
+                                const newExpanded = new Set(expandedCampaigns)
+                                if (newExpanded.has(campaign.id)) {
+                                  newExpanded.delete(campaign.id)
+                                  setExpandedCampaigns(newExpanded)
+                                } else {
+                                  newExpanded.add(campaign.id)
+                                  setExpandedCampaigns(newExpanded)
+                                  
+                                  // Fetch full campaign details if not already loaded
+                                  if (!expandedCampaignData[campaign.id]) {
+                                    const newLoading = new Set(loadingCampaignData)
+                                    newLoading.add(campaign.id)
+                                    setLoadingCampaignData(newLoading)
+                                    
+                                    try {
+                                      const response = await authenticatedFetch(`/api/admin/campaigns/${campaign.id}`)
+                                      if (response.ok) {
+                                        const fullCampaign = await response.json()
+                                        setExpandedCampaignData(prev => ({
+                                          ...prev,
+                                          [campaign.id]: fullCampaign
+                                        }))
+                                      }
+                                    } catch (error) {
+                                      console.error('Error fetching campaign details:', error)
+                                    } finally {
+                                      const updatedLoading = new Set(loadingCampaignData)
+                                      updatedLoading.delete(campaign.id)
+                                      setLoadingCampaignData(updatedLoading)
+                                    }
+                                  }
+                                }
+                              }}
+                              className="flex items-center gap-1 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-full border border-border hover:border-foreground/30"
+                            >
+                              {expandedCampaigns.has(campaign.id) ? (
+                                <>
+                                  <ChevronUp className="h-3 w-3" />
+                                  <span>Hide Details</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-3 w-3" />
+                                  <span>Show Details</span>
+                                </>
+                              )}
+                            </button>
                           </div>
 
                           {/* Expandable Details */}
@@ -2281,7 +2290,7 @@ function CampaignView({
           <div className="mt-2">
             <div className="w-full bg-muted rounded-full h-3">
               <div
-                className="h-3 rounded-full bg-foreground/70"
+                className="h-3 rounded-full bg-green-500"
                 style={{ width: `${Math.min(stats.budgetUtilization || 0, 100)}%` }}
               />
             </div>

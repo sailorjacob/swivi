@@ -372,7 +372,7 @@ export default function AdminAnalyticsPage() {
                           </div>
                           <div className="w-full bg-muted rounded-full h-2">
                             <div
-                              className="h-2 rounded-full bg-foreground/70 transition-all duration-500"
+                              className="h-2 rounded-full bg-green-500 transition-all duration-500"
                               style={{ width: `${Math.min(progressPercent, 100)}%` }}
                             />
                           </div>
