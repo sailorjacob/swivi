@@ -200,6 +200,9 @@ export default function AdminSubmissionsPage() {
     }
   }, [])
 
+  // Track current offset in a ref to avoid re-triggering useEffect
+  const currentOffsetRef = useRef(0)
+
   // Fetch submissions
   const fetchSubmissions = useCallback(async (loadMore = false, isBackgroundRefresh = false) => {
     try {
@@ -212,7 +215,8 @@ export default function AdminSubmissionsPage() {
       }
       if (!isBackgroundRefresh) setError(null)
       
-      const offset = loadMore ? pagination.offset + pagination.limit : 0
+      // Use ref for offset to avoid dependency issues
+      const offset = loadMore ? currentOffsetRef.current + pagination.limit : 0
       const params = new URLSearchParams({
         limit: pagination.limit.toString(),
         offset: offset.toString()
@@ -248,6 +252,8 @@ export default function AdminSubmissionsPage() {
           // Replace submissions for fresh fetch
         setSubmissions(data.submissions)
         }
+        // Update ref and state
+        currentOffsetRef.current = offset
         setPagination({
           ...data.pagination,
           offset: offset
@@ -267,7 +273,7 @@ export default function AdminSubmissionsPage() {
       setIsLoadingMore(false)
       setIsRefreshing(false)
     }
-  }, [filters, pagination.limit, pagination.offset])
+  }, [filters, pagination.limit]) // Removed pagination.offset from dependencies
 
   useEffect(() => {
     fetchCampaigns()
@@ -655,31 +661,31 @@ export default function AdminSubmissionsPage() {
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                      <span>Submitted: {(() => {
-                        try {
-                          const date = new Date(submission.createdAt)
-                          if (isNaN(date.getTime())) {
-                            return 'Unknown date'
+                    {/* Key Stats Row - Always Visible */}
+                    <div className="flex flex-wrap items-center gap-3 text-xs">
+                      {/* Submitted time */}
+                      <span className="text-muted-foreground">
+                        Submitted {(() => {
+                          try {
+                            const date = new Date(submission.createdAt)
+                            if (isNaN(date.getTime())) return 'Unknown'
+                            return date.toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric', 
+                              year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          } catch (error) {
+                            return 'Invalid date'
                           }
-                          return date.toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric', 
-                            year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })
-                        } catch (error) {
-                          console.error('Date parsing error:', error, 'Raw date:', submission.createdAt)
-                          return 'Invalid date'
-                        }
-                      })()}</span>
-                      {submission.payout && (
-                        <span>Payout: ${submission.payout.toFixed(2)}</span>
-                      )}
-                      {/* View tracking data with processing status */}
+                        })()}
+                      </span>
+                      
+                      <span className="text-muted-foreground/40">•</span>
+                      
+                      {/* View Stats - Compact but informative */}
                       {(() => {
-                        const processingStatus = getProcessingStatusDisplay(submission.processingStatus)
                         const hasInitialViews = submission.initialViews && Number(submission.initialViews) > 0
                         const hasCurrentViews = submission.currentViews && Number(submission.currentViews) > 0
                         const isScraping = submission.processingStatus === 'SCRAPING'
@@ -690,80 +696,83 @@ export default function AdminSubmissionsPage() {
                           return (
                             <span className="flex items-center gap-1 text-muted-foreground">
                               <Loader2 className="w-3 h-3 animate-spin" />
-                              Scraping initial views...
+                              Scraping...
                             </span>
                           )
                         }
                         
                         if (hasInitialViews || hasCurrentViews) {
                           return (
-                            <span className="flex items-center gap-1">
-                              <span className="font-medium">Views:</span>
-                              {hasInitialViews && (
-                                <span title="Initial scraped views at submission time" className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                                  {Number(submission.initialViews).toLocaleString()} initial
-                                </span>
-                              )}
-                              {hasCurrentViews && (
-                                <>
-                                  <span className="mx-1">→</span>
-                                  <span title="Current views from tracking">
-                                    {Number(submission.currentViews).toLocaleString()} current
-                                  </span>
-                                </>
-                              )}
+                            <div className="flex items-center gap-2">
+                              <span className="bg-muted px-2 py-0.5 rounded text-foreground font-medium">
+                                {Number(submission.initialViews || 0).toLocaleString()} initial
+                              </span>
+                              <span className="text-muted-foreground">→</span>
+                              <span className="bg-muted px-2 py-0.5 rounded text-foreground font-medium">
+                                {Number(submission.currentViews || submission.initialViews || 0).toLocaleString()} current
+                              </span>
                               {submission.viewChange && Number(submission.viewChange) > 0 && (
-                                <span className="font-medium" title="View change (earnings based on this)">
-                                  (+{Number(submission.viewChange).toLocaleString()})
+                                <span className="text-green-600 dark:text-green-400 font-medium">
+                                  +{Number(submission.viewChange).toLocaleString()}
                                 </span>
                               )}
-                            </span>
+                            </div>
                           )
                         }
                         
                         if (scrapeFailed) {
                           return (
-                            <span className="flex items-center gap-1 text-muted-foreground/60" title={submission.processingStatus}>
+                            <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400" title={submission.processingStatus}>
                               <AlertCircle className="w-3 h-3" />
                               Scrape failed
                             </span>
                           )
                         }
                         
-                        if (submission.processingStatus === 'COMPLETE') {
-                          return (
-                            <span className="text-muted-foreground/60" title="Scraping completed but returned 0 views">
-                              0 views (scraped)
-                            </span>
-                          )
-                        }
-                        
                         return (
-                          <span className="text-muted-foreground/60">No view data</span>
+                          <span className="text-muted-foreground/60">Awaiting scrape</span>
                         )
                       })()}
-                      {/* Scrape count */}
-                      {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 && (
-                        <span className="flex items-center gap-1" title="Number of times this clip has been scraped">
+                      
+                      <span className="text-muted-foreground/40">•</span>
+                      
+                      {/* Scrape count and last scraped */}
+                      {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 ? (
+                        <span className="flex items-center gap-2 text-muted-foreground">
                           <Eye className="w-3 h-3" />
                           {submission.clips.view_tracking.length} scrape{submission.clips.view_tracking.length !== 1 ? 's' : ''}
+                          <span className="text-muted-foreground/40">•</span>
+                          Last: {new Date(submission.clips.view_tracking[0].scrapedAt || submission.clips.view_tracking[0].date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit'
+                          })}
                         </span>
+                      ) : (
+                        <span className="text-muted-foreground/60">No scrapes yet</span>
                       )}
+                      {/* Earnings display */}
                       {submission.campaigns.status === 'COMPLETED' && submission.finalEarnings ? (
-                        <span className="font-bold flex items-center gap-1">
-                          Final Earnings: ${Number(submission.finalEarnings).toFixed(2)} 🔒
-                        </span>
+                        <>
+                          <span className="text-muted-foreground/40">•</span>
+                          <span className="font-bold text-foreground flex items-center gap-1">
+                            ${Number(submission.finalEarnings).toFixed(2)} final 🔒
+                          </span>
+                        </>
                       ) : submission.clips?.earnings && Number(submission.clips.earnings) > 0 ? (
-                        <span>Current Earnings: ${Number(submission.clips.earnings).toFixed(2)}</span>
+                        <>
+                          <span className="text-muted-foreground/40">•</span>
+                          <span className="font-medium text-green-600 dark:text-green-400">
+                            ${Number(submission.clips.earnings).toFixed(2)} earned
+                          </span>
+                        </>
+                      ) : submission.status === 'PENDING' ? (
+                        <>
+                          <span className="text-muted-foreground/40">•</span>
+                          <span className="text-muted-foreground/60 italic">No earnings until approved</span>
+                        </>
                       ) : null}
-                      {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 && (
-                        <span>Last Tracked: {new Date(submission.clips.view_tracking[0].date).toLocaleString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit'
-                        })}</span>
-                      )}
                     </div>
                   </div>
                   {/* Action buttons */}
