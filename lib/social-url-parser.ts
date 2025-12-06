@@ -307,4 +307,72 @@ export class SocialUrlParser {
     const parsed = this.parseUrl(url)
     return parsed.isValid && !!parsed.username && !parsed.postId
   }
+
+  /**
+   * Generates a normalized unique identifier for a social media post.
+   * This combines platform + postId to create a consistent identifier
+   * regardless of URL format variations (http/https, www, query params, etc.)
+   * 
+   * Example: "TIKTOK:7123456789" or "YOUTUBE:dQw4w9WgXcQ"
+   * 
+   * Returns null if the URL is not a valid post URL (profile URLs, invalid URLs)
+   */
+  static getNormalizedPostId(url: string): string | null {
+    const parsed = this.parseUrl(url)
+    
+    if (!parsed.isValid || !parsed.postId) {
+      return null
+    }
+    
+    // Normalize the postId (remove any trailing slashes, lowercase for consistency)
+    const normalizedId = parsed.postId.replace(/\/+$/, '').trim()
+    
+    if (!normalizedId) {
+      return null
+    }
+    
+    return `${parsed.platform}:${normalizedId}`
+  }
+
+  /**
+   * Normalizes a social media URL to a canonical format.
+   * This removes query parameters, fragments, and normalizes the path.
+   * Useful for comparing URLs that might be formatted differently but point to the same content.
+   */
+  static normalizeUrl(url: string): string | null {
+    const parsed = this.parseUrl(url)
+    
+    if (!parsed.isValid) {
+      return null
+    }
+
+    // For post URLs, construct a canonical URL
+    if (parsed.postId) {
+      switch (parsed.platform) {
+        case 'TIKTOK':
+          if (parsed.username) {
+            return `https://www.tiktok.com/@${parsed.username}/video/${parsed.postId}`
+          }
+          // For short URLs where we don't have username, keep the short format
+          return `https://www.tiktok.com/t/${parsed.postId}`
+        
+        case 'INSTAGRAM':
+          return `https://www.instagram.com/reel/${parsed.postId}`
+        
+        case 'YOUTUBE':
+          return `https://www.youtube.com/shorts/${parsed.postId}`
+        
+        case 'TWITTER':
+          if (parsed.username) {
+            return `https://x.com/${parsed.username}/status/${parsed.postId}`
+          }
+          return null
+        
+        default:
+          return null
+      }
+    }
+
+    return null
+  }
 }

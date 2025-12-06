@@ -160,6 +160,10 @@ model ClipSubmission {
 
   @@index([campaignId, status])
   @@index([autoRejected])
+  @@index([clipUrl, campaignId]) // For duplicate detection queries
+  @@index([clipUrl, userId]) // For cross-campaign duplicate detection
+  // Note: Unique constraints are partial indexes defined in migration
+  // They only apply to non-REJECTED submissions to allow duplicate history
   @@map("clip_submissions")
 }
 

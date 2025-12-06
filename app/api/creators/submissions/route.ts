@@ -211,19 +211,81 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Check for duplicate URL in the same campaign
-    const existingSubmission = await prisma.clipSubmission.findFirst({
+    // Ensure this is a post URL, not a profile URL
+    if (!parsedUrl.postId) {
+      return NextResponse.json({
+        error: "Invalid submission URL",
+        details: "Please submit a link to a specific video or post, not a profile URL."
+      }, { status: 400 })
+    }
+
+    // Get normalized post identifier for robust duplicate detection
+    const normalizedPostId = SocialUrlParser.getNormalizedPostId(validatedData.clipUrl)
+    
+    if (!normalizedPostId) {
+      return NextResponse.json({
+        error: "Could not parse video URL",
+        details: "Unable to extract video ID from the provided URL. Please check the URL and try again."
+      }, { status: 400 })
+    }
+
+    console.log(`🔍 Checking for duplicates: normalizedPostId=${normalizedPostId}`)
+
+    // Check for duplicate submissions using multiple strategies:
+    // 1. Exact URL match in any campaign by same user
+    // 2. Normalized post ID match (catches URL variations like http/https, www, query params)
+    
+    // First, get all submissions for this campaign to check for duplicates
+    const existingSubmissionsInCampaign = await prisma.clipSubmission.findMany({
       where: {
         campaignId: validatedData.campaignId,
-        clipUrl: validatedData.clipUrl
+        status: { not: 'REJECTED' } // Allow resubmission if previous was rejected
+      },
+      select: {
+        id: true,
+        clipUrl: true,
+        userId: true
       }
     })
 
-    if (existingSubmission) {
-      return NextResponse.json({
-        error: "Duplicate submission",
-        details: "This URL has already been submitted to this campaign."
-      }, { status: 400 })
+    // Check for duplicate by normalized post ID in this campaign
+    for (const existing of existingSubmissionsInCampaign) {
+      const existingNormalizedId = SocialUrlParser.getNormalizedPostId(existing.clipUrl)
+      if (existingNormalizedId === normalizedPostId) {
+        console.log(`❌ Duplicate detected: submission ${existing.id} has same post ID`)
+        return NextResponse.json({
+          error: "Duplicate submission",
+          details: "This video has already been submitted to this campaign."
+        }, { status: 400 })
+      }
+    }
+
+    // Also check if the SAME user has submitted this exact video to ANY campaign
+    // This prevents a user from double-dipping the same content across campaigns
+    const userSubmissionsWithSameVideo = await prisma.clipSubmission.findMany({
+      where: {
+        userId: dbUser.id,
+        status: { not: 'REJECTED' }
+      },
+      select: {
+        id: true,
+        clipUrl: true,
+        campaignId: true,
+        campaigns: {
+          select: { title: true }
+        }
+      }
+    })
+
+    for (const existing of userSubmissionsWithSameVideo) {
+      const existingNormalizedId = SocialUrlParser.getNormalizedPostId(existing.clipUrl)
+      if (existingNormalizedId === normalizedPostId && existing.campaignId !== validatedData.campaignId) {
+        console.log(`❌ Cross-campaign duplicate: user submitted same video to campaign ${existing.campaignId}`)
+        return NextResponse.json({
+          error: "Duplicate submission",
+          details: `You have already submitted this video to another campaign ("${existing.campaigns.title}"). Each video can only be submitted to one campaign.`
+        }, { status: 400 })
+      }
     }
 
     // Admin bypass for testing - admins can submit any URL without verification
@@ -472,6 +534,33 @@ export async function POST(request: NextRequest) {
         code: dbError.code,
         meta: dbError.meta
       })
+      
+      // Check for unique constraint violation (Prisma error code P2002)
+      // This catches race conditions where duplicate check passed but insert failed
+      if (dbError.code === 'P2002') {
+        const constraintTarget = dbError.meta?.target || []
+        console.log(`❌ Unique constraint violation on: ${JSON.stringify(constraintTarget)}`)
+        
+        if (constraintTarget.includes('clipUrl') && constraintTarget.includes('campaignId')) {
+          return NextResponse.json({
+            error: "Duplicate submission",
+            details: "This video has already been submitted to this campaign."
+          }, { status: 400 })
+        }
+        
+        if (constraintTarget.includes('clipUrl') && constraintTarget.includes('userId')) {
+          return NextResponse.json({
+            error: "Duplicate submission",
+            details: "You have already submitted this video to another campaign. Each video can only be submitted once."
+          }, { status: 400 })
+        }
+        
+        // Generic duplicate error
+        return NextResponse.json({
+          error: "Duplicate submission",
+          details: "This submission appears to be a duplicate. Please check your existing submissions."
+        }, { status: 400 })
+      }
       
       // Check if it's a missing column error
       if (dbError.message?.includes('initialViews') || dbError.message?.includes('column')) {
