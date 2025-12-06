@@ -448,14 +448,10 @@ export default function CampaignDetailPage() {
           ) : activityData ? (
             <div className="space-y-6 overflow-y-auto max-h-[calc(85vh-120px)] pr-2">
               {/* Stats Row */}
-              <div className="grid grid-cols-4 gap-2">
-                <div className="text-center py-3 px-2 border border-border rounded-md">
-                  <p className="text-xl font-semibold">{activityData.totals.totalClippers}</p>
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Clippers</p>
-                </div>
+              <div className="grid grid-cols-3 gap-2">
                 <div className="text-center py-3 px-2 border border-border rounded-md">
                   <p className="text-xl font-semibold">{activityData.totals.totalClips}</p>
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Clips</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Submissions</p>
                 </div>
                 <div className="text-center py-3 px-2 border border-border rounded-md">
                   <p className="text-xl font-semibold">{activityData.totals.totalViewsGained.toLocaleString()}</p>
