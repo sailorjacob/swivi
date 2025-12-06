@@ -649,14 +649,31 @@ export default function AdminAnalyticsPage() {
                 </Badge>
               )}
               {cronLogs.length > 0 && (() => {
-                const successRate = cronLogs.filter(l => l.status === 'SUCCESS').length / cronLogs.length
-                if (successRate >= 0.9) return <CheckCircle className="w-4 h-4 text-green-500" />
-                if (successRate >= 0.5) return <CheckCircle className="w-4 h-4 text-amber-500" />
-                return <XCircle className="w-4 h-4 text-red-500" />
+                // Check the most recent log's clip success rate, not just cron job status
+                const mostRecentLog = cronLogs[0]
+                const totalClips = mostRecentLog.clipsProcessed || 0
+                const successfulClips = mostRecentLog.clipsSuccessful || 0
+                const clipSuccessRate = totalClips > 0 ? successfulClips / totalClips : 1
+                
+                // Only show red if really failing (less than 50% success)
+                // Show amber for mostly working (50-95%), green for excellent (95%+)
+                if (clipSuccessRate >= 0.95) {
+                  return <CheckCircle className="w-4 h-4 text-green-500" />
+                } else if (clipSuccessRate >= 0.5 || (totalClips > 0 && successfulClips >= totalClips - 2)) {
+                  // Also show amber/green if only 1-2 failures even if rate is slightly lower
+                  return <CheckCircle className="w-4 h-4 text-amber-500" />
+                } else {
+                  return <XCircle className="w-4 h-4 text-red-500" />
+                }
               })()}
             </div>
             <span className="text-xs text-muted-foreground">
-              {cronLogs.filter(l => l.status === 'SUCCESS').length}/{cronLogs.length} successful
+              {cronLogs.length > 0 && (() => {
+                const mostRecentLog = cronLogs[0]
+                const total = mostRecentLog.clipsProcessed || 0
+                const success = mostRecentLog.clipsSuccessful || 0
+                return `${success}/${total} clips successful`
+              })()}
             </span>
           </div>
         </CardHeader>
