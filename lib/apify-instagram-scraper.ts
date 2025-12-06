@@ -117,6 +117,13 @@ export class ApifyInstagramScraper {
         throw new Error('No data returned from Apify scraper')
       }
 
+      // Log key metrics for debugging view discrepancies
+      console.log(`📊 Instagram scrape result for ${postUrl.substring(0, 50)}...`)
+      console.log(`   videoViewCount: ${result.videoViewCount}`)
+      console.log(`   videoPlayCount: ${result.videoPlayCount}`)
+      console.log(`   likesCount: ${result.likesCount}`)
+      console.log(`   type: ${result.type}, productType: ${result.productType}`)
+
       return result
 
     } catch (error) {
