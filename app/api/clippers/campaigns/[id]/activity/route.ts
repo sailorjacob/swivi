@@ -157,17 +157,18 @@ export async function GET(
       .sort((a, b) => b.viewsGained - a.viewsGained)
       .slice(0, 10)
 
-    // Get recent activity for this campaign
+    // Get recent submissions for activity feed
     const recentSubmissions = await prisma.clipSubmission.findMany({
       where: { campaignId },
       orderBy: { createdAt: 'desc' },
-      take: 15,
+      take: 10,
       select: {
         id: true,
         status: true,
         createdAt: true,
         updatedAt: true,
         platform: true,
+        initialViews: true,
         users: {
           select: { name: true, image: true }
         },
@@ -176,7 +177,7 @@ export async function GET(
             url: true,
             view_tracking: {
               orderBy: { date: 'desc' },
-              take: 1,
+              take: 2,
               select: { views: true, scrapedAt: true }
             }
           }
@@ -184,8 +185,45 @@ export async function GET(
       }
     })
 
-    // Build activity feed
-    const activities = recentSubmissions.map(submission => {
+    // Get recent view tracking events for approved clips in this campaign
+    const recentViewGrowth = await prisma.viewTracking.findMany({
+      where: {
+        clips: {
+          clipSubmissions: {
+            some: {
+              campaignId,
+              status: { in: ['APPROVED', 'PAID'] }
+            }
+          }
+        }
+      },
+      orderBy: { scrapedAt: 'desc' },
+      take: 10,
+      select: {
+        id: true,
+        views: true,
+        scrapedAt: true,
+        platform: true,
+        clips: {
+          select: {
+            url: true,
+            clipSubmissions: {
+              where: { campaignId },
+              take: 1,
+              select: {
+                initialViews: true,
+                users: {
+                  select: { name: true, image: true }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    // Build activity feed - mix submissions and view growth events
+    const submissionActivities = recentSubmissions.map(submission => {
       const latestScrape = submission.clips?.view_tracking?.[0]
       
       return {
@@ -199,9 +237,37 @@ export async function GET(
         platform: submission.platform,
         clipUrl: submission.clips?.url,
         views: latestScrape ? Number(latestScrape.views) : null,
-        lastScraped: latestScrape?.scrapedAt
+        viewsGained: null as number | null
       }
     })
+
+    // Add view growth activities
+    const viewGrowthActivities = recentViewGrowth
+      .filter(vt => vt.clips?.clipSubmissions?.[0])
+      .map(vt => {
+        const submission = vt.clips!.clipSubmissions[0]
+        const initialViews = Number(submission.initialViews || 0)
+        const currentViews = Number(vt.views || 0)
+        const viewsGained = Math.max(0, currentViews - initialViews)
+        
+        return {
+          id: `vt-${vt.id}`,
+          type: 'VIEW_GROWTH' as const,
+          timestamp: vt.scrapedAt,
+          clipper: submission.users.name || 'Anonymous',
+          clipperImage: submission.users.image,
+          platform: vt.platform,
+          clipUrl: vt.clips!.url,
+          views: currentViews,
+          viewsGained: viewsGained > 0 ? viewsGained : null
+        }
+      })
+      .filter(a => a.viewsGained && a.viewsGained > 100) // Only show significant growth
+
+    // Combine and sort by timestamp
+    const activities = [...submissionActivities, ...viewGrowthActivities]
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 15)
 
     // Get campaign totals
     const campaignTotals = {

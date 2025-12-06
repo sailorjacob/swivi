@@ -22,10 +22,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { 
   ArrowLeft,
@@ -51,7 +48,6 @@ import {
   FolderOpen,
   Activity,
   Crown,
-  TrendingUp,
   Play
 } from "lucide-react"
 
@@ -191,6 +187,7 @@ export default function CampaignDetailPage() {
       platform: string
       clipUrl: string | null
       views: number | null
+      viewsGained: number | null
     }>
     totals: {
       totalClippers: number
@@ -431,214 +428,170 @@ export default function CampaignDetailPage() {
         </div>
       )}
 
-      {/* Navigation Bar */}
-      <div className="flex items-center justify-between mb-2">
-        <Button variant="ghost" size="sm" onClick={() => router.back()}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Campaigns
-        </Button>
+      {/* Back Button */}
+      <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-2">
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Campaigns
+      </Button>
 
-        {/* Activity & Leaderboard Button */}
-        <Dialog open={activityModalOpen} onOpenChange={setActivityModalOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Activity className="w-4 h-4" />
-              Activity & Top Clippers
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[85vh]">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-yellow-500" />
-                Campaign Leaderboard & Activity
-              </DialogTitle>
-            </DialogHeader>
+      {/* Activity Modal */}
+      <Dialog open={activityModalOpen} onOpenChange={setActivityModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden">
+          <DialogHeader className="pb-4 border-b border-border">
+            <DialogTitle className="text-lg font-semibold">Campaign Activity</DialogTitle>
+          </DialogHeader>
 
-            {activityLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : activityData ? (
-              <Tabs defaultValue="leaderboard" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="leaderboard" className="gap-1.5">
-                    <Crown className="w-3.5 h-3.5" />
-                    Top Clippers
-                  </TabsTrigger>
-                  <TabsTrigger value="clips" className="gap-1.5">
-                    <Play className="w-3.5 h-3.5" />
-                    Top Clips
-                  </TabsTrigger>
-                  <TabsTrigger value="activity" className="gap-1.5">
-                    <Activity className="w-3.5 h-3.5" />
-                    Recent
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Campaign Totals Summary */}
-                <div className="grid grid-cols-4 gap-3 my-4">
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <p className="text-2xl font-bold">{activityData.totals.totalClippers}</p>
-                    <p className="text-xs text-muted-foreground">Clippers</p>
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <p className="text-2xl font-bold">{activityData.totals.totalClips}</p>
-                    <p className="text-xs text-muted-foreground">Clips</p>
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <p className="text-2xl font-bold">{activityData.totals.totalViewsGained.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Views Gained</p>
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-500">${activityData.totals.totalEarnings.toFixed(2)}</p>
-                    <p className="text-xs text-muted-foreground">Earnings</p>
-                  </div>
+          {activityLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : activityData ? (
+            <div className="space-y-6 overflow-y-auto max-h-[calc(85vh-120px)] pr-2">
+              {/* Stats Row */}
+              <div className="grid grid-cols-4 gap-2">
+                <div className="text-center py-3 px-2 border border-border rounded-md">
+                  <p className="text-xl font-semibold">{activityData.totals.totalClippers}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Clippers</p>
                 </div>
+                <div className="text-center py-3 px-2 border border-border rounded-md">
+                  <p className="text-xl font-semibold">{activityData.totals.totalClips}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Clips</p>
+                </div>
+                <div className="text-center py-3 px-2 border border-border rounded-md">
+                  <p className="text-xl font-semibold">{activityData.totals.totalViewsGained.toLocaleString()}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Views</p>
+                </div>
+                <div className="text-center py-3 px-2 border border-border rounded-md">
+                  <p className="text-xl font-semibold">${activityData.totals.totalEarnings.toFixed(0)}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Paid Out</p>
+                </div>
+              </div>
 
-                {/* Top Clippers Tab */}
-                <TabsContent value="leaderboard" className="mt-0">
-                  <ScrollArea className="h-[400px] pr-4">
-                    <div className="space-y-2">
-                      {activityData.topClippers.length === 0 ? (
-                        <p className="text-center text-muted-foreground py-8">No clippers yet</p>
-                      ) : (
-                        activityData.topClippers.map((clipper, index) => (
-                          <div
-                            key={clipper.userId}
-                            className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/50"
-                          >
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted font-bold text-sm">
-                              {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
-                            </div>
-                            <Avatar className="w-10 h-10">
-                              <AvatarImage src={clipper.image || undefined} />
-                              <AvatarFallback>{clipper.name?.[0] || '?'}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium truncate">{clipper.name || 'Anonymous'}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {clipper.clipCount} clip{clipper.clipCount !== 1 ? 's' : ''}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium flex items-center gap-1">
-                                <TrendingUp className="w-3.5 h-3.5 text-green-500" />
-                                {clipper.totalViewsGained.toLocaleString()}
-                              </p>
-                              <p className="text-xs text-green-500">${clipper.totalEarnings.toFixed(2)}</p>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
+              {/* Top Clippers Section */}
+              <div>
+                <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                  <Crown className="w-3.5 h-3.5" />
+                  Top Clippers
+                </h3>
+                <div className="space-y-1.5">
+                  {activityData.topClippers.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No clippers yet</p>
+                  ) : (
+                    activityData.topClippers.slice(0, 5).map((clipper, index) => (
+                      <div
+                        key={clipper.userId}
+                        className="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-muted/50 transition-colors"
+                      >
+                        <span className="w-5 text-xs font-medium text-muted-foreground">
+                          {index + 1}.
+                        </span>
+                        <Avatar className="w-7 h-7">
+                          <AvatarImage src={clipper.image || undefined} />
+                          <AvatarFallback className="text-xs">{clipper.name?.[0] || '?'}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{clipper.name || 'Anonymous'}</p>
+                        </div>
+                        <div className="text-right text-sm">
+                          <span className="text-muted-foreground">+{clipper.totalViewsGained.toLocaleString()}</span>
+                          <span className="mx-1.5 text-muted-foreground/50">·</span>
+                          <span className="font-medium">${clipper.totalEarnings.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
 
-                {/* Top Clips Tab */}
-                <TabsContent value="clips" className="mt-0">
-                  <ScrollArea className="h-[400px] pr-4">
-                    <div className="space-y-2">
-                      {activityData.topClips.length === 0 ? (
-                        <p className="text-center text-muted-foreground py-8">No clips yet</p>
-                      ) : (
-                        activityData.topClips.map((clip, index) => (
-                          <div
-                            key={clip.id}
-                            className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/50"
-                          >
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted font-bold text-sm">
-                              {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {clip.platform}
-                                </Badge>
-                                <span className="text-sm text-muted-foreground truncate">
-                                  {clip.clipper.name || 'Anonymous'}
-                                </span>
-                              </div>
-                              <a 
-                                href={clip.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-xs text-blue-500 hover:underline truncate block"
-                              >
-                                {clip.url}
-                              </a>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium flex items-center gap-1">
-                                <Eye className="w-3.5 h-3.5 text-muted-foreground" />
-                                +{clip.viewsGained.toLocaleString()}
-                              </p>
-                              <p className="text-xs text-green-500">${clip.earnings.toFixed(2)}</p>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
+              {/* Recent Activity Section */}
+              <div>
+                <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                  <Activity className="w-3.5 h-3.5" />
+                  Recent Activity
+                </h3>
+                <div className="space-y-1">
+                  {activityData.recentActivity.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No recent activity</p>
+                  ) : (
+                    activityData.recentActivity.slice(0, 8).map((activity) => (
+                      <div
+                        key={activity.id}
+                        className="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-muted/50 transition-colors"
+                      >
+                        <Avatar className="w-6 h-6">
+                          <AvatarImage src={activity.clipperImage || undefined} />
+                          <AvatarFallback className="text-[10px]">{activity.clipper?.[0] || '?'}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0 text-sm">
+                          <span className="font-medium">{activity.clipper}</span>
+                          {' '}
+                          {activity.type === 'SUBMISSION' && (
+                            <span className="text-muted-foreground">submitted a clip</span>
+                          )}
+                          {activity.type === 'APPROVED' && (
+                            <span className="text-muted-foreground">was approved</span>
+                          )}
+                          {activity.type === 'REJECTED' && (
+                            <span className="text-muted-foreground">was rejected</span>
+                          )}
+                          {activity.type === 'VIEW_GROWTH' && activity.viewsGained && (
+                            <span className="text-muted-foreground">
+                              gained <span className="font-medium">+{activity.viewsGained.toLocaleString()}</span> views
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-muted-foreground shrink-0">
+                          {new Date(activity.timestamp).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
 
-                {/* Recent Activity Tab */}
-                <TabsContent value="activity" className="mt-0">
-                  <ScrollArea className="h-[400px] pr-4">
-                    <div className="space-y-2">
-                      {activityData.recentActivity.length === 0 ? (
-                        <p className="text-center text-muted-foreground py-8">No recent activity</p>
-                      ) : (
-                        activityData.recentActivity.map((activity) => (
-                          <div
-                            key={activity.id}
-                            className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/50"
-                          >
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={activity.clipperImage || undefined} />
-                              <AvatarFallback>{activity.clipper?.[0] || '?'}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm">
-                                <span className="font-medium">{activity.clipper}</span>
-                                {' '}
-                                {activity.type === 'SUBMISSION' && 'submitted a clip'}
-                                {activity.type === 'APPROVED' && <span className="text-green-500">got approved</span>}
-                                {activity.type === 'REJECTED' && <span className="text-red-500">was rejected</span>}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(activity.timestamp).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: 'numeric',
-                                  minute: '2-digit'
-                                })}
-                                {' • '}
-                                {activity.platform}
-                                {activity.views && ` • ${activity.views.toLocaleString()} views`}
-                              </p>
-                            </div>
-                            {activity.type === 'APPROVED' && (
-                              <CheckCircle className="w-5 h-5 text-green-500" />
-                            )}
-                            {activity.type === 'REJECTED' && (
-                              <XCircle className="w-5 h-5 text-red-500" />
-                            )}
-                            {activity.type === 'SUBMISSION' && (
-                              <Clock className="w-5 h-5 text-yellow-500" />
-                            )}
+              {/* Top Clips Section */}
+              <div>
+                <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                  <Play className="w-3.5 h-3.5" />
+                  Top Clips
+                </h3>
+                <div className="space-y-1.5">
+                  {activityData.topClips.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No clips yet</p>
+                  ) : (
+                    activityData.topClips.slice(0, 5).map((clip, index) => (
+                      <div
+                        key={clip.id}
+                        className="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-muted/50 transition-colors"
+                      >
+                        <span className="w-5 text-xs font-medium text-muted-foreground">
+                          {index + 1}.
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">{clip.clipper.name || 'Anonymous'}</span>
+                            <span className="text-xs text-muted-foreground">· {clip.platform}</span>
                           </div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
-              </Tabs>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">Failed to load data</p>
-            )}
-          </DialogContent>
-        </Dialog>
-      </div>
+                        </div>
+                        <div className="text-right text-sm">
+                          <span className="text-muted-foreground">+{clip.viewsGained.toLocaleString()}</span>
+                          <span className="mx-1.5 text-muted-foreground/50">·</span>
+                          <span className="font-medium">${clip.earnings.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-16">Failed to load data</p>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Campaign Header */}
       <motion.div
@@ -1156,35 +1109,59 @@ export default function CampaignDetailPage() {
         </div>
       </div>
 
-      {/* Bonus Banner - Bottom */}
-      {hasBonuses(campaign) && isActive && (
+      {/* Bottom Actions Bar */}
+      {isActive && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
           className="border-t border-border pt-6"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-md bg-muted border border-border">
-                <Trophy className="w-4 h-4" />
+          {hasBonuses(campaign) ? (
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-md bg-muted border border-border">
+                  <Trophy className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">$2,000 in Performance Bounties</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Tier 1: $150/creator (8 spots) · Tier 2: $40/winning clip (20 winners)
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-medium text-sm">$2,000 in Performance Bounties</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Tier 1: $150/creator (8 spots) · Tier 2: $40/winning clip (20 winners)
-                </p>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setBonusModalOpen(true)}
+                >
+                  View Bounties
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setActivityModalOpen(true)}
+                  className="gap-1.5"
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  Activity
+                </Button>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setBonusModalOpen(true)}
-              className="shrink-0"
-            >
-              View Details
-            </Button>
-          </div>
+          ) : (
+            <div className="flex justify-end">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setActivityModalOpen(true)}
+                className="gap-1.5"
+              >
+                <Activity className="w-3.5 h-3.5" />
+                Activity & Leaderboard
+              </Button>
+            </div>
+          )}
         </motion.div>
       )}
 
