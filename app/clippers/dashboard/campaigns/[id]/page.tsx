@@ -145,7 +145,8 @@ export default function CampaignDetailPage() {
   const [campaign, setCampaign] = useState<Campaign | null>(null)
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [verifiedAccounts, setVerifiedAccounts] = useState<VerifiedAccount[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true) // Initial load only
+  const [isRefreshing, setIsRefreshing] = useState(false) // Background refresh indicator
   const [submitting, setSubmitting] = useState(false)
   const [bonusModalOpen, setBonusModalOpen] = useState(false)
   
@@ -166,9 +167,14 @@ export default function CampaignDetailPage() {
   const selectedPlatform = watch("platform")
 
   // Fetch campaign and user's submissions
-  const fetchData = async () => {
+  const fetchData = async (isBackgroundRefresh = false) => {
     try {
-      setLoading(true)
+      // Only show full loading on initial load, not background refresh
+      if (!isBackgroundRefresh) {
+        setLoading(true)
+      } else {
+        setIsRefreshing(true)
+      }
       
       // Fetch campaign details
       const campaignRes = await authenticatedFetch(`/api/clippers/campaigns/${campaignId}`)
@@ -196,15 +202,16 @@ export default function CampaignDetailPage() {
       }
     } catch (error) {
       console.error("Error fetching data:", error)
-      toast.error("Failed to load campaign")
+      if (!isBackgroundRefresh) toast.error("Failed to load campaign")
     } finally {
       setLoading(false)
+      setIsRefreshing(false)
     }
   }
 
   useEffect(() => {
     if (campaignId) {
-      fetchData()
+      fetchData(false) // Initial load
     }
   }, [campaignId])
 
@@ -214,13 +221,13 @@ export default function CampaignDetailPage() {
     
     const interval = setInterval(() => {
       // Only refresh if not currently loading to avoid race conditions
-      if (!loading) {
-        fetchData()
+      if (!loading && !isRefreshing) {
+        fetchData(true) // Silent background refresh
       }
     }, 30000) // 30 seconds
 
     return () => clearInterval(interval)
-  }, [campaignId, loading])
+  }, [campaignId, loading, isRefreshing])
 
   // Re-filter submissions when campaign loads
   const campaignSubmissions = submissions.filter(s => {
@@ -337,7 +344,17 @@ export default function CampaignDetailPage() {
   const remainingBudget = budgetNum - spentNum
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Subtle refresh indicator - only shows during background refresh */}
+      {isRefreshing && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>Updating...</span>
+          </div>
+        </div>
+      )}
+
       {/* Back Button */}
       <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-2">
         <ArrowLeft className="w-4 h-4 mr-2" />

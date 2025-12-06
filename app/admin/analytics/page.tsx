@@ -114,25 +114,30 @@ export default function AdminAnalyticsPage() {
   const [campaigns, setCampaigns] = useState<CampaignGroup[]>([])
   const [cronLogs, setCronLogs] = useState<CronLog[]>([])
   const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true) // Initial load only
+  const [isRefreshing, setIsRefreshing] = useState(false) // Background refresh indicator
   const [logsLoading, setLogsLoading] = useState(true)
   const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set())
   const [showCronLogs, setShowCronLogs] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
 
   useEffect(() => {
-    fetchAllData()
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchAllData, 30000)
+    fetchAllData(false) // Initial load
+    // Auto-refresh every 30 seconds - silent background refresh
+    const interval = setInterval(() => fetchAllData(true), 30000)
     return () => clearInterval(interval)
   }, [])
 
-  const fetchAllData = async () => {
+  const fetchAllData = async (isBackgroundRefresh = false) => {
+    if (isBackgroundRefresh) {
+      setIsRefreshing(true)
+    }
     await Promise.all([
       fetchPlatformStats(),
-      fetchViewHistory(),
+      fetchViewHistory(isBackgroundRefresh),
       fetchCronLogs()
     ])
+    setIsRefreshing(false)
   }
 
   const fetchPlatformStats = async () => {
@@ -147,9 +152,12 @@ export default function AdminAnalyticsPage() {
     }
   }
 
-  const fetchViewHistory = async () => {
+  const fetchViewHistory = async (isBackgroundRefresh = false) => {
     try {
-      setLoading(true)
+      // Only show loading on initial load, not background refresh
+      if (!isBackgroundRefresh) {
+        setLoading(true)
+      }
       const response = await authenticatedFetch('/api/admin/analytics/view-history')
       const data = await response.json()
 
@@ -210,21 +218,27 @@ export default function AdminAnalyticsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
-      {/* Header with refresh indicator */}
+    <div className="container mx-auto px-4 py-8 space-y-6 relative">
+      {/* Subtle refresh indicator - only shows during background refresh */}
+      {isRefreshing && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>Updating...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Analytics</h1>
           <p className="text-sm text-muted-foreground">Platform-wide performance and campaign insights</p>
-            </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="w-2 h-2 bg-foreground/50 rounded-full animate-pulse" />
-          Auto-refreshing
-          <Button variant="ghost" size="sm" onClick={fetchAllData}>
-            <RefreshCw className="w-4 h-4" />
-          </Button>
-                          </div>
-                        </div>
+        </div>
+        <Button variant="ghost" size="sm" onClick={() => fetchAllData(false)} disabled={isRefreshing}>
+          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+        </Button>
+      </div>
 
       {/* Whop-Style Platform Stats - Top Section */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

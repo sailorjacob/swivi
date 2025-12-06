@@ -134,7 +134,8 @@ export default function AdminSubmissionsPage() {
   
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [campaigns, setCampaigns] = useState<Array<{id: string, title: string, creator: string}>>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true) // Initial load only
+  const [isRefreshing, setIsRefreshing] = useState(false) // Background refresh indicator
   const [error, setError] = useState<string | null>(null)
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null)
   const [showRejectDialog, setShowRejectDialog] = useState(false)
@@ -193,14 +194,16 @@ export default function AdminSubmissionsPage() {
   }, [])
 
   // Fetch submissions
-  const fetchSubmissions = useCallback(async (loadMore = false) => {
+  const fetchSubmissions = useCallback(async (loadMore = false, isBackgroundRefresh = false) => {
     try {
       if (loadMore) {
         setIsLoadingMore(true)
+      } else if (isBackgroundRefresh) {
+        setIsRefreshing(true)
       } else {
         setLoading(true)
       }
-      setError(null)
+      if (!isBackgroundRefresh) setError(null)
       
       const offset = loadMore ? pagination.offset + pagination.limit : 0
       const params = new URLSearchParams({
@@ -247,14 +250,15 @@ export default function AdminSubmissionsPage() {
           setStatusCounts(data.statusCounts)
         }
       } else {
-        setError("Failed to load submissions")
+        if (!isBackgroundRefresh) setError("Failed to load submissions")
       }
     } catch (error) {
       console.error("Error fetching submissions:", error)
-      setError("Failed to load submissions")
+      if (!isBackgroundRefresh) setError("Failed to load submissions")
     } finally {
       setLoading(false)
       setIsLoadingMore(false)
+      setIsRefreshing(false)
     }
   }, [filters, pagination.limit, pagination.offset])
 
@@ -267,13 +271,13 @@ export default function AdminSubmissionsPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       // Only refresh if not currently loading to avoid race conditions
-      if (!loading) {
-        fetchSubmissions()
+      if (!loading && !isRefreshing) {
+        fetchSubmissions(false, true) // Background refresh - no loading state
       }
     }, 30000) // 30 seconds
 
     return () => clearInterval(interval)
-  }, [fetchSubmissions, loading])
+  }, [fetchSubmissions, loading, isRefreshing])
 
   // Update submission status
   const updateSubmissionStatus = async (submissionId: string, status: Submission["status"], reason?: string, payout?: number) => {
@@ -366,16 +370,15 @@ export default function AdminSubmissionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Subtle loading indicator + auto-refresh badge */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-      {loading && (
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      {/* Subtle refresh indicator - only shows during background refresh */}
+      {isRefreshing && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>Updating...</span>
+          </div>
+        </div>
       )}
-        <span className="text-xs text-muted-foreground bg-muted/80 px-2 py-1 rounded-full flex items-center gap-1">
-          <span className="w-1.5 h-1.5 bg-foreground/50 rounded-full animate-pulse" />
-          Auto-refreshing
-        </span>
-      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

@@ -124,15 +124,21 @@ const hasBonuses = (campaign: Campaign) => {
 export default function CampaignsPage() {
   const router = useRouter()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true) // Initial load only
+  const [isRefreshing, setIsRefreshing] = useState(false) // Background refresh indicator
   const [error, setError] = useState<string | null>(null)
   const [bonusModalOpen, setBonusModalOpen] = useState(false)
   const [selectedBountyCampaign, setSelectedBountyCampaign] = useState<Campaign | null>(null)
   const [filter, setFilter] = useState<'active' | 'upcoming' | 'completed' | 'all'>('active')
 
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = async (isBackgroundRefresh = false) => {
     try {
-      setLoading(true)
+      // Only show full loading on initial load, not on background refresh
+      if (!isBackgroundRefresh) {
+        setLoading(true)
+      } else {
+        setIsRefreshing(true)
+      }
       setError(null)
       const response = await authenticatedFetch("/api/clippers/campaigns")
       if (response.ok) {
@@ -141,20 +147,28 @@ export default function CampaignsPage() {
       } else if (response.status >= 500) {
         // For server errors, show empty state instead of error for better UX
         console.log('🔍 Server error loading campaigns - showing empty state')
-        setCampaigns([])
+        if (!isBackgroundRefresh) setCampaigns([])
       } else {
-        setError("Failed to load campaigns")
+        if (!isBackgroundRefresh) setError("Failed to load campaigns")
       }
     } catch (error) {
       console.error("Error fetching campaigns:", error)
-      setError("Failed to load campaigns")
+      if (!isBackgroundRefresh) setError("Failed to load campaigns")
     } finally {
       setLoading(false)
+      setIsRefreshing(false)
     }
   }
 
   useEffect(() => {
-    fetchCampaigns()
+    fetchCampaigns(false) // Initial load
+    
+    // Background refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchCampaigns(true) // Silent background refresh
+    }, 30000)
+    
+    return () => clearInterval(interval)
   }, [])
 
   const handleViewCampaign = (campaign: Campaign) => {
@@ -222,7 +236,17 @@ export default function CampaignsPage() {
 
   return (
     <ErrorBoundary fallback={CampaignErrorFallback}>
-      <div className="space-y-6">
+      <div className="space-y-6 relative">
+
+      {/* Subtle refresh indicator - only shows during background refresh */}
+      {isRefreshing && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>Updating...</span>
+          </div>
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="flex gap-6 border-b border-border">
