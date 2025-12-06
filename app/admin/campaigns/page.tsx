@@ -72,6 +72,9 @@ const statusOptions = [
   { value: "CANCELLED", label: "Cancelled" }
 ]
 
+// Admin action password for dangerous operations
+const ADMIN_ACTION_PASSWORD = "swivi123"
+
 export default function AdminCampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [analytics, setAnalytics] = useState<any>(null)
@@ -84,6 +87,18 @@ export default function AdminCampaignsPage() {
   const [expandedCampaignData, setExpandedCampaignData] = useState<Record<string, any>>({})
   const [loadingCampaignData, setLoadingCampaignData] = useState<Set<string>>(new Set())
   const [isUpdating, setIsUpdating] = useState(false)
+  
+  // Password protection for dangerous actions
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [passwordInput, setPasswordInput] = useState("")
+  const [passwordError, setPasswordError] = useState("")
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'toggleTest' | 'delete' | 'hardDelete' | 'complete' | 'cancel'
+    campaignId: string
+    campaignTitle: string
+    extraData?: any
+  } | null>(null)
+  
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -682,8 +697,8 @@ export default function AdminCampaignsPage() {
     }
   }
 
-  // Archive campaign (soft delete)
-  const handleDeleteCampaign = async (campaignId: string, isTest?: boolean) => {
+  // Archive campaign (soft delete) - actual implementation
+  const performDeleteCampaign = async (campaignId: string) => {
     try {
       const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}`, {
         method: "DELETE"
@@ -707,12 +722,13 @@ export default function AdminCampaignsPage() {
     }
   }
 
-  // Permanently delete campaign (hard delete - only for test campaigns)
-  const handlePermanentDelete = async (campaignId: string) => {
-    if (!confirm("PERMANENTLY DELETE this campaign and ALL its data? This cannot be undone. Only use for test campaigns.")) {
-      return
-    }
+  // Wrapper for delete that checks for password on ACTIVE campaigns
+  const handleDeleteCampaign = (campaign: Campaign) => {
+    requestPasswordConfirmation('delete', campaign)
+  }
 
+  // Permanently delete campaign (hard delete) - actual implementation
+  const performHardDeleteCampaign = async (campaignId: string) => {
     try {
       const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}?hard=true`, {
         method: "DELETE"
@@ -729,6 +745,14 @@ export default function AdminCampaignsPage() {
       console.error("Error deleting campaign:", error)
       toast.error("Failed to delete campaign")
     }
+  }
+
+  // Wrapper for hard delete that checks for password
+  const handlePermanentDelete = (campaign: Campaign) => {
+    if (!confirm("PERMANENTLY DELETE this campaign and ALL its data? This cannot be undone.")) {
+      return
+    }
+    requestPasswordConfirmation('hardDelete', campaign)
   }
 
   // Restore archived campaign
@@ -757,8 +781,65 @@ export default function AdminCampaignsPage() {
     }
   }
 
-  // Toggle test campaign status
-  const handleToggleTest = async (campaignId: string, currentlyTest: boolean) => {
+  // Request password confirmation for dangerous actions on ACTIVE campaigns
+  const requestPasswordConfirmation = (
+    actionType: 'toggleTest' | 'delete' | 'hardDelete' | 'complete' | 'cancel',
+    campaign: Campaign,
+    extraData?: any
+  ) => {
+    // Only require password for ACTIVE campaigns (not drafts, completed, etc.)
+    if (campaign.status === 'ACTIVE') {
+      setPendingAction({
+        type: actionType,
+        campaignId: campaign.id,
+        campaignTitle: campaign.title,
+        extraData
+      })
+      setPasswordInput("")
+      setPasswordError("")
+      setShowPasswordDialog(true)
+    } else {
+      // For non-active campaigns, execute directly
+      executeProtectedAction(actionType, campaign.id, extraData)
+    }
+  }
+
+  // Execute the protected action after password confirmation
+  const executeProtectedAction = async (
+    actionType: string,
+    campaignId: string,
+    extraData?: any
+  ) => {
+    switch (actionType) {
+      case 'toggleTest':
+        await performToggleTest(campaignId, extraData?.currentlyTest)
+        break
+      case 'delete':
+        await performDeleteCampaign(campaignId)
+        break
+      case 'hardDelete':
+        await performHardDeleteCampaign(campaignId)
+        break
+      // Add more cases as needed
+    }
+    setShowPasswordDialog(false)
+    setPendingAction(null)
+  }
+
+  // Verify password and execute pending action
+  const handlePasswordSubmit = () => {
+    if (passwordInput === ADMIN_ACTION_PASSWORD) {
+      if (pendingAction) {
+        executeProtectedAction(pendingAction.type, pendingAction.campaignId, pendingAction.extraData)
+      }
+    } else {
+      setPasswordError("Incorrect password")
+      setPasswordInput("")
+    }
+  }
+
+  // Toggle test campaign status (actual implementation)
+  const performToggleTest = async (campaignId: string, currentlyTest: boolean) => {
     try {
       const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}`, {
         method: "PUT",
@@ -781,6 +862,11 @@ export default function AdminCampaignsPage() {
       console.error("Error toggling test status:", error)
       toast.error("Failed to update campaign")
     }
+  }
+
+  // Wrapper for toggle test that checks for password
+  const handleToggleTest = (campaign: Campaign) => {
+    requestPasswordConfirmation('toggleTest', campaign, { currentlyTest: campaign.isTest || false })
   }
 
   // View campaign - fetch full details including submissions
@@ -1267,7 +1353,7 @@ export default function AdminCampaignsPage() {
                               )}
                               {!campaign.deletedAt && (
                                 <button
-                                  onClick={() => handleToggleTest(campaign.id, campaign.isTest || false)}
+                                  onClick={() => handleToggleTest(campaign)}
                                   className={`p-2 transition-colors ${campaign.isTest ? 'text-foreground hover:text-muted-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                                   title={campaign.isTest ? "Mark as real campaign" : "Mark as test (exclude from stats)"}
                                 >
@@ -1377,14 +1463,14 @@ export default function AdminCampaignsPage() {
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     {campaign.deletedAt ? (
                                       <AlertDialogAction
-                                        onClick={() => handlePermanentDelete(campaign.id)}
+                                        onClick={() => handlePermanentDelete(campaign)}
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                       >
                                         Permanently Delete
                                       </AlertDialogAction>
                                     ) : (
                                       <AlertDialogAction
-                                        onClick={() => handleDeleteCampaign(campaign.id, campaign.isTest)}
+                                        onClick={() => handleDeleteCampaign(campaign)}
                                       >
                                         Archive
                                       </AlertDialogAction>
@@ -1678,6 +1764,81 @@ export default function AdminCampaignsPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Password Confirmation Dialog for Dangerous Actions */}
+        <Dialog open={showPasswordDialog} onOpenChange={(open) => {
+          if (!open) {
+            setShowPasswordDialog(false)
+            setPendingAction(null)
+            setPasswordInput("")
+            setPasswordError("")
+          }
+        }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-destructive flex items-center gap-2">
+                ⚠️ Protected Action
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                You are about to perform a dangerous action on an <strong>ACTIVE</strong> campaign:
+              </p>
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="font-medium">{pendingAction?.campaignTitle}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Action: {pendingAction?.type === 'toggleTest' ? 'Mark as Test Campaign' : 
+                          pendingAction?.type === 'delete' ? 'Archive Campaign' :
+                          pendingAction?.type === 'hardDelete' ? 'Permanently Delete' :
+                          pendingAction?.type}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin-password">Enter admin password to confirm:</Label>
+                <Input
+                  id="admin-password"
+                  type="password"
+                  placeholder="Password"
+                  value={passwordInput}
+                  onChange={(e) => {
+                    setPasswordInput(e.target.value)
+                    setPasswordError("")
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handlePasswordSubmit()
+                    }
+                  }}
+                  className={passwordError ? "border-destructive" : ""}
+                />
+                {passwordError && (
+                  <p className="text-sm text-destructive">{passwordError}</p>
+                )}
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowPasswordDialog(false)
+                    setPendingAction(null)
+                    setPasswordInput("")
+                    setPasswordError("")
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handlePasswordSubmit}
+                  disabled={!passwordInput}
+                >
+                  Confirm Action
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </motion.div>
     </div>
   )
