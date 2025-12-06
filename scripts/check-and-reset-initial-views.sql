@@ -22,7 +22,7 @@ SELECT
 FROM clip_submissions cs
 JOIN users u ON u.id = cs."userId"
 LEFT JOIN clips cl ON cl.id = cs."clipId"
-JOIN "Campaign" cam ON cam.id = cs."campaignId"
+JOIN campaigns cam ON cam.id = cs."campaignId"
 WHERE cs."initialViews" > 0
 ORDER BY cs."initialViews" DESC;
 
@@ -58,7 +58,7 @@ UPDATE clips cl
 SET earnings = (
     SELECT ROUND((cl.views::numeric / 1000.0) * cam."payoutRate", 2)
     FROM clip_submissions cs
-    JOIN "Campaign" cam ON cam.id = cs."campaignId"
+    JOIN campaigns cam ON cam.id = cs."campaignId"
     WHERE cs."clipId" = cl.id
     AND cs.status = 'APPROVED'
     LIMIT 1
@@ -81,7 +81,7 @@ SET "totalEarnings" = COALESCE((
 WHERE role = 'CLIPPER';
 
 -- STEP 4: Recalculate campaign spent
-UPDATE "Campaign" c
+UPDATE campaigns c
 SET spent = COALESCE((
     SELECT SUM(cl.earnings)
     FROM clip_submissions cs
