@@ -3,17 +3,16 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
-  Loader2, CheckCircle, XCircle, ChevronDown, ChevronRight, ChevronUp,
+  Loader2, CheckCircle, XCircle, ChevronDown, ChevronUp,
   TrendingUp, Eye, DollarSign, Users, FileVideo, BarChart3, 
-  Clock, ExternalLink, RefreshCw
+  Clock, ExternalLink, RefreshCw, Target, Play, Zap
 } from 'lucide-react'
 import { authenticatedFetch } from '@/lib/supabase-browser'
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Dot } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts'
 import Link from 'next/link'
 import { getPlatformLogo } from '@/components/ui/icons/platform-logos'
 
@@ -29,8 +28,8 @@ interface ClipData {
   clipId: string
   clipUrl: string
   platform: string
-  status: string // Submission status: PENDING, APPROVED, REJECTED
-  clipStatus?: string // Clip status: PENDING, ACTIVE
+  status: string
+  clipStatus?: string
   processingStatus?: string
   submittedAt: string
   initialViews: number
@@ -117,24 +116,19 @@ export default function AdminAnalyticsPage() {
   const [campaigns, setCampaigns] = useState<CampaignGroup[]>([])
   const [cronLogs, setCronLogs] = useState<CronLog[]>([])
   const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null)
-  const [loading, setLoading] = useState(true) // Initial load only
-  const [isRefreshing, setIsRefreshing] = useState(false) // Background refresh indicator
-  const [logsLoading, setLogsLoading] = useState(true)
-  const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set())
+  const [loading, setLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null)
   const [showCronLogs, setShowCronLogs] = useState(false)
-  const [activeTab, setActiveTab] = useState('overview')
 
   useEffect(() => {
-    fetchAllData(false) // Initial load
-    // Auto-refresh every 30 seconds - silent background refresh
+    fetchAllData(false)
     const interval = setInterval(() => fetchAllData(true), 30000)
     return () => clearInterval(interval)
   }, [])
 
   const fetchAllData = async (isBackgroundRefresh = false) => {
-    if (isBackgroundRefresh) {
-      setIsRefreshing(true)
-    }
+    if (isBackgroundRefresh) setIsRefreshing(true)
     await Promise.all([
       fetchPlatformStats(),
       fetchViewHistory(isBackgroundRefresh),
@@ -157,16 +151,10 @@ export default function AdminAnalyticsPage() {
 
   const fetchViewHistory = async (isBackgroundRefresh = false) => {
     try {
-      // Only show loading on initial load, not background refresh
-      if (!isBackgroundRefresh) {
-      setLoading(true)
-      }
+      if (!isBackgroundRefresh) setLoading(true)
       const response = await authenticatedFetch('/api/admin/analytics/view-history')
       const data = await response.json()
-
-      if (response.ok) {
-        setCampaigns(data.campaigns)
-      }
+      if (response.ok) setCampaigns(data.campaigns)
     } catch (error) {
       console.error('Error fetching view history:', error)
     } finally {
@@ -176,39 +164,27 @@ export default function AdminAnalyticsPage() {
 
   const fetchCronLogs = async () => {
     try {
-      setLogsLoading(true)
       const response = await authenticatedFetch('/api/admin/analytics/cron-logs?limit=10')
-      
       if (response.ok) {
         const data = await response.json()
         setCronLogs(data.logs || [])
       }
     } catch (error) {
       console.error('Failed to fetch cron logs:', error)
-    } finally {
-      setLogsLoading(false)
     }
   }
 
-  const toggleCampaign = (campaignId: string) => {
-    const newExpanded = new Set(expandedCampaigns)
-    if (newExpanded.has(campaignId)) {
-      newExpanded.delete(campaignId)
-    } else {
-      newExpanded.add(campaignId)
-    }
-    setExpandedCampaigns(newExpanded)
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  }
-
-  // Calculate effective CPM
   const effectiveCPM = platformStats?.overview.trackedViews && platformStats.overview.trackedViews > 0
     ? (platformStats.overview.totalEarnings / platformStats.overview.trackedViews) * 1000
     : 0
+
+  // Prepare platform data for chart
+  const platformChartData = platformStats?.platformBreakdown 
+    ? Object.entries(platformStats.platformBreakdown).map(([platform, count]) => ({
+        platform: platform === 'YOUTUBE' ? 'YouTube' : platform === 'TIKTOK' ? 'TikTok' : platform === 'INSTAGRAM' ? 'Instagram' : platform === 'TWITTER' ? 'X' : platform,
+        count
+      }))
+    : []
 
   if (loading && !platformStats) {
     return (
@@ -221,8 +197,8 @@ export default function AdminAnalyticsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6 relative">
-      {/* Subtle refresh indicator - only shows during background refresh */}
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      {/* Refresh Indicator */}
       {isRefreshing && (
         <div className="fixed top-4 right-4 z-50">
           <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground">
@@ -235,444 +211,431 @@ export default function AdminAnalyticsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Analytics</h1>
-          <p className="text-sm text-muted-foreground">Platform-wide performance and campaign insights</p>
+          <h1 className="text-3xl font-bold">Analytics</h1>
+          <p className="text-muted-foreground">Platform performance & campaign insights</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => fetchAllData(false)} disabled={isRefreshing}>
+          <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
+
+      {/* Key Metrics - Large Hero Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-emerald-500/20">
+                <Eye className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <span className="text-sm text-muted-foreground">Views Generated</span>
             </div>
-        <Button variant="ghost" size="sm" onClick={() => fetchAllData(false)} disabled={isRefreshing}>
-          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </Button>
-                        </div>
-
-      {/* Whop-Style Platform Stats - Top Section */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="bg-card">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Total views generated</p>
-            <p className="text-3xl font-bold">{(platformStats?.overview.trackedViews || 0).toLocaleString()}</p>
+            <p className="text-4xl font-bold">{(platformStats?.overview.trackedViews || 0).toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mt-1">Total tracked view growth</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
+        <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Total amount paid out</p>
-            <p className="text-3xl font-bold">${(platformStats?.payoutStats.totalPaid || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-blue-500/20">
+                <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <span className="text-sm text-muted-foreground">Total Paid Out</span>
+            </div>
+            <p className="text-4xl font-bold">${(platformStats?.payoutStats.totalPaid || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+            <p className="text-xs text-muted-foreground mt-1">To creators</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
+        <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Effective CPM</p>
-            <p className="text-3xl font-bold">${effectiveCPM.toFixed(2)}</p>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-purple-500/20">
+                <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <span className="text-sm text-muted-foreground">Effective CPM</span>
+            </div>
+            <p className="text-4xl font-bold">${effectiveCPM.toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground mt-1">Cost per 1K views</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
+        <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Approved submissions</p>
-            <p className="text-3xl font-bold">{(platformStats?.overview.approvedSubmissions || 0).toLocaleString()}</p>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-orange-500/20">
+                <FileVideo className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <span className="text-sm text-muted-foreground">Submissions</span>
+            </div>
+            <p className="text-4xl font-bold">{(platformStats?.overview.approvedSubmissions || 0).toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mt-1">of {platformStats?.overview.totalSubmissions || 0} total approved</p>
           </CardContent>
         </Card>
-
-        <Card className="bg-card">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Total submissions</p>
-            <p className="text-3xl font-bold">{(platformStats?.overview.totalSubmissions || 0).toLocaleString()}</p>
-          </CardContent>
-        </Card>
-                      </div>
+      </div>
 
       {/* Secondary Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
-          <CardContent className="pt-4 pb-4">
+          <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Active Campaigns</p>
-                <p className="text-xl font-bold">{platformStats?.overview.activeCampaigns || 0}</p>
-                      </div>
-              <TrendingUp className="w-5 h-5 text-muted-foreground" />
+                <p className="text-2xl font-bold">{platformStats?.overview.activeCampaigns || 0}</p>
+              </div>
+              <Target className="w-8 h-8 text-muted-foreground/30" />
             </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
         <Card>
-          <CardContent className="pt-4 pb-4">
+          <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Total Clippers</p>
-                <p className="text-xl font-bold">{platformStats?.overview.totalUsers || 0}</p>
+                <p className="text-2xl font-bold">{platformStats?.overview.totalUsers || 0}</p>
               </div>
-              <Users className="w-5 h-5 text-muted-foreground" />
+              <Users className="w-8 h-8 text-muted-foreground/30" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-4 pb-4">
+          <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Pending Review</p>
-                <p className="text-xl font-bold">{platformStats?.overview.pendingSubmissions || 0}</p>
+                <p className="text-2xl font-bold">{platformStats?.overview.pendingSubmissions || 0}</p>
               </div>
-              <Clock className="w-5 h-5 text-muted-foreground" />
+              <Clock className="w-8 h-8 text-muted-foreground/30" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-4 pb-4">
+          <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Pending Payouts</p>
-                <p className="text-xl font-bold">${(platformStats?.payoutStats.pendingPayouts || 0).toFixed(2)}</p>
+                <p className="text-2xl font-bold">${(platformStats?.payoutStats.pendingPayouts || 0).toFixed(0)}</p>
               </div>
-              <DollarSign className="w-5 h-5 text-muted-foreground" />
+              <DollarSign className="w-8 h-8 text-muted-foreground/30" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Total Campaigns</p>
+                <p className="text-2xl font-bold">{platformStats?.overview.totalCampaigns || 0}</p>
+              </div>
+              <BarChart3 className="w-8 h-8 text-muted-foreground/30" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Tabs for different views */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Campaign Overview</TabsTrigger>
-          <TabsTrigger value="clips">Clip Tracking</TabsTrigger>
-          <TabsTrigger value="platform">Platform Breakdown</TabsTrigger>
-        </TabsList>
-
-        {/* Campaign Overview Tab */}
-        <TabsContent value="overview" className="mt-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Campaign Performance</h2>
-              <Link href="/admin/submissions">
-                <Button variant="outline" size="sm">
-                  Review Submissions →
+      {/* Two Column Layout */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Left Column - Campaign Performance */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Campaign Performance Section */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Campaign Performance</h2>
+              <Link href="/admin/campaigns">
+                <Button variant="ghost" size="sm">
+                  Manage Campaigns →
                 </Button>
               </Link>
             </div>
 
-            {/* Campaign Cards - Whop Style */}
-            {platformStats?.campaignTrackedViews && platformStats.campaignTrackedViews.length > 0 ? (
-              <div className="space-y-4">
-                {platformStats.campaignTrackedViews.map((campaign) => {
-                  const progressPercent = campaign.currentViews > 0 
-                    ? Math.min(100, (campaign.trackedViews / campaign.currentViews) * 100) 
-                    : 0
+            <div className="space-y-4">
+              {platformStats?.campaignTrackedViews && platformStats.campaignTrackedViews.length > 0 ? (
+                platformStats.campaignTrackedViews.map((campaign) => {
+                  const campaignGroup = campaigns.find(c => c.campaign.id === campaign.campaignId)
+                  const isExpanded = expandedCampaign === campaign.campaignId
+                  const budgetProgress = campaign.currentViews > 0 ? Math.min(100, (campaign.trackedViews / campaign.currentViews) * 100) : 0
                   
                   return (
                     <Card key={campaign.campaignId} className="overflow-hidden">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-lg">{campaign.campaignTitle}</h3>
-                              <Badge variant={campaign.campaignStatus === 'ACTIVE' ? 'default' : 'secondary'}>
-                                {campaign.campaignStatus}
-                              </Badge>
+                      <CardContent className="p-0">
+                        {/* Campaign Header */}
+                        <div className="p-5 border-b border-border/50">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-1">
+                                <h3 className="font-semibold text-lg">{campaign.campaignTitle}</h3>
+                                <Badge variant={campaign.campaignStatus === 'ACTIVE' ? 'default' : 'secondary'}>
+                                  {campaign.campaignStatus}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <span>{campaign.totalSubmissions} submissions</span>
+                                <span>•</span>
+                                <span>{campaign.approvedSubmissions} approved</span>
+                              </div>
                             </div>
-                            <Link 
-                              href={`/admin/submissions?campaignId=${campaign.campaignId}`}
-                              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-                            >
-                              See submissions ({campaign.totalSubmissions} total, {campaign.approvedSubmissions || 0} approved)
-                              <ExternalLink className="w-3 h-3" />
+                            <Link href={`/admin/submissions?campaignId=${campaign.campaignId}`}>
+                              <Button variant="outline" size="sm">
+                                <ExternalLink className="w-3 h-3 mr-1" />
+                                View
+                              </Button>
                             </Link>
                           </div>
+
+                          {/* Stats Grid */}
+                          <div className="grid grid-cols-4 gap-4">
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                              <p className="text-xs text-muted-foreground mb-1">Initial Views</p>
+                              <p className="text-lg font-bold">{campaign.initialViews.toLocaleString()}</p>
+                            </div>
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                              <p className="text-xs text-muted-foreground mb-1">Current Views</p>
+                              <p className="text-lg font-bold">{campaign.currentViews.toLocaleString()}</p>
+                            </div>
+                            <div className="p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                              <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">Views Generated</p>
+                              <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">+{campaign.trackedViews.toLocaleString()}</p>
+                            </div>
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                              <p className="text-xs text-muted-foreground mb-1">Growth</p>
+                              <p className="text-lg font-bold">
+                                {campaign.initialViews > 0 ? `${((campaign.trackedViews / campaign.initialViews) * 100).toFixed(1)}%` : '—'}
+                              </p>
+                            </div>
+                          </div>
                         </div>
 
-                        {/* Progress Bar */}
-                        <div className="mb-4">
-                          <div className="flex items-center justify-between text-sm mb-1">
-                            <span className="text-muted-foreground">Views Generated</span>
-                            <span className="font-medium">{campaign.trackedViews.toLocaleString()}</span>
-                          </div>
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <div
-                              className="h-2 rounded-full bg-green-500 transition-all duration-500"
-                              style={{ width: `${Math.min(progressPercent, 100)}%` }}
-                            />
-                          </div>
-                        </div>
+                        {/* Expand/Collapse Clips */}
+                        {campaignGroup && campaignGroup.clips.length > 0 && (
+                          <>
+                            <button
+                              onClick={() => setExpandedCampaign(isExpanded ? null : campaign.campaignId)}
+                              className="w-full p-3 flex items-center justify-between text-sm text-muted-foreground hover:bg-muted/50 transition-colors"
+                            >
+                              <span className="flex items-center gap-2">
+                                <FileVideo className="w-4 h-4" />
+                                {campaignGroup.clips.length} clips tracked
+                              </span>
+                              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </button>
 
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <p className="text-muted-foreground text-xs">Initial Views</p>
-                            <p className="font-medium">{campaign.initialViews.toLocaleString()}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground text-xs">Current Views</p>
-                            <p className="font-medium">{campaign.currentViews.toLocaleString()}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground text-xs">Views Gained</p>
-                            <p className="font-medium">+{campaign.trackedViews.toLocaleString()}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground text-xs">Submissions</p>
-                            <p className="font-medium">{campaign.totalSubmissions}</p>
-                          </div>
-                        </div>
+                            {/* Clips List */}
+                            {isExpanded && (
+                              <div className="border-t border-border/50 divide-y divide-border/50 max-h-96 overflow-y-auto">
+                                {campaignGroup.clips.map((clip) => {
+                                  const viewGrowth = clip.currentViews - clip.initialViews
+                                  return (
+                                    <div key={clip.submissionId} className="p-4 hover:bg-muted/30 transition-colors">
+                                      <div className="flex items-start justify-between gap-4">
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center gap-2 mb-1">
+                                            {getPlatformLogo(clip.platform, '', 16)}
+                                            <span className="font-medium text-sm">{clip.user.name || clip.user.email}</span>
+                                            <Badge 
+                                              variant={clip.status === 'APPROVED' ? 'default' : clip.status === 'PENDING' ? 'secondary' : 'outline'}
+                                              className="text-xs"
+                                            >
+                                              {clip.status}
+                                            </Badge>
+                                          </div>
+                                          <a 
+                                            href={clip.clipUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-muted-foreground hover:text-foreground underline block truncate"
+                                          >
+                                            {clip.clipUrl}
+                                          </a>
+                                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                            <span>{clip.scrapeCount || clip.viewHistory.length} scrapes</span>
+                                            <span>•</span>
+                                            <span>Submitted {new Date(clip.submittedAt).toLocaleDateString()}</span>
+                                          </div>
+                                        </div>
+                                        <div className="text-right">
+                                          <p className="font-bold">{clip.currentViews.toLocaleString()}</p>
+                                          <p className="text-xs text-muted-foreground">views</p>
+                                          {viewGrowth > 0 && (
+                                            <p className="text-xs text-emerald-600 dark:text-emerald-400">+{viewGrowth.toLocaleString()}</p>
+                                          )}
+                                          {clip.status === 'APPROVED' && clip.earnings > 0 && (
+                                            <p className="text-xs font-medium mt-1">${clip.earnings.toFixed(2)}</p>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      {/* Mini sparkline */}
+                                      {clip.viewHistory.length > 1 && (
+                                        <div className="h-8 mt-2">
+                                          <ResponsiveContainer width="100%" height="100%">
+                                            <AreaChart data={clip.viewHistory.slice(-10)}>
+                                              <Area 
+                                                type="monotone" 
+                                                dataKey="views" 
+                                                stroke="currentColor"
+                                                fill="currentColor"
+                                                fillOpacity={0.1}
+                                                strokeWidth={1.5}
+                                                className="text-emerald-500"
+                                              />
+                                            </AreaChart>
+                                          </ResponsiveContainer>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </>
+                        )}
                       </CardContent>
                     </Card>
                   )
-                })}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">No campaigns with tracked views yet.</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-
-        {/* Clip Tracking Tab */}
-        <TabsContent value="clips" className="mt-6">
-      <div className="space-y-4">
-            {campaigns.length > 0 ? campaigns.map((campaignGroup) => {
-          const isExpanded = expandedCampaigns.has(campaignGroup.campaign.id)
-          const totalViews = campaignGroup.clips.reduce((sum, clip) => sum + clip.currentViews, 0)
-          const totalEarnings = campaignGroup.clips.reduce((sum, clip) => sum + clip.earnings, 0)
-
-          return (
-            <Card key={campaignGroup.campaign.id}>
-                  <CardHeader className="py-4">
-                <div 
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleCampaign(campaignGroup.campaign.id)}
-                >
-                  <div className="flex items-center gap-3">
-                    {isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                    )}
-                    <div>
-                          <CardTitle className="text-base">{campaignGroup.campaign.title}</CardTitle>
-                          <CardDescription className="text-xs">
-                            {campaignGroup.clips.length} clips • {totalViews.toLocaleString()} views • ${totalEarnings.toFixed(2)} earned
-                      </CardDescription>
-                    </div>
-                  </div>
-                      <Badge variant="outline">{campaignGroup.campaign.status}</Badge>
-                </div>
-              </CardHeader>
-
-              {isExpanded && (
-                    <CardContent className="pt-0">
-                      <div className="space-y-4">
-                    {campaignGroup.clips.map((clip) => {
-                      const chartData = clip.viewHistory.map(point => ({
-                        date: formatDate(point.date),
-                        views: point.views,
-                        success: point.success
-                      }))
-
-                      if (chartData.length > 0 && clip.initialViews > 0) {
-                        chartData.unshift({
-                          date: formatDate(clip.submittedAt),
-                          views: clip.initialViews,
-                          success: true
-                        })
-                      }
-
-                      const viewGrowth = clip.currentViews - clip.initialViews
-
-                      return (
-                            <div key={clip.submissionId} className="p-4 bg-muted/30 rounded-lg border">
-                              {/* User & Clip Info */}
-                              <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    {getPlatformLogo(clip.platform, '', 16)}
-                                    <span className="font-medium text-sm">{clip.user.name || clip.user.email}</span>
-                                    <Badge 
-                                      variant={clip.status === 'APPROVED' ? 'default' : clip.status === 'PENDING' ? 'secondary' : 'outline'} 
-                                      className="text-xs"
-                                    >
-                                      {clip.status}
-                                    </Badge>
-                                    {clip.status === 'PENDING' && (
-                                      <span className="text-xs text-muted-foreground">(no earnings until approved)</span>
-                                    )}
-                              </div>
-                              <a 
-                                href={clip.clipUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                    className="text-xs text-muted-foreground hover:text-foreground underline break-all transition-colors"
-                              >
-                                    {clip.clipUrl.length > 60 ? `${clip.clipUrl.substring(0, 60)}...` : clip.clipUrl}
-                              </a>
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    Submitted: {new Date(clip.submittedAt).toLocaleDateString()}
-                                  </p>
-                            </div>
-                            <div className="text-right ml-4">
-                                  <p className="font-bold">{clip.currentViews.toLocaleString()} views</p>
-                              {viewGrowth > 0 && (
-                                    <p className="text-xs font-medium text-green-600 dark:text-green-400">+{viewGrowth.toLocaleString()}</p>
-                              )}
-                                  <p className="text-xs text-muted-foreground">
-                                    {clip.status === 'APPROVED' ? `$${clip.earnings.toFixed(2)}` : 'No earnings yet'}
-                                  </p>
-                            </div>
-                          </div>
-
-                              {/* Mini Chart */}
-                              {chartData.length > 1 && (
-                                <div className="h-16">
-                                  <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={chartData}>
-                                  <Line 
-                                    type="monotone" 
-                                    dataKey="views" 
-                                        stroke="currentColor" 
-                                    strokeWidth={2}
-                                        dot={false}
-                                        className="text-foreground/60"
-                                  />
-                                </LineChart>
-                              </ResponsiveContainer>
-                            </div>
-                          )}
-
-                              {/* Scrape Status */}
-                              <div className="flex items-center gap-1 mt-2">
-                            <span className="text-xs text-muted-foreground">
-                              {clip.viewHistory.length} scrape{clip.viewHistory.length !== 1 ? 's' : ''}:
-                            </span>
-                                {clip.viewHistory.slice(-10).map((point, idx) => (
-                              <div 
-                                key={idx}
-                                title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
-                              >
-                                {point.success ? (
-                                      <CheckCircle className="w-3 h-3 text-foreground/70" />
-                                ) : (
-                                      <XCircle className="w-3 h-3 text-foreground/40" />
-                                )}
-                              </div>
-                            ))}
-                                {clip.viewHistory.length > 10 && (
-                                  <span className="text-xs text-muted-foreground">(showing last 10)</span>
-                            )}
-                                {clip.viewHistory.length === 0 && (
-                                  <span className="text-xs text-muted-foreground italic">No scrapes yet</span>
-                                )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </CardContent>
+                })
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Target className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
+                    <p className="text-muted-foreground">No campaigns with tracked views yet.</p>
+                    <Link href="/admin/campaigns" className="inline-block mt-4">
+                      <Button variant="outline" size="sm">Create Campaign</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
               )}
-            </Card>
-          )
-            }) : (
-          <Card>
-                <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">No clips being tracked yet.</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-        </TabsContent>
+            </div>
+          </div>
+        </div>
 
-        {/* Platform Breakdown Tab */}
-        <TabsContent value="platform" className="mt-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Platform Distribution */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Submissions by Platform</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {platformStats?.platformBreakdown && Object.keys(platformStats.platformBreakdown).length > 0 ? (
-                  <div className="space-y-3">
-                    {Object.entries(platformStats.platformBreakdown)
+        {/* Right Column - Platform & Stats */}
+        <div className="space-y-6">
+          {/* Platform Distribution */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Platform Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {platformChartData.length > 0 ? (
+                <>
+                  <div className="h-40 mb-4">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={platformChartData} layout="vertical">
+                        <XAxis type="number" hide />
+                        <YAxis type="category" dataKey="platform" width={70} tick={{ fontSize: 12 }} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'hsl(var(--card))', 
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Bar dataKey="count" fill="hsl(var(--foreground))" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="space-y-2">
+                    {Object.entries(platformStats?.platformBreakdown || {})
                       .sort(([, a], [, b]) => b - a)
                       .map(([platform, count]) => {
-                        const total = Object.values(platformStats.platformBreakdown).reduce((a, b) => a + b, 0)
+                        const total = Object.values(platformStats?.platformBreakdown || {}).reduce((a, b) => a + b, 0)
                         const percent = total > 0 ? (count / total) * 100 : 0
-                        
                         return (
-                          <div key={platform}>
-                            <div className="flex items-center justify-between mb-1">
-                              <div className="flex items-center gap-2">
-                                {getPlatformLogo(platform, '', 16)}
-                                <span className="text-sm font-medium">
-                                  {platform === 'YOUTUBE' ? 'YouTube' : 
-                                   platform === 'TIKTOK' ? 'TikTok' :
-                                   platform === 'INSTAGRAM' ? 'Instagram' :
-                                   platform === 'TWITTER' ? 'X' : platform}
-                                </span>
-                              </div>
-                              <span className="text-sm text-muted-foreground">{count} ({percent.toFixed(1)}%)</span>
+                          <div key={platform} className="flex items-center justify-between text-sm">
+                            <div className="flex items-center gap-2">
+                              {getPlatformLogo(platform, '', 14)}
+                              <span>{platform === 'YOUTUBE' ? 'YouTube' : platform === 'TIKTOK' ? 'TikTok' : platform === 'INSTAGRAM' ? 'Instagram' : platform === 'TWITTER' ? 'X' : platform}</span>
                             </div>
-                            <div className="w-full bg-muted rounded-full h-2">
-                              <div
-                                className="h-2 rounded-full bg-foreground/70"
-                                style={{ width: `${percent}%` }}
-                              />
-                            </div>
+                            <span className="text-muted-foreground">{count} ({percent.toFixed(0)}%)</span>
                           </div>
                         )
                       })}
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No platform data yet.</p>
-                )}
-              </CardContent>
-            </Card>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">No platform data yet</p>
+              )}
+            </CardContent>
+          </Card>
 
-            {/* Top Campaigns */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Top Campaigns by Spend</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {platformStats?.topCampaigns && platformStats.topCampaigns.length > 0 ? (
-                  <div className="space-y-2">
-                    {platformStats.topCampaigns.slice(0, 5).map((campaign, idx) => (
-                      <div key={campaign.id} className="flex items-center justify-between p-2 rounded bg-muted/50">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground w-4">{idx + 1}.</span>
-                          <span className="text-sm font-medium truncate max-w-[180px]">{campaign.title}</span>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold">${campaign.earnings.toFixed(2)}</p>
-                          <p className="text-xs text-muted-foreground">{campaign.submissions} subs</p>
-                        </div>
+          {/* Top Campaigns by Spend */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Top Campaigns by Spend</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {platformStats?.topCampaigns && platformStats.topCampaigns.length > 0 ? (
+                <div className="space-y-3">
+                  {platformStats.topCampaigns.slice(0, 5).map((campaign, idx) => (
+                    <div key={campaign.id} className="flex items-center gap-3">
+                      <span className="text-lg font-bold text-muted-foreground/50 w-6">{idx + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{campaign.title}</p>
+                        <p className="text-xs text-muted-foreground">{campaign.submissions} submissions</p>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No campaigns yet.</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+                      <div className="text-right">
+                        <p className="font-bold">${campaign.earnings.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">No campaigns yet</p>
+              )}
+            </CardContent>
+          </Card>
 
-      {/* Collapsible Cron Logs Section */}
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Link href="/admin/submissions?status=PENDING" className="block">
+                <Button variant="outline" className="w-full justify-start">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Review Pending ({platformStats?.overview.pendingSubmissions || 0})
+                </Button>
+              </Link>
+              <Link href="/admin/payouts" className="block">
+                <Button variant="outline" className="w-full justify-start">
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Process Payouts
+                </Button>
+              </Link>
+              <Link href="/admin/campaigns" className="block">
+                <Button variant="outline" className="w-full justify-start">
+                  <Target className="w-4 h-4 mr-2" />
+                  Manage Campaigns
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Cron Job Status */}
       <Card>
         <CardHeader 
           className="cursor-pointer py-4" 
           onClick={() => setShowCronLogs(!showCronLogs)}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {showCronLogs ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              <CardTitle className="text-sm font-medium">Cron Job History</CardTitle>
+              <CardTitle className="text-sm font-medium">View Tracking Status</CardTitle>
               {cronLogs.length > 0 && (
                 <Badge variant="outline" className="text-xs">
                   Last run: {new Date(cronLogs[0].startedAt).toLocaleTimeString()}
                 </Badge>
+              )}
+              {cronLogs.length > 0 && cronLogs[0].status === 'SUCCESS' && (
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
               )}
             </div>
             <span className="text-xs text-muted-foreground">
@@ -683,38 +646,34 @@ export default function AdminAnalyticsPage() {
         
         {showCronLogs && (
           <CardContent className="pt-0">
-            {logsLoading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : cronLogs.length > 0 ? (
+            {cronLogs.length > 0 ? (
               <div className="space-y-2">
                 {cronLogs.map((log) => {
                   const isSuccess = log.status === 'SUCCESS'
-                  const duration = log.duration ? `${(log.duration / 1000).toFixed(1)}s` : 'N/A'
-                  
                   return (
                     <div 
                       key={log.id} 
-                      className="flex items-center justify-between p-2 bg-muted/30 rounded text-xs"
+                      className="flex items-center justify-between p-3 bg-muted/30 rounded-lg text-sm"
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         {isSuccess ? (
-                          <CheckCircle className="w-4 h-4 text-foreground/70" />
+                          <CheckCircle className="w-4 h-4 text-emerald-500" />
                         ) : (
-                          <XCircle className="w-4 h-4 text-foreground/50" />
+                          <XCircle className="w-4 h-4 text-red-500" />
                         )}
-                        <span className="text-muted-foreground">
-                          {new Date(log.startedAt).toLocaleString()}
-                        </span>
-                        <span>• {duration}</span>
+                        <div>
+                          <p className="font-medium">{new Date(log.startedAt).toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {log.duration ? `${(log.duration / 1000).toFixed(1)}s` : 'N/A'}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 text-muted-foreground">
-                        <span>{log.clipsProcessed} processed</span>
-                        <span className="font-medium">✓{log.clipsSuccessful}</span>
-                        {log.clipsFailed > 0 && <span className="opacity-60">✗{log.clipsFailed}</span>}
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>{log.clipsProcessed} clips</span>
+                        <span className="text-emerald-600">✓{log.clipsSuccessful}</span>
+                        {log.clipsFailed > 0 && <span className="text-red-500">✗{log.clipsFailed}</span>}
                         {log.earningsCalculated > 0 && (
-                          <span className="font-medium">${log.earningsCalculated.toFixed(2)}</span>
+                          <span className="font-medium text-foreground">${log.earningsCalculated.toFixed(2)}</span>
                         )}
                       </div>
                     </div>
@@ -722,7 +681,7 @@ export default function AdminAnalyticsPage() {
                 })}
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground py-2">No cron logs yet.</p>
+              <p className="text-sm text-muted-foreground text-center py-4">No cron logs yet</p>
             )}
           </CardContent>
         )}

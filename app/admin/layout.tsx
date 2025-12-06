@@ -57,7 +57,7 @@ const navItems: NavItem[] = [
     icon: Wallet
   },
   {
-    label: "View Analytics",
+    label: "Analytics",
     href: "/admin/analytics",
     icon: BarChart3
   },
