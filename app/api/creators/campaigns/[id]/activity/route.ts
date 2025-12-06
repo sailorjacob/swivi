@@ -293,7 +293,7 @@ export async function GET(
 
     return NextResponse.json({
       campaign,
-      topClippers: sortedClippers,
+      topClippers: sortedClippers, // Keep as topClippers for this API
       topClips,
       recentActivity: activities,
       totals: campaignTotals

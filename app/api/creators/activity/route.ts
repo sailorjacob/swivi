@@ -172,8 +172,8 @@ export async function GET(request: NextRequest) {
             submission.status === 'APPROVED' ? 'APPROVED' : 
             submission.status === 'REJECTED' ? 'REJECTED' : 'SUBMISSION',
       timestamp: submission.updatedAt || submission.createdAt,
-      clipper: submission.users.name || 'Anonymous',
-      clipperImage: submission.users.image,
+      creator: submission.users.name || 'Anonymous',
+      creatorImage: submission.users.image,
       platform: submission.platform,
       campaign: submission.campaigns?.title,
       campaignId: submission.campaigns?.id,
@@ -193,8 +193,8 @@ export async function GET(request: NextRequest) {
           id: `vt-${vt.id}`,
           type: 'VIEW_GROWTH' as const,
           timestamp: vt.scrapedAt,
-          clipper: submission.users.name || 'Anonymous',
-          clipperImage: submission.users.image,
+          creator: submission.users.name || 'Anonymous',
+          creatorImage: submission.users.image,
           platform: vt.platform,
           campaign: submission.campaigns?.title,
           campaignId: submission.campaigns?.id,
@@ -240,14 +240,14 @@ export async function GET(request: NextRequest) {
     // Platform totals
     const totals = {
       totalSubmissions, // Total clip submissions
-      totalClippers: clipperStats.size, // Approved clippers with views
+      totalCreators: clipperStats.size, // Approved clippers with views
       totalViewsGained: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalViewsGained, 0),
       totalEarnings: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalEarnings, 0),
       totalRemainingBudget // Total budget remaining across active campaigns
     }
 
     return NextResponse.json({
-      topClippers,
+      topCreators: topClippers,
       recentActivity: activities,
       totals
     })
