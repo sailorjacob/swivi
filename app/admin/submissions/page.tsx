@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { Check, X, ExternalLink, Search, Filter, Calendar, User, DollarSign, Loader2, AlertCircle, ArrowUpRight, XCircle, Trash2, ChevronDown, ChevronUp, TrendingUp, Eye } from "lucide-react"
+import { Check, X, ExternalLink, Search, Filter, Calendar, User, DollarSign, Loader2, AlertCircle, ArrowUpRight, XCircle, Trash2, ChevronDown, ChevronUp, ChevronRight, TrendingUp, Eye, CheckCircle, Clock } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,6 +20,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "sonner"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { getPlatformLogo } from "@/components/ui/icons/platform-logos"
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface Submission {
   id: string
@@ -767,7 +768,7 @@ export default function AdminSubmissionsPage() {
                   </div>
                   {/* Action buttons */}
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    {/* Expand/Collapse Button for tracking details - always show */}
+                    {/* View Tracking Data Toggle - matching creator dashboard style */}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -780,14 +781,18 @@ export default function AdminSubmissionsPage() {
                         }
                         setExpandedSubmissions(newExpanded)
                       }}
-                      className="text-muted-foreground"
-                      title="View tracking details"
+                      className="text-xs text-muted-foreground hover:text-foreground"
                     >
-                      <Eye className="h-4 w-4 mr-1" />
                       {expandedSubmissions.has(submission.id) ? (
-                        <ChevronUp className="h-4 w-4" />
+                        <>
+                          <ChevronDown className="w-4 h-4 mr-1" />
+                          Hide Analytics
+                        </>
                       ) : (
-                        <ChevronDown className="h-4 w-4" />
+                        <>
+                          <ChevronRight className="w-4 h-4 mr-1" />
+                          View Tracking Data
+                        </>
                       )}
                     </Button>
                     {submission.status === "PENDING" && (
@@ -856,124 +861,165 @@ export default function AdminSubmissionsPage() {
                   </div>
                 </div>
                 
-                {/* Expandable Tracking Details - always available */}
+                {/* Expandable Tracking Details - Beautiful Analytics Section (matching creator dashboard) */}
                 {expandedSubmissions.has(submission.id) && (
-                  <div className="mt-3 pt-3 border-t border-border">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* View Tracking Stats */}
-                      <div className="space-y-3">
-                        <h4 className="text-sm font-medium flex items-center gap-2">
-                          <Eye className="w-4 h-4" />
-                          View Tracking
-                          {submission.status === 'PENDING' && (
-                            <span className="text-xs text-muted-foreground font-normal">(no earnings until approved)</span>
-                          )}
-                        </h4>
-                        <div className="grid grid-cols-3 gap-2 text-center">
-                          <div className="p-2 bg-muted/50 rounded">
-                            <p className="text-lg font-bold">{Number(submission.initialViews || 0).toLocaleString()}</p>
-                            <p className="text-xs text-muted-foreground">Initial</p>
-                          </div>
-                          <div className="p-2 bg-muted/50 rounded">
-                            <p className="text-lg font-bold">{Number(submission.currentViews || submission.initialViews || 0).toLocaleString()}</p>
-                            <p className="text-xs text-muted-foreground">Current</p>
-                          </div>
-                          <div className="p-2 bg-muted/80 rounded border border-foreground/10">
-                            <p className="text-lg font-bold text-green-600 dark:text-green-400">+{Number(submission.viewChange || 0).toLocaleString()}</p>
-                            <p className="text-xs text-muted-foreground">Gained</p>
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <div className="space-y-4">
+                      {/* Stats Summary - 3 columns like creator dashboard */}
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="bg-muted/50 p-3 rounded-lg">
+                          <div className="text-xs text-muted-foreground mb-1">Initial Views</div>
+                          <div className="text-lg font-semibold">
+                            {Number(submission.initialViews || 0).toLocaleString()}
                           </div>
                         </div>
-                        
-                        {/* Earnings calculation - only for approved */}
-                        {submission.status === 'APPROVED' && (
-                          <div className="p-3 bg-muted/50 rounded-lg border border-border">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="text-xs text-muted-foreground">Rate: ${submission.campaigns.payoutRate}/1K views</p>
-                                <p className="text-sm font-medium">
-                                  {Number(submission.viewChange || 0).toLocaleString()} views × ${submission.campaigns.payoutRate}/1K
-                                </p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-xl font-bold">
-                                  ${((Number(submission.viewChange || 0) / 1000) * submission.campaigns.payoutRate).toFixed(2)}
-                                </p>
-                              </div>
-                            </div>
+                        <div className="bg-muted/50 p-3 rounded-lg">
+                          <div className="text-xs text-muted-foreground mb-1">Current Views</div>
+                          <div className="text-lg font-semibold">
+                            {Number(submission.currentViews || submission.initialViews || 0).toLocaleString()}
                           </div>
-                        )}
-                        
-                        {/* Pending info */}
-                        {submission.status === 'PENDING' && (
-                          <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20 text-sm">
-                            <p className="text-amber-600 dark:text-amber-400">
-                              ⏳ Awaiting approval. Views are being tracked but earnings won't calculate until approved.
-                            </p>
+                        </div>
+                        <div className="bg-primary/10 p-3 rounded-lg">
+                          <div className="text-xs text-muted-foreground mb-1">Tracked Views</div>
+                          <div className="text-lg font-semibold text-primary">
+                            +{Number(submission.viewChange || 0).toLocaleString()}
                           </div>
-                        )}
+                        </div>
                       </div>
-                      
-                      {/* Tracking Timeline */}
-                      <div className="space-y-3">
-                        <h4 className="text-sm font-medium flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4" />
-                          Scrape Timeline
-                          {submission.clips?.view_tracking && (
-                            <span className="text-xs text-muted-foreground font-normal">
-                              ({submission.clips.view_tracking.length} scrape{submission.clips.view_tracking.length !== 1 ? 's' : ''})
-                            </span>
-                          )}
-                        </h4>
-                        {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 ? (
-                          <>
-                            <div className="space-y-1 max-h-32 overflow-y-auto">
-                              {submission.clips.view_tracking.slice(0, 10).map((tracking, idx) => (
-                                <div 
-                                  key={idx}
-                                  className="flex items-center justify-between text-xs p-1.5 bg-muted/30 rounded"
-                                >
-                                  <span className="text-muted-foreground">
-                                    {new Date(tracking.scrapedAt || tracking.date).toLocaleString('en-US', {
-                                      month: 'short',
-                                      day: 'numeric',
-                                      hour: 'numeric',
-                                      minute: '2-digit'
-                                    })}
-                                  </span>
-                                  <span className="font-medium">{Number(tracking.views).toLocaleString()} views</span>
-                                </div>
-                              ))}
+
+                      {/* View History Chart */}
+                      {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 ? (
+                        <>
+                          <div>
+                            <h4 className="text-sm font-medium mb-3">View History</h4>
+                            <div className="h-48 w-full">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={submission.clips.view_tracking.map((t, idx) => ({
+                                  date: new Date(t.scrapedAt || t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                                  views: Number(t.views),
+                                  scrapedAt: t.scrapedAt || t.date,
+                                  success: Number(t.views) > 0 || idx > 0
+                                }))}>
+                                  <XAxis
+                                    dataKey="date"
+                                    stroke="hsl(var(--muted-foreground))"
+                                    fontSize={12}
+                                    tickLine={false}
+                                  />
+                                  <YAxis
+                                    stroke="hsl(var(--muted-foreground))"
+                                    fontSize={12}
+                                    tickLine={false}
+                                    tickFormatter={(value) => value.toLocaleString()}
+                                  />
+                                  <Tooltip
+                                    content={({ active, payload }) => {
+                                      if (active && payload && payload.length) {
+                                        return (
+                                          <div className="bg-background border rounded-lg p-2 shadow-lg">
+                                            <p className="text-sm font-semibold">{payload[0].value?.toLocaleString()} views</p>
+                                            <p className="text-xs text-muted-foreground">{payload[0].payload.date}</p>
+                                          </div>
+                                        )
+                                      }
+                                      return null
+                                    }}
+                                  />
+                                  <Line
+                                    type="monotone"
+                                    dataKey="views"
+                                    stroke="hsl(var(--primary))"
+                                    strokeWidth={2}
+                                    dot={{ fill: 'hsl(var(--primary))', r: 3 }}
+                                    activeDot={{ r: 5 }}
+                                  />
+                                </LineChart>
+                              </ResponsiveContainer>
                             </div>
-                            {submission.clips.view_tracking.length > 10 && (
-                              <p className="text-xs text-muted-foreground">
-                                + {submission.clips.view_tracking.length - 10} more scrapes
+                          </div>
+
+                          {/* Scrape Log - horizontal icons like creator dashboard */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs text-muted-foreground">Tracking History:</span>
+                            {submission.clips.view_tracking.map((tracking, idx) => (
+                              <div 
+                                key={idx}
+                                className="flex items-center gap-1"
+                                title={`${new Date(tracking.scrapedAt || tracking.date).toLocaleString()} - ${Number(tracking.views).toLocaleString()} views`}
+                              >
+                                {Number(tracking.views) > 0 || idx > 0 ? (
+                                  <CheckCircle className="w-3 h-3 text-foreground" />
+                                ) : (
+                                  <XCircle className="w-3 h-3 text-muted-foreground" />
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center py-6 text-sm text-muted-foreground">
+                          <Eye className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p>No tracking data yet</p>
+                          <p className="text-xs mt-1">View tracking data will appear here once scraping begins</p>
+                        </div>
+                      )}
+
+                      {/* Status-based info cards */}
+                      {submission.status === 'APPROVED' && (
+                        <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">Earnings Calculation</p>
+                              <p className="text-sm font-medium">
+                                {Number(submission.viewChange || 0).toLocaleString()} views × ${submission.campaigns.payoutRate}/1K
                               </p>
-                            )}
-                          </>
-                        ) : (
-                          <div className="p-3 bg-muted/30 rounded text-sm text-muted-foreground">
-                            No scrapes yet. View tracking will begin after initial processing.
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                ${((Number(submission.viewChange || 0) / 1000) * submission.campaigns.payoutRate).toFixed(2)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">earned</p>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* User Stats Summary */}
-                    <div className="mt-3 pt-3 border-t border-dashed">
-                      <div className="flex items-center justify-between text-sm">
+                        </div>
+                      )}
+                      
+                      {submission.status === 'PENDING' && (
+                        <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20 text-sm">
+                          <p className="text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            Awaiting approval. Views are being tracked but earnings won't calculate until approved.
+                          </p>
+                        </div>
+                      )}
+                      
+                      {submission.status === 'REJECTED' && (
+                        <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20 text-sm">
+                          <p className="text-red-600 dark:text-red-400 flex items-center gap-2">
+                            <XCircle className="w-4 h-4" />
+                            Rejected. {submission.rejectionReason ? `Reason: ${submission.rejectionReason}` : 'No earnings will be calculated.'}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* User Stats Summary - clean bottom bar */}
+                      <div className="pt-3 border-t border-dashed flex items-center justify-between text-sm">
                         <div className="flex items-center gap-4">
-                          <span className="text-muted-foreground">User Total:</span>
-                          <span>{Number(submission.users.totalViews || 0).toLocaleString()} views</span>
-                          <span>${Number(submission.users.totalEarnings || 0).toFixed(2)} earned</span>
+                          <span className="text-muted-foreground">User:</span>
+                          <span className="font-medium">{submission.users.name || submission.users.email}</span>
+                          <span className="text-muted-foreground">•</span>
+                          <span>{Number(submission.users.totalViews || 0).toLocaleString()} total views</span>
+                          <span className="text-muted-foreground">•</span>
+                          <span className="font-medium text-green-600 dark:text-green-400">${Number(submission.users.totalEarnings || 0).toFixed(2)} earned</span>
                         </div>
                         <button
                           onClick={() => {
                             setSelectedUserModal(submission.users)
                             setUserSubmissions(submissions.filter(s => s.users.id === submission.users.id))
                           }}
-                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          className="text-xs text-primary hover:underline"
                         >
-                          View User Profile →
+                          View Profile →
                         </button>
                       </div>
                     </div>
