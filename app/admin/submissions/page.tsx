@@ -201,7 +201,7 @@ export default function AdminSubmissionsPage() {
       } else if (isBackgroundRefresh) {
         setIsRefreshing(true)
       } else {
-        setLoading(true)
+      setLoading(true)
       }
       if (!isBackgroundRefresh) setError(null)
       
@@ -239,7 +239,7 @@ export default function AdminSubmissionsPage() {
           setSubmissions(prev => [...prev, ...data.submissions])
         } else {
           // Replace submissions for fresh fetch
-          setSubmissions(data.submissions)
+        setSubmissions(data.submissions)
         }
         setPagination({
           ...data.pagination,
@@ -376,7 +376,7 @@ export default function AdminSubmissionsPage() {
           <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground">
             <Loader2 className="w-3 h-3 animate-spin" />
             <span>Updating...</span>
-          </div>
+      </div>
         </div>
       )}
 
@@ -624,10 +624,10 @@ export default function AdminSubmissionsPage() {
                         {submission.socialAccount && (
                           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground mt-1">
                             <span className="font-mono text-foreground">@{submission.socialAccount.username}</span>
-                            {submission.socialAccount.verified && (
+                              {submission.socialAccount.verified && (
                               <Check className="w-3 h-3 text-foreground" />
-                            )}
-                          </span>
+                              )}
+                            </span>
                         )}
                       </div>
                     </div>

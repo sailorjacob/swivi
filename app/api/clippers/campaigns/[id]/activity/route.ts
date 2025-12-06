@@ -269,10 +269,16 @@ export async function GET(
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 15)
 
+    // Get total submissions count for this campaign (all statuses)
+    const totalSubmissions = await prisma.clipSubmission.count({
+      where: { campaignId }
+    })
+
     // Get campaign totals
     const campaignTotals = {
-      totalClippers: clipperStats.size,
-      totalClips: topClippers.length,
+      totalSubmissions, // All submissions for this campaign
+      totalClippers: clipperStats.size, // Unique approved clippers
+      totalClips: topClippers.length, // Approved clips
       totalViewsGained: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalViewsGained, 0),
       totalEarnings: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalEarnings, 0)
     }

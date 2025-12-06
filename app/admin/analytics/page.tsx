@@ -156,7 +156,7 @@ export default function AdminAnalyticsPage() {
     try {
       // Only show loading on initial load, not background refresh
       if (!isBackgroundRefresh) {
-        setLoading(true)
+      setLoading(true)
       }
       const response = await authenticatedFetch('/api/admin/analytics/view-history')
       const data = await response.json()
@@ -234,11 +234,11 @@ export default function AdminAnalyticsPage() {
         <div>
           <h1 className="text-2xl font-bold">Analytics</h1>
           <p className="text-sm text-muted-foreground">Platform-wide performance and campaign insights</p>
-        </div>
+            </div>
         <Button variant="ghost" size="sm" onClick={() => fetchAllData(false)} disabled={isRefreshing}>
           <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
+          </Button>
+                        </div>
 
       {/* Whop-Style Platform Stats - Top Section */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

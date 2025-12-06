@@ -184,7 +184,7 @@ export default function CampaignsPage() {
     try {
       // Only show full loading on initial load, not on background refresh
       if (!isBackgroundRefresh) {
-        setLoading(true)
+      setLoading(true)
       } else {
         setIsRefreshing(true)
       }
@@ -338,18 +338,18 @@ export default function CampaignsPage() {
       <div className="flex gap-6">
         {/* Campaigns Section */}
         <div className="flex-1 min-w-0">
-          {/* Empty State */}
-          {sortedFilteredCampaigns.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground">
-                {filter === 'active' ? 'No active campaigns right now. Check back soon.' :
-                 filter === 'upcoming' ? 'No upcoming campaigns scheduled.' :
-                 filter === 'completed' ? 'No completed campaigns yet.' :
-                 'No campaigns found.'}
-              </p>
-            </div>
-          ) : (
-            /* Campaigns Grid */
+      {/* Empty State */}
+      {sortedFilteredCampaigns.length === 0 ? (
+        <div className="text-center py-16">
+          <p className="text-muted-foreground">
+            {filter === 'active' ? 'No active campaigns right now. Check back soon.' :
+             filter === 'upcoming' ? 'No upcoming campaigns scheduled.' :
+             filter === 'completed' ? 'No completed campaigns yet.' :
+             'No campaigns found.'}
+          </p>
+        </div>
+      ) : (
+        /* Campaigns Grid */
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {sortedFilteredCampaigns.map((campaign) => {
           // CRITICAL: Convert budget/spent to numbers for proper calculations
@@ -544,8 +544,8 @@ export default function CampaignsPage() {
           </motion.div>
           )
         })}
-            </div>
-          )}
+        </div>
+      )}
         </div>
 
         {/* Activity Sidebar - Always visible on xl screens */}
@@ -657,21 +657,21 @@ export default function CampaignsPage() {
         </div>
       </div>
 
-      {/* Bonus Modal for Featured Campaigns */}
-      <CampaignBonusModal
-        isOpen={bonusModalOpen}
-        onClose={() => {
-          setBonusModalOpen(false)
-          setSelectedBountyCampaign(null)
-        }}
-        campaign={selectedBountyCampaign ? {
-          id: selectedBountyCampaign.id,
-          title: selectedBountyCampaign.title,
-          totalBudget: selectedBountyCampaign.budget,
-          bonusBudget: 2000,
-          payoutRate: `$${selectedBountyCampaign.payoutRate} per 1,000 views`
-        } : undefined}
-      />
+        {/* Bonus Modal for Featured Campaigns */}
+        <CampaignBonusModal
+          isOpen={bonusModalOpen}
+          onClose={() => {
+            setBonusModalOpen(false)
+            setSelectedBountyCampaign(null)
+          }}
+          campaign={selectedBountyCampaign ? {
+            id: selectedBountyCampaign.id,
+            title: selectedBountyCampaign.title,
+            totalBudget: selectedBountyCampaign.budget,
+            bonusBudget: 2000,
+            payoutRate: `$${selectedBountyCampaign.payoutRate} per 1,000 views`
+          } : undefined}
+        />
       </div>
     </ErrorBoundary>
   )

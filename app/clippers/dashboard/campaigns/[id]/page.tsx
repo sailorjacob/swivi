@@ -17,7 +17,7 @@ import { CampaignBonusModal } from "@/components/campaigns/campaign-bonus-modal"
 import { LinkifyParagraph } from "@/components/ui/linkify-text"
 import toast from "react-hot-toast"
 import Link from "next/link"
-import {
+import { 
   Dialog,
   DialogContent,
   DialogHeader,
@@ -190,6 +190,7 @@ export default function CampaignDetailPage() {
       viewsGained: number | null
     }>
     totals: {
+      totalSubmissions: number
       totalClippers: number
       totalClips: number
       totalViewsGained: number
@@ -219,7 +220,7 @@ export default function CampaignDetailPage() {
     try {
       // Only show full loading on initial load, not background refresh
       if (!isBackgroundRefresh) {
-        setLoading(true)
+      setLoading(true)
       } else {
         setIsRefreshing(true)
       }
@@ -450,7 +451,7 @@ export default function CampaignDetailPage() {
               {/* Stats Row */}
               <div className="grid grid-cols-3 gap-2">
                 <div className="text-center py-3 px-2 border border-border rounded-md">
-                  <p className="text-xl font-semibold">{activityData.totals.totalClips}</p>
+                  <p className="text-xl font-semibold">{activityData.totals.totalSubmissions}</p>
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Submissions</p>
                 </div>
                 <div className="text-center py-3 px-2 border border-border rounded-md">
@@ -1114,23 +1115,23 @@ export default function CampaignDetailPage() {
           className="border-t border-border pt-6"
         >
           {hasBonuses(campaign) ? (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-md bg-muted border border-border">
-                  <Trophy className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">$2,000 in Performance Bounties</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Tier 1: $150/creator (8 spots) · Tier 2: $40/winning clip (20 winners)
-                  </p>
-                </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-md bg-muted border border-border">
+                <Trophy className="w-4 h-4" />
               </div>
+              <div>
+                <p className="font-medium text-sm">$2,000 in Performance Bounties</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Tier 1: $150/creator (8 spots) · Tier 2: $40/winning clip (20 winners)
+                </p>
+              </div>
+            </div>
               <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setBonusModalOpen(true)}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setBonusModalOpen(true)}
                 >
                   View Bounties
                 </Button>
@@ -1139,11 +1140,11 @@ export default function CampaignDetailPage() {
                   size="sm" 
                   onClick={() => setActivityModalOpen(true)}
                   className="gap-1.5"
-                >
+            >
                   <Activity className="w-3.5 h-3.5" />
                   Activity
-                </Button>
-              </div>
+            </Button>
+          </div>
             </div>
           ) : (
             <div className="flex justify-end">
