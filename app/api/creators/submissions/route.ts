@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
         viewChange: Math.max(0, currentViews - initialViews).toString(),
         finalEarnings: sub.finalEarnings ? sub.finalEarnings.toString() : "0",
         payout: sub.payout ? sub.payout.toString() : null,
-        scrapeCount: viewTracking.length,
+        trackingCount: viewTracking.length,
         lastTracked: viewTracking[0]?.scrapedAt ? new Date(viewTracking[0].scrapedAt).toISOString() : null,
         clips: sub.clips ? {
           id: sub.clips.id,

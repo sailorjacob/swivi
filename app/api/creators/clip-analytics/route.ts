@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
     const viewHistory = (clip.view_tracking || []).map((track: any) => ({
       date: new Date(track.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       views: Number(track.views || 0),
-      scrapedAt: track.createdAt,
+      trackedAt: track.createdAt,
       success: Number(track.views) > 0 || clip.view_tracking.indexOf(track) > 0
     }))
 

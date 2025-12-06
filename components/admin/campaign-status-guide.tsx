@@ -141,7 +141,7 @@ export function CampaignStatusGuide() {
                 <ul className="text-muted-foreground list-disc list-inside space-y-1">
                   <li>Hidden from creators (like hidden flag)</li>
                   <li>If ACTIVE, submissions ARE accepted</li>
-                  <li>View tracking is DISABLED (won't scrape views)</li>
+                  <li>View tracking is DISABLED (won't track views)</li>
                   <li>Excluded from all analytics and reports</li>
                   <li>Can be permanently deleted (hard delete)</li>
                   <li><strong>Use case:</strong> Testing submission flow without affecting data</li>

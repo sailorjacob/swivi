@@ -298,11 +298,11 @@ export async function GET(request: NextRequest) {
       // Only show earnings if submission is approved
       const earnings = submission.status === 'APPROVED' && clip?.earnings ? Number(clip.earnings) : 0
 
-      // Build scrape history for display
-      const scrapeHistory = viewTrackingRecords.slice(0, 20).map((track: any) => ({
+      // Build tracking history for display
+      const trackingHistory = viewTrackingRecords.slice(0, 20).map((track: any) => ({
         views: Number(track.views),
         date: track.date,
-        scrapedAt: track.scrapedAt,
+        trackedAt: track.scrapedAt,
         success: Number(track.views) > 0
       }))
 
@@ -325,8 +325,8 @@ export async function GET(request: NextRequest) {
         clipUrl: submission.clipUrl,
         platform: submission.platform,
         lastTracked: latestTracking?.scrapedAt ? new Date(latestTracking.scrapedAt).toISOString() : null,
-        scrapeCount: viewTrackingRecords.length,
-        scrapeHistory: scrapeHistory
+        trackingCount: viewTrackingRecords.length,
+        trackingHistory: trackingHistory
       }
     })
 

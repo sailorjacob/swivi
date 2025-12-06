@@ -45,10 +45,10 @@ const getStatusIcon = (status: string) => {
   return null
 }
 
-interface ScrapeRecord {
+interface TrackingRecord {
   views: number
   date: string
-  scrapedAt: string
+  trackedAt: string
   success: boolean
 }
 
@@ -78,8 +78,8 @@ interface DashboardData {
     currentViews?: string
     viewChange?: string
     lastTracked?: string | null
-    scrapeCount?: number
-    scrapeHistory?: ScrapeRecord[]
+    trackingCount?: number
+    trackingHistory?: TrackingRecord[]
   }>
   activeCampaigns: number
   availableBalance?: number
@@ -557,8 +557,8 @@ export default function ClipperDashboard() {
                           <span className="text-xs italic">earnings start after approval</span>
                         ) : null}
                         <span className="hidden sm:inline">•</span>
-                        {clip.scrapeCount !== undefined && clip.scrapeCount > 0 && (
-                          <span className="text-xs">{clip.scrapeCount} scrape{clip.scrapeCount !== 1 ? 's' : ''}</span>
+                        {clip.trackingCount !== undefined && clip.trackingCount > 0 && (
+                          <span className="text-xs">{clip.trackingCount} update{clip.trackingCount !== 1 ? 's' : ''}</span>
                         )}
                       </div>
                       <div className="text-xs text-muted-foreground mb-2">
@@ -715,7 +715,7 @@ export default function ClipperDashboard() {
                                 </div>
                               </div>
 
-                              {/* Scrape Log - max 10 icons shown */}
+                              {/* Tracking Log - max 10 icons shown */}
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs text-muted-foreground">Tracking History:</span>
                                 {(() => {
@@ -736,7 +736,7 @@ export default function ClipperDashboard() {
                                         <div 
                                           key={idx}
                                           className="flex items-center gap-1"
-                                          title={`${new Date(point.scrapedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
+                                          title={`${new Date(point.trackedAt).toLocaleString()} - ${point.views.toLocaleString()} views`}
                                         >
                                           {point.success ? (
                                             <CheckCircle className="w-3 h-3 text-foreground" />
@@ -754,7 +754,7 @@ export default function ClipperDashboard() {
                             <div className="text-center py-6 text-sm text-muted-foreground">
                               <Eye className="w-8 h-8 mx-auto mb-2 opacity-50" />
                               <p>No tracking data yet</p>
-                              <p className="text-xs mt-1">View tracking data will appear here once scraping begins</p>
+                              <p className="text-xs mt-1">View tracking data will appear here once tracking begins</p>
                             </div>
                           )}
                         </div>

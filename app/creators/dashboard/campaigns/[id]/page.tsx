@@ -108,7 +108,7 @@ interface Submission {
   viewChange?: string
   finalEarnings: string
   createdAt: string
-  scrapeCount?: number
+  trackingCount?: number
   lastTracked?: string
   campaigns: {
     title: string
@@ -1023,9 +1023,9 @@ export default function CampaignDetailPage() {
                                   {Icon && <Icon className="w-4 h-4" />}
                                 </div>
                                 {getStatusBadge(submission.status)}
-                                {submission.scrapeCount !== undefined && submission.scrapeCount > 0 && (
+                                {submission.trackingCount !== undefined && submission.trackingCount > 0 && (
                                   <span className="text-xs text-muted-foreground">
-                                    {submission.scrapeCount} scrape{submission.scrapeCount !== 1 ? 's' : ''}
+                                    {submission.trackingCount} update{submission.trackingCount !== 1 ? 's' : ''}
                                   </span>
                                 )}
                               </div>
