@@ -103,6 +103,7 @@ interface PlatformStats {
     campaignTitle: string
     campaignStatus: string
     totalSubmissions: number
+    approvedSubmissions: number
     trackedViews: number
     initialViews: number
     currentViews: number
@@ -357,7 +358,7 @@ export default function AdminAnalyticsPage() {
                               href={`/admin/submissions?campaignId=${campaign.campaignId}`}
                               className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
                             >
-                              See submissions ({campaign.totalSubmissions})
+                              See submissions ({campaign.totalSubmissions} total, {campaign.approvedSubmissions || 0} approved)
                               <ExternalLink className="w-3 h-3" />
                             </Link>
                           </div>

@@ -152,6 +152,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Get tracked views per campaign (real campaigns only)
+    // Includes approved submissions for view tracking AND total submission count
     const campaignsWithTrackedViews = await prisma.campaign.findMany({
       where: realCampaignFilter,
       select: {
@@ -159,6 +160,11 @@ export async function GET(request: NextRequest) {
         title: true,
         status: true,
         isTest: true,
+        _count: {
+          select: {
+            clipSubmissions: true // Total ALL submissions count
+          }
+        },
         clipSubmissions: {
           where: {
             status: 'APPROVED'
@@ -204,7 +210,8 @@ export async function GET(request: NextRequest) {
         campaignId: campaign.id,
         campaignTitle: campaign.title,
         campaignStatus: campaign.status,
-        totalSubmissions: campaign.clipSubmissions.length,
+        totalSubmissions: campaign._count.clipSubmissions, // ALL submissions, not just approved
+        approvedSubmissions: campaign.clipSubmissions.length, // Approved only (for view tracking)
         trackedViews: totalTrackedViews,
         initialViews: totalInitialViews,
         currentViews: totalCurrentViews
