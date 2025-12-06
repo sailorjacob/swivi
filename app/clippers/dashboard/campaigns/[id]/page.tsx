@@ -419,6 +419,16 @@ export default function CampaignDetailPage() {
 
   return (
     <div className="space-y-6">
+      {/* Floating refresh indicator - positioned absolute so it doesn't push content */}
+      {isRefreshing && (
+        <div className="fixed top-20 right-4 z-50 pointer-events-none">
+          <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground shadow-sm">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>Updating...</span>
+          </div>
+        </div>
+      )}
+
       {/* Back Button */}
       <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-2">
         <ArrowLeft className="w-4 h-4 mr-2" />
