@@ -3,6 +3,19 @@ const nextConfig = {
   // Redirects from old /clippers/* URLs to new /creators/* URLs
   async redirects() {
     return [
+      // Specific redirect for become-a-clipper (from /clippers/ path)
+      {
+        source: '/clippers/become-a-clipper',
+        destination: '/creators/become-a-creator',
+        permanent: true,
+      },
+      // Handle old "clipper" terminology redirects within /creators/
+      {
+        source: '/creators/become-a-clipper',
+        destination: '/creators/become-a-creator',
+        permanent: true,
+      },
+      // General /clippers/* to /creators/* redirect
       {
         source: '/clippers/:path*',
         destination: '/creators/:path*',
