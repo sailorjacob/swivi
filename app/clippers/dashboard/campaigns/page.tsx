@@ -164,6 +164,7 @@ export default function CampaignsPage() {
   const [filter, setFilter] = useState<'active' | 'upcoming' | 'completed' | 'all'>('active')
   const [activityData, setActivityData] = useState<ActivityData | null>(null)
   const [activityLoading, setActivityLoading] = useState(true)
+  const [showActivity, setShowActivity] = useState(false)
 
   // Fetch activity data
   const fetchActivity = useCallback(async () => {
@@ -557,111 +558,134 @@ export default function CampaignsPage() {
           )}
         </div>
 
-        {/* Activity Sidebar - Hidden on mobile */}
-        <div className="hidden xl:block w-80 shrink-0">
-          <div className="sticky top-4 space-y-4">
-            {/* Stats Summary */}
-            {activityData && (
-              <div className="border border-border rounded-lg p-4">
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div>
-                    <p className="text-lg font-semibold">{activityData.totals.totalClippers}</p>
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Clippers</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-semibold">{activityData.totals.totalViewsGained.toLocaleString()}</p>
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Views</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-semibold">${activityData.totals.totalEarnings.toFixed(0)}</p>
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Paid</p>
-                  </div>
-                </div>
-              </div>
-            )}
+        {/* Activity Sidebar - Collapsible */}
+        <div className="hidden lg:block shrink-0">
+          <div className="sticky top-4">
+            {/* Toggle Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowActivity(!showActivity)}
+              className="mb-4 gap-2"
+            >
+              <Activity className="w-4 h-4" />
+              Activity
+              <ChevronRight className={`w-4 h-4 transition-transform ${showActivity ? 'rotate-90' : ''}`} />
+            </Button>
 
-            {/* Top Clippers */}
-            <div className="border border-border rounded-lg p-4">
-              <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
-                <Crown className="w-3.5 h-3.5" />
-                Top Clippers
-              </h3>
-              {activityLoading ? (
-                <div className="flex items-center justify-center py-6">
-                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                </div>
-              ) : activityData?.topClippers.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">No clippers yet</p>
-              ) : (
-                <div className="space-y-1">
-                  {activityData?.topClippers.slice(0, 5).map((clipper, index) => (
-                    <div
-                      key={clipper.userId}
-                      className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-muted/50 transition-colors"
-                    >
-                      <span className="w-4 text-xs text-muted-foreground">{index + 1}.</span>
-                      <Avatar className="w-6 h-6">
-                        <AvatarImage src={clipper.image || undefined} />
-                        <AvatarFallback className="text-[10px]">{clipper.name?.[0] || '?'}</AvatarFallback>
-                      </Avatar>
-                      <span className="flex-1 text-sm truncate">{clipper.name || 'Anonymous'}</span>
-                      <span className="text-xs text-muted-foreground">+{clipper.totalViewsGained.toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Recent Activity */}
-            <div className="border border-border rounded-lg p-4">
-              <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
-                <Activity className="w-3.5 h-3.5" />
-                Recent Activity
-              </h3>
-              {activityLoading ? (
-                <div className="flex items-center justify-center py-6">
-                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                </div>
-              ) : activityData?.recentActivity.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">No activity yet</p>
-              ) : (
-                <div className="space-y-1">
-                  {activityData?.recentActivity.slice(0, 6).map((activity) => (
-                    <div
-                      key={activity.id}
-                      className="flex items-start gap-2 py-1.5 px-2 rounded hover:bg-muted/50 transition-colors cursor-pointer"
-                      onClick={() => activity.campaignId && router.push(`/clippers/dashboard/campaigns/${activity.campaignId}`)}
-                    >
-                      <Avatar className="w-5 h-5 mt-0.5">
-                        <AvatarImage src={activity.clipperImage || undefined} />
-                        <AvatarFallback className="text-[8px]">{activity.clipper?.[0] || '?'}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0 text-xs">
-                        <span className="font-medium">{activity.clipper}</span>
-                        {' '}
-                        {activity.type === 'SUBMISSION' && (
-                          <span className="text-muted-foreground">submitted</span>
-                        )}
-                        {activity.type === 'APPROVED' && (
-                          <span className="text-muted-foreground">approved</span>
-                        )}
-                        {activity.type === 'REJECTED' && (
-                          <span className="text-muted-foreground">rejected</span>
-                        )}
-                        {activity.type === 'VIEW_GROWTH' && activity.viewsGained && (
-                          <span className="text-muted-foreground">
-                            +{activity.viewsGained.toLocaleString()}
-                          </span>
-                        )}
-                        {activity.campaign && (
-                          <p className="text-muted-foreground/70 truncate">{activity.campaign}</p>
-                        )}
+            {/* Expandable Content */}
+            {showActivity && (
+              <motion.div
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 320 }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-4 overflow-hidden"
+              >
+                {/* Stats Summary */}
+                {activityData && (
+                  <div className="border border-border rounded-lg p-4">
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <p className="text-lg font-semibold">{activityData.totals.totalClippers}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Clippers</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold">{activityData.totals.totalViewsGained.toLocaleString()}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Views</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold">${activityData.totals.totalEarnings.toFixed(0)}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Paid</p>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                {/* Top Clippers */}
+                <div className="border border-border rounded-lg p-4">
+                  <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                    <Crown className="w-3.5 h-3.5" />
+                    Top Clippers
+                  </h3>
+                  {activityLoading ? (
+                    <div className="flex items-center justify-center py-6">
+                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : activityData?.topClippers.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No clippers yet</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {activityData?.topClippers.slice(0, 5).map((clipper, index) => (
+                        <div
+                          key={clipper.userId}
+                          className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-muted/50 transition-colors"
+                        >
+                          <span className="w-4 text-xs text-muted-foreground">{index + 1}.</span>
+                          <Avatar className="w-6 h-6">
+                            <AvatarImage src={clipper.image || undefined} />
+                            <AvatarFallback className="text-[10px]">{clipper.name?.[0] || '?'}</AvatarFallback>
+                          </Avatar>
+                          <span className="flex-1 text-sm truncate">{clipper.name || 'Anonymous'}</span>
+                          <span className="text-xs text-muted-foreground">+{clipper.totalViewsGained.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+
+                {/* Recent Activity */}
+                <div className="border border-border rounded-lg p-4">
+                  <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                    <Activity className="w-3.5 h-3.5" />
+                    Recent Activity
+                  </h3>
+                  {activityLoading ? (
+                    <div className="flex items-center justify-center py-6">
+                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : activityData?.recentActivity.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No activity yet</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {activityData?.recentActivity.slice(0, 6).map((activity) => (
+                        <div
+                          key={activity.id}
+                          className="flex items-start gap-2 py-1.5 px-2 rounded hover:bg-muted/50 transition-colors cursor-pointer"
+                          onClick={() => activity.campaignId && router.push(`/clippers/dashboard/campaigns/${activity.campaignId}`)}
+                        >
+                          <Avatar className="w-5 h-5 mt-0.5">
+                            <AvatarImage src={activity.clipperImage || undefined} />
+                            <AvatarFallback className="text-[8px]">{activity.clipper?.[0] || '?'}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0 text-xs">
+                            <span className="font-medium">{activity.clipper}</span>
+                            {' '}
+                            {activity.type === 'SUBMISSION' && (
+                              <span className="text-muted-foreground">submitted</span>
+                            )}
+                            {activity.type === 'APPROVED' && (
+                              <span className="text-muted-foreground">approved</span>
+                            )}
+                            {activity.type === 'REJECTED' && (
+                              <span className="text-muted-foreground">rejected</span>
+                            )}
+                            {activity.type === 'VIEW_GROWTH' && activity.viewsGained && (
+                              <span className="text-muted-foreground">
+                                +{activity.viewsGained.toLocaleString()}
+                              </span>
+                            )}
+                            {activity.campaign && (
+                              <p className="text-muted-foreground/70 truncate">{activity.campaign}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>

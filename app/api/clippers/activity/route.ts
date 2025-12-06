@@ -208,9 +208,24 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 10)
 
+    // Get total unique clippers who have submitted (not just approved)
+    const totalAppliedClippers = await prisma.clipSubmission.findMany({
+      where: {
+        campaigns: {
+          status: { in: ['ACTIVE', 'COMPLETED'] },
+          isTest: false
+        }
+      },
+      select: {
+        userId: true
+      },
+      distinct: ['userId']
+    })
+
     // Platform totals
     const totals = {
-      totalClippers: clipperStats.size,
+      totalClippers: totalAppliedClippers.length, // All clippers who have applied
+      totalApprovedClippers: clipperStats.size, // Only approved clippers
       totalViewsGained: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalViewsGained, 0),
       totalEarnings: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalEarnings, 0)
     }
