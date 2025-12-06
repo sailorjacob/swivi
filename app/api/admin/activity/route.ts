@@ -84,9 +84,10 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      recentViewTracking = await prisma.viewTracking.findMany({
+      // Get recent view tracking records with their clips
+      const rawViewTracking = await prisma.viewTracking.findMany({
         orderBy: { scrapedAt: 'desc' },
-        take: 15,
+        take: 30, // Fetch more to find previous records for increment calculation
         select: {
           id: true,
           clipId: true,
@@ -113,6 +114,29 @@ export async function GET(request: NextRequest) {
           users: {
             select: { name: true, email: true }
           }
+        }
+      })
+      
+      // For each tracking record, find the previous one for the same clip to calculate increment
+      // Group by clipId to find previous tracking
+      const clipTrackingMap = new Map<string, typeof rawViewTracking>()
+      rawViewTracking.forEach(tracking => {
+        const existing = clipTrackingMap.get(tracking.clipId) || []
+        existing.push(tracking)
+        clipTrackingMap.set(tracking.clipId, existing)
+      })
+      
+      // Add previousViews to each tracking record
+      recentViewTracking = rawViewTracking.slice(0, 15).map(tracking => {
+        const clipHistory = clipTrackingMap.get(tracking.clipId) || []
+        // Find the previous tracking record (the one right after this one in the sorted list)
+        const currentIndex = clipHistory.findIndex(t => t.id === tracking.id)
+        const previousTracking = clipHistory[currentIndex + 1]
+        const previousViews = previousTracking ? Number(previousTracking.views) : 0
+        
+        return {
+          ...tracking,
+          previousViews // Add previousViews for increment calculation
         }
       })
     } catch (e) {
@@ -208,6 +232,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Add view tracking (scrapes) - limit to avoid spam
+    // Only show clips that actually gained views in this scrape (increment > 0)
     const uniqueViewTrackings = new Map()
     recentViewTracking.forEach(tracking => {
       // Dedupe by clip URL to avoid spam from multiple scrapes
@@ -217,12 +242,15 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    Array.from(uniqueViewTrackings.values()).slice(0, 10).forEach(tracking => {
+    Array.from(uniqueViewTrackings.values()).slice(0, 15).forEach((tracking: any) => {
       if (tracking.scrapedAt) {
-        const submission = tracking.clips?.clipSubmissions?.[0]
-        const initialViews = submission?.initialViews ? Number(submission.initialViews) : 0
         const currentViews = tracking.views ? Number(tracking.views) : 0
-        const viewGrowth = Math.max(0, currentViews - initialViews)
+        // Use the actual increment from last scrape (not total growth since submission)
+        const previousViews = tracking.previousViews || 0
+        const viewIncrement = Math.max(0, currentViews - previousViews)
+        
+        // Only show if there was an actual increase in views
+        if (viewIncrement <= 0) return
         
         // Create a short display URL (e.g., "instagram.com/reel/abc...")
         const fullUrl = tracking.clips?.url || ''
@@ -237,12 +265,14 @@ export async function GET(request: NextRequest) {
           shortUrl = fullUrl.length > 40 ? fullUrl.substring(0, 40) + '...' : fullUrl
         }
         
+        const submission = tracking.clips?.clipSubmissions?.[0]
+        
         activities.push({
           type: 'VIEW_SCRAPE',
           timestamp: tracking.scrapedAt,
           data: {
             views: currentViews,
-            viewGrowth: viewGrowth,
+            viewGrowth: viewIncrement, // Now shows actual increment, not total growth
             platform: tracking.platform,
             url: tracking.clips?.url,
             shortUrl: shortUrl,
