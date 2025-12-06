@@ -323,7 +323,7 @@ export async function POST(request: NextRequest) {
           userId: dbUser.id,
           url: validatedData.clipUrl,
           platform: validatedData.platform,
-          status: 'PENDING', // Mark as pending until submission is approved
+          status: 'ACTIVE', // Clip is active, submission status is what determines approval
           views: BigInt(0)
         }
       })
