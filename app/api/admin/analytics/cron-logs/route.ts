@@ -54,7 +54,11 @@ export async function GET(request: NextRequest) {
       success: true,
       logs: logs.map(log => ({
         ...log,
-        earningsCalculated: Number(log.earningsCalculated || 0)
+        clipsProcessed: Number(log.clipsProcessed || 0),
+        clipsSuccessful: Number(log.clipsSuccessful || 0),
+        clipsFailed: Number(log.clipsFailed || 0),
+        earningsCalculated: Number(log.earningsCalculated || 0),
+        campaignsCompleted: Number(log.campaignsCompleted || 0)
       })),
       total: logs.length
     })

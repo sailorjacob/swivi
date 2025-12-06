@@ -110,32 +110,22 @@ export class ViewTrackingService {
           }
         })
 
-      // Create new view tracking record for today
+      // Create a NEW view tracking record for each scrape
+      // This gives complete tracking history instead of just 1 record per day
+      const now = new Date()
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      await prisma.viewTracking.upsert({
-        where: {
-          userId_clipId_date_platform: {
-            userId: clip.userId,
-            clipId,
-            date: today,
-            platform: clip.platform
-          }
-        },
-        update: {
+      await prisma.viewTracking.create({
+        data: {
+          userId: clip.userId,
+          clipId,
           views: BigInt(currentViews),
-          scrapedAt: new Date() // Update the actual scrape timestamp
-        },
-        create: {
-            userId: clip.userId,
-            clipId,
-            views: BigInt(currentViews),
-            date: today,
-            platform: clip.platform,
-            scrapedAt: new Date()
-          }
-        })
+          date: today,
+          platform: clip.platform,
+          scrapedAt: now
+        }
+      })
 
       // Only calculate earnings for APPROVED submissions
       let earningsToAdd = 0

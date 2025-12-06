@@ -243,90 +243,52 @@ export class XViewTrackingService {
         clipId = newClip.id
       }
 
-      // Check if we already have tracking data for today
-      const existingTracking = await prisma.viewTracking.findUnique({
+      // Get the latest tracking record to calculate view difference
+      const latestTracking = await prisma.viewTracking.findFirst({
         where: {
-          userId_clipId_date_platform: {
-            userId: submission.userId,
-            clipId: clipId,
-            date: date,
-            platform: submission.platform
-          }
+          clipId: clipId,
+          platform: submission.platform
+        },
+        orderBy: { scrapedAt: 'desc' }
+      })
+
+      const previousViews = latestTracking ? Number(latestTracking.views) : 0
+      const viewDifference = Math.max(0, currentViews - previousViews)
+
+      // Always create a new tracking record for each scrape
+      // This provides complete tracking history
+      await prisma.viewTracking.create({
+        data: {
+          userId: submission.userId,
+          clipId: clipId,
+          views: currentViews,
+          date: date,
+          platform: submission.platform,
+          scrapedAt: new Date()
         }
       })
 
-      if (existingTracking) {
-        // Update existing tracking record
-        const viewDifference = currentViews - Number(existingTracking.views)
-
-        await prisma.viewTracking.update({
-          where: {
-            userId_clipId_date_platform: {
-              userId: submission.userId,
-              clipId: clipId,
-              date: date,
-              platform: submission.platform
-            }
-          },
-          data: {
-            views: currentViews
-          }
-        })
-
-        // Update user's total views if views increased
-        if (viewDifference > 0) {
-          await prisma.user.update({
-            where: { id: submission.userId },
-            data: {
-              totalViews: {
-                increment: viewDifference
-              }
-            }
-          })
-
-          // Update clip views
-          await prisma.clip.update({
-            where: { id: clipId },
-            data: {
-              views: currentViews
-            }
-          })
-        }
-
-        console.log(`📈 Updated tracking for submission ${submissionId}: ${viewDifference} new views`)
-
-      } else {
-        // Create new tracking record
-        await prisma.viewTracking.create({
-          data: {
-            userId: submission.userId,
-            clipId: clipId,
-            views: currentViews,
-            date: date,
-            platform: submission.platform
-          }
-        })
-
-        // Update user's total views
+      // Update user's total views if views increased
+      if (viewDifference > 0) {
         await prisma.user.update({
           where: { id: submission.userId },
           data: {
             totalViews: {
-              increment: currentViews
+              increment: viewDifference
             }
           }
         })
-
-        // Update clip views
-        await prisma.clip.update({
-          where: { id: clipId },
-          data: {
-            views: currentViews
-          }
-        })
-
-        console.log(`📊 Created new tracking for submission ${submissionId}: ${currentViews} views`)
       }
+
+      // Always update clip with current views
+      await prisma.clip.update({
+        where: { id: clipId },
+        data: {
+          views: currentViews
+        }
+      })
+
+      console.log(`📊 Created tracking for submission ${submissionId}: ${currentViews} views (+${viewDifference} new)`)
 
     } catch (error) {
       console.error(`❌ Error updating views for submission ${submissionId}:`, error)
