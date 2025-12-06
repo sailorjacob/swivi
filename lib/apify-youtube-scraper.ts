@@ -41,8 +41,8 @@ export class ApifyYouTubeScraper {
   async scrapeYouTubeVideo(videoUrl: string): Promise<YouTubeScrapeResult | null> {
     try {
       // Use waitForFinish parameter to avoid polling - Apify holds connection until done
-      // Increased to 240s (4min) to handle slow YouTube scrapes, still under Vercel's 5min limit
-      const runResponse = await fetch(`${this.baseUrl}/acts/${this.actorName}/runs?waitForFinish=240`, {
+      // 60s timeout - fail fast and retry next cron run if stuck
+      const runResponse = await fetch(`${this.baseUrl}/acts/${this.actorName}/runs?waitForFinish=60`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

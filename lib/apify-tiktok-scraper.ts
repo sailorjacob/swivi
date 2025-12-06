@@ -50,8 +50,8 @@ export class ApifyTikTokScraper {
   async scrapeTikTokVideo(postUrl: string): Promise<TikTokScrapeResult | null> {
     try {
       // Use waitForFinish parameter to avoid polling - Apify holds connection until done
-      // Increased to 240s (4min) to handle slow scrapes, still under Vercel's 5min limit
-      const runResponse = await fetch(`${this.baseUrl}/acts/clockworks~tiktok-scraper/runs?waitForFinish=240`, {
+      // 60s timeout - fail fast and retry next cron run if stuck
+      const runResponse = await fetch(`${this.baseUrl}/acts/clockworks~tiktok-scraper/runs?waitForFinish=60`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

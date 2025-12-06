@@ -71,12 +71,12 @@ export async function GET(request: NextRequest) {
     const tracker = new SimpleViewTracker()
 
     // Run the tracking loop - processes clips one by one
-    // - maxDurationMs: Stop 30s before Vercel's 300s timeout
-    // - maxClips: Process up to 150 clips per run
+    // - maxDurationMs: 240s (leave 60s buffer for 300s Vercel timeout)
+    // - maxClips: 50 clips per run (conservative, ensures completion)
     // - delayBetweenMs: 500ms between clips (be nice to Apify)
     const result = await tracker.runTrackingLoop({
-      maxDurationMs: 270000,  // 270 seconds (leave 30s buffer)
-      maxClips: 150,          // Up to 150 clips per run
+      maxDurationMs: 240000,  // 240 seconds (leave 60s buffer)
+      maxClips: 50,           // 50 clips per run
       delayBetweenMs: 500     // 500ms between clips
     })
 
@@ -88,6 +88,9 @@ export async function GET(request: NextRequest) {
     console.log(`   Failed: ${result.failed}`)
     console.log(`   Views gained: ${result.totalViewsGained.toLocaleString()}`)
     console.log(`   Earnings added: $${result.totalEarningsAdded.toFixed(2)}`)
+    if (result.initialViewsFixed > 0) {
+      console.log(`   Initial views fixed: ${result.initialViewsFixed}`)
+    }
     console.log(`   Stopped because: ${result.stoppedReason}`)
 
     // Update lock record with success
@@ -104,6 +107,7 @@ export async function GET(request: NextRequest) {
           earningsCalculated: result.totalEarningsAdded,
           details: {
             viewsGained: result.totalViewsGained,
+            initialViewsFixed: result.initialViewsFixed,
             stoppedReason: result.stoppedReason
           }
         }
@@ -123,6 +127,7 @@ export async function GET(request: NextRequest) {
         failed: result.failed,
         viewsGained: result.totalViewsGained,
         earningsAdded: `$${result.totalEarningsAdded.toFixed(2)}`,
+        initialViewsFixed: result.initialViewsFixed,
         stoppedReason: result.stoppedReason
       }
     })

@@ -7,7 +7,7 @@
   "crons": [
     {
       "path": "/api/cron/view-tracking",
-      "schedule": "*/15 * * * *"
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/api/cron/campaign-activation",

@@ -11,6 +11,7 @@ import { SocialPlatform } from '@prisma/client'
  * - Update the database immediately after each scrape
  * - Take as long as needed - reliability over speed
  * - If one fails, move to the next (don't stop everything)
+ * - Fix initialViews = 0 issues automatically
  */
 export class SimpleViewTracker {
   private scraper: MultiPlatformScraper | null = null
@@ -23,63 +24,16 @@ export class SimpleViewTracker {
   }
 
   /**
-   * Get the next clip that needs tracking (oldest tracked first)
+   * Wraps a promise with a timeout
+   * If the promise doesn't resolve within the timeout, it rejects
    */
-  private async getNextClipToTrack(): Promise<{
-    clipId: string
-    url: string
-    platform: SocialPlatform
-    userId: string
-    campaignId: string
-    campaignTitle: string
-    submissionStatus: string
-    lastTracked: Date | null
-  } | null> {
-    // Find the clip that was tracked longest ago (or never)
-    // Only from active campaigns, approved or pending submissions
-    const submission = await prisma.clipSubmission.findFirst({
-      where: {
-        clipId: { not: null },
-        status: { in: ['APPROVED', 'PENDING'] },
-        campaigns: {
-          status: 'ACTIVE',
-          isTest: false,
-          deletedAt: null
-        }
-      },
-      include: {
-        clips: {
-          include: {
-            view_tracking: {
-              orderBy: { scrapedAt: 'desc' },
-              take: 1
-            }
-          }
-        },
-        campaigns: {
-          select: { id: true, title: true, payoutRate: true, budget: true, spent: true }
-        }
-      },
-      orderBy: [
-        // Prioritize clips that have never been tracked or tracked longest ago
-        // This uses the clip's updatedAt as a proxy (we'll improve this)
-      ]
-    })
-
-    if (!submission || !submission.clips) return null
-
-    const lastTracking = submission.clips.view_tracking[0]
-
-    return {
-      clipId: submission.clipId!,
-      url: submission.clipUrl,
-      platform: submission.platform,
-      userId: submission.userId,
-      campaignId: submission.campaignId,
-      campaignTitle: submission.campaigns.title,
-      submissionStatus: submission.status,
-      lastTracked: lastTracking?.scrapedAt || null
-    }
+  private withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) => 
+        setTimeout(() => reject(new Error(errorMessage)), timeoutMs)
+      )
+    ])
   }
 
   /**
@@ -161,7 +115,8 @@ export class SimpleViewTracker {
 
   /**
    * Track a single clip - scrape views and update database
-   * Returns true if successful, false if failed
+   * Includes 60s timeout per clip to fail fast
+   * Automatically fixes initialViews = 0 issues
    */
   async trackSingleClip(clip: {
     clipId: string
@@ -169,6 +124,7 @@ export class SimpleViewTracker {
     platform: SocialPlatform
     userId: string
     campaignId: string
+    submissionId: string
     isApproved: boolean
     initialViews: bigint
     payoutRate: number
@@ -179,6 +135,7 @@ export class SimpleViewTracker {
     views?: number
     viewsGained?: number
     earningsAdded?: number
+    initialViewsFixed?: boolean
     error?: string
   }> {
     if (!this.scraper) {
@@ -186,8 +143,12 @@ export class SimpleViewTracker {
     }
 
     try {
-      // 1. Scrape current views
-      const scrapedData = await this.scraper.scrapeContent(clip.url, clip.platform)
+      // 1. Scrape current views with 60s timeout
+      const scrapedData = await this.withTimeout(
+        this.scraper.scrapeContent(clip.url, clip.platform),
+        60000,
+        `Scrape timeout after 60s for ${clip.platform}`
+      )
 
       if (scrapedData.error || scrapedData.views === undefined) {
         return { 
@@ -209,7 +170,38 @@ export class SimpleViewTracker {
       const previousViews = lastTracking ? Number(lastTracking.views) : 0
       const viewsGained = Math.max(0, currentViews - previousViews)
 
-      // 3. Create new tracking record
+      // 3. FIX: If initialViews is 0, use the oldest tracking record or current views
+      let initialViewsFixed = false
+      let effectiveInitialViews = Number(clip.initialViews)
+      
+      if (effectiveInitialViews === 0 && clip.isApproved) {
+        // Try to get the oldest tracking record as the baseline
+        const oldestTracking = await prisma.viewTracking.findFirst({
+          where: { clipId: clip.clipId },
+          orderBy: { scrapedAt: 'asc' }
+        })
+        
+        if (oldestTracking) {
+          effectiveInitialViews = Number(oldestTracking.views)
+          console.log(`   🔧 Fixed initialViews: 0 → ${effectiveInitialViews} (from oldest tracking)`)
+        } else {
+          // No tracking history, use current views as initial (no earnings for this clip until next scrape)
+          effectiveInitialViews = currentViews
+          console.log(`   🔧 Fixed initialViews: 0 → ${currentViews} (first scrape)`)
+        }
+        
+        // Update the submission with the correct initialViews
+        await prisma.clipSubmission.update({
+          where: { id: clip.submissionId },
+          data: { 
+            initialViews: BigInt(effectiveInitialViews),
+            processingStatus: 'COMPLETE'
+          }
+        })
+        initialViewsFixed = true
+      }
+
+      // 4. Create new tracking record (ALWAYS creates, never updates - preserves history)
       await prisma.viewTracking.create({
         data: {
           userId: clip.userId,
@@ -221,7 +213,7 @@ export class SimpleViewTracker {
         }
       })
 
-      // 4. Update clip's current views
+      // 5. Update clip's current views
       await prisma.clip.update({
         where: { id: clip.clipId },
         data: {
@@ -231,11 +223,10 @@ export class SimpleViewTracker {
         }
       })
 
-      // 5. Calculate and add earnings (only for approved clips)
+      // 6. Calculate and add earnings (only for approved clips)
       let earningsAdded = 0
       if (clip.isApproved) {
-        const initialViews = Number(clip.initialViews)
-        const totalViewGrowth = currentViews - initialViews
+        const totalViewGrowth = Math.max(0, currentViews - effectiveInitialViews)
         const totalEarningsShouldBe = (totalViewGrowth / 1000) * clip.payoutRate
 
         // Cap at 30% of campaign budget per clip
@@ -261,7 +252,7 @@ export class SimpleViewTracker {
             data: { earnings: { increment: earningsAdded } }
           })
 
-          // Update user earnings
+          // Update user earnings and views
           await prisma.user.update({
             where: { id: clip.userId },
             data: { 
@@ -282,7 +273,8 @@ export class SimpleViewTracker {
         success: true,
         views: currentViews,
         viewsGained,
-        earningsAdded
+        earningsAdded,
+        initialViewsFixed
       }
 
     } catch (error) {
@@ -307,12 +299,13 @@ export class SimpleViewTracker {
     failed: number
     totalEarningsAdded: number
     totalViewsGained: number
+    initialViewsFixed: number
     stoppedReason: 'time_limit' | 'clip_limit' | 'all_done'
   }> {
     const {
-      maxDurationMs = 260000, // 260 seconds default (leave buffer for 300s timeout)
-      maxClips = 200,
-      delayBetweenMs = 1000   // 1 second between clips
+      maxDurationMs = 240000, // 240 seconds default (leave 60s buffer for 300s timeout)
+      maxClips = 50,          // Conservative default
+      delayBetweenMs = 500    // 500ms between clips
     } = options
 
     const startTime = Date.now()
@@ -321,60 +314,82 @@ export class SimpleViewTracker {
     let failed = 0
     let totalEarningsAdded = 0
     let totalViewsGained = 0
+    let initialViewsFixed = 0
 
     // Get all clips that need tracking, sorted by priority
     const clipsToTrack = await this.getClipsToTrack(maxClips)
-    console.log(`📋 Found ${clipsToTrack.length} clips to track`)
+    console.log(`📋 Found ${clipsToTrack.length} clips to track (max: ${maxClips})`)
 
     if (clipsToTrack.length === 0) {
+      console.log(`✨ No clips need tracking right now`)
       return {
         processed: 0,
         successful: 0,
         failed: 0,
         totalEarningsAdded: 0,
         totalViewsGained: 0,
+        initialViewsFixed: 0,
         stoppedReason: 'all_done'
       }
     }
 
     for (const clip of clipsToTrack) {
-      // Check time budget
+      // Check time budget before starting next clip
       const elapsed = Date.now() - startTime
-      if (elapsed >= maxDurationMs) {
-        console.log(`⏱️ Time limit reached (${elapsed}ms), stopping`)
+      const remaining = maxDurationMs - elapsed
+      
+      if (remaining < 65000) { // Need at least 65s for one more clip (60s scrape + 5s buffer)
+        console.log(`⏱️ Time budget low (${Math.round(remaining/1000)}s remaining), stopping gracefully`)
         return {
           processed,
           successful,
           failed,
           totalEarningsAdded,
           totalViewsGained,
+          initialViewsFixed,
           stoppedReason: 'time_limit'
         }
       }
 
       // Process this clip
       const timeSinceLastTrack = clip.lastTracked 
-        ? Math.round((Date.now() - clip.lastTracked.getTime()) / 60000) 
+        ? `${Math.round((Date.now() - clip.lastTracked.getTime()) / 60000)}m ago`
         : 'never'
-      console.log(`🔍 [${processed + 1}/${clipsToTrack.length}] Tracking clip ${clip.clipId.substring(0, 8)}... (last: ${timeSinceLastTrack}${typeof timeSinceLastTrack === 'number' ? 'm ago' : ''})`)
+      const statusLabel = clip.isApproved ? '✓' : '○'
+      
+      console.log(`🔍 [${processed + 1}/${clipsToTrack.length}] ${statusLabel} ${clip.platform} clip ${clip.clipId.substring(0, 8)}... (last: ${timeSinceLastTrack})`)
 
-      const result = await this.trackSingleClip(clip)
+      const result = await this.trackSingleClip({
+        ...clip,
+        submissionId: clip.submissionId
+      })
       processed++
 
       if (result.success) {
         successful++
         totalViewsGained += result.viewsGained || 0
         totalEarningsAdded += result.earningsAdded || 0
-        console.log(`   ✅ ${result.views?.toLocaleString()} views (+${result.viewsGained?.toLocaleString()}) ${result.earningsAdded ? `$${result.earningsAdded.toFixed(2)}` : ''}`)
+        if (result.initialViewsFixed) initialViewsFixed++
+        
+        const earningsStr = result.earningsAdded && result.earningsAdded > 0 
+          ? ` → $${result.earningsAdded.toFixed(2)}` 
+          : ''
+        console.log(`   ✅ ${result.views?.toLocaleString()} views (+${result.viewsGained?.toLocaleString()})${earningsStr}`)
       } else {
         failed++
-        console.log(`   ❌ Failed: ${result.error}`)
+        console.log(`   ❌ ${result.error}`)
       }
 
-      // Small delay between clips to be nice to Apify
+      // Small delay between clips
       if (processed < clipsToTrack.length) {
         await new Promise(resolve => setTimeout(resolve, delayBetweenMs))
       }
+    }
+
+    const totalSeconds = Math.round((Date.now() - startTime) / 1000)
+    console.log(`\n📊 Tracking complete in ${totalSeconds}s: ${successful}/${processed} successful`)
+    if (initialViewsFixed > 0) {
+      console.log(`   🔧 Fixed ${initialViewsFixed} clips with initialViews = 0`)
     }
 
     return {
@@ -383,8 +398,8 @@ export class SimpleViewTracker {
       failed,
       totalEarningsAdded,
       totalViewsGained,
+      initialViewsFixed,
       stoppedReason: processed >= maxClips ? 'clip_limit' : 'all_done'
     }
   }
 }
-
