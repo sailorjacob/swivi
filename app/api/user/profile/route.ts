@@ -77,6 +77,7 @@ export async function GET(request: NextRequest) {
               initialViews: true,
               clips: {
                 select: {
+                  views: true,  // MAX ever tracked views
                   earnings: true,
                   view_tracking: {
                     orderBy: { date: 'desc' },
@@ -222,17 +223,16 @@ export async function GET(request: NextRequest) {
     // Total lifetime earnings = current balance + already paid out
     const totalEarnings = userCurrentBalance + totalPaidOut
 
-    // Views: Calculate tracked views (views gained since submission, not raw total)
+    // Views: Calculate tracked views using clip.views (MAX ever tracked) as source of truth
     let totalViews = 0
     if (dbUser.clipSubmissions) {
       for (const submission of dbUser.clipSubmissions) {
         if (submission.clips) {
-          const latestViews = submission.clips.view_tracking?.[0]
-            ? Number(submission.clips.view_tracking[0].views || 0)
-            : 0
+          // Use clip.views (MAX ever tracked) as source of truth
+          const currentViews = Number(submission.clips.views || 0)
           const initialViews = submission.initialViews ? Number(submission.initialViews) : 0
           // Tracked views = views gained since submission
-          const viewsGained = Math.max(0, latestViews - initialViews)
+          const viewsGained = Math.max(0, currentViews - initialViews)
           totalViews += viewsGained
         }
       }

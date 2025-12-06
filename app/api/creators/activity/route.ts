@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
         clips: {
           select: {
             url: true,
+            views: true,  // MAX ever tracked views
             earnings: true,
             view_tracking: {
               orderBy: { date: 'desc' },
@@ -112,6 +113,7 @@ export async function GET(request: NextRequest) {
         },
         clips: {
           select: {
+            views: true,  // MAX ever tracked views
             earnings: true,
             view_tracking: {
               orderBy: { date: 'desc' },
@@ -136,9 +138,8 @@ export async function GET(request: NextRequest) {
     for (const submission of topClippersData) {
       const userId = submission.userId
       const initialViews = Number(submission.initialViews || 0)
-      const currentViews = submission.clips?.view_tracking?.[0]
-        ? Number(submission.clips.view_tracking[0].views || 0)
-        : initialViews
+      // Use clip.views (MAX ever tracked) as source of truth
+      const currentViews = Number(submission.clips?.views || 0)
       const viewsGained = Math.max(0, currentViews - initialViews)
       const earnings = Number(submission.clips?.earnings || 0)
 

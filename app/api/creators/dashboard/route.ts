@@ -172,6 +172,7 @@ export async function GET(request: NextRequest) {
                   select: {
                     id: true,
                     title: true,
+                    views: true,  // MAX ever tracked views
                     view_tracking: {
                       orderBy: { date: "desc" },
                       take: 1
@@ -254,22 +255,20 @@ export async function GET(request: NextRequest) {
     // This never decreases - it's your all-time earnings
     const totalEarned = userCurrentBalance + totalPaidOut
 
+    // Use clip.views (MAX ever tracked) as single source of truth
     const totalViews = userData.clipSubmissions
-      .filter(s => s.status === 'APPROVED' && s.clips?.view_tracking?.[0])
+      .filter(s => s.status === 'APPROVED' && s.clips)
       .reduce((sum, submission) => {
-        const latestViews = Number(submission.clips.view_tracking[0].views || 0)
-        return sum + latestViews
+        return sum + Number(submission.clips?.views || 0)
       }, 0)
 
-    // Tracked views: Views gained from scraping (total views - initial views)
+    // Tracked views: Views gained = total views (since initialViews is now 0)
     const trackedViews = userData.clipSubmissions
       .filter(s => s.status === 'APPROVED')
       .reduce((sum, submission) => {
-        const latestViews = submission.clips?.view_tracking?.[0] 
-          ? Number(submission.clips.view_tracking[0].views || 0)
-          : 0
+        const currentViews = Number(submission.clips?.views || 0)
         const initialViews = submission.initialViews ? Number(submission.initialViews) : 0
-        const viewsGained = Math.max(0, latestViews - initialViews)
+        const viewsGained = Math.max(0, currentViews - initialViews)
         return sum + viewsGained
       }, 0)
 

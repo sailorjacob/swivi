@@ -104,6 +104,7 @@ export async function GET(request: NextRequest) {
       select: {
         clips: {
           select: {
+            views: true,  // MAX ever tracked views
             earnings: true,
             view_tracking: {
               orderBy: { date: 'desc' },
@@ -122,11 +123,9 @@ export async function GET(request: NextRequest) {
       return sum + Number(submission.clips?.earnings || 0)
     }, 0)
 
+    // Use clip.views (MAX ever tracked) as single source of truth
     const totalViews = allApprovedSubmissions.reduce((sum, submission) => {
-      if (submission.clips?.view_tracking?.[0]) {
-        return sum + Number(submission.clips.view_tracking[0].views || 0)
-      }
-      return sum
+      return sum + Number(submission.clips?.views || 0)
     }, 0)
 
     // Get top performing campaigns (real campaigns only)
@@ -176,6 +175,7 @@ export async function GET(request: NextRequest) {
             clips: {
               select: {
                 id: true,
+                views: true,  // MAX ever tracked views
                 view_tracking: {
                   orderBy: { date: 'desc' },
                   take: 1,
@@ -198,9 +198,8 @@ export async function GET(request: NextRequest) {
       
       campaign.clipSubmissions.forEach(submission => {
         const initialViews = Number(submission.initialViews || 0)
-        const currentViews = submission.clips?.view_tracking?.[0] 
-          ? Number(submission.clips.view_tracking[0].views || 0) 
-          : initialViews
+        // Use clip.views (MAX ever tracked) as source of truth
+        const currentViews = Number(submission.clips?.views || 0)
         
         totalInitialViews += initialViews
         totalCurrentViews += currentViews

@@ -93,6 +93,7 @@ export async function GET(request: NextRequest) {
           initialViews: true,
           clips: {
             select: {
+              views: true,  // MAX ever tracked views
               view_tracking: {
                 orderBy: { date: 'desc' },
                 take: 1,
@@ -107,12 +108,11 @@ export async function GET(request: NextRequest) {
     ])
 
     // Calculate real-time tracked views (views gained since submission)
+    // Use clip.views (MAX ever tracked) as source of truth
     const totalTrackedViews = approvedSubmissionsWithViews.reduce((sum, submission) => {
-      const latestViews = submission.clips?.view_tracking?.[0]
-        ? Number(submission.clips.view_tracking[0].views || 0)
-        : 0
+      const currentViews = Number(submission.clips?.views || 0)
       const initialViews = Number(submission.initialViews || 0)
-      const viewsGained = Math.max(0, latestViews - initialViews)
+      const viewsGained = Math.max(0, currentViews - initialViews)
       return sum + viewsGained
     }, 0)
 

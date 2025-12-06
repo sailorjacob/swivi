@@ -57,6 +57,7 @@ export async function GET(
             id: true,
             url: true,
             platform: true,
+            views: true,  // MAX ever tracked views
             earnings: true,
             view_tracking: {
               orderBy: { date: 'desc' },
@@ -89,9 +90,8 @@ export async function GET(
     for (const submission of topClippers) {
       const userId = submission.userId
       const initialViews = Number(submission.initialViews || 0)
-      const currentViews = submission.clips?.view_tracking?.[0]
-        ? Number(submission.clips.view_tracking[0].views || 0)
-        : initialViews
+      // Use clip.views (MAX ever tracked) as source of truth
+      const currentViews = Number(submission.clips?.views || 0)
       const viewsGained = Math.max(0, currentViews - initialViews)
       const earnings = Number(submission.clips?.earnings || 0)
 
@@ -137,9 +137,8 @@ export async function GET(
     const topClips = topClippers
       .map(submission => {
         const initialViews = Number(submission.initialViews || 0)
-        const currentViews = submission.clips?.view_tracking?.[0]
-          ? Number(submission.clips.view_tracking[0].views || 0)
-          : initialViews
+        // Use clip.views (MAX ever tracked) as source of truth
+        const currentViews = Number(submission.clips?.views || 0)
         const viewsGained = Math.max(0, currentViews - initialViews)
         
         return {
