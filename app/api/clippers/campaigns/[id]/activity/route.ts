@@ -25,7 +25,9 @@ export async function GET(
         id: true,
         title: true,
         status: true,
-        payoutRate: true
+        payoutRate: true,
+        budget: true,
+        spent: true
       }
     })
 
@@ -274,13 +276,19 @@ export async function GET(
       where: { campaignId }
     })
 
+    // Calculate remaining budget for this campaign
+    const campaignBudget = Number(campaign.budget || 0)
+    const spent = Number(campaign.spent || 0)
+    const remainingBudget = Math.max(0, campaignBudget - spent)
+
     // Get campaign totals
     const campaignTotals = {
       totalSubmissions, // All submissions for this campaign
       totalClippers: clipperStats.size, // Unique approved clippers
       totalClips: topClippers.length, // Approved clips
       totalViewsGained: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalViewsGained, 0),
-      totalEarnings: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalEarnings, 0)
+      totalEarnings: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalEarnings, 0),
+      remainingBudget // Budget remaining for this campaign
     }
 
     return NextResponse.json({

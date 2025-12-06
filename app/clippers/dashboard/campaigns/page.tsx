@@ -152,6 +152,7 @@ interface ActivityData {
     totalClippers: number
     totalViewsGained: number
     totalEarnings: number
+    totalRemainingBudget: number
   }
 }
 
@@ -601,8 +602,8 @@ export default function CampaignsPage() {
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Views</p>
                   </div>
                   <div>
-                    <p className="text-lg font-semibold">${activityData.totals.totalEarnings.toFixed(0)}</p>
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Paid</p>
+                    <p className="text-lg font-semibold">${activityData.totals.totalRemainingBudget.toFixed(0)}</p>
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Remaining</p>
                   </div>
                 </div>
               </div>

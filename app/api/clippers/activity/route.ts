@@ -218,12 +218,32 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    // Get active campaigns to calculate remaining budget
+    const activeCampaigns = await prisma.campaign.findMany({
+      where: {
+        status: 'ACTIVE',
+        isTest: false
+      },
+      select: {
+        budget: true,
+        spent: true
+      }
+    })
+
+    // Calculate total remaining budget across all active campaigns
+    const totalRemainingBudget = activeCampaigns.reduce((sum, campaign) => {
+      const budget = Number(campaign.budget || 0)
+      const spent = Number(campaign.spent || 0)
+      return sum + Math.max(0, budget - spent)
+    }, 0)
+
     // Platform totals
     const totals = {
       totalSubmissions, // Total clip submissions
       totalClippers: clipperStats.size, // Approved clippers with views
       totalViewsGained: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalViewsGained, 0),
-      totalEarnings: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalEarnings, 0)
+      totalEarnings: Array.from(clipperStats.values()).reduce((sum, c) => sum + c.totalEarnings, 0),
+      totalRemainingBudget // Total budget remaining across active campaigns
     }
 
     return NextResponse.json({

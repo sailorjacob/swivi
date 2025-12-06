@@ -195,6 +195,7 @@ export default function CampaignDetailPage() {
       totalClips: number
       totalViewsGained: number
       totalEarnings: number
+      remainingBudget: number
     }
   } | null>(null)
   const [activityLoading, setActivityLoading] = useState(false)
@@ -459,8 +460,8 @@ export default function CampaignDetailPage() {
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Views</p>
                 </div>
                 <div className="text-center py-3 px-2 border border-border rounded-md">
-                  <p className="text-xl font-semibold">${activityData.totals.totalEarnings.toFixed(0)}</p>
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Paid Out</p>
+                  <p className="text-xl font-semibold">${activityData.totals.remainingBudget.toFixed(0)}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Remaining</p>
                 </div>
               </div>
 
@@ -560,9 +561,12 @@ export default function CampaignDetailPage() {
                     <p className="text-sm text-muted-foreground py-4 text-center">No clips yet</p>
                   ) : (
                     activityData.topClips.slice(0, 5).map((clip, index) => (
-                      <div
+                      <a
                         key={clip.id}
-                        className="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-muted/50 transition-colors"
+                        href={clip.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
                       >
                         <span className="w-5 text-xs font-medium text-muted-foreground">
                           {index + 1}.
@@ -578,7 +582,8 @@ export default function CampaignDetailPage() {
                           <span className="mx-1.5 text-muted-foreground/50">·</span>
                           <span className="font-medium">${clip.earnings.toFixed(2)}</span>
                         </div>
-                      </div>
+                        <ExternalLink className="w-3.5 h-3.5 text-muted-foreground/50" />
+                      </a>
                     ))
                   )}
                 </div>
