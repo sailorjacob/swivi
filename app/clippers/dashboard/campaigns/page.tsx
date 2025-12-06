@@ -31,6 +31,8 @@ import {
   Calendar,
   Activity,
   Crown,
+  X,
+  Info
 } from "lucide-react"
 
 interface Campaign {
@@ -164,6 +166,21 @@ export default function CampaignsPage() {
   const [filter, setFilter] = useState<'active' | 'upcoming' | 'completed' | 'all'>('active')
   const [activityData, setActivityData] = useState<ActivityData | null>(null)
   const [activityLoading, setActivityLoading] = useState(true)
+  
+  // Info notice state - check localStorage to see if user dismissed it
+  const [showInfoNotice, setShowInfoNotice] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('campaigns-info-notice-dismissed') !== 'true'
+    }
+    return true
+  })
+  
+  const dismissInfoNotice = () => {
+    setShowInfoNotice(false)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('campaigns-info-notice-dismissed', 'true')
+    }
+  }
 
   // Fetch activity data
   const fetchActivity = useCallback(async () => {
@@ -289,6 +306,26 @@ export default function CampaignsPage() {
     <ErrorBoundary fallback={CampaignErrorFallback}>
       <div className="space-y-6 relative">
 
+      {/* Info Notice - Floating at bottom center */}
+      {showInfoNotice && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-xl w-full mx-4">
+          <div className="flex items-center justify-between gap-4 px-4 py-3 bg-background border border-border rounded-lg shadow-lg text-sm">
+            <div className="flex items-center gap-3">
+              <Info className="w-4 h-4 text-muted-foreground shrink-0" />
+              <p className="text-muted-foreground">
+                Clips are generally approved within 24 hours. Tracking starts as soon as clips are submitted.
+              </p>
+            </div>
+            <button
+              onClick={dismissInfoNotice}
+              className="p-1 hover:bg-muted rounded transition-colors shrink-0"
+              aria-label="Dismiss"
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="flex gap-6 border-b border-border">
