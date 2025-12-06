@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { supabase, authenticatedFetch } from "@/lib/supabase-browser"
 import { motion } from "framer-motion"
@@ -11,6 +11,7 @@ import { Progress } from "../../../../components/ui/progress"
 import { CampaignBonusModal } from "../../../../components/campaigns/campaign-bonus-modal"
 import { LinkifyText } from "../../../../components/ui/linkify-text"
 import { ErrorBoundary, CampaignErrorFallback } from "../../../../components/error-boundary"
+import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar"
 import Image from "next/image"
 import Link from "next/link"
 import { 
@@ -27,7 +28,10 @@ import {
   Loader2,
   CheckCircle,
   Trophy,
-  Calendar
+  Calendar,
+  Activity,
+  Crown,
+  ChevronRight
 } from "lucide-react"
 
 interface Campaign {
@@ -121,6 +125,34 @@ const hasBonuses = (campaign: Campaign) => {
          campaign.title.toLowerCase().includes('season 2')
 }
 
+// Activity data type
+interface ActivityData {
+  topClippers: Array<{
+    userId: string
+    name: string | null
+    image: string | null
+    totalViewsGained: number
+    totalEarnings: number
+    clipCount: number
+  }>
+  recentActivity: Array<{
+    id: string
+    type: string
+    timestamp: string
+    clipper: string
+    clipperImage: string | null
+    platform: string
+    campaign: string | null
+    campaignId: string | null
+    viewsGained: number | null
+  }>
+  totals: {
+    totalClippers: number
+    totalViewsGained: number
+    totalEarnings: number
+  }
+}
+
 export default function CampaignsPage() {
   const router = useRouter()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
@@ -130,6 +162,23 @@ export default function CampaignsPage() {
   const [bonusModalOpen, setBonusModalOpen] = useState(false)
   const [selectedBountyCampaign, setSelectedBountyCampaign] = useState<Campaign | null>(null)
   const [filter, setFilter] = useState<'active' | 'upcoming' | 'completed' | 'all'>('active')
+  const [activityData, setActivityData] = useState<ActivityData | null>(null)
+  const [activityLoading, setActivityLoading] = useState(true)
+
+  // Fetch activity data
+  const fetchActivity = useCallback(async () => {
+    try {
+      const response = await authenticatedFetch("/api/clippers/activity")
+      if (response.ok) {
+        const data = await response.json()
+        setActivityData(data)
+      }
+    } catch (error) {
+      console.error("Error fetching activity:", error)
+    } finally {
+      setActivityLoading(false)
+    }
+  }, [])
 
   const fetchCampaigns = async (isBackgroundRefresh = false) => {
     try {
@@ -162,14 +211,16 @@ export default function CampaignsPage() {
 
   useEffect(() => {
     fetchCampaigns(false) // Initial load
+    fetchActivity() // Fetch activity data
     
     // Background refresh every 30 seconds
     const interval = setInterval(() => {
       fetchCampaigns(true) // Silent background refresh
+      fetchActivity() // Also refresh activity
     }, 30000)
     
     return () => clearInterval(interval)
-  }, [])
+  }, [fetchActivity])
 
   const handleViewCampaign = (campaign: Campaign) => {
     router.push(`/clippers/dashboard/campaigns/${campaign.id}`)
@@ -292,19 +343,23 @@ export default function CampaignsPage() {
         </button>
       </div>
 
-      {/* Empty State */}
-      {sortedFilteredCampaigns.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-muted-foreground">
-            {filter === 'active' ? 'No active campaigns right now. Check back soon.' :
-             filter === 'upcoming' ? 'No upcoming campaigns scheduled.' :
-             filter === 'completed' ? 'No completed campaigns yet.' :
-             'No campaigns found.'}
-          </p>
-        </div>
-      ) : (
-        /* Campaigns Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Main Content with Activity Sidebar */}
+      <div className="flex gap-6">
+        {/* Campaigns Section */}
+        <div className="flex-1 min-w-0">
+          {/* Empty State */}
+          {sortedFilteredCampaigns.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground">
+                {filter === 'active' ? 'No active campaigns right now. Check back soon.' :
+                 filter === 'upcoming' ? 'No upcoming campaigns scheduled.' :
+                 filter === 'completed' ? 'No completed campaigns yet.' :
+                 'No campaigns found.'}
+              </p>
+            </div>
+          ) : (
+            /* Campaigns Grid */
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {sortedFilteredCampaigns.map((campaign) => {
           // CRITICAL: Convert budget/spent to numbers for proper calculations
           // Prisma Decimal types may be serialized as strings, causing comparison bugs
@@ -498,24 +553,134 @@ export default function CampaignsPage() {
           </motion.div>
           )
         })}
+            </div>
+          )}
         </div>
-      )}
 
-        {/* Bonus Modal for Featured Campaigns */}
-        <CampaignBonusModal
-          isOpen={bonusModalOpen}
-          onClose={() => {
-            setBonusModalOpen(false)
-            setSelectedBountyCampaign(null)
-          }}
-          campaign={selectedBountyCampaign ? {
-            id: selectedBountyCampaign.id,
-            title: selectedBountyCampaign.title,
-            totalBudget: selectedBountyCampaign.budget,
-            bonusBudget: 2000,
-            payoutRate: `$${selectedBountyCampaign.payoutRate} per 1,000 views`
-          } : undefined}
-        />
+        {/* Activity Sidebar - Hidden on mobile */}
+        <div className="hidden xl:block w-80 shrink-0">
+          <div className="sticky top-4 space-y-4">
+            {/* Stats Summary */}
+            {activityData && (
+              <div className="border border-border rounded-lg p-4">
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="text-lg font-semibold">{activityData.totals.totalClippers}</p>
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Clippers</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-semibold">{activityData.totals.totalViewsGained.toLocaleString()}</p>
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Views</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-semibold">${activityData.totals.totalEarnings.toFixed(0)}</p>
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Paid</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Top Clippers */}
+            <div className="border border-border rounded-lg p-4">
+              <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                <Crown className="w-3.5 h-3.5" />
+                Top Clippers
+              </h3>
+              {activityLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : activityData?.topClippers.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No clippers yet</p>
+              ) : (
+                <div className="space-y-1">
+                  {activityData?.topClippers.slice(0, 5).map((clipper, index) => (
+                    <div
+                      key={clipper.userId}
+                      className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-muted/50 transition-colors"
+                    >
+                      <span className="w-4 text-xs text-muted-foreground">{index + 1}.</span>
+                      <Avatar className="w-6 h-6">
+                        <AvatarImage src={clipper.image || undefined} />
+                        <AvatarFallback className="text-[10px]">{clipper.name?.[0] || '?'}</AvatarFallback>
+                      </Avatar>
+                      <span className="flex-1 text-sm truncate">{clipper.name || 'Anonymous'}</span>
+                      <span className="text-xs text-muted-foreground">+{clipper.totalViewsGained.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Recent Activity */}
+            <div className="border border-border rounded-lg p-4">
+              <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                <Activity className="w-3.5 h-3.5" />
+                Recent Activity
+              </h3>
+              {activityLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : activityData?.recentActivity.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No activity yet</p>
+              ) : (
+                <div className="space-y-1">
+                  {activityData?.recentActivity.slice(0, 6).map((activity) => (
+                    <div
+                      key={activity.id}
+                      className="flex items-start gap-2 py-1.5 px-2 rounded hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => activity.campaignId && router.push(`/clippers/dashboard/campaigns/${activity.campaignId}`)}
+                    >
+                      <Avatar className="w-5 h-5 mt-0.5">
+                        <AvatarImage src={activity.clipperImage || undefined} />
+                        <AvatarFallback className="text-[8px]">{activity.clipper?.[0] || '?'}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0 text-xs">
+                        <span className="font-medium">{activity.clipper}</span>
+                        {' '}
+                        {activity.type === 'SUBMISSION' && (
+                          <span className="text-muted-foreground">submitted</span>
+                        )}
+                        {activity.type === 'APPROVED' && (
+                          <span className="text-muted-foreground">approved</span>
+                        )}
+                        {activity.type === 'REJECTED' && (
+                          <span className="text-muted-foreground">rejected</span>
+                        )}
+                        {activity.type === 'VIEW_GROWTH' && activity.viewsGained && (
+                          <span className="text-muted-foreground">
+                            +{activity.viewsGained.toLocaleString()}
+                          </span>
+                        )}
+                        {activity.campaign && (
+                          <p className="text-muted-foreground/70 truncate">{activity.campaign}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bonus Modal for Featured Campaigns */}
+      <CampaignBonusModal
+        isOpen={bonusModalOpen}
+        onClose={() => {
+          setBonusModalOpen(false)
+          setSelectedBountyCampaign(null)
+        }}
+        campaign={selectedBountyCampaign ? {
+          id: selectedBountyCampaign.id,
+          title: selectedBountyCampaign.title,
+          totalBudget: selectedBountyCampaign.budget,
+          bonusBudget: 2000,
+          payoutRate: `$${selectedBountyCampaign.payoutRate} per 1,000 views`
+        } : undefined}
+      />
       </div>
     </ErrorBoundary>
   )
