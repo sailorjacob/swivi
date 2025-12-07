@@ -389,7 +389,7 @@ export default function AdminSubmissionsPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 md:px-4 py-4 md:py-8">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <p className="text-lg text-destructive mb-4">{error}</p>
@@ -403,7 +403,7 @@ export default function AdminSubmissionsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-3 md:px-4 py-4 md:py-8">
       {/* Subtle refresh indicator - only shows during background refresh */}
       {isRefreshing && (
         <div className="fixed top-4 right-4 z-50">
@@ -419,64 +419,64 @@ export default function AdminSubmissionsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Compact Stats Bar */}
-        <div className="flex flex-wrap items-center gap-6 mb-6 text-sm">
-          <div className="flex items-center gap-2">
+        {/* Compact Stats Bar - scrollable on mobile */}
+        <div className="flex items-center gap-4 md:gap-6 mb-6 text-sm overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-muted-foreground">Total:</span>
             <span className="font-semibold">{totalCount}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-muted-foreground">Pending:</span>
             <span className="font-semibold">{pendingCount}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-muted-foreground">Approved:</span>
             <span className="font-semibold">{approvedCount}</span>
           </div>
           {rejectedCount > 0 && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <span className="text-muted-foreground">Rejected:</span>
               <span className="font-semibold">{rejectedCount}</span>
             </div>
           )}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-muted-foreground">Paid:</span>
             <span className="font-semibold">${totalEarnings.toFixed(2)}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Paid submissions:</span>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-muted-foreground whitespace-nowrap">Paid submissions:</span>
             <span className="font-semibold">{paidCount}</span>
           </div>
           {flaggedCount > 0 && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <span className="text-muted-foreground">Flagged:</span>
               <span className="font-semibold">{flaggedCount}</span>
             </div>
           )}
         </div>
 
-        {/* Filters */}
+        {/* Filters - mobile optimized grid */}
         <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[200px]">
-                <Label htmlFor="search">Search</Label>
+          <CardContent className="p-4 md:p-6">
+            <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 md:gap-4">
+              <div className="col-span-2 md:flex-1 md:min-w-[200px]">
+                <Label htmlFor="search" className="text-xs md:text-sm">Search</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
-                    placeholder="Search by user, campaign, or URL..."
+                    placeholder="Search..."
                     value={filters.search}
                     onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                    className="pl-10"
+                    className="pl-10 h-9 md:h-10"
                   />
                 </div>
               </div>
 
-              <div className="min-w-[150px]">
-                <Label>Status</Label>
+              <div className="md:min-w-[130px]">
+                <Label className="text-xs md:text-sm">Status</Label>
                 <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9 md:h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -489,10 +489,10 @@ export default function AdminSubmissionsPage() {
                 </Select>
               </div>
 
-              <div className="min-w-[150px]">
-                <Label>Platform</Label>
+              <div className="md:min-w-[130px]">
+                <Label className="text-xs md:text-sm">Platform</Label>
                 <Select value={filters.platform} onValueChange={(value) => setFilters({ ...filters, platform: value })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9 md:h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -505,10 +505,10 @@ export default function AdminSubmissionsPage() {
                 </Select>
               </div>
 
-              <div className="min-w-[200px]">
-                <Label>Campaign</Label>
+              <div className="col-span-2 md:col-span-1 md:min-w-[180px]">
+                <Label className="text-xs md:text-sm">Campaign</Label>
                 <Select value={filters.campaignId} onValueChange={(value) => setFilters({ ...filters, campaignId: value })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9 md:h-10">
                     <SelectValue placeholder="All Campaigns" />
                   </SelectTrigger>
                   <SelectContent>
@@ -522,10 +522,10 @@ export default function AdminSubmissionsPage() {
                 </Select>
               </div>
 
-              <div className="min-w-[150px]">
-                <Label>Date Range</Label>
+              <div className="md:min-w-[130px]">
+                <Label className="text-xs md:text-sm">Date</Label>
                 <Select value={filters.dateRange} onValueChange={(value) => setFilters({ ...filters, dateRange: value })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9 md:h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -538,10 +538,10 @@ export default function AdminSubmissionsPage() {
                 </Select>
               </div>
 
-              <div className="min-w-[150px]">
-                <Label>Payout Status</Label>
+              <div className="md:min-w-[130px]">
+                <Label className="text-xs md:text-sm">Payout</Label>
                 <Select value={filters.payoutStatus} onValueChange={(value) => setFilters({ ...filters, payoutStatus: value })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9 md:h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -559,11 +559,11 @@ export default function AdminSubmissionsPage() {
 
         {/* Submissions List */}
         <Card>
-          <CardHeader>
-            <CardTitle>All Submissions</CardTitle>
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-lg md:text-xl">Submissions</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="p-3 md:p-6 pt-0 md:pt-0">
+            <div className="space-y-3 md:space-y-4">
               {!loading && submissions.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">
@@ -577,20 +577,20 @@ export default function AdminSubmissionsPage() {
                 <div
                   key={submission.id}
                   ref={isHighlighted ? highlightedRef : undefined}
-                  className={`p-4 border rounded-lg hover:bg-muted/50 transition-all duration-500 ${
+                  className={`p-3 md:p-4 border rounded-lg hover:bg-muted/50 transition-all duration-500 ${
                     submission.requiresReview ? 'border-slate-400 bg-slate-100/30 dark:border-slate-600 dark:bg-slate-800/30' : ''
                   } ${isHighlighted ? 'bg-muted/80 border-foreground/20' : ''}`}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4">
                   <div className="flex-1 min-w-0">
-                    {/* Platform, Status, and User info - all left aligned */}
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-md">
-                        {getPlatformLogo(submission.platform, '', 16)}
-                        <span className="text-xs font-medium">
-                          {submission.platform === 'YOUTUBE' ? 'YouTube' : 
-                           submission.platform === 'TIKTOK' ? 'TikTok' :
-                           submission.platform === 'INSTAGRAM' ? 'Instagram' :
+                    {/* Platform, Status, and User info - responsive layout */}
+                    <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2">
+                      <div className="flex items-center gap-1 md:gap-1.5 px-1.5 md:px-2 py-0.5 md:py-1 bg-muted rounded-md">
+                        {getPlatformLogo(submission.platform, '', 14)}
+                        <span className="text-[10px] md:text-xs font-medium">
+                          {submission.platform === 'YOUTUBE' ? 'YT' : 
+                           submission.platform === 'TIKTOK' ? 'TT' :
+                           submission.platform === 'INSTAGRAM' ? 'IG' :
                            submission.platform === 'TWITTER' ? 'X' :
                            submission.platform}
                         </span>
@@ -599,22 +599,22 @@ export default function AdminSubmissionsPage() {
                       {submission.status !== "PENDING" && (
                         <div className="flex items-center gap-1">
                           {getStatusIcon(submission.status, submission.autoRejected)}
-                          <Badge className={getStatusColor(submission)}>
+                          <Badge className={`${getStatusColor(submission)} text-[10px] md:text-xs`}>
                             {submission.status.charAt(0) + submission.status.slice(1).toLowerCase()}
                           </Badge>
                         </div>
                       )}
                       {submission.requiresReview && (
                         <>
-                          <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400">
+                          <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400 text-[10px] md:text-xs">
                             Flagged
                           </Badge>
-                          <AlertCircle className="w-4 h-4 text-amber-500" title="Flagged for review" />
+                          <AlertCircle className="w-3 md:w-4 h-3 md:h-4 text-amber-500" title="Flagged for review" />
                         </>
                       )}
                       {submission.autoRejected && (
-                        <span className="text-xs px-2 py-1 bg-muted text-muted-foreground border border-border rounded">
-                          Auto-rejected
+                        <span className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 bg-muted text-muted-foreground border border-border rounded">
+                          Auto
                         </span>
                       )}
                       {/* Clickable user profile */}
@@ -624,16 +624,16 @@ export default function AdminSubmissionsPage() {
                           // Filter all submissions by this user
                           setUserSubmissions(submissions.filter(s => s.users.id === submission.users.id))
                         }}
-                        className="ml-auto flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+                        className="ml-auto flex items-center gap-1 md:gap-1.5 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors group"
                       >
                         <User className="w-3 h-3" />
-                        <span className="group-hover:underline">{submission.users.name || submission.users.email}</span>
+                        <span className="group-hover:underline truncate max-w-[100px] md:max-w-none">{submission.users.name || submission.users.email}</span>
                       </button>
                     </div>
                     
                     {/* Campaign title and URL */}
-                    <div className="mb-2 flex items-start gap-3">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
+                    <div className="mb-2 flex items-start gap-2 md:gap-3">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
                         {submission.campaigns.featuredImage ? (
                           <img 
                             src={submission.campaigns.featuredImage} 
@@ -647,33 +647,33 @@ export default function AdminSubmissionsPage() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{submission.campaigns.title}</p>
+                        <div className="flex items-center gap-1 md:gap-2">
+                          <p className="font-medium text-sm md:text-base truncate">{submission.campaigns.title}</p>
                           <a 
                             href={`/admin/campaigns?id=${submission.campaigns.id}`}
-                            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                            className="text-[10px] md:text-xs text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
                           >
                             View →
                           </a>
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                        <div className="flex items-center gap-1 md:gap-2 mt-0.5 md:mt-1">
+                          <ExternalLink className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                           <button
                             onClick={() => window.open(submission.clipUrl, '_blank')}
-                            className="text-sm text-muted-foreground hover:text-foreground underline hover:underline-offset-2 transition-colors"
+                            className="text-xs md:text-sm text-muted-foreground hover:text-foreground underline hover:underline-offset-2 transition-colors truncate"
                             title={submission.clipUrl}
                           >
-                            {submission.clipUrl.length > 60 ? `${submission.clipUrl.substring(0, 60)}...` : submission.clipUrl}
+                            {submission.clipUrl.length > 40 ? `${submission.clipUrl.substring(0, 40)}...` : submission.clipUrl}
                           </button>
                         </div>
                         {submission.requiresReview && submission.reviewReason && (
-                          <p className="text-sm text-muted-foreground bg-muted p-2 rounded mt-2">
-                            <strong>Review Reason:</strong> {submission.reviewReason}
+                          <p className="text-xs md:text-sm text-muted-foreground bg-muted p-1.5 md:p-2 rounded mt-1.5 md:mt-2">
+                            <strong>Review:</strong> {submission.reviewReason}
                           </p>
                         )}
                         {/* Verified Account - compact inline display */}
                         {submission.socialAccount && (
-                          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                          <span className="inline-flex items-center gap-1 text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
                             <span className="font-mono text-foreground">@{submission.socialAccount.username}</span>
                               {submission.socialAccount.verified && (
                               <Check className="w-3 h-3 text-foreground" />
@@ -682,11 +682,11 @@ export default function AdminSubmissionsPage() {
                         )}
                       </div>
                     </div>
-                    {/* Key Stats Row - Always Visible */}
-                    <div className="flex flex-wrap items-center gap-3 text-xs">
+                    {/* Key Stats Row - Always Visible - scrollable on mobile */}
+                    <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs overflow-x-auto pb-1 -mx-1 px-1">
                       {/* Submitted time */}
-                      <span className="text-muted-foreground">
-                        Submitted {(() => {
+                      <span className="text-muted-foreground whitespace-nowrap flex-shrink-0">
+                        <span className="hidden sm:inline">Submitted </span>{(() => {
                           try {
                             const date = new Date(submission.createdAt)
                             if (isNaN(date.getTime())) return 'Unknown'
@@ -703,7 +703,7 @@ export default function AdminSubmissionsPage() {
                         })()}
                       </span>
                       
-                      <span className="text-muted-foreground/40">•</span>
+                      <span className="text-muted-foreground/40 flex-shrink-0">•</span>
                       
                       {/* View Stats - Compact but informative */}
                       {(() => {
@@ -715,7 +715,7 @@ export default function AdminSubmissionsPage() {
                         
                         if (isScraping) {
                           return (
-                            <span className="flex items-center gap-1 text-muted-foreground">
+                            <span className="flex items-center gap-1 text-muted-foreground whitespace-nowrap flex-shrink-0">
                               <Loader2 className="w-3 h-3 animate-spin" />
                               Scraping...
                             </span>
@@ -724,16 +724,16 @@ export default function AdminSubmissionsPage() {
                         
                         if (hasInitialViews || hasCurrentViews) {
                           return (
-                            <div className="flex items-center gap-2">
-                              <span className="bg-muted px-2 py-0.5 rounded text-foreground font-medium">
-                                {Number(submission.initialViews || 0).toLocaleString()} initial
+                            <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+                              <span className="bg-muted px-1.5 md:px-2 py-0.5 rounded text-foreground font-medium whitespace-nowrap">
+                                {Number(submission.initialViews || 0).toLocaleString()}<span className="hidden sm:inline"> initial</span>
                               </span>
                               <span className="text-muted-foreground">→</span>
-                              <span className="bg-muted px-2 py-0.5 rounded text-foreground font-medium">
-                                {Number(submission.currentViews || submission.initialViews || 0).toLocaleString()} current
+                              <span className="bg-muted px-1.5 md:px-2 py-0.5 rounded text-foreground font-medium whitespace-nowrap">
+                                {Number(submission.currentViews || submission.initialViews || 0).toLocaleString()}<span className="hidden sm:inline"> current</span>
                               </span>
                               {submission.viewChange && Number(submission.viewChange) > 0 && (
-                                <span className="text-green-600 dark:text-green-400 font-medium">
+                                <span className="text-green-600 dark:text-green-400 font-medium whitespace-nowrap">
                                   +{Number(submission.viewChange).toLocaleString()}
                                 </span>
                               )}
@@ -743,62 +743,90 @@ export default function AdminSubmissionsPage() {
                         
                         if (scrapeFailed) {
                           return (
-                            <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400" title={submission.processingStatus}>
+                            <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 whitespace-nowrap flex-shrink-0" title={submission.processingStatus}>
                               <AlertCircle className="w-3 h-3" />
-                              Scrape failed
+                              <span className="hidden sm:inline">Scrape </span>failed
                             </span>
                           )
                         }
                         
                         return (
-                          <span className="text-muted-foreground/60">Awaiting scrape</span>
+                          <span className="text-muted-foreground/60 whitespace-nowrap flex-shrink-0">Awaiting<span className="hidden sm:inline"> scrape</span></span>
                         )
                       })()}
                       
-                      <span className="text-muted-foreground/40">•</span>
+                      <span className="text-muted-foreground/40 flex-shrink-0">•</span>
                       
                       {/* Scrape count and last scraped */}
                       {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 ? (
-                        <span className="flex items-center gap-2 text-muted-foreground">
+                        <span className="flex items-center gap-1 md:gap-2 text-muted-foreground whitespace-nowrap flex-shrink-0">
                           <Eye className="w-3 h-3" />
-                          {submission.clips.view_tracking.length} scrape{submission.clips.view_tracking.length !== 1 ? 's' : ''}
-                          <span className="text-muted-foreground/40">•</span>
-                          Last: {new Date(submission.clips.view_tracking[0].scrapedAt || submission.clips.view_tracking[0].date).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit'
-                          })}
+                          {submission.clips.view_tracking.length}x
+                          <span className="hidden sm:inline text-muted-foreground/40">•</span>
+                          <span className="hidden sm:inline">
+                            {new Date(submission.clips.view_tracking[0].scrapedAt || submission.clips.view_tracking[0].date).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </span>
                         </span>
                       ) : (
-                        <span className="text-muted-foreground/60">No scrapes yet</span>
+                        <span className="text-muted-foreground/60 whitespace-nowrap flex-shrink-0">No scrapes</span>
                       )}
                       {/* Earnings display */}
                       {submission.campaigns.status === 'COMPLETED' && submission.finalEarnings ? (
                         <>
-                          <span className="text-muted-foreground/40">•</span>
-                          <span className="font-bold text-foreground flex items-center gap-1">
-                            ${Number(submission.finalEarnings).toFixed(2)} final 🔒
+                          <span className="text-muted-foreground/40 flex-shrink-0">•</span>
+                          <span className="font-bold text-foreground flex items-center gap-1 whitespace-nowrap flex-shrink-0">
+                            ${Number(submission.finalEarnings).toFixed(2)} 🔒
                           </span>
                         </>
                       ) : submission.clips?.earnings && Number(submission.clips.earnings) > 0 ? (
                         <>
-                          <span className="text-muted-foreground/40">•</span>
-                          <span className="font-medium text-green-600 dark:text-green-400">
-                            ${Number(submission.clips.earnings).toFixed(2)} earned
+                          <span className="text-muted-foreground/40 flex-shrink-0">•</span>
+                          <span className="font-medium text-green-600 dark:text-green-400 whitespace-nowrap flex-shrink-0">
+                            ${Number(submission.clips.earnings).toFixed(2)}
                           </span>
                         </>
                       ) : submission.status === 'PENDING' ? (
                         <>
-                          <span className="text-muted-foreground/40">•</span>
-                          <span className="text-muted-foreground/60 italic">No earnings until approved</span>
+                          <span className="text-muted-foreground/40 flex-shrink-0 hidden sm:inline">•</span>
+                          <span className="text-muted-foreground/60 italic whitespace-nowrap flex-shrink-0 hidden sm:inline">Awaiting approval</span>
                         </>
                       ) : null}
                     </div>
                   </div>
-                  {/* Action buttons */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {/* View Tracking Data Toggle - matching creator dashboard style */}
+                  {/* Action buttons - mobile: full width row at bottom, desktop: side aligned */}
+                  <div className="flex items-center gap-2 flex-shrink-0 flex-wrap md:flex-nowrap">
+                    {/* Primary actions for PENDING - show prominently on mobile */}
+                    {submission.status === "PENDING" && (
+                      <div className="flex items-center gap-2 w-full md:w-auto order-first md:order-none">
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setSelectedSubmission(submission)
+                            updateSubmissionStatus(submission.id, "APPROVED")
+                          }}
+                          className="flex-1 md:flex-none h-9"
+                        >
+                          <Check className="w-4 h-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedSubmission(submission)
+                            setShowRejectDialog(true)
+                          }}
+                          className="flex-1 md:flex-none h-9"
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Reject
+                        </Button>
+                      </div>
+                    )}
+                    {/* View Tracking Data Toggle */}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -811,77 +839,55 @@ export default function AdminSubmissionsPage() {
                         }
                         setExpandedSubmissions(newExpanded)
                       }}
-                      className="text-xs text-muted-foreground hover:text-foreground"
+                      className="text-xs text-muted-foreground hover:text-foreground h-9"
                     >
                       {expandedSubmissions.has(submission.id) ? (
                         <>
                           <ChevronDown className="w-4 h-4 mr-1" />
-                          Hide Analytics
+                          <span className="hidden sm:inline">Hide Analytics</span>
+                          <span className="sm:hidden">Hide</span>
                         </>
                       ) : (
                         <>
                           <ChevronRight className="w-4 h-4 mr-1" />
-                          View Tracking Data
+                          <span className="hidden sm:inline">View Tracking</span>
+                          <span className="sm:hidden">Stats</span>
                         </>
                       )}
                     </Button>
-                    {submission.status === "PENDING" && (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            setSelectedSubmission(submission)
-                            updateSubmissionStatus(submission.id, "APPROVED")
-                          }}
-                        >
-                          <Check className="w-4 h-4 mr-1" />
-                          Approve
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedSubmission(submission)
-                            setShowRejectDialog(true)
-                          }}
-                        >
-                          <X className="w-4 h-4 mr-1" />
-                          Reject
-                        </Button>
-                      </>
-                    )}
                     {/* Revert to Pending - for approved or rejected submissions */}
                     {(submission.status === "APPROVED" || submission.status === "REJECTED") && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-muted-foreground hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground h-9"
                         onClick={() => {
                           setSelectedSubmission(submission)
                           updateSubmissionStatus(submission.id, "PENDING")
                         }}
                         title="Revert to pending for re-review"
                       >
-                        ↩ Revert
+                        ↩ <span className="hidden sm:inline ml-1">Revert</span>
                       </Button>
                     )}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive h-9 px-2">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent className="max-w-[90vw] md:max-w-lg">
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Submission</AlertDialogTitle>
                           <AlertDialogDescription>
                             Are you sure you want to delete this submission? This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                          <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => deleteSubmission(submission.id)}
+                            className="w-full sm:w-auto"
                           >
                             Delete
                           </AlertDialogAction>
@@ -893,25 +899,25 @@ export default function AdminSubmissionsPage() {
                 
                 {/* Expandable Tracking Details - Beautiful Analytics Section (matching creator dashboard) */}
                 {expandedSubmissions.has(submission.id) && (
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <div className="space-y-4">
-                      {/* Stats Summary - 3 columns like creator dashboard */}
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="bg-muted/50 p-3 rounded-lg">
-                          <div className="text-xs text-muted-foreground mb-1">Initial Views</div>
-                          <div className="text-lg font-semibold">
+                  <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-border">
+                    <div className="space-y-3 md:space-y-4">
+                      {/* Stats Summary - responsive grid */}
+                      <div className="grid grid-cols-3 gap-2 md:gap-4">
+                        <div className="bg-muted/50 p-2 md:p-3 rounded-lg">
+                          <div className="text-[10px] md:text-xs text-muted-foreground mb-0.5 md:mb-1">Initial</div>
+                          <div className="text-sm md:text-lg font-semibold">
                             {Number(submission.initialViews || 0).toLocaleString()}
                           </div>
                         </div>
-                        <div className="bg-muted/50 p-3 rounded-lg">
-                          <div className="text-xs text-muted-foreground mb-1">Current Views</div>
-                          <div className="text-lg font-semibold">
+                        <div className="bg-muted/50 p-2 md:p-3 rounded-lg">
+                          <div className="text-[10px] md:text-xs text-muted-foreground mb-0.5 md:mb-1">Current</div>
+                          <div className="text-sm md:text-lg font-semibold">
                             {Number(submission.currentViews || submission.initialViews || 0).toLocaleString()}
                           </div>
                         </div>
-                        <div className="bg-green-500/10 p-3 rounded-lg">
-                          <div className="text-xs text-muted-foreground mb-1">Tracked Views</div>
-                          <div className="text-lg font-semibold text-green-600 dark:text-green-400">
+                        <div className="bg-green-500/10 p-2 md:p-3 rounded-lg">
+                          <div className="text-[10px] md:text-xs text-muted-foreground mb-0.5 md:mb-1">Tracked</div>
+                          <div className="text-sm md:text-lg font-semibold text-green-600 dark:text-green-400">
                             +{Number(submission.viewChange || 0).toLocaleString()}
                           </div>
                         </div>
@@ -921,8 +927,8 @@ export default function AdminSubmissionsPage() {
                       {submission.clips?.view_tracking && submission.clips.view_tracking.length > 0 ? (
                         <>
                           <div>
-                            <h4 className="text-sm font-medium mb-3">View History ({submission.clips.view_tracking.length} scrapes)</h4>
-                            <div className="h-48 w-full">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">View History ({submission.clips.view_tracking.length} scrapes)</h4>
+                            <div className="h-36 md:h-48 w-full">
                               <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={
                                   // IMPORTANT: Sort by scrapedAt ASCENDING (oldest first, newest last)
@@ -1107,16 +1113,16 @@ export default function AdminSubmissionsPage() {
           setCustomRejectionReason("")
         }
       }}>
-        <DialogContent aria-describedby="reject-dialog-description">
+        <DialogContent className="max-w-[90vw] md:max-w-lg" aria-describedby="reject-dialog-description">
           <DialogHeader>
             <DialogTitle>Reject Submission</DialogTitle>
             <p id="reject-dialog-description" className="text-sm text-muted-foreground">
-              Select a reason for rejecting this submission. The clipper will be notified.
+              Select a reason for rejecting this submission.
             </p>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="rejection-reason">Rejection Reason</Label>
+              <Label htmlFor="rejection-reason" className="text-sm">Rejection Reason</Label>
               <Select
                 value={rejectionReason}
                 onValueChange={(value) => {
@@ -1126,7 +1132,7 @@ export default function AdminSubmissionsPage() {
                   }
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-10">
                   <SelectValue placeholder="Select a reason" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1142,17 +1148,18 @@ export default function AdminSubmissionsPage() {
             </div>
             {rejectionReason === 'other' && (
               <div>
-                <Label htmlFor="custom-reason">Custom Reason</Label>
+                <Label htmlFor="custom-reason" className="text-sm">Custom Reason</Label>
                 <Textarea
                   id="custom-reason"
                   placeholder="Enter custom rejection reason..."
                   value={customRejectionReason}
                   onChange={(e) => setCustomRejectionReason(e.target.value)}
+                  className="min-h-[80px]"
                 />
               </div>
             )}
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={() => {
@@ -1160,6 +1167,7 @@ export default function AdminSubmissionsPage() {
                 setRejectionReason("")
                 setCustomRejectionReason("")
               }}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
@@ -1174,6 +1182,7 @@ export default function AdminSubmissionsPage() {
                 }
               }}
               disabled={!rejectionReason || (rejectionReason === 'other' && !customRejectionReason)}
+              className="w-full sm:w-auto"
             >
               Reject
             </Button>
@@ -1188,7 +1197,7 @@ export default function AdminSubmissionsPage() {
           setUserSubmissions([])
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] md:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <User className="w-5 h-5" />
@@ -1197,55 +1206,55 @@ export default function AdminSubmissionsPage() {
           </DialogHeader>
           
           {selectedUserModal && (
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {/* User Info */}
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <div className="flex items-start justify-between">
+              <div className="p-3 md:p-4 bg-muted/50 rounded-lg">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                   <div>
-                    <h3 className="text-lg font-semibold">{selectedUserModal.name || 'No name'}</h3>
-                    <p className="text-sm text-muted-foreground">{selectedUserModal.email}</p>
+                    <h3 className="text-base md:text-lg font-semibold">{selectedUserModal.name || 'No name'}</h3>
+                    <p className="text-xs md:text-sm text-muted-foreground truncate max-w-[200px] md:max-w-none">{selectedUserModal.email}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold">${Number(selectedUserModal.totalEarnings || 0).toFixed(2)}</p>
+                  <div className="sm:text-right">
+                    <p className="text-xl md:text-2xl font-bold">${Number(selectedUserModal.totalEarnings || 0).toFixed(2)}</p>
                     <p className="text-xs text-muted-foreground">Total Earnings</p>
                   </div>
                 </div>
-                <div className="mt-4 grid grid-cols-3 gap-4 text-center">
+                <div className="mt-3 md:mt-4 grid grid-cols-3 gap-2 md:gap-4 text-center">
                   <div className="p-2 bg-background rounded">
-                    <p className="text-lg font-bold">{Number(selectedUserModal.totalViews || 0).toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Total Views</p>
+                    <p className="text-sm md:text-lg font-bold">{Number(selectedUserModal.totalViews || 0).toLocaleString()}</p>
+                    <p className="text-[10px] md:text-xs text-muted-foreground">Views</p>
                   </div>
                   <div className="p-2 bg-background rounded">
-                    <p className="text-lg font-bold">{userSubmissions.length}</p>
-                    <p className="text-xs text-muted-foreground">Submissions</p>
+                    <p className="text-sm md:text-lg font-bold">{userSubmissions.length}</p>
+                    <p className="text-[10px] md:text-xs text-muted-foreground">Subs</p>
                   </div>
                   <div className="p-2 bg-background rounded">
-                    <p className="text-lg font-bold">{userSubmissions.filter(s => s.status === 'APPROVED').length}</p>
-                    <p className="text-xs text-muted-foreground">Approved</p>
+                    <p className="text-sm md:text-lg font-bold">{userSubmissions.filter(s => s.status === 'APPROVED').length}</p>
+                    <p className="text-[10px] md:text-xs text-muted-foreground">Approved</p>
                   </div>
                 </div>
               </div>
 
               {/* User's Submissions */}
               <div>
-                <h4 className="text-sm font-medium mb-3">Submissions ({userSubmissions.length})</h4>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
+                <h4 className="text-sm font-medium mb-2 md:mb-3">Submissions ({userSubmissions.length})</h4>
+                <div className="space-y-2 max-h-48 md:max-h-64 overflow-y-auto">
                   {userSubmissions.map((sub) => (
-                    <div key={sub.id} className="p-3 border rounded-lg bg-muted/20">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {getPlatformLogo(sub.platform, '', 14)}
-                          <Badge variant="outline" className="text-xs">
+                    <div key={sub.id} className="p-2 md:p-3 border rounded-lg bg-muted/20">
+                      <div className="flex flex-wrap items-center justify-between gap-1">
+                        <div className="flex items-center gap-1 md:gap-2">
+                          {getPlatformLogo(sub.platform, '', 12)}
+                          <Badge variant="outline" className="text-[10px] md:text-xs">
                             {sub.status}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] md:text-xs text-muted-foreground truncate max-w-[80px] md:max-w-none">
                             {sub.campaigns.title}
                           </span>
                         </div>
-                        <div className="text-right text-xs">
-                          <span className="font-medium">{Number(sub.currentViews || sub.initialViews || 0).toLocaleString()} views</span>
+                        <div className="text-right text-[10px] md:text-xs">
+                          <span className="font-medium">{Number(sub.currentViews || sub.initialViews || 0).toLocaleString()}</span>
                           {sub.clips?.earnings && Number(sub.clips.earnings) > 0 && (
-                            <span className="ml-2 text-muted-foreground">
+                            <span className="ml-1 md:ml-2 text-muted-foreground">
                               ${Number(sub.clips.earnings).toFixed(2)}
                             </span>
                           )}
@@ -1255,7 +1264,7 @@ export default function AdminSubmissionsPage() {
                         href={sub.clipUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-blue-500 hover:underline mt-1 block truncate"
+                        className="text-[10px] md:text-xs text-blue-500 hover:underline mt-1 block truncate"
                       >
                         {sub.clipUrl}
                       </a>
@@ -1267,14 +1276,14 @@ export default function AdminSubmissionsPage() {
               {/* Verified Social Accounts */}
               {userSubmissions.some(s => s.socialAccount) && (
                 <div>
-                  <h4 className="text-sm font-medium mb-3">Verified Accounts</h4>
+                  <h4 className="text-sm font-medium mb-2 md:mb-3">Verified Accounts</h4>
                   <div className="flex flex-wrap gap-2">
                     {[...new Map(userSubmissions
                       .filter(s => s.socialAccount)
                       .map(s => [s.socialAccount?.id, s.socialAccount])
                     ).values()].map((account: any) => (
-                      <div key={account.id} className="flex items-center gap-1.5 px-3 py-1.5 bg-muted rounded-full text-sm">
-                        {getPlatformLogo(account.platform, '', 14)}
+                      <div key={account.id} className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 bg-muted rounded-full text-xs md:text-sm">
+                        {getPlatformLogo(account.platform, '', 12)}
                         <span className="font-mono">@{account.username}</span>
                         {account.verified && <Check className="w-3 h-3 text-green-500" />}
                       </div>
@@ -1285,14 +1294,15 @@ export default function AdminSubmissionsPage() {
             </div>
           )}
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedUserModal(null)}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setSelectedUserModal(null)} className="w-full sm:w-auto">
               Close
             </Button>
             <Button
               onClick={() => {
                 window.open(`/admin/users?email=${encodeURIComponent(selectedUserModal?.email || '')}`, '_blank')
               }}
+              className="w-full sm:w-auto"
             >
               View Full Profile →
             </Button>
