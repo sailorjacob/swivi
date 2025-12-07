@@ -10,3 +10,5 @@ ALTER TABLE "clip_submissions" ADD CONSTRAINT "clip_submissions_socialAccountId_
 -- Create index for faster lookups
 CREATE INDEX "clip_submissions_socialAccountId_idx" ON "clip_submissions"("socialAccountId");
 
+
+

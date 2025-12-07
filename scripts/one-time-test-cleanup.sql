@@ -88,3 +88,5 @@ SELECT id, email, "totalEarnings", "totalViews" FROM users;
 -- DONE! Platform is clean for first real campaign
 -- ============================================================
 
+
+

@@ -41,3 +41,5 @@ WHERE status = 'ACTIVE'
   AND spent < budget
   AND "deletedAt" IS NULL;
 
+
+

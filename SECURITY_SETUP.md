@@ -189,3 +189,5 @@ ALTER TABLE table_name DISABLE ROW LEVEL SECURITY;
 
 Remember to re-enable it after debugging!
 
+
+

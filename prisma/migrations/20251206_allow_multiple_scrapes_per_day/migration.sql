@@ -9,3 +9,5 @@ DROP INDEX IF EXISTS "view_tracking_userId_clipId_date_platform_key";
 CREATE INDEX IF NOT EXISTS "view_tracking_userId_clipId_platform_idx" ON "view_tracking"("userId", "clipId", "platform");
 CREATE INDEX IF NOT EXISTS "view_tracking_clipId_scrapedAt_idx" ON "view_tracking"("clipId", "scrapedAt" DESC);
 
+
+

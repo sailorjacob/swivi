@@ -171,3 +171,5 @@ SELECT COUNT(*) as orphaned_clips FROM clips WHERE id NOT IN (SELECT DISTINCT "c
 SELECT COUNT(*) as remaining_payouts FROM payouts;
 SELECT COUNT(*) as remaining_payout_requests FROM payout_requests;
 
+
+

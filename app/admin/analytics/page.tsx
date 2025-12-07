@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
   Loader2, CheckCircle, XCircle, ChevronDown, ChevronUp,
-  TrendingUp, Eye, DollarSign, Users, FileVideo, BarChart3, 
-  Clock, ExternalLink, RefreshCw, Target, Play, Zap
+  TrendingUp, DollarSign, FileVideo, BarChart3, 
+  Clock, ExternalLink, RefreshCw, Target, Zap
 } from 'lucide-react'
 import { authenticatedFetch } from '@/lib/supabase-browser'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts'
@@ -223,16 +223,16 @@ export default function AdminAnalyticsPage() {
 
       {/* Key Metrics - Large Hero Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-green-500/5 border-green-500/20">
+        <Card className="bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 border-violet-500/20">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <Eye className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <div className="p-2 rounded-lg bg-violet-500/20">
+                <TrendingUp className="w-5 h-5 text-violet-600 dark:text-violet-400" />
               </div>
-              <span className="text-sm text-muted-foreground">Views Generated</span>
+              <span className="text-sm text-muted-foreground">View Growth</span>
             </div>
-            <p className="text-4xl font-bold text-green-600 dark:text-green-400">{(platformStats?.overview.trackedViews || 0).toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground mt-1">Total tracked view growth</p>
+            <p className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400 bg-clip-text text-transparent">{(platformStats?.overview.trackedViews || 0).toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mt-1">Since clips were submitted</p>
           </CardContent>
         </Card>
 
@@ -277,7 +277,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* Secondary Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
@@ -286,18 +286,6 @@ export default function AdminAnalyticsPage() {
                 <p className="text-2xl font-bold">{platformStats?.overview.activeCampaigns || 0}</p>
               </div>
               <Target className="w-8 h-8 text-muted-foreground/30" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Total Clippers</p>
-                <p className="text-2xl font-bold">{platformStats?.overview.totalUsers || 0}</p>
-              </div>
-              <Users className="w-8 h-8 text-muted-foreground/30" />
             </div>
           </CardContent>
         </Card>
@@ -412,9 +400,9 @@ export default function AdminAnalyticsPage() {
                               <p className="text-xs text-muted-foreground mb-1">Current Views</p>
                               <p className="text-lg font-bold">{campaign.currentViews.toLocaleString()}</p>
                             </div>
-                            <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                              <p className="text-xs text-green-600 dark:text-green-400 mb-1">Views Generated</p>
-                              <p className="text-lg font-bold text-green-600 dark:text-green-400">+{campaign.trackedViews.toLocaleString()}</p>
+                            <div className="p-3 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 rounded-lg border border-violet-500/20">
+                              <p className="text-xs text-violet-600 dark:text-violet-400 mb-1">View Growth</p>
+                              <p className="text-lg font-bold text-violet-600 dark:text-violet-400">+{campaign.trackedViews.toLocaleString()}</p>
                             </div>
                             <div className="p-3 bg-muted/50 rounded-lg">
                               <p className="text-xs text-muted-foreground mb-1">Growth</p>
@@ -476,7 +464,7 @@ export default function AdminAnalyticsPage() {
                                           <p className="font-bold">{clip.currentViews.toLocaleString()}</p>
                                           <p className="text-xs text-muted-foreground">views</p>
                                           {viewGrowth > 0 && (
-                                            <p className="text-xs text-green-600 dark:text-green-400">+{viewGrowth.toLocaleString()}</p>
+                                            <p className="text-xs text-violet-600 dark:text-violet-400">+{viewGrowth.toLocaleString()}</p>
                                           )}
                                           {clip.status === 'APPROVED' && clip.earnings > 0 && (
                                             <p className="text-xs font-medium mt-1">${clip.earnings.toFixed(2)}</p>
@@ -712,7 +700,7 @@ export default function AdminAnalyticsPage() {
                       </div>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span>{log.clipsProcessed} clips</span>
-                        <span className="text-green-600 dark:text-green-400">✓{log.clipsSuccessful}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">✓{log.clipsSuccessful}</span>
                         {log.clipsFailed > 0 && (
                           <span className={log.clipsFailed <= 2 ? "text-amber-500" : "text-red-500"}>
                             ✗{log.clipsFailed}

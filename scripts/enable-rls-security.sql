@@ -116,3 +116,5 @@ ORDER BY tablename;
 -- ✅ Your Next.js app via Prisma - STILL WORKS (bypasses RLS)
 -- ============================================================
 
+
+
