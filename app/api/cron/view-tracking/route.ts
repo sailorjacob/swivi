@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { SimpleViewTracker } from "@/lib/simple-view-tracker"
 import { prisma } from "@/lib/prisma"
 
-// This endpoint is called by Vercel Cron Jobs every 45 minutes
+// This endpoint is called by Vercel Cron Jobs every 20 minutes
 // It processes clips ONE BY ONE - simple, reliable, consistent
 
 // Lock timeout in minutes - if a job is older than this, consider it stale
