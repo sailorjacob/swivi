@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const role = searchParams.get("role")
-    const limit = parseInt(searchParams.get("limit") || "100")
+    const limit = parseInt(searchParams.get("limit") || "200")
     const offset = parseInt(searchParams.get("offset") || "0")
 
     console.log("🔍 Query params:", { role, limit, offset })
@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
         orderBy: {
           createdAt: "desc"
         },
-        take: Math.min(limit, 50), // Reduce limit to avoid timeouts
+        take: Math.min(limit, 200), // Allow up to 200 users per request
         skip: offset
       })
       console.log("✅ Users fetched:", users.length)
@@ -140,9 +140,15 @@ export async function GET(request: NextRequest) {
         payoutRequests: undefined // Remove full array from response
       }))
 
-      // Get total count
-      total = await prisma.user.count({ where })
-      console.log("✅ Total count:", total)
+      // Get total count and role counts
+      const [totalFiltered, totalAll, adminCount, clipperCount] = await Promise.all([
+        prisma.user.count({ where }),
+        prisma.user.count(),
+        prisma.user.count({ where: { role: 'ADMIN' } }),
+        prisma.user.count({ where: { role: 'CLIPPER' } })
+      ])
+      total = totalFiltered
+      console.log("✅ Total count:", total, "Admin:", adminCount, "Clipper:", clipperCount)
 
       return NextResponse.json({
         users: processedUsers,
@@ -151,6 +157,11 @@ export async function GET(request: NextRequest) {
           limit,
           offset,
           hasMore: offset + limit < total
+        },
+        stats: {
+          totalUsers: totalAll,
+          adminCount,
+          clipperCount
         }
       })
     } catch (queryError) {

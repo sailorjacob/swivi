@@ -69,6 +69,7 @@ export default function AdminUsersPage() {
   const [hasScrolled, setHasScrolled] = useState(false)
   
   const [users, setUsers] = useState<User[]>([])
+  const [userStats, setUserStats] = useState({ totalUsers: 0, adminCount: 0, clipperCount: 0 })
   const [loading, setLoading] = useState(true)
   const [slowLoading, setSlowLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
@@ -132,7 +133,12 @@ export default function AdminUsersPage() {
         const data = await response.json()
         console.log("✅ Users data received:", data)
         console.log("Number of users:", data.users?.length || 0)
+        console.log("Stats:", data.stats)
         setUsers(data.users || [])
+        // Use the stats from API for accurate counts
+        if (data.stats) {
+          setUserStats(data.stats)
+        }
       } else if (response.status === 401) {
         console.error("❌ Authentication error - showing error instead of redirecting")
         toast.error("Authentication failed. Please refresh the page or sign in again.")
@@ -301,10 +307,8 @@ export default function AdminUsersPage() {
     return matchesSearch
   })
 
-  // Calculate stats - only calculate when users are loaded
-  const adminCount = users.filter(u => u.role === "ADMIN").length
-  const clipperCount = users.filter(u => u.role === "CLIPPER").length
-  const totalCount = users.length
+  // Use stats from API for accurate counts across all users
+  const { totalUsers: totalCount, adminCount, clipperCount } = userStats
 
 
   // Show loading while checking authentication
