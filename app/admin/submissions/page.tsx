@@ -124,11 +124,7 @@ const sortOptions = [
   { value: "newest", label: "Newest First" },
   { value: "oldest", label: "Oldest First" },
   { value: "mostViews", label: "Most Views" },
-  { value: "leastViews", label: "Least Views" },
-  { value: "mostViewGrowth", label: "Most View Growth" },
-  { value: "mostEarnings", label: "Highest Earnings" },
-  { value: "paidFirst", label: "Paid First" },
-  { value: "pendingFirst", label: "Pending First" }
+  { value: "mostEarnings", label: "Highest Earnings" }
 ]
 
 // Get status icon component
@@ -331,7 +327,7 @@ export default function AdminSubmissionsPage() {
     return () => clearInterval(interval)
   }, [fetchSubmissions, loading, isRefreshing])
 
-  // Update submission status
+  // Update submission status - updates in place without refetching to preserve scroll position
   const updateSubmissionStatus = async (submissionId: string, status: Submission["status"], reason?: string, payout?: number) => {
     try {
       const response = await authenticatedFetch(`/api/admin/submissions/${submissionId}`, {
@@ -348,7 +344,34 @@ export default function AdminSubmissionsPage() {
 
       if (response.ok) {
         toast.success(`Submission ${status.toLowerCase()} successfully`)
-        fetchSubmissions()
+        
+        // Update the submission in place without refetching - preserves scroll position
+        setSubmissions(prev => prev.map(sub => 
+          sub.id === submissionId 
+            ? { ...sub, status, rejectionReason: reason, requiresReview: false }
+            : sub
+        ))
+        
+        // Update status counts
+        setStatusCounts(prev => {
+          const oldStatus = submissions.find(s => s.id === submissionId)?.status
+          const newCounts = { ...prev }
+          
+          // Decrement old status count
+          if (oldStatus === 'PENDING') newCounts.pending = Math.max(0, newCounts.pending - 1)
+          else if (oldStatus === 'APPROVED') newCounts.approved = Math.max(0, newCounts.approved - 1)
+          else if (oldStatus === 'REJECTED') newCounts.rejected = Math.max(0, newCounts.rejected - 1)
+          else if (oldStatus === 'PAID') newCounts.paid = Math.max(0, newCounts.paid - 1)
+          
+          // Increment new status count
+          if (status === 'PENDING') newCounts.pending++
+          else if (status === 'APPROVED') newCounts.approved++
+          else if (status === 'REJECTED') newCounts.rejected++
+          else if (status === 'PAID') newCounts.paid++
+          
+          return newCounts
+        })
+        
         setShowRejectDialog(false)
         setRejectionReason("")
         setPayoutAmount("")
