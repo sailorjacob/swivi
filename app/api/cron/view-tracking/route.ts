@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { SimpleViewTracker } from "@/lib/simple-view-tracker"
 import { prisma } from "@/lib/prisma"
 
-// This endpoint is called by Vercel Cron Jobs every 15 minutes
+// This endpoint is called by Vercel Cron Jobs every 45 minutes
 // It processes clips ONE BY ONE - simple, reliable, consistent
 
 // Lock timeout in minutes - if a job is older than this, consider it stale
@@ -72,11 +72,11 @@ export async function GET(request: NextRequest) {
 
     // Run the tracking loop - processes clips one by one
     // - maxDurationMs: 240s (leave 60s buffer for 300s Vercel timeout)
-    // - maxClips: 50 clips per run (conservative, ensures completion)
+    // - maxClips: 75 clips per run (increased since we run every 45 min instead of 10 min)
     // - delayBetweenMs: 500ms between clips (be nice to Apify)
     const result = await tracker.runTrackingLoop({
       maxDurationMs: 240000,  // 240 seconds (leave 60s buffer)
-      maxClips: 50,           // 50 clips per run
+      maxClips: 75,           // 75 clips per run (increased for 45-min intervals)
       delayBetweenMs: 500     // 500ms between clips
     })
 
