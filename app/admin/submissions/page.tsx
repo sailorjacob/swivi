@@ -120,6 +120,17 @@ const payoutStatusOptions = [
   { value: "unpaid", label: "Unpaid" }
 ]
 
+const sortOptions = [
+  { value: "newest", label: "Newest First" },
+  { value: "oldest", label: "Oldest First" },
+  { value: "mostViews", label: "Most Views" },
+  { value: "leastViews", label: "Least Views" },
+  { value: "mostViewGrowth", label: "Most View Growth" },
+  { value: "mostEarnings", label: "Highest Earnings" },
+  { value: "paidFirst", label: "Paid First" },
+  { value: "pendingFirst", label: "Pending First" }
+]
+
 // Get status icon component
 const getStatusIcon = (status: string, autoRejected?: boolean) => {
   if (status === "APPROVED") {
@@ -152,7 +163,8 @@ export default function AdminSubmissionsPage() {
     campaignId: "",
     search: "",
     dateRange: "all",
-    payoutStatus: "all"
+    payoutStatus: "all",
+    sortBy: "newest"
   })
   const [pagination, setPagination] = useState({
     total: 0,
@@ -245,6 +257,12 @@ export default function AdminSubmissionsPage() {
       }
       if (filters.campaignId) {
         params.append("campaignId", filters.campaignId)
+      }
+      if (filters.sortBy && filters.sortBy !== "newest") {
+        params.append("sortBy", filters.sortBy)
+      }
+      if (filters.search) {
+        params.append("search", filters.search)
       }
 
       const response = await authenticatedFetch(`/api/admin/submissions?${params}`)
@@ -465,7 +483,7 @@ export default function AdminSubmissionsPage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
-                    placeholder="Search..."
+                    placeholder="Search username, email, URL..."
                     value={filters.search}
                     onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                     className="pl-10 h-9 md:h-10"
@@ -546,6 +564,22 @@ export default function AdminSubmissionsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {payoutStatusOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="md:min-w-[140px]">
+                <Label className="text-xs md:text-sm">Sort By</Label>
+                <Select value={filters.sortBy} onValueChange={(value) => setFilters({ ...filters, sortBy: value })}>
+                  <SelectTrigger className="h-9 md:h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sortOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>

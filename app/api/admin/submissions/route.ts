@@ -60,9 +60,24 @@ export async function GET(request: NextRequest) {
     const dateRange = searchParams.get("dateRange")
     const payoutStatus = searchParams.get("payoutStatus")
     const requiresReview = searchParams.get("requiresReview")
+    const sortBy = searchParams.get("sortBy") || "newest" // newest, oldest, mostViews, leastViews, mostViewGrowth, mostEarnings, paidFirst, pendingFirst
+    const search = searchParams.get("search")
 
     // Build where clause for filtering
     const where: any = {}
+
+    // Search filter - search by username, email, clip URL, or campaign title
+    if (search && search.trim()) {
+      const searchTerm = search.trim()
+      where.OR = [
+        { users: { name: { contains: searchTerm, mode: 'insensitive' } } },
+        { users: { email: { contains: searchTerm, mode: 'insensitive' } } },
+        { clipUrl: { contains: searchTerm, mode: 'insensitive' } },
+        { campaigns: { title: { contains: searchTerm, mode: 'insensitive' } } },
+        { campaigns: { creator: { contains: searchTerm, mode: 'insensitive' } } },
+        { socialAccount: { username: { contains: searchTerm, mode: 'insensitive' } } }
+      ]
+    }
 
     if (status && status !== "all") {
       if (status === "flagged") {
@@ -109,7 +124,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log("🔍 Fetching submissions with filters:", where)
+    console.log("🔍 Fetching submissions with filters:", where, "sortBy:", sortBy)
+
+    // Build orderBy based on sortBy parameter
+    // Note: for views/earnings sorting, we do post-processing since it requires clip data
+    const getOrderBy = () => {
+      switch (sortBy) {
+        case "oldest":
+          return { createdAt: "asc" as const }
+        case "mostViews":
+        case "leastViews":
+        case "mostEarnings":
+          // These require post-processing - fetch by newest first, then sort after
+          return { createdAt: "desc" as const }
+        case "newest":
+        default:
+          return { createdAt: "desc" as const }
+      }
+    }
 
     let submissions
     try {
@@ -118,9 +150,7 @@ export async function GET(request: NextRequest) {
       
       submissions = await prisma.clipSubmission.findMany({
         where,
-        orderBy: {
-          createdAt: "desc"
-        },
+        orderBy: getOrderBy(),
         select: {
           id: true,
           clipUrl: true,
@@ -213,6 +243,54 @@ export async function GET(request: NextRequest) {
       
       // Update submissions with the enhanced data
       submissions = submissionsWithClips
+
+      // Post-process sorting for views, earnings, and status-based sorts (requires clip data or status)
+      const requiresPostSort = ["mostViews", "leastViews", "mostViewGrowth", "mostEarnings", "paidFirst", "pendingFirst"]
+      if (requiresPostSort.includes(sortBy)) {
+        submissions.sort((a: any, b: any) => {
+          if (sortBy === "mostViews") {
+            const aViews = a.clips?.view_tracking?.[0]?.views || a.initialViews || BigInt(0)
+            const bViews = b.clips?.view_tracking?.[0]?.views || b.initialViews || BigInt(0)
+            return Number(bViews) - Number(aViews) // Descending (most first)
+          } else if (sortBy === "leastViews") {
+            const aViews = a.clips?.view_tracking?.[0]?.views || a.initialViews || BigInt(0)
+            const bViews = b.clips?.view_tracking?.[0]?.views || b.initialViews || BigInt(0)
+            return Number(aViews) - Number(bViews) // Ascending (least first)
+          } else if (sortBy === "mostViewGrowth") {
+            const aCurrentViews = a.clips?.view_tracking?.[0]?.views || a.initialViews || BigInt(0)
+            const aInitialViews = a.initialViews || BigInt(0)
+            const aGrowth = Number(aCurrentViews) - Number(aInitialViews)
+            const bCurrentViews = b.clips?.view_tracking?.[0]?.views || b.initialViews || BigInt(0)
+            const bInitialViews = b.initialViews || BigInt(0)
+            const bGrowth = Number(bCurrentViews) - Number(bInitialViews)
+            return bGrowth - aGrowth // Descending (most growth first)
+          } else if (sortBy === "mostEarnings") {
+            const aEarnings = a.clips?.earnings || a.finalEarnings || BigInt(0)
+            const bEarnings = b.clips?.earnings || b.finalEarnings || BigInt(0)
+            return Number(bEarnings) - Number(aEarnings) // Descending (most first)
+          } else if (sortBy === "paidFirst") {
+            // PAID > APPROVED > PENDING > REJECTED
+            const statusOrder: Record<string, number> = { PAID: 0, APPROVED: 1, PENDING: 2, REJECTED: 3 }
+            const aOrder = statusOrder[a.status] ?? 4
+            const bOrder = statusOrder[b.status] ?? 4
+            if (aOrder !== bOrder) return aOrder - bOrder
+            // Within same status, sort by newest
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          } else if (sortBy === "pendingFirst") {
+            // PENDING > APPROVED > PAID > REJECTED (for review workflow)
+            const statusOrder: Record<string, number> = { PENDING: 0, APPROVED: 1, PAID: 2, REJECTED: 3 }
+            const aOrder = statusOrder[a.status] ?? 4
+            const bOrder = statusOrder[b.status] ?? 4
+            if (aOrder !== bOrder) return aOrder - bOrder
+            // Within same status, sort by most views for efficient approval
+            const aViews = a.clips?.view_tracking?.[0]?.views || a.initialViews || BigInt(0)
+            const bViews = b.clips?.view_tracking?.[0]?.views || b.initialViews || BigInt(0)
+            return Number(bViews) - Number(aViews)
+          }
+          return 0
+        })
+        console.log("✅ Applied post-processing sort:", sortBy)
+      }
 
       console.log("✅ Enhanced submissions with clip data:", submissions.length)
     } catch (dbError) {
