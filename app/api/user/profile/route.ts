@@ -223,17 +223,14 @@ export async function GET(request: NextRequest) {
     // Total lifetime earnings = current balance + already paid out
     const totalEarnings = userCurrentBalance + totalPaidOut
 
-    // Views: Calculate tracked views using clip.views (MAX ever tracked) as source of truth
+    // Views: Use clip.views (MAX ever tracked) as source of truth - same as dashboard
+    // This shows total views across all approved clips
     let totalViews = 0
     if (dbUser.clipSubmissions) {
       for (const submission of dbUser.clipSubmissions) {
         if (submission.clips) {
-          // Use clip.views (MAX ever tracked) as source of truth
-          const currentViews = Number(submission.clips.views || 0)
-          const initialViews = submission.initialViews ? Number(submission.initialViews) : 0
-          // Tracked views = views gained since submission
-          const viewsGained = Math.max(0, currentViews - initialViews)
-          totalViews += viewsGained
+          // Use clip.views directly (same calculation as dashboard)
+          totalViews += Number(submission.clips.views || 0)
         }
       }
     }
