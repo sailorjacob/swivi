@@ -412,8 +412,9 @@ export default function CampaignsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            whileHover={{ y: -4, scale: 1.02 }}
           >
-            <Card className={`bg-card border-border hover:shadow-lg transition-all duration-300 cursor-pointer group ${isCompleted ? 'opacity-75 border-green-500/30' : ''} ${isScheduled && filter === 'active' ? 'opacity-60' : ''}`}>
+            <Card className={`bg-card border-border hover:shadow-xl transition-all duration-300 cursor-pointer group ${isCompleted ? 'opacity-75 border-green-500/30' : ''} ${isScheduled && filter === 'active' ? 'opacity-60' : ''}`}>
               <CardContent className="p-0">
                 {/* Campaign Image */}
                 <div 

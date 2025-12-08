@@ -501,9 +501,7 @@ export default function CampaignDetailPage() {
                           <p className="text-sm font-medium truncate">{clipper.name || 'Anonymous'}</p>
                         </div>
                         <div className="text-right text-sm">
-                          <span className="text-muted-foreground">+{clipper.totalViewsGained.toLocaleString()}</span>
-                          <span className="mx-1.5 text-muted-foreground/50">·</span>
-                          <span className="font-medium">${clipper.totalEarnings.toFixed(2)}</span>
+                          <span className="text-muted-foreground">+{clipper.totalViewsGained.toLocaleString()} views</span>
                         </div>
                       </div>
                     ))
@@ -588,9 +586,7 @@ export default function CampaignDetailPage() {
                           </div>
                         </div>
                         <div className="text-right text-sm">
-                          <span className="text-muted-foreground">+{clip.viewsGained.toLocaleString()}</span>
-                          <span className="mx-1.5 text-muted-foreground/50">·</span>
-                          <span className="font-medium">${clip.earnings.toFixed(2)}</span>
+                          <span className="text-muted-foreground">+{clip.viewsGained.toLocaleString()} views</span>
                         </div>
                         <ExternalLink className="w-3.5 h-3.5 text-muted-foreground/50" />
                       </a>
