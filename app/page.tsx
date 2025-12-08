@@ -14,8 +14,11 @@ import { Founder } from "@/components/marketing/founder"
 import { CampaignsPreview } from "@/components/marketing/campaigns-preview"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { FeaturedCampaignModal, useFeaturedCampaignModal } from "@/components/marketing/featured-campaign-modal"
 
 export default function HomePage() {
+  const { isOpen, campaign, stats, close } = useFeaturedCampaignModal()
+
   return (
     <>
       <Header />
@@ -34,6 +37,14 @@ export default function HomePage() {
         </div>
       </main>
       <Footer />
+      
+      {/* Featured Campaign Announcement Modal */}
+      <FeaturedCampaignModal 
+        campaign={campaign}
+        stats={stats}
+        isOpen={isOpen}
+        onClose={close}
+      />
     </>
   )
 } 
