@@ -572,23 +572,28 @@ export function LiveCampaigns() {
       {filteredCampaigns.length === 0 && (
         <motion.div
           variants={itemVariants}
-          className="text-center py-12"
+          className="text-center py-8"
         >
-          <Filter className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium mb-2">No campaigns found</h3>
-          <p className="text-muted-foreground mb-4">
-            Try adjusting your filters or search terms to find more campaigns.
+          {/* Illustration */}
+          <div className="relative w-48 h-48 mx-auto mb-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 to-foreground/10 rounded-2xl" />
+            <div className="absolute inset-4 border-2 border-dashed border-foreground/20 rounded-xl flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-foreground/10 flex items-center justify-center">
+                  <Target className="w-8 h-8 text-foreground/40" />
+                </div>
+                <div className="flex gap-1 justify-center">
+                  <div className="w-2 h-2 rounded-full bg-foreground/20" />
+                  <div className="w-2 h-2 rounded-full bg-foreground/30" />
+                  <div className="w-2 h-2 rounded-full bg-foreground/20" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <h3 className="text-xl font-medium mb-2">No campaigns found</h3>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            New brand activations are coming soon! Join our Discord to be the first to know when campaigns go live.
           </p>
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              setSearchTerm("")
-              setSelectedStatus("all")
-              setSelectedDifficulty("all")
-            }}
-          >
-            Clear All Filters
-          </Button>
         </motion.div>
       )}
 
@@ -598,7 +603,7 @@ export function LiveCampaigns() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="text-center mt-16"
+        className={`text-center ${filteredCampaigns.length === 0 ? 'mt-4' : 'mt-16'}`}
       >
         <motion.div
           variants={itemVariants}
