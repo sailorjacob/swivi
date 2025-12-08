@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Plus, Edit, Trash2, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle, ChevronDown, ChevronUp, EyeOff, Eye, FlaskConical, ArchiveRestore, Archive } from "lucide-react"
+import { Plus, Edit, Trash2, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle, ChevronDown, ChevronUp, EyeOff, Eye, FlaskConical, ArchiveRestore, Archive, Link2, Copy, RefreshCw } from "lucide-react"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { supabase } from "@/lib/supabase-auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -87,6 +87,12 @@ export default function AdminCampaignsPage() {
   const [expandedCampaignData, setExpandedCampaignData] = useState<Record<string, any>>({})
   const [loadingCampaignData, setLoadingCampaignData] = useState<Set<string>>(new Set())
   const [isUpdating, setIsUpdating] = useState(false)
+  
+  // Client portal link state
+  const [clientPortalLinks, setClientPortalLinks] = useState<Record<string, string | null>>({})
+  const [loadingClientLinks, setLoadingClientLinks] = useState<Set<string>>(new Set())
+  const [showClientLinkDialog, setShowClientLinkDialog] = useState(false)
+  const [selectedCampaignForLink, setSelectedCampaignForLink] = useState<Campaign | null>(null)
   
   // Password protection for dangerous actions
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
@@ -869,6 +875,97 @@ export default function AdminCampaignsPage() {
     requestPasswordConfirmation('toggleTest', campaign, { currentlyTest: campaign.isTest || false })
   }
 
+  // Client Portal Link Functions
+  const fetchClientLink = async (campaignId: string) => {
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}/client-token`)
+      if (response.ok) {
+        const data = await response.json()
+        setClientPortalLinks(prev => ({
+          ...prev,
+          [campaignId]: data.token || null
+        }))
+        return data.token
+      }
+    } catch (error) {
+      console.error("Error fetching client link:", error)
+    }
+    return null
+  }
+
+  const generateClientLink = async (campaignId: string) => {
+    const newLoading = new Set(loadingClientLinks)
+    newLoading.add(campaignId)
+    setLoadingClientLinks(newLoading)
+    
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}/client-token`, {
+        method: "POST"
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setClientPortalLinks(prev => ({
+          ...prev,
+          [campaignId]: data.token
+        }))
+        toast.success("Client portal link generated!")
+        return data.token
+      } else {
+        toast.error("Failed to generate link")
+      }
+    } catch (error) {
+      console.error("Error generating client link:", error)
+      toast.error("Failed to generate link")
+    } finally {
+      const updated = new Set(loadingClientLinks)
+      updated.delete(campaignId)
+      setLoadingClientLinks(updated)
+    }
+    return null
+  }
+
+  const copyClientLink = async (campaignId: string, token: string | null) => {
+    let linkToken = token
+    
+    // If no token exists, generate one first
+    if (!linkToken) {
+      linkToken = await generateClientLink(campaignId)
+    }
+    
+    if (linkToken) {
+      const fullUrl = `${window.location.origin}/client/${linkToken}`
+      await navigator.clipboard.writeText(fullUrl)
+      toast.success("Client portal link copied!")
+    }
+  }
+
+  const revokeClientLink = async (campaignId: string) => {
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}/client-token`, {
+        method: "DELETE"
+      })
+      if (response.ok) {
+        setClientPortalLinks(prev => ({
+          ...prev,
+          [campaignId]: null
+        }))
+        toast.success("Client portal link revoked")
+      } else {
+        toast.error("Failed to revoke link")
+      }
+    } catch (error) {
+      console.error("Error revoking client link:", error)
+      toast.error("Failed to revoke link")
+    }
+  }
+
+  const openClientLinkDialog = async (campaign: Campaign) => {
+    setSelectedCampaignForLink(campaign)
+    setShowClientLinkDialog(true)
+    // Fetch current link status
+    await fetchClientLink(campaign.id)
+  }
+
   // View campaign - fetch full details including submissions
   const handleViewCampaign = async (campaign: Campaign) => {
     try {
@@ -1297,6 +1394,13 @@ export default function AdminCampaignsPage() {
                                 title="Edit campaign"
                               >
                                 <Edit className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => openClientLinkDialog(campaign)}
+                                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                                title="Client portal link"
+                              >
+                                <Link2 className="h-4 w-4" />
                               </button>
                               {!campaign.deletedAt && (
                                 <button
@@ -1846,6 +1950,112 @@ export default function AdminCampaignsPage() {
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Client Portal Link Dialog */}
+        <Dialog open={showClientLinkDialog} onOpenChange={(open) => {
+          if (!open) {
+            setShowClientLinkDialog(false)
+            setSelectedCampaignForLink(null)
+          }
+        }}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="h-5 w-5" />
+                Client Portal Link
+              </DialogTitle>
+            </DialogHeader>
+            {selectedCampaignForLink && (
+              <div className="space-y-4">
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="font-medium">{selectedCampaignForLink.title}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Share this link with your client to give them read-only access to campaign stats and submissions.
+                  </p>
+                </div>
+
+                {clientPortalLinks[selectedCampaignForLink.id] ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 p-3 bg-foreground/5 border border-foreground/10 rounded-lg">
+                      <CheckCircle className="h-4 w-4 text-foreground flex-shrink-0" />
+                      <p className="text-sm text-foreground">
+                        Client portal link is active
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Input
+                        readOnly
+                        value={`${typeof window !== 'undefined' ? window.location.origin : ''}/client/${clientPortalLinks[selectedCampaignForLink.id]}`}
+                        className="text-sm font-mono"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => copyClientLink(selectedCampaignForLink.id, clientPortalLinks[selectedCampaignForLink.id])}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => generateClientLink(selectedCampaignForLink.id)}
+                        disabled={loadingClientLinks.has(selectedCampaignForLink.id)}
+                      >
+                        {loadingClientLinks.has(selectedCampaignForLink.id) ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                        )}
+                        Regenerate Link
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => revokeClientLink(selectedCampaignForLink.id)}
+                      >
+                        Revoke Access
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      No client portal link has been generated for this campaign yet.
+                    </p>
+                    <Button
+                      onClick={() => generateClientLink(selectedCampaignForLink.id)}
+                      disabled={loadingClientLinks.has(selectedCampaignForLink.id)}
+                      className="w-full"
+                    >
+                      {loadingClientLinks.has(selectedCampaignForLink.id) ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Link2 className="h-4 w-4 mr-2" />
+                          Generate Client Portal Link
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                <div className="pt-3 border-t border-border">
+                  <p className="text-xs text-muted-foreground">
+                    <strong>Note:</strong> The client portal shows campaign stats, approved submissions, and view tracking data. 
+                    Clients cannot make any changes. You can regenerate the link at any time to invalidate the old one.
+                  </p>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </motion.div>
