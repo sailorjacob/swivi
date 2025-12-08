@@ -71,8 +71,8 @@ export function LiveCampaigns() {
   const [selectedCampaign, setSelectedCampaign] = useState<LiveCampaign | null>(null)
   const [bonusModalOpen, setBonusModalOpen] = useState(false)
 
-  // Fetch campaigns from API
-  const fetchCampaigns = async () => {
+  // Fetch campaigns from API with better error handling
+  const fetchCampaigns = async (retryCount = 0) => {
     try {
       setLoading(true)
       setError(null)
@@ -81,27 +81,51 @@ export function LiveCampaigns() {
         params.append("status", selectedStatus.toUpperCase())
       }
 
-      // Fetch both campaigns and real-time stats
-      const [campaignsResponse, statsResponse] = await Promise.all([
-        fetch(`/api/campaigns?${params}`),
-        fetch('/api/campaigns/stats')
-      ])
+      // Fetch campaigns first (required)
+      const campaignsResponse = await fetch(`/api/campaigns?${params}`)
       
       if (campaignsResponse.ok) {
         const campaignsData = await campaignsResponse.json()
         setCampaigns(campaignsData)
+        setError(null) // Clear any previous errors
+        
+        // Fetch stats separately (optional, don't fail if this errors)
+        try {
+          const statsResponse = await fetch('/api/campaigns/stats')
+          if (statsResponse.ok) {
+            const statsData = await statsResponse.json()
+            setCampaignStats(statsData)
+          }
+        } catch (statsError) {
+          // Stats are optional, don't show error for this
+          console.log("Stats fetch failed (non-critical):", statsError)
+        }
       } else {
-        setError("Failed to load campaigns")
-      }
-      
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json()
-        setCampaignStats(statsData)
+        // Retry once on failure
+        if (retryCount < 1) {
+          console.log("Campaigns fetch failed, retrying...")
+          setTimeout(() => fetchCampaigns(retryCount + 1), 1000)
+          return
+        }
+        // Don't show error if we got a server error - just show empty state
+        if (campaignsResponse.status >= 500) {
+          console.log("Server error loading campaigns - showing empty state")
+          setCampaigns([])
+        } else {
+          setError("Unable to load campaigns. Please try again.")
+        }
       }
       
     } catch (error) {
       console.error("Error fetching campaigns:", error)
-      setError("Failed to load campaigns")
+      // Retry once on network error
+      if (retryCount < 1) {
+        console.log("Network error, retrying...")
+        setTimeout(() => fetchCampaigns(retryCount + 1), 1000)
+        return
+      }
+      // Show empty state instead of error for better UX
+      setCampaigns([])
     } finally {
       setLoading(false)
     }
@@ -238,9 +262,13 @@ export function LiveCampaigns() {
     return (
       <div className="w-full">
         <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <p className="text-lg text-red-600 mb-4">{error}</p>
-            <Button onClick={fetchCampaigns} variant="outline">
+          <div className="text-center max-w-md">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+              <Target className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <p className="text-lg font-medium mb-2">Couldn't load campaigns</p>
+            <p className="text-sm text-muted-foreground mb-4">{error}</p>
+            <Button onClick={() => fetchCampaigns(0)} variant="outline">
               Try Again
             </Button>
           </div>
