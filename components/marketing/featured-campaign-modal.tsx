@@ -16,7 +16,6 @@ import {
   Play,
   Clock
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
 interface FeaturedCampaign {
@@ -242,20 +241,28 @@ export function FeaturedCampaignModal({
                   </div>
                 )}
 
-                {/* CTA Buttons - Larger touch targets on mobile */}
+                {/* CTA Buttons - Larger touch targets on mobile, snappy hover effects */}
                 <div className="flex flex-col gap-2 sm:gap-2">
-                  <Button asChild className="w-full h-12 sm:h-11 text-sm sm:text-base group">
-                    <Link href="/creators/signup">
+                  <Link 
+                    href="/creators/signup"
+                    className="group relative w-full h-12 sm:h-11 flex items-center justify-center rounded-full text-sm sm:text-base font-medium bg-foreground text-background overflow-hidden transition-transform duration-150 ease-out active:scale-[0.98]"
+                  >
+                    <span className="absolute inset-0 bg-background/10 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-out" />
+                    <span className="relative flex items-center">
                       Start Earning Now
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
-                  </Button>
-                  <Button variant="outline" asChild className="w-full h-11 sm:h-10 text-sm sm:text-base">
-                    <Link href="/activations">
+                      <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-150 ease-out group-hover:translate-x-1" />
+                    </span>
+                  </Link>
+                  <Link 
+                    href="/activations"
+                    className="group relative w-full h-11 sm:h-10 flex items-center justify-center rounded-full text-sm sm:text-base font-medium border border-foreground text-foreground overflow-hidden transition-transform duration-150 ease-out active:scale-[0.98]"
+                  >
+                    <span className="absolute inset-0 bg-foreground scale-x-0 group-hover:scale-x-100 transition-transform duration-150 ease-out origin-left" />
+                    <span className="relative flex items-center transition-colors duration-150 ease-out group-hover:text-background">
                       <Eye className="w-4 h-4 mr-2" />
                       View All Campaigns
-                    </Link>
-                  </Button>
+                    </span>
+                  </Link>
                 </div>
 
                 {/* Footer Note */}
