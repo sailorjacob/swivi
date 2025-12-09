@@ -180,7 +180,7 @@ export default function GuidePage() {
                         <div className="flex items-center gap-3 mb-1">
                           <span className="font-medium">{item.component}</span>
                           {item.profit ? (
-                            <span className="text-xs px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded">
+                            <span className="text-xs px-2 py-0.5 bg-foreground/10 text-foreground rounded">
                               Profit Center
                             </span>
                           ) : (
@@ -239,7 +239,7 @@ export default function GuidePage() {
                         <td className="py-3 text-right">{formatCurrency(row.clientCost)}</td>
                         <td className="py-3 text-right">
                           {row.profit > 0 ? (
-                            <span className="text-emerald-600 dark:text-emerald-400">{formatCurrency(row.profit)}</span>
+                            <span className="font-medium">{formatCurrency(row.profit)}</span>
                           ) : (
                             <span className="text-muted-foreground">$0</span>
                           )}
@@ -251,7 +251,7 @@ export default function GuidePage() {
                     <tr className="border-t-2 border-border">
                       <td colSpan={2} className="py-3 font-semibold">Total</td>
                       <td className="py-3 text-right font-semibold">{formatCurrency(totalClientCost)}</td>
-                      <td className="py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
+                      <td className="py-3 text-right font-semibold">
                         {formatCurrency(totalProfit)}
                       </td>
                     </tr>
@@ -262,7 +262,7 @@ export default function GuidePage() {
               <div className="mt-6 p-4 bg-muted rounded-lg">
                 <p className="text-sm">
                   <span className="font-medium">Result:</span> The client pays $100k (getting ~$1.50 CPM, still a great deal), 
-                  and you profit <span className="text-emerald-600 dark:text-emerald-400 font-medium">$50,000</span> instead of $3,000.
+                  and you profit <span className="font-medium">$50,000</span> instead of $3,000.
                 </p>
               </div>
             </CardContent>

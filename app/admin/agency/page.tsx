@@ -37,6 +37,13 @@ const resourceCards = [
     highlights: ["MSA & SOW", "Usage Rights", "Whitelisting"]
   },
   {
+    title: "Document Templates",
+    description: "Ready-to-use MSA, SOW, proposal, and invoice templates",
+    href: "/admin/agency/documents",
+    icon: FileText,
+    highlights: ["MSA Template", "SOW Template", "Invoice Template"]
+  },
+  {
     title: "Landing Big Clients",
     description: "Strategy for pitching Netflix, Red Bull, and enterprise brands",
     href: "/admin/agency/pitching",
@@ -113,11 +120,11 @@ export default function AgencyHubPage() {
           transition={{ duration: 0.4 }}
           className="mb-8"
         >
-          <Card className="border-amber-500/30 bg-amber-500/5">
+          <Card className="border-foreground/20">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
-                <div className="p-2 rounded-lg bg-amber-500/10">
-                  <AlertTriangle className="w-5 h-5 text-amber-500" />
+                <div className="p-2 rounded-lg bg-muted">
+                  <AlertTriangle className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div>
                   <h2 className="font-semibold mb-2">The Pricing Gap</h2>
@@ -126,19 +133,19 @@ export default function AgencyHubPage() {
                     pricing as a vendor (cost-plus) rather than a strategic agency (value-based).
                   </p>
                   <div className="grid md:grid-cols-3 gap-4 text-sm">
-                    <div className="p-3 bg-background rounded-lg border border-border">
+                    <div className="p-3 bg-muted/50 rounded-lg border border-border">
                       <p className="text-muted-foreground mb-1">What You Charged</p>
                       <p className="text-xl font-semibold">$23,000</p>
                       <p className="text-xs text-muted-foreground">$1.15 CPM</p>
                     </div>
-                    <div className="p-3 bg-background rounded-lg border border-border">
+                    <div className="p-3 bg-muted/50 rounded-lg border border-border">
                       <p className="text-muted-foreground mb-1">Market Value</p>
                       <p className="text-xl font-semibold">$92k–$160k</p>
                       <p className="text-xs text-muted-foreground">$4.60–$8.00 CPM</p>
                     </div>
-                    <div className="p-3 bg-background rounded-lg border border-border">
+                    <div className="p-3 bg-muted/50 rounded-lg border border-border">
                       <p className="text-muted-foreground mb-1">Value Left Behind</p>
-                      <p className="text-xl font-semibold text-amber-500">~$100,000</p>
+                      <p className="text-xl font-semibold">~$100,000</p>
                       <p className="text-xs text-muted-foreground">Per campaign</p>
                     </div>
                   </div>

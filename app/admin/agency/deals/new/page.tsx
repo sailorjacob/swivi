@@ -446,7 +446,7 @@ export default function NewDealPage() {
                               <Input value={item.description} onChange={(e) => updateLineItem(item.id, { description: e.target.value })} placeholder="Service description..." className="col-span-6" />
                               <Input type="number" value={item.quantity} onChange={(e) => updateLineItem(item.id, { quantity: Number(e.target.value) })} min={1} className="col-span-2" />
                               <Input type="number" value={item.rate} onChange={(e) => updateLineItem(item.id, { rate: Number(e.target.value) })} min={0} step={0.01} className="col-span-3" />
-                              <button onClick={() => removeLineItem(item.id)} disabled={proposal.lineItems.length <= 1} className="col-span-1 p-2 text-muted-foreground hover:text-red-500 disabled:opacity-30 transition-colors">
+                              <button onClick={() => removeLineItem(item.id)} disabled={proposal.lineItems.length <= 1} className="col-span-1 p-2 text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors">
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
@@ -484,7 +484,7 @@ export default function NewDealPage() {
                           {proposal.discount > 0 && (
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">Discount {proposal.discountType === 'percentage' && `(${proposal.discount}%)`}</span>
-                              <span className="text-green-600">-{formatCurrency(calculateDiscount())}</span>
+                              <span className="text-muted-foreground">-{formatCurrency(calculateDiscount())}</span>
                             </div>
                           )}
                           {proposal.taxRate > 0 && (

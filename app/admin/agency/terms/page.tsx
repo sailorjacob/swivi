@@ -334,25 +334,25 @@ export default function TermsPage() {
               <h3 className="font-semibold mb-4">Critical Reminders</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3 text-sm">
-                  <CheckCircle className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <span className="w-1 h-1 rounded-full bg-foreground mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
                     <span className="text-foreground font-medium">Always get it in writing.</span> Even small projects need a simple SOW.
                   </span>
                 </li>
                 <li className="flex items-start gap-3 text-sm">
-                  <CheckCircle className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <span className="w-1 h-1 rounded-full bg-foreground mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
                     <span className="text-foreground font-medium">Never start work before contracts are signed.</span> Verbal approvals are not binding.
                   </span>
                 </li>
                 <li className="flex items-start gap-3 text-sm">
-                  <CheckCircle className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <span className="w-1 h-1 rounded-full bg-foreground mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
                     <span className="text-foreground font-medium">Separate your fees.</span> Show "Media Budget" vs. "Agency Fees" vs. "Usage Rights."
                   </span>
                 </li>
                 <li className="flex items-start gap-3 text-sm">
-                  <CheckCircle className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <span className="w-1 h-1 rounded-full bg-foreground mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
                     <span className="text-foreground font-medium">Include revision limits.</span> Unlimited revisions erode margins quickly.
                   </span>

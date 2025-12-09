@@ -212,19 +212,19 @@ export default function BestPracticesPage() {
                     <p className="text-sm text-muted-foreground mb-4">{item.why}</p>
                     
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+                      <div className="p-3 rounded-lg bg-foreground/5 border border-foreground/10">
                         <div className="flex items-center gap-2 mb-2">
-                          <CheckCircle className="w-4 h-4 text-emerald-500" />
-                          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Do</span>
+                          <CheckCircle className="w-4 h-4 text-foreground" />
+                          <span className="text-xs font-medium uppercase tracking-wider">Do</span>
                         </div>
                         <p className="text-sm">{item.do}</p>
                       </div>
-                      <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20">
+                      <div className="p-3 rounded-lg bg-muted border border-border">
                         <div className="flex items-center gap-2 mb-2">
-                          <XCircle className="w-4 h-4 text-red-500" />
-                          <span className="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wider">Don't</span>
+                          <XCircle className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Don't</span>
                         </div>
-                        <p className="text-sm">{item.dont}</p>
+                        <p className="text-sm text-muted-foreground">{item.dont}</p>
                       </div>
                     </div>
                   </CardContent>
