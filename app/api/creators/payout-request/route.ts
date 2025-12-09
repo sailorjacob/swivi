@@ -47,7 +47,14 @@ export async function POST(request: NextRequest) {
           totalEarnings: true, // This is the source of truth for available balance
           paypalEmail: true,
           walletAddress: true,
-          bitcoinAddress: true
+          bitcoinAddress: true,
+          clipSubmissions: {
+            where: { status: 'APPROVED' },
+            select: {
+              clips: { select: { earnings: true } },
+              campaigns: { select: { status: true, title: true } }
+            }
+          }
         }
       })
 
@@ -55,10 +62,40 @@ export async function POST(request: NextRequest) {
         throw new Error("USER_NOT_FOUND")
       }
 
+      // Calculate earnings from COMPLETED campaigns only (these are payable)
+      const completedCampaignEarnings = dbUser.clipSubmissions
+        .filter(s => s.campaigns.status === 'COMPLETED')
+        .reduce((sum, s) => sum + Number(s.clips?.earnings || 0), 0)
+
+      // Calculate earnings from ACTIVE campaigns (NOT payable yet)
+      const activeCampaignEarnings = dbUser.clipSubmissions
+        .filter(s => s.campaigns.status === 'ACTIVE')
+        .reduce((sum, s) => sum + Number(s.clips?.earnings || 0), 0)
+
+      // Get list of active campaigns this user has earnings in
+      const activeCampaignTitles = [...new Set(
+        dbUser.clipSubmissions
+          .filter(s => s.campaigns.status === 'ACTIVE' && Number(s.clips?.earnings || 0) > 0)
+          .map(s => s.campaigns.title)
+      )]
+
       // Use user.totalEarnings as the source of truth (not clip.earnings which can be stale)
       const availableBalance = Number(dbUser.totalEarnings || 0)
 
-      // Validate amount against available balance
+      // The payable amount is the lesser of user's balance and their completed campaign earnings
+      const payableBalance = Math.min(availableBalance, completedCampaignEarnings)
+
+      // BLOCK: If user has NO completed campaign earnings, they cannot request any payout
+      if (completedCampaignEarnings <= 0) {
+        throw new Error(`ACTIVE_CAMPAIGNS_ONLY:${activeCampaignEarnings}:${activeCampaignTitles.join(',')}`)
+      }
+
+      // BLOCK: If requested amount exceeds payable balance (completed campaign earnings)
+      if (validatedData.amount > payableBalance) {
+        throw new Error(`EXCEEDS_PAYABLE:${payableBalance}:${validatedData.amount}:${activeCampaignEarnings}`)
+      }
+
+      // Also validate against total available balance
       if (validatedData.amount > availableBalance) {
         throw new Error(`INSUFFICIENT_BALANCE:${availableBalance}:${validatedData.amount}`)
       }
@@ -186,6 +223,33 @@ export async function POST(request: NextRequest) {
       if (error.message === "INVALID_PAYPAL_EMAIL") {
         return NextResponse.json({
           error: "Invalid PayPal email address"
+        }, { status: 400 })
+      }
+
+      // NEW: Handle active campaigns only error
+      if (error.message.startsWith("ACTIVE_CAMPAIGNS_ONLY:")) {
+        const [, activeCampaignEarnings, campaignTitles] = error.message.split(':')
+        return NextResponse.json({
+          error: "Payouts not available yet",
+          code: "ACTIVE_CAMPAIGNS_ONLY",
+          message: "Your earnings are from campaigns that are still active. Payouts are available once campaigns are completed.",
+          activeCampaignEarnings: parseFloat(activeCampaignEarnings),
+          activeCampaigns: campaignTitles ? campaignTitles.split(',').filter(Boolean) : [],
+          hint: "Keep your videos live to maximize earnings. You'll be notified when campaigns complete and payouts become available."
+        }, { status: 400 })
+      }
+
+      // NEW: Handle exceeds payable balance error
+      if (error.message.startsWith("EXCEEDS_PAYABLE:")) {
+        const [, payableBalance, requestedAmount, activeCampaignEarnings] = error.message.split(':')
+        return NextResponse.json({
+          error: "Amount exceeds payable balance",
+          code: "EXCEEDS_PAYABLE",
+          message: `You can only request up to $${parseFloat(payableBalance).toFixed(2)} from completed campaigns. The remaining $${parseFloat(activeCampaignEarnings).toFixed(2)} will be available when active campaigns complete.`,
+          payableBalance: parseFloat(payableBalance),
+          requestedAmount: parseFloat(requestedAmount),
+          activeCampaignEarnings: parseFloat(activeCampaignEarnings),
+          hint: "Reduce your request amount or wait for active campaigns to complete."
         }, { status: 400 })
       }
     }

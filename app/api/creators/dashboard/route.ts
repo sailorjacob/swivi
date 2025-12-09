@@ -283,6 +283,18 @@ export async function GET(request: NextRequest) {
         return sum + Number(submission.clips?.earnings || 0)
       }, 0)
 
+    // Completed campaign earnings: These are payable NOW
+    // Only earnings from COMPLETED campaigns can be requested for payout
+    const completedCampaignEarnings = userData.clipSubmissions
+      .filter(s => s.status === 'APPROVED' && s.campaigns.status === 'COMPLETED')
+      .reduce((sum, submission) => {
+        return sum + Number(submission.clips?.earnings || 0)
+      }, 0)
+
+    // Payable balance: The amount that can actually be requested for payout
+    // This is the lesser of user's current balance and their completed campaign earnings
+    const payableBalance = Math.min(userCurrentBalance, completedCampaignEarnings)
+
     // Get recent clips with detailed view tracking including full scrape history
     const recentClips = userData.clipSubmissions.map(submission => {
       const clip = submission.clips
@@ -383,6 +395,8 @@ export async function GET(request: NextRequest) {
       activeCampaigns: activeCampaigns,
       availableBalance: availableBalance,
       activeCampaignEarnings: activeCampaignEarnings,
+      completedCampaignEarnings: completedCampaignEarnings,
+      payableBalance: payableBalance, // Amount that can be requested for payout
       totalEarnings: totalEarned,
       totalViews: totalViews,
       trackedViews: trackedViews

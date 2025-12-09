@@ -57,7 +57,13 @@ export default function PayoutsPage() {
   const availableBalance = dashboardData?.availableBalance || 0.00
   const totalEarned = dashboardData?.totalEarnings || 0.00
   const activeCampaignEarnings = dashboardData?.activeCampaignEarnings || 0.00
+  const completedCampaignEarnings = dashboardData?.completedCampaignEarnings || 0.00
+  const payableBalance = dashboardData?.payableBalance || 0.00
   const minimumPayout = 20.00
+  
+  // Check if user can request payouts (has earnings from completed campaigns)
+  const canRequestPayout = payableBalance >= minimumPayout
+  const hasOnlyActiveEarnings = activeCampaignEarnings > 0 && completedCampaignEarnings <= 0
 
   // Load dashboard data (earnings)
   const loadDashboard = useCallback(async () => {
@@ -136,8 +142,12 @@ export default function PayoutsPage() {
       return
     }
     
-    if (amount > availableBalance) {
-      toast.error("Insufficient balance")
+    if (amount > payableBalance) {
+      if (payableBalance <= 0) {
+        toast.error("No payouts available yet. Your earnings are from active campaigns that haven't completed.")
+      } else {
+        toast.error(`Maximum payable amount is $${payableBalance.toFixed(2)} (from completed campaigns)`)
+      }
       return
     }
     
@@ -181,8 +191,15 @@ export default function PayoutsPage() {
         loadDashboard()
         loadPayoutHistory()
       } else {
-        const error = await response.json()
-        toast.error(error.error || "Failed to submit payout request")
+        const errorData = await response.json()
+        // Handle specific error codes
+        if (errorData.code === 'ACTIVE_CAMPAIGNS_ONLY') {
+          toast.error("Your earnings are from active campaigns. Payouts available after campaign ends.")
+        } else if (errorData.code === 'EXCEEDS_PAYABLE') {
+          toast.error(`Maximum payable is $${errorData.payableBalance?.toFixed(2)}. Remaining earnings will be available after campaign ends.`)
+        } else {
+          toast.error(errorData.error || "Failed to submit payout request")
+        }
       }
     } catch (error) {
       console.error("Error submitting payout request:", error)
@@ -238,6 +255,16 @@ export default function PayoutsPage() {
   return (
     <div className="space-y-8">
       
+      {/* Active Campaign Earnings Notice */}
+      {hasOnlyActiveEarnings && (
+        <div className="p-4 bg-muted/50 border border-border rounded-lg">
+          <p className="text-sm text-muted-foreground">
+            Your <span className="font-medium text-foreground">${activeCampaignEarnings.toFixed(2)}</span> in earnings 
+            is from active campaigns. Payouts available once campaigns complete.
+          </p>
+        </div>
+      )}
+
       {/* Earnings Overview */}
       <div className="grid gap-4 md:grid-cols-3 mb-8">
         <Card className="bg-card border-border">
@@ -254,16 +281,21 @@ export default function PayoutsPage() {
 
         <Card className="bg-card border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Available Balance</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Payable Balance</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
-              ${availableBalance.toFixed(2)}
+              ${payableBalance.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">From completed campaigns</p>
-            {availableBalance < minimumPayout && (
+            {payableBalance > 0 && payableBalance < minimumPayout && (
               <p className="text-xs text-muted-foreground/70 mt-2">
-                Need ${(minimumPayout - availableBalance).toFixed(2)} more to request payout
+                Need ${(minimumPayout - payableBalance).toFixed(2)} more to request payout
+              </p>
+            )}
+            {payableBalance <= 0 && completedCampaignEarnings <= 0 && activeCampaignEarnings > 0 && (
+              <p className="text-xs text-muted-foreground/70 mt-2">
+                Waiting for campaigns to complete
               </p>
             )}
           </CardContent>
@@ -278,13 +310,18 @@ export default function PayoutsPage() {
               ${activeCampaignEarnings.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">From active campaigns</p>
+            {activeCampaignEarnings > 0 && (
+              <p className="text-xs text-muted-foreground/70 mt-2">
+                Available after campaign ends
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
 
       <div className="text-sm text-muted-foreground mb-4 p-4 bg-muted/30 rounded-lg">
         <p><strong>Minimum payout:</strong> ${minimumPayout.toFixed(2)}</p>
-        <p className="mt-1 text-xs">Active campaign earnings will be available for payout once campaigns are completed.</p>
+        <p className="mt-1 text-xs">Payouts are only available for earnings from completed campaigns. Keep your videos live to maximize earnings!</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -304,14 +341,18 @@ export default function PayoutsPage() {
                     type="number"
                     placeholder="0.00"
                     min={minimumPayout}
-                    max={availableBalance}
+                    max={payableBalance}
                     step="0.01"
                     value={payoutAmount}
                     onChange={(e) => setPayoutAmount(e.target.value)}
                     className="pl-10"
+                    disabled={!canRequestPayout}
                     required
                   />
                 </div>
+                {payableBalance > 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">Max: ${payableBalance.toFixed(2)}</p>
+                )}
               </div>
 
               <div>
@@ -357,12 +398,19 @@ export default function PayoutsPage() {
 
               <Button 
                 type="submit" 
-                disabled={isLoading}
+                disabled={isLoading || !canRequestPayout}
                 size="sm"
                 className="w-full"
               >
-                {isLoading ? "Processing..." : "Request Payout"}
+                {isLoading ? "Processing..." : !canRequestPayout ? (
+                  hasOnlyActiveEarnings ? "Campaign In Progress" : `Minimum $${minimumPayout} Required`
+                ) : "Request Payout"}
               </Button>
+              {!canRequestPayout && hasOnlyActiveEarnings && (
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Payouts available when campaign ends
+                </p>
+              )}
             </form>
           </CardContent>
         </Card>
