@@ -56,6 +56,21 @@ export class SimpleViewTracker {
     campaignBudget: number
     campaignSpent: number
   }>> {
+    // Debug: Log what we're looking for
+    const [activeCampaignCount, totalSubmissions, submissionsWithClipId, eligibleCount] = await Promise.all([
+      prisma.campaign.count({ where: { status: 'ACTIVE', isTest: false, deletedAt: null } }),
+      prisma.clipSubmission.count(),
+      prisma.clipSubmission.count({ where: { clipId: { not: null } } }),
+      prisma.clipSubmission.count({
+        where: {
+          clipId: { not: null },
+          status: { in: ['APPROVED', 'PENDING'] },
+          campaigns: { status: 'ACTIVE', isTest: false, deletedAt: null }
+        }
+      })
+    ])
+    console.log(`📊 Tracking eligibility: ${activeCampaignCount} active campaigns, ${totalSubmissions} total submissions, ${submissionsWithClipId} with clipId, ${eligibleCount} eligible for tracking`)
+
     // Get all submissions with clips from active campaigns
     const submissions = await prisma.clipSubmission.findMany({
       where: {
