@@ -96,12 +96,12 @@ export async function GET(request: NextRequest) {
     const tracker = new SimpleViewTracker()
 
     // Run the tracking loop - processes clips one by one
-    // - maxDurationMs: 240s (leave 60s buffer for 300s Vercel timeout)
-    // - maxClips: 100 clips per run (for ~600 clips/hour throughput with 10-min cron)
+    // - maxDurationMs: 270s (leave 30s buffer for 300s Vercel timeout)
+    // - maxClips: 100 clips per run
     // - delayBetweenMs: 500ms between clips (respectful to Apify rate limits)
     const result = await tracker.runTrackingLoop({
-      maxDurationMs: 240000,  // 240 seconds (leave 60s buffer)
-      maxClips: 100,          // 100 clips per run (6 runs/hour × 100 = 600 clips/hour)
+      maxDurationMs: 270000,  // 270 seconds (leave 30s buffer for Vercel's 300s limit)
+      maxClips: 100,          // 100 clips per run
       delayBetweenMs: 500     // 500ms between clips (safe for Apify)
     })
 

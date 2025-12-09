@@ -345,7 +345,9 @@ export class SimpleViewTracker {
       const elapsed = Date.now() - startTime
       const remaining = maxDurationMs - elapsed
       
-      if (remaining < 65000) { // Need at least 65s for one more clip (60s scrape + 5s buffer)
+      // Most scrapes take 5-15s, only stop when we have <20s left
+      // (the 60s timeout is a max, not typical duration)
+      if (remaining < 20000) { // Need at least 20s for one more clip
         console.log(`⏱️ Time budget low (${Math.round(remaining/1000)}s remaining), stopping gracefully`)
         return {
           processed,
