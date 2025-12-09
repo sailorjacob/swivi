@@ -9,160 +9,91 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { 
   ArrowLeft,
-  MessageSquare,
-  FileText,
-  TrendingUp,
-  Users,
-  Shield,
-  Clock,
-  Target,
-  CheckCircle2,
-  AlertTriangle,
-  Lightbulb
+  CheckCircle,
+  XCircle
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
-const bestPractices = [
+const criticalRules = [
   {
-    title: "Use Clear Terminology",
-    icon: MessageSquare,
-    description: "Speak the language of professional agencies",
-    dos: [
-      "Use terms like retainer, MSA, SOW, KPIs correctly",
-      "Define metrics clearly in all communications",
-      "Be precise about scope and deliverables",
-      "Document everything in writing"
-    ],
-    donts: [
-      "Use vague language about what's included",
-      "Promise things not explicitly in the agreement",
-      "Assume the client understands industry terms"
-    ]
+    rule: "Never quote a flat price first",
+    why: "Ask for their media budget. This anchors the conversation around value, not your costs. Let them tell you their range before you propose numbers.",
+    do: "\"What media budget are you working with for this activation?\"",
+    dont: "\"We can do this for $15,000.\""
   },
   {
-    title: "Structure Deals Thoughtfully",
-    icon: FileText,
-    description: "Create agreements that protect both parties",
-    dos: [
-      "Consider hybrid models (base + performance bonuses)",
-      "Include change order procedures for scope changes",
-      "Set clear payment milestones and terms",
-      "Define what's included AND excluded"
-    ],
-    donts: [
-      "Leave scope open-ended",
-      "Agree to unlimited revisions",
-      "Start work before contracts are signed"
-    ]
+    rule: "Separate your fees visually",
+    why: "Show Media Budget vs. Agency Fees vs. Usage Rights. Transparency builds trust and justifies your value.",
+    do: "Line-item breakdown showing pass-through costs separately from your management fee",
+    dont: "Single lump sum that hides your margins"
   },
   {
-    title: "Leverage Results",
-    icon: TrendingUp,
-    description: "Use your track record to win bigger deals",
-    dos: [
-      "Document all campaign metrics systematically",
-      "Create case studies from successful projects",
-      "Tie results to business outcomes (ROI, not just views)",
-      "Use past performance to justify pricing"
-    ],
-    donts: [
-      "Undersell your achievements",
-      "Forget to collect testimonials",
-      "Compare to irrelevant benchmarks"
-    ]
+    rule: "Never give away perpetuity rights for free",
+    why: "If they want content forever, that's a signal of massive value. Charge 100%+ markup for perpetual licensing.",
+    do: "\"Perpetual rights require a 100% licensing premium on the base rate.\"",
+    dont: "Including \"all rights in perpetuity\" in your base package"
   },
   {
-    title: "Educate Your Clients",
-    icon: Users,
-    description: "Help brands understand your value",
-    dos: [
-      "Explain how creator-driven content works",
-      "Share industry context and benchmarks",
-      "Be transparent about process and timeline",
-      "Set realistic expectations upfront"
-    ],
-    donts: [
-      "Assume they know how influencer marketing works",
-      "Overpromise to close a deal",
-      "Hide challenges or limitations"
-    ]
+    rule: "Always upsell usage rights after delivery",
+    why: "If they love the content, they'll want to use it more. This is found money.",
+    do: "\"For $10k, we can whitelist the top 20 posts so you can put ad spend behind them.\"",
+    dont: "Assuming the deal is done when content is delivered"
   },
   {
-    title: "Focus on Partnership",
-    icon: Shield,
-    description: "Build relationships, not just transactions",
-    dos: [
-      "Treat each project as part of a growing relationship",
-      "Proactively share insights and recommendations",
-      "Be responsive and communicative",
-      "Look for ways to add value beyond the contract"
-    ],
-    donts: [
-      "Disappear between deliverables",
-      "Only reach out when you want something",
-      "Treat clients as one-time transactions"
-    ]
+    rule: "Get an MSA before sending SOWs",
+    why: "Once the legal framework is in place, new campaigns don't need fresh legal review. This reduces friction for repeat business.",
+    do: "\"Let's get the MSA signed first—then we can move quickly on specific campaigns.\"",
+    dont: "Negotiating every single campaign from scratch"
   },
   {
-    title: "Manage Time Wisely",
-    icon: Clock,
-    description: "Protect your capacity and set boundaries",
-    dos: [
-      "Set clear response time expectations",
-      "Schedule regular check-ins vs. ad-hoc requests",
-      "Build buffer time into project timelines",
-      "Track time spent vs. estimated"
-    ],
-    donts: [
-      "Promise immediate responses 24/7",
-      "Let scope creep go unchecked",
-      "Underestimate how long things take"
-    ]
+    rule: "Position as strategic partner, not vendor",
+    why: "Vendors get one-off projects. Partners get retainers and long-term work. Partners are involved in strategy discussions.",
+    do: "\"Here's our recommendation for your Q1 activation strategy...\"",
+    dont: "\"Just tell us what you need and we'll quote it.\""
   },
   {
-    title: "Deliver Consistently",
-    icon: Target,
-    description: "Build a reputation for reliability",
-    dos: [
-      "Meet deadlines or communicate early if at risk",
-      "Maintain quality standards across all work",
-      "Provide regular progress updates",
-      "Own mistakes and fix them quickly"
-    ],
-    donts: [
-      "Miss deadlines without warning",
-      "Let quality slip on smaller projects",
-      "Make excuses instead of solutions"
-    ]
+    rule: "Never start work before contracts are signed",
+    why: "Verbal approvals are not binding. Scope creep happens. Protect yourself.",
+    do: "\"We'll begin creative briefing as soon as the SOW is executed.\"",
+    dont: "\"Sure, we can get started while legal reviews the paperwork.\""
   },
   {
-    title: "Protect Yourself",
-    icon: Shield,
-    description: "Mitigate risks with proper documentation",
-    dos: [
-      "Use contracts for all work, even small projects",
-      "Get sign-off on key deliverables",
-      "Document all communications and decisions",
-      "Have clear IP and usage terms"
-    ],
-    donts: [
-      "Work on a handshake agreement",
-      "Assume verbal approvals are binding",
-      "Forget to define ownership of content"
-    ]
+    rule: "Include revision limits in every SOW",
+    why: "Unlimited revisions erode margins quickly. Define what's included and what costs extra.",
+    do: "\"Two rounds of revisions included. Additional rounds at $X per round.\"",
+    dont: "\"We'll keep revising until you're happy.\""
   }
 ]
 
-const quickReminders = [
-  "Always get scope in writing before starting work",
-  "A smaller retainer beats a bigger one-off project",
-  "Your case studies are your most valuable sales tool",
+const quickReference = [
+  "Ask for their budget before quoting your price",
+  "Break fees into Media, Management, and Rights",
+  "Get the MSA signed first, then send SOWs",
+  "Start with a pilot project to prove value",
+  "Document everything in case study format",
   "Respond to client emails within 24 hours",
-  "Underpromise, overdeliver",
-  "When in doubt, schedule a call instead of a long email chain",
-  "Track everything—you'll need the data later",
-  "The best clients come from referrals"
+  "Include kill fees for cancelled projects",
+  "Set clear approval windows (48 hours = approved)"
+]
+
+const pricingMindset = [
+  {
+    shift: "From \"What do I need to charge?\"",
+    to: "\"What is this worth to them?\""
+  },
+  {
+    shift: "From \"Cost-plus markup\"",
+    to: "\"Value-based pricing with separate line items\""
+  },
+  {
+    shift: "From \"One flat fee\"",
+    to: "\"Base fee + Usage Rights + Whitelisting\""
+  },
+  {
+    shift: "From \"Competing on price\"",
+    to: "\"Competing on CPM efficiency and speed\""
+  }
 ]
 
 export default function BestPracticesPage() {
@@ -191,40 +122,35 @@ export default function BestPracticesPage() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="border-b border-border bg-card/50">
+      <div className="border-b border-border">
         <div className="container mx-auto px-6 py-6">
           <Link href="/admin/agency" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4" />
-            Back to Agency Hub
+            Back to Agency
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">Best Practices</h1>
           <p className="text-muted-foreground mt-1">
-            Quick reference principles for operating professionally
+            Operational principles for scaling to $100k+ deals
           </p>
         </div>
       </div>
 
       <div className="container mx-auto px-6 py-8 max-w-4xl">
-        {/* Quick Reminders */}
+        {/* Quick Reference */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
           className="mb-10"
         >
-          <Card className="bg-gradient-to-br from-foreground/5 to-foreground/10 border-foreground/10">
+          <Card className="border-foreground/10 bg-foreground/5">
             <CardContent className="pt-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-foreground/10 rounded-lg">
-                  <Lightbulb className="w-5 h-5" />
-                </div>
-                <h2 className="font-semibold">Quick Reminders</h2>
-              </div>
+              <h2 className="font-semibold mb-4">Quick Reference</h2>
               <div className="grid md:grid-cols-2 gap-3">
-                {quickReminders.map((reminder, i) => (
+                {quickReference.map((item, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-muted-foreground">{reminder}</span>
+                    <CheckCircle className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <span className="text-muted-foreground">{item}</span>
                   </div>
                 ))}
               </div>
@@ -232,66 +158,81 @@ export default function BestPracticesPage() {
           </Card>
         </motion.section>
 
-        {/* Best Practices Grid */}
-        <div className="space-y-6">
-          {bestPractices.map((practice, i) => (
-            <motion.div
-              key={practice.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 + i * 0.03 }}
-            >
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2.5 bg-foreground/5 rounded-lg">
-                      <practice.icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">{practice.title}</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">{practice.description}</p>
+        {/* Pricing Mindset Shifts */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="mb-10"
+        >
+          <h2 className="text-xl font-semibold mb-4">Pricing Mindset Shifts</h2>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                {pricingMindset.map((item, i) => (
+                  <div key={i} className={i !== pricingMindset.length - 1 ? "pb-4 border-b border-border/50" : ""}>
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <p className="text-sm text-muted-foreground line-through">{item.shift}</p>
+                      </div>
+                      <span className="text-muted-foreground">→</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{item.to}</p>
+                      </div>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="grid md:grid-cols-2 gap-6 pl-14">
-                    {/* Do's */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                        <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Do</span>
-                      </div>
-                      <ul className="space-y-2">
-                        {practice.dos.map((item, j) => (
-                          <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
-                            <span className="w-1 h-1 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.section>
+
+        <Separator className="my-8" />
+
+        {/* Critical Rules */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
+          <h2 className="text-xl font-semibold mb-4">Critical Rules</h2>
+          
+          <div className="space-y-4">
+            {criticalRules.map((item, i) => (
+              <motion.div
+                key={item.rule}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 + i * 0.03 }}
+              >
+                <Card>
+                  <CardContent className="py-5">
+                    <h3 className="font-medium mb-2">{item.rule}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">{item.why}</p>
                     
-                    {/* Don'ts */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <AlertTriangle className="w-4 h-4 text-amber-500" />
-                        <span className="text-sm font-medium text-amber-600 dark:text-amber-400">Don't</span>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-500" />
+                          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Do</span>
+                        </div>
+                        <p className="text-sm">{item.do}</p>
                       </div>
-                      <ul className="space-y-2">
-                        {practice.donts.map((item, j) => (
-                          <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
-                            <span className="w-1 h-1 rounded-full bg-amber-500 mt-2 flex-shrink-0" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <XCircle className="w-4 h-4 text-red-500" />
+                          <span className="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wider">Don't</span>
+                        </div>
+                        <p className="text-sm">{item.dont}</p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
 
         {/* Bottom CTA */}
         <motion.div
@@ -303,11 +244,11 @@ export default function BestPracticesPage() {
           <Card>
             <CardContent className="pt-6 text-center">
               <p className="text-muted-foreground mb-4">
-                Ready to put these practices into action?
+                Ready to structure your next deal?
               </p>
               <Link 
                 href="/admin/agency/deals/new"
-                className="inline-flex items-center justify-center rounded-full bg-foreground text-background px-6 py-2 text-sm font-medium hover:bg-foreground/90 transition-colors"
+                className="inline-flex items-center justify-center rounded-lg bg-foreground text-background px-6 py-2 text-sm font-medium hover:bg-foreground/90 transition-colors"
               >
                 Create a New Deal
               </Link>
@@ -318,4 +259,3 @@ export default function BestPracticesPage() {
     </div>
   )
 }
-

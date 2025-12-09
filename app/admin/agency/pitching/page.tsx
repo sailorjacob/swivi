@@ -10,136 +10,131 @@ import { motion } from "framer-motion"
 import { 
   ArrowLeft,
   Target,
-  TrendingUp,
-  FileText,
   Users,
-  CheckCircle,
-  Star,
   Lightbulb,
-  BarChart3,
-  Zap,
-  Award,
-  MessageSquare
+  FileText,
+  CheckCircle,
+  ArrowRight
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
-const buildingCredibility = [
+const whoToPitch = {
+  media: {
+    category: "Netflix / Media Companies",
+    titles: [
+      "Director of Title Marketing",
+      "Publicity Manager",
+      "Social Activation Lead",
+      "VP of Marketing (for bigger asks)"
+    ]
+  },
+  consumer: {
+    category: "Red Bull / Consumer Goods",
+    titles: [
+      "Field Marketing Manager",
+      "Brand Activation Manager",
+      "Culture Marketing Manager",
+      "Director of Digital Marketing"
+    ]
+  },
+  note: "Don't email the CEO. Email the people whose job depends on \"Activations\" and \"Buzz.\""
+}
+
+const innovationBudgetPitch = {
+  context: "Big brands use the 70-20-10 rule: 70% on proven standard ads, 20% on innovation, 10% on experimental.",
+  yourFit: "You fit perfectly into the 10-20% Innovation Budget. Position yourself there.",
+  pitch: "\"I know your core budget is allocated, but we fit perfectly into your Innovation Budget. We can flood the feed with 500+ authentic user videos for the price of one produced commercial.\""
+}
+
+const caseStudyStructure = [
   {
-    title: "Lead with Results",
-    description: "Open with specific, impressive metrics from past campaigns",
-    details: [
-      "Highlight views, engagement rates, conversions",
-      "Compare to industry benchmarks (show you outperform)",
-      "Use real campaign names when possible (with permission)",
-      "Quantify ROI—translate views to business value"
-    ],
-    icon: BarChart3
+    section: "The Hook / Headline",
+    description: "Lead with the impressive number",
+    example: "\"How we generated 20M organic views for Owning Manhattan at $1.15 CPM\""
   },
   {
-    title: "Case Studies",
-    description: "Document your wins in a format brands can easily review",
-    details: [
-      "Challenge: What was the brand trying to achieve?",
-      "Solution: What did you propose and execute?",
-      "Results: Hard numbers and outcomes",
-      "Testimonial: Client quote if available"
-    ],
-    icon: FileText
+    section: "The Problem",
+    description: "What the brand was trying to achieve",
+    example: "Netflix needed authentic buzz for their new luxury real estate series, beyond traditional ads."
   },
   {
-    title: "Niche Expertise",
-    description: "Emphasize what makes you different from traditional agencies",
-    details: [
-      "Creator network scale and quality",
-      "Platform-specific knowledge (TikTok, Instagram, etc.)",
-      "Speed and agility vs. big agencies",
-      "Authenticity of creator-driven content"
-    ],
-    icon: Star
+    section: "The Solution",
+    description: "What you proposed and executed",
+    example: "We activated 70 creators across TikTok and Instagram to create authentic reaction content over a 4-week flight."
+  },
+  {
+    section: "The Results",
+    description: "Hard numbers with context",
+    example: "20M+ organic views, 500K+ engagements, $1.15 CPM (vs. industry standard $4.60+)"
+  },
+  {
+    section: "The Capability Statement",
+    description: "Why you can do it again",
+    example: "\"We have a network of 70+ creators ready to activate in 48 hours. We don't just post; we create a 'surround sound' effect.\""
   }
 ]
 
 const pitchStructure = [
   {
     step: "1",
-    title: "Hook",
-    description: "Start with something that gets their attention—a surprising stat, a relevant success, or insight into their market."
+    title: "Don't Quote a Flat Price",
+    description: "Ask for their \"Media Budget\" first. This anchors the conversation around value, not your costs.",
+    example: "\"What media budget are you working with for this activation?\""
   },
   {
     step: "2",
-    title: "Problem / Opportunity",
-    description: "Show you understand their challenges or goals. This proves you've done your homework."
+    title: "Separate Your Fees",
+    description: "Show them \"Media Budget\" vs. \"Agency Management Fees\" vs. \"Usage Rights.\" Transparency builds trust.",
+    example: "\"Our proposal breaks down into three components: creator payments, our management fee, and optional usage rights.\""
   },
   {
     step: "3",
-    title: "Solution",
-    description: "Present your approach. How does your creator network solve their problem better than alternatives?"
-  },
-  {
-    step: "4",
-    title: "Proof",
-    description: "Back it up with case studies, metrics, and examples of similar work."
-  },
-  {
-    step: "5",
-    title: "Investment",
-    description: "Present the budget breakdown clearly. Show what they get at each level if offering options."
-  },
-  {
-    step: "6",
-    title: "Next Steps",
-    description: "Make it easy to say yes. Propose a clear path forward—meeting, pilot project, or contract."
+    title: "Upsell Rights",
+    description: "If they love the videos, that's your opening for additional revenue.",
+    example: "\"For an extra $10k, we can whitelist the top 20 posts so you can put ad spend behind them.\""
   }
 ]
 
-const landingClients = [
+const objectionHandlers = [
   {
-    approach: "Pilot Projects",
-    description: "Propose a smaller initial project to build trust",
-    why: "Lowers risk for the brand, lets you prove value before asking for bigger commitments",
-    icon: Zap
+    objection: "\"That's more than we budgeted\"",
+    response: "\"I understand. Let me show you the CPM breakdown—at $1.50 CPM, this is actually 3x more efficient than traditional media buying. What budget range would work for your team?\""
   },
   {
-    approach: "Personalized Outreach",
-    description: "Research the brand and tailor your pitch specifically to them",
-    why: "Generic pitches get ignored. Show you understand their brand, audience, and goals",
-    icon: MessageSquare
+    objection: "\"We can do this in-house\"",
+    response: "\"Absolutely you could. The question is whether managing 70 creator relationships, approvals, payouts, and QC is the best use of your team's time. We handle the headache so you can focus on strategy.\""
   },
   {
-    approach: "Network & Referrals",
-    description: "Leverage existing relationships and ask for introductions",
-    why: "Warm introductions convert at much higher rates than cold outreach",
-    icon: Users
+    objection: "\"We need to see results first\"",
+    response: "\"Let's start with a pilot—10 creators, 2-week flight. You'll see the quality and velocity before committing to a full campaign.\""
   },
   {
-    approach: "Demonstrate Value First",
-    description: "Consider creating spec content or analysis to show what you can do",
-    why: "Shows initiative and lets them see the quality before committing",
-    icon: Award
+    objection: "\"Why should we pay for usage rights?\"",
+    response: "\"The content performs 3-5x better than brand content on paid. You're paying for the ability to amplify proven winners, not just the content itself.\""
   }
 ]
 
-const valueTranslation = [
+const proofPoints = [
   {
-    metric: "Views",
-    business: "Brand Awareness / Reach",
-    tip: "Compare to paid media CPMs to show value"
+    metric: "20M+ Views",
+    context: "Owning Manhattan Campaign",
+    translation: "At market CPM ($4.60), that's $92,000 in media value"
   },
   {
-    metric: "Engagement",
-    business: "Audience Connection",
-    tip: "Higher engagement = more qualified attention"
+    metric: "$1.15 CPM",
+    context: "Your delivery cost",
+    translation: "75% below industry standard—massive value for clients"
   },
   {
-    metric: "Click-throughs",
-    business: "Traffic & Consideration",
-    tip: "Track with UTMs to prove website impact"
+    metric: "70+ Creators",
+    context: "Current network (scaling to 1,000+)",
+    translation: "48-hour activation capability"
   },
   {
-    metric: "Conversions",
-    business: "Revenue / ROI",
-    tip: "The ultimate proof of value—tie to sales when possible"
+    metric: "500K+ Engagements",
+    context: "Quality attention, not just views",
+    translation: "$0.02 CPE vs. $0.15 industry standard"
   }
 ]
 
@@ -169,80 +164,175 @@ export default function PitchingPage() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="border-b border-border bg-card/50">
+      <div className="border-b border-border">
         <div className="container mx-auto px-6 py-6">
           <Link href="/admin/agency" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4" />
-            Back to Agency Hub
+            Back to Agency
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">Pitching & Landing Clients</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Landing Big Clients</h1>
           <p className="text-muted-foreground mt-1">
-            How to win big brands and structure winning proposals
+            Strategy for pitching enterprise brands
           </p>
         </div>
       </div>
 
       <div className="container mx-auto px-6 py-8 max-w-4xl">
-        {/* Building Credibility */}
+        {/* Who to Pitch */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
           className="mb-12"
         >
-          <h2 className="text-xl font-semibold mb-2">Building Credibility</h2>
-          <p className="text-muted-foreground mb-6">
-            Establish trust and expertise before asking for big commitments.
-          </p>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-muted">
+              <Users className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <h2 className="text-xl font-semibold">Who to Pitch</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6">{whoToPitch.note}</p>
           
-          <div className="grid gap-4">
-            {buildingCredibility.map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-              >
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start gap-4">
-                      <div className="p-2.5 bg-foreground/5 rounded-lg">
-                        <item.icon className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-base">{item.title}</CardTitle>
-                        <CardDescription>{item.description}</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0 pl-16">
-                    <ul className="space-y-2">
-                      {item.details.map((detail, j) => (
-                        <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <CheckCircle className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                          {detail}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">{whoToPitch.media.category}</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <ul className="space-y-2">
+                  {whoToPitch.media.titles.map((title) => (
+                    <li key={title} className="text-sm text-muted-foreground flex items-center gap-2">
+                      <span className="w-1 h-1 rounded-full bg-muted-foreground" />
+                      {title}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">{whoToPitch.consumer.category}</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <ul className="space-y-2">
+                  {whoToPitch.consumer.titles.map((title) => (
+                    <li key={title} className="text-sm text-muted-foreground flex items-center gap-2">
+                      <span className="w-1 h-1 rounded-full bg-muted-foreground" />
+                      {title}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </motion.section>
 
         <Separator className="my-8" />
 
-        {/* Pitch Structure */}
+        {/* The Innovation Budget Pitch */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="mb-12"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-muted">
+              <Lightbulb className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <h2 className="text-xl font-semibold">The Innovation Budget Pitch</h2>
+          </div>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground mb-4">{innovationBudgetPitch.context}</p>
+              <p className="text-sm mb-4"><span className="font-medium">Your fit:</span> {innovationBudgetPitch.yourFit}</p>
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">The Pitch</p>
+                <p className="text-sm font-medium italic">{innovationBudgetPitch.pitch}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.section>
+
+        <Separator className="my-8" />
+
+        {/* Your Proof Points */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
           className="mb-12"
         >
-          <h2 className="text-xl font-semibold mb-2">Pitch Structure</h2>
-          <p className="text-muted-foreground mb-6">
-            A proven framework for structuring persuasive proposals.
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-muted">
+              <Target className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <h2 className="text-xl font-semibold">Your Proof Points</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6">Lead with these numbers. They translate directly to value.</p>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            {proofPoints.map((point) => (
+              <Card key={point.metric}>
+                <CardContent className="pt-6">
+                  <p className="text-2xl font-semibold mb-1">{point.metric}</p>
+                  <p className="text-sm text-muted-foreground mb-2">{point.context}</p>
+                  <p className="text-sm">{point.translation}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </motion.section>
+
+        <Separator className="my-8" />
+
+        {/* Case Study Structure */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="mb-12"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-muted">
+              <FileText className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <h2 className="text-xl font-semibold">Case Study Structure</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6">
+            Don't just say "we did this." Send a case study PDF with this structure:
+          </p>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-6">
+                {caseStudyStructure.map((item, i) => (
+                  <div key={item.section} className={i !== caseStudyStructure.length - 1 ? "pb-6 border-b border-border/50" : ""}>
+                    <h3 className="font-medium mb-1">{item.section}</h3>
+                    <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <p className="text-sm italic">"{item.example}"</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.section>
+
+        <Separator className="my-8" />
+
+        {/* The Pitch Flow */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25 }}
+          className="mb-12"
+        >
+          <h2 className="text-xl font-semibold mb-2">The Pitch Flow</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            For your next deal, follow this sequence:
           </p>
           
           <Card>
@@ -260,7 +350,10 @@ export default function PitchingPage() {
                     </div>
                     <div className="flex-1 pb-4">
                       <h3 className="font-medium mb-1">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                      <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
+                      <div className="p-2 bg-muted rounded text-sm font-mono">
+                        {item.example}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -271,104 +364,47 @@ export default function PitchingPage() {
 
         <Separator className="my-8" />
 
-        {/* Landing Clients */}
+        {/* Objection Handling */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.25 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
           className="mb-12"
         >
-          <h2 className="text-xl font-semibold mb-2">Landing Big Clients</h2>
-          <p className="text-muted-foreground mb-6">
-            Strategies for winning major brand partnerships.
+          <h2 className="text-xl font-semibold mb-2">Handling Objections</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            Common pushback and how to respond:
           </p>
           
-          <div className="grid md:grid-cols-2 gap-4">
-            {landingClients.map((item, i) => (
-              <motion.div
-                key={item.approach}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.25 + i * 0.05 }}
-              >
-                <Card className="h-full">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-muted rounded-lg">
-                        <item.icon className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <CardTitle className="text-base">{item.approach}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Why it works</p>
-                      <p className="text-sm">{item.why}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+          <div className="space-y-3">
+            {objectionHandlers.map((item) => (
+              <Card key={item.objection}>
+                <CardContent className="py-4">
+                  <p className="text-sm font-medium mb-2">{item.objection}</p>
+                  <div className="flex items-start gap-2">
+                    <ArrowRight className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-muted-foreground">{item.response}</p>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </motion.section>
-
-        <Separator className="my-8" />
-
-        {/* Translating Value */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.35 }}
-          className="mb-12"
-        >
-          <h2 className="text-xl font-semibold mb-2">Translating Metrics to Business Value</h2>
-          <p className="text-muted-foreground mb-6">
-            Brands care about outcomes. Here's how to connect your metrics to their goals.
-          </p>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-3 gap-4 text-sm font-medium mb-3 text-muted-foreground">
-                <div>Your Metric</div>
-                <div>Business Impact</div>
-                <div>Pro Tip</div>
-              </div>
-              <div className="divide-y divide-border">
-                {valueTranslation.map((item) => (
-                  <div key={item.metric} className="grid grid-cols-3 gap-4 py-4 text-sm">
-                    <div className="font-medium">{item.metric}</div>
-                    <div className="text-muted-foreground">{item.business}</div>
-                    <div className="text-muted-foreground">{item.tip}</div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </motion.section>
 
         {/* Key Insight */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.45 }}
+          transition={{ duration: 0.4, delay: 0.35 }}
         >
-          <Card className="bg-gradient-to-br from-foreground/5 to-foreground/10 border-foreground/10">
+          <Card className="border-foreground/10 bg-foreground/5">
             <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-foreground/10 rounded-xl">
-                  <Lightbulb className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-lg mb-2">The Small Agency Advantage</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Social media democratizes advertising, giving nimble teams direct access to target audiences. 
-                    Your agility, creator relationships, and platform expertise are competitive advantages over 
-                    larger, slower agencies. Lean into what makes you different—authenticity, speed, and 
-                    creator-native content that performs.
-                  </p>
-                </div>
-              </div>
+              <h3 className="font-semibold mb-3">The Small Agency Advantage</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Social media democratizes advertising. Your agility, creator relationships, and platform expertise are competitive 
+                advantages over larger, slower agencies. You can activate 70 creators in 48 hours—try getting that from a holding company.
+                Lean into what makes you different: <span className="text-foreground">authenticity, speed, and creator-native content that performs.</span>
+              </p>
             </CardContent>
           </Card>
         </motion.div>
@@ -376,4 +412,3 @@ export default function PitchingPage() {
     </div>
   )
 }
-
