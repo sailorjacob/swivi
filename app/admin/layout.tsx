@@ -18,7 +18,8 @@ import {
   Menu,
   ArrowLeft,
   Wallet,
-  Trophy
+  Trophy,
+  FileText
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -55,6 +56,11 @@ const navItems: NavItem[] = [
     label: "Payout Management",
     href: "/admin/payouts",
     icon: Wallet
+  },
+  {
+    label: "Proposals & Deals",
+    href: "/admin/proposals",
+    icon: FileText
   },
   {
     label: "Analytics",
