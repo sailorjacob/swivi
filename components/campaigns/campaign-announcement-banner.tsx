@@ -26,37 +26,42 @@ export const CAMPAIGN_UPDATES: Record<string, {
   }[]
   contentFolders?: { label: string; url: string }[]
 }> = {
-  "serhant-dec-2024": {
-    id: "serhant-dec-2024",
+  "serhant-dec-2025": {
+    id: "serhant-dec-2025",
     title: "SERHANT Team Update",
-    date: "December 2024",
+    date: "December 9, 2025",
     campaignMatch: (title: string) => {
       const t = title.toLowerCase()
       return t.includes("owning manhattan") && t.includes("season 2")
     },
     sections: [
       {
-        heading: "New Directive",
+        heading: "From the SERHANT Team",
         content: [
-          "New batch of content, some of the punchier moments. There could be shorter clips made out of these.",
-          "Need to push clippers to add punchy on-video text.",
-          "Have them watch the full video and get the context of the situation.",
-          "We need clever stuff, memeable stuff, stuff people can connect and relate to, stuff they want to share with a friend.",
-          "Need to avoid duplicate content / posts being accepted into the campaign."
+          "New batch of content is now live — some of the punchier moments from the show. There could be shorter clips made out of these.",
         ]
       },
       {
-        heading: "What This Means",
+        heading: "What They're Looking For",
         content: [
-          "They're happy with the momentum, but they want the next level.",
+          "Add punchy on-video text to your clips.",
+          "Watch the full video and understand the context before clipping.",
+          "Create clever stuff, memeable stuff, content people can connect and relate to — stuff they want to share with a friend.",
+          "Avoid duplicate content. Recycled posts will not be accepted."
+        ]
+      },
+      {
+        heading: "The Takeaway",
+        content: [
+          "The team is happy with the momentum so far, but they want the next level.",
           "Funnier. Punchier. Sharper text. More context-aware edits. Zero duplicates."
         ]
       },
       {
-        heading: "Action",
+        heading: "Your Action Items",
         content: [
-          "Pull clips from the new batch.",
-          "Watch the full videos.",
+          "Pull clips from the new content batch.",
+          "Watch the full videos first.",
           "Extract the human moments.",
           "Build edits that hit instantly.",
           "Add on-screen captions that elevate the joke, the awkwardness, the drama, or the relatability.",
