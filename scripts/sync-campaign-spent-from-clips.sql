@@ -1,6 +1,7 @@
 -- ============================================================================
 -- FIX: Sync campaign.spent to actual clip earnings
 -- This ensures campaign.spent matches the sum of clip.earnings for that campaign
+-- NOTE: Column names use camelCase (Prisma convention)
 -- ============================================================================
 
 -- STEP 1: Preview what will be fixed (DRY RUN)
@@ -14,14 +15,14 @@ SELECT
 FROM campaigns c
 LEFT JOIN (
   SELECT 
-    cs.campaign_id,
+    cs."campaignId",
     SUM(cl.earnings) as total_earnings
   FROM clip_submissions cs
-  JOIN clips cl ON cs.clip_id = cl.id
+  JOIN clips cl ON cs."clipId" = cl.id
   WHERE cs.status = 'APPROVED'
-  GROUP BY cs.campaign_id
-) actual ON c.id = actual.campaign_id
-WHERE c.deleted_at IS NULL
+  GROUP BY cs."campaignId"
+) actual ON c.id = actual."campaignId"
+WHERE c."deletedAt" IS NULL
   AND ABS(c.spent - COALESCE(actual.total_earnings, 0)) > 0.01
 ORDER BY ABS(c.spent - COALESCE(actual.total_earnings, 0)) DESC;
 
@@ -29,21 +30,20 @@ ORDER BY ABS(c.spent - COALESCE(actual.total_earnings, 0)) DESC;
 /*
 UPDATE campaigns c
 SET spent = COALESCE(actual.total_earnings, 0),
-    updated_at = NOW()
+    "updatedAt" = NOW()
 FROM (
   SELECT 
-    cs.campaign_id,
+    cs."campaignId",
     SUM(cl.earnings) as total_earnings
   FROM clip_submissions cs
-  JOIN clips cl ON cs.clip_id = cl.id
+  JOIN clips cl ON cs."clipId" = cl.id
   WHERE cs.status = 'APPROVED'
-  GROUP BY cs.campaign_id
+  GROUP BY cs."campaignId"
 ) actual
-WHERE c.id = actual.campaign_id
-  AND c.deleted_at IS NULL
+WHERE c.id = actual."campaignId"
+  AND c."deletedAt" IS NULL
   AND ABS(c.spent - COALESCE(actual.total_earnings, 0)) > 0.01;
 */
 
 -- STEP 3: Verify fix worked
 -- Run the preview query again to confirm no discrepancies remain
-
