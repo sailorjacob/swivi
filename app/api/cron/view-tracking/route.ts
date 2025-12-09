@@ -9,7 +9,8 @@ import { prisma } from "@/lib/prisma"
 // It processes clips ONE BY ONE - simple, reliable, consistent
 
 // Lock timeout in minutes - if a job is older than this, consider it stale
-const LOCK_TIMEOUT_MINUTES = 20
+// Reduced to 10 minutes to match our 10-minute cron frequency
+const LOCK_TIMEOUT_MINUTES = 10
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,11 +31,35 @@ export async function GET(request: NextRequest) {
     }
 
     // ============================================
+    // AUTO-CLEANUP: Clear truly stuck jobs first
+    // ============================================
+    const stuckJobCutoff = new Date(Date.now() - LOCK_TIMEOUT_MINUTES * 60 * 1000)
+    
+    // Auto-clear any jobs that have been "RUNNING" for longer than the timeout
+    // This prevents jobs that crashed without updating their status from blocking forever
+    const clearedStuckJobs = await prisma.cronJobLog.updateMany({
+      where: {
+        jobName: 'view-tracking',
+        status: 'RUNNING',
+        startedAt: { lt: stuckJobCutoff }
+      },
+      data: {
+        status: 'FAILED',
+        completedAt: new Date(),
+        errorMessage: 'Auto-cleared: exceeded lock timeout (likely crashed)'
+      }
+    })
+    
+    if (clearedStuckJobs.count > 0) {
+      console.log(`🧹 Auto-cleared ${clearedStuckJobs.count} stuck job(s) that exceeded ${LOCK_TIMEOUT_MINUTES}min timeout`)
+    }
+
+    // ============================================
     // LOCK CHECK: Prevent overlapping runs
     // ============================================
     const lockCutoff = new Date(Date.now() - LOCK_TIMEOUT_MINUTES * 60 * 1000)
     
-    // Check if there's a recent job still running
+    // Check if there's a recent job still running (within the timeout window)
     const runningJob = await prisma.cronJobLog.findFirst({
       where: {
         jobName: 'view-tracking',
@@ -72,12 +97,12 @@ export async function GET(request: NextRequest) {
 
     // Run the tracking loop - processes clips one by one
     // - maxDurationMs: 240s (leave 60s buffer for 300s Vercel timeout)
-    // - maxClips: 75 clips per run (increased since we run every 45 min instead of 10 min)
-    // - delayBetweenMs: 500ms between clips (be nice to Apify)
+    // - maxClips: 100 clips per run (for ~600 clips/hour throughput with 10-min cron)
+    // - delayBetweenMs: 500ms between clips (respectful to Apify rate limits)
     const result = await tracker.runTrackingLoop({
       maxDurationMs: 240000,  // 240 seconds (leave 60s buffer)
-      maxClips: 75,           // 75 clips per run (increased for 45-min intervals)
-      delayBetweenMs: 500     // 500ms between clips
+      maxClips: 100,          // 100 clips per run (6 runs/hour × 100 = 600 clips/hour)
+      delayBetweenMs: 500     // 500ms between clips (safe for Apify)
     })
 
     const duration = Date.now() - startTime

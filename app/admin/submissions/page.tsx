@@ -764,11 +764,15 @@ export default function AdminSubmissionsPage() {
                       
                       {/* View Stats - Compact but informative */}
                       {(() => {
-                        const hasInitialViews = submission.initialViews && Number(submission.initialViews) > 0
-                        const hasCurrentViews = submission.currentViews && Number(submission.currentViews) > 0
+                        const hasViews = submission.initialViews !== undefined || submission.currentViews !== undefined
+                        const viewsValue = Number(submission.currentViews || submission.initialViews || 0)
                         const isScraping = submission.processingStatus === 'SCRAPING'
                         const scrapeFailed = submission.processingStatus?.startsWith('SCRAPE_FAILED') || 
                                             submission.processingStatus?.startsWith('SCRAPE_ERROR')
+                        // Has been scraped if: processingStatus is COMPLETE, or has view_tracking records, or has clip with views
+                        const hasBeenScraped = submission.processingStatus === 'COMPLETE' || 
+                                              (submission.clips?.view_tracking && submission.clips.view_tracking.length > 0) ||
+                                              submission.clips?.views !== undefined
                         
                         if (isScraping) {
                           return (
@@ -779,7 +783,17 @@ export default function AdminSubmissionsPage() {
                           )
                         }
                         
-                        if (hasInitialViews || hasCurrentViews) {
+                        if (scrapeFailed) {
+                          return (
+                            <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 whitespace-nowrap flex-shrink-0" title={submission.processingStatus}>
+                              <AlertCircle className="w-3 h-3" />
+                              <span className="hidden sm:inline">Scrape </span>failed
+                            </span>
+                          )
+                        }
+                        
+                        // Show view stats if we have any data (even 0 views after scrape)
+                        if (hasBeenScraped || hasViews) {
                           return (
                             <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
                               <span className="bg-muted px-1.5 md:px-2 py-0.5 rounded text-foreground font-medium whitespace-nowrap">
@@ -787,7 +801,7 @@ export default function AdminSubmissionsPage() {
                               </span>
                               <span className="text-muted-foreground">→</span>
                               <span className="bg-muted px-1.5 md:px-2 py-0.5 rounded text-foreground font-medium whitespace-nowrap">
-                                {Number(submission.currentViews || submission.initialViews || 0).toLocaleString()}<span className="hidden sm:inline"> current</span>
+                                {viewsValue.toLocaleString()}<span className="hidden sm:inline"> current</span>
                               </span>
                               {submission.viewChange && Number(submission.viewChange) > 0 && (
                                 <span className="text-green-600 dark:text-green-400 font-medium whitespace-nowrap">
@@ -795,15 +809,6 @@ export default function AdminSubmissionsPage() {
                                 </span>
                               )}
                             </div>
-                          )
-                        }
-                        
-                        if (scrapeFailed) {
-                          return (
-                            <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 whitespace-nowrap flex-shrink-0" title={submission.processingStatus}>
-                              <AlertCircle className="w-3 h-3" />
-                              <span className="hidden sm:inline">Scrape </span>failed
-                            </span>
                           )
                         }
                         
