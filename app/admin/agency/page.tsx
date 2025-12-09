@@ -23,6 +23,13 @@ import { Button } from "@/components/ui/button"
 
 const resourceCards = [
   {
+    title: "Knowledge Base",
+    description: "In-depth guides on agency models, pricing structures, and scaling strategies",
+    href: "/admin/agency/knowledge",
+    icon: BookOpen,
+    highlights: ["Agency Models", "Value Gap Analysis", "$100k Deal Guide"]
+  },
+  {
     title: "How We Work",
     description: "Pricing models, deal structures, and the agency formula for $100k+ campaigns",
     href: "/admin/agency/guide",
