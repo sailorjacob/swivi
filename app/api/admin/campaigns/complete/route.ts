@@ -84,10 +84,10 @@ export async function POST(request: NextRequest) {
       return sum + Number(sub.clips?.earnings || 0)
     }, 0)
 
-    // Calculate total views
+    // Calculate total views - use clip.views (MAX ever tracked) as source of truth
     const totalViews = approvedSubmissions.reduce((sum, sub) => {
-      const latestTracking = sub.clips?.view_tracking?.[0]
-      return sum + Number(latestTracking?.views || sub.clips?.views || 0)
+      // clip.views stores MAX ever tracked, more reliable than viewTracking[0]
+      return sum + Number(sub.clips?.views || sub.clips?.view_tracking?.[0]?.views || 0)
     }, 0)
 
     // Build user breakdown

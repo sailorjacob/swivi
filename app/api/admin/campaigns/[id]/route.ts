@@ -119,9 +119,11 @@ export async function GET(
     // Process submissions to include calculated fields and scrape tracking
     const processedSubmissions = campaign.clipSubmissions.map(sub => {
       const viewTracking = sub.clips?.view_tracking || []
-      const latestViews = viewTracking[0]?.views || sub.clips?.views || 0
-      const initialViews = sub.initialViews || 0
-      const viewsGained = Number(latestViews) - Number(initialViews)
+      // IMPORTANT: Use clip.views as source of truth (MAX ever tracked)
+      // viewTracking stores each scrape which may return lower values on failure
+      const currentViews = Number(sub.clips?.views || viewTracking[0]?.views || 0)
+      const initialViews = Number(sub.initialViews || 0)
+      const viewsGained = Math.max(0, currentViews - initialViews)
       const earnings = Number(sub.clips?.earnings || 0)
       const scrapeCount = viewTracking.length
 
@@ -132,8 +134,8 @@ export async function GET(
         status: sub.status,
         clipStatus: sub.clips?.status || null,
         createdAt: sub.createdAt,
-        initialViews: Number(initialViews),
-        currentViews: Number(latestViews),
+        initialViews,
+        currentViews,
         viewsGained,
         earnings,
         scrapeCount,

@@ -349,24 +349,25 @@ export async function GET(request: NextRequest) {
         }
       })
 
+      // Use clip.views (MAX ever tracked) as source of truth
       const totalCampaignViews = campaignSubmissions.reduce((sum, submission) => {
-        if (submission.clips?.viewTracking && submission.clips.viewTracking.length > 0) {
-          return sum + Number(submission.clips.viewTracking[0]?.views || 0)
-        }
-        return sum
+        // Prefer clip.views over viewTracking[0] since clip.views stores MAX
+        const views = Number(submission.clip?.views || submission.clip?.viewTracking?.[0]?.views || 0)
+        return sum + views
       }, 0)
 
       const totalCampaignEarnings = campaignSubmissions
-        .filter(s => s.clips)
-        .reduce((sum, s) => sum + Number(s.clips?.earnings || 0), 0)
+        .filter(s => s.clip)
+        .reduce((sum, s) => sum + Number(s.clip?.earnings || 0), 0)
 
       const topPerformers = campaignSubmissions
-        .filter(submission => submission.clips?.viewTracking && submission.clips.viewTracking.length > 0)
+        .filter(submission => submission.clip)
         .map(submission => ({
           userId: submission.users.id,
           userName: submission.users.name || submission.users.email || 'Unknown',
-          views: Number(submission.clips?.viewTracking[0]?.views || 0),
-          earnings: Number(submission.clips?.earnings || 0),
+          // Use clip.views (MAX) as source of truth
+          views: Number(submission.clip?.views || submission.clip?.viewTracking?.[0]?.views || 0),
+          earnings: Number(submission.clip?.earnings || 0),
           submissionId: submission.id
         }))
         .sort((a, b) => b.views - a.views)
@@ -415,11 +416,11 @@ export async function GET(request: NextRequest) {
       })
 
       if (userStats) {
+        // Use clip.views (MAX ever tracked) as source of truth
         const totalUserViews = userStats.clipSubmissions.reduce((sum, submission) => {
-          if (submission.clip?.viewTracking && submission.clip.viewTracking.length > 0) {
-            return sum + Number(submission.clip.viewTracking[0]?.views || 0)
-          }
-          return sum
+          // Prefer clip.views over viewTracking[0] since clip.views stores MAX
+          const views = Number(submission.clip?.views || submission.clip?.viewTracking?.[0]?.views || 0)
+          return sum + views
         }, 0)
 
         const totalUserEarnings = userStats.clipSubmissions
@@ -427,11 +428,12 @@ export async function GET(request: NextRequest) {
           .reduce((sum, s) => sum + Number(s.clip?.earnings || 0), 0)
 
         const recentSubmissions = userStats.clipSubmissions
-          .filter(submission => submission.clip?.viewTracking && submission.clip.viewTracking.length > 0)
+          .filter(submission => submission.clip)
           .map(submission => ({
             campaignTitle: submission.campaign.title,
             platform: submission.platform,
-            views: Number(submission.clip?.viewTracking[0]?.views || 0),
+            // Use clip.views (MAX) as source of truth
+            views: Number(submission.clip?.views || submission.clip?.viewTracking?.[0]?.views || 0),
             earnings: Number(submission.clip?.earnings || 0),
             status: submission.status,
             submittedAt: submission.createdAt

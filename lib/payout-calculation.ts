@@ -115,11 +115,10 @@ export class PayoutCalculationService {
       for (const submission of campaign.clipSubmissions) {
         if (!submission.clips) continue
 
-        // Get latest view tracking data
-        const latestTracking = submission.clips.view_tracking
-          .sort((a, b) => b.date.getTime() - a.date.getTime())[0]
-
-        const views = latestTracking ? Number(latestTracking.views) : 0
+        // Use clip.views (MAX ever tracked) as source of truth
+        // viewTracking stores each scrape which may return lower values on failure
+        const views = Number(submission.clips.views || 
+          submission.clips.view_tracking?.sort((a, b) => b.date.getTime() - a.date.getTime())[0]?.views || 0)
         const payoutAmount = this.calculatePayoutAmount(views, campaign.payoutRate)
 
         if (payoutAmount > 0) {
@@ -264,11 +263,13 @@ export class PayoutCalculationService {
       const approvedSubmissions = campaign.clipSubmissions.filter(s => s.status === 'APPROVED').length
 
       // Calculate total views from approved submissions
+      // Use clip.views (MAX ever tracked) as source of truth
       const totalViews = campaign.clipSubmissions.reduce((sum, submission) => {
         if (!submission.clips) return sum
-        const latestTracking = submission.clips.viewTracking
-          .sort((a, b) => b.date.getTime() - a.date.getTime())[0]
-        return sum + (latestTracking ? Number(latestTracking.views) : 0)
+        // Prefer clip.views over viewTracking[0] since clip.views stores MAX
+        const views = Number(submission.clips.views || 
+          submission.clips.viewTracking?.sort((a, b) => b.date.getTime() - a.date.getTime())[0]?.views || 0)
+        return sum + views
       }, 0)
 
       const totalPayouts = campaign.clipSubmissions.reduce((sum, submission) => {

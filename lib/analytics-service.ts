@@ -147,11 +147,11 @@ export class AnalyticsService {
         const totalSubmissions = campaign.clipSubmissions.length
         const approvedSubmissions = campaign.clipSubmissions.filter(s => s.status === 'APPROVED').length
 
+        // Use clip.views (MAX ever tracked) as source of truth
         const totalViews = campaign.clipSubmissions.reduce((sum, submission) => {
-          if (submission.clips?.viewTracking && submission.clips.viewTracking.length > 0) {
-            return sum + Number(submission.clips.viewTracking[0]?.views || 0)
-          }
-          return sum
+          // Prefer clip.views over viewTracking[0] since clip.views stores MAX
+          const views = Number(submission.clips?.views || submission.clips?.viewTracking?.[0]?.views || 0)
+          return sum + views
         }, 0)
 
         const totalEarnings = campaign.clipSubmissions
@@ -237,11 +237,11 @@ export class AnalyticsService {
         const totalSubmissions = user.clipSubmissions.length
         const approvedSubmissions = user.clipSubmissions.filter(s => s.status === 'APPROVED').length
 
+        // Use clip.views (MAX ever tracked) as source of truth
         const totalViews = user.clipSubmissions.reduce((sum, submission) => {
-          if (submission.clip?.viewTracking && submission.clip.viewTracking.length > 0) {
-            return sum + Number(submission.clip.viewTracking[0]?.views || 0)
-          }
-          return sum
+          // Prefer clip.views over viewTracking[0] since clip.views stores MAX
+          const views = Number(submission.clip?.views || submission.clip?.viewTracking?.[0]?.views || 0)
+          return sum + views
         }, 0)
 
         const totalEarnings = user.clipSubmissions
