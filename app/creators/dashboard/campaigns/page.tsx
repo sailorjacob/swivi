@@ -9,6 +9,7 @@ import { Badge } from "../../../../components/ui/badge"
 import { Button } from "../../../../components/ui/button"
 import { Progress } from "../../../../components/ui/progress"
 import { CampaignBonusModal } from "../../../../components/campaigns/campaign-bonus-modal"
+import { CampaignAnnouncementNotification, campaignHasAnnouncement } from "../../../../components/campaigns/campaign-announcement-banner"
 import { LinkifyText } from "../../../../components/ui/linkify-text"
 import { ErrorBoundary, CampaignErrorFallback } from "../../../../components/error-boundary"
 import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar"
@@ -414,7 +415,14 @@ export default function CampaignsPage() {
             transition={{ duration: 0.5 }}
             whileHover={{ y: -4, scale: 1.02 }}
           >
-            <Card className={`bg-card border-border hover:shadow-xl transition-all duration-300 cursor-pointer group ${isCompleted ? 'opacity-75 border-green-500/30' : ''} ${isScheduled && filter === 'active' ? 'opacity-60' : ''}`}>
+            <Card className={`bg-card border-border hover:shadow-xl transition-all duration-300 cursor-pointer group relative ${isCompleted ? 'opacity-75 border-green-500/30' : ''} ${isScheduled && filter === 'active' ? 'opacity-60' : ''}`}>
+              {/* Announcement notification indicator */}
+              {campaignHasAnnouncement(campaign.title) && isActive && (
+                <CampaignAnnouncementNotification
+                  campaignTitle={campaign.title}
+                  onClick={() => handleViewCampaign(campaign)}
+                />
+              )}
               <CardContent className="p-0">
                 {/* Campaign Image */}
                 <div 

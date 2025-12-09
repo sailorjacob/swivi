@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CampaignBonusModal } from "@/components/campaigns/campaign-bonus-modal"
+import { CampaignUpdateButton } from "@/components/campaigns/campaign-announcement-banner"
 import { LinkifyParagraph } from "@/components/ui/linkify-text"
 import toast from "react-hot-toast"
 import Link from "next/link"
@@ -667,6 +668,8 @@ export default function CampaignDetailPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Team Update Button */}
+              <CampaignUpdateButton campaignTitle={campaign.title} />
               {/* Activity Button */}
               <Button
                 variant="outline"
