@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CampaignBonusModal } from "@/components/campaigns/campaign-bonus-modal"
-import { CampaignUpdateButton } from "@/components/campaigns/campaign-announcement-banner"
+import { CampaignUpdateButton, CampaignUpdateAutoOpen } from "@/components/campaigns/campaign-announcement-banner"
 import { LinkifyParagraph } from "@/components/ui/linkify-text"
 import toast from "react-hot-toast"
 import Link from "next/link"
@@ -431,6 +431,9 @@ export default function CampaignDetailPage() {
 
   return (
     <div className="space-y-6">
+      {/* Auto-open team update dialog */}
+      {campaign && <CampaignUpdateAutoOpen campaignTitle={campaign.title} />}
+
       {/* Floating refresh indicator - positioned absolute so it doesn't push content */}
       {isRefreshing && (
         <div className="fixed top-20 right-4 z-50 pointer-events-none">

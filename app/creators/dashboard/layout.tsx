@@ -34,6 +34,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle"
 // import { NotificationBell } from "@/components/notifications/notification-bell"
 import { ErrorBoundary, DashboardErrorFallback } from "@/components/error-boundary"
 import { AccountSetupPrompt } from "@/components/creators/account-setup-prompt"
+import { TeamUpdatePopup } from "@/components/campaigns/campaign-announcement-banner"
 
 interface NavItem {
   label: string
@@ -246,8 +247,26 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [hasSubmissions, setHasSubmissions] = useState(false)
   const { data: session, status } = useSession()
   const router = useRouter()
+
+  // Check if user has submissions (for team update popup)
+  useEffect(() => {
+    const checkSubmissions = async () => {
+      if (!session?.user?.id) return
+      try {
+        const response = await authenticatedFetch("/api/creators/submissions?limit=1")
+        if (response.ok) {
+          const data = await response.json()
+          setHasSubmissions(Array.isArray(data) && data.length > 0)
+        }
+      } catch {
+        // Ignore errors
+      }
+    }
+    checkSubmissions()
+  }, [session?.user?.id])
 
   useEffect(() => {
     if (status === "loading") return
@@ -329,6 +348,9 @@ export default function DashboardLayout({
 
           {/* Account Setup Prompt - floating at bottom for new users */}
           <AccountSetupPrompt />
+
+          {/* Team Update Popup - shows once on login if user has submissions */}
+          <TeamUpdatePopup hasSubmittedToCampaign={hasSubmissions} />
         </main>
 
         {/* Footer */}

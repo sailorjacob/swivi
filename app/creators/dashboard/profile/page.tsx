@@ -35,6 +35,7 @@ import Link from "next/link"
 import toast from "react-hot-toast"
 import { SocialVerificationDialog } from "../../../../components/creators/social-verification-dialog"
 import { SupportTicketDialog } from "../../../../components/creators/support-ticket-dialog"
+import { ProfileMessagesSection } from "../../../../components/campaigns/campaign-announcement-banner"
 
 interface UserProfile {
   id: string
@@ -592,58 +593,64 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Support & Sign Out */}
-        <div className="mt-auto pt-6 space-y-3">
-          {/* Support Tickets Status */}
-          {supportTickets.length > 0 && (
-            <Link href="/creators/dashboard/support">
-              <div className="p-3 rounded-lg border border-border bg-card/50 hover:bg-card/70 transition-colors cursor-pointer group">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                      {ticketsWithReplies > 0 && (
-                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm text-foreground">
-                        {supportTickets.length} {supportTickets.length === 1 ? 'ticket' : 'tickets'}
+        {/* Team Updates & Support */}
+        <div className="mt-auto pt-6 space-y-6">
+          {/* Team Updates / Messages */}
+          <ProfileMessagesSection />
+
+          {/* Support Section */}
+          <div className="space-y-3">
+            {/* Support Tickets Status */}
+            {supportTickets.length > 0 && (
+              <Link href="/creators/dashboard/support">
+                <div className="p-3 rounded-lg border border-border bg-card/50 hover:bg-card/70 transition-colors cursor-pointer group">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <MessageSquare className="w-4 h-4 text-muted-foreground" />
                         {ticketsWithReplies > 0 && (
-                          <span className="text-primary ml-1">
-                            • {ticketsWithReplies} {ticketsWithReplies === 1 ? 'reply' : 'replies'}
-                          </span>
+                          <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full" />
                         )}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {ticketsWithReplies > 0 ? 'View responses' : 'View your tickets'}
-                      </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-foreground">
+                          {supportTickets.length} {supportTickets.length === 1 ? 'ticket' : 'tickets'}
+                          {ticketsWithReplies > 0 && (
+                            <span className="text-primary ml-1">
+                              • {ticketsWithReplies} {ticketsWithReplies === 1 ? 'reply' : 'replies'}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {ticketsWithReplies > 0 ? 'View responses' : 'View your tickets'}
+                        </p>
+                      </div>
                     </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </div>
-              </div>
-            </Link>
-          )}
-          
-          <SupportTicketDialog>
+              </Link>
+            )}
+            
+            <SupportTicketDialog>
+              <Button
+                variant="outline"
+                className="w-full text-muted-foreground hover:text-foreground border-border hover:bg-muted"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Contact Support
+              </Button>
+            </SupportTicketDialog>
+            
             <Button
+              onClick={handleSignOut}
               variant="outline"
               className="w-full text-muted-foreground hover:text-foreground border-border hover:bg-muted"
             >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Contact Support
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
             </Button>
-          </SupportTicketDialog>
-          
-          <Button
-            onClick={handleSignOut}
-            variant="outline"
-            className="w-full text-muted-foreground hover:text-foreground border-border hover:bg-muted"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { 
   Dialog,
   DialogContent,
@@ -8,24 +8,32 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { ExternalLink, FileText } from "lucide-react"
+import { ExternalLink, FileText, X } from "lucide-react"
+
+// Storage key for tracking which updates have been seen
+const SEEN_UPDATES_KEY = "swivi-seen-updates"
 
 // Campaign updates configuration
-// Key is matched against campaign title (lowercase)
-const CAMPAIGN_UPDATES: Record<string, {
+// This could later be moved to database
+export const CAMPAIGN_UPDATES: Record<string, {
   id: string
   title: string
   date: string
+  campaignMatch: (title: string) => boolean
   sections: {
     heading?: string
     content: string[]
   }[]
   contentFolders?: { label: string; url: string }[]
 }> = {
-  "owning-manhattan-season-2": {
+  "serhant-dec-2024": {
     id: "serhant-dec-2024",
     title: "SERHANT Team Update",
     date: "December 2024",
+    campaignMatch: (title: string) => {
+      const t = title.toLowerCase()
+      return t.includes("owning manhattan") && t.includes("season 2")
+    },
     sections: [
       {
         heading: "New Directive",
@@ -65,45 +73,53 @@ const CAMPAIGN_UPDATES: Record<string, {
   }
 }
 
-function getUpdateForCampaign(campaignTitle: string) {
-  const normalized = campaignTitle.toLowerCase()
-  if (normalized.includes("owning manhattan") && normalized.includes("season 2")) {
-    return CAMPAIGN_UPDATES["owning-manhattan-season-2"]
+// Get all updates as array
+export function getAllUpdates() {
+  return Object.values(CAMPAIGN_UPDATES)
+}
+
+// Get update for a specific campaign
+export function getUpdateForCampaign(campaignTitle: string) {
+  return Object.values(CAMPAIGN_UPDATES).find(u => u.campaignMatch(campaignTitle)) || null
+}
+
+// Check if update has been seen
+export function hasSeenUpdate(updateId: string): boolean {
+  if (typeof window === "undefined") return false
+  try {
+    const seen = localStorage.getItem(SEEN_UPDATES_KEY)
+    if (!seen) return false
+    const parsed = JSON.parse(seen)
+    return !!parsed[updateId]
+  } catch {
+    return false
   }
-  return null
+}
+
+// Mark update as seen
+export function markUpdateSeen(updateId: string) {
+  if (typeof window === "undefined") return
+  try {
+    const seen = localStorage.getItem(SEEN_UPDATES_KEY)
+    const parsed = seen ? JSON.parse(seen) : {}
+    parsed[updateId] = Date.now()
+    localStorage.setItem(SEEN_UPDATES_KEY, JSON.stringify(parsed))
+  } catch {
+    // Ignore
+  }
+}
+
+// Clear seen status (for testing or reset)
+export function clearSeenUpdates() {
+  if (typeof window === "undefined") return
+  localStorage.removeItem(SEEN_UPDATES_KEY)
 }
 
 interface CampaignUpdateProps {
   campaignTitle: string
 }
 
-// Inline trigger for campaign detail page - subtle text link
-export function CampaignUpdateTrigger({ campaignTitle }: CampaignUpdateProps) {
-  const [open, setOpen] = useState(false)
-  const update = getUpdateForCampaign(campaignTitle)
-  
-  if (!update) return null
-
-  return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <FileText className="w-4 h-4" />
-        <span>Team Update ({update.date})</span>
-      </button>
-      
-      <CampaignUpdateDialog 
-        open={open} 
-        onOpenChange={setOpen} 
-        update={update}
-      />
-    </>
-  )
-}
-
-// Button variant for more prominent placement
+// Button variant for campaign header
 export function CampaignUpdateButton({ campaignTitle }: CampaignUpdateProps) {
   const [open, setOpen] = useState(false)
   const update = getUpdateForCampaign(campaignTitle)
@@ -131,42 +147,163 @@ export function CampaignUpdateButton({ campaignTitle }: CampaignUpdateProps) {
   )
 }
 
-// Card variant to show on campaign detail page
-export function CampaignUpdateCard({ campaignTitle }: CampaignUpdateProps) {
+// Auto-open version for campaign detail page
+export function CampaignUpdateAutoOpen({ campaignTitle }: CampaignUpdateProps) {
   const [open, setOpen] = useState(false)
   const update = getUpdateForCampaign(campaignTitle)
   
+  useEffect(() => {
+    if (update && !hasSeenUpdate(update.id)) {
+      // Small delay so page loads first
+      const timer = setTimeout(() => setOpen(true), 500)
+      return () => clearTimeout(timer)
+    }
+  }, [update])
+
+  const handleClose = (isOpen: boolean) => {
+    setOpen(isOpen)
+    if (!isOpen && update) {
+      markUpdateSeen(update.id)
+    }
+  }
+  
   if (!update) return null
+
+  return (
+    <CampaignUpdateDialog 
+      open={open} 
+      onOpenChange={handleClose} 
+      update={update}
+    />
+  )
+}
+
+// Global popup for dashboard login
+export function TeamUpdatePopup({ hasSubmittedToCampaign }: { hasSubmittedToCampaign?: boolean }) {
+  const [open, setOpen] = useState(false)
+  const [currentUpdate, setCurrentUpdate] = useState<typeof CAMPAIGN_UPDATES[string] | null>(null)
+
+  useEffect(() => {
+    // Only show if user has submitted to relevant campaign
+    if (!hasSubmittedToCampaign) return
+
+    // Find an update they haven't seen
+    const unseenUpdate = Object.values(CAMPAIGN_UPDATES).find(u => !hasSeenUpdate(u.id))
+    
+    if (unseenUpdate) {
+      setCurrentUpdate(unseenUpdate)
+      // Delay popup slightly after page load
+      const timer = setTimeout(() => setOpen(true), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [hasSubmittedToCampaign])
+
+  const handleClose = (isOpen: boolean) => {
+    setOpen(isOpen)
+    if (!isOpen && currentUpdate) {
+      markUpdateSeen(currentUpdate.id)
+    }
+  }
+
+  if (!currentUpdate) return null
+
+  return (
+    <CampaignUpdateDialog 
+      open={open} 
+      onOpenChange={handleClose} 
+      update={currentUpdate}
+    />
+  )
+}
+
+// Card for profile page messages section
+export function TeamUpdateCard({ update, onRead }: { 
+  update: typeof CAMPAIGN_UPDATES[string]
+  onRead?: () => void 
+}) {
+  const [open, setOpen] = useState(false)
+  const [seen, setSeen] = useState(false)
+
+  useEffect(() => {
+    setSeen(hasSeenUpdate(update.id))
+  }, [update.id])
+
+  const handleClose = (isOpen: boolean) => {
+    setOpen(isOpen)
+    if (!isOpen) {
+      markUpdateSeen(update.id)
+      setSeen(true)
+      onRead?.()
+    }
+  }
 
   return (
     <>
       <div 
         onClick={() => setOpen(true)}
-        className="p-4 border border-border rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+        className={`p-4 border border-border rounded-lg transition-colors cursor-pointer ${
+          seen ? 'bg-card hover:bg-muted/30' : 'bg-muted/30 hover:bg-muted/50'
+        }`}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <FileText className="w-5 h-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">{update.title}</p>
-              <p className="text-xs text-muted-foreground">{update.date} · Click to read</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <FileText className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium truncate">{update.title}</p>
+                {!seen && (
+                  <span className="w-2 h-2 bg-foreground rounded-full flex-shrink-0" />
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">{update.date}</p>
             </div>
           </div>
-          <span className="text-xs text-muted-foreground">→</span>
+          <span className="text-xs text-muted-foreground flex-shrink-0">→</span>
         </div>
       </div>
       
       <CampaignUpdateDialog 
         open={open} 
-        onOpenChange={setOpen} 
+        onOpenChange={handleClose} 
         update={update}
       />
     </>
   )
 }
 
+// Profile page messages section
+export function ProfileMessagesSection() {
+  const updates = getAllUpdates()
+  const [, forceUpdate] = useState(0)
+  
+  if (updates.length === 0) return null
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+          <FileText className="w-4 h-4" />
+          Team Updates
+        </h3>
+        <span className="text-xs text-muted-foreground">
+          {updates.filter(u => !hasSeenUpdate(u.id)).length} unread
+        </span>
+      </div>
+      <div className="space-y-2">
+        {updates.map(update => (
+          <TeamUpdateCard 
+            key={update.id} 
+            update={update} 
+            onRead={() => forceUpdate(n => n + 1)}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // The dialog content
-function CampaignUpdateDialog({ 
+export function CampaignUpdateDialog({ 
   open, 
   onOpenChange, 
   update 
@@ -234,10 +371,18 @@ export function campaignHasUpdate(campaignTitle: string): boolean {
 }
 
 // Legacy exports for backwards compatibility
-export const CampaignAnnouncementBanner = CampaignUpdateCard
+export const CampaignAnnouncementBanner = TeamUpdateCard
 export const CampaignAnnouncementNotification = ({ campaignTitle, onClick }: { campaignTitle: string, onClick?: () => void }) => {
   const update = getUpdateForCampaign(campaignTitle)
-  if (!update) return null
+  const [seen, setSeen] = useState(true)
+  
+  useEffect(() => {
+    if (update) {
+      setSeen(hasSeenUpdate(update.id))
+    }
+  }, [update])
+  
+  if (!update || seen) return null
   
   return (
     <button
