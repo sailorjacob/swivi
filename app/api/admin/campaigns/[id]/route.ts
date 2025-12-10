@@ -69,8 +69,7 @@ export async function GET(
         updatedAt: true,
         completedAt: true,
         completionReason: true,
-        budgetReachedAt: true,
-        budgetReachedViews: true,
+        // budgetReachedAt and budgetReachedViews may not exist yet - query them separately
         _count: {
           select: {
             clipSubmissions: true
