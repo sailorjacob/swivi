@@ -1659,22 +1659,106 @@ export default function AdminCampaignsPage() {
 
                                   {/* Stats from expanded data */}
                                   {expandedCampaignData[campaign.id]?.stats && (
-                                    <div className="grid grid-cols-4 gap-3">
-                                      <div className="text-center p-2 bg-muted/50 rounded-lg">
-                                        <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.totalSubmissions || 0}</p>
-                                        <p className="text-xs text-muted-foreground">Submissions</p>
+                                    <div className="space-y-3">
+                                      {/* Primary Stats Row */}
+                                      <div className="grid grid-cols-4 gap-3">
+                                        <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                          <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.totalSubmissions || 0}</p>
+                                          <p className="text-xs text-muted-foreground">Submissions</p>
+                                        </div>
+                                        <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                          <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.approvedCount || 0}</p>
+                                          <p className="text-xs text-muted-foreground">Approved</p>
+                                        </div>
+                                        <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                          <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.totalViews?.toLocaleString() || 0}</p>
+                                          <p className="text-xs text-muted-foreground">Total Views</p>
+                                        </div>
+                                        <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                          <p className="text-lg font-bold">${expandedCampaignData[campaign.id].stats.totalEarnings?.toFixed(2) || '0.00'}</p>
+                                          <p className="text-xs text-muted-foreground">Earnings</p>
+                                        </div>
                                       </div>
-                                      <div className="text-center p-2 bg-muted/50 rounded-lg">
-                                        <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.approvedCount || 0}</p>
-                                        <p className="text-xs text-muted-foreground">Approved</p>
+                                      
+                                      {/* Secondary Stats Row - Unique Pages & Views Breakdown */}
+                                      <div className="grid grid-cols-3 gap-3">
+                                        <button 
+                                          onClick={() => {
+                                            // Toggle showing the pages list
+                                            const el = document.getElementById(`pages-list-${campaign.id}`)
+                                            if (el) el.classList.toggle('hidden')
+                                          }}
+                                          className="text-center p-2 bg-foreground/5 hover:bg-foreground/10 rounded-lg border border-border transition-colors cursor-pointer"
+                                        >
+                                          <p className="text-lg font-bold text-primary">{expandedCampaignData[campaign.id].stats.uniquePages || 0}</p>
+                                          <p className="text-xs text-muted-foreground">Unique Pages ↓</p>
+                                        </button>
+                                        {expandedCampaignData[campaign.id].stats.viewsAtCompletion !== null ? (
+                                          <>
+                                            <div className="text-center p-2 bg-green-500/10 rounded-lg border border-green-500/20">
+                                              <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                                                {expandedCampaignData[campaign.id].stats.viewsAtCompletion?.toLocaleString() || 0}
+                                              </p>
+                                              <p className="text-xs text-muted-foreground">Views @ Completion</p>
+                                            </div>
+                                            <div className="text-center p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                                              <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                                +{expandedCampaignData[campaign.id].stats.viewsAfterCompletion?.toLocaleString() || 0}
+                                              </p>
+                                              <p className="text-xs text-muted-foreground">Extra Tracked</p>
+                                            </div>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                              <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.uniqueClippers || 0}</p>
+                                              <p className="text-xs text-muted-foreground">Unique Clippers</p>
+                                            </div>
+                                            <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                              <p className="text-lg font-bold">+{expandedCampaignData[campaign.id].stats.totalViewsGained?.toLocaleString() || 0}</p>
+                                              <p className="text-xs text-muted-foreground">Views Gained</p>
+                                            </div>
+                                          </>
+                                        )}
                                       </div>
-                                      <div className="text-center p-2 bg-muted/50 rounded-lg">
-                                        <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.totalViews?.toLocaleString() || 0}</p>
-                                        <p className="text-xs text-muted-foreground">Views</p>
-                                      </div>
-                                      <div className="text-center p-2 bg-muted/50 rounded-lg">
-                                        <p className="text-lg font-bold">${expandedCampaignData[campaign.id].stats.totalEarnings?.toFixed(2) || '0.00'}</p>
-                                        <p className="text-xs text-muted-foreground">Earnings</p>
+                                    </div>
+                                  )}
+
+                                  {/* Unique Pages List (toggleable) */}
+                                  {expandedCampaignData[campaign.id]?.participatingCreators && (
+                                    <div id={`pages-list-${campaign.id}`} className="hidden">
+                                      <div className="border rounded-lg overflow-hidden">
+                                        <div className="bg-muted px-3 py-2 border-b">
+                                          <p className="text-sm font-medium">
+                                            Unique Pages/Handles ({expandedCampaignData[campaign.id].participatingCreators.length})
+                                          </p>
+                                        </div>
+                                        <div className="max-h-64 overflow-y-auto divide-y">
+                                          {expandedCampaignData[campaign.id].participatingCreators.map((creator: any, idx: number) => (
+                                            <div key={idx} className="p-2 flex items-center justify-between text-sm hover:bg-muted/50">
+                                              <div className="flex items-center gap-2">
+                                                <Badge variant="outline" className="text-xs px-1.5 py-0">
+                                                  {creator.platform === 'YOUTUBE' ? 'YT' : 
+                                                   creator.platform === 'TIKTOK' ? 'TT' :
+                                                   creator.platform === 'INSTAGRAM' ? 'IG' :
+                                                   creator.platform === 'TWITTER' ? 'X' :
+                                                   creator.platform}
+                                                </Badge>
+                                                <div>
+                                                  <span className="font-medium">@{creator.username}</span>
+                                                  {creator.displayName && creator.displayName !== creator.username && (
+                                                    <span className="text-muted-foreground ml-1">({creator.displayName})</span>
+                                                  )}
+                                                </div>
+                                              </div>
+                                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                                <span>{creator.clipCount} clip{creator.clipCount !== 1 ? 's' : ''}</span>
+                                                <span>{creator.totalViews?.toLocaleString() || 0} views</span>
+                                                <span className="font-medium text-foreground">${creator.totalEarnings?.toFixed(2) || '0.00'}</span>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
                                       </div>
                                     </div>
                                   )}

@@ -263,9 +263,13 @@ export async function GET(
         rejectedCount: processedSubmissions.filter(s => s.status === 'REJECTED').length,
         uniqueClippers, // Total unique users who submitted (any status)
         uniqueApprovedClippers, // Unique users with approved submissions
+        uniquePages: participatingCreators.length, // Unique social handles/pages
         totalEarnings,
         totalViews,
         totalViewsGained,
+        // Views tracking for completed campaigns
+        viewsAtCompletion: spentNum >= effectiveBudget ? totalViews - totalViewsGained : null,
+        viewsAfterCompletion: spentNum >= effectiveBudget ? totalViewsGained : null,
         // Use effective budget for utilization calculation
         budgetUtilization: effectiveBudget > 0 
           ? (spentNum / effectiveBudget) * 100 

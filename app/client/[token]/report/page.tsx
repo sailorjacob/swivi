@@ -170,7 +170,7 @@ export default function ClientReportPage() {
           {/* Executive Summary */}
           <section className="mb-10">
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Executive Summary</h2>
-            <div className="grid grid-cols-4 gap-6">
+            <div className="grid grid-cols-5 gap-4">
               <div className="text-center p-4 border border-gray-200 rounded">
                 <p className="text-3xl font-bold">{performance.totalViews.toLocaleString()}</p>
                 <p className="text-sm text-gray-600">Total Views</p>
@@ -178,6 +178,10 @@ export default function ClientReportPage() {
               <div className="text-center p-4 border border-gray-200 rounded">
                 <p className="text-3xl font-bold">{submissions.approved}</p>
                 <p className="text-sm text-gray-600">Approved Clips</p>
+              </div>
+              <div className="text-center p-4 border border-gray-200 rounded">
+                <p className="text-3xl font-bold">{creators.breakdown.length}</p>
+                <p className="text-sm text-gray-600">Unique Pages</p>
               </div>
               <div className="text-center p-4 border border-gray-200 rounded">
                 <p className="text-3xl font-bold">{creators.unique}</p>
@@ -350,26 +354,33 @@ export default function ClientReportPage() {
             </table>
           </section>
 
-          {/* Creator Breakdown */}
-          <section className="mb-10">
+          {/* Participating Pages - All unique social handles */}
+          <section className="mb-10 page-break">
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">
-              Creator Breakdown ({creators.unique} creators)
+              Participating Pages ({creators.breakdown.length} unique pages from {creators.unique} creators)
             </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Each row represents a unique social media page/handle that posted content for this campaign.
+              Some creators may have multiple pages across different platforms.
+            </p>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b-2 border-gray-300">
-                  <th className="text-left py-2 font-semibold">Handle</th>
+                  <th className="text-left py-2 font-semibold">Page Handle</th>
                   <th className="text-left py-2 font-semibold">Platform</th>
-                  <th className="text-center py-2 font-semibold">Clips</th>
+                  <th className="text-center py-2 font-semibold">Posts</th>
                   <th className="text-right py-2 font-semibold">Views</th>
                   <th className="text-right py-2 font-semibold">% of Views</th>
                 </tr>
               </thead>
               <tbody>
-                {creators.breakdown.slice(0, 30).map((creator, idx) => (
+                {creators.breakdown.map((creator, idx) => (
                   <tr key={idx} className="border-b">
                     <td className="py-2">
                       <span className="font-medium">@{creator.handle}</span>
+                      {creator.creatorName && creator.creatorName !== creator.handle && (
+                        <span className="text-gray-400 ml-1 text-xs">({creator.creatorName})</span>
+                      )}
                     </td>
                     <td className="py-2">{creator.platform}</td>
                     <td className="py-2 text-center">{creator.approvedCount}</td>
@@ -383,11 +394,6 @@ export default function ClientReportPage() {
                 ))}
               </tbody>
             </table>
-            {creators.breakdown.length > 30 && (
-              <p className="text-xs text-gray-500 mt-2 text-center">
-                Showing top 30 of {creators.breakdown.length} creators
-              </p>
-            )}
           </section>
 
           {/* Footer */}
