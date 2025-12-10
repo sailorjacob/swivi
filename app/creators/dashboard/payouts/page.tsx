@@ -38,7 +38,7 @@ interface PayoutRequestItem {
 export default function PayoutsPage() {
   const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(false)
-  const [payoutAmount, setPayoutAmount] = useState("")
+  // Removed payoutAmount state - now using full payableBalance only
   const [payoutMethod, setPayoutMethod] = useState<'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE' | 'ETHEREUM' | 'BITCOIN'>('PAYPAL')
   const [payoutSaving, setPayoutSaving] = useState(false)
   const [payoutSuccess, setPayoutSuccess] = useState(false)
@@ -130,24 +130,11 @@ export default function PayoutsPage() {
   const handlePayoutRequest = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    const amount = parseFloat(payoutAmount)
-    
-    if (isNaN(amount)) {
-      toast.error("Please enter a valid amount")
-      return
-    }
+    // Use full payableBalance - no partial payouts allowed
+    const amount = payableBalance
     
     if (amount < minimumPayout) {
       toast.error(`Minimum payout is $${minimumPayout}`)
-      return
-    }
-    
-    if (amount > payableBalance) {
-      if (payableBalance <= 0) {
-        toast.error("No payouts available yet. Your earnings are from active campaigns that haven't completed.")
-      } else {
-        toast.error(`Maximum payable amount is $${payableBalance.toFixed(2)} (from completed campaigns)`)
-      }
       return
     }
     
@@ -185,7 +172,6 @@ export default function PayoutsPage() {
 
       if (response.ok) {
         toast.success("Payout request submitted successfully!")
-        setPayoutAmount("")
         setPayoutMethod("PAYPAL")
         // Refresh dashboard data and payout history
         loadDashboard()
@@ -332,27 +318,18 @@ export default function PayoutsPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePayoutRequest} className="space-y-4">
+              {/* Full Balance Display - No partial payouts allowed */}
               <div>
-                <Label htmlFor="amount">Amount (USD)</Label>
-                <div className="relative mt-1">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="amount"
-                    type="number"
-                    placeholder="0.00"
-                    min={minimumPayout}
-                    max={payableBalance}
-                    step="0.01"
-                    value={payoutAmount}
-                    onChange={(e) => setPayoutAmount(e.target.value)}
-                    className="pl-10"
-                    disabled={!canRequestPayout}
-                    required
-                  />
+                <Label>Payout Amount</Label>
+                <div className="mt-1 p-3 bg-muted/50 rounded-lg border border-border">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-foreground" />
+                    <span className="text-2xl font-bold text-foreground">{payableBalance.toFixed(2)}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Full balance from completed campaigns
+                  </p>
                 </div>
-                {payableBalance > 0 && (
-                  <p className="text-xs text-muted-foreground mt-1">Max: ${payableBalance.toFixed(2)}</p>
-                )}
               </div>
 
               <div>
@@ -404,11 +381,16 @@ export default function PayoutsPage() {
               >
                 {isLoading ? "Processing..." : !canRequestPayout ? (
                   hasOnlyActiveEarnings ? "Campaign In Progress" : `Minimum $${minimumPayout} Required`
-                ) : "Request Payout"}
+                ) : `Request Full Payout ($${payableBalance.toFixed(2)})`}
               </Button>
               {!canRequestPayout && hasOnlyActiveEarnings && (
                 <p className="text-xs text-muted-foreground mt-2 text-center">
                   Payouts available when campaign ends
+                </p>
+              )}
+              {canRequestPayout && (
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  One payout request per balance. Request your full earnings at once.
                 </p>
               )}
             </form>

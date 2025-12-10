@@ -90,9 +90,11 @@ export async function POST(request: NextRequest) {
         throw new Error(`ACTIVE_CAMPAIGNS_ONLY:${activeCampaignEarnings}:${activeCampaignTitles.join(',')}`)
       }
 
-      // BLOCK: If requested amount exceeds payable balance (completed campaign earnings)
-      if (validatedData.amount > payableBalance) {
-        throw new Error(`EXCEEDS_PAYABLE:${payableBalance}:${validatedData.amount}:${activeCampaignEarnings}`)
+      // ENFORCE: Full balance payout only - no partial payouts allowed
+      // Allow small tolerance for floating point differences (within $0.01)
+      const amountDifference = Math.abs(validatedData.amount - payableBalance)
+      if (amountDifference > 0.01) {
+        throw new Error(`FULL_BALANCE_REQUIRED:${payableBalance}:${validatedData.amount}`)
       }
 
       // Also validate against total available balance
@@ -239,17 +241,16 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
       }
 
-      // NEW: Handle exceeds payable balance error
-      if (error.message.startsWith("EXCEEDS_PAYABLE:")) {
-        const [, payableBalance, requestedAmount, activeCampaignEarnings] = error.message.split(':')
+      // Handle full balance required error (no partial payouts)
+      if (error.message.startsWith("FULL_BALANCE_REQUIRED:")) {
+        const [, payableBalance, requestedAmount] = error.message.split(':')
         return NextResponse.json({
-          error: "Amount exceeds payable balance",
-          code: "EXCEEDS_PAYABLE",
-          message: `You can only request up to $${parseFloat(payableBalance).toFixed(2)} from completed campaigns. The remaining $${parseFloat(activeCampaignEarnings).toFixed(2)} will be available when active campaigns complete.`,
+          error: "Full balance payout required",
+          code: "FULL_BALANCE_REQUIRED",
+          message: `You must request your full payable balance of $${parseFloat(payableBalance).toFixed(2)}. Partial payouts are not allowed.`,
           payableBalance: parseFloat(payableBalance),
           requestedAmount: parseFloat(requestedAmount),
-          activeCampaignEarnings: parseFloat(activeCampaignEarnings),
-          hint: "Reduce your request amount or wait for active campaigns to complete."
+          hint: "Request your full balance amount."
         }, { status: 400 })
       }
     }
