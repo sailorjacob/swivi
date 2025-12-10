@@ -39,6 +39,10 @@ export class SimpleViewTracker {
   /**
    * Get clips sorted by how long since they were last tracked
    * Clips never tracked come first, then oldest tracked
+   * 
+   * NOTE: We track both ACTIVE and COMPLETED campaigns!
+   * - ACTIVE campaigns: track views AND calculate earnings
+   * - COMPLETED campaigns: track views ONLY (for client reporting), no earnings
    */
   async getClipsToTrack(limit: number = 100): Promise<Array<{
     clipId: string
@@ -47,6 +51,7 @@ export class SimpleViewTracker {
     userId: string
     campaignId: string
     campaignTitle: string
+    campaignStatus: string
     submissionStatus: string
     submissionId: string
     isApproved: boolean
@@ -57,27 +62,29 @@ export class SimpleViewTracker {
     campaignSpent: number
   }>> {
     // Debug: Log what we're looking for
-    const [activeCampaignCount, totalSubmissions, submissionsWithClipId, eligibleCount] = await Promise.all([
+    const [activeCampaignCount, completedCampaignCount, totalSubmissions, submissionsWithClipId, eligibleCount] = await Promise.all([
       prisma.campaign.count({ where: { status: 'ACTIVE', isTest: false, deletedAt: null } }),
+      prisma.campaign.count({ where: { status: 'COMPLETED', isTest: false, deletedAt: null } }),
       prisma.clipSubmission.count(),
       prisma.clipSubmission.count({ where: { clipId: { not: null } } }),
       prisma.clipSubmission.count({
         where: {
           clipId: { not: null },
           status: { in: ['APPROVED', 'PENDING'] },
-          campaigns: { status: 'ACTIVE', isTest: false, deletedAt: null }
+          campaigns: { status: { in: ['ACTIVE', 'COMPLETED'] }, isTest: false, deletedAt: null }
         }
       })
     ])
-    console.log(`📊 Tracking eligibility: ${activeCampaignCount} active campaigns, ${totalSubmissions} total submissions, ${submissionsWithClipId} with clipId, ${eligibleCount} eligible for tracking`)
+    console.log(`📊 Tracking eligibility: ${activeCampaignCount} active + ${completedCampaignCount} completed campaigns, ${totalSubmissions} total submissions, ${submissionsWithClipId} with clipId, ${eligibleCount} eligible for tracking`)
 
-    // Get all submissions with clips from active campaigns
+    // Get all submissions with clips from ACTIVE and COMPLETED campaigns
+    // ACTIVE: track views + earnings, COMPLETED: track views only (for continued reporting)
     const submissions = await prisma.clipSubmission.findMany({
       where: {
         clipId: { not: null },
         status: { in: ['APPROVED', 'PENDING'] },
         campaigns: {
-          status: 'ACTIVE',
+          status: { in: ['ACTIVE', 'COMPLETED'] }, // Track both!
           isTest: false,
           deletedAt: null
         }
@@ -92,12 +99,13 @@ export class SimpleViewTracker {
           }
         },
         campaigns: {
-          select: { id: true, title: true, payoutRate: true, budget: true, spent: true, reservedAmount: true }
+          select: { id: true, title: true, status: true, payoutRate: true, budget: true, spent: true, reservedAmount: true }
         }
       }
     })
 
     // Map and sort by last tracked time (null = never tracked = highest priority)
+    // Prioritize ACTIVE campaigns over COMPLETED (active clips need earnings updates)
     const clipsWithTracking = submissions
       .filter(s => s.clips)
       .map(s => {
@@ -113,6 +121,7 @@ export class SimpleViewTracker {
           userId: s.userId,
           campaignId: s.campaignId,
           campaignTitle: s.campaigns.title,
+          campaignStatus: s.campaigns.status || 'ACTIVE', // Track campaign status for earnings logic
           submissionStatus: s.status,
           submissionId: s.id,
           isApproved: s.status === 'APPROVED',
@@ -124,11 +133,16 @@ export class SimpleViewTracker {
         }
       })
       .sort((a, b) => {
-        // Never tracked clips first
+        // Priority 1: ACTIVE campaigns before COMPLETED (earnings need updating)
+        if (a.campaignStatus === 'ACTIVE' && b.campaignStatus !== 'ACTIVE') return -1
+        if (a.campaignStatus !== 'ACTIVE' && b.campaignStatus === 'ACTIVE') return 1
+        
+        // Priority 2: Never tracked clips first
         if (!a.lastTracked && !b.lastTracked) return 0
         if (!a.lastTracked) return -1
         if (!b.lastTracked) return 1
-        // Then by oldest tracked
+        
+        // Priority 3: Oldest tracked first
         return a.lastTracked.getTime() - b.lastTracked.getTime()
       })
 
@@ -139,6 +153,9 @@ export class SimpleViewTracker {
    * Track a single clip - scrape views and update database
    * Includes 60s timeout per clip to fail fast
    * Automatically fixes initialViews = 0 issues
+   * 
+   * NOTE: For COMPLETED campaigns, we track views but DON'T add earnings
+   * This allows continued view tracking for client reporting after campaign ends
    */
   async trackSingleClip(clip: {
     clipId: string
@@ -146,6 +163,7 @@ export class SimpleViewTracker {
     platform: SocialPlatform
     userId: string
     campaignId: string
+    campaignStatus: string // 'ACTIVE' or 'COMPLETED'
     submissionId: string
     isApproved: boolean
     initialViews: bigint
@@ -158,6 +176,7 @@ export class SimpleViewTracker {
     viewsGained?: number
     earningsAdded?: number
     initialViewsFixed?: boolean
+    viewsOnly?: boolean // True if we only tracked views (no earnings - completed campaign)
     error?: string
   }> {
     if (!this.scraper) {
@@ -236,9 +255,12 @@ export class SimpleViewTracker {
         }
       })
 
-      // 6. Calculate and add earnings (only for approved clips)
+      // 6. Calculate and add earnings (only for approved clips in ACTIVE campaigns)
+      // COMPLETED campaigns: views tracked for reporting, but NO earnings added
       let earningsAdded = 0
-      if (clip.isApproved) {
+      const isCompletedCampaign = clip.campaignStatus === 'COMPLETED'
+      
+      if (clip.isApproved && !isCompletedCampaign) {
         // Use the higher view count (newViews) for earnings calculation
         const totalViewGrowth = Math.max(0, newViews - effectiveInitialViews)
         const totalEarningsShouldBe = (totalViewGrowth / 1000) * clip.payoutRate
@@ -281,6 +303,12 @@ export class SimpleViewTracker {
             data: { spent: { increment: earningsAdded } }
           })
         }
+      } else if (isCompletedCampaign && viewsGained > 0) {
+        // For completed campaigns, still update user's totalViews for their stats
+        await prisma.user.update({
+          where: { id: clip.userId },
+          data: { totalViews: { increment: viewsGained } }
+        })
       }
 
       return {
@@ -288,7 +316,8 @@ export class SimpleViewTracker {
         views: newViews,
         viewsGained,
         earningsAdded,
-        initialViewsFixed
+        initialViewsFixed,
+        viewsOnly: isCompletedCampaign
       }
 
     } catch (error) {
@@ -372,11 +401,13 @@ export class SimpleViewTracker {
         ? `${Math.round((Date.now() - clip.lastTracked.getTime()) / 60000)}m ago`
         : 'never'
       const statusLabel = clip.isApproved ? '✓' : '○'
+      const campaignLabel = clip.campaignStatus === 'COMPLETED' ? ' [COMPLETED-views only]' : ''
       
-      console.log(`🔍 [${processed + 1}/${clipsToTrack.length}] ${statusLabel} ${clip.platform} clip ${clip.clipId.substring(0, 8)}... (last: ${timeSinceLastTrack})`)
+      console.log(`🔍 [${processed + 1}/${clipsToTrack.length}] ${statusLabel} ${clip.platform} clip ${clip.clipId.substring(0, 8)}...${campaignLabel} (last: ${timeSinceLastTrack})`)
 
       const result = await this.trackSingleClip({
         ...clip,
+        campaignStatus: clip.campaignStatus,
         submissionId: clip.submissionId
       })
       processed++
@@ -389,7 +420,9 @@ export class SimpleViewTracker {
         
         const earningsStr = result.earningsAdded && result.earningsAdded > 0 
           ? ` → $${result.earningsAdded.toFixed(2)}` 
-          : ''
+          : result.viewsOnly 
+            ? ' (views only - campaign completed)'
+            : ''
         console.log(`   ✅ ${result.views?.toLocaleString()} views (+${result.viewsGained?.toLocaleString()})${earningsStr}`)
       } else {
         failed++
