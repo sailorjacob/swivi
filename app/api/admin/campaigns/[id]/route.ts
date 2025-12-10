@@ -255,7 +255,7 @@ export async function GET(
     // Convert Prisma Decimal types to numbers for proper client-side comparison
     const budgetNum = Number(campaign.budget)
     const spentNum = Number(campaign.spent ?? 0)
-    const reservedNum = Number(campaign.reservedAmount ?? 0)
+    const reservedNum = 0 // reservedAmount column may not exist yet
     const effectiveBudget = budgetNum - reservedNum
     
     return NextResponse.json({
