@@ -12,6 +12,7 @@ const updateCampaignSchema = z.object({
   creator: z.string().min(1, "Creator name is required").optional(),
   budget: z.number().positive("Budget must be positive").optional(),
   spent: z.number().min(0, "Spent amount cannot be negative").optional(),
+  reservedAmount: z.number().min(0, "Reserved amount cannot be negative").optional(), // For fees/bounties (admin only)
   payoutRate: z.number().positive("Payout rate must be positive").optional(),
   startDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
   endDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
@@ -55,6 +56,7 @@ export async function GET(
         creator: true,
         budget: true,
         spent: true,
+        reservedAmount: true,
         payoutRate: true,
         startDate: true,
         status: true,
@@ -158,10 +160,17 @@ export async function GET(
     const totalViewsGained = approvedSubmissions.reduce((sum, s) => sum + s.viewsGained, 0)
 
     // Convert Prisma Decimal types to numbers for proper client-side comparison
+    const budgetNum = Number(campaign.budget)
+    const spentNum = Number(campaign.spent ?? 0)
+    const reservedNum = Number(campaign.reservedAmount ?? 0)
+    const effectiveBudget = budgetNum - reservedNum
+    
     return NextResponse.json({
       ...campaign,
-      budget: Number(campaign.budget),
-      spent: Number(campaign.spent ?? 0),
+      budget: budgetNum,
+      spent: spentNum,
+      reservedAmount: reservedNum,
+      effectiveBudget, // Actual clipper payout budget (budget - reserved)
       payoutRate: Number(campaign.payoutRate),
       clipSubmissions: processedSubmissions,
       stats: {
@@ -172,9 +181,11 @@ export async function GET(
         totalEarnings,
         totalViews,
         totalViewsGained,
-        budgetUtilization: Number(campaign.budget) > 0 
-          ? (Number(campaign.spent ?? 0) / Number(campaign.budget)) * 100 
-          : 0
+        // Use effective budget for utilization calculation
+        budgetUtilization: effectiveBudget > 0 
+          ? (spentNum / effectiveBudget) * 100 
+          : 0,
+        remainingBudget: Math.max(0, effectiveBudget - spentNum)
       }
     })
   } catch (error) {
@@ -226,6 +237,7 @@ export async function PUT(
     if (validatedData.creator !== undefined) updateData.creator = validatedData.creator
     if (validatedData.budget !== undefined) updateData.budget = validatedData.budget
     if (validatedData.spent !== undefined) updateData.spent = validatedData.spent
+    if (validatedData.reservedAmount !== undefined) updateData.reservedAmount = validatedData.reservedAmount
     if (validatedData.payoutRate !== undefined) updateData.payoutRate = validatedData.payoutRate
     if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate
     if (validatedData.endDate !== undefined) updateData.endDate = validatedData.endDate

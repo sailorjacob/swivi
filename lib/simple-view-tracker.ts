@@ -92,7 +92,7 @@ export class SimpleViewTracker {
           }
         },
         campaigns: {
-          select: { id: true, title: true, payoutRate: true, budget: true, spent: true }
+          select: { id: true, title: true, payoutRate: true, budget: true, spent: true, reservedAmount: true }
         }
       }
     })
@@ -100,22 +100,29 @@ export class SimpleViewTracker {
     // Map and sort by last tracked time (null = never tracked = highest priority)
     const clipsWithTracking = submissions
       .filter(s => s.clips)
-      .map(s => ({
-        clipId: s.clipId!,
-        url: s.clipUrl,
-        platform: s.platform,
-        userId: s.userId,
-        campaignId: s.campaignId,
-        campaignTitle: s.campaigns.title,
-        submissionStatus: s.status,
-        submissionId: s.id,
-        isApproved: s.status === 'APPROVED',
-        initialViews: s.initialViews || BigInt(0),
-        lastTracked: s.clips!.view_tracking[0]?.scrapedAt || null,
-        payoutRate: Number(s.campaigns.payoutRate),
-        campaignBudget: Number(s.campaigns.budget),
-        campaignSpent: Number(s.campaigns.spent)
-      }))
+      .map(s => {
+        // Calculate effective budget (budget - reservedAmount for fees/bounties)
+        const totalBudget = Number(s.campaigns.budget)
+        const reservedAmount = Number(s.campaigns.reservedAmount || 0)
+        const effectiveBudget = totalBudget - reservedAmount
+        
+        return {
+          clipId: s.clipId!,
+          url: s.clipUrl,
+          platform: s.platform,
+          userId: s.userId,
+          campaignId: s.campaignId,
+          campaignTitle: s.campaigns.title,
+          submissionStatus: s.status,
+          submissionId: s.id,
+          isApproved: s.status === 'APPROVED',
+          initialViews: s.initialViews || BigInt(0),
+          lastTracked: s.clips!.view_tracking[0]?.scrapedAt || null,
+          payoutRate: Number(s.campaigns.payoutRate),
+          campaignBudget: effectiveBudget, // Use effective budget for spending calculations
+          campaignSpent: Number(s.campaigns.spent)
+        }
+      })
       .sort((a, b) => {
         // Never tracked clips first
         if (!a.lastTracked && !b.lastTracked) return 0

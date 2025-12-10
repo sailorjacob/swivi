@@ -49,7 +49,8 @@ export class ViewTrackingService {
                   payoutRate: true,
                   budget: true,
                   spent: true,
-                  status: true
+                  status: true,
+                  reservedAmount: true
                 }
               }
             }
@@ -136,21 +137,25 @@ export class ViewTrackingService {
         const initialViews = Number(activeSubmission.initialViews || 0)
         const totalViewGrowth = currentViews - initialViews
         const payoutRate = Number(campaign.payoutRate)
-        const campaignBudget = Number(campaign.budget)
+        
+        // Calculate effective budget (total budget - reserved for fees/bounties)
+        const totalBudget = Number(campaign.budget)
+        const reservedAmount = Number(campaign.reservedAmount || 0)
+        const effectiveBudget = totalBudget - reservedAmount
         
         // Calculate total earnings that should exist for this clip
         const totalEarningsShouldBe = (totalViewGrowth / 1000) * payoutRate
         
-        // Per-clip cap: maximum 30% of campaign budget per single clip
-        const maxClipEarnings = campaignBudget * 0.30
+        // Per-clip cap: maximum 30% of effective budget per single clip
+        const maxClipEarnings = effectiveBudget * 0.30
         const cappedEarnings = Math.min(totalEarningsShouldBe, maxClipEarnings)
         
         const currentClipEarnings = Number(clip.earnings || 0)
         const earningsDelta = Math.max(0, cappedEarnings - currentClipEarnings)
 
-        // Budget enforcement - only add earnings if budget allows
+        // Budget enforcement - only add earnings if effective budget allows
         const campaignSpent = Number(campaign.spent || 0)
-        const remainingBudget = Math.max(0, campaignBudget - campaignSpent)
+        const remainingBudget = Math.max(0, effectiveBudget - campaignSpent)
         earningsToAdd = Math.min(earningsDelta, remainingBudget)
       }
 
@@ -199,7 +204,11 @@ export class ViewTrackingService {
           }, 0)
 
           // Update campaign spent to actual total
-          const campaignBudget = Number(campaign.budget)
+          // Use effective budget for completion check (budget - reserved)
+          const totalBudget = Number(campaign.budget)
+          const reservedAmount = Number(campaign.reservedAmount || 0)
+          const effectiveBudget = totalBudget - reservedAmount
+          
           await tx.campaign.update({
             where: { id: campaign.id },
             data: {
@@ -207,14 +216,14 @@ export class ViewTrackingService {
             }
           })
 
-          // Check if campaign should be completed
-          if (totalSpent >= campaignBudget) {
+          // Check if campaign should be completed (based on effective budget)
+          if (totalSpent >= effectiveBudget) {
             await tx.campaign.update({
               where: { id: campaign.id },
               data: {
                 status: 'COMPLETED',
                 completedAt: new Date(),
-                completionReason: `Budget fully utilized ($${campaignBudget.toFixed(2)})`
+                completionReason: `Clipper budget fully utilized ($${effectiveBudget.toFixed(2)})`
               }
             })
 
