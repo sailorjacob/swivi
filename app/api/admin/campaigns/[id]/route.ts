@@ -94,6 +94,16 @@ export async function GET(
                 bitcoinAddress: true
               }
             },
+            socialAccounts: {
+              select: {
+                id: true,
+                platform: true,
+                username: true,
+                displayName: true,
+                profileUrl: true,
+                verified: true
+              }
+            },
             clips: {
               select: {
                 id: true,
@@ -131,6 +141,9 @@ export async function GET(
       const earnings = Number(sub.clips?.earnings || 0)
       const scrapeCount = viewTracking.length
 
+      // Get social account info (use the linked one or first verified for this platform)
+      const socialAccount = sub.socialAccounts || null
+      
       return {
         id: sub.id,
         clipUrl: sub.clipUrl,
@@ -151,7 +164,14 @@ export async function GET(
           paypalEmail: sub.users.paypalEmail,
           walletAddress: sub.users.walletAddress,
           bitcoinAddress: sub.users.bitcoinAddress
-        }
+        },
+        socialAccount: socialAccount ? {
+          platform: socialAccount.platform,
+          username: socialAccount.username,
+          displayName: socialAccount.displayName,
+          profileUrl: socialAccount.profileUrl,
+          verified: socialAccount.verified
+        } : null
       }
     })
 
@@ -168,6 +188,70 @@ export async function GET(
     // Count unique approved clippers (clippers with at least one approved submission)
     const uniqueApprovedClipperIds = new Set(approvedSubmissions.map(s => s.user.id))
     const uniqueApprovedClippers = uniqueApprovedClipperIds.size
+    
+    // Aggregate unique social handles with their stats
+    const handleStatsMap = new Map<string, {
+      platform: string
+      username: string
+      displayName: string | null
+      profileUrl: string | null
+      userId: string
+      userName: string | null
+      userEmail: string | null
+      clipCount: number
+      approvedClipCount: number
+      totalViews: number
+      totalEarnings: number
+    }>()
+    
+    for (const sub of processedSubmissions) {
+      // Create a unique key based on platform + username or platform + userId
+      const handle = sub.socialAccount?.username || sub.user.email?.split('@')[0] || sub.user.id
+      const key = `${sub.platform}:${handle}`
+      
+      const existing = handleStatsMap.get(key)
+      if (existing) {
+        existing.clipCount++
+        if (sub.status === 'APPROVED') {
+          existing.approvedClipCount++
+          existing.totalViews += sub.currentViews
+          existing.totalEarnings += sub.earnings
+        }
+      } else {
+        handleStatsMap.set(key, {
+          platform: sub.platform,
+          username: sub.socialAccount?.username || handle,
+          displayName: sub.socialAccount?.displayName || sub.user.name,
+          profileUrl: sub.socialAccount?.profileUrl || null,
+          userId: sub.user.id,
+          userName: sub.user.name,
+          userEmail: sub.user.email,
+          clipCount: 1,
+          approvedClipCount: sub.status === 'APPROVED' ? 1 : 0,
+          totalViews: sub.status === 'APPROVED' ? sub.currentViews : 0,
+          totalEarnings: sub.status === 'APPROVED' ? sub.earnings : 0
+        })
+      }
+    }
+    
+    // Convert to array and sort by earnings
+    const participatingCreators = Array.from(handleStatsMap.values())
+      .sort((a, b) => b.totalEarnings - a.totalEarnings)
+    
+    // Platform breakdown
+    const platformBreakdown = processedSubmissions.reduce((acc, sub) => {
+      const platform = sub.platform
+      if (!acc[platform]) {
+        acc[platform] = { submissions: 0, approved: 0, views: 0, earnings: 0 }
+      }
+      acc[platform].submissions++
+      if (sub.status === 'APPROVED') {
+        acc[platform].approved++
+        acc[platform].views += sub.currentViews
+        acc[platform].earnings += sub.earnings
+      }
+      return acc
+    }, {} as Record<string, { submissions: number, approved: number, views: number, earnings: number }>)
 
     // Convert Prisma Decimal types to numbers for proper client-side comparison
     const budgetNum = Number(campaign.budget)
@@ -198,7 +282,9 @@ export async function GET(
           ? (spentNum / effectiveBudget) * 100 
           : 0,
         remainingBudget: Math.max(0, effectiveBudget - spentNum)
-      }
+      },
+      participatingCreators, // List of unique handles with their stats
+      platformBreakdown // Breakdown by platform
     })
   } catch (error) {
     console.error("Error fetching campaign:", error)

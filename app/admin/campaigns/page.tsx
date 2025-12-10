@@ -2481,6 +2481,76 @@ function CampaignView({
         </div>
       </div>
 
+      {/* Platform Breakdown */}
+      {campaign.platformBreakdown && Object.keys(campaign.platformBreakdown).length > 0 && (
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground mb-3 block">
+            Platform Breakdown
+          </Label>
+          <div className="grid grid-cols-3 gap-3">
+            {Object.entries(campaign.platformBreakdown).map(([platform, data]: [string, any]) => (
+              <div key={platform} className="p-3 bg-muted rounded-lg border text-center">
+                <p className="font-medium text-sm">{platform}</p>
+                <p className="text-lg font-bold">{data.approved}/{data.submissions}</p>
+                <p className="text-xs text-muted-foreground">approved/total</p>
+                <p className="text-sm mt-1">{data.views.toLocaleString()} views</p>
+                <p className="text-xs text-muted-foreground">${data.earnings.toFixed(2)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Participating Creators */}
+      {campaign.participatingCreators && campaign.participatingCreators.length > 0 && (
+        <div>
+          <Label className="text-sm font-medium text-muted-foreground mb-3 block">
+            Participating Creators ({campaign.participatingCreators.length})
+          </Label>
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-muted">
+                <tr>
+                  <th className="text-left p-2 font-medium">Handle</th>
+                  <th className="text-left p-2 font-medium">Platform</th>
+                  <th className="text-center p-2 font-medium">Clips</th>
+                  <th className="text-right p-2 font-medium">Views</th>
+                  <th className="text-right p-2 font-medium">Earnings</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {campaign.participatingCreators.slice(0, 20).map((creator: any, idx: number) => (
+                  <tr key={idx} className="hover:bg-muted/50">
+                    <td className="p-2">
+                      <div>
+                        <span className="font-medium">@{creator.username}</span>
+                        {creator.displayName && (
+                          <span className="text-muted-foreground ml-1 text-xs">({creator.displayName})</span>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground">{creator.userEmail}</span>
+                    </td>
+                    <td className="p-2">
+                      <Badge variant="outline" className="text-xs">{creator.platform}</Badge>
+                    </td>
+                    <td className="p-2 text-center">
+                      {creator.approvedClipCount}/{creator.clipCount}
+                    </td>
+                    <td className="p-2 text-right">{creator.totalViews.toLocaleString()}</td>
+                    <td className="p-2 text-right font-medium">${creator.totalEarnings.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {campaign.participatingCreators.length > 20 && (
+              <div className="p-2 text-center text-xs text-muted-foreground bg-muted">
+                Showing top 20 of {campaign.participatingCreators.length} creators
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Status & Completion Info */}
       <div className="grid grid-cols-2 gap-6">
         <div>
