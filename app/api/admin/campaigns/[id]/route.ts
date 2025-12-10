@@ -6,6 +6,43 @@ import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
+// Helper to extract handle from social media URL
+function extractHandleFromUrl(url: string, platform: string): string | null {
+  try {
+    const urlObj = new URL(url)
+    const pathname = urlObj.pathname
+    
+    if (platform === 'TIKTOK') {
+      // TikTok: https://www.tiktok.com/@username/video/...
+      const match = pathname.match(/\/@([^/]+)/)
+      if (match) return match[1]
+    } else if (platform === 'INSTAGRAM') {
+      // Instagram: https://www.instagram.com/reel/...?igsh=... or /p/...
+      // Try to get from URL params or extract differently
+      // Instagram URLs don't always contain the username in the path
+      // But sometimes: https://www.instagram.com/username/reel/...
+      const parts = pathname.split('/').filter(Boolean)
+      if (parts.length > 0 && !['p', 'reel', 'reels', 'tv', 'stories'].includes(parts[0])) {
+        return parts[0]
+      }
+    } else if (platform === 'YOUTUBE') {
+      // YouTube: https://www.youtube.com/@username/shorts/... or /shorts/...
+      const match = pathname.match(/\/@([^/]+)/)
+      if (match) return match[1]
+      // YouTube shorts without handle: https://youtube.com/shorts/videoId
+    } else if (platform === 'TWITTER') {
+      // Twitter/X: https://twitter.com/username/status/... or https://x.com/username/...
+      const parts = pathname.split('/').filter(Boolean)
+      if (parts.length > 0 && parts[0] !== 'i') {
+        return parts[0]
+      }
+    }
+  } catch {
+    // Invalid URL
+  }
+  return null
+}
+
 const updateCampaignSchema = z.object({
   title: z.string().min(1, "Title is required").optional(),
   description: z.string().min(10, "Description must be at least 10 characters").optional(),
@@ -194,9 +231,11 @@ export async function GET(
     }>()
     
     for (const sub of processedSubmissions) {
-      // Create a unique key based on platform + username or platform + userId
-      const handle = sub.socialAccount?.username || sub.user.email?.split('@')[0] || sub.user.id
-      const key = `${sub.platform}:${handle}`
+      // Create a unique key based on platform + username
+      // Priority: 1) socialAccount username, 2) extracted from URL, 3) email prefix, 4) user ID
+      const urlHandle = extractHandleFromUrl(sub.clipUrl, sub.platform)
+      const handle = sub.socialAccount?.username || urlHandle || sub.user.email?.split('@')[0] || sub.user.id
+      const key = `${sub.platform}:${handle.toLowerCase()}`  // Normalize to lowercase
       
       const existing = handleStatsMap.get(key)
       if (existing) {
@@ -209,7 +248,7 @@ export async function GET(
       } else {
         handleStatsMap.set(key, {
           platform: sub.platform,
-          username: sub.socialAccount?.username || handle,
+          username: handle,
           displayName: sub.socialAccount?.displayName || sub.user.name,
           profileUrl: sub.socialAccount?.profileUrl || null,
           userId: sub.user.id,
