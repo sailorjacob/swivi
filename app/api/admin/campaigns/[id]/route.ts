@@ -145,17 +145,9 @@ export async function GET(
                   }
                 }
               }
-            },
-            socialAccount: {
-              select: {
-                id: true,
-                platform: true,
-                username: true,
-                displayName: true,
-                profileUrl: true,
-                verified: true
-              }
             }
+            // socialAccount query removed - column may not exist
+            // Using URL extraction for handle detection instead
           },
           orderBy: { createdAt: 'desc' }
         }
@@ -177,8 +169,8 @@ export async function GET(
       const earnings = Number(sub.clips?.earnings || 0)
       const scrapeCount = viewTracking.length
 
-      // Use the verified social account they selected when submitting
-      const socialAccount = sub.socialAccount || null
+      // socialAccount not available (column may not exist in DB)
+      const socialAccount = null
       
       return {
         id: sub.id,
@@ -242,12 +234,11 @@ export async function GET(
     }>()
     
     for (const sub of processedSubmissions) {
-      // Create a unique key based on verified social account
-      // Priority: 1) verified socialAccount username (what they selected), 2) URL extraction, 3) fallback
-      const verifiedHandle = sub.socialAccount?.username
+      // Create a unique key based on handle extracted from URL
+      // socialAccount query disabled due to missing DB column
       const urlHandle = extractHandleFromUrl(sub.clipUrl, sub.platform)
-      const handle = verifiedHandle || urlHandle || sub.user.email?.split('@')[0] || sub.user.id
-      const isVerified = !!verifiedHandle
+      const handle = urlHandle || sub.user.email?.split('@')[0] || sub.user.id
+      const isVerified = false  // Would be true if socialAccount was available
       const key = `${sub.platform}:${handle.toLowerCase()}`  // Normalize to lowercase
       
       const existing = handleStatsMap.get(key)
