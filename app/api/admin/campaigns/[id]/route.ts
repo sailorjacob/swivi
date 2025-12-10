@@ -94,7 +94,7 @@ export async function GET(
                 bitcoinAddress: true
               }
             },
-            socialAccounts: {
+            socialAccount: {
               select: {
                 id: true,
                 platform: true,
@@ -142,7 +142,7 @@ export async function GET(
       const scrapeCount = viewTracking.length
 
       // Get social account info (use the linked one or first verified for this platform)
-      const socialAccount = sub.socialAccounts || null
+      const socialAccount = sub.socialAccount || null
       
       return {
         id: sub.id,

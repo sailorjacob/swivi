@@ -57,7 +57,7 @@ export async function GET(
                 image: true
               }
             },
-            socialAccounts: {
+            socialAccount: {
               select: {
                 platform: true,
                 username: true,
@@ -95,7 +95,7 @@ export async function GET(
       const currentViews = Number(sub.clips?.views || 0)
       const viewsGained = Math.max(0, currentViews - initialViews)
       const earnings = Number(sub.clips?.earnings || 0)
-      const socialAccount = sub.socialAccounts
+      const socialAccount = sub.socialAccount
       
       return {
         id: sub.id,
