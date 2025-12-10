@@ -1680,18 +1680,19 @@ export default function AdminCampaignsPage() {
                                         </div>
                                       </div>
                                       
-                                      {/* Secondary Stats Row - Clippers, Pages & Views */}
+                                      {/* Secondary Stats Row - Clippers & Pages */}
                                       <div className="grid grid-cols-4 gap-3">
                                         <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                          <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.uniqueClippers || 0}</p>
+                                          <p className="text-xs text-muted-foreground">Clippers</p>
+                                        </div>
+                                        <div className="text-center p-2 bg-muted/50 rounded-lg">
                                           <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.uniqueApprovedClippers || 0}</p>
-                                          <p className="text-xs text-muted-foreground">
-                                            Clippers Paid
-                                            {expandedCampaignData[campaign.id].stats.uniqueClippers > expandedCampaignData[campaign.id].stats.uniqueApprovedClippers && (
-                                              <span className="text-[10px] opacity-60 block">
-                                                ({expandedCampaignData[campaign.id].stats.uniqueClippers} submitted)
-                                              </span>
-                                            )}
-                                          </p>
+                                          <p className="text-xs text-muted-foreground">Clippers Paid</p>
+                                        </div>
+                                        <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                          <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.totalPagesSubmitted || 0}</p>
+                                          <p className="text-xs text-muted-foreground">Pages</p>
                                         </div>
                                         <button 
                                           onClick={() => {
@@ -1702,15 +1703,12 @@ export default function AdminCampaignsPage() {
                                           className="text-center p-2 bg-foreground/5 hover:bg-foreground/10 rounded-lg border border-border transition-colors cursor-pointer"
                                         >
                                           <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.uniquePages || 0}</p>
-                                          <p className="text-xs text-muted-foreground">
-                                            Pages ↓
-                                            {expandedCampaignData[campaign.id].stats.totalPagesSubmitted > expandedCampaignData[campaign.id].stats.uniquePages && (
-                                              <span className="text-[10px] opacity-60 block">
-                                                ({expandedCampaignData[campaign.id].stats.totalPagesSubmitted} submitted)
-                                              </span>
-                                            )}
-                                          </p>
+                                          <p className="text-xs text-muted-foreground">Pages Approved ↓</p>
                                         </button>
+                                      </div>
+                                      
+                                      {/* Views Breakdown Row */}
+                                      <div className="grid grid-cols-2 gap-3">
                                         <div className="text-center p-2 bg-muted/50 rounded-lg">
                                           <p className="text-lg font-bold">
                                             {expandedCampaignData[campaign.id].stats.viewsAtCompletion?.toLocaleString() || 0}
