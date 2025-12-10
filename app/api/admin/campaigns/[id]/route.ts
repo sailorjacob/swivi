@@ -56,7 +56,7 @@ export async function GET(
         creator: true,
         budget: true,
         spent: true,
-        reservedAmount: true,
+        // reservedAmount may not exist yet - handled below
         payoutRate: true,
         startDate: true,
         status: true,
@@ -287,7 +287,12 @@ export async function GET(
     })
   } catch (error) {
     console.error("Error fetching campaign:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    // Return more detailed error in development
+    const errorMessage = error instanceof Error ? error.message : "Unknown error"
+    return NextResponse.json({ 
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+    }, { status: 500 })
   }
 }
 
