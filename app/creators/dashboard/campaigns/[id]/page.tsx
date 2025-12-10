@@ -426,8 +426,8 @@ export default function CampaignDetailPage() {
   const isActive = campaign.status === "ACTIVE" && !isBudgetExhausted
   const isScheduled = campaign.status === "SCHEDULED"
   const isCompleted = campaign.status === "COMPLETED" || isBudgetExhausted
-  const progress = budgetNum > 0 ? (spentNum / budgetNum) * 100 : 0
-  const remainingBudget = budgetNum - spentNum
+  const progress = budgetNum > 0 ? Math.min(100, (spentNum / budgetNum) * 100) : 0
+  const remainingBudget = Math.max(0, budgetNum - spentNum)
 
   return (
     <div className="space-y-6">

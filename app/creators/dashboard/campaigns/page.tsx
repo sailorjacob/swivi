@@ -404,7 +404,7 @@ export default function CampaignsPage() {
           const isCompleted = campaign.status === "COMPLETED"
 
           // Campaign runs until budget is exhausted
-          const remainingBudget = budgetNum - spentNum
+          const remainingBudget = Math.max(0, budgetNum - spentNum)
           const budgetText = remainingBudget > 0 ? `$${remainingBudget.toFixed(0)} left` : "Budget Full"
 
           return (

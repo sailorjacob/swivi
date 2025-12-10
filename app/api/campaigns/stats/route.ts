@@ -69,7 +69,7 @@ async function getCampaignStats(campaignId: string) {
     // Calculate progress percentages and budget remaining
     const budgetProgress = campaign.budget > 0 ? (payoutStats.totalSpent / Number(campaign.budget)) * 100 : 0
     const viewProgress = campaign.viewGoal ? (viewStats.totalViews / campaign.viewGoal) * 100 : 0
-    const remainingBudget = Number(campaign.budget) - payoutStats.totalSpent
+    const remainingBudget = Math.max(0, Number(campaign.budget) - payoutStats.totalSpent)
     
     return NextResponse.json({
       success: true,

@@ -277,8 +277,19 @@ export class SimpleViewTracker {
         const currentClipEarnings = Number(currentClip?.earnings || 0)
         const earningsDelta = Math.max(0, cappedEarnings - currentClipEarnings)
 
-        // Check budget remaining
-        const remainingBudget = Math.max(0, clip.campaignBudget - clip.campaignSpent)
+        // CRITICAL: Refetch FRESH campaign spent to prevent race condition overspend
+        // The campaignSpent from query time may be stale if other clips updated it
+        const freshCampaign = await prisma.campaign.findUnique({
+          where: { id: clip.campaignId },
+          select: { spent: true, budget: true, reservedAmount: true }
+        })
+        const freshSpent = Number(freshCampaign?.spent || 0)
+        const freshBudget = Number(freshCampaign?.budget || 0)
+        const freshReserved = Number(freshCampaign?.reservedAmount || 0)
+        const freshEffectiveBudget = freshBudget - freshReserved
+        
+        // Check budget remaining with FRESH data
+        const remainingBudget = Math.max(0, freshEffectiveBudget - freshSpent)
         earningsAdded = Math.min(earningsDelta, remainingBudget)
 
         if (earningsAdded > 0) {
@@ -297,11 +308,50 @@ export class SimpleViewTracker {
             }
           })
 
-          // Update campaign spent
-          await prisma.campaign.update({
+          // Update campaign spent - cap at budget to prevent overspend
+          // Use raw SQL to atomically cap: spent = LEAST(spent + earningsAdded, budget)
+          await prisma.$executeRaw`
+            UPDATE campaigns 
+            SET spent = LEAST(spent + ${earningsAdded}, budget - COALESCE("reservedAmount", 0)),
+                "updatedAt" = NOW()
+            WHERE id = ${clip.campaignId}
+          `
+          
+          // Check if budget was just reached - set metrics if first time
+          const updatedCampaign = await prisma.campaign.findUnique({
             where: { id: clip.campaignId },
-            data: { spent: { increment: earningsAdded } }
+            select: { spent: true, budget: true, reservedAmount: true, budgetReachedAt: true }
           })
+          
+          if (updatedCampaign) {
+            const effectiveBudget = Number(updatedCampaign.budget) - Number(updatedCampaign.reservedAmount || 0)
+            const isNowAtBudget = Number(updatedCampaign.spent) >= effectiveBudget
+            const wasNotPreviouslyReached = !updatedCampaign.budgetReachedAt
+            
+            if (isNowAtBudget && wasNotPreviouslyReached) {
+              // Budget just reached! Snapshot the current total views
+              const viewsSnapshot = await prisma.clip.aggregate({
+                where: {
+                  clipSubmissions: {
+                    some: {
+                      campaignId: clip.campaignId,
+                      status: 'APPROVED'
+                    }
+                  }
+                },
+                _sum: { views: true }
+              })
+              
+              await prisma.campaign.update({
+                where: { id: clip.campaignId },
+                data: {
+                  budgetReachedAt: new Date(),
+                  budgetReachedViews: viewsSnapshot._sum.views || BigInt(0)
+                }
+              })
+              console.log(`🎯 Campaign ${clip.campaignId} budget reached! Views snapshot: ${viewsSnapshot._sum.views}`)
+            }
+          }
         }
       } else if (isCompletedCampaign && viewsGained > 0) {
         // For completed campaigns, still update user's totalViews for their stats

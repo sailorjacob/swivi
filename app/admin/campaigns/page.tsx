@@ -1584,7 +1584,7 @@ export default function AdminCampaignsPage() {
                               <p className="text-xs text-muted-foreground">Budget</p>
                             </div>
                             <div className="text-center p-2 bg-muted/50 rounded-lg">
-                              <p className="text-2xl font-bold">${(campaign.budget - campaign.spent).toLocaleString()}</p>
+                              <p className="text-2xl font-bold">${Math.max(0, campaign.budget - campaign.spent).toLocaleString()}</p>
                               <p className="text-xs text-muted-foreground">Remaining</p>
                             </div>
                           </div>
