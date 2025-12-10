@@ -251,7 +251,7 @@ export async function PUT(
       }
     }
 
-    // If approved, send approval notification and activate clip
+    // If approved, send approval notification, activate clip, and calculate initial earnings
     if (validatedData.status === "APPROVED" && submission.status !== "APPROVED") {
       console.log("🔍 Activating clip for approved submission...")
       // Create or update clip for view tracking
@@ -282,6 +282,76 @@ export async function PUT(
         
         clipId = clip.id
         console.log("✅ Clip created with id:", clipId)
+      }
+
+      // IMPORTANT: Calculate initial earnings from current views
+      // This fixes the bug where clips get views tracked while PENDING,
+      // then approved, but never get earnings because they're at the back of the tracking queue
+      if (clipId) {
+        try {
+          const clipData = await prisma.clip.findUnique({
+            where: { id: clipId },
+            select: { views: true, earnings: true }
+          })
+          
+          const campaign = await prisma.campaign.findUnique({
+            where: { id: submission.campaignId },
+            select: { payoutRate: true, budget: true, spent: true, reservedAmount: true, status: true }
+          })
+          
+          if (clipData && campaign && campaign.status === 'ACTIVE') {
+            const currentViews = Number(clipData.views || 0)
+            const initialViews = Number(submission.initialViews || 0)
+            const currentEarnings = Number(clipData.earnings || 0)
+            const payoutRate = Number(campaign.payoutRate || 1) // Default $1 per 1000
+            
+            // Calculate effective budget (excluding reserved amount for fees)
+            const effectiveBudget = Number(campaign.budget) - Number(campaign.reservedAmount || 0)
+            const remainingBudget = Math.max(0, effectiveBudget - Number(campaign.spent))
+            
+            // Calculate what earnings should be
+            const viewGrowth = Math.max(0, currentViews - initialViews)
+            const shouldEarn = (viewGrowth / 1000) * payoutRate
+            
+            // Cap at 30% of effective budget
+            const maxClipEarnings = effectiveBudget * 0.30
+            const cappedEarnings = Math.min(shouldEarn, maxClipEarnings)
+            
+            // Only add if there's a delta
+            const earningsDelta = Math.max(0, cappedEarnings - currentEarnings)
+            const earningsToAdd = Math.min(earningsDelta, remainingBudget)
+            
+            if (earningsToAdd > 0.01) { // Only if meaningful amount
+              console.log(`💰 Calculating initial earnings: ${currentViews} views - ${initialViews} initial = ${viewGrowth} eligible`)
+              console.log(`💰 Should earn: $${shouldEarn.toFixed(2)}, adding: $${earningsToAdd.toFixed(2)}`)
+              
+              // Update clip earnings
+              await prisma.clip.update({
+                where: { id: clipId },
+                data: { earnings: { increment: earningsToAdd } }
+              })
+              
+              // Update user earnings
+              await prisma.user.update({
+                where: { id: submission.userId },
+                data: { totalEarnings: { increment: earningsToAdd } }
+              })
+              
+              // Update campaign spent
+              await prisma.campaign.update({
+                where: { id: submission.campaignId },
+                data: { spent: { increment: earningsToAdd } }
+              })
+              
+              console.log(`✅ Initial earnings of $${earningsToAdd.toFixed(2)} calculated for clip`)
+            } else {
+              console.log(`📊 No earnings to add (current: $${currentEarnings.toFixed(2)}, views: ${currentViews})`)
+            }
+          }
+        } catch (earningsError) {
+          console.error("Failed to calculate initial earnings:", earningsError)
+          // Don't fail the approval if earnings calculation fails
+        }
       }
 
       try {
