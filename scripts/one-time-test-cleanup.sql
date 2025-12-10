@@ -96,3 +96,4 @@ SELECT id, email, "totalEarnings", "totalViews" FROM users;
 
 
 
+

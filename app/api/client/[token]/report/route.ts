@@ -34,8 +34,7 @@ export async function GET(
         featuredImage: true,
         completedAt: true,
         completionReason: true,
-        budgetReachedAt: true,
-        budgetReachedViews: true,
+        // budgetReachedAt and budgetReachedViews may not exist yet
         createdAt: true,
         _count: {
           select: {
@@ -226,7 +225,7 @@ export async function GET(
         endDate: campaign.endDate,
         completedAt: campaign.completedAt,
         completionReason: campaign.completionReason,
-        budgetReachedAt: campaign.budgetReachedAt,
+        budgetReachedAt: null, // Requires migration to add column
         createdAt: campaign.createdAt
       },
       budget: {
@@ -240,7 +239,7 @@ export async function GET(
         totalViews,
         totalViewsGained,
         totalEarnings,
-        viewsAtBudgetReached: Number(campaign.budgetReachedViews || 0),
+        viewsAtBudgetReached: 0, // Requires migration to add column
         averageViewsPerClip: approvedSubmissions.length > 0 
           ? Math.round(totalViews / approvedSubmissions.length) 
           : 0
