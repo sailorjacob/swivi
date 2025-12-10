@@ -181,8 +181,8 @@ export default function PayoutsPage() {
         // Handle specific error codes
         if (errorData.code === 'ACTIVE_CAMPAIGNS_ONLY') {
           toast.error("Your earnings are from active campaigns. Payouts available after campaign ends.")
-        } else if (errorData.code === 'EXCEEDS_PAYABLE') {
-          toast.error(`Maximum payable is $${errorData.payableBalance?.toFixed(2)}. Remaining earnings will be available after campaign ends.`)
+        } else if (errorData.code === 'FULL_BALANCE_REQUIRED') {
+          toast.error(`You must request your full balance of $${errorData.payableBalance?.toFixed(2)}. Partial payouts are not allowed.`)
         } else {
           toast.error(errorData.error || "Failed to submit payout request")
         }
