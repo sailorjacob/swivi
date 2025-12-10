@@ -250,7 +250,7 @@ export default function PayoutsPage() {
           </p>
         </div>
       )}
-
+      
       {/* Earnings Overview */}
       <div className="grid gap-4 md:grid-cols-3 mb-8">
         <Card className="bg-card border-border">
