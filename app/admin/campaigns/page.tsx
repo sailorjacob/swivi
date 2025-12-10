@@ -1703,7 +1703,14 @@ export default function AdminCampaignsPage() {
                                           className="text-center p-2 bg-foreground/5 hover:bg-foreground/10 rounded-lg border border-border transition-colors cursor-pointer"
                                         >
                                           <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.uniquePages || 0}</p>
-                                          <p className="text-xs text-muted-foreground">Pages Approved ↓</p>
+                                          <p className="text-xs text-muted-foreground">
+                                            Pages Approved ↓
+                                            {expandedCampaignData[campaign.id].stats.verifiedPages > 0 && (
+                                              <span className="text-[10px] opacity-60 block">
+                                                {expandedCampaignData[campaign.id].stats.verifiedPages} verified
+                                              </span>
+                                            )}
+                                          </p>
                                         </button>
                                       </div>
                                       
@@ -1745,8 +1752,11 @@ export default function AdminCampaignsPage() {
                                                    creator.platform === 'TWITTER' ? 'X' :
                                                    creator.platform}
                                                 </Badge>
-                                                <div>
+                                                <div className="flex items-center gap-1">
                                                   <span className="font-medium">@{creator.username}</span>
+                                                  {creator.isVerified && (
+                                                    <span className="text-[10px] bg-foreground/10 px-1 rounded" title="Verified social account">✓</span>
+                                                  )}
                                                   {creator.displayName && creator.displayName !== creator.username && (
                                                     <span className="text-muted-foreground ml-1">({creator.displayName})</span>
                                                   )}

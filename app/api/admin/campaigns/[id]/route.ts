@@ -145,6 +145,16 @@ export async function GET(
                   }
                 }
               }
+            },
+            socialAccount: {
+              select: {
+                id: true,
+                platform: true,
+                username: true,
+                displayName: true,
+                profileUrl: true,
+                verified: true
+              }
             }
           },
           orderBy: { createdAt: 'desc' }
@@ -167,8 +177,8 @@ export async function GET(
       const earnings = Number(sub.clips?.earnings || 0)
       const scrapeCount = viewTracking.length
 
-      // Social account info not available in this simplified query
-      const socialAccount = null
+      // Use the verified social account they selected when submitting
+      const socialAccount = sub.socialAccount || null
       
       return {
         id: sub.id,
@@ -221,6 +231,7 @@ export async function GET(
       username: string
       displayName: string | null
       profileUrl: string | null
+      isVerified: boolean  // Whether this is from a verified social account
       userId: string
       userName: string | null
       userEmail: string | null
@@ -231,10 +242,12 @@ export async function GET(
     }>()
     
     for (const sub of processedSubmissions) {
-      // Create a unique key based on platform + username
-      // Priority: 1) socialAccount username, 2) extracted from URL, 3) email prefix, 4) user ID
+      // Create a unique key based on verified social account
+      // Priority: 1) verified socialAccount username (what they selected), 2) URL extraction, 3) fallback
+      const verifiedHandle = sub.socialAccount?.username
       const urlHandle = extractHandleFromUrl(sub.clipUrl, sub.platform)
-      const handle = sub.socialAccount?.username || urlHandle || sub.user.email?.split('@')[0] || sub.user.id
+      const handle = verifiedHandle || urlHandle || sub.user.email?.split('@')[0] || sub.user.id
+      const isVerified = !!verifiedHandle
       const key = `${sub.platform}:${handle.toLowerCase()}`  // Normalize to lowercase
       
       const existing = handleStatsMap.get(key)
@@ -251,6 +264,7 @@ export async function GET(
           username: handle,
           displayName: sub.socialAccount?.displayName || sub.user.name,
           profileUrl: sub.socialAccount?.profileUrl || null,
+          isVerified,
           userId: sub.user.id,
           userName: sub.user.name,
           userEmail: sub.user.email,
@@ -273,6 +287,8 @@ export async function GET(
     // Count unique pages by status
     const totalPagesSubmitted = allSubmittedPages.length
     const approvedPages = participatingCreators.length
+    const verifiedPages = participatingCreators.filter(c => c.isVerified).length
+    const unverifiedPages = approvedPages - verifiedPages
     
     // Platform breakdown
     const platformBreakdown = processedSubmissions.reduce((acc, sub) => {
@@ -312,6 +328,8 @@ export async function GET(
         uniqueApprovedClippers, // Unique users with approved submissions
         totalPagesSubmitted, // All unique pages that submitted (any status)
         uniquePages: approvedPages, // Unique pages with approved clips
+        verifiedPages, // Pages from verified social accounts
+        unverifiedPages, // Pages without verified social account link
         totalEarnings,
         totalViews,
         totalViewsGained,
