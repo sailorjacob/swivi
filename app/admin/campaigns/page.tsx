@@ -2458,7 +2458,11 @@ function CampaignView({
       </div>
 
       {/* Submission Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4">
+        <div className="text-center p-3 bg-muted rounded-lg border">
+          <p className="text-2xl font-bold">{stats.uniqueClippers || 0}</p>
+          <p className="text-xs text-muted-foreground">Unique Clippers</p>
+        </div>
         <div className="text-center p-3 bg-muted rounded-lg border">
           <p className="text-2xl font-bold">{stats.totalSubmissions || 0}</p>
           <p className="text-xs text-muted-foreground">Total Submissions</p>

@@ -69,6 +69,8 @@ export async function GET(
         updatedAt: true,
         completedAt: true,
         completionReason: true,
+        budgetReachedAt: true,
+        budgetReachedViews: true,
         _count: {
           select: {
             clipSubmissions: true
@@ -158,6 +160,14 @@ export async function GET(
     const totalEarnings = approvedSubmissions.reduce((sum, s) => sum + s.earnings, 0)
     const totalViews = approvedSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
     const totalViewsGained = approvedSubmissions.reduce((sum, s) => sum + s.viewsGained, 0)
+    
+    // Count unique clippers (different user accounts who submitted)
+    const uniqueClipperIds = new Set(processedSubmissions.map(s => s.user.id))
+    const uniqueClippers = uniqueClipperIds.size
+    
+    // Count unique approved clippers (clippers with at least one approved submission)
+    const uniqueApprovedClipperIds = new Set(approvedSubmissions.map(s => s.user.id))
+    const uniqueApprovedClippers = uniqueApprovedClipperIds.size
 
     // Convert Prisma Decimal types to numbers for proper client-side comparison
     const budgetNum = Number(campaign.budget)
@@ -178,6 +188,8 @@ export async function GET(
         approvedCount: approvedSubmissions.length,
         pendingCount: processedSubmissions.filter(s => s.status === 'PENDING').length,
         rejectedCount: processedSubmissions.filter(s => s.status === 'REJECTED').length,
+        uniqueClippers, // Total unique users who submitted (any status)
+        uniqueApprovedClippers, // Unique users with approved submissions
         totalEarnings,
         totalViews,
         totalViewsGained,
