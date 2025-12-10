@@ -1690,36 +1690,28 @@ export default function AdminCampaignsPage() {
                                           }}
                                           className="text-center p-2 bg-foreground/5 hover:bg-foreground/10 rounded-lg border border-border transition-colors cursor-pointer"
                                         >
-                                          <p className="text-lg font-bold text-primary">{expandedCampaignData[campaign.id].stats.uniquePages || 0}</p>
-                                          <p className="text-xs text-muted-foreground">Unique Pages ↓</p>
+                                          <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.uniquePages || 0}</p>
+                                          <p className="text-xs text-muted-foreground">
+                                            Approved Pages ↓
+                                            {expandedCampaignData[campaign.id].stats.totalPagesSubmitted > expandedCampaignData[campaign.id].stats.uniquePages && (
+                                              <span className="text-[10px] opacity-60 block">
+                                                ({expandedCampaignData[campaign.id].stats.totalPagesSubmitted} submitted)
+                                              </span>
+                                            )}
+                                          </p>
                                         </button>
-                                        {expandedCampaignData[campaign.id].stats.viewsAtCompletion !== null ? (
-                                          <>
-                                            <div className="text-center p-2 bg-green-500/10 rounded-lg border border-green-500/20">
-                                              <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                                                {expandedCampaignData[campaign.id].stats.viewsAtCompletion?.toLocaleString() || 0}
-                                              </p>
-                                              <p className="text-xs text-muted-foreground">Views @ Completion</p>
-                                            </div>
-                                            <div className="text-center p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                                              <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                                +{expandedCampaignData[campaign.id].stats.viewsAfterCompletion?.toLocaleString() || 0}
-                                              </p>
-                                              <p className="text-xs text-muted-foreground">Extra Tracked</p>
-                                            </div>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <div className="text-center p-2 bg-muted/50 rounded-lg">
-                                              <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.uniqueClippers || 0}</p>
-                                              <p className="text-xs text-muted-foreground">Unique Clippers</p>
-                                            </div>
-                                            <div className="text-center p-2 bg-muted/50 rounded-lg">
-                                              <p className="text-lg font-bold">+{expandedCampaignData[campaign.id].stats.totalViewsGained?.toLocaleString() || 0}</p>
-                                              <p className="text-xs text-muted-foreground">Views Gained</p>
-                                            </div>
-                                          </>
-                                        )}
+                                        <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                          <p className="text-lg font-bold">
+                                            {expandedCampaignData[campaign.id].stats.viewsAtCompletion?.toLocaleString() || 0}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground">Views @ Completion</p>
+                                        </div>
+                                        <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                          <p className="text-lg font-bold">
+                                            +{expandedCampaignData[campaign.id].stats.viewsAfterCompletion?.toLocaleString() || 0}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground">Extra Tracked</p>
+                                        </div>
                                       </div>
                                     </div>
                                   )}

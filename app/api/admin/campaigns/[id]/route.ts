@@ -223,9 +223,17 @@ export async function GET(
       }
     }
     
-    // Convert to array and sort by earnings
-    const participatingCreators = Array.from(handleStatsMap.values())
+    // Convert to array - all pages that submitted (for reference)
+    const allSubmittedPages = Array.from(handleStatsMap.values())
+    
+    // Filter to only pages with approved clips and sort by earnings
+    const participatingCreators = allSubmittedPages
+      .filter(c => c.approvedClipCount > 0)
       .sort((a, b) => b.totalEarnings - a.totalEarnings)
+    
+    // Count unique pages by status
+    const totalPagesSubmitted = allSubmittedPages.length
+    const approvedPages = participatingCreators.length
     
     // Platform breakdown
     const platformBreakdown = processedSubmissions.reduce((acc, sub) => {
@@ -263,13 +271,16 @@ export async function GET(
         rejectedCount: processedSubmissions.filter(s => s.status === 'REJECTED').length,
         uniqueClippers, // Total unique users who submitted (any status)
         uniqueApprovedClippers, // Unique users with approved submissions
-        uniquePages: participatingCreators.length, // Unique social handles/pages
+        totalPagesSubmitted, // All unique pages that submitted (any status)
+        uniquePages: approvedPages, // Unique pages with approved clips
         totalEarnings,
         totalViews,
         totalViewsGained,
-        // Views tracking for completed campaigns
-        viewsAtCompletion: spentNum >= effectiveBudget ? totalViews - totalViewsGained : null,
-        viewsAfterCompletion: spentNum >= effectiveBudget ? totalViewsGained : null,
+        // Views at completion = earnings paid out × 1000 (since $1 per 1K views)
+        // This represents views that were counted toward earnings
+        viewsAtCompletion: Math.round(totalEarnings * 1000),
+        // Extra tracked = total views - views that generated earnings
+        viewsAfterCompletion: Math.max(0, totalViews - Math.round(totalEarnings * 1000)),
         // Use effective budget for utilization calculation
         budgetUtilization: effectiveBudget > 0 
           ? (spentNum / effectiveBudget) * 100 
