@@ -1680,8 +1680,19 @@ export default function AdminCampaignsPage() {
                                         </div>
                                       </div>
                                       
-                                      {/* Secondary Stats Row - Unique Pages & Views Breakdown */}
-                                      <div className="grid grid-cols-3 gap-3">
+                                      {/* Secondary Stats Row - Clippers, Pages & Views */}
+                                      <div className="grid grid-cols-4 gap-3">
+                                        <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                          <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.uniqueApprovedClippers || 0}</p>
+                                          <p className="text-xs text-muted-foreground">
+                                            Clippers Paid
+                                            {expandedCampaignData[campaign.id].stats.uniqueClippers > expandedCampaignData[campaign.id].stats.uniqueApprovedClippers && (
+                                              <span className="text-[10px] opacity-60 block">
+                                                ({expandedCampaignData[campaign.id].stats.uniqueClippers} submitted)
+                                              </span>
+                                            )}
+                                          </p>
+                                        </div>
                                         <button 
                                           onClick={() => {
                                             // Toggle showing the pages list
@@ -1692,7 +1703,7 @@ export default function AdminCampaignsPage() {
                                         >
                                           <p className="text-lg font-bold">{expandedCampaignData[campaign.id].stats.uniquePages || 0}</p>
                                           <p className="text-xs text-muted-foreground">
-                                            Approved Pages ↓
+                                            Pages ↓
                                             {expandedCampaignData[campaign.id].stats.totalPagesSubmitted > expandedCampaignData[campaign.id].stats.uniquePages && (
                                               <span className="text-[10px] opacity-60 block">
                                                 ({expandedCampaignData[campaign.id].stats.totalPagesSubmitted} submitted)
