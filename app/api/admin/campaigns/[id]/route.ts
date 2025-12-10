@@ -93,16 +93,6 @@ export async function GET(
                 bitcoinAddress: true
               }
             },
-            socialAccount: {
-              select: {
-                id: true,
-                platform: true,
-                username: true,
-                displayName: true,
-                profileUrl: true,
-                verified: true
-              }
-            },
             clips: {
               select: {
                 id: true,
@@ -140,8 +130,8 @@ export async function GET(
       const earnings = Number(sub.clips?.earnings || 0)
       const scrapeCount = viewTracking.length
 
-      // Get social account info (use the linked one or first verified for this platform)
-      const socialAccount = sub.socialAccount || null
+      // Social account info not available in this simplified query
+      const socialAccount = null
       
       return {
         id: sub.id,
