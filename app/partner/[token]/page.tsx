@@ -264,7 +264,12 @@ export default function PartnerDashboardPage() {
                 <span className="text-[10px] md:text-xs uppercase tracking-wide">Progress</span>
               </div>
               <p className="text-xl md:text-3xl font-bold">{stats.budgetUtilization.toFixed(0)}%</p>
-              <Progress value={stats.budgetUtilization} className="mt-2 h-2" />
+              <div className="w-full bg-muted rounded-full h-2 mt-2">
+                <div
+                  className="bg-green-500 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(stats.budgetUtilization, 100)}%` }}
+                />
+              </div>
             </CardContent>
           </Card>
         </div>
