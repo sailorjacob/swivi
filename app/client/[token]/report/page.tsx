@@ -298,15 +298,15 @@ export default function ClientReportPage() {
               const surplusPercent = paidViews > 0 ? ((surplusViews / paidViews) * 100).toFixed(1) : '0'
               
               return surplusViews > 0 ? (
-                <div className="mt-4 p-4 rounded">
-                  <div className="flex items-center justify-between">
+                <div className="mt-4 p-3 md:p-4 rounded">
+                  <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-lg font-bold text-gray-800">Post Campaign Performance</p>
-                      <p className="text-sm text-gray-600">Views delivered beyond budget allocation</p>
+                      <p className="text-base md:text-lg font-bold text-gray-800">Post Campaign Performance</p>
+                      <p className="text-xs md:text-sm text-gray-600">Views delivered beyond budget</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-3xl font-bold" style={{color: '#00ff41'}}>+{surplusViews.toLocaleString()}</p>
-                      <p className="text-sm text-gray-600">Additional views ({surplusPercent}%)</p>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-2xl md:text-3xl font-bold" style={{color: '#00ff41'}}>+{surplusViews.toLocaleString()}</p>
+                      <p className="text-xs md:text-sm text-gray-600">additional views ({surplusPercent}%)</p>
                     </div>
                   </div>
                 </div>
@@ -354,7 +354,7 @@ export default function ClientReportPage() {
                 <tbody>
                   {Object.entries(platforms).map(([platform, stats]) => (
                     <tr key={platform} className="border-b">
-                      <td className="py-2 font-medium">{platform.toLowerCase()}</td>
+                      <td className="py-2 font-medium">{platform}</td>
                       <td className="py-2 text-center">{stats.total}</td>
                       <td className="py-2 text-center">{stats.approved}</td>
                       <td className="py-2 text-right">{stats.views.toLocaleString()}</td>
@@ -395,7 +395,7 @@ export default function ClientReportPage() {
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:underline"
                         >
-                          {clip.platform.toLowerCase()}
+                          {clip.platform}
                         </a>
                       </td>
                       <td className="py-2 text-right">{clip.views.toLocaleString()}</td>
@@ -440,7 +440,7 @@ export default function ClientReportPage() {
                             <span className="text-gray-400 ml-1 text-[10px] hidden md:inline">({creator.creatorName})</span>
                           )}
                         </td>
-                        <td className="py-2">{creator.platform.toLowerCase()}</td>
+                        <td className="py-2">{creator.platform}</td>
                         <td className="py-2 text-center">{creator.approvedCount}</td>
                         <td className="py-2 text-right">{creator.approvedViews.toLocaleString()}</td>
                         <td className="py-2 text-right">
@@ -491,7 +491,7 @@ export default function ClientReportPage() {
                             <span className="text-[10px] bg-gray-200 px-1 rounded ml-1" title="Verified">✓</span>
                           )}
                         </td>
-                        <td className="py-2">{creator.platform.toLowerCase()}</td>
+                        <td className="py-2">{creator.platform}</td>
                         <td className="py-2 text-center">{creator.clipCount}</td>
                         <td className="py-2 text-right">{creator.totalViews > 0 ? creator.totalViews.toLocaleString() : '—'}</td>
                       </tr>
@@ -532,61 +532,39 @@ export default function ClientReportPage() {
                         const bOrder = statusOrder[b.status as keyof typeof statusOrder] || 4
                         return aOrder - bOrder
                       })
-                      .map((submission, idx) => {
-                        // Extract readable URL preview
-                        const getUrlPreview = (url: string) => {
-                          try {
-                            const urlObj = new URL(url)
-                            // Remove protocol and www
-                            let preview = urlObj.hostname.replace('www.', '')
-                            // Add first part of pathname if exists
-                            if (urlObj.pathname && urlObj.pathname !== '/') {
-                              const pathParts = urlObj.pathname.split('/').filter(p => p)
-                              if (pathParts.length > 0) {
-                                preview += '/' + pathParts.slice(0, 2).join('/')
-                              }
-                            }
-                            // Truncate if too long
-                            return preview.length > 50 ? preview.substring(0, 47) + '...' : preview
-                          } catch {
-                            return url.substring(0, 50)
-                          }
-                        }
-                        
-                        return (
-                          <tr key={submission.id} className="border-b hover:bg-gray-50">
-                            <td className="py-2">
-                              <span className="font-medium">@{submission.handle.toLowerCase()}</span>
-                              {submission.creatorName && submission.creatorName !== submission.handle && (
-                                <span className="text-gray-400 ml-1 text-[10px] block hidden md:block">({submission.creatorName})</span>
-                              )}
-                            </td>
-                            <td className="py-2">{submission.platform.toLowerCase()}</td>
-                            <td className="py-2">
-                              <a 
-                                href={submission.clipUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline text-[10px] md:text-xs inline-flex items-center gap-1"
-                              >
-                                <span className="truncate max-w-[80px] md:max-w-none">{getUrlPreview(submission.clipUrl)}</span>
-                                <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                </svg>
-                              </a>
-                            </td>
-                            <td className="py-2 text-center text-[10px] hidden md:table-cell">
-                              {new Date(submission.submittedAt).toLocaleDateString()}
-                            </td>
-                            <td className="py-2 text-center">
-                              <span className="text-[10px] md:text-xs text-gray-700">
-                                {submission.status}
-                              </span>
-                            </td>
-                            <td className="py-2 text-right font-medium">{submission.currentViews.toLocaleString()}</td>
-                          </tr>
-                        )
-                      })}
+                      .map((submission, idx) => (
+                        <tr key={submission.id} className="border-b hover:bg-gray-50">
+                          <td className="py-2">
+                            <span className="font-medium">@{submission.handle.toLowerCase()}</span>
+                            {submission.creatorName && submission.creatorName !== submission.handle && (
+                              <span className="text-gray-400 ml-1 text-[10px] block hidden md:block">({submission.creatorName})</span>
+                            )}
+                          </td>
+                          <td className="py-2">{submission.platform}</td>
+                          <td className="py-2">
+                            <a 
+                              href={submission.clipUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-[10px] md:text-xs inline-flex items-center gap-1"
+                            >
+                              View Post
+                              <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          </td>
+                          <td className="py-2 text-center text-[10px] hidden md:table-cell">
+                            {new Date(submission.submittedAt).toLocaleDateString()}
+                          </td>
+                          <td className="py-2 text-center">
+                            <span className="text-[10px] md:text-xs text-gray-700">
+                              {submission.status}
+                            </span>
+                          </td>
+                          <td className="py-2 text-right font-medium">{submission.currentViews.toLocaleString()}</td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
