@@ -348,11 +348,13 @@ export async function GET(
     })
   } catch (error) {
     console.error("Error fetching campaign:", error)
-    // Return more detailed error in development
+    // Return detailed error for debugging
     const errorMessage = error instanceof Error ? error.message : "Unknown error"
+    const errorStack = error instanceof Error ? error.stack : undefined
     return NextResponse.json({ 
       error: "Internal server error",
-      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      message: errorMessage,
+      stack: errorStack?.split('\n').slice(0, 5).join('\n')
     }, { status: 500 })
   }
 }
