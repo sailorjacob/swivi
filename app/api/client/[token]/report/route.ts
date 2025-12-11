@@ -61,7 +61,7 @@ export async function GET(
                 platform: true,
                 username: true,
                 displayName: true,
-                profileUrl: true
+                verified: true
               }
             },
             clips: {
@@ -105,7 +105,7 @@ export async function GET(
         creatorName: sub.users.name || 'Anonymous',
         creatorImage: sub.users.image,
         handle: socialAccount?.username || sub.users.name?.split(' ')[0] || 'unknown',
-        profileUrl: socialAccount?.profileUrl || null,
+        isVerified: socialAccount?.verified || false,
         initialViews,
         currentViews,
         viewsGained,
@@ -128,7 +128,7 @@ export async function GET(
       handle: string
       platform: string
       creatorName: string
-      profileUrl: string | null
+      isVerified: boolean
       clipCount: number
       approvedCount: number
       totalViews: number
@@ -151,7 +151,7 @@ export async function GET(
           handle: sub.handle,
           platform: sub.platform,
           creatorName: sub.creatorName,
-          profileUrl: sub.profileUrl,
+          isVerified: sub.isVerified,
           clipCount: 1,
           approvedCount: (sub.status === 'APPROVED' || sub.status === 'PAID') ? 1 : 0,
           totalViews: (sub.status === 'APPROVED' || sub.status === 'PAID') ? sub.currentViews : 0,

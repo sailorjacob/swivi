@@ -51,7 +51,7 @@ interface ReportData {
       handle: string
       platform: string
       creatorName: string
-      profileUrl: string | null
+      isVerified: boolean
       clipCount: number
       approvedCount: number
       totalViews: number
@@ -378,6 +378,9 @@ export default function ClientReportPage() {
                   <tr key={idx} className="border-b">
                     <td className="py-2">
                       <span className="font-medium">@{creator.handle}</span>
+                      {creator.isVerified && (
+                        <span className="text-xs bg-gray-200 px-1 rounded ml-1" title="Verified social account">✓</span>
+                      )}
                       {creator.creatorName && creator.creatorName !== creator.handle && (
                         <span className="text-gray-400 ml-1 text-xs">({creator.creatorName})</span>
                       )}

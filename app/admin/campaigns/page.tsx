@@ -1741,34 +1741,85 @@ export default function AdminCampaignsPage() {
                                             Unique Pages/Handles ({expandedCampaignData[campaign.id].participatingCreators.length})
                                           </p>
                                         </div>
-                                        <div className="max-h-64 overflow-y-auto divide-y">
-                                          {expandedCampaignData[campaign.id].participatingCreators.map((creator: any, idx: number) => (
-                                            <div key={idx} className="p-2 flex items-center justify-between text-sm hover:bg-muted/50">
-                                              <div className="flex items-center gap-2">
-                                                <Badge variant="outline" className="text-xs px-1.5 py-0">
-                                                  {creator.platform === 'YOUTUBE' ? 'YT' : 
-                                                   creator.platform === 'TIKTOK' ? 'TT' :
-                                                   creator.platform === 'INSTAGRAM' ? 'IG' :
-                                                   creator.platform === 'TWITTER' ? 'X' :
-                                                   creator.platform}
-                                                </Badge>
-                                                <div className="flex items-center gap-1">
-                                                  <span className="font-medium">@{creator.username}</span>
-                                                  {creator.isVerified && (
-                                                    <span className="text-[10px] bg-foreground/10 px-1 rounded" title="Verified social account">✓</span>
-                                                  )}
-                                                  {creator.displayName && creator.displayName !== creator.username && (
-                                                    <span className="text-muted-foreground ml-1">({creator.displayName})</span>
+                                        <div className="max-h-96 overflow-y-auto divide-y">
+                                          {expandedCampaignData[campaign.id].participatingCreators.map((creator: any, idx: number) => {
+                                            // Get clips for this creator
+                                            const creatorClips = expandedCampaignData[campaign.id].clipSubmissions?.filter((sub: any) => 
+                                              sub.platform === creator.platform && 
+                                              (sub.socialAccount?.username?.toLowerCase() === creator.username?.toLowerCase() ||
+                                               (!sub.socialAccount && sub.user?.email?.split('@')[0]?.toLowerCase() === creator.username?.toLowerCase()))
+                                            ) || []
+                                            
+                                            return (
+                                              <div key={idx} className="text-sm">
+                                                <button
+                                                  onClick={() => {
+                                                    const el = document.getElementById(`creator-clips-${campaign.id}-${idx}`)
+                                                    if (el) el.classList.toggle('hidden')
+                                                  }}
+                                                  className="w-full p-2 flex items-center justify-between hover:bg-muted/50 cursor-pointer"
+                                                >
+                                                  <div className="flex items-center gap-2">
+                                                    <Badge variant="outline" className="text-xs px-1.5 py-0">
+                                                      {creator.platform === 'YOUTUBE' ? 'YT' : 
+                                                       creator.platform === 'TIKTOK' ? 'TT' :
+                                                       creator.platform === 'INSTAGRAM' ? 'IG' :
+                                                       creator.platform === 'TWITTER' ? 'X' :
+                                                       creator.platform}
+                                                    </Badge>
+                                                    <div className="flex items-center gap-1">
+                                                      <span className="font-medium">@{creator.username}</span>
+                                                      {creator.isVerified && (
+                                                        <span className="text-[10px] bg-foreground/10 px-1 rounded" title="Verified social account">✓</span>
+                                                      )}
+                                                      {creator.displayName && creator.displayName !== creator.username && (
+                                                        <span className="text-muted-foreground ml-1">({creator.displayName})</span>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                                    <span className="text-primary underline">{creator.clipCount} clip{creator.clipCount !== 1 ? 's' : ''} ↓</span>
+                                                    <span>{creator.totalViews?.toLocaleString() || 0} views</span>
+                                                    <span className="font-medium text-foreground">${creator.totalEarnings?.toFixed(2) || '0.00'}</span>
+                                                  </div>
+                                                </button>
+                                                {/* Expandable clips list */}
+                                                <div id={`creator-clips-${campaign.id}-${idx}`} className="hidden bg-muted/30 border-t">
+                                                  {creatorClips.length > 0 ? (
+                                                    <div className="divide-y divide-border/50">
+                                                      {creatorClips.slice(0, 10).map((clip: any, clipIdx: number) => (
+                                                        <a 
+                                                          key={clipIdx}
+                                                          href={clip.clipUrl}
+                                                          target="_blank"
+                                                          rel="noopener noreferrer"
+                                                          className="block p-2 pl-8 hover:bg-muted/50 text-xs"
+                                                        >
+                                                          <div className="flex items-center justify-between">
+                                                            <span className="text-blue-500 hover:text-blue-700 truncate max-w-[250px]">
+                                                              {clip.clipUrl}
+                                                            </span>
+                                                            <div className="flex items-center gap-3 text-muted-foreground">
+                                                              <Badge variant="outline" className="text-[10px] px-1 py-0">{clip.status}</Badge>
+                                                              <span>{clip.currentViews?.toLocaleString() || 0} views</span>
+                                                              <span className="font-medium text-foreground">${clip.earnings?.toFixed(2) || '0.00'}</span>
+                                                            </div>
+                                                          </div>
+                                                        </a>
+                                                      ))}
+                                                      {creatorClips.length > 10 && (
+                                                        <p className="p-2 pl-8 text-xs text-muted-foreground">
+                                                          +{creatorClips.length - 10} more clips...
+                                                        </p>
+                                                      )}
+                                                    </div>
+                                                  ) : (
+                                                    <p className="p-2 pl-8 text-xs text-muted-foreground">No clips found</p>
                                                   )}
                                                 </div>
                                               </div>
-                                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                                <span>{creator.clipCount} clip{creator.clipCount !== 1 ? 's' : ''}</span>
-                                                <span>{creator.totalViews?.toLocaleString() || 0} views</span>
-                                                <span className="font-medium text-foreground">${creator.totalEarnings?.toFixed(2) || '0.00'}</span>
-                                              </div>
-                                            </div>
-                                          ))}
+                                            )
+                                          })}
                                         </div>
                                       </div>
                                     </div>
