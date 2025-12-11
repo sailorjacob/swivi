@@ -293,135 +293,182 @@ export default function PartnerCampaignDetailPage() {
 
           {/* Budget Progress Bar */}
           <div className="mt-4">
-            <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-              <span>Budget Used</span>
-              <span>{formatCurrency(spentNum)} / {formatCurrency(budgetNum)}</span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-3">
+            <div className="w-full bg-muted rounded-full h-2">
               <div
-                className="bg-green-500 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
+                className="bg-green-500 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(progress, 100)}%` }}
               />
             </div>
+          </div>
+
+          {/* Platforms */}
+          <div className="flex items-center gap-2 mt-4">
+            <span className="text-sm text-muted-foreground">Platforms:</span>
+            {data.targetPlatforms.map((platform) => (
+              <div key={platform} className="flex items-center gap-1 px-2 py-1 bg-muted rounded">
+                {getPlatformLogo(platform, '', 12)}
+                <span className="text-xs capitalize">{platform.toLowerCase()}</span>
+              </div>
+            ))}
           </div>
         </div>
       </motion.div>
 
-      {/* Requirements Section */}
-      {data.requirements && data.requirements.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Campaign Requirements</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {data.requirements.map((req, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm">
-                    <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
-                    <span>{req}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* Submissions Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Play className="w-5 h-5" />
-                Submissions ({data.submissions.length})
-              </CardTitle>
-              <div className="flex gap-3 text-sm text-muted-foreground">
-                <span>{data.stats.approvedSubmissions} approved</span>
-                <span>·</span>
-                <span>{data.stats.pendingSubmissions} pending</span>
-                <span>·</span>
-                <span>{data.stats.rejectedSubmissions} rejected</span>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {data.submissions.length === 0 ? (
-              <div className="text-center py-12">
-                <Play className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No submissions yet</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {data.submissions.map((submission, index) => (
-                  <div
-                    key={submission.id}
-                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    {/* Rank */}
-                    <span className="w-6 text-sm font-medium text-muted-foreground">
-                      {index + 1}.
-                    </span>
-
-                    {/* Creator */}
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={submission.creatorImage || undefined} />
-                      <AvatarFallback className="text-xs">
-                        {submission.creatorName[0] || '?'}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{submission.creatorName}</span>
-                        {getSubmissionStatusBadge(submission.status)}
-                      </div>
-                    </div>
-
-                    {/* Platform */}
-                    <div className="flex-shrink-0">
-                      {getPlatformLogo(submission.platform, '', 18)}
-                    </div>
-
-                    {/* Views */}
-                    <div className="text-right text-sm">
-                      <span className="font-medium">{submission.currentViews.toLocaleString()}</span>
-                      <span className="text-muted-foreground ml-1">views</span>
-                    </div>
-
-                    {/* Views Gained */}
-                    {submission.viewsGained > 0 && (
-                      <div className="text-right text-sm text-muted-foreground">
-                        +{submission.viewsGained.toLocaleString()}
-                      </div>
-                    )}
-
-                    {/* Link */}
-                    <a
-                      href={submission.clipUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Submissions */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Submissions Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Play className="w-5 h-5" />
+                  Submissions ({data.submissions.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {data.submissions.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Play className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No submissions yet for this campaign</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
+                ) : (
+                  <div className="space-y-3">
+                    {data.submissions.map((submission) => {
+                      const viewGrowth = submission.viewsGained
+                      
+                      return (
+                        <div
+                          key={submission.id}
+                          className="p-4 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Avatar className="w-6 h-6">
+                                  <AvatarImage src={submission.creatorImage || undefined} />
+                                  <AvatarFallback className="text-xs">
+                                    {(submission.creatorName || '?')[0]}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm font-medium">{submission.creatorName}</span>
+                                <div className="p-1.5 rounded bg-muted">
+                                  {getPlatformLogo(submission.platform, '', 14)}
+                                </div>
+                                {getSubmissionStatusBadge(submission.status)}
+                              </div>
+                              <a
+                                href={submission.clipUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-500 hover:text-blue-600 truncate block flex items-center gap-1"
+                              >
+                                {submission.clipUrl.length > 50 
+                                  ? `${submission.clipUrl.substring(0, 50)}...` 
+                                  : submission.clipUrl}
+                                <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                              </a>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                <span>Submitted {new Date(submission.submittedAt).toLocaleDateString()}</span>
+                                {submission.currentViews > 0 && (
+                                  <span className="font-medium text-foreground">
+                                    {submission.currentViews.toLocaleString()} views
+                                    {viewGrowth > 0 && (
+                                      <span className="text-muted-foreground ml-1">
+                                        (+{viewGrowth.toLocaleString()})
+                                      </span>
+                                    )}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Right Column - Requirements */}
+        <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5" />
+                  Requirements
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {data.requirements && data.requirements.length > 0 ? (
+                  <ul className="space-y-2 ml-1">
+                    {data.requirements.map((req, index) => (
+                      <li key={index} className="flex items-start gap-3 text-sm text-muted-foreground">
+                        <span className="text-foreground mt-1.5">•</span>
+                        <span>{req}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No specific requirements</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Campaign Stats Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                  <Target className="w-4 h-4" />
+                  Campaign Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Submissions</span>
+                    <span className="font-medium">{data.stats.totalSubmissions}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Approved</span>
+                    <span className="font-medium">{data.stats.approvedSubmissions}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Pending</span>
+                    <span className="font-medium">{data.stats.pendingSubmissions}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Unique Creators</span>
+                    <span className="font-medium">{data.stats.uniqueCreators}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Views</span>
+                    <span className="font-medium">{data.stats.totalViews.toLocaleString()}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </div>
     </div>
   )
 }

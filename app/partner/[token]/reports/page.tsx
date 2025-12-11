@@ -8,16 +8,12 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import {
   FileText,
-  ExternalLink,
-  Download,
   Calendar,
-  Target,
   CheckCircle,
   Clock,
   Eye,
   DollarSign,
-  Users,
-  Printer
+  Users
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -260,16 +256,6 @@ export default function PartnerReportsPage() {
                             Live Dashboard
                           </Button>
                         </Link>
-                        <Button 
-                          variant="outline"
-                          onClick={() => {
-                            window.open(`/client/${token}/report`, '_blank')
-                            setTimeout(() => window.print(), 1000)
-                          }}
-                        >
-                          <Printer className="w-4 h-4 mr-2" />
-                          Print Report
-                        </Button>
                       </div>
                     </div>
                   </div>
