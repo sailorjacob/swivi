@@ -14,28 +14,22 @@ export async function GET(
       return NextResponse.json({ error: "Invalid token" }, { status: 400 })
     }
 
-    // Find the campaign with this token to get partner info
-    const partnerCampaign = await prisma.campaign.findFirst({
-      where: { clientAccessToken: token },
-      select: { creator: true }
-    })
-
-    if (!partnerCampaign) {
-      return NextResponse.json({ error: "Invalid access token" }, { status: 404 })
-    }
-
-    const partnerName = partnerCampaign.creator || "Partner"
-
-    // Get all campaigns for this partner token with full submission data
-    const campaigns = await prisma.campaign.findMany({
+    // Find the campaign with this token
+    const campaign = await prisma.campaign.findFirst({
       where: { clientAccessToken: token },
       select: {
         id: true,
         title: true,
+        description: true,
+        creator: true,
         status: true,
         budget: true,
         spent: true,
+        payoutRate: true,
         targetPlatforms: true,
+        featuredImage: true,
+        startDate: true,
+        completedAt: true,
         createdAt: true,
         clipSubmissions: {
           select: {
@@ -43,9 +37,12 @@ export async function GET(
             clipUrl: true,
             platform: true,
             status: true,
+            initialViews: true,
+            createdAt: true,
             users: {
               select: {
-                name: true
+                name: true,
+                image: true
               }
             },
             clips: {
@@ -55,89 +52,88 @@ export async function GET(
             }
           }
         }
-      },
-      orderBy: { createdAt: 'desc' }
-    })
-
-    // Calculate summary stats
-    let totalBudget = 0
-    let totalSpent = 0
-    let totalViews = 0
-    let totalSubmissions = 0
-    let approvedSubmissions = 0
-    let activeCampaigns = 0
-    let completedCampaigns = 0
-
-    const recentCampaigns = campaigns.map(campaign => {
-      const budget = Number(campaign.budget || 0)
-      const spent = Number(campaign.spent || 0)
-      
-      totalBudget += budget
-      totalSpent += spent
-      totalSubmissions += campaign.clipSubmissions.length
-      
-      let campaignViews = 0
-      let campaignApproved = 0
-      
-      campaign.clipSubmissions.forEach(sub => {
-        if (sub.status === 'APPROVED' || sub.status === 'PAID') {
-          campaignApproved++
-          const views = Number(sub.clips?.views || 0)
-          campaignViews += views
-          totalViews += views
-        }
-      })
-      
-      approvedSubmissions += campaignApproved
-      
-      if (campaign.status === 'ACTIVE') activeCampaigns++
-      if (campaign.status === 'COMPLETED') completedCampaigns++
-
-      return {
-        id: campaign.id,
-        title: campaign.title,
-        status: campaign.status,
-        budget,
-        spent,
-        views: campaignViews,
-        submissions: campaign.clipSubmissions.length,
-        approvedCount: campaignApproved,
-        platforms: campaign.targetPlatforms,
-        createdAt: campaign.createdAt.toISOString()
       }
     })
 
-    // Get top performers across all campaigns (approved only)
-    const topPerformers = campaigns
-      .flatMap(campaign => 
-        campaign.clipSubmissions
-          .filter(sub => sub.status === 'APPROVED' || sub.status === 'PAID')
-          .map(sub => ({
-            id: sub.id,
-            clipUrl: sub.clipUrl,
-            platform: sub.platform,
-            creatorName: sub.users.name || 'Creator',
-            views: Number(sub.clips?.views || 0),
-            campaignTitle: campaign.title
-          }))
-      )
-      .sort((a, b) => b.views - a.views)
-      .slice(0, 10)
+    if (!campaign) {
+      return NextResponse.json({ error: "Invalid access token" }, { status: 404 })
+    }
+
+    const partnerName = campaign.creator || "Partner"
+
+    // Calculate stats and process submissions
+    const budget = Number(campaign.budget || 0)
+    const spent = Number(campaign.spent || 0)
+    const budgetUtilization = budget > 0 ? Math.min((spent / budget) * 100, 100) : 0
+
+    let totalViews = 0
+    let totalViewsGained = 0
+    let approvedCount = 0
+    const platformStats: Record<string, { count: number; views: number; viewsGained: number }> = {}
+
+    // Process all submissions, filter to approved for display
+    const approvedSubmissions = campaign.clipSubmissions
+      .filter(sub => sub.status === 'APPROVED' || sub.status === 'PAID')
+      .map(sub => {
+        const initialViews = Number(sub.initialViews || 0)
+        const currentViews = Number(sub.clips?.views || 0)
+        const viewsGained = Math.max(0, currentViews - initialViews)
+
+        totalViews += currentViews
+        totalViewsGained += viewsGained
+        approvedCount++
+
+        // Platform stats
+        const platform = sub.platform
+        if (!platformStats[platform]) {
+          platformStats[platform] = { count: 0, views: 0, viewsGained: 0 }
+        }
+        platformStats[platform].count++
+        platformStats[platform].views += currentViews
+        platformStats[platform].viewsGained += viewsGained
+
+        return {
+          id: sub.id,
+          clipUrl: sub.clipUrl,
+          platform: sub.platform,
+          status: sub.status,
+          creatorName: sub.users.name || 'Creator',
+          creatorImage: sub.users.image,
+          initialViews,
+          currentViews,
+          viewsGained,
+          submittedAt: sub.createdAt.toISOString()
+        }
+      })
+
+    // Sort by views (highest first)
+    approvedSubmissions.sort((a, b) => b.currentViews - a.currentViews)
 
     return NextResponse.json({
       partnerName,
-      summary: {
-        totalCampaigns: campaigns.length,
-        activeCampaigns,
-        completedCampaigns,
-        totalBudget,
-        totalSpent,
-        totalViews,
-        totalSubmissions,
-        approvedSubmissions
+      campaign: {
+        id: campaign.id,
+        title: campaign.title,
+        description: campaign.description || '',
+        status: campaign.status,
+        targetPlatforms: campaign.targetPlatforms,
+        featuredImage: campaign.featuredImage,
+        startDate: campaign.startDate?.toISOString() || null,
+        completedAt: campaign.completedAt?.toISOString() || null,
+        createdAt: campaign.createdAt.toISOString()
       },
-      recentCampaigns,
-      topPerformers
+      stats: {
+        budget,
+        spent,
+        budgetUtilization,
+        totalSubmissions: campaign.clipSubmissions.length,
+        approvedSubmissions: approvedCount,
+        totalViews,
+        totalViewsGained,
+        payoutRate: Number(campaign.payoutRate || 0)
+      },
+      platformStats,
+      submissions: approvedSubmissions
     })
   } catch (error) {
     console.error("Error fetching partner dashboard:", error)

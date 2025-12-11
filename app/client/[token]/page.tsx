@@ -242,9 +242,9 @@ export default function ClientPortalPage() {
                 </div>
                 <p className="text-xl md:text-3xl font-bold">{stats.totalViews.toLocaleString()}</p>
                 {stats.totalViewsGained > 0 && (
-                  <p className="text-xs md:text-sm text-green-600 dark:text-green-400 flex items-center gap-1 mt-1">
+                  <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1 mt-1">
                     <TrendingUp className="w-3 h-3" />
-                    +{stats.totalViewsGained.toLocaleString()}
+                    +{stats.totalViewsGained.toLocaleString()} tracked
                   </p>
                 )}
               </CardContent>
@@ -322,7 +322,7 @@ export default function ClientPortalPage() {
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Tracked</span>
-                          <span className="font-medium text-green-600 dark:text-green-400">
+                          <span className="font-medium">
                             +{stats.viewsGained.toLocaleString()}
                           </span>
                         </div>
@@ -403,7 +403,7 @@ export default function ClientPortalPage() {
                           <p className="text-xs text-muted-foreground">views</p>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                          <p className="text-sm font-medium">
                             +{submission.viewsGained.toLocaleString()}
                           </p>
                           <p className="text-xs text-muted-foreground">tracked</p>

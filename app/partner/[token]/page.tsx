@@ -4,58 +4,62 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
-import Link from "next/link"
 import { motion } from "framer-motion"
-import {
-  Eye,
-  TrendingUp,
-  Users,
-  DollarSign,
-  Target,
-  BarChart3,
-  ArrowRight,
-  Play,
+import { 
+  Eye, 
+  TrendingUp, 
+  Users, 
+  DollarSign, 
+  ExternalLink, 
   CheckCircle,
   Clock,
-  AlertCircle,
-  FileText
+  BarChart3,
+  Play,
+  Calendar,
+  Target,
+  AlertCircle
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getPlatformLogo } from "@/components/ui/icons/platform-logos"
 
 interface DashboardData {
   partnerName: string
-  summary: {
-    totalCampaigns: number
-    activeCampaigns: number
-    completedCampaigns: number
-    totalBudget: number
-    totalSpent: number
-    totalViews: number
-    totalSubmissions: number
-    approvedSubmissions: number
-  }
-  recentCampaigns: Array<{
+  campaign: {
     id: string
     title: string
+    description: string
     status: string
+    targetPlatforms: string[]
+    featuredImage: string | null
+    startDate: string | null
+    completedAt: string | null
+    createdAt: string
+  }
+  stats: {
     budget: number
     spent: number
-    views: number
-    submissions: number
-    platforms: string[]
-    createdAt: string
-  }>
-  topPerformers: Array<{
+    budgetUtilization: number
+    totalSubmissions: number
+    approvedSubmissions: number
+    totalViews: number
+    totalViewsGained: number
+    payoutRate: number
+  }
+  platformStats: Record<string, { count: number; views: number; viewsGained: number }>
+  submissions: Array<{
     id: string
     clipUrl: string
     platform: string
+    status: string
     creatorName: string
-    views: number
-    campaignTitle: string
+    creatorImage: string | null
+    initialViews: number
+    currentViews: number
+    viewsGained: number
+    submittedAt: string
   }>
 }
 
@@ -110,29 +114,28 @@ export default function PartnerDashboardPage() {
     )
   }
 
-  const { summary, recentCampaigns, topPerformers } = data
+  const { campaign, stats, platformStats, submissions } = data
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'ACTIVE':
         return (
           <Badge className="bg-foreground text-background">
-            <span className="w-1.5 h-1.5 bg-background rounded-full mr-1.5 animate-pulse" />
-            Live
+            <span className="w-2 h-2 bg-background rounded-full mr-1.5 animate-pulse" />
+            LIVE
           </Badge>
         )
       case 'COMPLETED':
         return (
-          <Badge variant="secondary">
+          <Badge className="bg-muted text-muted-foreground">
             <CheckCircle className="w-3 h-3 mr-1" />
-            Completed
+            COMPLETED
           </Badge>
         )
       case 'PAUSED':
         return (
-          <Badge variant="outline">
-            <Clock className="w-3 h-3 mr-1" />
-            Paused
+          <Badge className="bg-muted text-muted-foreground border border-foreground/20">
+            PAUSED
           </Badge>
         )
       default:
@@ -141,229 +144,255 @@ export default function PartnerDashboardPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Welcome Header */}
+    <div className="p-6 max-w-6xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold mb-2">Welcome back, {data.partnerName}</h1>
-        <p className="text-muted-foreground">
-          Here's an overview of your campaign performance on Swivi.
-        </p>
-      </motion.div>
-
-      {/* Stats Overview */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
-      >
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <Target className="w-4 h-4" />
-              <span className="text-xs uppercase tracking-wide">Campaigns</span>
-            </div>
-            <p className="text-3xl font-bold">{summary.totalCampaigns}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {summary.activeCampaigns} active
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <Eye className="w-4 h-4" />
-              <span className="text-xs uppercase tracking-wide">Total Views</span>
-            </div>
-            <p className="text-3xl font-bold">{summary.totalViews.toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-              <TrendingUp className="w-3 h-3" />
-              Across all campaigns
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <Users className="w-4 h-4" />
-              <span className="text-xs uppercase tracking-wide">Submissions</span>
-            </div>
-            <p className="text-3xl font-bold">{summary.approvedSubmissions}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              of {summary.totalSubmissions} total
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <DollarSign className="w-4 h-4" />
-              <span className="text-xs uppercase tracking-wide">Budget Used</span>
-            </div>
-            <p className="text-3xl font-bold">${summary.totalSpent.toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              of ${summary.totalBudget.toLocaleString()}
-            </p>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Two Column Layout */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Recent Campaigns */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Target className="w-5 h-5" />
-                Your Campaigns
-              </CardTitle>
-              <Link href={`/partner/${token}/campaigns`}>
-                <Button variant="ghost" size="sm" className="text-xs">
-                  View All <ArrowRight className="w-3 h-3 ml-1" />
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              {recentCampaigns.length === 0 ? (
-                <div className="text-center py-8">
-                  <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No campaigns yet</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {recentCampaigns.slice(0, 5).map((campaign) => {
-                    const progress = campaign.budget > 0 
-                      ? Math.min((campaign.spent / campaign.budget) * 100, 100) 
-                      : 0
-                    return (
-                      <div key={campaign.id} className="p-4 border border-border rounded-lg">
-                        <div className="flex items-start justify-between gap-4 mb-3">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium truncate">{campaign.title}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              {getStatusBadge(campaign.status)}
-                              <div className="flex gap-1">
-                                {campaign.platforms.slice(0, 3).map(p => (
-                                  <div key={p} className="w-4 h-4">
-                                    {getPlatformLogo(p, '', 16)}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right text-sm">
-                            <p className="font-medium">{campaign.views.toLocaleString()}</p>
-                            <p className="text-xs text-muted-foreground">views</p>
-                          </div>
-                        </div>
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>{campaign.submissions} clips</span>
-                            <span>${campaign.spent.toLocaleString()} / ${campaign.budget.toLocaleString()}</span>
-                          </div>
-                          <Progress value={progress} className="h-1.5" />
-                        </div>
+        {/* Campaign Hero */}
+        <div className="relative mb-8">
+          {campaign.featuredImage && (
+            <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-6">
+              <img
+                src={campaign.featuredImage}
+                alt={campaign.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <div className="flex items-center gap-3">
+                  {getStatusBadge(campaign.status)}
+                  <div className="flex gap-1">
+                    {campaign.targetPlatforms.map(platform => (
+                      <div key={platform} className="w-6 h-6">
+                        {getPlatformLogo(platform, '', 20)}
                       </div>
-                    )
-                  })}
+                    ))}
+                  </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                {!campaign.featuredImage && getStatusBadge(campaign.status)}
+                {!campaign.featuredImage && (
+                  <div className="flex gap-1">
+                    {campaign.targetPlatforms.map(platform => (
+                      <div key={platform} className="w-5 h-5">
+                        {getPlatformLogo(platform, '', 18)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">{campaign.title}</h1>
+              <p className="text-muted-foreground mb-3">{campaign.description}</p>
+              <p className="text-sm text-muted-foreground flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Started {new Date(campaign.startDate || campaign.createdAt).toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+                {campaign.completedAt && (
+                  <span className="ml-2">
+                    · Completed {new Date(campaign.completedAt).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
+          <Card>
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                <Eye className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Total Views</span>
+              </div>
+              <p className="text-xl md:text-3xl font-bold">{stats.totalViews.toLocaleString()}</p>
+              {stats.totalViewsGained > 0 && (
+                <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                  <TrendingUp className="w-3 h-3" />
+                  +{stats.totalViewsGained.toLocaleString()} tracked
+                </p>
               )}
             </CardContent>
           </Card>
-        </motion.div>
 
-        {/* Top Performers */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                <Users className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Posts</span>
+              </div>
+              <p className="text-xl md:text-3xl font-bold">{stats.approvedSubmissions}</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                of {stats.totalSubmissions} submitted
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Budget Used</span>
+              </div>
+              <p className="text-xl md:text-3xl font-bold">${stats.spent.toLocaleString()}</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                of ${stats.budget.toLocaleString()}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                <BarChart3 className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Progress</span>
+              </div>
+              <p className="text-xl md:text-3xl font-bold">{stats.budgetUtilization.toFixed(0)}%</p>
+              <Progress value={stats.budgetUtilization} className="mt-2 h-2" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Platform Breakdown */}
+        {Object.keys(platformStats).length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <BarChart3 className="w-5 h-5" />
-                Top Performing Content
+                Platform Breakdown
               </CardTitle>
-              <Link href={`/partner/${token}/submissions`}>
-                <Button variant="ghost" size="sm" className="text-xs">
-                  View All <ArrowRight className="w-3 h-3 ml-1" />
-                </Button>
-              </Link>
             </CardHeader>
             <CardContent>
-              {topPerformers.length === 0 ? (
-                <div className="text-center py-8">
-                  <Play className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No content yet</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {topPerformers.slice(0, 5).map((clip, index) => (
-                    <a
-                      key={clip.id}
-                      href={clip.clipUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-4 p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold flex-shrink-0">
-                        {index + 1}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {Object.entries(platformStats).map(([platform, platformData]) => (
+                  <div key={platform} className="p-4 border border-border rounded-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      {getPlatformLogo(platform, '', 20)}
+                      <span className="font-medium">
+                        {platform === 'YOUTUBE' ? 'YouTube' : 
+                         platform === 'TIKTOK' ? 'TikTok' :
+                         platform === 'INSTAGRAM' ? 'Instagram' :
+                         platform === 'TWITTER' ? 'X' :
+                         platform}
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Posts</span>
+                        <span className="font-medium">{platformData.count}</span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate text-sm">{clip.creatorName}</p>
-                        <p className="text-xs text-muted-foreground truncate">{clip.campaignTitle}</p>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Views</span>
+                        <span className="font-medium">{platformData.views.toLocaleString()}</span>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {getPlatformLogo(clip.platform, '', 16)}
-                        <div className="text-right">
-                          <p className="font-medium text-sm">{clip.views.toLocaleString()}</p>
-                          <p className="text-xs text-muted-foreground">views</p>
-                        </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Tracked</span>
+                        <span className="font-medium">
+                          +{platformData.viewsGained.toLocaleString()}
+                        </span>
                       </div>
-                    </a>
-                  ))}
-                </div>
-              )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
-        </motion.div>
-      </div>
+        )}
 
-      {/* Quick Actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="mt-8"
-      >
-        <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h3 className="font-semibold text-lg mb-1">Need a detailed report?</h3>
-                <p className="text-muted-foreground text-sm">
-                  View comprehensive performance reports for any of your campaigns.
-                </p>
+        {/* Top Posts */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Play className="w-5 h-5" />
+              Top Posts ({submissions.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {submissions.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Play className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground">No approved posts yet</p>
               </div>
-              <Link href={`/partner/${token}/reports`}>
-                <Button>
-                  <FileText className="w-4 h-4 mr-2" />
-                  View Reports
-                </Button>
-              </Link>
-            </div>
+            ) : (
+              <div className="space-y-3">
+                {submissions.map((submission, index) => (
+                  <motion.div
+                    key={submission.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                    className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    {/* Rank */}
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold flex-shrink-0">
+                      {index + 1}
+                    </div>
+
+                    {/* Creator */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={submission.creatorImage || undefined} />
+                        <AvatarFallback className="text-xs">
+                          {submission.creatorName?.[0] || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="hidden sm:block">
+                        <p className="text-sm font-medium truncate max-w-[100px]">
+                          {submission.creatorName}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Platform */}
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {getPlatformLogo(submission.platform, '', 16)}
+                    </div>
+
+                    {/* URL - truncated */}
+                    <a
+                      href={submission.clipUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 min-w-0 text-sm text-muted-foreground hover:text-foreground truncate flex items-center gap-1"
+                    >
+                      <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate">{submission.clipUrl}</span>
+                    </a>
+
+                    {/* Stats */}
+                    <div className="flex items-center gap-4 flex-shrink-0 text-right">
+                      <div>
+                        <p className="text-sm font-medium">{submission.currentViews.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">views</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          +{submission.viewsGained.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-muted-foreground">tracked</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
