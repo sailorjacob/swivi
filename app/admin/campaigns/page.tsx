@@ -595,7 +595,11 @@ export default function AdminCampaignsPage() {
       return
     }
 
+    // Show loading toast
+    const loadingToast = toast.loading("Completing campaign...")
+
     try {
+      console.log("🎯 Starting campaign completion for:", campaignId)
       const response = await authenticatedFetch(`/api/admin/campaigns/complete`, {
         method: "POST",
         headers: {
@@ -607,17 +611,23 @@ export default function AdminCampaignsPage() {
         })
       })
 
+      console.log("📥 Response status:", response.status)
+      const result = await response.json()
+      console.log("📦 Response data:", result)
+
       if (response.ok) {
-        const result = await response.json()
-        toast.success(`Campaign completed! ${result.stats.approvedSubmissions} approved clips with total earnings of $${result.stats.totalEarnings.toFixed(2)}`)
+        toast.dismiss(loadingToast)
+        toast.success(`✅ Campaign completed! ${result.stats.approvedSubmissions} approved clips with total earnings of $${result.stats.totalEarnings.toFixed(2)}`)
         await fetchCampaigns()
       } else {
-        const error = await response.json()
-        toast.error(error.error || "Failed to complete campaign")
+        toast.dismiss(loadingToast)
+        console.error("❌ Completion failed:", result)
+        toast.error(result.error || "Failed to complete campaign")
       }
     } catch (error) {
-      console.error("Error completing campaign:", error)
-      toast.error("Failed to complete campaign")
+      toast.dismiss(loadingToast)
+      console.error("❌ Error completing campaign:", error)
+      toast.error("Failed to complete campaign. Please check the console for details.")
     }
   }
 
