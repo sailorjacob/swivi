@@ -47,7 +47,6 @@ function PartnerNav({
   const navItems: NavItem[] = [
     { label: "Dashboard", href: `/partner/${token}`, icon: LayoutDashboard },
     { label: "Campaigns", href: `/partner/${token}/campaigns`, icon: Target },
-    { label: "Submissions", href: `/partner/${token}/submissions`, icon: Eye },
     { label: "Reports", href: `/partner/${token}/reports`, icon: FileText },
   ]
 

@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import {
@@ -19,11 +19,11 @@ import {
   XCircle,
   ExternalLink,
   Play,
-  FolderOpen
+  FolderOpen,
+  Loader2
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getPlatformLogo } from "@/components/ui/icons/platform-logos"
@@ -32,6 +32,7 @@ interface CampaignDetail {
   id: string
   title: string
   description: string
+  creator: string
   status: string
   budget: number
   spent: number
@@ -69,6 +70,7 @@ interface CampaignDetail {
 
 export default function PartnerCampaignDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const token = params.token as string
   const campaignId = params.id as string
   
@@ -98,32 +100,13 @@ export default function PartnerCampaignDetailPage() {
     }
   }, [token, campaignId])
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'ACTIVE':
-        return (
-          <Badge className="bg-foreground text-background">
-            <span className="w-1.5 h-1.5 bg-background rounded-full mr-1.5 animate-pulse" />
-            Live
-          </Badge>
-        )
-      case 'COMPLETED':
-        return (
-          <Badge variant="secondary">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Completed
-          </Badge>
-        )
-      case 'PAUSED':
-        return (
-          <Badge variant="outline">
-            <Clock className="w-3 h-3 mr-1" />
-            Paused
-          </Badge>
-        )
-      default:
-        return <Badge variant="outline">{status}</Badge>
-    }
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
   }
 
   const getSubmissionStatusBadge = (status: string) => {
@@ -131,21 +114,21 @@ export default function PartnerCampaignDetailPage() {
       case 'APPROVED':
       case 'PAID':
         return (
-          <Badge className="bg-foreground text-background">
+          <Badge className="bg-foreground/10 text-foreground border-foreground/20">
             <CheckCircle className="w-3 h-3 mr-1" />
             Approved
           </Badge>
         )
       case 'PENDING':
         return (
-          <Badge variant="outline">
+          <Badge className="bg-muted text-muted-foreground border-border">
             <Clock className="w-3 h-3 mr-1" />
             Pending
           </Badge>
         )
       case 'REJECTED':
         return (
-          <Badge variant="secondary">
+          <Badge className="bg-muted text-muted-foreground/70 border-border">
             <XCircle className="w-3 h-3 mr-1" />
             Rejected
           </Badge>
@@ -157,78 +140,74 @@ export default function PartnerCampaignDetailPage() {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+      <div className="p-6 flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     )
   }
 
   if (error || !data) {
     return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">{error || "Campaign not found"}</p>
-            <Link href={`/partner/${token}/campaigns`}>
-              <Button variant="outline" className="mt-4">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Campaigns
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+      <div className="p-6 text-center py-12">
+        <p className="text-muted-foreground mb-4">{error || "Campaign not found"}</p>
+        <Button variant="outline" onClick={() => router.back()}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Go Back
+        </Button>
       </div>
     )
   }
 
-  const progress = data.budget > 0 ? Math.min((data.spent / data.budget) * 100, 100) : 0
+  const spentNum = Number(data.spent ?? 0)
+  const budgetNum = Number(data.budget ?? 0)
+  const isBudgetExhausted = spentNum >= budgetNum
+  const isActive = data.status === "ACTIVE" && !isBudgetExhausted
+  const isCompleted = data.status === "COMPLETED" || isBudgetExhausted
+  const progress = budgetNum > 0 ? Math.min(100, (spentNum / budgetNum) * 100) : 0
+  const remainingBudget = Math.max(0, budgetNum - spentNum)
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 space-y-6 max-w-6xl mx-auto">
       {/* Back Button */}
-      <Link href={`/partner/${token}/campaigns`}>
-        <Button variant="ghost" className="mb-6">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Campaigns
-        </Button>
-      </Link>
+      <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-2">
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Campaigns
+      </Button>
 
       {/* Campaign Header */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="relative overflow-hidden rounded-xl border border-border bg-card"
       >
-        {/* Featured Image */}
+        {/* Featured Image Banner */}
         {data.featuredImage && (
-          <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-6">
+          <div className="relative h-48 overflow-hidden">
             <img
               src={data.featuredImage}
               alt={data.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4">
-              <div className="flex items-center gap-3">
-                {getStatusBadge(data.status)}
-                <div className="flex gap-1">
-                  {data.targetPlatforms.map(platform => (
-                    <div key={platform} className="w-6 h-6">
-                      {getPlatformLogo(platform, '', 20)}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2 flex-wrap">
-              {!data.featuredImage && getStatusBadge(data.status)}
-              {!data.featuredImage && (
+        <div className="p-6">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                {isActive && (
+                  <Badge className="bg-foreground/10 text-foreground border-foreground/20">
+                    <span className="w-2 h-2 bg-foreground rounded-full mr-1.5 animate-pulse" />
+                    LIVE
+                  </Badge>
+                )}
+                {isCompleted && (
+                  <Badge className="bg-muted text-muted-foreground">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    COMPLETED
+                  </Badge>
+                )}
                 <div className="flex gap-1">
                   {data.targetPlatforms.map(platform => (
                     <div key={platform} className="w-5 h-5">
@@ -236,126 +215,104 @@ export default function PartnerCampaignDetailPage() {
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">{data.title}</h1>
-            <p className="text-muted-foreground mb-4">{data.description}</p>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                Started {new Date(data.startDate || data.createdAt).toLocaleDateString()}
-              </span>
-              {data.completedAt && (
-                <span className="flex items-center gap-1">
-                  <CheckCircle className="w-4 h-4" />
-                  Completed {new Date(data.completedAt).toLocaleDateString()}
+              </div>
+              
+              <h1 className="text-2xl font-bold mb-2">{data.title}</h1>
+              <p className="text-muted-foreground mb-4">{data.description}</p>
+              
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <div className="w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center text-xs">
+                    {data.creator.charAt(0)}
+                  </div>
+                  {data.creator}
                 </span>
+                <span className="flex items-center gap-1.5">
+                  <Users className="w-4 h-4" />
+                  {data.stats.totalSubmissions} submissions
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Eye className="w-4 h-4" />
+                  {data.stats.totalViews.toLocaleString()} views
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {data.contentFolderUrl && (
+                <Button
+                  variant="outline"
+                  asChild
+                >
+                  <a href={data.contentFolderUrl} target="_blank" rel="noopener noreferrer">
+                    <FolderOpen className="w-4 h-4 mr-2" />
+                    Content Folder
+                  </a>
+                </Button>
               )}
+              <Link href={`/client/${token}/report`}>
+                <Button variant="outline">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Full Report
+                </Button>
+              </Link>
             </div>
           </div>
 
-          {/* Content Folder Link */}
-          {data.contentFolderUrl && (
-            <a href={data.contentFolderUrl} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline">
-                <FolderOpen className="w-4 h-4 mr-2" />
-                Content Folder
-              </Button>
-            </a>
-          )}
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+            <div className="p-4 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <Target className="w-4 h-4" />
+                <span className="text-xs">Total Budget</span>
+              </div>
+              <p className="text-xl font-bold">{formatCurrency(budgetNum)}</p>
+            </div>
+            <div className="p-4 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <DollarSign className="w-4 h-4" />
+                <span className="text-xs">Payout Rate</span>
+              </div>
+              <p className="text-xl font-bold">${data.payoutRate}/1K</p>
+            </div>
+            <div className="p-4 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <Clock className="w-4 h-4" />
+                <span className="text-xs">Remaining</span>
+              </div>
+              <p className="text-xl font-bold">{formatCurrency(remainingBudget)}</p>
+            </div>
+            <div className="p-4 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <Eye className="w-4 h-4" />
+                <span className="text-xs">Progress</span>
+              </div>
+              <p className="text-xl font-bold">{progress.toFixed(1)}%</p>
+            </div>
+          </div>
+
+          {/* Budget Progress Bar */}
+          <div className="mt-4">
+            <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+              <span>Budget Used</span>
+              <span>{formatCurrency(spentNum)} / {formatCurrency(budgetNum)}</span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-2">
+              <div
+                className="bg-foreground h-2 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
         </div>
       </motion.div>
 
-      {/* Stats Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
-      >
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <Eye className="w-4 h-4" />
-              <span className="text-xs uppercase tracking-wide">Total Views</span>
-            </div>
-            <p className="text-3xl font-bold">{data.stats.totalViews.toLocaleString()}</p>
-            {data.stats.viewsGained > 0 && (
-              <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                <TrendingUp className="w-3 h-3" />
-                +{data.stats.viewsGained.toLocaleString()} tracked
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <Users className="w-4 h-4" />
-              <span className="text-xs uppercase tracking-wide">Submissions</span>
-            </div>
-            <p className="text-3xl font-bold">{data.stats.approvedSubmissions}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              of {data.stats.totalSubmissions} total
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <DollarSign className="w-4 h-4" />
-              <span className="text-xs uppercase tracking-wide">Budget Used</span>
-            </div>
-            <p className="text-3xl font-bold">${data.spent.toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              of ${data.budget.toLocaleString()}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <Target className="w-4 h-4" />
-              <span className="text-xs uppercase tracking-wide">Payout Rate</span>
-            </div>
-            <p className="text-3xl font-bold">${data.payoutRate}</p>
-            <p className="text-sm text-muted-foreground mt-1">per 1K views</p>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Budget Progress */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-        className="mb-8"
-      >
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-between text-sm mb-2">
-              <span className="text-muted-foreground">Budget Progress</span>
-              <span className="font-medium">{progress.toFixed(1)}%</span>
-            </div>
-            <Progress value={progress} className="h-3" />
-            <div className="flex justify-between text-xs text-muted-foreground mt-2">
-              <span>${data.spent.toLocaleString()} spent</span>
-              <span>${(data.budget - data.spent).toLocaleString()} remaining</span>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Requirements */}
+      {/* Requirements Section */}
       {data.requirements && data.requirements.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-8"
+          transition={{ delay: 0.1 }}
         >
           <Card>
             <CardHeader>
@@ -365,7 +322,7 @@ export default function PartnerCampaignDetailPage() {
               <ul className="space-y-2">
                 {data.requirements.map((req, idx) => (
                   <li key={idx} className="flex items-start gap-2 text-sm">
-                    <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
                     <span>{req}</span>
                   </li>
                 ))}
@@ -375,11 +332,11 @@ export default function PartnerCampaignDetailPage() {
         </motion.div>
       )}
 
-      {/* Submissions */}
+      {/* Submissions Section */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25 }}
+        transition={{ delay: 0.2 }}
       >
         <Card>
           <CardHeader>
@@ -388,10 +345,12 @@ export default function PartnerCampaignDetailPage() {
                 <Play className="w-5 h-5" />
                 Submissions ({data.submissions.length})
               </CardTitle>
-              <div className="flex gap-2 text-sm">
-                <span className="text-muted-foreground">{data.stats.approvedSubmissions} approved</span>
-                <span className="text-muted-foreground">·</span>
-                <span className="text-muted-foreground">{data.stats.pendingSubmissions} pending</span>
+              <div className="flex gap-3 text-sm text-muted-foreground">
+                <span>{data.stats.approvedSubmissions} approved</span>
+                <span>·</span>
+                <span>{data.stats.pendingSubmissions} pending</span>
+                <span>·</span>
+                <span>{data.stats.rejectedSubmissions} rejected</span>
               </div>
             </div>
           </CardHeader>
@@ -402,55 +361,48 @@ export default function PartnerCampaignDetailPage() {
                 <p className="text-muted-foreground">No submissions yet</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {data.submissions.map((submission, index) => (
                   <div
                     key={submission.id}
-                    className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-muted/30 transition-colors"
+                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     {/* Rank */}
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold flex-shrink-0">
-                      {index + 1}
-                    </div>
+                    <span className="w-6 text-sm font-medium text-muted-foreground">
+                      {index + 1}.
+                    </span>
 
                     {/* Creator */}
-                    <Avatar className="w-10 h-10 flex-shrink-0">
+                    <Avatar className="w-8 h-8">
                       <AvatarImage src={submission.creatorImage || undefined} />
-                      <AvatarFallback className="text-sm">
+                      <AvatarFallback className="text-xs">
                         {submission.creatorName[0] || '?'}
                       </AvatarFallback>
                     </Avatar>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium truncate">{submission.creatorName}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{submission.creatorName}</span>
                         {getSubmissionStatusBadge(submission.status)}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(submission.submittedAt).toLocaleDateString()}
-                      </p>
                     </div>
 
                     {/* Platform */}
                     <div className="flex-shrink-0">
-                      {getPlatformLogo(submission.platform, '', 20)}
+                      {getPlatformLogo(submission.platform, '', 18)}
                     </div>
 
                     {/* Views */}
-                    <div className="text-right flex-shrink-0 hidden sm:block">
-                      <p className="font-medium">{submission.currentViews.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">views</p>
+                    <div className="text-right text-sm">
+                      <span className="font-medium">{submission.currentViews.toLocaleString()}</span>
+                      <span className="text-muted-foreground ml-1">views</span>
                     </div>
 
                     {/* Views Gained */}
                     {submission.viewsGained > 0 && (
-                      <div className="text-right flex-shrink-0 hidden md:block">
-                        <p className="font-medium flex items-center gap-1 justify-end">
-                          <TrendingUp className="w-3 h-3" />
-                          +{submission.viewsGained.toLocaleString()}
-                        </p>
-                        <p className="text-xs text-muted-foreground">tracked</p>
+                      <div className="text-right text-sm text-muted-foreground">
+                        +{submission.viewsGained.toLocaleString()}
                       </div>
                     )}
 
@@ -459,11 +411,9 @@ export default function PartnerCampaignDetailPage() {
                       href={submission.clipUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-shrink-0"
+                      className="text-muted-foreground hover:text-foreground"
                     >
-                      <Button variant="ghost" size="icon">
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
+                      <ExternalLink className="w-4 h-4" />
                     </a>
                   </div>
                 ))}
