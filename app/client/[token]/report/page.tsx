@@ -254,13 +254,13 @@ export default function ClientReportPage() {
           {/* Performance Metrics */}
           <section className="mb-10">
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Performance Metrics</h2>
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-4 gap-4">
               <div className="p-4 border border-gray-200 rounded">
                 <p className="text-2xl font-bold">{performance.totalViews.toLocaleString()}</p>
                 <p className="text-sm text-gray-600">Total Views</p>
-                {performance.viewsAtBudgetReached > 0 && (
+                {performance.totalViewsGained > 0 && (
                   <p className="text-xs text-gray-400 mt-1">
-                    {performance.viewsAtBudgetReached.toLocaleString()} at budget reached
+                    +{performance.totalViewsGained.toLocaleString()} gained
                   </p>
                 )}
               </div>
@@ -269,10 +269,38 @@ export default function ClientReportPage() {
                 <p className="text-sm text-gray-600">Avg Views/Clip</p>
               </div>
               <div className="p-4 border border-gray-200 rounded">
-                <p className="text-2xl font-bold">${(budget.total / performance.totalViews * 1000).toFixed(2)}</p>
+                <p className="text-2xl font-bold">${(budget.spent / performance.totalViews * 1000).toFixed(2)}</p>
                 <p className="text-sm text-gray-600">Effective CPM</p>
+                <p className="text-xs text-gray-400 mt-1">Cost per 1K views</p>
+              </div>
+              <div className="p-4 border border-gray-200 rounded">
+                <p className="text-2xl font-bold">${budget.payoutRate.toFixed(2)}</p>
+                <p className="text-sm text-gray-600">Base CPM</p>
+                <p className="text-xs text-gray-400 mt-1">Payout rate</p>
               </div>
             </div>
+            
+            {/* Surplus Views (views after budget spent) */}
+            {(() => {
+              const paidViews = Math.round(budget.spent * 1000 / budget.payoutRate)
+              const surplusViews = Math.max(0, performance.totalViews - paidViews)
+              const surplusPercent = paidViews > 0 ? ((surplusViews / paidViews) * 100).toFixed(1) : '0'
+              
+              return surplusViews > 0 ? (
+                <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-lg font-bold text-gray-800">Bonus Performance</p>
+                      <p className="text-sm text-gray-600">Views delivered beyond budget allocation</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-3xl font-bold text-green-600">+{surplusViews.toLocaleString()}</p>
+                      <p className="text-sm text-gray-600">Surplus views ({surplusPercent}% extra)</p>
+                    </div>
+                  </div>
+                </div>
+              ) : null
+            })()}
           </section>
 
           {/* Submission Breakdown */}

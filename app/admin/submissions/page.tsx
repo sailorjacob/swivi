@@ -1267,25 +1267,30 @@ export default function AdminSubmissionsPage() {
             </DialogTitle>
           </DialogHeader>
           
-          {selectedUserModal && (
-            <div className="space-y-4 md:space-y-6">
-              {/* User Info */}
-              <div className="p-3 md:p-4 bg-muted/50 rounded-lg">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                  <div>
-                    <h3 className="text-base md:text-lg font-semibold">{selectedUserModal.name || 'No name'}</h3>
-                    <p className="text-xs md:text-sm text-muted-foreground truncate max-w-[200px] md:max-w-none">{selectedUserModal.email}</p>
+          {selectedUserModal && (() => {
+            // Calculate actual earnings from all their submissions
+            const actualEarnings = userSubmissions.reduce((sum, sub) => sum + Number(sub.clips?.earnings || 0), 0)
+            const actualViews = userSubmissions.reduce((sum, sub) => sum + Number(sub.clips?.views || 0), 0)
+            
+            return (
+              <div className="space-y-4 md:space-y-6">
+                {/* User Info */}
+                <div className="p-3 md:p-4 bg-muted/50 rounded-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                    <div>
+                      <h3 className="text-base md:text-lg font-semibold">{selectedUserModal.name || 'No name'}</h3>
+                      <p className="text-xs md:text-sm text-muted-foreground truncate max-w-[200px] md:max-w-none">{selectedUserModal.email}</p>
+                    </div>
+                    <div className="sm:text-right">
+                      <p className="text-xl md:text-2xl font-bold">${actualEarnings.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">Total Earnings</p>
+                    </div>
                   </div>
-                  <div className="sm:text-right">
-                    <p className="text-xl md:text-2xl font-bold">${Number(selectedUserModal.totalEarnings || 0).toFixed(2)}</p>
-                    <p className="text-xs text-muted-foreground">Total Earnings</p>
-                  </div>
-                </div>
-                <div className="mt-3 md:mt-4 grid grid-cols-3 gap-2 md:gap-4 text-center">
-                  <div className="p-2 bg-background rounded">
-                    <p className="text-sm md:text-lg font-bold">{Number(selectedUserModal.totalViews || 0).toLocaleString()}</p>
-                    <p className="text-[10px] md:text-xs text-muted-foreground">Views</p>
-                  </div>
+                  <div className="mt-3 md:mt-4 grid grid-cols-3 gap-2 md:gap-4 text-center">
+                    <div className="p-2 bg-background rounded">
+                      <p className="text-sm md:text-lg font-bold">{actualViews.toLocaleString()}</p>
+                      <p className="text-[10px] md:text-xs text-muted-foreground">Views</p>
+                    </div>
                   <div className="p-2 bg-background rounded">
                     <p className="text-sm md:text-lg font-bold">{userSubmissions.length}</p>
                     <p className="text-[10px] md:text-xs text-muted-foreground">Subs</p>
@@ -1354,7 +1359,8 @@ export default function AdminSubmissionsPage() {
                 </div>
               )}
             </div>
-          )}
+          )
+          })()}
 
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setSelectedUserModal(null)} className="w-full sm:w-auto">
