@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import {
@@ -12,41 +12,34 @@ import {
   Users,
   DollarSign,
   Target,
-  ExternalLink,
-  Calendar,
-  CheckCircle,
   Clock,
-  Search,
-  Filter,
-  ChevronDown,
-  ChevronUp
+  CheckCircle,
+  Play,
+  Calendar,
+  Loader2
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { getPlatformLogo } from "@/components/ui/icons/platform-logos"
 
 interface Campaign {
   id: string
   title: string
   description: string
+  creator: string
   status: string
   budget: number
   spent: number
   payoutRate: number
   targetPlatforms: string[]
   featuredImage: string | null
-  startDate: string | null
-  endDate: string | null
-  completedAt: string | null
   createdAt: string
   stats: {
     totalSubmissions: number
     approvedSubmissions: number
     totalViews: number
-    viewsGained: number
   }
 }
 
@@ -57,14 +50,13 @@ interface CampaignsData {
 
 export default function PartnerCampaignsPage() {
   const params = useParams()
+  const router = useRouter()
   const token = params.token as string
   
   const [data, setData] = useState<CampaignsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null)
+  const [filter, setFilter] = useState<'active' | 'completed' | 'all'>('all')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,38 +80,23 @@ export default function PartnerCampaignsPage() {
     }
   }, [token])
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'ACTIVE':
-        return (
-          <Badge className="bg-foreground text-background">
-            <span className="w-1.5 h-1.5 bg-background rounded-full mr-1.5 animate-pulse" />
-            Live
-          </Badge>
-        )
-      case 'COMPLETED':
-        return (
-          <Badge variant="secondary">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Completed
-          </Badge>
-        )
-      case 'PAUSED':
-        return (
-          <Badge variant="outline">
-            <Clock className="w-3 h-3 mr-1" />
-            Paused
-          </Badge>
-        )
-      default:
-        return <Badge variant="outline">{status}</Badge>
-    }
+  const handleViewCampaign = (campaign: Campaign) => {
+    router.push(`/partner/${token}/campaigns/${campaign.id}`)
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
   }
 
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+        <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     )
   }
@@ -137,11 +114,16 @@ export default function PartnerCampaignsPage() {
     )
   }
 
+  // Filter campaigns
   const filteredCampaigns = data.campaigns.filter(campaign => {
-    const matchesSearch = campaign.title.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === "all" || campaign.status === statusFilter
-    return matchesSearch && matchesStatus
+    if (filter === 'active') return campaign.status === 'ACTIVE'
+    if (filter === 'completed') return campaign.status === 'COMPLETED'
+    return true
   })
+
+  // Count by status
+  const activeCampaignsCount = data.campaigns.filter(c => c.status === 'ACTIVE').length
+  const completedCampaignsCount = data.campaigns.filter(c => c.status === 'COMPLETED').length
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -157,231 +139,188 @@ export default function PartnerCampaignsPage() {
         </p>
       </motion.div>
 
-      {/* Filters */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="flex flex-col sm:flex-row gap-4 mb-6"
-      >
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search campaigns..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant={statusFilter === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setStatusFilter("all")}
-          >
-            All
-          </Button>
-          <Button
-            variant={statusFilter === "ACTIVE" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setStatusFilter("ACTIVE")}
-          >
-            Active
-          </Button>
-          <Button
-            variant={statusFilter === "COMPLETED" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setStatusFilter("COMPLETED")}
-          >
-            Completed
-          </Button>
-        </div>
-      </motion.div>
+      {/* Filter Tabs */}
+      <div className="flex gap-6 border-b border-border mb-6">
+        <button
+          onClick={() => setFilter('all')}
+          className={`pb-2 text-sm transition-colors ${
+            filter === 'all' 
+              ? 'text-foreground border-b-2 border-foreground -mb-px' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          All {data.campaigns.length > 0 && `(${data.campaigns.length})`}
+        </button>
+        <button
+          onClick={() => setFilter('active')}
+          className={`pb-2 text-sm transition-colors ${
+            filter === 'active' 
+              ? 'text-foreground border-b-2 border-foreground -mb-px' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Active {activeCampaignsCount > 0 && `(${activeCampaignsCount})`}
+        </button>
+        <button
+          onClick={() => setFilter('completed')}
+          className={`pb-2 text-sm transition-colors ${
+            filter === 'completed' 
+              ? 'text-foreground border-b-2 border-foreground -mb-px' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Completed {completedCampaignsCount > 0 && `(${completedCampaignsCount})`}
+        </button>
+      </div>
 
-      {/* Campaigns List */}
+      {/* Campaigns Grid */}
       {filteredCampaigns.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6 text-center py-12">
-            <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No campaigns found</h3>
-            <p className="text-muted-foreground">
-              {searchQuery || statusFilter !== "all" 
-                ? "Try adjusting your filters" 
-                : "Your campaigns will appear here"}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="text-center py-16">
+          <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">
+            {filter === 'active' ? 'No active campaigns right now.' :
+             filter === 'completed' ? 'No completed campaigns yet.' :
+             'No campaigns found.'}
+          </p>
+        </div>
       ) : (
-        <div className="space-y-4">
-          {filteredCampaigns.map((campaign, index) => {
-            const progress = campaign.budget > 0 
-              ? Math.min((campaign.spent / campaign.budget) * 100, 100) 
-              : 0
-            const isExpanded = expandedCampaign === campaign.id
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredCampaigns.map((campaign) => {
+            const budgetNum = Number(campaign.budget ?? 0)
+            const spentNum = Number(campaign.spent ?? 0)
+            const progress = budgetNum > 0 ? (spentNum / budgetNum) * 100 : 0
+            const isActive = campaign.status === "ACTIVE"
+            const isCompleted = campaign.status === "COMPLETED"
+            const remainingBudget = Math.max(0, budgetNum - spentNum)
 
             return (
               <motion.div
                 key={campaign.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + index * 0.05 }}
+                transition={{ duration: 0.5 }}
+                whileHover={{ y: -4, scale: 1.02 }}
               >
-                <Card className="overflow-hidden">
-                  {/* Campaign Header */}
-                  <div 
-                    className="p-6 cursor-pointer hover:bg-muted/30 transition-colors"
-                    onClick={() => setExpandedCampaign(isExpanded ? null : campaign.id)}
-                  >
-                    <div className="flex items-start gap-4">
-                      {/* Featured Image */}
-                      {campaign.featuredImage && (
-                        <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0 hidden sm:block">
-                          <img 
-                            src={campaign.featuredImage} 
-                            alt={campaign.title}
-                            className="w-full h-full object-cover"
-                          />
+                <Card className={`bg-card border-border hover:shadow-xl transition-all duration-300 cursor-pointer group relative ${isCompleted ? 'opacity-75' : ''}`}>
+                  <CardContent className="p-0">
+                    {/* Campaign Image */}
+                    <div 
+                      className="relative h-48 bg-muted rounded-t-lg overflow-hidden cursor-pointer"
+                      onClick={() => handleViewCampaign(campaign)}
+                    >
+                      {/* Status Badge */}
+                      <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
+                        {isActive && (
+                          <Badge className="bg-foreground text-background text-xs px-2 py-1">
+                            LIVE
+                          </Badge>
+                        )}
+                        {isCompleted && (
+                          <Badge className="bg-muted text-muted-foreground text-xs px-2 py-1 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" />
+                            COMPLETED
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 z-5 flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/20 backdrop-blur-sm rounded-full p-3">
+                          <Eye className="w-6 h-6 text-white" />
+                        </div>
+                      </div>
+
+                      {/* Image */}
+                      {campaign.featuredImage ? (
+                        <img
+                          src={campaign.featuredImage}
+                          alt={campaign.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-foreground/20 to-foreground/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                          <Target className="w-12 h-12 text-muted-foreground" />
                         </div>
                       )}
+                    </div>
 
-                      {/* Campaign Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          <h3 className="font-semibold text-lg">{campaign.title}</h3>
-                          {getStatusBadge(campaign.status)}
+                    {/* Campaign Info */}
+                    <div className="p-4">
+                      {/* Creator */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-6 h-6 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-medium">
+                          {campaign.creator.charAt(0).toUpperCase()}
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                          {campaign.description}
-                        </p>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            {new Date(campaign.createdAt).toLocaleDateString()}
-                          </span>
-                          <div className="flex gap-1">
-                            {campaign.targetPlatforms.map(p => (
-                              <div key={p} className="w-4 h-4">
-                                {getPlatformLogo(p, '', 16)}
-                              </div>
-                            ))}
+                        <span className="text-sm text-muted-foreground">{campaign.creator}</span>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-lg font-medium text-foreground mb-2 line-clamp-2">
+                        {campaign.title}
+                      </h3>
+
+                      {/* Description */}
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {campaign.description}
+                      </p>
+
+                      {/* Budget Progress Bar */}
+                      <div className="mb-4">
+                        <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+                          <span className="font-medium">Budget Progress</span>
+                          <span className="font-medium">{formatCurrency(spentNum)} / {formatCurrency(budgetNum)}</span>
+                        </div>
+                        <Progress value={progress} className="h-3" />
+                      </div>
+
+                      {/* Key Metrics */}
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">${campaign.payoutRate} per 1K views</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">
+                              {remainingBudget > 0 ? `${formatCurrency(remainingBudget)} left` : 'Budget Full'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Eye className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">{campaign.stats.totalViews.toLocaleString()} views</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">{campaign.stats.approvedSubmissions} posts</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Stats Summary */}
-                      <div className="hidden md:flex items-center gap-6">
-                        <div className="text-center">
-                          <p className="text-2xl font-bold">{campaign.stats.totalViews.toLocaleString()}</p>
-                          <p className="text-xs text-muted-foreground">Views</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-2xl font-bold">{campaign.stats.approvedSubmissions}</p>
-                          <p className="text-xs text-muted-foreground">Posts</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-2xl font-bold">{progress.toFixed(0)}%</p>
-                          <p className="text-xs text-muted-foreground">Budget</p>
+                      {/* Platforms */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-xs text-muted-foreground">Platforms:</span>
+                        <div className="flex gap-1">
+                          {campaign.targetPlatforms.map((platform) => (
+                            <div key={platform} className="w-5 h-5 rounded bg-muted flex items-center justify-center">
+                              {getPlatformLogo(platform, '', 14)}
+                            </div>
+                          ))}
                         </div>
                       </div>
 
-                      {/* Expand Button */}
-                      <Button variant="ghost" size="icon" className="flex-shrink-0">
-                        {isExpanded ? (
-                          <ChevronUp className="w-5 h-5" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5" />
-                        )}
+                      {/* Action Button */}
+                      <Button
+                        className="w-full bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
+                        onClick={() => handleViewCampaign(campaign)}
+                      >
+                        {isCompleted ? "View Results" : "View Campaign"}
                       </Button>
                     </div>
-                  </div>
-
-                  {/* Expanded Details */}
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="border-t border-border"
-                    >
-                      <div className="p-6 bg-muted/20">
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                          <div className="p-4 bg-background rounded-lg border border-border">
-                            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                              <Eye className="w-4 h-4" />
-                              <span className="text-xs">Total Views</span>
-                            </div>
-                            <p className="text-xl font-bold">{campaign.stats.totalViews.toLocaleString()}</p>
-                            {campaign.stats.viewsGained > 0 && (
-                              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                                <TrendingUp className="w-3 h-3" />
-                                +{campaign.stats.viewsGained.toLocaleString()} tracked
-                              </p>
-                            )}
-                          </div>
-                          <div className="p-4 bg-background rounded-lg border border-border">
-                            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                              <Users className="w-4 h-4" />
-                              <span className="text-xs">Submissions</span>
-                            </div>
-                            <p className="text-xl font-bold">{campaign.stats.approvedSubmissions}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              of {campaign.stats.totalSubmissions} total
-                            </p>
-                          </div>
-                          <div className="p-4 bg-background rounded-lg border border-border">
-                            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                              <DollarSign className="w-4 h-4" />
-                              <span className="text-xs">Budget Used</span>
-                            </div>
-                            <p className="text-xl font-bold">${campaign.spent.toLocaleString()}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              of ${campaign.budget.toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="p-4 bg-background rounded-lg border border-border">
-                            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                              <TrendingUp className="w-4 h-4" />
-                              <span className="text-xs">Payout Rate</span>
-                            </div>
-                            <p className="text-xl font-bold">${campaign.payoutRate}</p>
-                            <p className="text-xs text-muted-foreground mt-1">per 1K views</p>
-                          </div>
-                        </div>
-
-                        {/* Progress Bar */}
-                        <div className="mb-6">
-                          <div className="flex justify-between text-sm mb-2">
-                            <span className="text-muted-foreground">Budget Progress</span>
-                            <span className="font-medium">{progress.toFixed(1)}%</span>
-                          </div>
-                          <Progress value={progress} className="h-2" />
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex gap-3 flex-wrap">
-                          <Link href={`/partner/${token}/campaigns/${campaign.id}`}>
-                            <Button size="sm">
-                              <Eye className="w-4 h-4 mr-2" />
-                              View Details & Submissions
-                            </Button>
-                          </Link>
-                          <Link href={`/client/${token}`}>
-                            <Button variant="outline" size="sm">
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              Live Dashboard
-                            </Button>
-                          </Link>
-                          <Link href={`/client/${token}/report`}>
-                            <Button variant="outline" size="sm">
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              Full Report
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
+                  </CardContent>
                 </Card>
               </motion.div>
             )

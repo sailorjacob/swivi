@@ -28,20 +28,11 @@ export async function GET(
         payoutRate: true,
         targetPlatforms: true,
         featuredImage: true,
-        startDate: true,
-        endDate: true,
-        completedAt: true,
         createdAt: true,
-        _count: {
-          select: {
-            clipSubmissions: true
-          }
-        },
         clipSubmissions: {
           select: {
             id: true,
             status: true,
-            initialViews: true,
             clips: {
               select: {
                 views: true
@@ -61,16 +52,12 @@ export async function GET(
 
     const formattedCampaigns = campaigns.map(campaign => {
       let totalViews = 0
-      let viewsGained = 0
       let approvedCount = 0
 
       campaign.clipSubmissions.forEach(sub => {
         if (sub.status === 'APPROVED' || sub.status === 'PAID') {
           approvedCount++
-          const views = Number(sub.clips?.views || 0)
-          const initial = Number(sub.initialViews || 0)
-          totalViews += views
-          viewsGained += Math.max(0, views - initial)
+          totalViews += Number(sub.clips?.views || 0)
         }
       })
 
@@ -78,21 +65,18 @@ export async function GET(
         id: campaign.id,
         title: campaign.title,
         description: campaign.description || '',
+        creator: campaign.creator || 'Partner',
         status: campaign.status,
         budget: Number(campaign.budget || 0),
         spent: Number(campaign.spent || 0),
         payoutRate: Number(campaign.payoutRate || 0),
         targetPlatforms: campaign.targetPlatforms,
         featuredImage: campaign.featuredImage,
-        startDate: campaign.startDate?.toISOString() || null,
-        endDate: campaign.endDate?.toISOString() || null,
-        completedAt: campaign.completedAt?.toISOString() || null,
         createdAt: campaign.createdAt.toISOString(),
         stats: {
-          totalSubmissions: campaign._count.clipSubmissions,
+          totalSubmissions: campaign.clipSubmissions.length,
           approvedSubmissions: approvedCount,
-          totalViews,
-          viewsGained
+          totalViews
         }
       }
     })
