@@ -240,7 +240,8 @@ export async function GET(
       userEmail: string | null
       clipCount: number
       approvedClipCount: number
-      totalViews: number
+      totalViews: number // All views from this page (approved + unapproved)
+      approvedViews: number // Only approved views
       totalEarnings: number
     }>()
     
@@ -255,9 +256,10 @@ export async function GET(
       const existing = handleStatsMap.get(key)
       if (existing) {
         existing.clipCount++
+        existing.totalViews += sub.currentViews // Track ALL views
         if (sub.status === 'APPROVED') {
           existing.approvedClipCount++
-          existing.totalViews += sub.currentViews
+          existing.approvedViews += sub.currentViews
           existing.totalEarnings += sub.earnings
         }
       } else {
@@ -271,7 +273,8 @@ export async function GET(
           userEmail: sub.user.email,
           clipCount: 1,
           approvedClipCount: sub.status === 'APPROVED' ? 1 : 0,
-          totalViews: sub.status === 'APPROVED' ? sub.currentViews : 0,
+          totalViews: sub.currentViews, // Track ALL views
+          approvedViews: sub.status === 'APPROVED' ? sub.currentViews : 0,
           totalEarnings: sub.status === 'APPROVED' ? sub.earnings : 0
         })
       }

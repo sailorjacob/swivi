@@ -185,24 +185,25 @@ export default function ClientReportPage() {
           <section className="mb-10">
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Executive Summary</h2>
             <div className="grid grid-cols-5 gap-4">
-              <div className="text-center p-4 border border-gray-200 rounded">
-                <p className="text-xl font-bold whitespace-nowrap">{performance.totalViews.toLocaleString()}</p>
-                <p className="text-sm text-gray-600">Total Views</p>
+              <div className="p-4 border border-gray-200 rounded">
+                <p className="text-2xl font-bold">{performance.totalSubmittedViews.toLocaleString()}</p>
+                <p className="text-sm text-gray-600">Total Submitted Views</p>
+                <p className="text-xs text-gray-400 mt-1">All content</p>
               </div>
-              <div className="text-center p-4 border border-gray-200 rounded">
-                <p className="text-3xl font-bold">{submissions.approved}</p>
+              <div className="p-4 border border-gray-200 rounded">
+                <p className="text-2xl font-bold">{submissions.approved}</p>
                 <p className="text-sm text-gray-600">Approved Clips</p>
               </div>
-              <div className="text-center p-4 border border-gray-200 rounded">
-                <p className="text-3xl font-bold">{creators.breakdown.length}</p>
+              <div className="p-4 border border-gray-200 rounded">
+                <p className="text-2xl font-bold">{creators.breakdown.length}</p>
                 <p className="text-sm text-gray-600">Unique Pages</p>
               </div>
-              <div className="text-center p-4 border border-gray-200 rounded">
-                <p className="text-3xl font-bold">{submissions.total}</p>
+              <div className="p-4 border border-gray-200 rounded">
+                <p className="text-2xl font-bold">{submissions.total}</p>
                 <p className="text-sm text-gray-600">Total Submissions</p>
               </div>
-              <div className="text-center p-4 border border-gray-200 rounded">
-                <p className="text-xl font-bold whitespace-nowrap">${budget.spent.toLocaleString()}</p>
+              <div className="p-4 border border-gray-200 rounded">
+                <p className="text-2xl font-bold">${budget.spent.toLocaleString()}</p>
                 <p className="text-sm text-gray-600">Total Spend</p>
               </div>
             </div>
@@ -268,7 +269,7 @@ export default function ClientReportPage() {
           {/* Performance Metrics */}
           <section className="mb-10">
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Performance Metrics</h2>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-5 gap-4">
               <div className="p-4 border border-gray-200 rounded">
                 <p className="text-2xl font-bold">{performance.totalSubmittedViews.toLocaleString()}</p>
                 <p className="text-sm text-gray-600">Total Submitted Views</p>
@@ -286,8 +287,13 @@ export default function ClientReportPage() {
               </div>
               <div className="p-4 border border-gray-200 rounded">
                 <p className="text-2xl font-bold">${(budget.spent / performance.totalViews * 1000).toFixed(2)}</p>
-                <p className="text-sm text-gray-600">Effective CPM</p>
-                <p className="text-xs text-gray-400 mt-1">Cost per 1K views</p>
+                <p className="text-sm text-gray-600">Approved CPM</p>
+                <p className="text-xs text-gray-400 mt-1">Cost per 1K approved</p>
+              </div>
+              <div className="p-4 border border-gray-200 rounded">
+                <p className="text-2xl font-bold">${(budget.spent / performance.totalSubmittedViews * 1000).toFixed(2)}</p>
+                <p className="text-sm text-gray-600">Overall CPM</p>
+                <p className="text-xs text-gray-400 mt-1">All submitted views</p>
               </div>
             </div>
             
@@ -406,33 +412,44 @@ export default function ClientReportPage() {
                 <tr className="border-b-2 border-gray-300">
                   <th className="text-left py-2 font-semibold">Page Handle</th>
                   <th className="text-left py-2 font-semibold">Platform</th>
-                  <th className="text-center py-2 font-semibold">Posts</th>
-                  <th className="text-right py-2 font-semibold">Views</th>
-                  <th className="text-right py-2 font-semibold">% of Views</th>
+                  <th className="text-center py-2 font-semibold">Approved</th>
+                  <th className="text-right py-2 font-semibold">Approved Views</th>
+                  <th className="text-right py-2 font-semibold">Unapproved Views</th>
+                  <th className="text-right py-2 font-semibold">% of Total</th>
                 </tr>
               </thead>
               <tbody>
-                {creators.breakdown.map((creator, idx) => (
-                  <tr key={idx} className="border-b">
-                    <td className="py-2">
-                      <span className="font-medium">@{creator.handle}</span>
-                      {creator.isVerified && (
-                        <span className="text-xs bg-gray-200 px-1 rounded ml-1" title="Verified social account">✓</span>
-                      )}
-                      {creator.creatorName && creator.creatorName !== creator.handle && (
-                        <span className="text-gray-400 ml-1 text-xs">({creator.creatorName})</span>
-                      )}
-                    </td>
-                    <td className="py-2">{creator.platform}</td>
-                    <td className="py-2 text-center">{creator.approvedCount}</td>
-                    <td className="py-2 text-right">{creator.approvedViews.toLocaleString()}</td>
-                    <td className="py-2 text-right">
-                      {performance.totalViews > 0 
-                        ? ((creator.approvedViews / performance.totalViews) * 100).toFixed(1) 
-                        : 0}%
-                    </td>
-                  </tr>
-                ))}
+                {creators.breakdown.map((creator, idx) => {
+                  const unapprovedViewsForPage = creator.totalViews - creator.approvedViews
+                  return (
+                    <tr key={idx} className="border-b">
+                      <td className="py-2">
+                        <span className="font-medium">@{creator.handle}</span>
+                        {creator.isVerified && (
+                          <span className="text-xs bg-gray-200 px-1 rounded ml-1" title="Verified social account">✓</span>
+                        )}
+                        {creator.creatorName && creator.creatorName !== creator.handle && (
+                          <span className="text-gray-400 ml-1 text-xs">({creator.creatorName})</span>
+                        )}
+                      </td>
+                      <td className="py-2">{creator.platform}</td>
+                      <td className="py-2 text-center">{creator.approvedCount}</td>
+                      <td className="py-2 text-right">{creator.approvedViews.toLocaleString()}</td>
+                      <td className="py-2 text-right">
+                        {unapprovedViewsForPage > 0 ? (
+                          <span className="text-gray-500">{unapprovedViewsForPage.toLocaleString()}</span>
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )}
+                      </td>
+                      <td className="py-2 text-right">
+                        {performance.totalViews > 0 
+                          ? ((creator.approvedViews / performance.totalViews) * 100).toFixed(1) 
+                          : 0}%
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </section>

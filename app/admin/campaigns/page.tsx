@@ -1793,11 +1793,14 @@ export default function AdminCampaignsPage() {
                                                       )}
                                                     </div>
                                                   </div>
-                                                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                                    <span className="text-primary underline">{creator.clipCount} clip{creator.clipCount !== 1 ? 's' : ''} ↓</span>
-                                                    <span>{creator.totalViews?.toLocaleString() || 0} views</span>
-                                                    <span className="font-medium text-foreground">${creator.totalEarnings?.toFixed(2) || '0.00'}</span>
-                                                  </div>
+                                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                                <span className="text-primary underline">{creator.clipCount} clip{creator.clipCount !== 1 ? 's' : ''} ↓</span>
+                                                <span>{creator.approvedViews?.toLocaleString() || 0} approved</span>
+                                                {creator.totalViews > creator.approvedViews && (
+                                                  <span className="opacity-60">+{(creator.totalViews - creator.approvedViews).toLocaleString()} unapproved</span>
+                                                )}
+                                                <span className="font-medium text-foreground">${creator.totalEarnings?.toFixed(2) || '0.00'}</span>
+                                              </div>
                                                 </button>
                                                 {/* Expandable clips list */}
                                                 <div id={`creator-clips-${campaign.id}-${idx}`} className="hidden bg-muted/30 border-t">
