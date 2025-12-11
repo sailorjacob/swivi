@@ -517,13 +517,21 @@ export default function ClientReportPage() {
                       <th className="text-left py-2 font-semibold">Clipper</th>
                       <th className="text-left py-2 font-semibold">Platform</th>
                       <th className="text-left py-2 font-semibold">Link</th>
-                      <th className="text-right py-2 font-semibold">Views</th>
                       <th className="text-center py-2 font-semibold">Date</th>
                       <th className="text-center py-2 font-semibold">Status</th>
+                      <th className="text-right py-2 font-semibold">Views</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data.allSubmissions.map((submission, idx) => (
+                    {[...data.allSubmissions]
+                      .sort((a, b) => {
+                        // Sort by status: APPROVED/PAID first, then PENDING, then REJECTED
+                        const statusOrder = { 'APPROVED': 1, 'PAID': 1, 'PENDING': 2, 'REJECTED': 3 }
+                        const aOrder = statusOrder[a.status as keyof typeof statusOrder] || 4
+                        const bOrder = statusOrder[b.status as keyof typeof statusOrder] || 4
+                        return aOrder - bOrder
+                      })
+                      .map((submission, idx) => (
                       <tr key={submission.id} className="border-b hover:bg-gray-50">
                         <td className="py-2">
                           <span className="font-medium">@{submission.handle}</span>
@@ -542,21 +550,15 @@ export default function ClientReportPage() {
                             View Post
                           </a>
                         </td>
-                        <td className="py-2 text-right font-medium">{submission.currentViews.toLocaleString()}</td>
                         <td className="py-2 text-center text-xs">
                           {new Date(submission.submittedAt).toLocaleDateString()}
                         </td>
                         <td className="py-2 text-center">
-                          <span className={`text-xs px-2 py-1 rounded ${
-                            submission.status === 'APPROVED' || submission.status === 'PAID'
-                              ? 'bg-green-100 text-green-800'
-                              : submission.status === 'PENDING'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}>
+                          <span className="text-xs text-gray-700">
                             {submission.status}
                           </span>
                         </td>
+                        <td className="py-2 text-right font-medium">{submission.currentViews.toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
