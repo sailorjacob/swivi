@@ -377,16 +377,10 @@ export default function PartnerDashboardPage() {
                     </a>
 
                     {/* Stats */}
-                    <div className="flex items-center gap-4 flex-shrink-0 text-right">
+                    <div className="flex items-center flex-shrink-0 text-right">
                       <div>
                         <p className="text-sm font-medium">{submission.currentViews.toLocaleString()}</p>
                         <p className="text-xs text-muted-foreground">views</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">
-                          +{submission.viewsGained.toLocaleString()}
-                        </p>
-                        <p className="text-xs text-muted-foreground">tracked</p>
                       </div>
                     </div>
                   </motion.div>
