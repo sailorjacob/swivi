@@ -152,7 +152,6 @@ export async function GET(
                 platform: true,
                 username: true,
                 displayName: true,
-                profileUrl: true,
                 verified: true
               }
             }
@@ -205,7 +204,6 @@ export async function GET(
           platform: socialAccount.platform,
           username: socialAccount.username,
           displayName: socialAccount.displayName,
-          profileUrl: socialAccount.profileUrl,
           verified: socialAccount.verified
         } : null
       }
@@ -230,7 +228,6 @@ export async function GET(
       platform: string
       username: string
       displayName: string | null
-      profileUrl: string | null
       isVerified: boolean  // Whether this is from a verified social account
       userId: string
       userName: string | null
@@ -262,7 +259,6 @@ export async function GET(
           platform: sub.platform,
           username: handle,
           displayName: sub.socialAccount?.displayName || sub.user.name,
-          profileUrl: sub.socialAccount?.profileUrl || null,
           isVerified,
           userId: sub.user.id,
           userName: sub.user.name,
