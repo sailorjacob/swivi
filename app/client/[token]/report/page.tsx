@@ -185,26 +185,25 @@ export default function ClientReportPage() {
           <section className="mb-10">
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Executive Summary</h2>
             <div className="grid grid-cols-5 gap-4">
-              <div className="p-4 border border-gray-200 rounded">
+              <div className="text-center p-3 border border-gray-200 rounded">
                 <p className="text-2xl font-bold">{performance.totalSubmittedViews.toLocaleString()}</p>
-                <p className="text-sm text-gray-600">Total Submitted Views</p>
-                <p className="text-xs text-gray-400 mt-1">All content</p>
+                <p className="text-xs text-gray-600">Total Submitted Views</p>
               </div>
-              <div className="p-4 border border-gray-200 rounded">
+              <div className="text-center p-3 border border-gray-200 rounded">
                 <p className="text-2xl font-bold">{submissions.approved}</p>
-                <p className="text-sm text-gray-600">Approved Clips</p>
+                <p className="text-xs text-gray-600">Approved Clips</p>
               </div>
-              <div className="p-4 border border-gray-200 rounded">
+              <div className="text-center p-3 border border-gray-200 rounded">
                 <p className="text-2xl font-bold">{creators.breakdown.length}</p>
-                <p className="text-sm text-gray-600">Unique Pages</p>
+                <p className="text-xs text-gray-600">Unique Pages</p>
               </div>
-              <div className="p-4 border border-gray-200 rounded">
+              <div className="text-center p-3 border border-gray-200 rounded">
                 <p className="text-2xl font-bold">{submissions.total}</p>
-                <p className="text-sm text-gray-600">Total Submissions</p>
+                <p className="text-xs text-gray-600">Total Submissions</p>
               </div>
-              <div className="p-4 border border-gray-200 rounded">
+              <div className="text-center p-3 border border-gray-200 rounded">
                 <p className="text-2xl font-bold">${budget.spent.toLocaleString()}</p>
-                <p className="text-sm text-gray-600">Total Spend</p>
+                <p className="text-xs text-gray-600">Total Spend</p>
               </div>
             </div>
           </section>
@@ -270,30 +269,25 @@ export default function ClientReportPage() {
           <section className="mb-10">
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Performance Metrics</h2>
             <div className="grid grid-cols-5 gap-4">
-              <div className="p-4 border border-gray-200 rounded">
-                <p className="text-2xl font-bold">{performance.totalSubmittedViews.toLocaleString()}</p>
-                <p className="text-sm text-gray-600">Total Submitted Views</p>
-                <p className="text-xs text-gray-400 mt-1">All content posted</p>
+              <div className="text-center p-3 border border-gray-200 rounded">
+                <p className="text-xl font-bold">{performance.totalSubmittedViews.toLocaleString()}</p>
+                <p className="text-xs text-gray-600">Total Submitted</p>
               </div>
-              <div className="p-4 border border-gray-200 rounded">
-                <p className="text-2xl font-bold">{performance.totalViews.toLocaleString()}</p>
-                <p className="text-sm text-gray-600">Approved Views</p>
-                <p className="text-xs text-gray-400 mt-1">Budget allocated</p>
+              <div className="text-center p-3 border border-gray-200 rounded">
+                <p className="text-xl font-bold">{performance.totalViews.toLocaleString()}</p>
+                <p className="text-xs text-gray-600">Approved Views</p>
               </div>
-              <div className="p-4 border border-gray-200 rounded">
-                <p className="text-2xl font-bold">{performance.unapprovedViews.toLocaleString()}</p>
-                <p className="text-sm text-gray-600">Unapproved Views</p>
-                <p className="text-xs text-gray-400 mt-1">Not paid</p>
+              <div className="text-center p-3 border border-gray-200 rounded">
+                <p className="text-xl font-bold">{performance.unapprovedViews.toLocaleString()}</p>
+                <p className="text-xs text-gray-600">Unapproved</p>
               </div>
-              <div className="p-4 border border-gray-200 rounded">
-                <p className="text-2xl font-bold">${(budget.spent / performance.totalViews * 1000).toFixed(2)}</p>
-                <p className="text-sm text-gray-600">Approved CPM</p>
-                <p className="text-xs text-gray-400 mt-1">Cost per 1K approved</p>
+              <div className="text-center p-3 border border-gray-200 rounded">
+                <p className="text-xl font-bold">${(budget.spent / performance.totalViews * 1000).toFixed(2)}</p>
+                <p className="text-xs text-gray-600">Approved CPM</p>
               </div>
-              <div className="p-4 border border-gray-200 rounded">
-                <p className="text-2xl font-bold">${(budget.spent / performance.totalSubmittedViews * 1000).toFixed(2)}</p>
-                <p className="text-sm text-gray-600">Overall CPM</p>
-                <p className="text-xs text-gray-400 mt-1">All submitted views</p>
+              <div className="text-center p-3 border border-gray-200 rounded">
+                <p className="text-xl font-bold">${(budget.spent / performance.totalSubmittedViews * 1000).toFixed(2)}</p>
+                <p className="text-xs text-gray-600">Overall CPM</p>
               </div>
             </div>
             
