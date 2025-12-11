@@ -17,7 +17,8 @@ import {
   Play,
   CheckCircle,
   Clock,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
