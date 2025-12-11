@@ -185,23 +185,23 @@ export default function ClientReportPage() {
           <section className="mb-10">
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Executive Summary</h2>
             <div className="grid grid-cols-5 gap-4">
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-2xl font-bold">{performance.totalSubmittedViews.toLocaleString()}</p>
                 <p className="text-xs text-gray-600">Total Submitted Views</p>
               </div>
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-2xl font-bold">{submissions.approved}</p>
                 <p className="text-xs text-gray-600">Approved Clips</p>
               </div>
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-2xl font-bold">{creators.breakdown.length}</p>
                 <p className="text-xs text-gray-600">Unique Pages</p>
               </div>
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-2xl font-bold">{submissions.total}</p>
                 <p className="text-xs text-gray-600">Total Submissions</p>
               </div>
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-2xl font-bold">${budget.spent.toLocaleString()}</p>
                 <p className="text-xs text-gray-600">Total Spend</p>
               </div>
@@ -269,23 +269,23 @@ export default function ClientReportPage() {
           <section className="mb-10">
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Performance Metrics</h2>
             <div className="grid grid-cols-5 gap-4">
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-xl font-bold">{performance.totalSubmittedViews.toLocaleString()}</p>
                 <p className="text-xs text-gray-600">Total Submitted</p>
               </div>
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-xl font-bold">{performance.totalViews.toLocaleString()}</p>
                 <p className="text-xs text-gray-600">Approved Views</p>
               </div>
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-xl font-bold">{performance.unapprovedViews.toLocaleString()}</p>
                 <p className="text-xs text-gray-600">Unapproved</p>
               </div>
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-xl font-bold">${(budget.spent / performance.totalViews * 1000).toFixed(2)}</p>
                 <p className="text-xs text-gray-600">Approved CPM</p>
               </div>
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-xl font-bold">${(budget.spent / performance.totalSubmittedViews * 1000).toFixed(2)}</p>
                 <p className="text-xs text-gray-600">Overall CPM</p>
               </div>
@@ -298,7 +298,7 @@ export default function ClientReportPage() {
               const surplusPercent = paidViews > 0 ? ((surplusViews / paidViews) * 100).toFixed(1) : '0'
               
               return surplusViews > 0 ? (
-                <div className="mt-4 p-4 border border-gray-200 rounded">
+                <div className="mt-4 p-4 rounded">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-lg font-bold text-gray-800">Post Campaign Performance</p>
@@ -318,19 +318,19 @@ export default function ClientReportPage() {
           <section className="mb-10">
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Submission Breakdown</h2>
             <div className="grid grid-cols-4 gap-4">
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-2xl font-bold">{submissions.total}</p>
                 <p className="text-xs text-gray-600">Total</p>
               </div>
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-2xl font-bold">{submissions.approved}</p>
                 <p className="text-xs text-gray-600">Approved</p>
               </div>
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-2xl font-bold">{submissions.pending}</p>
                 <p className="text-xs text-gray-600">Pending</p>
               </div>
-              <div className="text-center p-3 border border-gray-200 rounded">
+              <div className="text-center p-3 rounded">
                 <p className="text-2xl font-bold">{submissions.rejected}</p>
                 <p className="text-xs text-gray-600">Rejected</p>
               </div>
@@ -353,7 +353,7 @@ export default function ClientReportPage() {
               <tbody>
                 {Object.entries(platforms).map(([platform, stats]) => (
                   <tr key={platform} className="border-b">
-                    <td className="py-2 font-medium">{platform}</td>
+                    <td className="py-2 font-medium">{platform.toLowerCase()}</td>
                     <td className="py-2 text-center">{stats.total}</td>
                     <td className="py-2 text-center">{stats.approved}</td>
                     <td className="py-2 text-right">{stats.views.toLocaleString()}</td>
@@ -384,7 +384,7 @@ export default function ClientReportPage() {
                 {topClips.map((clip, idx) => (
                   <tr key={idx} className="border-b">
                     <td className="py-2">{idx + 1}</td>
-                    <td className="py-2 font-medium">@{clip.handle}</td>
+                    <td className="py-2 font-medium">@{clip.handle.toLowerCase()}</td>
                     <td className="py-2">
                       <a 
                         href={clip.clipUrl} 
@@ -392,7 +392,7 @@ export default function ClientReportPage() {
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline"
                       >
-                        {clip.platform}
+                        {clip.platform.toLowerCase()}
                       </a>
                     </td>
                     <td className="py-2 text-right">{clip.views.toLocaleString()}</td>
@@ -427,7 +427,7 @@ export default function ClientReportPage() {
                   return (
                     <tr key={idx} className="border-b">
                       <td className="py-2">
-                        <span className="font-medium">@{creator.handle}</span>
+                        <span className="font-medium">@{creator.handle.toLowerCase()}</span>
                         {creator.isVerified && (
                           <span className="text-xs bg-gray-200 px-1 rounded ml-1" title="Verified social account">✓</span>
                         )}
@@ -435,7 +435,7 @@ export default function ClientReportPage() {
                           <span className="text-gray-400 ml-1 text-xs">({creator.creatorName})</span>
                         )}
                       </td>
-                      <td className="py-2">{creator.platform}</td>
+                      <td className="py-2">{creator.platform.toLowerCase()}</td>
                       <td className="py-2 text-center">{creator.approvedCount}</td>
                       <td className="py-2 text-right">{creator.approvedViews.toLocaleString()}</td>
                       <td className="py-2 text-right">
@@ -480,7 +480,7 @@ export default function ClientReportPage() {
                   {creators.nonParticipating.map((creator, idx) => (
                     <tr key={idx} className="border-b">
                       <td className="py-2">
-                        <span className="font-medium">@{creator.handle}</span>
+                        <span className="font-medium">@{creator.handle.toLowerCase()}</span>
                         {creator.isVerified && (
                           <span className="text-xs bg-gray-200 px-1 rounded ml-1" title="Verified social account">✓</span>
                         )}
@@ -488,7 +488,7 @@ export default function ClientReportPage() {
                           <span className="text-gray-400 ml-1 text-xs">({creator.creatorName})</span>
                         )}
                       </td>
-                      <td className="py-2">{creator.platform}</td>
+                      <td className="py-2">{creator.platform.toLowerCase()}</td>
                       <td className="py-2 text-center">{creator.clipCount}</td>
                       <td className="py-2 text-right">{creator.totalViews > 0 ? creator.totalViews.toLocaleString() : '—'}</td>
                       <td className="py-2 text-center">
@@ -534,12 +534,12 @@ export default function ClientReportPage() {
                       .map((submission, idx) => (
                       <tr key={submission.id} className="border-b hover:bg-gray-50">
                         <td className="py-2">
-                          <span className="font-medium">@{submission.handle}</span>
+                          <span className="font-medium">@{submission.handle.toLowerCase()}</span>
                           {submission.creatorName && submission.creatorName !== submission.handle && (
                             <span className="text-gray-400 ml-1 text-xs block">({submission.creatorName})</span>
                           )}
                         </td>
-                        <td className="py-2">{submission.platform}</td>
+                        <td className="py-2">{submission.platform.toLowerCase()}</td>
                         <td className="py-2">
                           <a 
                             href={submission.clipUrl} 
