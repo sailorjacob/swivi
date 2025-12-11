@@ -591,7 +591,7 @@ export default function AdminCampaignsPage() {
 
   // Complete campaign manually
   const handleCompleteCampaign = async (campaignId: string) => {
-    if (!confirm("Are you sure you want to complete this campaign? This will finalize all earnings and stop view tracking.")) {
+    if (!confirm("Are you sure you want to complete this campaign? This will finalize all earnings and officially close the campaign. View tracking will continue for reporting purposes.")) {
       return
     }
 
@@ -1449,7 +1449,7 @@ export default function AdminCampaignsPage() {
                                   Go Live Now
                                 </Button>
                               )}
-                              {campaign.status === "ACTIVE" && (
+                              {campaign.status === "ACTIVE" && progressPercentage < 100 && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -1468,7 +1468,7 @@ export default function AdminCampaignsPage() {
                                   Resume
                                 </Button>
                               )}
-                              {campaign.status === "ACTIVE" && progressPercentage >= 50 && (
+                              {campaign.status === "ACTIVE" && progressPercentage >= 50 && progressPercentage < 100 && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -1476,6 +1476,16 @@ export default function AdminCampaignsPage() {
                                   className="ml-1"
                                 >
                                   Complete
+                                </Button>
+                              )}
+                              {campaign.status === "ACTIVE" && progressPercentage >= 100 && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleCompleteCampaign(campaign.id)}
+                                  className="ml-1"
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Mark Complete
                                 </Button>
                               )}
                               {campaign.status === "COMPLETED" && (
