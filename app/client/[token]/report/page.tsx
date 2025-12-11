@@ -526,7 +526,11 @@ export default function ClientReportPage() {
                   <tbody>
                     {[...data.allSubmissions]
                       .sort((a, b) => {
-                        // Sort by status: APPROVED/PAID first, then PENDING, then REJECTED
+                        // Sort by views (highest to lowest)
+                        const viewDiff = b.currentViews - a.currentViews
+                        if (viewDiff !== 0) return viewDiff
+                        
+                        // If views are the same, sort by status as secondary
                         const statusOrder = { 'APPROVED': 1, 'PAID': 1, 'PENDING': 2, 'REJECTED': 3 }
                         const aOrder = statusOrder[a.status as keyof typeof statusOrder] || 4
                         const bOrder = statusOrder[b.status as keyof typeof statusOrder] || 4

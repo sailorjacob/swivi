@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getPlatformLogo } from "@/components/ui/icons/platform-logos"
+import { SwiviLogo } from "@/components/ui/icons/swivi-logo"
 
 interface CampaignData {
   campaign: {
@@ -161,10 +162,8 @@ export default function ClientPortalPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-foreground text-background flex items-center justify-center text-sm font-bold">
-                S
-              </div>
-              <span className="text-sm text-muted-foreground">Client Portal</span>
+              <SwiviLogo size={32} />
+              <span className="text-sm font-medium">Partner Portal</span>
             </div>
             <Badge variant="outline" className="text-xs">
               <Clock className="w-3 h-3 mr-1" />
