@@ -301,12 +301,12 @@ export default function ClientReportPage() {
                 <div className="mt-4 p-4 border border-gray-200 rounded">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-lg font-bold text-gray-800">Bonus Performance</p>
+                      <p className="text-lg font-bold text-gray-800">Post Campaign Performance</p>
                       <p className="text-sm text-gray-600">Views delivered beyond budget allocation</p>
                     </div>
                     <div className="text-right">
                       <p className="text-3xl font-bold" style={{color: '#00ff41'}}>+{surplusViews.toLocaleString()}</p>
-                      <p className="text-sm text-gray-600">Surplus views ({surplusPercent}% extra)</p>
+                      <p className="text-sm text-gray-600">Surplus views ({surplusPercent}%)</p>
                     </div>
                   </div>
                 </div>
@@ -385,7 +385,16 @@ export default function ClientReportPage() {
                   <tr key={idx} className="border-b">
                     <td className="py-2">{idx + 1}</td>
                     <td className="py-2 font-medium">@{clip.handle}</td>
-                    <td className="py-2">{clip.platform}</td>
+                    <td className="py-2">
+                      <a 
+                        href={clip.clipUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {clip.platform}
+                      </a>
+                    </td>
                     <td className="py-2 text-right">{clip.views.toLocaleString()}</td>
                   </tr>
                 ))}
@@ -489,6 +498,70 @@ export default function ClientReportPage() {
                   ))}
                 </tbody>
               </table>
+            </section>
+          )}
+
+          {/* All Submissions - Complete List */}
+          {data.allSubmissions && data.allSubmissions.length > 0 && (
+            <section className="mb-10 page-break">
+              <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">
+                All Submissions ({data.allSubmissions.length} total)
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Complete list of every submission with their current performance metrics.
+              </p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b-2 border-gray-300">
+                      <th className="text-left py-2 font-semibold">Clipper</th>
+                      <th className="text-left py-2 font-semibold">Platform</th>
+                      <th className="text-left py-2 font-semibold">Link</th>
+                      <th className="text-right py-2 font-semibold">Views</th>
+                      <th className="text-center py-2 font-semibold">Date</th>
+                      <th className="text-center py-2 font-semibold">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.allSubmissions.map((submission, idx) => (
+                      <tr key={submission.id} className="border-b hover:bg-gray-50">
+                        <td className="py-2">
+                          <span className="font-medium">@{submission.handle}</span>
+                          {submission.creatorName && submission.creatorName !== submission.handle && (
+                            <span className="text-gray-400 ml-1 text-xs block">({submission.creatorName})</span>
+                          )}
+                        </td>
+                        <td className="py-2">{submission.platform}</td>
+                        <td className="py-2">
+                          <a 
+                            href={submission.clipUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline text-xs"
+                          >
+                            View Post
+                          </a>
+                        </td>
+                        <td className="py-2 text-right font-medium">{submission.currentViews.toLocaleString()}</td>
+                        <td className="py-2 text-center text-xs">
+                          {new Date(submission.submittedAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-2 text-center">
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            submission.status === 'APPROVED' || submission.status === 'PAID'
+                              ? 'bg-green-100 text-green-800'
+                              : submission.status === 'PENDING'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {submission.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </section>
           )}
 

@@ -266,7 +266,18 @@ export async function GET(
         nonParticipating: nonParticipatingPages
       },
       platforms: platformBreakdown,
-      topClips
+      topClips,
+      allSubmissions: allSubmissions.map(s => ({
+        id: s.id,
+        clipUrl: s.clipUrl,
+        platform: s.platform,
+        status: s.status,
+        creatorName: s.creatorName,
+        handle: s.handle,
+        currentViews: s.currentViews,
+        earnings: s.earnings,
+        submittedAt: s.submittedAt
+      }))
     })
   } catch (error) {
     console.error("Error fetching client report data:", error)
