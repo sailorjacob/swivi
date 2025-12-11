@@ -59,7 +59,7 @@ interface CampaignDetail {
     clipUrl: string
     platform: string
     status: string
-    creatorName: string
+    creatorHandle: string
     creatorImage: string | null
     initialViews: number
     currentViews: number
@@ -330,13 +330,7 @@ export default function PartnerCampaignDetailPage() {
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2">
-                                <Avatar className="w-6 h-6">
-                                  <AvatarImage src={submission.creatorImage || undefined} />
-                                  <AvatarFallback className="text-xs">
-                                    {(submission.creatorName || '?')[0]}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span className="text-sm font-medium">{submission.creatorName}</span>
+                                <span className="text-sm font-medium">@{submission.creatorHandle}</span>
                                 <div className="p-1.5 rounded bg-muted">
                                   {Icon && <Icon className="w-4 h-4" />}
                                 </div>

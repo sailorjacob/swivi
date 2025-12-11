@@ -52,6 +52,12 @@ export async function GET(
                 image: true
               }
             },
+            socialAccount: {
+              select: {
+                username: true,
+                platform: true
+              }
+            },
             clips: {
               select: {
                 views: true
@@ -99,7 +105,7 @@ export async function GET(
         clipUrl: sub.clipUrl,
         platform: sub.platform,
         status: sub.status,
-        creatorName: sub.users.name || 'Creator',
+        creatorHandle: sub.socialAccount?.username || sub.users.name || 'Unknown',
         creatorImage: sub.users.image,
         initialViews,
         currentViews,

@@ -58,7 +58,7 @@ interface CampaignData {
     clipUrl: string
     platform: string
     status: string
-    creatorName: string
+    creatorHandle: string
     creatorImage: string | null
     initialViews: number
     currentViews: number
@@ -367,15 +367,9 @@ export default function ClientPortalPage() {
 
                       {/* Creator */}
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={submission.creatorImage || undefined} />
-                          <AvatarFallback className="text-xs">
-                            {submission.creatorName?.[0] || '?'}
-                          </AvatarFallback>
-                        </Avatar>
                         <div className="hidden sm:block">
-                          <p className="text-sm font-medium truncate max-w-[100px]">
-                            {submission.creatorName}
+                          <p className="text-sm font-medium truncate max-w-[120px]">
+                            @{submission.creatorHandle}
                           </p>
                         </div>
                       </div>
