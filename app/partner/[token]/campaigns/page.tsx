@@ -20,7 +20,6 @@ import {
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { getPlatformLogo } from "@/components/ui/icons/platform-logos"
 
@@ -201,7 +200,7 @@ export default function PartnerCampaignsPage() {
                 transition={{ duration: 0.5 }}
                 whileHover={{ y: -4, scale: 1.02 }}
               >
-                <Card className={`bg-card border-border hover:shadow-xl transition-all duration-300 cursor-pointer group relative ${isCompleted ? 'opacity-75' : ''}`}>
+                <Card className={`bg-card border-border hover:shadow-xl transition-all duration-300 cursor-pointer group relative ${isCompleted ? 'opacity-75 border-green-500/30' : ''}`}>
                   <CardContent className="p-0">
                     {/* Campaign Image */}
                     <div 
@@ -216,7 +215,7 @@ export default function PartnerCampaignsPage() {
                           </Badge>
                         )}
                         {isCompleted && (
-                          <Badge className="bg-muted text-muted-foreground text-xs px-2 py-1 flex items-center gap-1">
+                          <Badge className="bg-green-600 text-white text-xs px-2 py-1 flex items-center gap-1">
                             <CheckCircle className="w-3 h-3" />
                             COMPLETED
                           </Badge>
@@ -249,9 +248,9 @@ export default function PartnerCampaignsPage() {
                       {/* Creator */}
                       <div className="flex items-center gap-2 mb-3">
                         <div className="w-6 h-6 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-medium">
-                          {campaign.creator.charAt(0).toUpperCase()}
+                          {(campaign.creator || 'P').charAt(0).toUpperCase()}
                         </div>
-                        <span className="text-sm text-muted-foreground">{campaign.creator}</span>
+                        <span className="text-sm text-muted-foreground">{campaign.creator || 'Partner'}</span>
                       </div>
 
                       {/* Title */}
@@ -270,7 +269,12 @@ export default function PartnerCampaignsPage() {
                           <span className="font-medium">Budget Progress</span>
                           <span className="font-medium">{formatCurrency(spentNum)} / {formatCurrency(budgetNum)}</span>
                         </div>
-                        <Progress value={progress} className="h-3" />
+                        <div className="w-full bg-muted rounded-full h-3">
+                          <div
+                            className="bg-green-500 h-3 rounded-full transition-all duration-300"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
                       </div>
 
                       {/* Key Metrics */}
@@ -290,12 +294,12 @@ export default function PartnerCampaignsPage() {
 
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <Eye className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">{campaign.stats.totalViews.toLocaleString()} views</span>
+                            <Target className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">Pool: {formatCurrency(budgetNum)}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Users className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">{campaign.stats.approvedSubmissions} posts</span>
+                            <span className="text-sm text-muted-foreground">{campaign.stats.totalSubmissions} submissions</span>
                           </div>
                         </div>
                       </div>

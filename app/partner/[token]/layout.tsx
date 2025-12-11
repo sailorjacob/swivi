@@ -61,14 +61,9 @@ function PartnerNav({
     <div className={cn("flex flex-col h-full bg-card border-r border-border", className)}>
       {/* Logo */}
       <div className="p-6 border-b border-border">
-        <Link href={`/partner/${token}`} className="flex items-center space-x-4 hover:opacity-80 transition-opacity">
+        <Link href={`/partner/${token}`} className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
           <SwiviLogo size={36} />
-          <div>
-            <h1 className="text-foreground font-light text-lg">Partner Portal</h1>
-            <p className="text-muted-foreground text-xs truncate max-w-[140px]">
-              {partnerName}
-            </p>
-          </div>
+          <h1 className="text-foreground font-light text-lg">Partner Portal</h1>
         </Link>
       </div>
 

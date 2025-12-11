@@ -203,7 +203,7 @@ export default function PartnerCampaignDetailPage() {
                   </Badge>
                 )}
                 {isCompleted && (
-                  <Badge className="bg-muted text-muted-foreground">
+                  <Badge className="bg-green-600 text-white">
                     <CheckCircle className="w-3 h-3 mr-1" />
                     COMPLETED
                   </Badge>
@@ -223,9 +223,9 @@ export default function PartnerCampaignDetailPage() {
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <div className="w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center text-xs">
-                    {data.creator.charAt(0)}
+                    {(data.creator || 'P').charAt(0)}
                   </div>
-                  {data.creator}
+                  {data.creator || 'Partner'}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Users className="w-4 h-4" />
@@ -297,9 +297,9 @@ export default function PartnerCampaignDetailPage() {
               <span>Budget Used</span>
               <span>{formatCurrency(spentNum)} / {formatCurrency(budgetNum)}</span>
             </div>
-            <div className="w-full bg-muted rounded-full h-2">
+            <div className="w-full bg-muted rounded-full h-3">
               <div
-                className="bg-foreground h-2 rounded-full transition-all duration-300"
+                className="bg-green-500 h-3 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
