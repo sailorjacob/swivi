@@ -36,6 +36,8 @@ interface ReportData {
     totalViews: number
     totalViewsGained: number
     totalEarnings: number
+    totalSubmittedViews: number
+    unapprovedViews: number
     viewsAtBudgetReached: number
     averageViewsPerClip: number
   }
@@ -268,27 +270,24 @@ export default function ClientReportPage() {
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Performance Metrics</h2>
             <div className="grid grid-cols-4 gap-4">
               <div className="p-4 border border-gray-200 rounded">
-                <p className="text-2xl font-bold">{performance.totalViews.toLocaleString()}</p>
-                <p className="text-sm text-gray-600">Total Views</p>
-                {performance.totalViewsGained > 0 && (
-                  <p className="text-xs text-gray-400 mt-1">
-                    +{performance.totalViewsGained.toLocaleString()} gained
-                  </p>
-                )}
+                <p className="text-2xl font-bold">{performance.totalSubmittedViews.toLocaleString()}</p>
+                <p className="text-sm text-gray-600">Total Submitted Views</p>
+                <p className="text-xs text-gray-400 mt-1">All content posted</p>
               </div>
               <div className="p-4 border border-gray-200 rounded">
-                <p className="text-2xl font-bold">{performance.averageViewsPerClip.toLocaleString()}</p>
-                <p className="text-sm text-gray-600">Avg Views/Clip</p>
+                <p className="text-2xl font-bold">{performance.totalViews.toLocaleString()}</p>
+                <p className="text-sm text-gray-600">Approved Views</p>
+                <p className="text-xs text-gray-400 mt-1">Budget allocated</p>
+              </div>
+              <div className="p-4 border border-gray-200 rounded">
+                <p className="text-2xl font-bold">{performance.unapprovedViews.toLocaleString()}</p>
+                <p className="text-sm text-gray-600">Unapproved Views</p>
+                <p className="text-xs text-gray-400 mt-1">Not paid</p>
               </div>
               <div className="p-4 border border-gray-200 rounded">
                 <p className="text-2xl font-bold">${(budget.spent / performance.totalViews * 1000).toFixed(2)}</p>
                 <p className="text-sm text-gray-600">Effective CPM</p>
                 <p className="text-xs text-gray-400 mt-1">Cost per 1K views</p>
-              </div>
-              <div className="p-4 border border-gray-200 rounded">
-                <p className="text-2xl font-bold">${budget.payoutRate.toFixed(2)}</p>
-                <p className="text-sm text-gray-600">Base CPM</p>
-                <p className="text-xs text-gray-400 mt-1">Payout rate</p>
               </div>
             </div>
             

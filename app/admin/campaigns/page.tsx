@@ -1715,20 +1715,36 @@ export default function AdminCampaignsPage() {
                                       </div>
                                       
                                       {/* Views Breakdown Row */}
-                                      <div className="grid grid-cols-2 gap-3">
+                                      <div className="grid grid-cols-3 gap-3">
+                                        <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                          <p className="text-lg font-bold">
+                                            {expandedCampaignData[campaign.id].stats.totalSubmittedViews?.toLocaleString() || 0}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground">Total Submitted Views</p>
+                                        </div>
                                         <div className="text-center p-2 bg-muted/50 rounded-lg">
                                           <p className="text-lg font-bold">
                                             {expandedCampaignData[campaign.id].stats.viewsAtCompletion?.toLocaleString() || 0}
                                           </p>
-                                          <p className="text-xs text-muted-foreground">Views @ Completion</p>
+                                          <p className="text-xs text-muted-foreground">Approved (Paid)</p>
                                         </div>
+                                        <div className="text-center p-2 bg-muted/50 rounded-lg">
+                                          <p className="text-lg font-bold">
+                                            {expandedCampaignData[campaign.id].stats.unapprovedViews?.toLocaleString() || 0}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground">Unapproved</p>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Bonus Row - Extra tracked after completion */}
+                                      {expandedCampaignData[campaign.id].stats.viewsAfterCompletion > 0 && (
                                         <div className="text-center p-2 bg-muted/50 rounded-lg">
                                           <p className="text-lg font-bold">
                                             +{expandedCampaignData[campaign.id].stats.viewsAfterCompletion?.toLocaleString() || 0}
                                           </p>
-                                          <p className="text-xs text-muted-foreground">Extra Tracked</p>
+                                          <p className="text-xs text-muted-foreground">Extra Tracked After Completion</p>
                                         </div>
-                                      </div>
+                                      )}
                                     </div>
                                   )}
 

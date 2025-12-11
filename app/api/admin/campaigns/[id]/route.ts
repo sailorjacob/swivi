@@ -211,9 +211,15 @@ export async function GET(
 
     // Calculate stats
     const approvedSubmissions = processedSubmissions.filter(s => s.status === 'APPROVED')
+    const unapprovedSubmissions = processedSubmissions.filter(s => s.status !== 'APPROVED')
+    
     const totalEarnings = approvedSubmissions.reduce((sum, s) => sum + s.earnings, 0)
     const totalViews = approvedSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
     const totalViewsGained = approvedSubmissions.reduce((sum, s) => sum + s.viewsGained, 0)
+    
+    // Views from ALL submissions (approved + unapproved)
+    const totalSubmittedViews = processedSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
+    const unapprovedViews = unapprovedSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
     
     // Count unique clippers (different user accounts who submitted)
     const uniqueClipperIds = new Set(processedSubmissions.map(s => s.user.id))
@@ -326,8 +332,10 @@ export async function GET(
         verifiedPages, // Pages from verified social accounts
         unverifiedPages, // Pages without verified social account link
         totalEarnings,
-        totalViews,
+        totalViews, // Views from approved clips only
         totalViewsGained,
+        totalSubmittedViews, // Views from ALL submissions (approved + unapproved)
+        unapprovedViews, // Views from rejected/pending submissions
         // Views at completion = earnings paid out × 1000 (since $1 per 1K views)
         // This represents views that were counted toward earnings
         viewsAtCompletion: Math.round(totalEarnings * 1000),

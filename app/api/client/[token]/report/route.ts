@@ -117,11 +117,16 @@ export async function GET(
 
     // Filter approved submissions
     const approvedSubmissions = allSubmissions.filter(s => s.status === 'APPROVED' || s.status === 'PAID')
+    const unapprovedSubmissions = allSubmissions.filter(s => s.status !== 'APPROVED' && s.status !== 'PAID')
 
     // Calculate totals
     const totalViews = approvedSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
     const totalViewsGained = approvedSubmissions.reduce((sum, s) => sum + s.viewsGained, 0)
     const totalEarnings = approvedSubmissions.reduce((sum, s) => sum + s.earnings, 0)
+    
+    // Total views from ALL submissions (including unapproved)
+    const totalSubmittedViews = allSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
+    const unapprovedViews = unapprovedSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
 
     // Aggregate by creator handle
     const creatorStatsMap = new Map<string, {
@@ -244,9 +249,11 @@ export async function GET(
         payoutRate: Number(campaign.payoutRate)
       },
       performance: {
-        totalViews,
+        totalViews, // Approved views only
         totalViewsGained,
         totalEarnings,
+        totalSubmittedViews, // All views including unapproved
+        unapprovedViews, // Views from rejected/pending submissions
         viewsAtBudgetReached: 0, // Requires migration to add column
         averageViewsPerClip: approvedSubmissions.length > 0 
           ? Math.round(totalViews / approvedSubmissions.length) 
