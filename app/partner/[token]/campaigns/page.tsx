@@ -94,19 +94,19 @@ export default function PartnerCampaignsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="px-4 py-4 md:px-6 md:py-6 w-full flex items-center justify-center min-h-[300px]">
+        <Loader2 className="w-6 h-6 md:w-8 md:h-8 animate-spin" />
       </div>
     )
   }
 
   if (error || !data) {
     return (
-      <div className="p-6">
+      <div className="px-4 py-4 md:px-6 md:py-6 w-full">
         <Card>
           <CardContent className="pt-6 text-center">
-            <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">{error || "Unable to load campaigns"}</p>
+            <Target className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-sm md:text-base text-muted-foreground">{error || "Unable to load campaigns"}</p>
           </CardContent>
         </Card>
       </div>
@@ -125,7 +125,7 @@ export default function PartnerCampaignsPage() {
   const completedCampaignsCount = data.campaigns.filter(c => c.status === 'COMPLETED').length
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto">
+    <div className="px-4 py-4 md:px-6 md:py-6 w-full max-w-7xl mx-auto">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

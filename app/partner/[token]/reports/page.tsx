@@ -55,7 +55,7 @@ export default function PartnerReportsPage() {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-6 flex items-center justify-center min-h-[300px]">
+      <div className="px-4 py-4 md:px-6 md:py-6 w-full flex items-center justify-center min-h-[300px]">
         <div className="w-6 h-6 md:w-8 md:h-8 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
       </div>
     )
@@ -63,7 +63,7 @@ export default function PartnerReportsPage() {
 
   if (error || !data) {
     return (
-      <div className="p-4 md:p-6">
+      <div className="px-4 py-4 md:px-6 md:py-6 w-full">
         <Card>
           <CardContent className="pt-6 text-center">
             <FileText className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground mx-auto mb-4" />
@@ -75,7 +75,7 @@ export default function PartnerReportsPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+    <div className="px-4 py-4 md:px-6 md:py-6 w-full max-w-4xl mx-auto">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

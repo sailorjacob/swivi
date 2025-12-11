@@ -131,17 +131,17 @@ export default function PartnerCampaignDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="px-4 py-4 md:px-6 md:py-6 w-full flex items-center justify-center min-h-[300px]">
+        <Loader2 className="w-6 h-6 md:w-8 md:h-8 animate-spin" />
       </div>
     )
   }
 
   if (error || !data) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground mb-4">{error || "Campaign not found"}</p>
-        <Button variant="outline" onClick={() => router.back()}>
+      <div className="px-4 py-4 md:px-6 md:py-6 w-full text-center">
+        <p className="text-sm md:text-base text-muted-foreground mb-4">{error || "Campaign not found"}</p>
+        <Button variant="outline" size="sm" onClick={() => router.back()}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Go Back
         </Button>

@@ -249,9 +249,9 @@ export default function PartnerLayout({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
         {/* Mobile Header */}
-        <div className="lg:hidden flex items-center justify-between p-4 border-b border-border bg-card sticky top-0 z-40">
+        <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-card sticky top-0 z-40">
           <Link href={`/partner/${token}`} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <SwiviLogo size={28} />
             <h1 className="text-foreground font-light text-sm">Partner</h1>
@@ -276,11 +276,12 @@ export default function PartnerLayout({
         </div>
 
         {/* Page Content */}
-        <main className="flex-1 pb-20 lg:pb-0">
+        <main className="flex-1 pb-20 lg:pb-0 overflow-x-hidden">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
+            className="w-full"
           >
             {children}
           </motion.div>
