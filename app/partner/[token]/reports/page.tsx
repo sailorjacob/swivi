@@ -83,8 +83,8 @@ export default function PartnerReportsPage() {
     switch (status) {
       case 'ACTIVE':
         return (
-          <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-            <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse" />
+          <Badge className="bg-foreground text-background">
+            <span className="w-1.5 h-1.5 bg-background rounded-full mr-1.5 animate-pulse" />
             Live
           </Badge>
         )
@@ -209,8 +209,8 @@ export default function PartnerReportsPage() {
                       {/* Quick Stats */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-                            <Eye className="w-4 h-4 text-blue-600" />
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                            <Eye className="w-4 h-4 text-foreground" />
                           </div>
                           <div>
                             <p className="font-semibold">{campaign.stats.totalViews.toLocaleString()}</p>
@@ -218,8 +218,8 @@ export default function PartnerReportsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
-                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                            <CheckCircle className="w-4 h-4 text-foreground" />
                           </div>
                           <div>
                             <p className="font-semibold">{campaign.stats.approvedSubmissions}</p>
@@ -227,8 +227,8 @@ export default function PartnerReportsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center">
-                            <Users className="w-4 h-4 text-purple-600" />
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                            <Users className="w-4 h-4 text-foreground" />
                           </div>
                           <div>
                             <p className="font-semibold">{campaign.stats.uniqueCreators}</p>
@@ -236,8 +236,8 @@ export default function PartnerReportsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center">
-                            <DollarSign className="w-4 h-4 text-orange-600" />
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                            <DollarSign className="w-4 h-4 text-foreground" />
                           </div>
                           <div>
                             <p className="font-semibold">${campaign.spent.toLocaleString()}</p>
@@ -280,31 +280,6 @@ export default function PartnerReportsPage() {
         </div>
       )}
 
-      {/* Help Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="mt-8"
-      >
-        <Card className="bg-muted/30">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h3 className="font-semibold text-lg mb-1">Need help with your reports?</h3>
-                <p className="text-muted-foreground text-sm">
-                  Contact your Swivi representative for customized reporting or campaign insights.
-                </p>
-              </div>
-              <a href="mailto:partners@swivi.io">
-                <Button variant="outline">
-                  Contact Support
-                </Button>
-              </a>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
     </div>
   )
 }

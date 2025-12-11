@@ -26,9 +26,7 @@ export async function GET(
 
     const partnerName = partnerCampaign.creator || "Partner"
 
-    // Get all campaigns for this partner token
-    // For now, we'll just get the single campaign associated with this token
-    // In a full implementation, you'd want a proper partner entity
+    // Get all campaigns for this partner token with full submission data
     const campaigns = await prisma.campaign.findMany({
       where: { clientAccessToken: token },
       select: {
@@ -39,19 +37,12 @@ export async function GET(
         spent: true,
         targetPlatforms: true,
         createdAt: true,
-        _count: {
-          select: {
-            clipSubmissions: true
-          }
-        },
         clipSubmissions: {
-          where: {
-            status: { in: ['APPROVED', 'PAID'] }
-          },
           select: {
             id: true,
             clipUrl: true,
             platform: true,
+            status: true,
             users: {
               select: {
                 name: true
@@ -62,13 +53,7 @@ export async function GET(
                 views: true
               }
             }
-          },
-          orderBy: {
-            clips: {
-              views: 'desc'
-            }
-          },
-          take: 10
+          }
         }
       },
       orderBy: { createdAt: 'desc' }
@@ -89,16 +74,21 @@ export async function GET(
       
       totalBudget += budget
       totalSpent += spent
-      totalSubmissions += campaign._count.clipSubmissions
+      totalSubmissions += campaign.clipSubmissions.length
       
       let campaignViews = 0
+      let campaignApproved = 0
+      
       campaign.clipSubmissions.forEach(sub => {
-        const views = Number(sub.clips?.views || 0)
-        campaignViews += views
-        totalViews += views
+        if (sub.status === 'APPROVED' || sub.status === 'PAID') {
+          campaignApproved++
+          const views = Number(sub.clips?.views || 0)
+          campaignViews += views
+          totalViews += views
+        }
       })
       
-      approvedSubmissions += campaign.clipSubmissions.length
+      approvedSubmissions += campaignApproved
       
       if (campaign.status === 'ACTIVE') activeCampaigns++
       if (campaign.status === 'COMPLETED') completedCampaigns++
@@ -111,22 +101,25 @@ export async function GET(
         spent,
         views: campaignViews,
         submissions: campaign.clipSubmissions.length,
+        approvedCount: campaignApproved,
         platforms: campaign.targetPlatforms,
         createdAt: campaign.createdAt.toISOString()
       }
     })
 
-    // Get top performers across all campaigns
+    // Get top performers across all campaigns (approved only)
     const topPerformers = campaigns
       .flatMap(campaign => 
-        campaign.clipSubmissions.map(sub => ({
-          id: sub.id,
-          clipUrl: sub.clipUrl,
-          platform: sub.platform,
-          creatorName: sub.users.name || 'Creator',
-          views: Number(sub.clips?.views || 0),
-          campaignTitle: campaign.title
-        }))
+        campaign.clipSubmissions
+          .filter(sub => sub.status === 'APPROVED' || sub.status === 'PAID')
+          .map(sub => ({
+            id: sub.id,
+            clipUrl: sub.clipUrl,
+            platform: sub.platform,
+            creatorName: sub.users.name || 'Creator',
+            views: Number(sub.clips?.views || 0),
+            campaignTitle: campaign.title
+          }))
       )
       .sort((a, b) => b.views - a.views)
       .slice(0, 10)

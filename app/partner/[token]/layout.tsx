@@ -101,18 +101,15 @@ function PartnerNav({
         })}
       </nav>
 
-      {/* Quick Links */}
+      {/* Home Link */}
       <div className="p-4 border-t border-border">
-        <div className="text-xs text-muted-foreground mb-3">Quick Links</div>
-        <a
-          href="https://swivi.io"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+        <Link
+          href="/"
+          className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
         >
-          <ExternalLink className="w-4 h-4" />
-          Visit Swivi.io
-        </a>
+          <SwiviLogo size={20} />
+          <span>Back to Home</span>
+        </Link>
       </div>
     </div>
   )

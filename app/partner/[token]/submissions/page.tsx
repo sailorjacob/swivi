@@ -87,21 +87,21 @@ export default function PartnerSubmissionsPage() {
       case 'APPROVED':
       case 'PAID':
         return (
-          <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+          <Badge className="bg-foreground text-background">
             <CheckCircle className="w-3 h-3 mr-1" />
             Approved
           </Badge>
         )
       case 'PENDING':
         return (
-          <Badge variant="outline" className="text-yellow-600 border-yellow-500/20">
+          <Badge variant="outline">
             <Clock className="w-3 h-3 mr-1" />
             Pending
           </Badge>
         )
       case 'REJECTED':
         return (
-          <Badge variant="outline" className="text-red-600 border-red-500/20">
+          <Badge variant="secondary">
             <XCircle className="w-3 h-3 mr-1" />
             Rejected
           </Badge>
@@ -175,19 +175,19 @@ export default function PartnerSubmissionsPage() {
         </Card>
         <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setStatusFilter("APPROVED")}>
           <CardContent className="pt-4 pb-4">
-            <p className="text-2xl font-bold text-green-600">{data.stats.approved}</p>
+            <p className="text-2xl font-bold">{data.stats.approved}</p>
             <p className="text-xs text-muted-foreground">Approved</p>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setStatusFilter("PENDING")}>
           <CardContent className="pt-4 pb-4">
-            <p className="text-2xl font-bold text-yellow-600">{data.stats.pending}</p>
+            <p className="text-2xl font-bold">{data.stats.pending}</p>
             <p className="text-xs text-muted-foreground">Pending</p>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setStatusFilter("REJECTED")}>
           <CardContent className="pt-4 pb-4">
-            <p className="text-2xl font-bold text-red-600">{data.stats.rejected}</p>
+            <p className="text-2xl font-bold">{data.stats.rejected}</p>
             <p className="text-xs text-muted-foreground">Rejected</p>
           </CardContent>
         </Card>
@@ -283,7 +283,7 @@ export default function PartnerSubmissionsPage() {
                     {/* Views Gained */}
                     {submission.viewsGained > 0 && (
                       <div className="text-right flex-shrink-0 hidden md:block">
-                        <p className="font-medium text-green-600 flex items-center gap-1 justify-end">
+                        <p className="font-medium flex items-center gap-1 justify-end">
                           <TrendingUp className="w-3 h-3" />
                           +{submission.viewsGained.toLocaleString()}
                         </p>

@@ -92,8 +92,8 @@ export default function PartnerCampaignsPage() {
     switch (status) {
       case 'ACTIVE':
         return (
-          <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-            <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse" />
+          <Badge className="bg-foreground text-background">
+            <span className="w-1.5 h-1.5 bg-background rounded-full mr-1.5 animate-pulse" />
             Live
           </Badge>
         )
@@ -313,7 +313,7 @@ export default function PartnerCampaignsPage() {
                             </div>
                             <p className="text-xl font-bold">{campaign.stats.totalViews.toLocaleString()}</p>
                             {campaign.stats.viewsGained > 0 && (
-                              <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
+                              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                                 <TrendingUp className="w-3 h-3" />
                                 +{campaign.stats.viewsGained.toLocaleString()} tracked
                               </p>
@@ -359,17 +359,23 @@ export default function PartnerCampaignsPage() {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 flex-wrap">
+                          <Link href={`/partner/${token}/campaigns/${campaign.id}`}>
+                            <Button size="sm">
+                              <Eye className="w-4 h-4 mr-2" />
+                              View Details & Submissions
+                            </Button>
+                          </Link>
                           <Link href={`/client/${token}`}>
                             <Button variant="outline" size="sm">
                               <ExternalLink className="w-4 h-4 mr-2" />
-                              View Live Dashboard
+                              Live Dashboard
                             </Button>
                           </Link>
                           <Link href={`/client/${token}/report`}>
                             <Button variant="outline" size="sm">
                               <ExternalLink className="w-4 h-4 mr-2" />
-                              View Full Report
+                              Full Report
                             </Button>
                           </Link>
                         </div>

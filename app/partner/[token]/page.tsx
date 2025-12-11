@@ -116,8 +116,8 @@ export default function PartnerDashboardPage() {
     switch (status) {
       case 'ACTIVE':
         return (
-          <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-            <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse" />
+          <Badge className="bg-foreground text-background">
+            <span className="w-1.5 h-1.5 bg-background rounded-full mr-1.5 animate-pulse" />
             Live
           </Badge>
         )
@@ -181,7 +181,7 @@ export default function PartnerDashboardPage() {
               <span className="text-xs uppercase tracking-wide">Total Views</span>
             </div>
             <p className="text-3xl font-bold">{summary.totalViews.toLocaleString()}</p>
-            <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
+            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
               <TrendingUp className="w-3 h-3" />
               Across all campaigns
             </p>
