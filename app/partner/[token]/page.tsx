@@ -151,7 +151,7 @@ export default function PartnerDashboardPage() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -196,9 +196,9 @@ export default function PartnerDashboardPage() {
                   </div>
                 )}
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">{campaign.title}</h1>
-              <p className="text-muted-foreground mb-3">{campaign.description}</p>
-              <p className="text-sm text-muted-foreground flex items-center gap-2">
+              <h1 className="text-2xl md:text-4xl font-bold mb-2">{campaign.title}</h1>
+              <p className="text-sm md:text-base text-muted-foreground mb-3">{campaign.description}</p>
+              <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
                 <Calendar className="w-4 h-4" />
                 Started {new Date(campaign.startDate || campaign.createdAt).toLocaleDateString('en-US', {
                   month: 'long',
@@ -282,20 +282,20 @@ export default function PartnerDashboardPage() {
 
         {/* Platform Breakdown */}
         {Object.keys(platformStats).length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
+          <Card className="mb-6 md:mb-8">
+            <CardHeader className="pb-3 md:pb-6">
+              <CardTitle className="text-base md:text-lg flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 md:w-5 md:h-5" />
                 Platform Breakdown
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 {Object.entries(platformStats).map(([platform, platformData]) => (
-                  <div key={platform} className="p-4 border border-border rounded-lg">
-                    <div className="flex items-center gap-2 mb-3">
-                      {getPlatformLogo(platform, '', 20)}
-                      <span className="font-medium">
+                  <div key={platform} className="p-3 md:p-4 border border-border rounded-lg">
+                    <div className="flex items-center gap-2 mb-2 md:mb-3">
+                      {getPlatformLogo(platform, '', 18)}
+                      <span className="font-medium text-sm md:text-base">
                         {platform === 'YOUTUBE' ? 'YouTube' : 
                          platform === 'TIKTOK' ? 'TikTok' :
                          platform === 'INSTAGRAM' ? 'Instagram' :
@@ -304,21 +304,21 @@ export default function PartnerDashboardPage() {
                       </span>
                     </div>
                     <div className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Total Posts</span>
+                      <div className="flex justify-between text-xs md:text-sm">
+                        <span className="text-muted-foreground">Posts</span>
                         <span className="font-medium">{platformData.totalSubmissions}</span>
                       </div>
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-xs md:text-sm">
                         <span className="text-muted-foreground">Approved</span>
                         <span className="font-medium">{platformData.approvedSubmissions}</span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Budget Views</span>
+                      <div className="flex justify-between text-xs md:text-sm">
+                        <span className="text-muted-foreground">Views</span>
                         <span className="font-medium">{platformData.budgetViews.toLocaleString()}</span>
                       </div>
                       {platformData.additionalViews > 0 && (
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">+ Since End</span>
+                        <div className="flex justify-between text-xs md:text-sm">
+                          <span className="text-muted-foreground">+ Since</span>
                           <span className="font-medium">
                             {platformData.additionalViews.toLocaleString()}
                           </span>
@@ -334,42 +334,36 @@ export default function PartnerDashboardPage() {
 
         {/* Top Posts */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Play className="w-5 h-5" />
+          <CardHeader className="pb-3 md:pb-6">
+            <CardTitle className="text-base md:text-lg flex items-center gap-2">
+              <Play className="w-4 h-4 md:w-5 md:h-5" />
               Top Posts ({submissions.length})
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {submissions.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                  <Play className="w-8 h-8 text-muted-foreground" />
+              <div className="text-center py-8 md:py-12">
+                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Play className="w-6 h-6 md:w-8 md:h-8 text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground">No approved posts yet</p>
+                <p className="text-muted-foreground text-sm md:text-base">No approved posts yet</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 {submissions.map((submission, index) => (
-                  <motion.div
+                  <motion.a
                     key={submission.id}
+                    href={submission.clipUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03 }}
-                    className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                    className="flex items-center gap-2 md:gap-4 p-3 md:p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     {/* Rank */}
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold flex-shrink-0">
+                    <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-muted flex items-center justify-center text-xs md:text-sm font-bold flex-shrink-0">
                       {index + 1}
-                    </div>
-
-                    {/* Creator Handle */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <div className="hidden sm:block">
-                        <p className="text-sm font-medium truncate max-w-[120px]">
-                          @{submission.creatorHandle}
-                        </p>
-                      </div>
                     </div>
 
                     {/* Platform */}
@@ -377,25 +371,23 @@ export default function PartnerDashboardPage() {
                       {getPlatformLogo(submission.platform, '', 16)}
                     </div>
 
-                    {/* URL - truncated */}
-                    <a
-                      href={submission.clipUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 min-w-0 text-sm text-muted-foreground hover:text-foreground truncate flex items-center gap-1"
-                    >
-                      <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                      <span className="truncate">{submission.clipUrl}</span>
-                    </a>
+                    {/* Handle & Link */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs md:text-sm font-medium truncate">
+                        @{submission.creatorHandle}
+                      </p>
+                      <p className="text-[10px] md:text-xs text-muted-foreground truncate flex items-center gap-1">
+                        <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                        View Post
+                      </p>
+                    </div>
 
                     {/* Stats */}
-                    <div className="flex items-center flex-shrink-0 text-right">
-                      <div>
-                        <p className="text-sm font-medium">{submission.currentViews.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">views</p>
-                      </div>
+                    <div className="flex-shrink-0 text-right">
+                      <p className="text-xs md:text-sm font-medium">{submission.currentViews.toLocaleString()}</p>
+                      <p className="text-[10px] md:text-xs text-muted-foreground">views</p>
                     </div>
-                  </motion.div>
+                  </motion.a>
                 ))}
               </div>
             )}

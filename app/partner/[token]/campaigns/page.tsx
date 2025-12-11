@@ -125,24 +125,24 @@ export default function PartnerCampaignsPage() {
   const completedCampaignsCount = data.campaigns.filter(c => c.status === 'COMPLETED').length
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="mb-6 md:mb-8"
       >
-        <h1 className="text-3xl font-bold mb-2">Your Campaigns</h1>
-        <p className="text-muted-foreground">
-          View and track all your campaigns on Swivi.
+        <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2">Your Campaigns</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
+          View and track all your campaigns.
         </p>
       </motion.div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-6 border-b border-border mb-6">
+      <div className="flex gap-4 md:gap-6 border-b border-border mb-4 md:mb-6 overflow-x-auto">
         <button
           onClick={() => setFilter('all')}
-          className={`pb-2 text-sm transition-colors ${
+          className={`pb-2 text-xs md:text-sm whitespace-nowrap transition-colors ${
             filter === 'all' 
               ? 'text-foreground border-b-2 border-foreground -mb-px' 
               : 'text-muted-foreground hover:text-foreground'
@@ -152,7 +152,7 @@ export default function PartnerCampaignsPage() {
         </button>
         <button
           onClick={() => setFilter('active')}
-          className={`pb-2 text-sm transition-colors ${
+          className={`pb-2 text-xs md:text-sm whitespace-nowrap transition-colors ${
             filter === 'active' 
               ? 'text-foreground border-b-2 border-foreground -mb-px' 
               : 'text-muted-foreground hover:text-foreground'
@@ -162,7 +162,7 @@ export default function PartnerCampaignsPage() {
         </button>
         <button
           onClick={() => setFilter('completed')}
-          className={`pb-2 text-sm transition-colors ${
+          className={`pb-2 text-xs md:text-sm whitespace-nowrap transition-colors ${
             filter === 'completed' 
               ? 'text-foreground border-b-2 border-foreground -mb-px' 
               : 'text-muted-foreground hover:text-foreground'
@@ -174,8 +174,8 @@ export default function PartnerCampaignsPage() {
 
       {/* Campaigns Grid */}
       {filteredCampaigns.length === 0 ? (
-        <div className="text-center py-16">
-          <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+        <div className="text-center py-12 md:py-16">
+          <Target className="w-12 h-12 md:w-16 md:h-16 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">
             {filter === 'active' ? 'No active campaigns right now.' :
              filter === 'completed' ? 'No completed campaigns yet.' :
@@ -183,7 +183,7 @@ export default function PartnerCampaignsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           {filteredCampaigns.map((campaign) => {
             const budgetNum = Number(campaign.budget ?? 0)
             const spentNum = Number(campaign.spent ?? 0)
@@ -204,7 +204,7 @@ export default function PartnerCampaignsPage() {
                   <CardContent className="p-0">
                     {/* Campaign Image */}
                     <div 
-                      className="relative h-48 bg-muted rounded-t-lg overflow-hidden cursor-pointer"
+                      className="relative h-36 md:h-48 bg-muted rounded-t-lg overflow-hidden cursor-pointer"
                       onClick={() => handleViewCampaign(campaign)}
                     >
                       {/* Status Badge */}
@@ -244,69 +244,53 @@ export default function PartnerCampaignsPage() {
                     </div>
 
                     {/* Campaign Info */}
-                    <div className="p-4">
+                    <div className="p-3 md:p-4">
                       {/* Creator */}
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-medium">
+                      <div className="flex items-center gap-2 mb-2 md:mb-3">
+                        <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-foreground text-background flex items-center justify-center text-[10px] md:text-xs font-medium">
                           {(campaign.creator || 'P').charAt(0).toUpperCase()}
                         </div>
-                        <span className="text-sm text-muted-foreground">{campaign.creator || 'Partner'}</span>
+                        <span className="text-xs md:text-sm text-muted-foreground">{campaign.creator || 'Partner'}</span>
                       </div>
 
                       {/* Title */}
-                      <h3 className="text-lg font-medium text-foreground mb-2 line-clamp-2">
+                      <h3 className="text-base md:text-lg font-medium text-foreground mb-1 md:mb-2 line-clamp-2">
                         {campaign.title}
                       </h3>
 
                       {/* Description */}
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4 line-clamp-2">
                         {campaign.description}
                       </p>
 
                       {/* Budget Progress Bar */}
-                      <div className="mb-4">
-                        <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-                          <span className="font-medium">Budget Progress</span>
+                      <div className="mb-3 md:mb-4">
+                        <div className="flex justify-between text-[10px] md:text-xs text-muted-foreground mb-1 md:mb-1.5">
+                          <span className="font-medium">Budget</span>
                           <span className="font-medium">{formatCurrency(spentNum)} / {formatCurrency(budgetNum)}</span>
                         </div>
-                        <div className="w-full bg-muted rounded-full h-3">
+                        <div className="w-full bg-muted rounded-full h-2 md:h-3">
                           <div
-                            className="bg-green-500 h-3 rounded-full transition-all duration-300"
+                            className="bg-green-500 h-2 md:h-3 rounded-full transition-all duration-300"
                             style={{ width: `${progress}%` }}
                           />
                         </div>
                       </div>
 
-                      {/* Key Metrics */}
-                      <div className="space-y-3 mb-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">${campaign.payoutRate} per 1K views</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">
-                              {remainingBudget > 0 ? `${formatCurrency(remainingBudget)} left` : 'Budget Full'}
-                            </span>
-                          </div>
+                      {/* Key Metrics - Stack on mobile */}
+                      <div className="grid grid-cols-2 gap-2 mb-3 md:mb-4 text-[10px] md:text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
+                          <span>${campaign.payoutRate}/1K</span>
                         </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Target className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">Pool: {formatCurrency(budgetNum)}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Users className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">{campaign.stats.totalSubmissions} submissions</span>
-                          </div>
+                        <div className="flex items-center gap-1 justify-end">
+                          <Users className="w-3 h-3 md:w-4 md:h-4" />
+                          <span>{campaign.stats.totalSubmissions} posts</span>
                         </div>
                       </div>
 
                       {/* Platforms */}
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-xs text-muted-foreground">Platforms:</span>
+                      <div className="flex items-center gap-2 mb-3 md:mb-4">
                         <div className="flex gap-1">
                           {campaign.targetPlatforms.map((platform) => (
                             <div key={platform} className="w-5 h-5 rounded bg-muted flex items-center justify-center">
@@ -318,8 +302,9 @@ export default function PartnerCampaignsPage() {
 
                       {/* Action Button */}
                       <Button
-                        className="w-full bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
+                        className="w-full text-xs md:text-sm bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
                         onClick={() => handleViewCampaign(campaign)}
+                        size="sm"
                       >
                         {isCompleted ? "View Results" : "View Campaign"}
                       </Button>

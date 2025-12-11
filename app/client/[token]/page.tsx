@@ -166,43 +166,43 @@ export default function ClientPortalPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <SwiviLogo size={32} />
-              <span className="text-sm font-medium">Partner Portal</span>
+            <div className="flex items-center gap-2 md:gap-3">
+              <SwiviLogo size={28} className="md:w-8 md:h-8" />
+              <span className="text-xs md:text-sm font-medium">Partner</span>
             </div>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-[10px] md:text-xs hidden sm:flex">
               <Clock className="w-3 h-3 mr-1" />
-              Last updated: {new Date().toLocaleTimeString()}
+              Updated: {new Date().toLocaleTimeString()}
             </Badge>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="container mx-auto px-4 py-4 md:py-8 max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           {/* Campaign Hero */}
-          <div className="relative mb-8">
+          <div className="relative mb-6 md:mb-8">
             {campaign.featuredImage && (
-              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-6">
+              <div className="relative h-36 md:h-64 rounded-xl overflow-hidden mb-4 md:mb-6">
                 <img
                   src={campaign.featuredImage}
                   alt={campaign.title}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4">
-                  <div className="flex items-center gap-3">
+                <div className="absolute bottom-3 left-3 right-3 md:bottom-4 md:left-4 md:right-4">
+                  <div className="flex items-center gap-2 md:gap-3">
                     {getStatusBadge(campaign.status)}
                     <div className="flex gap-1">
                       {campaign.targetPlatforms.map(platform => (
-                        <div key={platform} className="w-6 h-6">
-                          {getPlatformLogo(platform, '', 20)}
+                        <div key={platform} className="w-5 h-5 md:w-6 md:h-6">
+                          {getPlatformLogo(platform, '', 18)}
                         </div>
                       ))}
                     </div>
@@ -211,24 +211,24 @@ export default function ClientPortalPage() {
               </div>
             )}
 
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-2 md:gap-3 mb-2">
                   {!campaign.featuredImage && getStatusBadge(campaign.status)}
                 </div>
-                <h1 className="text-3xl md:text-4xl font-bold mb-2">{campaign.title}</h1>
-                <p className="text-muted-foreground mb-3">{campaign.description}</p>
-                <p className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
+                <h1 className="text-2xl md:text-4xl font-bold mb-1 md:mb-2">{campaign.title}</h1>
+                <p className="text-sm md:text-base text-muted-foreground mb-2 md:mb-3">{campaign.description}</p>
+                <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
+                  <Calendar className="w-3 h-3 md:w-4 md:h-4" />
                   Started {new Date(campaign.createdAt).toLocaleDateString('en-US', {
-                    month: 'long',
+                    month: 'short',
                     day: 'numeric',
                     year: 'numeric'
                   })}
                   {campaign.completedAt && (
-                    <span className="ml-2">
+                    <span className="ml-1 md:ml-2">
                       · Completed {new Date(campaign.completedAt).toLocaleDateString('en-US', {
-                        month: 'long',
+                        month: 'short',
                         day: 'numeric',
                         year: 'numeric'
                       })}
@@ -302,20 +302,20 @@ export default function ClientPortalPage() {
 
           {/* Platform Breakdown */}
           {Object.keys(platformStats).length > 0 && (
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
+            <Card className="mb-6 md:mb-8">
+              <CardHeader className="pb-3 md:pb-6">
+                <CardTitle className="text-base md:text-lg flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 md:w-5 md:h-5" />
                   Platform Breakdown
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <CardContent className="pt-0">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                   {Object.entries(platformStats).map(([platform, stats]) => (
-                    <div key={platform} className="p-4 border border-border rounded-lg">
-                      <div className="flex items-center gap-2 mb-3">
-                        {getPlatformLogo(platform, '', 20)}
-                        <span className="font-medium">
+                    <div key={platform} className="p-3 md:p-4 border border-border rounded-lg">
+                      <div className="flex items-center gap-2 mb-2 md:mb-3">
+                        {getPlatformLogo(platform, '', 18)}
+                        <span className="font-medium text-sm md:text-base">
                           {platform === 'YOUTUBE' ? 'YouTube' : 
                            platform === 'TIKTOK' ? 'TikTok' :
                            platform === 'INSTAGRAM' ? 'Instagram' :
@@ -324,21 +324,21 @@ export default function ClientPortalPage() {
                         </span>
                       </div>
                       <div className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Total Posts</span>
+                        <div className="flex justify-between text-xs md:text-sm">
+                          <span className="text-muted-foreground">Posts</span>
                           <span className="font-medium">{stats.totalSubmissions}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
+                        <div className="flex justify-between text-xs md:text-sm">
                           <span className="text-muted-foreground">Approved</span>
                           <span className="font-medium">{stats.approvedSubmissions}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Budget Views</span>
+                        <div className="flex justify-between text-xs md:text-sm">
+                          <span className="text-muted-foreground">Views</span>
                           <span className="font-medium">{stats.budgetViews.toLocaleString()}</span>
                         </div>
                         {stats.additionalViews > 0 && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">+ Since End</span>
+                          <div className="flex justify-between text-xs md:text-sm">
+                            <span className="text-muted-foreground">+ Since</span>
                             <span className="font-medium">
                               {stats.additionalViews.toLocaleString()}
                             </span>
@@ -354,42 +354,36 @@ export default function ClientPortalPage() {
 
           {/* Top Posts */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Play className="w-5 h-5" />
+            <CardHeader className="pb-3 md:pb-6">
+              <CardTitle className="text-base md:text-lg flex items-center gap-2">
+                <Play className="w-4 h-4 md:w-5 md:h-5" />
                 Top Posts ({submissions.length})
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               {submissions.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                    <Play className="w-8 h-8 text-muted-foreground" />
+                <div className="text-center py-8 md:py-12">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                    <Play className="w-6 h-6 md:w-8 md:h-8 text-muted-foreground" />
                   </div>
-                  <p className="text-muted-foreground">No approved posts yet</p>
+                  <p className="text-sm md:text-base text-muted-foreground">No approved posts yet</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                   {submissions.map((submission, index) => (
-                    <motion.div
+                    <motion.a
                       key={submission.id}
+                      href={submission.clipUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                      transition={{ delay: index * 0.03 }}
+                      className="flex items-center gap-2 md:gap-4 p-3 md:p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
                     >
                       {/* Rank */}
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold flex-shrink-0">
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-muted flex items-center justify-center text-xs md:text-sm font-bold flex-shrink-0">
                         {index + 1}
-                      </div>
-
-                      {/* Creator */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="hidden sm:block">
-                          <p className="text-sm font-medium truncate max-w-[120px]">
-                            @{submission.creatorHandle}
-                          </p>
-                        </div>
                       </div>
 
                       {/* Platform */}
@@ -397,31 +391,23 @@ export default function ClientPortalPage() {
                         {getPlatformLogo(submission.platform, '', 16)}
                       </div>
 
-                      {/* URL - truncated */}
-                      <a
-                        href={submission.clipUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 min-w-0 text-sm text-muted-foreground hover:text-foreground truncate flex items-center gap-1"
-                      >
-                        <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                        <span className="truncate">{submission.clipUrl}</span>
-                      </a>
+                      {/* Handle & Link */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs md:text-sm font-medium truncate">
+                          @{submission.creatorHandle}
+                        </p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-1">
+                          <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                          View Post
+                        </p>
+                      </div>
 
                       {/* Stats */}
-                      <div className="flex items-center gap-4 flex-shrink-0 text-right">
-                        <div>
-                          <p className="text-sm font-medium">{submission.currentViews.toLocaleString()}</p>
-                          <p className="text-xs text-muted-foreground">views</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">
-                            +{submission.viewsGained.toLocaleString()}
-                          </p>
-                          <p className="text-xs text-muted-foreground">tracked</p>
-                        </div>
+                      <div className="flex-shrink-0 text-right">
+                        <p className="text-xs md:text-sm font-medium">{submission.currentViews.toLocaleString()}</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground">views</p>
                       </div>
-                    </motion.div>
+                    </motion.a>
                   ))}
                 </div>
               )}
@@ -429,8 +415,8 @@ export default function ClientPortalPage() {
           </Card>
 
           {/* Footer */}
-          <div className="mt-12 pt-8 border-t border-border text-center">
-            <p className="text-sm text-muted-foreground">
+          <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border text-center">
+            <p className="text-xs md:text-sm text-muted-foreground">
               Powered by <span className="font-semibold">Swivi</span>
             </p>
           </div>

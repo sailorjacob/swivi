@@ -158,11 +158,11 @@ export default function PartnerCampaignDetailPage() {
   const remainingBudget = Math.max(0, budgetNum - spentNum)
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 md:space-y-6 p-4 md:p-6">
       {/* Back Button */}
-      <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-2">
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Campaigns
+      <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-1 md:mb-2 -ml-2">
+        <ArrowLeft className="w-4 h-4 mr-1 md:mr-2" />
+        <span className="text-xs md:text-sm">Back</span>
       </Button>
 
       {/* Campaign Header */}
@@ -173,7 +173,7 @@ export default function PartnerCampaignDetailPage() {
       >
         {/* Featured Image Banner */}
         {data.featuredImage && (
-          <div className="relative h-48 overflow-hidden">
+          <div className="relative h-36 md:h-48 overflow-hidden">
             <img
               src={data.featuredImage}
               alt={data.title}
@@ -183,53 +183,52 @@ export default function PartnerCampaignDetailPage() {
           </div>
         )}
 
-        <div className="p-6">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div className="p-4 md:p-6">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-2 md:gap-3 mb-2">
                 {isActive && (
-                  <Badge className="bg-foreground/10 text-foreground border-foreground/20">
-                    <span className="w-2 h-2 bg-foreground rounded-full mr-1.5 animate-pulse" />
+                  <Badge className="bg-foreground/10 text-foreground border-foreground/20 text-[10px] md:text-xs">
+                    <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-foreground rounded-full mr-1 md:mr-1.5 animate-pulse" />
                     LIVE
                   </Badge>
                 )}
                 {isCompleted && (
-                  <Badge className="bg-muted text-muted-foreground">
+                  <Badge className="bg-muted text-muted-foreground text-[10px] md:text-xs">
                     <CheckCircle className="w-3 h-3 mr-1" />
                     COMPLETED
                   </Badge>
                 )}
               </div>
               
-              <h1 className="text-2xl font-bold mb-2">{data.title}</h1>
-              <p className="text-muted-foreground mb-4">{data.description}</p>
+              <h1 className="text-xl md:text-2xl font-bold mb-1 md:mb-2">{data.title}</h1>
+              <p className="text-xs md:text-base text-muted-foreground mb-3 md:mb-4">{data.description}</p>
               
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <div className="w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center text-xs">
+              <div className="flex items-center gap-3 md:gap-4 text-xs md:text-sm text-muted-foreground">
+                <span className="flex items-center gap-1 md:gap-1.5">
+                  <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-foreground text-background flex items-center justify-center text-[10px] md:text-xs">
                     {(data.creator || 'P').charAt(0)}
                   </div>
                   {data.creator || 'Partner'}
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <Users className="w-4 h-4" />
-                  {data.stats.totalSubmissions} submissions
+                <span className="flex items-center gap-1 md:gap-1.5">
+                  <Users className="w-3 h-3 md:w-4 md:h-4" />
+                  {data.stats.totalSubmissions} posts
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-2 md:mt-0">
               {data.contentFolderUrl && (
                 <Button
                   variant="outline"
+                  size="sm"
                   asChild
-                  className="group border-zinc-400/30 hover:border-zinc-300 hover:bg-gradient-to-r hover:from-zinc-300/20 hover:to-zinc-400/20"
+                  className="text-xs md:text-sm"
                 >
                   <a href={data.contentFolderUrl} target="_blank" rel="noopener noreferrer">
-                    <FolderOpen className="w-4 h-4 mr-2 text-zinc-400 group-hover:text-zinc-200" />
-                    <span className="group-hover:text-zinc-100">
-                      Content Folder
-                    </span>
+                    <FolderOpen className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                    Content
                   </a>
                 </Button>
               )}
@@ -237,31 +236,31 @@ export default function PartnerCampaignDetailPage() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <div className="p-4 rounded-lg bg-muted/50">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <Target className="w-4 h-4" />
-                <span className="text-xs">Total Budget</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mt-4 md:mt-6">
+            <div className="p-3 md:p-4 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-1 md:gap-2 text-muted-foreground mb-1">
+                <Target className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs">Budget</span>
               </div>
-              <p className="text-xl font-bold">{formatCurrency(budgetNum)}</p>
+              <p className="text-lg md:text-xl font-bold">{formatCurrency(budgetNum)}</p>
             </div>
-            <div className="p-4 rounded-lg bg-muted/50">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <DollarSign className="w-4 h-4" />
-                <span className="text-xs">Payout Rate</span>
+            <div className="p-3 md:p-4 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-1 md:gap-2 text-muted-foreground mb-1">
+                <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs">Rate</span>
               </div>
-              <p className="text-xl font-bold">${data.payoutRate}/1K</p>
+              <p className="text-lg md:text-xl font-bold">${data.payoutRate}/1K</p>
             </div>
-            <div className="p-4 rounded-lg bg-muted/50">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <Clock className="w-4 h-4" />
-                <span className="text-xs">Remaining</span>
+            <div className="p-3 md:p-4 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-1 md:gap-2 text-muted-foreground mb-1">
+                <Clock className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs">Left</span>
               </div>
-              <p className="text-xl font-bold">{formatCurrency(remainingBudget)}</p>
+              <p className="text-lg md:text-xl font-bold">{formatCurrency(remainingBudget)}</p>
             </div>
-            <div className="p-4 rounded-lg bg-muted/50">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <Eye className="w-4 h-4" />
+            <div className="p-3 md:p-4 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-1 md:gap-2 text-muted-foreground mb-1">
+                <Eye className="w-3 h-3 md:w-4 md:h-4" />
                 <span className="text-xs">Progress</span>
               </div>
               <p className="text-xl font-bold">{progress.toFixed(1)}%</p>
@@ -269,24 +268,24 @@ export default function PartnerCampaignDetailPage() {
           </div>
 
           {/* Budget Progress Bar */}
-          <div className="mt-4">
-            <div className="w-full bg-muted rounded-full h-2">
+          <div className="mt-3 md:mt-4">
+            <div className="w-full bg-muted rounded-full h-1.5 md:h-2">
               <div
-                className="bg-green-500 h-2 rounded-full transition-all duration-500"
+                className="bg-green-500 h-1.5 md:h-2 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(progress, 100)}%` }}
               />
             </div>
           </div>
 
           {/* Platforms */}
-          <div className="flex items-center gap-2 mt-4">
-            <span className="text-sm text-muted-foreground">Platforms:</span>
+          <div className="flex items-center gap-2 mt-3 md:mt-4 flex-wrap">
+            <span className="text-xs md:text-sm text-muted-foreground">Platforms:</span>
             {data.targetPlatforms.map((platform) => {
               const Icon = platformIcons[platform]
               return (
-                <div key={platform} className="flex items-center gap-1 px-2 py-1 bg-muted rounded">
+                <div key={platform} className="flex items-center gap-1 px-1.5 md:px-2 py-1 bg-muted rounded">
                   {Icon && <Icon className="w-3 h-3" />}
-                  <span className="text-xs capitalize">{platform.toLowerCase()}</span>
+                  <span className="text-[10px] md:text-xs capitalize">{platform.toLowerCase()}</span>
                 </div>
               )
             })}
@@ -294,9 +293,9 @@ export default function PartnerCampaignDetailPage() {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Left Column - Submissions */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 md:space-y-6">
           {/* Submissions */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -304,65 +303,65 @@ export default function PartnerCampaignDetailPage() {
             transition={{ delay: 0.2 }}
           >
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileVideo className="w-5 h-5" />
+              <CardHeader className="pb-3 md:pb-6">
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                  <FileVideo className="w-4 h-4 md:w-5 md:h-5" />
                   Submissions ({data.submissions.length})
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 {data.submissions.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <FileVideo className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>No submissions yet for this campaign</p>
+                  <div className="text-center py-6 md:py-8 text-muted-foreground">
+                    <FileVideo className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm md:text-base">No submissions yet</p>
                   </div>
                 ) : (
-                  <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                  <div className="space-y-2 md:space-y-3 max-h-[400px] md:max-h-[500px] overflow-y-auto pr-1 md:pr-2">
                     {data.submissions.map((submission) => {
                       const Icon = platformIcons[submission.platform]
                       const viewGrowth = submission.viewsGained
                       
                       return (
-                        <div
+                        <a
                           key={submission.id}
-                          className="p-4 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
+                          href={submission.clipUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block p-3 md:p-4 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
                         >
-                          <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-center gap-2 md:gap-3">
+                            <div className="p-1 md:p-1.5 rounded bg-muted flex-shrink-0">
+                              {Icon && <Icon className="w-3 h-3 md:w-4 md:h-4" />}
+                            </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-sm font-medium">@{submission.creatorHandle}</span>
-                                <div className="p-1.5 rounded bg-muted">
-                                  {Icon && <Icon className="w-4 h-4" />}
-                                </div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs md:text-sm font-medium truncate">@{submission.creatorHandle}</span>
                                 {getStatusBadge(submission.status)}
                               </div>
-                              <a
-                                href={submission.clipUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-blue-500 hover:text-blue-600 truncate block flex items-center gap-1"
-                              >
-                                {submission.clipUrl.length > 50 
-                                  ? `${submission.clipUrl.substring(0, 50)}...` 
-                                  : submission.clipUrl}
-                                <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                              </a>
-                              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                                <span>Submitted {new Date(submission.submittedAt).toLocaleDateString()}</span>
-                                {submission.currentViews > 0 && (
-                                  <span className="font-medium text-foreground">
-                                    {submission.currentViews.toLocaleString()} views
-                                    {viewGrowth > 0 && (
-                                      <span className="text-green-600 dark:text-green-400 ml-1">
-                                        (+{viewGrowth.toLocaleString()})
-                                      </span>
-                                    )}
-                                  </span>
-                                )}
+                              <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-muted-foreground mt-1">
+                                <span className="hidden sm:inline">
+                                  {new Date(submission.submittedAt).toLocaleDateString()}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <ExternalLink className="w-3 h-3" />
+                                  View
+                                </span>
                               </div>
                             </div>
+                            {submission.currentViews > 0 && (
+                              <div className="text-right flex-shrink-0">
+                                <p className="text-xs md:text-sm font-medium">
+                                  {submission.currentViews.toLocaleString()}
+                                </p>
+                                {viewGrowth > 0 && (
+                                  <p className="text-[10px] md:text-xs text-green-600 dark:text-green-400">
+                                    +{viewGrowth.toLocaleString()}
+                                  </p>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        </div>
+                        </a>
                       )
                     })}
                   </div>
@@ -373,31 +372,31 @@ export default function PartnerCampaignDetailPage() {
         </div>
 
         {/* Right Column - Requirements */}
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5" />
+              <CardHeader className="pb-3 md:pb-6">
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                  <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />
                   Requirements
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 {data.requirements && data.requirements.length > 0 ? (
                   <ul className="space-y-2 ml-1">
                     {data.requirements.map((req, index) => (
-                      <li key={index} className="flex items-start gap-3 text-sm text-muted-foreground">
-                        <span className="text-foreground mt-1.5">•</span>
+                      <li key={index} className="flex items-start gap-2 md:gap-3 text-xs md:text-sm text-muted-foreground">
+                        <span className="text-foreground mt-1">•</span>
                         <span>{req}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No specific requirements</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">No specific requirements</p>
                 )}
               </CardContent>
             </Card>
