@@ -55,6 +55,7 @@ interface ReportData {
       clipCount: number
       approvedCount: number
       totalViews: number
+      approvedViews: number
       totalEarnings: number
     }>
     nonParticipating: Array<{
@@ -65,6 +66,7 @@ interface ReportData {
       clipCount: number
       approvedCount: number
       totalViews: number
+      approvedViews: number
       totalEarnings: number
     }>
   }
@@ -182,7 +184,7 @@ export default function ClientReportPage() {
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Executive Summary</h2>
             <div className="grid grid-cols-5 gap-4">
               <div className="text-center p-4 border border-gray-200 rounded">
-                <p className="text-2xl font-bold break-words">{performance.totalViews.toLocaleString()}</p>
+                <p className="text-xl font-bold whitespace-nowrap">{performance.totalViews.toLocaleString()}</p>
                 <p className="text-sm text-gray-600">Total Views</p>
               </div>
               <div className="text-center p-4 border border-gray-200 rounded">
@@ -198,7 +200,7 @@ export default function ClientReportPage() {
                 <p className="text-sm text-gray-600">Total Submissions</p>
               </div>
               <div className="text-center p-4 border border-gray-200 rounded">
-                <p className="text-2xl font-bold break-words">${budget.spent.toLocaleString()}</p>
+                <p className="text-xl font-bold whitespace-nowrap">${budget.spent.toLocaleString()}</p>
                 <p className="text-sm text-gray-600">Total Spend</p>
               </div>
             </div>
@@ -424,10 +426,10 @@ export default function ClientReportPage() {
                     </td>
                     <td className="py-2">{creator.platform}</td>
                     <td className="py-2 text-center">{creator.approvedCount}</td>
-                    <td className="py-2 text-right">{creator.totalViews.toLocaleString()}</td>
+                    <td className="py-2 text-right">{creator.approvedViews.toLocaleString()}</td>
                     <td className="py-2 text-right">
                       {performance.totalViews > 0 
-                        ? ((creator.totalViews / performance.totalViews) * 100).toFixed(1) 
+                        ? ((creator.approvedViews / performance.totalViews) * 100).toFixed(1) 
                         : 0}%
                     </td>
                   </tr>
@@ -451,6 +453,7 @@ export default function ClientReportPage() {
                     <th className="text-left py-2 font-semibold">Page Handle</th>
                     <th className="text-left py-2 font-semibold">Platform</th>
                     <th className="text-center py-2 font-semibold">Submissions</th>
+                    <th className="text-right py-2 font-semibold">Views</th>
                     <th className="text-center py-2 font-semibold">Status</th>
                   </tr>
                 </thead>
@@ -468,8 +471,9 @@ export default function ClientReportPage() {
                       </td>
                       <td className="py-2">{creator.platform}</td>
                       <td className="py-2 text-center">{creator.clipCount}</td>
+                      <td className="py-2 text-right">{creator.totalViews > 0 ? creator.totalViews.toLocaleString() : '—'}</td>
                       <td className="py-2 text-center">
-                        <span className="text-xs text-gray-500">Rejected/Pending</span>
+                        <span className="text-xs text-gray-500">Not Approved</span>
                       </td>
                     </tr>
                   ))}

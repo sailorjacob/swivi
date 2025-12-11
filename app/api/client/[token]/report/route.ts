@@ -132,6 +132,7 @@ export async function GET(
       clipCount: number
       approvedCount: number
       totalViews: number
+      approvedViews: number
       totalEarnings: number
     }>()
 
@@ -141,9 +142,10 @@ export async function GET(
       
       if (existing) {
         existing.clipCount++
+        existing.totalViews += sub.currentViews // Track views for all submissions
         if (sub.status === 'APPROVED' || sub.status === 'PAID') {
           existing.approvedCount++
-          existing.totalViews += sub.currentViews
+          existing.approvedViews += sub.currentViews
           existing.totalEarnings += sub.earnings
         }
       } else {
@@ -154,7 +156,8 @@ export async function GET(
           isVerified: sub.isVerified,
           clipCount: 1,
           approvedCount: (sub.status === 'APPROVED' || sub.status === 'PAID') ? 1 : 0,
-          totalViews: (sub.status === 'APPROVED' || sub.status === 'PAID') ? sub.currentViews : 0,
+          totalViews: sub.currentViews, // Track views for all submissions
+          approvedViews: (sub.status === 'APPROVED' || sub.status === 'PAID') ? sub.currentViews : 0,
           totalEarnings: (sub.status === 'APPROVED' || sub.status === 'PAID') ? sub.earnings : 0
         })
       }
