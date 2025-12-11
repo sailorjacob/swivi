@@ -306,7 +306,7 @@ export default function ClientReportPage() {
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="text-2xl md:text-3xl font-bold" style={{color: '#00ff41'}}>+{surplusViews.toLocaleString()}</p>
-                      <p className="text-xs md:text-sm text-gray-600">additional views ({surplusPercent}%)</p>
+                      <p className="text-xs md:text-sm text-gray-600">views ({surplusPercent}%)</p>
                     </div>
                   </div>
                 </div>
@@ -526,15 +526,17 @@ export default function ClientReportPage() {
                   <tbody>
                     {[...data.allSubmissions]
                       .sort((a, b) => {
-                        // Sort by views (highest to lowest)
-                        const viewDiff = b.currentViews - a.currentViews
-                        if (viewDiff !== 0) return viewDiff
-                        
-                        // If views are the same, sort by status as secondary
+                        // Sort by status first: APPROVED/PAID, then PENDING, then REJECTED
                         const statusOrder = { 'APPROVED': 1, 'PAID': 1, 'PENDING': 2, 'REJECTED': 3 }
                         const aOrder = statusOrder[a.status as keyof typeof statusOrder] || 4
                         const bOrder = statusOrder[b.status as keyof typeof statusOrder] || 4
-                        return aOrder - bOrder
+                        
+                        if (aOrder !== bOrder) {
+                          return aOrder - bOrder
+                        }
+                        
+                        // Within same status group, sort by views (highest to lowest)
+                        return b.currentViews - a.currentViews
                       })
                       .map((submission, idx) => (
                         <tr key={submission.id} className="border-b hover:bg-gray-50">
