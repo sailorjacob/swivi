@@ -49,7 +49,8 @@ interface CampaignData {
     totalSubmissions: number
     approvedSubmissions: number
     totalViews: number
-    totalViewsGained: number
+    viewsDuringCampaign: number
+    viewsAfterCampaign: number
     payoutRate: number
   }
   platformStats: Record<string, { count: number; views: number; viewsGained: number }>
@@ -238,13 +239,13 @@ export default function ClientPortalPage() {
               <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
                 <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
                   <Eye className="w-3 h-3 md:w-4 md:h-4" />
-                  <span className="text-[10px] md:text-xs uppercase tracking-wide">Total Views</span>
+                  <span className="text-[10px] md:text-xs uppercase tracking-wide">Budget Views</span>
                 </div>
-                <p className="text-xl md:text-3xl font-bold">{stats.totalViews.toLocaleString()}</p>
-                {stats.totalViewsGained > 0 && (
+                <p className="text-xl md:text-3xl font-bold">{stats.viewsDuringCampaign.toLocaleString()}</p>
+                {stats.viewsAfterCampaign > 0 && (
                   <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1 mt-1">
                     <TrendingUp className="w-3 h-3" />
-                    +{stats.totalViewsGained.toLocaleString()} tracked
+                    +{stats.viewsAfterCampaign.toLocaleString()} bonus
                   </p>
                 )}
               </CardContent>

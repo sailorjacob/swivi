@@ -30,6 +30,8 @@ export async function GET(
         featuredImage: true,
         startDate: true,
         completedAt: true,
+        budgetReachedAt: true,
+        budgetReachedViews: true,
         createdAt: true,
         clipSubmissions: {
           select: {
@@ -71,9 +73,13 @@ export async function GET(
     const budget = Number(campaign.budget || 0)
     const spent = Number(campaign.spent || 0)
     const budgetUtilization = budget > 0 ? Math.min((spent / budget) * 100, 100) : 0
+    
+    // Use budgetReachedViews as a snapshot of views when campaign budget was reached
+    const budgetReachedViews = Number(campaign.budgetReachedViews || 0)
 
     let totalViews = 0
-    let totalViewsGained = 0
+    let viewsDuringCampaign = 0 // Views that counted toward budget
+    let viewsAfterCampaign = 0 // Views gained after budget reached
     let approvedCount = 0
     const platformStats: Record<string, { count: number; views: number; viewsGained: number }> = {}
 
@@ -86,7 +92,9 @@ export async function GET(
         const viewsGained = Math.max(0, currentViews - initialViews)
 
         totalViews += currentViews
-        totalViewsGained += viewsGained
+        // If budget was reached and we have that snapshot, calculate properly
+        // Otherwise fall back to showing all views as "during campaign"
+        viewsDuringCampaign += viewsGained
         approvedCount++
 
         // Platform stats
@@ -114,6 +122,12 @@ export async function GET(
 
     // Sort by views (highest first)
     approvedSubmissions.sort((a, b) => b.currentViews - a.currentViews)
+    
+    // Calculate views after campaign if we have budget reached data
+    if (budgetReachedViews > 0 && totalViews > budgetReachedViews) {
+      viewsAfterCampaign = totalViews - budgetReachedViews
+      viewsDuringCampaign = budgetReachedViews
+    }
 
     return NextResponse.json({
       partnerName,
@@ -135,7 +149,8 @@ export async function GET(
         totalSubmissions: campaign.clipSubmissions.length,
         approvedSubmissions: approvedCount,
         totalViews,
-        totalViewsGained,
+        viewsDuringCampaign,
+        viewsAfterCampaign,
         payoutRate: Number(campaign.payoutRate || 0)
       },
       platformStats,

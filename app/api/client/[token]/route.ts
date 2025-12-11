@@ -32,6 +32,8 @@ export async function GET(
         targetPlatforms: true,
         featuredImage: true,
         completedAt: true,
+        budgetReachedAt: true,
+        budgetReachedViews: true,
         createdAt: true,
         _count: {
           select: {
@@ -88,9 +90,13 @@ export async function GET(
     const totalSubmissions = campaign._count.clipSubmissions
     const approvedSubmissions = campaign.clipSubmissions.length
     
+    // Use budgetReachedViews as a snapshot of views when campaign budget was reached
+    const budgetReachedViews = Number(campaign.budgetReachedViews || 0)
+    
     // Calculate total views and views gained
     let totalViews = 0
-    let totalViewsGained = 0
+    let viewsDuringCampaign = 0
+    let viewsAfterCampaign = 0
     
     const processedSubmissions = campaign.clipSubmissions.map(sub => {
       const initialViews = Number(sub.initialViews || 0)
@@ -98,7 +104,7 @@ export async function GET(
       const viewsGained = Math.max(0, currentViews - initialViews)
       
       totalViews += currentViews
-      totalViewsGained += viewsGained
+      viewsDuringCampaign += viewsGained
       
       return {
         id: sub.id,
@@ -122,6 +128,12 @@ export async function GET(
     const spentNum = Number(campaign.spent || 0)
     const budgetUtilization = budgetNum > 0 ? (spentNum / budgetNum) * 100 : 0
     const remainingBudget = Math.max(0, budgetNum - spentNum)
+    
+    // Calculate views after campaign if we have budget reached data
+    if (budgetReachedViews > 0 && totalViews > budgetReachedViews) {
+      viewsAfterCampaign = totalViews - budgetReachedViews
+      viewsDuringCampaign = budgetReachedViews
+    }
 
     // Platform breakdown
     const platformStats = processedSubmissions.reduce((acc, sub) => {
@@ -157,7 +169,8 @@ export async function GET(
         totalSubmissions,
         approvedSubmissions,
         totalViews,
-        totalViewsGained,
+        viewsDuringCampaign,
+        viewsAfterCampaign,
         payoutRate: Number(campaign.payoutRate)
       },
       platformStats,

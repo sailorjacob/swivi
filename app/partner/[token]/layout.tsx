@@ -63,7 +63,7 @@ function PartnerNav({
       <div className="p-6 border-b border-border">
         <Link href={`/partner/${token}`} className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
           <SwiviLogo size={36} />
-          <h1 className="text-foreground font-light text-lg">Partner Portal</h1>
+          <h1 className="text-foreground font-light text-lg">Partner</h1>
         </Link>
       </div>
 
@@ -192,7 +192,7 @@ export default function PartnerLayout({
         <div className="lg:hidden flex items-center justify-between p-4 border-b border-border flex-shrink-0">
           <Link href={`/partner/${token}`} className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <SwiviLogo size={32} />
-            <h1 className="text-foreground font-light">Partner Portal</h1>
+            <h1 className="text-foreground font-light">Partner</h1>
           </Link>
           <Sheet>
             <SheetTrigger asChild>
@@ -223,7 +223,7 @@ export default function PartnerLayout({
         <footer className="border-t border-border bg-card flex-shrink-0">
           <div className="px-6 py-3 flex items-center justify-between">
             <div className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} Swivi Partner Portal
+              Swivi Partners
             </div>
             <ThemeToggle size="sm" />
           </div>
