@@ -86,6 +86,14 @@ export async function GET(
       return NextResponse.json({ error: "Campaign not found" }, { status: 404 })
     }
 
+    // Need to get all submissions for total counts per platform
+    const allSubmissions = await prisma.clipSubmission.findMany({
+      where: { campaignId: campaign.id },
+      select: {
+        platform: true
+      }
+    })
+    
     // Calculate stats
     const totalSubmissions = campaign._count.clipSubmissions
     const approvedSubmissions = campaign.clipSubmissions.length
@@ -98,6 +106,29 @@ export async function GET(
     let viewsDuringCampaign = 0
     let viewsAfterCampaign = 0
     
+    // Initialize platform stats with total submission counts
+    const platformStats: Record<string, { 
+      totalSubmissions: number
+      approvedSubmissions: number
+      totalViews: number
+      budgetViews: number
+      additionalViews: number
+    }> = {}
+    
+    allSubmissions.forEach(sub => {
+      const platform = sub.platform
+      if (!platformStats[platform]) {
+        platformStats[platform] = { 
+          totalSubmissions: 0, 
+          approvedSubmissions: 0, 
+          totalViews: 0,
+          budgetViews: 0,
+          additionalViews: 0
+        }
+      }
+      platformStats[platform].totalSubmissions++
+    })
+    
     const processedSubmissions = campaign.clipSubmissions.map(sub => {
       const initialViews = Number(sub.initialViews || 0)
       const currentViews = Number(sub.clips?.views || 0)
@@ -105,6 +136,20 @@ export async function GET(
       
       totalViews += currentViews
       viewsDuringCampaign += viewsGained
+      
+      // Platform stats for approved submissions
+      const platform = sub.platform
+      if (!platformStats[platform]) {
+        platformStats[platform] = { 
+          totalSubmissions: 0, 
+          approvedSubmissions: 0, 
+          totalViews: 0,
+          budgetViews: 0,
+          additionalViews: 0
+        }
+      }
+      platformStats[platform].approvedSubmissions++
+      platformStats[platform].totalViews += currentViews
       
       return {
         id: sub.id,
@@ -133,19 +178,21 @@ export async function GET(
     if (budgetReachedViews > 0 && totalViews > budgetReachedViews) {
       viewsAfterCampaign = totalViews - budgetReachedViews
       viewsDuringCampaign = budgetReachedViews
+      
+      // Proportionally split views per platform based on the overall ratio
+      const budgetRatio = budgetReachedViews / totalViews
+      Object.keys(platformStats).forEach(platform => {
+        const platformTotalViews = platformStats[platform].totalViews
+        platformStats[platform].budgetViews = Math.round(platformTotalViews * budgetRatio)
+        platformStats[platform].additionalViews = platformTotalViews - platformStats[platform].budgetViews
+      })
+    } else {
+      // No budget reached data, all views are budget views
+      Object.keys(platformStats).forEach(platform => {
+        platformStats[platform].budgetViews = platformStats[platform].totalViews
+        platformStats[platform].additionalViews = 0
+      })
     }
-
-    // Platform breakdown
-    const platformStats = processedSubmissions.reduce((acc, sub) => {
-      const platform = sub.platform
-      if (!acc[platform]) {
-        acc[platform] = { count: 0, views: 0, viewsGained: 0 }
-      }
-      acc[platform].count++
-      acc[platform].views += sub.currentViews
-      acc[platform].viewsGained += sub.viewsGained
-      return acc
-    }, {} as Record<string, { count: number; views: number; viewsGained: number }>)
 
     return NextResponse.json({
       campaign: {

@@ -49,7 +49,13 @@ interface DashboardData {
     viewsAfterCampaign: number
     payoutRate: number
   }
-  platformStats: Record<string, { count: number; views: number; viewsGained: number }>
+  platformStats: Record<string, { 
+    totalSubmissions: number
+    approvedSubmissions: number
+    totalViews: number
+    budgetViews: number
+    additionalViews: number
+  }>
   submissions: Array<{
     id: string
     clipUrl: string
@@ -225,7 +231,7 @@ export default function PartnerDashboardPage() {
               {stats.viewsAfterCampaign > 0 && (
                 <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1 mt-1">
                   <TrendingUp className="w-3 h-3" />
-                  +{stats.viewsAfterCampaign.toLocaleString()} bonus
+                  +{stats.viewsAfterCampaign.toLocaleString()} since end
                 </p>
               )}
             </CardContent>
@@ -299,19 +305,25 @@ export default function PartnerDashboardPage() {
                     </div>
                     <div className="space-y-1">
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Posts</span>
-                        <span className="font-medium">{platformData.count}</span>
+                        <span className="text-muted-foreground">Total Posts</span>
+                        <span className="font-medium">{platformData.totalSubmissions}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Views</span>
-                        <span className="font-medium">{platformData.views.toLocaleString()}</span>
+                        <span className="text-muted-foreground">Approved</span>
+                        <span className="font-medium">{platformData.approvedSubmissions}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Tracked</span>
-                        <span className="font-medium">
-                          +{platformData.viewsGained.toLocaleString()}
-                        </span>
+                        <span className="text-muted-foreground">Budget Views</span>
+                        <span className="font-medium">{platformData.budgetViews.toLocaleString()}</span>
                       </div>
+                      {platformData.additionalViews > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">+ Since End</span>
+                          <span className="font-medium">
+                            {platformData.additionalViews.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

@@ -81,7 +81,28 @@ export async function GET(
     let viewsDuringCampaign = 0 // Views that counted toward budget
     let viewsAfterCampaign = 0 // Views gained after budget reached
     let approvedCount = 0
-    const platformStats: Record<string, { count: number; views: number; viewsGained: number }> = {}
+    const platformStats: Record<string, { 
+      totalSubmissions: number
+      approvedSubmissions: number
+      totalViews: number
+      budgetViews: number
+      additionalViews: number
+    }> = {}
+    
+    // First pass: count all submissions per platform (for total count)
+    campaign.clipSubmissions.forEach(sub => {
+      const platform = sub.platform
+      if (!platformStats[platform]) {
+        platformStats[platform] = { 
+          totalSubmissions: 0, 
+          approvedSubmissions: 0, 
+          totalViews: 0,
+          budgetViews: 0,
+          additionalViews: 0
+        }
+      }
+      platformStats[platform].totalSubmissions++
+    })
 
     // Process all submissions, filter to approved for display
     const approvedSubmissions = campaign.clipSubmissions
@@ -92,19 +113,13 @@ export async function GET(
         const viewsGained = Math.max(0, currentViews - initialViews)
 
         totalViews += currentViews
-        // If budget was reached and we have that snapshot, calculate properly
-        // Otherwise fall back to showing all views as "during campaign"
         viewsDuringCampaign += viewsGained
         approvedCount++
 
-        // Platform stats
+        // Platform stats for approved submissions
         const platform = sub.platform
-        if (!platformStats[platform]) {
-          platformStats[platform] = { count: 0, views: 0, viewsGained: 0 }
-        }
-        platformStats[platform].count++
-        platformStats[platform].views += currentViews
-        platformStats[platform].viewsGained += viewsGained
+        platformStats[platform].approvedSubmissions++
+        platformStats[platform].totalViews += currentViews
 
         return {
           id: sub.id,
@@ -127,6 +142,20 @@ export async function GET(
     if (budgetReachedViews > 0 && totalViews > budgetReachedViews) {
       viewsAfterCampaign = totalViews - budgetReachedViews
       viewsDuringCampaign = budgetReachedViews
+      
+      // Proportionally split views per platform based on the overall ratio
+      const budgetRatio = budgetReachedViews / totalViews
+      Object.keys(platformStats).forEach(platform => {
+        const platformTotalViews = platformStats[platform].totalViews
+        platformStats[platform].budgetViews = Math.round(platformTotalViews * budgetRatio)
+        platformStats[platform].additionalViews = platformTotalViews - platformStats[platform].budgetViews
+      })
+    } else {
+      // No budget reached data, all views are budget views
+      Object.keys(platformStats).forEach(platform => {
+        platformStats[platform].budgetViews = platformStats[platform].totalViews
+        platformStats[platform].additionalViews = 0
+      })
     }
 
     return NextResponse.json({
