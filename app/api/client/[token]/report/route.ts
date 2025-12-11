@@ -117,16 +117,19 @@ export async function GET(
 
     // Filter approved submissions
     const approvedSubmissions = allSubmissions.filter(s => s.status === 'APPROVED' || s.status === 'PAID')
-    const unapprovedSubmissions = allSubmissions.filter(s => s.status !== 'APPROVED' && s.status !== 'PAID')
+    const pendingSubmissions = allSubmissions.filter(s => s.status === 'PENDING')
+    const rejectedSubmissions = allSubmissions.filter(s => s.status === 'REJECTED')
 
     // Calculate totals
     const totalViews = approvedSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
     const totalViewsGained = approvedSubmissions.reduce((sum, s) => sum + s.viewsGained, 0)
     const totalEarnings = approvedSubmissions.reduce((sum, s) => sum + s.earnings, 0)
     
-    // Total views from ALL submissions (including unapproved)
-    const totalSubmittedViews = allSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
-    const unapprovedViews = unapprovedSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
+    // Total views from APPROVED + PENDING submissions only (exclude REJECTED)
+    const totalSubmittedViews = approvedSubmissions.reduce((sum, s) => sum + s.currentViews, 0) + 
+                                 pendingSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
+    // Unapproved views = PENDING only (exclude REJECTED)
+    const unapprovedViews = pendingSubmissions.reduce((sum, s) => sum + s.currentViews, 0)
 
     // Aggregate by creator handle
     const creatorStatsMap = new Map<string, {
@@ -136,7 +139,7 @@ export async function GET(
       isVerified: boolean
       clipCount: number
       approvedCount: number
-      totalViews: number
+      totalViews: number // Views from approved + pending (exclude rejected)
       approvedViews: number
       totalEarnings: number
     }>()
@@ -147,7 +150,10 @@ export async function GET(
       
       if (existing) {
         existing.clipCount++
-        existing.totalViews += sub.currentViews // Track views for all submissions
+        // Only count views from APPROVED + PENDING (exclude REJECTED)
+        if (sub.status !== 'REJECTED') {
+          existing.totalViews += sub.currentViews
+        }
         if (sub.status === 'APPROVED' || sub.status === 'PAID') {
           existing.approvedCount++
           existing.approvedViews += sub.currentViews
@@ -161,7 +167,8 @@ export async function GET(
           isVerified: sub.isVerified,
           clipCount: 1,
           approvedCount: (sub.status === 'APPROVED' || sub.status === 'PAID') ? 1 : 0,
-          totalViews: sub.currentViews, // Track views for all submissions
+          // Only count views from APPROVED + PENDING (exclude REJECTED)
+          totalViews: sub.status !== 'REJECTED' ? sub.currentViews : 0,
           approvedViews: (sub.status === 'APPROVED' || sub.status === 'PAID') ? sub.currentViews : 0,
           totalEarnings: (sub.status === 'APPROVED' || sub.status === 'PAID') ? sub.earnings : 0
         })
