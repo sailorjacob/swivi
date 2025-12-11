@@ -57,6 +57,16 @@ interface ReportData {
       totalViews: number
       totalEarnings: number
     }>
+    nonParticipating: Array<{
+      handle: string
+      platform: string
+      creatorName: string
+      isVerified: boolean
+      clipCount: number
+      approvedCount: number
+      totalViews: number
+      totalEarnings: number
+    }>
   }
   platforms: Record<string, {
     total: number
@@ -172,7 +182,7 @@ export default function ClientReportPage() {
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">Executive Summary</h2>
             <div className="grid grid-cols-5 gap-4">
               <div className="text-center p-4 border border-gray-200 rounded">
-                <p className="text-3xl font-bold">{performance.totalViews.toLocaleString()}</p>
+                <p className="text-2xl font-bold break-words">{performance.totalViews.toLocaleString()}</p>
                 <p className="text-sm text-gray-600">Total Views</p>
               </div>
               <div className="text-center p-4 border border-gray-200 rounded">
@@ -184,11 +194,11 @@ export default function ClientReportPage() {
                 <p className="text-sm text-gray-600">Unique Pages</p>
               </div>
               <div className="text-center p-4 border border-gray-200 rounded">
-                <p className="text-3xl font-bold">{creators.unique}</p>
-                <p className="text-sm text-gray-600">Unique Creators</p>
+                <p className="text-3xl font-bold">{submissions.total}</p>
+                <p className="text-sm text-gray-600">Total Submissions</p>
               </div>
               <div className="text-center p-4 border border-gray-200 rounded">
-                <p className="text-3xl font-bold">${budget.spent.toLocaleString()}</p>
+                <p className="text-2xl font-bold break-words">${budget.spent.toLocaleString()}</p>
                 <p className="text-sm text-gray-600">Total Spend</p>
               </div>
             </div>
@@ -287,14 +297,14 @@ export default function ClientReportPage() {
               const surplusPercent = paidViews > 0 ? ((surplusViews / paidViews) * 100).toFixed(1) : '0'
               
               return surplusViews > 0 ? (
-                <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded">
+                <div className="mt-4 p-4 border border-gray-200 rounded">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-lg font-bold text-gray-800">Bonus Performance</p>
                       <p className="text-sm text-gray-600">Views delivered beyond budget allocation</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-3xl font-bold text-green-600">+{surplusViews.toLocaleString()}</p>
+                      <p className="text-3xl font-bold" style={{color: '#00ff41'}}>+{surplusViews.toLocaleString()}</p>
                       <p className="text-sm text-gray-600">Surplus views ({surplusPercent}% extra)</p>
                     </div>
                   </div>
@@ -385,11 +395,10 @@ export default function ClientReportPage() {
           {/* Participating Pages - All unique social handles */}
           <section className="mb-10 page-break">
             <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">
-              Participating Pages ({creators.breakdown.length} unique pages from {creators.unique} creators)
+              Participating Pages ({creators.breakdown.length} approved unique pages from {submissions.total} total submissions)
             </h2>
             <p className="text-sm text-gray-600 mb-4">
-              Each row represents a unique social media page/handle that posted content for this campaign.
-              Some creators may have multiple pages across different platforms.
+              Each row represents a unique social media page/handle with approved content for this campaign.
             </p>
             <table className="w-full text-sm">
               <thead>
@@ -426,6 +435,48 @@ export default function ClientReportPage() {
               </tbody>
             </table>
           </section>
+
+          {/* Non-Participating Pages */}
+          {creators.nonParticipating && creators.nonParticipating.length > 0 && (
+            <section className="mb-10">
+              <h2 className="text-xl font-bold border-b border-gray-300 pb-2 mb-4">
+                Non-Participating Pages ({creators.nonParticipating.length} pages with no approved content)
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                These pages submitted content but had no approved clips.
+              </p>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b-2 border-gray-300">
+                    <th className="text-left py-2 font-semibold">Page Handle</th>
+                    <th className="text-left py-2 font-semibold">Platform</th>
+                    <th className="text-center py-2 font-semibold">Submissions</th>
+                    <th className="text-center py-2 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {creators.nonParticipating.map((creator, idx) => (
+                    <tr key={idx} className="border-b">
+                      <td className="py-2">
+                        <span className="font-medium">@{creator.handle}</span>
+                        {creator.isVerified && (
+                          <span className="text-xs bg-gray-200 px-1 rounded ml-1" title="Verified social account">✓</span>
+                        )}
+                        {creator.creatorName && creator.creatorName !== creator.handle && (
+                          <span className="text-gray-400 ml-1 text-xs">({creator.creatorName})</span>
+                        )}
+                      </td>
+                      <td className="py-2">{creator.platform}</td>
+                      <td className="py-2 text-center">{creator.clipCount}</td>
+                      <td className="py-2 text-center">
+                        <span className="text-xs text-gray-500">Rejected/Pending</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          )}
 
           {/* Footer */}
           <footer className="border-t-2 border-black pt-4 mt-8 text-center text-sm text-gray-500">

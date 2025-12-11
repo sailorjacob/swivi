@@ -163,6 +163,11 @@ export async function GET(
     const creatorBreakdown = Array.from(creatorStatsMap.values())
       .filter(c => c.approvedCount > 0) // Only show creators with approved content
       .sort((a, b) => b.totalViews - a.totalViews)
+    
+    // Non-participating pages (no approved content)
+    const nonParticipatingPages = Array.from(creatorStatsMap.values())
+      .filter(c => c.approvedCount === 0) // Pages with no approved content
+      .sort((a, b) => b.clipCount - a.clipCount)
 
     // Platform breakdown
     const platformBreakdown = allSubmissions.reduce((acc, sub) => {
@@ -247,7 +252,8 @@ export async function GET(
       submissions: statusCounts,
       creators: {
         unique: uniqueCreatorIds.size,
-        breakdown: creatorBreakdown
+        breakdown: creatorBreakdown,
+        nonParticipating: nonParticipatingPages
       },
       platforms: platformBreakdown,
       topClips
