@@ -16,10 +16,37 @@ import {
   Plus,
   Building2,
   TrendingUp,
-  AlertTriangle
+  AlertTriangle,
+  Handshake,
+  Zap,
+  ListChecks
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+
+const dealFlowCards = [
+  {
+    title: "Deal Flows & Pitch Guide",
+    description: "Four deal types (CPM, Delivery Engine, Flat Rate, Retainer) with pitching strategies",
+    href: "/admin/agency/deal-flows",
+    icon: Handshake,
+    highlights: ["4 Deal Types", "50% Margin Target", "Decision Tree"]
+  },
+  {
+    title: "Deal Templates",
+    description: "Ready-to-use emails, proposals, SOWs, MSAs, and invoices for each deal type",
+    href: "/admin/agency/deal-templates",
+    icon: FileText,
+    highlights: ["Email Templates", "Proposal Letters", "Contract Templates"]
+  },
+  {
+    title: "Quick Reference",
+    description: "One-page cheat sheets for each deal type with pricing, red flags, and scripts",
+    href: "/admin/agency/deal-quickref",
+    icon: ListChecks,
+    highlights: ["Cheat Sheets", "Objection Handling", "Margin Guidelines"]
+  }
+]
 
 const resourceCards = [
   {
@@ -185,6 +212,56 @@ export default function AgencyHubPage() {
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* Deal Flow Resources - NEW */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+          className="mb-8"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Zap className="w-4 h-4 text-foreground" />
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Deal Flow & Pitching</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-4">
+            {dealFlowCards.map((card, i) => (
+              <motion.div
+                key={card.href}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 + i * 0.05 }}
+              >
+                <Link href={card.href}>
+                  <Card className="h-full hover:border-foreground/30 transition-colors cursor-pointer group border-foreground/10">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="p-2 rounded-lg bg-foreground/10">
+                          <card.icon className="w-4 h-4 text-foreground" />
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <CardTitle className="text-base mt-3">{card.title}</CardTitle>
+                      <CardDescription className="text-sm">{card.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="flex flex-wrap gap-2">
+                        {card.highlights.map((highlight) => (
+                          <span 
+                            key={highlight}
+                            className="text-xs px-2 py-1 bg-foreground/10 rounded text-foreground"
+                          >
+                            {highlight}
+                          </span>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
 
         {/* Resource Cards */}
