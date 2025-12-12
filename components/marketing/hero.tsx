@@ -28,7 +28,7 @@ const itemVariants = {
 
 export function Hero() {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+    <section className="sticky top-0 h-screen flex items-center overflow-hidden">
       {/* Video Background */}
       <div className="absolute inset-0 overflow-hidden">
         <video
@@ -67,7 +67,7 @@ export function Hero() {
             className="mb-10 text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl font-light leading-relaxed"
           >
             Data-backed creator networks delivering measurable reach at scale. 
-            20M+ verified impressions. Sub-market CPM. Enterprise-grade analytics.
+            100M+ verified impressions. Sub-market CPM. Enterprise-grade analytics.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -88,7 +88,7 @@ export function Hero() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" className="font-normal bg-transparent text-white hover:bg-white/10 border-white/30 hover:border-white">
-              <Link href="#how-it-works">
+              <Link href="/case-studies">
                 View Case Studies
               </Link>
             </Button>
@@ -101,16 +101,16 @@ export function Hero() {
           >
             <div className="flex flex-col sm:flex-row gap-8 text-white/80">
               <div>
-                <div className="text-3xl font-light text-white">20M+</div>
-                <div className="text-sm uppercase tracking-wider">Verified Views</div>
+                <div className="text-3xl font-light text-white">100M+</div>
+                <div className="text-sm uppercase tracking-wider">Views Delivered</div>
+              </div>
+              <div>
+                <div className="text-3xl font-light text-white">10M</div>
+                <div className="text-sm uppercase tracking-wider">Active Network</div>
               </div>
               <div>
                 <div className="text-3xl font-light text-white">50%</div>
                 <div className="text-sm uppercase tracking-wider">Below Market CPM</div>
-              </div>
-              <div>
-                <div className="text-3xl font-light text-white">100+</div>
-                <div className="text-sm uppercase tracking-wider">Active Creators</div>
               </div>
             </div>
           </motion.div>
