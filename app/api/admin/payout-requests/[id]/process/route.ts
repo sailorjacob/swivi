@@ -117,13 +117,14 @@ export async function POST(
 
     } else if (validatedData.action === 'revert') {
       // Revert from APPROVED/PROCESSING back to PENDING
+      // Clear previous notes unless new notes provided, to start fresh
       await prisma.payoutRequest.update({
         where: { id: payoutRequestId },
         data: {
           status: 'PENDING',
           processedBy: null,
           processedAt: null,
-          notes: validatedData.notes || 'Reverted to pending by admin'
+          notes: validatedData.notes || null // Clear notes on revert unless new notes provided
         }
       })
 

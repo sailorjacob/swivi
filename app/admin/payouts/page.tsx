@@ -38,6 +38,12 @@ interface PayoutRequest {
     bitcoinAddress?: string
     totalEarnings: number
   }
+  campaigns?: {
+    id: string
+    title: string
+    status: string
+    earnings: number
+  }[]
 }
 
 interface UserWithBalance {
@@ -301,6 +307,28 @@ export default function AdminPayoutsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="text-xs text-muted-foreground mb-0.5">Notes</div>
                         <div className="text-xs line-clamp-2">{request.notes}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Campaign Breakdown */}
+                  {request.campaigns && request.campaigns.length > 0 && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Target className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-muted-foreground mb-1">Campaign(s)</div>
+                        <div className="flex flex-wrap gap-1">
+                          {request.campaigns.map(c => (
+                            <Badge 
+                              key={c.id} 
+                              variant="outline" 
+                              className="text-xs font-normal"
+                            >
+                              {c.title}
+                              <span className="ml-1 text-muted-foreground">${c.earnings.toFixed(0)}</span>
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -771,6 +799,24 @@ export default function AdminPayoutsPage() {
                     {selectedRequest.paymentDetails}
                   </div>
                 </div>
+
+                {/* Campaign Breakdown in Dialog */}
+                {selectedRequest.campaigns && selectedRequest.campaigns.length > 0 && (
+                  <div className="border rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="w-4 h-4 text-muted-foreground" />
+                      <label className="text-xs font-medium text-muted-foreground">Earnings by Campaign</label>
+                    </div>
+                    <div className="space-y-1">
+                      {selectedRequest.campaigns.map(c => (
+                        <div key={c.id} className="flex items-center justify-between text-sm">
+                          <span className="truncate">{c.title}</span>
+                          <span className="font-medium ml-2">${c.earnings.toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {selectedRequest.status === 'PENDING' && (

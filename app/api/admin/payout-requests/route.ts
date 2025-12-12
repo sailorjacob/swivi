@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       where.userId = userId
     }
 
-    // Get payout requests with user details
+    // Get payout requests with user details and their campaign earnings
     const payoutRequests = await prisma.payoutRequest.findMany({
       where,
       include: {
@@ -49,7 +49,25 @@ export async function GET(request: NextRequest) {
             paypalEmail: true,
             walletAddress: true,
             bitcoinAddress: true,
-            totalEarnings: true
+            totalEarnings: true,
+            // Get campaigns this user has earnings from
+            clipSubmissions: {
+              where: { status: 'APPROVED' },
+              select: {
+                campaigns: {
+                  select: {
+                    id: true,
+                    title: true,
+                    status: true
+                  }
+                },
+                clips: {
+                  select: {
+                    earnings: true
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -57,27 +75,50 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json({
-      payoutRequests: payoutRequests.map(pr => ({
-        id: pr.id,
-        amount: Number(pr.amount),
-        status: pr.status,
-        paymentMethod: pr.paymentMethod,
-        paymentDetails: pr.paymentDetails,
-        requestedAt: pr.requestedAt,
-        processedAt: pr.processedAt,
-        processedBy: pr.processedBy,
-        transactionId: pr.transactionId,
-        notes: pr.notes,
-        user: {
-          id: pr.users.id,
-          name: pr.users.name,
-          email: pr.users.email,
-          paypalEmail: pr.users.paypalEmail,
-          walletAddress: pr.users.walletAddress,
-          bitcoinAddress: pr.users.bitcoinAddress,
-          totalEarnings: Number(pr.users.totalEarnings)
+      payoutRequests: payoutRequests.map(pr => {
+        // Calculate earnings by campaign
+        const campaignEarnings = new Map<string, { id: string, title: string, status: string, earnings: number }>()
+        
+        for (const submission of pr.users.clipSubmissions) {
+          const campaignId = submission.campaigns.id
+          const earnings = Number(submission.clips?.earnings || 0)
+          
+          if (campaignEarnings.has(campaignId)) {
+            campaignEarnings.get(campaignId)!.earnings += earnings
+          } else {
+            campaignEarnings.set(campaignId, {
+              id: campaignId,
+              title: submission.campaigns.title,
+              status: submission.campaigns.status || 'UNKNOWN',
+              earnings
+            })
+          }
         }
-      }))
+
+        return {
+          id: pr.id,
+          amount: Number(pr.amount),
+          status: pr.status,
+          paymentMethod: pr.paymentMethod,
+          paymentDetails: pr.paymentDetails,
+          requestedAt: pr.requestedAt,
+          processedAt: pr.processedAt,
+          processedBy: pr.processedBy,
+          transactionId: pr.transactionId,
+          notes: pr.notes,
+          user: {
+            id: pr.users.id,
+            name: pr.users.name,
+            email: pr.users.email,
+            paypalEmail: pr.users.paypalEmail,
+            walletAddress: pr.users.walletAddress,
+            bitcoinAddress: pr.users.bitcoinAddress,
+            totalEarnings: Number(pr.users.totalEarnings)
+          },
+          // Include campaign breakdown
+          campaigns: Array.from(campaignEarnings.values()).sort((a, b) => b.earnings - a.earnings)
+        }
+      })
     })
 
   } catch (error) {
