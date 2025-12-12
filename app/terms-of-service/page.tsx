@@ -75,7 +75,17 @@ export default function TermsOfServicePage() {
                   <li>Content approval by campaign managers</li>
                   <li>Compliance with submission requirements</li>
                   <li>Processing times of 24-48 hours after approval</li>
+                  <li>A 10% platform fee deducted from all payouts</li>
+                  <li>Minimum payout threshold of $20.00</li>
                 </ul>
+                <p className="mb-4">
+                  <strong>Platform Fee:</strong> Swivi retains a 10% platform fee from all creator payouts. This fee supports 
+                  platform maintenance, payment processing, creator tools, and continued development of services. The fee is 
+                  automatically calculated and deducted at the time of payout processing.
+                </p>
+                <p className="mb-4">
+                  <strong>Example:</strong> If you earn $100 from a campaign, you will receive $90 after the 10% platform fee.
+                </p>
               </section>
 
               <section className="mb-8">
