@@ -400,19 +400,26 @@ export default function PartnerDashboardPage() {
         {/* Platform Breakdown */}
         {Object.keys(platformStats).length > 0 && (
           <Card className="mb-6 md:mb-8">
-            <CardHeader className="pb-3 md:pb-6">
+            <CardHeader className="pb-4">
               <CardTitle className="text-base md:text-lg flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 md:w-5 md:h-5" />
                 Platform Breakdown
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+              <div className={`grid gap-4 ${
+                Object.keys(platformStats).length === 1 ? 'grid-cols-1' :
+                Object.keys(platformStats).length === 2 ? 'grid-cols-1 sm:grid-cols-2' :
+                Object.keys(platformStats).length === 3 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' :
+                'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+              }`}>
                 {Object.entries(platformStats).map(([platform, platformData]) => (
-                  <div key={platform} className="p-3 md:p-4 border border-border rounded-lg">
-                    <div className="flex items-center gap-2 mb-2 md:mb-3">
-                      {getPlatformLogo(platform, '', 18)}
-                      <span className="font-medium text-sm md:text-base">
+                  <div key={platform} className="p-4 md:p-5 bg-muted/30 border border-border rounded-xl">
+                    <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border/50">
+                      <div className="p-2 bg-background rounded-lg">
+                        {getPlatformLogo(platform, '', 24)}
+                      </div>
+                      <span className="font-semibold text-base md:text-lg">
                         {platform === 'YOUTUBE' ? 'YouTube' : 
                          platform === 'TIKTOK' ? 'TikTok' :
                          platform === 'INSTAGRAM' ? 'Instagram' :
@@ -420,24 +427,24 @@ export default function PartnerDashboardPage() {
                          platform}
                       </span>
                     </div>
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs md:text-sm">
-                        <span className="text-muted-foreground">Posts</span>
-                        <span className="font-medium">{platformData.totalSubmissions}</span>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Total Posts</span>
+                        <span className="text-lg font-bold">{platformData.totalSubmissions}</span>
                       </div>
-                      <div className="flex justify-between text-xs md:text-sm">
-                        <span className="text-muted-foreground">Approved</span>
-                        <span className="font-medium">{platformData.approvedSubmissions}</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Approved</span>
+                        <span className="text-lg font-bold">{platformData.approvedSubmissions}</span>
                       </div>
-                      <div className="flex justify-between text-xs md:text-sm">
-                        <span className="text-muted-foreground">Views</span>
-                        <span className="font-medium">{platformData.budgetViews.toLocaleString()}</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Views</span>
+                        <span className="text-lg font-bold">{platformData.budgetViews.toLocaleString()}</span>
                       </div>
                       {platformData.additionalViews > 0 && (
-                        <div className="flex justify-between text-xs md:text-sm">
-                          <span className="text-muted-foreground">+ Since</span>
-                          <span className="font-medium">
-                            {platformData.additionalViews.toLocaleString()}
+                        <div className="flex justify-between items-center pt-2 border-t border-border/50">
+                          <span className="text-sm text-muted-foreground">+ Since End</span>
+                          <span className="text-base font-semibold text-green-600 dark:text-green-400">
+                            +{platformData.additionalViews.toLocaleString()}
                           </span>
                         </div>
                       )}
