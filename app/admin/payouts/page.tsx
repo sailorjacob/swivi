@@ -417,10 +417,10 @@ export default function AdminPayoutsPage() {
       </div>
 
       {/* Summary Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4 mb-8">
+      <div className="grid gap-4 md:grid-cols-5 mb-8">
         <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total User Balances</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Owed</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -435,155 +435,28 @@ export default function AdminPayoutsPage() {
 
         <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Paid Out</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary?.pendingRequestsCount || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              ${summary?.pendingRequestsTotal?.toFixed(2) || '0.00'} total requested
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Users with Balance</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary?.usersWithBalancesCount || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Ready to request payout
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed Campaigns</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary?.completedCampaignsCount || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              With finalized earnings
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Users with Balances Section */}
-      {usersWithBalances.length > 0 && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Wallet className="w-5 h-5" />
-              Users with Available Balance
-            </CardTitle>
-            <CardDescription>
-              Users who have earned money and can request payouts. Click to copy payment details.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {usersWithBalances.slice(0, 10).map((user) => (
-                <div 
-                  key={user.id} 
-                  className="p-4 rounded-lg border bg-muted/30"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium">{user.name || user.email || 'Unknown'}</span>
-                        {user.hasPendingRequest && (
-                          <Badge variant="outline" className="text-xs">
-                            <Clock className="w-3 h-3 mr-1" />
-                            Request Pending
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                      
-                      {/* Payment Methods */}
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {user.paypalEmail && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="h-7 text-xs"
-                            onClick={() => copyToClipboard(user.paypalEmail!, 'PayPal email')}
-                          >
-                            <span className="font-medium mr-1">PayPal:</span>
-                            {user.paypalEmail}
-                            <Copy className="w-3 h-3 ml-1" />
-                          </Button>
-                        )}
-                        {user.walletAddress && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="h-7 text-xs"
-                            onClick={() => copyToClipboard(user.walletAddress!, 'Ethereum wallet')}
-                          >
-                            <span className="font-medium mr-1">ETH:</span>
-                            {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
-                            <Copy className="w-3 h-3 ml-1" />
-                          </Button>
-                        )}
-                        {user.bitcoinAddress && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="h-7 text-xs"
-                            onClick={() => copyToClipboard(user.bitcoinAddress!, 'Bitcoin address')}
-                          >
-                            <span className="font-medium mr-1">Bitcoin:</span>
-                            {user.bitcoinAddress.slice(0, 6)}...{user.bitcoinAddress.slice(-4)}
-                            <Copy className="w-3 h-3 ml-1" />
-                          </Button>
-                        )}
-                        {!user.paypalEmail && !user.walletAddress && !user.bitcoinAddress && (
-                          <Badge variant="outline" className="text-muted-foreground text-xs">
-                            <AlertCircle className="w-3 h-3 mr-1" />
-                            No payment method set
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="text-right">
-                      <div className="text-xl font-bold">
-                        ${user.totalEarnings.toFixed(2)}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {user.approvedClips} clips
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {usersWithBalances.length > 10 && (
-                <p className="text-sm text-muted-foreground text-center pt-2">
-                  And {usersWithBalances.length - 10} more users with balances...
-                </p>
-              )}
+            <div className="text-2xl font-bold">
+              ${completedRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {completedRequests.length} payouts completed
+            </p>
           </CardContent>
         </Card>
-      )}
 
-      {/* Payout Requests Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4 mb-8">
         <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingRequests.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              ${pendingRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)} total
+              ${pendingRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)} requested
             </p>
           </CardContent>
         </Card>
@@ -596,37 +469,154 @@ export default function AdminPayoutsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{processingRequests.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              ${processingRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)} total
+              ${processingRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)} in progress
             </p>
           </CardContent>
         </Card>
 
         <Card className="border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Fulfillment</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{completedRequests.length}</div>
+            <div className="text-2xl font-bold">
+              {summary?.totalUserBalances && summary.totalUserBalances > 0 
+                ? Math.round((completedRequests.reduce((sum, r) => sum + r.amount, 0) / 
+                    (summary.totalUserBalances + completedRequests.reduce((sum, r) => sum + r.amount, 0))) * 100)
+                : 0}%
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
-              ${completedRequests.reduce((sum, r) => sum + r.amount, 0).toFixed(2)} paid out
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-            <XCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{rejectedRequests.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Not processed
+              Of total earnings paid
             </p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Users with Balances Section */}
+      {usersWithBalances.length > 0 && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wallet className="w-5 h-5" />
+              All Users with Balance ({usersWithBalances.length})
+            </CardTitle>
+            <CardDescription className="flex items-center justify-between">
+              <span>Users who have earned money and can request payouts. Click to copy payment details.</span>
+              <span className="font-medium text-foreground">
+                Total: ${usersWithBalances.reduce((sum, u) => sum + u.totalEarnings, 0).toFixed(2)}
+              </span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Table Header */}
+            <div className="grid grid-cols-12 gap-2 px-4 py-2 bg-muted/50 rounded-t-lg text-xs font-medium text-muted-foreground border-b">
+              <div className="col-span-3">User</div>
+              <div className="col-span-4">Payment Methods</div>
+              <div className="col-span-2 text-center">Clips</div>
+              <div className="col-span-2 text-right">Balance</div>
+              <div className="col-span-1 text-center">Status</div>
+            </div>
+            
+            {/* Table Body */}
+            <div className="divide-y divide-border max-h-[500px] overflow-y-auto">
+              {usersWithBalances.map((user) => (
+                <div 
+                  key={user.id} 
+                  className="grid grid-cols-12 gap-2 px-4 py-3 items-center hover:bg-muted/30 transition-colors"
+                >
+                  {/* User Info */}
+                  <div className="col-span-3">
+                    <div className="font-medium text-sm truncate">{user.name || 'Unknown'}</div>
+                    <div className="text-xs text-muted-foreground truncate">{user.email}</div>
+                  </div>
+                  
+                  {/* Payment Methods */}
+                  <div className="col-span-4 flex flex-wrap gap-1">
+                    {user.paypalEmail && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 text-xs px-2"
+                        onClick={() => copyToClipboard(user.paypalEmail!, 'PayPal')}
+                      >
+                        <Mail className="w-3 h-3 mr-1" />
+                        PayPal
+                        <Copy className="w-2.5 h-2.5 ml-1 opacity-50" />
+                      </Button>
+                    )}
+                    {user.bitcoinAddress && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 text-xs px-2"
+                        onClick={() => copyToClipboard(user.bitcoinAddress!, 'Bitcoin')}
+                      >
+                        <Wallet className="w-3 h-3 mr-1" />
+                        BTC
+                        <Copy className="w-2.5 h-2.5 ml-1 opacity-50" />
+                      </Button>
+                    )}
+                    {user.walletAddress && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 text-xs px-2"
+                        onClick={() => copyToClipboard(user.walletAddress!, 'USDC wallet')}
+                      >
+                        <Wallet className="w-3 h-3 mr-1" />
+                        USDC
+                        <Copy className="w-2.5 h-2.5 ml-1 opacity-50" />
+                      </Button>
+                    )}
+                    {!user.paypalEmail && !user.walletAddress && !user.bitcoinAddress && (
+                      <span className="text-xs text-muted-foreground">No payment set</span>
+                    )}
+                  </div>
+                  
+                  {/* Clips */}
+                  <div className="col-span-2 text-center text-sm">
+                    {user.approvedClips}
+                  </div>
+                  
+                  {/* Balance */}
+                  <div className="col-span-2 text-right font-bold text-sm">
+                    ${user.totalEarnings.toFixed(2)}
+                  </div>
+                  
+                  {/* Status */}
+                  <div className="col-span-1 text-center">
+                    {user.hasPendingRequest ? (
+                      <Badge variant="outline" className="text-xs px-1.5">
+                        <Clock className="w-3 h-3" />
+                      </Badge>
+                    ) : user.totalEarnings >= 20 ? (
+                      <Badge variant="outline" className="text-xs px-1.5 text-green-600 border-green-600/30">
+                        <Check className="w-3 h-3" />
+                      </Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">{'<$20'}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Legend */}
+            <div className="flex gap-4 mt-3 pt-3 border-t text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Badge variant="outline" className="text-xs px-1.5"><Clock className="w-3 h-3" /></Badge>
+                Request pending
+              </span>
+              <span className="flex items-center gap-1">
+                <Badge variant="outline" className="text-xs px-1.5 text-green-600 border-green-600/30"><Check className="w-3 h-3" /></Badge>
+                Can request payout
+              </span>
+              <span>{'<$20'} = Below minimum</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Payout Requests Cards */}
       <div className="space-y-4">
