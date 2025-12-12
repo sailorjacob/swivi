@@ -527,7 +527,13 @@ export default function AdminCampaignsPage() {
       } else {
         const error = await response.json()
         console.error('❌ Update failed:', error)
-        toast.error(error.error || "Failed to update campaign")
+        // Show detailed error message if available
+        const errorMsg = error.message || error.error || "Failed to update campaign"
+        const details = error.details ? `\n${error.details}` : ""
+        toast.error(errorMsg)
+        if (details) {
+          console.error('Error details:', details)
+        }
       }
     } catch (error) {
       console.error("❌ Error updating campaign:", error)
@@ -2508,29 +2514,45 @@ function CampaignForm({
             <label htmlFor="campaign-status" className="block text-sm font-medium mb-1">
               Status
             </label>
-            <Select 
-              value={formData.status || 'ACTIVE'} 
-              onValueChange={(value) => setFormData({ ...formData, status: value })}
-              name="status"
-            >
-              <SelectTrigger id="campaign-status" aria-label="Campaign Status">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="DRAFT">Draft</SelectItem>
-                <SelectItem value="SCHEDULED">Scheduled (goes live at start date)</SelectItem>
-                <SelectItem value="ACTIVE">Active (live now)</SelectItem>
-                <SelectItem value="PAUSED">Paused (temporarily hidden)</SelectItem>
-                {/* Show CANCELLED option only when editing an existing campaign */}
-                {isEdit && (
-                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground mt-1">
-              {formData.status === 'PAUSED' && 'Campaign is temporarily paused. Clippers cannot submit but existing submissions continue earning.'}
-              {formData.status === 'CANCELLED' && 'Campaign is cancelled. No new submissions or earnings.'}
-            </p>
+            {/* For COMPLETED campaigns, show read-only status with reactivate hint */}
+            {formData.status === 'COMPLETED' ? (
+              <>
+                <div className="flex items-center gap-2 h-10 px-3 border rounded-md bg-muted/50">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm font-medium">Completed</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Campaign is completed. You can still edit details like title and description. 
+                  Use the "Reactivate" button on the campaign card to change status back to Active.
+                </p>
+              </>
+            ) : (
+              <>
+                <Select 
+                  value={formData.status || 'ACTIVE'} 
+                  onValueChange={(value) => setFormData({ ...formData, status: value })}
+                  name="status"
+                >
+                  <SelectTrigger id="campaign-status" aria-label="Campaign Status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DRAFT">Draft</SelectItem>
+                    <SelectItem value="SCHEDULED">Scheduled (goes live at start date)</SelectItem>
+                    <SelectItem value="ACTIVE">Active (live now)</SelectItem>
+                    <SelectItem value="PAUSED">Paused (temporarily hidden)</SelectItem>
+                    {/* Show CANCELLED option only when editing an existing campaign */}
+                    {isEdit && (
+                      <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formData.status === 'PAUSED' && 'Campaign is temporarily paused. Clippers cannot submit but existing submissions continue earning.'}
+                  {formData.status === 'CANCELLED' && 'Campaign is cancelled. No new submissions or earnings.'}
+                </p>
+              </>
+            )}
           </div>
           
           {formData.status === 'SCHEDULED' && (

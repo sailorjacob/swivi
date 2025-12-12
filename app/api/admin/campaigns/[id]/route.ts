@@ -51,8 +51,14 @@ const updateCampaignSchema = z.object({
   spent: z.number().min(0, "Spent amount cannot be negative").optional(),
   reservedAmount: z.number().min(0, "Reserved amount cannot be negative").optional(), // For fees/bounties (admin only)
   payoutRate: z.number().positive("Payout rate must be positive").optional(),
-  startDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
-  endDate: z.string().transform((str) => str ? new Date(str) : null).nullable().optional(),
+  startDate: z.union([
+    z.string().transform((str) => str ? new Date(str) : null),
+    z.null()
+  ]).optional(),
+  endDate: z.union([
+    z.string().transform((str) => str ? new Date(str) : null),
+    z.null()
+  ]).optional(),
   status: z.enum(["DRAFT", "SCHEDULED", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional(),
   hidden: z.boolean().optional(),
   isTest: z.boolean().optional(),
@@ -393,6 +399,13 @@ export async function PUT(
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 
+    // Ensure we have a valid campaign ID
+    const campaignId = params.id
+    if (!campaignId) {
+      return NextResponse.json({ error: "Campaign ID is required" }, { status: 400 })
+    }
+    console.log("🔧 Updating campaign:", campaignId)
+
     const body = await request.json()
     console.log("🔧 Update campaign request body:", JSON.stringify(body, null, 2))
     console.log("🔍 FeaturedImage in update body:", body.featuredImage)
@@ -402,7 +415,7 @@ export async function PUT(
 
     // Check if campaign exists
     const existingCampaign = await prisma.campaign.findUnique({
-      where: { id: params.id }
+      where: { id: campaignId }
     })
 
     if (!existingCampaign) {
@@ -494,7 +507,7 @@ export async function PUT(
     // if (validatedData.tags !== undefined) updateData.tags = validatedData.tags
 
     const campaign = await prisma.campaign.update({
-      where: { id: params.id },
+      where: { id: campaignId },
       data: updateData,
       include: {
         _count: {
@@ -514,7 +527,14 @@ export async function PUT(
     }
 
     console.error("Error updating campaign:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    // Return detailed error info for debugging
+    const errorMessage = error instanceof Error ? error.message : "Unknown error"
+    const errorStack = error instanceof Error ? error.stack : undefined
+    return NextResponse.json({ 
+      error: "Internal server error",
+      message: errorMessage,
+      details: errorStack?.split('\n').slice(0, 5).join('\n')
+    }, { status: 500 })
   }
 }
 
