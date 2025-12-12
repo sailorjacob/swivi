@@ -9,8 +9,12 @@ import { z } from "zod"
 const processPayoutSchema = z.object({
   action: z.enum(['approve', 'reject', 'complete', 'revert']),
   transactionId: z.string().optional(),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  platformFeeRate: z.number().min(0).max(1).optional() // Fee rate as decimal (0.10 = 10%)
 })
+
+// Default platform fee rate - can be overridden per payout
+const DEFAULT_PLATFORM_FEE_RATE = 0.10
 
 // Process a payout request
 export async function POST(
@@ -134,6 +138,11 @@ export async function POST(
     } else if (validatedData.action === 'complete') {
       // Complete the payout - money has been sent
       const payoutAmount = Number(payoutRequest.amount)
+      
+      // Calculate platform fee (use provided rate or default)
+      const feeRate = validatedData.platformFeeRate ?? DEFAULT_PLATFORM_FEE_RATE
+      const feeAmount = payoutAmount * feeRate
+      const netAmount = payoutAmount - feeAmount
 
       // REQUIRE transaction ID for completed payouts (audit trail)
       if (!validatedData.transactionId || validatedData.transactionId.trim() === '') {
@@ -175,7 +184,7 @@ export async function POST(
           throw new Error("ALREADY_COMPLETED")
         }
 
-        // Update payout request status
+        // Update payout request status with fee tracking
         await tx.payoutRequest.update({
           where: { id: payoutRequestId },
           data: {
@@ -183,7 +192,11 @@ export async function POST(
             processedAt: new Date(),
             processedBy: adminUser.id,
             transactionId: validatedData.transactionId,
-            notes: validatedData.notes || 'Payment sent'
+            notes: validatedData.notes || 'Payment sent',
+            // Store fee information for record keeping
+            platformFeeRate: feeRate,
+            platformFeeAmount: feeAmount,
+            netAmount: netAmount
           }
         })
 
@@ -242,7 +255,9 @@ export async function POST(
         // Audit log
         console.log(`✅ PAYOUT COMPLETED: Admin ${adminUser.email} completed payout ${payoutRequestId}`)
         console.log(`   User: ${freshUser.email}`)
-        console.log(`   Amount: $${payoutAmount.toFixed(2)}`)
+        console.log(`   Gross Amount: $${payoutAmount.toFixed(2)}`)
+        console.log(`   Platform Fee: ${(feeRate * 100).toFixed(0)}% ($${feeAmount.toFixed(2)})`)
+        console.log(`   Net Sent: $${netAmount.toFixed(2)}`)
         console.log(`   Transaction ID: ${validatedData.transactionId}`)
         console.log(`   Balance Before: $${currentBalance.toFixed(2)}`)
         console.log(`   Balance After: $${Number(updatedUser.totalEarnings).toFixed(2)}`)

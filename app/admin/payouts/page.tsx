@@ -73,15 +73,19 @@ interface PayoutSummary {
 }
 
 // Platform fee configuration - easily adjustable for different campaigns/scenarios
-// TODO: In future, this could come from campaign settings or be per-request configurable
-const PLATFORM_FEE_RATES = {
-  DEFAULT: 0.10,      // 10% - standard rate
-  REDUCED: 0.05,      // 5% - reduced rate for special campaigns
-  ZERO: 0,            // 0% - no fee (promotional)
-} as const
+const PLATFORM_FEE_OPTIONS = [
+  { value: 0, label: '0% (No fee)' },
+  { value: 0.05, label: '5%' },
+  { value: 0.10, label: '10%' },
+  { value: 0.15, label: '15%' },
+  { value: 0.20, label: '20%' },
+] as const
+
+// Default fee rate - can be overridden per payout
+const DEFAULT_PLATFORM_FEE = 0.10
 
 // Helper to calculate payout after fee
-const calculatePayoutAfterFee = (amount: number, feeRate: number = PLATFORM_FEE_RATES.DEFAULT) => {
+const calculatePayoutAfterFee = (amount: number, feeRate: number = DEFAULT_PLATFORM_FEE) => {
   const fee = amount * feeRate
   const netAmount = amount - fee
   return { fee, netAmount, feeRate, feePercent: feeRate * 100 }
@@ -104,8 +108,8 @@ export default function AdminPayoutsPage() {
   const [usersWithBalances, setUsersWithBalances] = useState<UserWithBalance[]>([])
   const [summaryLoading, setSummaryLoading] = useState(true)
   
-  // Current platform fee rate - could be made dynamic per campaign in the future
-  const currentFeeRate = PLATFORM_FEE_RATES.DEFAULT
+  // Platform fee rate - adjustable per payout
+  const [currentFeeRate, setCurrentFeeRate] = useState(DEFAULT_PLATFORM_FEE)
 
   useEffect(() => {
     fetchPayoutRequests()
@@ -168,7 +172,7 @@ export default function AdminPayoutsPage() {
     }
   }
 
-  const handleProcess = async (action: 'approve' | 'reject' | 'complete') => {
+  const handleProcess = async (action: 'approve' | 'reject' | 'complete' | 'revert') => {
     if (!selectedRequest) return
 
     try {
@@ -180,7 +184,8 @@ export default function AdminPayoutsPage() {
         body: JSON.stringify({
           action,
           transactionId: action === 'complete' ? transactionId : undefined,
-          notes
+          notes,
+          platformFeeRate: action === 'complete' ? currentFeeRate : undefined
         })
       })
 
@@ -192,7 +197,9 @@ export default function AdminPayoutsPage() {
         setProcessDialogOpen(false)
         setTransactionId('')
         setNotes('')
+        setCurrentFeeRate(DEFAULT_PLATFORM_FEE) // Reset to default
         fetchPayoutRequests()
+        fetchPayoutSummary()
       } else {
         toast.error(data.error || 'Failed to process payout request')
       }
@@ -892,6 +899,29 @@ export default function AdminPayoutsPage() {
 
               {(selectedRequest.status === 'APPROVED' || selectedRequest.status === 'PROCESSING') && (
                 <>
+                  {/* Platform Fee Rate Selector */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Platform Fee Rate</label>
+                    <Select 
+                      value={currentFeeRate.toString()} 
+                      onValueChange={(val) => setCurrentFeeRate(parseFloat(val))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PLATFORM_FEE_OPTIONS.map(option => (
+                          <SelectItem key={option.value} value={option.value.toString()}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Fee: ${(selectedRequest.amount * currentFeeRate).toFixed(2)} → Send: ${(selectedRequest.amount * (1 - currentFeeRate)).toFixed(2)}
+                    </div>
+                  </div>
+
                   <div>
                     <label className="text-sm font-medium mb-2 block">Transaction ID *</label>
                     <Input
