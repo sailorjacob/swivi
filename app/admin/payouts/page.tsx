@@ -361,18 +361,32 @@ export default function AdminPayoutsPage() {
                 )}
 
                 {(request.status === 'APPROVED' || request.status === 'PROCESSING') && (
-                  <Button
-                    size="sm"
-                    className="w-full"
-                    onClick={() => {
-                      setSelectedRequest(request)
-                      setNotes(request.notes || '')
-                      setProcessDialogOpen(true)
-                    }}
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
-                    Mark as Paid
-                  </Button>
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        setSelectedRequest(request)
+                        handleProcess('revert')
+                      }}
+                    >
+                      <Clock className="w-3.5 h-3.5 mr-1.5" />
+                      Back to Pending
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        setSelectedRequest(request)
+                        setNotes(request.notes || '')
+                        setProcessDialogOpen(true)
+                      }}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                      Mark as Paid
+                    </Button>
+                  </div>
                 )}
 
                 {request.status === 'COMPLETED' && (
