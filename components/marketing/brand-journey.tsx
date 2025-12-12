@@ -5,7 +5,7 @@ import { useRef } from "react"
 
 const journeySteps = [
   {
-    title: "Imagine This",
+    title: null,
     content: (
       <>
         "Hi [Name], Our creator network delivered{" "}
@@ -14,29 +14,114 @@ const journeySteps = [
         Imagine similar for [Your Brand]—let's discuss a pilot."
       </>
     ),
-    subtitle: "Initial Outreach"
+    showTitle: false
   },
   {
-    title: "We Learn About You",
-    content: "Tell us your goals. Your budget. Your vision. We position ourselves as your partner, not just another vendor. This is about building something together.",
-    subtitle: "Discovery Call"
+    title: null,
+    content: "We listen. Your goals become ours. Your vision shapes everything we build. This is about understanding what success actually means for your brand.",
+    showTitle: false
   },
   {
-    title: "Custom Strategy",
-    content: "We build a proposal tailored to your brand. Real benchmarks. Real results. Options that scale with your ambitions—from focused pilots to enterprise campaigns.",
-    subtitle: "Proposal Phase"
+    title: "Proposal",
+    content: "Custom strategies built around real data. Benchmarks from campaigns that actually delivered. Flexible options that grow with you.",
+    showTitle: true
   },
   {
-    title: "Transparent Partnership",
-    content: "No hidden costs. No surprises. Just honest conversations about what works, backed by data from campaigns that delivered millions of impressions.",
-    subtitle: "Negotiation"
+    title: null,
+    content: "Honest conversations. Real numbers. No surprises. We work with partners who value transparency and results backed by millions of impressions.",
+    showTitle: false
   },
   {
-    title: "Launch & Scale",
-    content: "Limited creator slots. High-intent campaigns. We close 30% of partnerships because we only take on brands we know we can win for.",
-    subtitle: "Closing"
+    title: "Delivery",
+    content: "We work with a select group of partners to ensure every campaign gets the attention it deserves. Quality over quantity, always.",
+    showTitle: true
   }
 ]
+
+function LiquidBlob({ side, index }: { side: 'left' | 'right', index: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  })
+
+  const y = useTransform(scrollYProgress, [0, 1], [200, -200])
+  const rotate = useTransform(scrollYProgress, [0, 1], [0, 360])
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ y, rotate }}
+      className={`absolute ${side === 'left' ? 'left-0' : 'right-0'} top-1/2 -translate-y-1/2 pointer-events-none`}
+    >
+      <svg width="400" height="400" viewBox="0 0 400 400" className="opacity-20">
+        <defs>
+          <filter id={`goo-${side}-${index}`}>
+            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+          </filter>
+        </defs>
+        <g filter={`url(#goo-${side}-${index})`}>
+          <motion.circle
+            cx="200"
+            cy="200"
+            r="80"
+            fill="currentColor"
+            className="text-foreground"
+            animate={{
+              r: [80, 100, 80],
+              cx: [200, 220, 200],
+              cy: [200, 180, 200],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: index * 0.3
+            }}
+          />
+          <motion.circle
+            cx="250"
+            cy="200"
+            r="60"
+            fill="currentColor"
+            className="text-foreground"
+            animate={{
+              r: [60, 80, 60],
+              cx: [250, 230, 250],
+              cy: [200, 220, 200],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: index * 0.3 + 0.5
+            }}
+          />
+          <motion.circle
+            cx="200"
+            cy="250"
+            r="70"
+            fill="currentColor"
+            className="text-foreground"
+            animate={{
+              r: [70, 90, 70],
+              cx: [200, 180, 200],
+              cy: [250, 230, 250],
+            }}
+            transition={{
+              duration: 7,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: index * 0.3 + 1
+            }}
+          />
+        </g>
+      </svg>
+    </motion.div>
+  )
+}
 
 function StorySection({ step, index }: { step: typeof journeySteps[0], index: number }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -53,16 +138,19 @@ function StorySection({ step, index }: { step: typeof journeySteps[0], index: nu
     <motion.div
       ref={ref}
       style={{ opacity, scale, y }}
-      className="min-h-screen flex items-center justify-center py-20"
+      className="relative min-h-screen flex items-center justify-center py-20"
     >
-      <div className="max-width-wrapper section-padding text-center">
+      {/* Liquid Metal Blobs */}
+      <LiquidBlob side="left" index={index} />
+      <LiquidBlob side="right" index={index} />
+
+      <div className="max-width-wrapper section-padding text-center relative z-10">
         <motion.div className="space-y-6">
-          <p className="text-xs tracking-widest uppercase text-muted-foreground font-light">
-            {step.subtitle}
-          </p>
-          <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-tight leading-[0.9]">
-            {step.title}
-          </h2>
+          {step.showTitle && step.title && (
+            <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-tight leading-[0.9]">
+              {step.title}
+            </h2>
+          )}
           <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed font-light">
             {step.content}
           </p>
@@ -126,10 +214,10 @@ export function BrandJourney() {
             className="space-y-8"
           >
             <h3 className="text-4xl sm:text-5xl md:text-6xl font-light tracking-tight">
-              Ready to talk?
+              Let's talk
             </h3>
             <p className="text-xl text-muted-foreground font-light max-w-2xl mx-auto">
-              Let's build something that gets millions of eyes on your brand.
+              We'd love to learn about your brand and explore what's possible together.
             </p>
             <motion.a
               href="/brands"
@@ -137,7 +225,7 @@ export function BrandJourney() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Start a Pilot
+              Get in Touch
             </motion.a>
           </motion.div>
         </div>
