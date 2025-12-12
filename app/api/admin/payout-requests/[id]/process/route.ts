@@ -10,7 +10,7 @@ const processPayoutSchema = z.object({
   action: z.enum(['approve', 'reject', 'complete', 'revert']),
   transactionId: z.string().optional(),
   notes: z.string().optional(),
-  platformFeeRate: z.number().min(0).max(1).optional() // Fee rate as decimal (0.10 = 10%)
+  platformFeeRate: z.number().min(0).max(0.10).optional() // Fee rate as decimal (max 10%)
 })
 
 // Default platform fee rate - can be overridden per payout

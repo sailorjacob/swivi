@@ -72,13 +72,11 @@ interface PayoutSummary {
   completedCampaignsCount: number
 }
 
-// Platform fee configuration - easily adjustable for different campaigns/scenarios
+// Platform fee configuration - max 10%
 const PLATFORM_FEE_OPTIONS = [
   { value: 0, label: '0% (No fee)' },
   { value: 0.05, label: '5%' },
   { value: 0.10, label: '10%' },
-  { value: 0.15, label: '15%' },
-  { value: 0.20, label: '20%' },
 ] as const
 
 // Default fee rate - can be overridden per payout
