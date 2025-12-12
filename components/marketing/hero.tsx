@@ -28,36 +28,21 @@ const itemVariants = {
 
 export function Hero() {
   return (
-    <section className="relative min-h-[80vh] flex items-center overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(3)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-[500px] h-[500px] rounded-full bg-foreground/10"
-            initial={{
-              x: `${Math.random() * 100}%`,
-              y: `${Math.random() * 100}%`,
-              scale: 0.5 + Math.random() * 0.5,
-            }}
-            animate={{
-              x: [
-                `${Math.random() * 100}%`,
-                `${Math.random() * 100}%`,
-                `${Math.random() * 100}%`,
-              ],
-              y: [
-                `${Math.random() * 100}%`,
-                `${Math.random() * 100}%`,
-                `${Math.random() * 100}%`,
-              ],
-            }}
-            transition={{
-              duration: 20 + Math.random() * 10,
-              repeat: Infinity,
-            }}
-          />
-        ))}
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      {/* Video Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'brightness(0.4)' }}
+        >
+          <source src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/bg.mp4" type="video/mp4" />
+        </video>
+        {/* Gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
       </div>
 
       <div className="max-width-wrapper section-padding py-20 md:py-32 relative z-10">
@@ -65,30 +50,24 @@ export function Hero() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="mx-auto max-w-3xl"
+          className="mx-auto max-w-4xl"
         >
           {/* Main Heading */}
           <motion.h1
             variants={itemVariants}
-            className="mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light leading-tight"
+            className="mb-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light leading-[1.1] tracking-tight text-white"
           >
-            Supercharge Your Brand's{" "}
-            <motion.span
-              className="font-normal inline-block"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              Media Presence
-            </motion.span>
+            Performance-Driven{" "}
+            <span className="font-normal">Creator Distribution</span>
           </motion.h1>
 
           {/* Subheading */}
           <motion.p
             variants={itemVariants}
-            className="mb-10 text-base sm:text-lg text-muted-foreground max-w-xl"
+            className="mb-10 text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl font-light leading-relaxed"
           >
-            Turn your content into viral moments and more sales. We amplify your reach across 
-            all media. Book a call now!
+            Data-backed creator networks delivering measurable reach at scale. 
+            20M+ verified impressions. Sub-market CPM. Enterprise-grade analytics.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -96,9 +75,9 @@ export function Hero() {
             variants={itemVariants}
             className="flex flex-col sm:flex-row gap-4"
           >
-            <Button size="lg" className="group font-normal bg-transparent text-foreground hover:bg-foreground hover:text-background border border-foreground">
+            <Button size="lg" className="group font-normal bg-white text-black hover:bg-white/90 border-0">
               <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center">
-                Book a Call
+                Schedule Consultation
                 <motion.span
                   className="ml-2"
                   whileHover={{ x: 5 }}
@@ -108,9 +87,9 @@ export function Hero() {
                 </motion.span>
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="font-normal bg-transparent text-foreground hover:bg-foreground hover:text-background border-foreground">
+            <Button size="lg" variant="outline" className="font-normal bg-transparent text-white hover:bg-white/10 border-white/30 hover:border-white">
               <Link href="#how-it-works">
-                See How It Works
+                View Case Studies
               </Link>
             </Button>
           </motion.div>
@@ -118,15 +97,22 @@ export function Hero() {
           {/* Trust indicator */}
           <motion.div
             variants={itemVariants}
-            className="mt-16 pt-16 border-t border-white/10"
+            className="mt-16 pt-16 border-t border-white/20"
           >
-            <motion.p
-              className="text-sm text-muted-foreground"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              Helping brands go viral.
-            </motion.p>
+            <div className="flex flex-col sm:flex-row gap-8 text-white/80">
+              <div>
+                <div className="text-3xl font-light text-white">20M+</div>
+                <div className="text-sm uppercase tracking-wider">Verified Views</div>
+              </div>
+              <div>
+                <div className="text-3xl font-light text-white">50%</div>
+                <div className="text-sm uppercase tracking-wider">Below Market CPM</div>
+              </div>
+              <div>
+                <div className="text-3xl font-light text-white">100+</div>
+                <div className="text-sm uppercase tracking-wider">Active Creators</div>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
       </div>
