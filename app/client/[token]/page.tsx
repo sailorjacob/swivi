@@ -300,8 +300,67 @@ export default function ClientPortalPage() {
             </Card>
           </div>
 
-          {/* Secondary Stats - Pages */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-4">
+          {/* Views Breakdown */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-4">
+            <Card>
+              <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+                <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                  <Eye className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="text-[10px] md:text-xs uppercase tracking-wide">Submitted Views</span>
+                </div>
+                <p className="text-xl md:text-3xl font-bold">{stats.totalSubmittedViews.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+                <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                  <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="text-[10px] md:text-xs uppercase tracking-wide">Approved (Paid)</span>
+                </div>
+                <p className="text-xl md:text-3xl font-bold">{stats.viewsAtCompletion.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+
+            {stats.viewsAfterCompletion > 0 && (
+              <Card>
+                <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+                  <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                    <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
+                    <span className="text-[10px] md:text-xs uppercase tracking-wide">Extra Tracked</span>
+                  </div>
+                  <p className="text-xl md:text-3xl font-bold">+{stats.viewsAfterCompletion.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Budget Progress */}
+          <Card className="mb-4">
+            <CardContent className="pt-4 md:pt-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <DollarSign className="w-4 h-4" />
+                  <span className="text-xs md:text-sm">Budget Progress</span>
+                </div>
+                <span className="text-xs md:text-sm font-medium">
+                  ${stats.spent.toLocaleString()} / ${stats.budget.toLocaleString()}
+                </span>
+              </div>
+              <div className="w-full bg-muted rounded-full h-3">
+                <div
+                  className="bg-green-500 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(stats.budgetUtilization, 100)}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 text-right">
+                {stats.budgetUtilization.toFixed(0)}% utilized
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Pages Stats */}
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8">
             <Card>
               <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
                 <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
@@ -327,75 +386,6 @@ export default function ClientPortalPage() {
               </CardContent>
             </Card>
           </div>
-
-          {/* Views Breakdown */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4">
-            <Card>
-              <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
-                <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-                  <Eye className="w-3 h-3 md:w-4 md:h-4" />
-                  <span className="text-[10px] md:text-xs uppercase tracking-wide">Submitted Views</span>
-                </div>
-                <p className="text-xl md:text-3xl font-bold">{stats.totalSubmittedViews.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
-                <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-                  <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
-                  <span className="text-[10px] md:text-xs uppercase tracking-wide">Approved (Paid)</span>
-                </div>
-                <p className="text-xl md:text-3xl font-bold">{stats.viewsAtCompletion.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
-                <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-                  <Clock className="w-3 h-3 md:w-4 md:h-4" />
-                  <span className="text-[10px] md:text-xs uppercase tracking-wide">Pending</span>
-                </div>
-                <p className="text-xl md:text-3xl font-bold">{stats.pendingViews.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-
-            {stats.viewsAfterCompletion > 0 && (
-              <Card>
-                <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
-                  <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-                    <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
-                    <span className="text-[10px] md:text-xs uppercase tracking-wide">Extra Tracked</span>
-                  </div>
-                  <p className="text-xl md:text-3xl font-bold">+{stats.viewsAfterCompletion.toLocaleString()}</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Budget Progress */}
-          <Card className="mb-6 md:mb-8">
-            <CardContent className="pt-4 md:pt-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <DollarSign className="w-4 h-4" />
-                  <span className="text-xs md:text-sm">Budget Progress</span>
-                </div>
-                <span className="text-xs md:text-sm font-medium">
-                  ${stats.spent.toLocaleString()} / ${stats.budget.toLocaleString()}
-                </span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-3">
-                <div
-                  className="bg-green-500 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(stats.budgetUtilization, 100)}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2 text-right">
-                {stats.budgetUtilization.toFixed(0)}% utilized
-              </p>
-            </CardContent>
-          </Card>
 
           {/* Platform Breakdown */}
           {Object.keys(platformStats).length > 0 && (
