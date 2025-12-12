@@ -22,13 +22,18 @@ export default function HomePage() {
         {/* Video Hero - Sticky, stays in background as you scroll */}
         <HeroVideo />
         
-        {/* Rest of content scrolls over video */}
-        <div className="relative z-10 bg-background">
-          <Founder />
-          <div className="space-y-8 md:space-y-16">
-            <Features />
-            <HowItWorks />
-            <FAQ />
+        {/* Rest of content scrolls over video with solid background */}
+        <div className="relative z-20">
+          {/* Solid background overlay to prevent video bleed-through */}
+          <div className="absolute inset-0 bg-background -z-10" />
+          
+          <div className="relative bg-background">
+            <Founder />
+            <div className="space-y-8 md:space-y-16">
+              <Features />
+              <HowItWorks />
+              <FAQ />
+            </div>
           </div>
         </div>
       </main>

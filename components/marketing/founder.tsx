@@ -11,7 +11,7 @@ export function Founder() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className="py-8 border-y border-black/5"
+      className="py-8 border-y border-black/5 bg-background relative"
     >
       <div className="max-width-wrapper section-padding">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-center sm:text-left">

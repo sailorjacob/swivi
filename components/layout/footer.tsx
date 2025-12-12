@@ -20,7 +20,7 @@ export function Footer() {
     : "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/SwiviLogo.png"
 
   return (
-    <footer className="border-t border-black/10 mt-auto relative">
+    <footer className="border-t border-black/10 mt-auto relative bg-background">
       <div className="max-width-wrapper section-padding py-12 md:py-16">
         <div className="flex flex-col items-center text-center space-y-6">
           {/* Logo and tagline */}

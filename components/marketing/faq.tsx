@@ -15,7 +15,7 @@ const faqs = [
 
 export function FAQ() {
   return (
-    <section className="py-20 md:py-32 border-t border-black/5">
+    <section className="py-20 md:py-32 border-t border-black/5 bg-background relative">
       <div className="max-width-wrapper section-padding">
         <div className="mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">

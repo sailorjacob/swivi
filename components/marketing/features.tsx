@@ -28,7 +28,7 @@ const useCases = [
 
 export function Features() {
   return (
-    <section id="services" className="py-20 md:py-32">
+    <section id="services" className="py-20 md:py-32 bg-background relative">
       <div className="max-width-wrapper section-padding">
         <div className="mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
