@@ -72,6 +72,21 @@ interface PayoutSummary {
   completedCampaignsCount: number
 }
 
+// Platform fee configuration - easily adjustable for different campaigns/scenarios
+// TODO: In future, this could come from campaign settings or be per-request configurable
+const PLATFORM_FEE_RATES = {
+  DEFAULT: 0.10,      // 10% - standard rate
+  REDUCED: 0.05,      // 5% - reduced rate for special campaigns
+  ZERO: 0,            // 0% - no fee (promotional)
+} as const
+
+// Helper to calculate payout after fee
+const calculatePayoutAfterFee = (amount: number, feeRate: number = PLATFORM_FEE_RATES.DEFAULT) => {
+  const fee = amount * feeRate
+  const netAmount = amount - fee
+  return { fee, netAmount, feeRate, feePercent: feeRate * 100 }
+}
+
 export default function AdminPayoutsPage() {
   const searchParams = useSearchParams()
   const highlightId = searchParams.get('highlight')
@@ -88,6 +103,9 @@ export default function AdminPayoutsPage() {
   const [summary, setSummary] = useState<PayoutSummary | null>(null)
   const [usersWithBalances, setUsersWithBalances] = useState<UserWithBalance[]>([])
   const [summaryLoading, setSummaryLoading] = useState(true)
+  
+  // Current platform fee rate - could be made dynamic per campaign in the future
+  const currentFeeRate = PLATFORM_FEE_RATES.DEFAULT
 
   useEffect(() => {
     fetchPayoutRequests()
@@ -238,6 +256,19 @@ export default function AdminPayoutsPage() {
                     <DollarSign className="w-6 h-6 text-muted-foreground" />
                     <span className="text-3xl font-bold">{request.amount.toFixed(2)}</span>
                   </div>
+                  {/* Fee Preview - shown for pending/processing */}
+                  {['PENDING', 'APPROVED', 'PROCESSING'].includes(request.status) && currentFeeRate > 0 && (
+                    <div className="mt-2 pt-2 border-t border-dashed text-xs text-muted-foreground">
+                      <div className="flex justify-between">
+                        <span>Fee ({currentFeeRate * 100}%):</span>
+                        <span>−${(request.amount * currentFeeRate).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-medium text-foreground mt-1">
+                        <span>To send:</span>
+                        <span>${(request.amount * (1 - currentFeeRate)).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Payment Details */}
@@ -747,20 +778,22 @@ export default function AdminPayoutsPage() {
                       <span className="text-muted-foreground">Requested amount:</span>
                       <span className="text-muted-foreground">${selectedRequest.amount.toFixed(2)}</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Platform fee (10%):</span>
-                      <span className="text-muted-foreground">−${(selectedRequest.amount * 0.10).toFixed(2)}</span>
-                    </div>
+                    {currentFeeRate > 0 && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Platform fee ({currentFeeRate * 100}%):</span>
+                        <span className="text-muted-foreground">−${(selectedRequest.amount * currentFeeRate).toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="border-t border-dashed my-2" />
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Amount to send:</span>
                       <div className="flex items-center gap-1">
-                        <span className="text-lg font-bold text-foreground">${(selectedRequest.amount * 0.90).toFixed(2)}</span>
+                        <span className="text-lg font-bold text-foreground">${(selectedRequest.amount * (1 - currentFeeRate)).toFixed(2)}</span>
                         <Button
                           variant="ghost"
                           size="sm"
                           className="h-6 px-2"
-                          onClick={() => copyToClipboard((selectedRequest.amount * 0.90).toFixed(2), 'Amount to send')}
+                          onClick={() => copyToClipboard((selectedRequest.amount * (1 - currentFeeRate)).toFixed(2), 'Amount to send')}
                         >
                           <Copy className="w-3 h-3" />
                         </Button>
