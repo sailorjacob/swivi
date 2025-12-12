@@ -4,6 +4,32 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+// Helper to extract handle from URL
+function extractHandleFromUrl(url: string, platform: string): string | null {
+  try {
+    const urlObj = new URL(url)
+    const pathname = urlObj.pathname
+    
+    if (platform === 'TIKTOK') {
+      const match = pathname.match(/@([^\/]+)/)
+      return match ? match[1] : null
+    } else if (platform === 'YOUTUBE') {
+      const match = pathname.match(/@([^\/]+)/) || pathname.match(/channel\/([^\/]+)/)
+      return match ? match[1] : null
+    } else if (platform === 'INSTAGRAM') {
+      const match = pathname.match(/(?:reel|p)\/[^\/]+/) 
+      const parts = pathname.split('/')
+      return parts[1] || null
+    } else if (platform === 'TWITTER') {
+      const parts = pathname.split('/')
+      return parts[1] || null
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { token: string } }
@@ -15,7 +41,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid token" }, { status: 400 })
     }
 
-    // Find campaign by client access token
+    // Find campaign by client access token - get ALL submissions
     const campaign = await prisma.campaign.findUnique({
       where: { clientAccessToken: token },
       select: {
@@ -41,39 +67,33 @@ export async function GET(
           }
         },
         clipSubmissions: {
-          where: {
-            status: { in: ['APPROVED', 'PAID'] }
-          },
           select: {
             id: true,
             clipUrl: true,
             platform: true,
             status: true,
             initialViews: true,
+            earnings: true,
+            userId: true,
             createdAt: true,
             users: {
               select: {
+                id: true,
                 name: true,
+                email: true,
                 image: true
               }
             },
             socialAccount: {
               select: {
                 username: true,
-                platform: true
+                platform: true,
+                verified: true
               }
             },
             clips: {
               select: {
-                views: true,
-                view_tracking: {
-                  orderBy: { scrapedAt: 'desc' },
-                  take: 1,
-                  select: {
-                    views: true,
-                    scrapedAt: true
-                  }
-                }
+                views: true
               }
             }
           },
@@ -86,27 +106,38 @@ export async function GET(
       return NextResponse.json({ error: "Campaign not found" }, { status: 404 })
     }
 
-    // Need to get all submissions for total counts per platform
-    const allSubmissions = await prisma.clipSubmission.findMany({
-      where: { campaignId: campaign.id },
-      select: {
-        platform: true
-      }
-    })
-    
     // Calculate stats
-    const totalSubmissions = campaign._count.clipSubmissions
-    const approvedSubmissions = campaign.clipSubmissions.length
-    
-    // Use budgetReachedViews as a snapshot of views when campaign budget was reached
+    const budgetNum = Number(campaign.budget || 0)
+    const spentNum = Number(campaign.spent || 0)
+    const payoutRate = Number(campaign.payoutRate || 0)
+    const budgetUtilization = budgetNum > 0 ? (spentNum / budgetNum) * 100 : 0
+    const remainingBudget = Math.max(0, budgetNum - spentNum)
     const budgetReachedViews = Number(campaign.budgetReachedViews || 0)
     
-    // Calculate total views and views gained
-    let totalViews = 0
-    let viewsDuringCampaign = 0
-    let viewsAfterCampaign = 0
+    // Track unique clippers and pages
+    const uniqueClipperIds = new Set<string>()
+    const uniqueApprovedClipperIds = new Set<string>()
     
-    // Initialize platform stats with total submission counts
+    // Handle stats map for page tracking
+    const handleStatsMap = new Map<string, {
+      platform: string
+      username: string
+      isVerified: boolean
+      clipCount: number
+      approvedClipCount: number
+      totalViews: number
+      approvedViews: number
+    }>()
+
+    let totalViews = 0
+    let totalSubmittedViews = 0
+    let approvedViews = 0
+    let pendingViews = 0
+    let approvedCount = 0
+    let pendingCount = 0
+    let rejectedCount = 0
+    let totalEarnings = 0
+    
     const platformStats: Record<string, { 
       totalSubmissions: number
       approvedSubmissions: number
@@ -115,7 +146,65 @@ export async function GET(
       additionalViews: number
     }> = {}
     
-    allSubmissions.forEach(sub => {
+    // Process all submissions
+    const processedSubmissions = campaign.clipSubmissions.map(sub => {
+      const initialViews = Number(sub.initialViews || 0)
+      const currentViews = Number(sub.clips?.views || 0)
+      const viewsGained = Math.max(0, currentViews - initialViews)
+      const earnings = Number(sub.earnings || 0)
+      const isApproved = sub.status === 'APPROVED' || sub.status === 'PAID'
+      const isPending = sub.status === 'PENDING'
+      const isRejected = sub.status === 'REJECTED'
+      
+      // Track unique clippers
+      uniqueClipperIds.add(sub.userId)
+      if (isApproved) {
+        uniqueApprovedClipperIds.add(sub.userId)
+        approvedCount++
+        approvedViews += currentViews
+        totalEarnings += earnings
+      } else if (isPending) {
+        pendingCount++
+        pendingViews += currentViews
+      } else if (isRejected) {
+        rejectedCount++
+      }
+      
+      // Total submitted views = approved + pending only
+      if (!isRejected) {
+        totalSubmittedViews += currentViews
+      }
+      
+      // Track page/handle stats
+      const verifiedHandle = sub.socialAccount?.username
+      const urlHandle = extractHandleFromUrl(sub.clipUrl, sub.platform)
+      const handle = verifiedHandle || urlHandle || sub.users.email?.split('@')[0] || sub.users.id
+      const isVerified = !!verifiedHandle && sub.socialAccount?.verified === true
+      const key = `${sub.platform}:${handle.toLowerCase()}`
+      
+      const existing = handleStatsMap.get(key)
+      if (existing) {
+        existing.clipCount++
+        if (!isRejected) {
+          existing.totalViews += currentViews
+        }
+        if (isApproved) {
+          existing.approvedClipCount++
+          existing.approvedViews += currentViews
+        }
+      } else {
+        handleStatsMap.set(key, {
+          platform: sub.platform,
+          username: handle,
+          isVerified,
+          clipCount: 1,
+          approvedClipCount: isApproved ? 1 : 0,
+          totalViews: !isRejected ? currentViews : 0,
+          approvedViews: isApproved ? currentViews : 0
+        })
+      }
+      
+      // Platform stats
       const platform = sub.platform
       if (!platformStats[platform]) {
         platformStats[platform] = { 
@@ -127,30 +216,12 @@ export async function GET(
         }
       }
       platformStats[platform].totalSubmissions++
-    })
-    
-    const processedSubmissions = campaign.clipSubmissions.map(sub => {
-      const initialViews = Number(sub.initialViews || 0)
-      const currentViews = Number(sub.clips?.views || 0)
-      const viewsGained = Math.max(0, currentViews - initialViews)
-      
-      totalViews += currentViews
-      viewsDuringCampaign += viewsGained
-      
-      // Platform stats for approved submissions
-      const platform = sub.platform
-      if (!platformStats[platform]) {
-        platformStats[platform] = { 
-          totalSubmissions: 0, 
-          approvedSubmissions: 0, 
-          totalViews: 0,
-          budgetViews: 0,
-          additionalViews: 0
-        }
+      if (isApproved) {
+        platformStats[platform].approvedSubmissions++
+        platformStats[platform].totalViews += currentViews
+        totalViews += currentViews
       }
-      platformStats[platform].approvedSubmissions++
-      platformStats[platform].totalViews += currentViews
-      
+
       return {
         id: sub.id,
         clipUrl: sub.clipUrl,
@@ -161,25 +232,31 @@ export async function GET(
         initialViews,
         currentViews,
         viewsGained,
+        earnings,
         submittedAt: sub.createdAt
       }
     })
-
-    // Sort by views gained (highest first)
-    processedSubmissions.sort((a, b) => b.viewsGained - a.viewsGained)
-
-    // Calculate budget utilization
-    const budgetNum = Number(campaign.budget || 0)
-    const spentNum = Number(campaign.spent || 0)
-    const budgetUtilization = budgetNum > 0 ? (spentNum / budgetNum) * 100 : 0
-    const remainingBudget = Math.max(0, budgetNum - spentNum)
     
-    // Calculate views after campaign if we have budget reached data
+    // Get page stats
+    const allSubmittedPages = Array.from(handleStatsMap.values())
+    const totalPagesSubmitted = allSubmittedPages.length
+    const approvedPages = allSubmittedPages.filter(p => p.approvedClipCount > 0)
+    const uniquePages = approvedPages.length
+    const verifiedPages = approvedPages.filter(p => p.isVerified).length
+    
+    // Views at completion (views that generated earnings)
+    const viewsAtCompletion = payoutRate > 0 ? Math.round(totalEarnings / payoutRate * 1000) : approvedViews
+    const viewsAfterCompletion = Math.max(0, approvedViews - viewsAtCompletion)
+    
+    // Views during campaign vs after
+    let viewsDuringCampaign = approvedViews
+    let viewsAfterCampaign = 0
+    
     if (budgetReachedViews > 0 && totalViews > budgetReachedViews) {
       viewsAfterCampaign = totalViews - budgetReachedViews
       viewsDuringCampaign = budgetReachedViews
       
-      // Proportionally split views per platform based on the overall ratio
+      // Proportionally split views per platform
       const budgetRatio = budgetReachedViews / totalViews
       Object.keys(platformStats).forEach(platform => {
         const platformTotalViews = platformStats[platform].totalViews
@@ -187,12 +264,17 @@ export async function GET(
         platformStats[platform].additionalViews = platformTotalViews - platformStats[platform].budgetViews
       })
     } else {
-      // No budget reached data, all views are budget views
       Object.keys(platformStats).forEach(platform => {
         platformStats[platform].budgetViews = platformStats[platform].totalViews
         platformStats[platform].additionalViews = 0
       })
     }
+    
+    // Filter to approved submissions for display, sorted by views
+    const approvedSubmissionsList = processedSubmissions
+      .filter(sub => sub.status === 'APPROVED' || sub.status === 'PAID')
+      .sort((a, b) => b.currentViews - a.currentViews)
+      .slice(0, 50) // Limit to top 50 for performance
 
     return NextResponse.json({
       campaign: {
@@ -213,19 +295,36 @@ export async function GET(
         spent: spentNum,
         remainingBudget,
         budgetUtilization: Math.min(budgetUtilization, 100),
-        totalSubmissions,
-        approvedSubmissions,
-        totalViews,
+        payoutRate,
+        // Submission counts
+        totalSubmissions: campaign._count.clipSubmissions,
+        approvedSubmissions: approvedCount,
+        pendingSubmissions: pendingCount,
+        rejectedSubmissions: rejectedCount,
+        // Clipper counts
+        uniqueClippers: uniqueClipperIds.size,
+        uniqueApprovedClippers: uniqueApprovedClipperIds.size,
+        // Page counts
+        totalPagesSubmitted,
+        uniquePages,
+        verifiedPages,
+        // Views metrics
+        totalViews: approvedViews,
+        totalSubmittedViews,
+        approvedViews,
+        pendingViews,
+        viewsAtCompletion,
+        viewsAfterCompletion,
         viewsDuringCampaign,
         viewsAfterCampaign,
-        payoutRate: Number(campaign.payoutRate)
+        // Earnings
+        totalEarnings
       },
       platformStats,
-      submissions: processedSubmissions.slice(0, 50) // Limit to top 50 for performance
+      submissions: approvedSubmissionsList
     })
   } catch (error) {
     console.error("Error fetching client portal data:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
-

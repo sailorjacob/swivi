@@ -42,12 +42,30 @@ interface DashboardData {
     budget: number
     spent: number
     budgetUtilization: number
+    payoutRate: number
+    // Submission counts
     totalSubmissions: number
     approvedSubmissions: number
+    pendingSubmissions: number
+    rejectedSubmissions: number
+    // Clipper counts
+    uniqueClippers: number
+    uniqueApprovedClippers: number
+    // Page counts
+    totalPagesSubmitted: number
+    uniquePages: number
+    verifiedPages: number
+    // Views metrics
     totalViews: number
+    totalSubmittedViews: number
+    approvedViews: number
+    pendingViews: number
+    viewsAtCompletion: number
+    viewsAfterCompletion: number
     viewsDuringCampaign: number
     viewsAfterCampaign: number
-    payoutRate: number
+    // Earnings
+    totalEarnings: number
   }
   platformStats: Record<string, { 
     totalSubmissions: number
@@ -219,34 +237,35 @@ export default function PartnerDashboardPage() {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
+        {/* Primary Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4">
           <Card>
             <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
               <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-                <Eye className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="text-[10px] md:text-xs uppercase tracking-wide">Budget Views</span>
+                <Target className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Submissions</span>
               </div>
-              <p className="text-xl md:text-3xl font-bold">{stats.viewsDuringCampaign.toLocaleString()}</p>
-              {stats.viewsAfterCampaign > 0 && (
-                <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                  <TrendingUp className="w-3 h-3" />
-                  +{stats.viewsAfterCampaign.toLocaleString()} since end
-                </p>
-              )}
+              <p className="text-xl md:text-3xl font-bold">{stats.totalSubmissions}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
               <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-                <Users className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="text-[10px] md:text-xs uppercase tracking-wide">Posts</span>
+                <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Approved</span>
               </div>
               <p className="text-xl md:text-3xl font-bold">{stats.approvedSubmissions}</p>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                of {stats.totalSubmissions} submitted
-              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                <Eye className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Total Views</span>
+              </div>
+              <p className="text-xl md:text-3xl font-bold">{stats.totalViews.toLocaleString()}</p>
             </CardContent>
           </Card>
 
@@ -254,12 +273,32 @@ export default function PartnerDashboardPage() {
             <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
               <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
                 <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="text-[10px] md:text-xs uppercase tracking-wide">Budget Used</span>
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Earnings</span>
               </div>
-              <p className="text-xl md:text-3xl font-bold">${stats.spent.toLocaleString()}</p>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                of ${stats.budget.toLocaleString()}
-              </p>
+              <p className="text-xl md:text-3xl font-bold">${stats.totalEarnings.toLocaleString()}</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Secondary Stats - Clippers & Pages */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4">
+          <Card>
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                <Users className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Clippers</span>
+              </div>
+              <p className="text-xl md:text-3xl font-bold">{stats.uniqueClippers}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Clippers Paid</span>
+              </div>
+              <p className="text-xl md:text-3xl font-bold">{stats.uniqueApprovedClippers}</p>
             </CardContent>
           </Card>
 
@@ -267,18 +306,96 @@ export default function PartnerDashboardPage() {
             <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
               <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
                 <BarChart3 className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="text-[10px] md:text-xs uppercase tracking-wide">Progress</span>
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Pages</span>
               </div>
-              <p className="text-xl md:text-3xl font-bold">{stats.budgetUtilization.toFixed(0)}%</p>
-              <div className="w-full bg-muted rounded-full h-2 mt-2">
-                <div
-                  className="bg-green-500 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(stats.budgetUtilization, 100)}%` }}
-                />
+              <p className="text-xl md:text-3xl font-bold">{stats.totalPagesSubmitted}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Pages Approved</span>
               </div>
+              <p className="text-xl md:text-3xl font-bold">{stats.uniquePages}</p>
+              {stats.verifiedPages > 0 && (
+                <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
+                  {stats.verifiedPages} verified
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
+
+        {/* Views Breakdown */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4">
+          <Card>
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                <Eye className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Submitted Views</span>
+              </div>
+              <p className="text-xl md:text-3xl font-bold">{stats.totalSubmittedViews.toLocaleString()}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Approved (Paid)</span>
+              </div>
+              <p className="text-xl md:text-3xl font-bold">{stats.viewsAtCompletion.toLocaleString()}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                <Clock className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">Pending</span>
+              </div>
+              <p className="text-xl md:text-3xl font-bold">{stats.pendingViews.toLocaleString()}</p>
+            </CardContent>
+          </Card>
+
+          {stats.viewsAfterCompletion > 0 && (
+            <Card>
+              <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+                <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+                  <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="text-[10px] md:text-xs uppercase tracking-wide">Extra Tracked</span>
+                </div>
+                <p className="text-xl md:text-3xl font-bold">+{stats.viewsAfterCompletion.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Budget Progress */}
+        <Card className="mb-6 md:mb-8">
+          <CardContent className="pt-4 md:pt-6">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <DollarSign className="w-4 h-4" />
+                <span className="text-xs md:text-sm">Budget Progress</span>
+              </div>
+              <span className="text-xs md:text-sm font-medium">
+                ${stats.spent.toLocaleString()} / ${stats.budget.toLocaleString()}
+              </span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-3">
+              <div
+                className="bg-green-500 h-3 rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(stats.budgetUtilization, 100)}%` }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 text-right">
+              {stats.budgetUtilization.toFixed(0)}% utilized
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Platform Breakdown */}
         {Object.keys(platformStats).length > 0 && (
