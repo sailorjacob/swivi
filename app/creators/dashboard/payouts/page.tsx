@@ -381,6 +381,17 @@ export default function PayoutsPage() {
               </div>
 
 
+              {/* USDC Info Alert */}
+              {payoutMethod === 'ETHEREUM' && (
+                <div className="p-3 bg-muted/50 border border-border rounded-lg text-sm flex items-start gap-2">
+                  <Info className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground">USDC on Ethereum Mainnet</p>
+                    <p className="text-xs mt-1 text-muted-foreground">Receive USDC on the default Ethereum chain. NOT <span className="line-through text-red-400">Base</span>, <span className="line-through text-red-400">Optimism</span>, or <span className="line-through text-red-400">Polygon</span>. Please make sure your wallet address is correct.</p>
+                  </div>
+                </div>
+              )}
+
               <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
                 <p className="font-medium text-foreground mb-1">Processing Time:</p>
                 <p>• PayPal: 1-3 business days</p>
