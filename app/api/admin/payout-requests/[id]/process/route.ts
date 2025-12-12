@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
 const processPayoutSchema = z.object({
-  action: z.enum(['approve', 'reject', 'complete']),
+  action: z.enum(['approve', 'reject', 'complete', 'revert']),
   transactionId: z.string().optional(),
   notes: z.string().optional()
 })
@@ -68,8 +68,8 @@ export async function POST(
     // State machine validation
     const validTransitions: Record<string, string[]> = {
       'PENDING': ['approve', 'reject'],
-      'APPROVED': ['complete', 'reject'],
-      'PROCESSING': ['complete', 'reject'],
+      'APPROVED': ['complete', 'reject', 'revert'],
+      'PROCESSING': ['complete', 'reject', 'revert'],
       'COMPLETED': [], // Cannot change completed
       'REJECTED': [], // Cannot change rejected
       'CANCELLED': [] // Cannot change cancelled
@@ -114,6 +114,21 @@ export async function POST(
 
       console.log(`📝 PAYOUT APPROVED: Admin ${adminUser.email} approved request ${payoutRequestId} for $${Number(payoutRequest.amount).toFixed(2)}`)
       notificationMessage = `Your payout request for $${Number(payoutRequest.amount).toFixed(2)} has been approved and is being processed.`
+
+    } else if (validatedData.action === 'revert') {
+      // Revert from APPROVED/PROCESSING back to PENDING
+      await prisma.payoutRequest.update({
+        where: { id: payoutRequestId },
+        data: {
+          status: 'PENDING',
+          processedBy: null,
+          processedAt: null,
+          notes: validatedData.notes || 'Reverted to pending by admin'
+        }
+      })
+
+      console.log(`📝 PAYOUT REVERTED: Admin ${adminUser.email} reverted request ${payoutRequestId} back to pending`)
+      notificationMessage = `Your payout request for $${Number(payoutRequest.amount).toFixed(2)} has been moved back to pending status.`
 
     } else if (validatedData.action === 'complete') {
       // Complete the payout - money has been sent
@@ -253,12 +268,17 @@ export async function POST(
       }
     })
 
+    const newStatus = validatedData.action === 'complete' ? 'COMPLETED' 
+      : validatedData.action === 'reject' ? 'REJECTED' 
+      : validatedData.action === 'revert' ? 'PENDING'
+      : 'APPROVED'
+
     return NextResponse.json({
       success: true,
-      message: `Payout request ${validatedData.action}d successfully`,
+      message: `Payout request ${validatedData.action === 'revert' ? 'reverted to pending' : validatedData.action + 'd'} successfully`,
       payoutRequest: {
         id: payoutRequestId,
-        status: validatedData.action === 'complete' ? 'COMPLETED' : validatedData.action === 'reject' ? 'REJECTED' : 'APPROVED'
+        status: newStatus
       }
     })
 

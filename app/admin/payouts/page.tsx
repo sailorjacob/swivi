@@ -263,14 +263,20 @@ export default function AdminPayoutsPage() {
                     <CreditCard className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="text-xs text-muted-foreground">Payment Method</div>
-                      <div className="font-medium truncate">
+                      <div className="font-medium">
                         {request.paymentMethod === 'PAYPAL' ? 'PayPal' :
                          request.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' :
                          request.paymentMethod === 'ETHEREUM' ? 'USDC (Ethereum)' :
                          request.paymentMethod === 'BITCOIN' ? 'Bitcoin' :
                          request.paymentMethod}
                       </div>
-                      <div className="text-xs text-muted-foreground truncate">{request.paymentDetails}</div>
+                      <button 
+                        onClick={() => copyToClipboard(request.paymentDetails, 'Payment details')}
+                        className="text-xs text-muted-foreground hover:text-foreground break-all text-left flex items-start gap-1 group"
+                      >
+                        <span className="break-all">{request.paymentDetails}</span>
+                        <Copy className="w-3 h-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5" />
+                      </button>
                     </div>
                   </div>
 
@@ -345,7 +351,7 @@ export default function AdminPayoutsPage() {
                       onClick={() => {
                         setSelectedRequest(request)
                         setNotes(request.notes || '')
-                        handleProcess('approve')
+                        setProcessDialogOpen(true)
                       }}
                     >
                       <Check className="w-3.5 h-3.5 mr-1.5" />
@@ -726,7 +732,7 @@ export default function AdminPayoutsPage() {
               </div>
 
               {/* Payment Details */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
                 <div className="border rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <CreditCard className="w-4 h-4 text-muted-foreground" />
@@ -741,11 +747,24 @@ export default function AdminPayoutsPage() {
                   </div>
                 </div>
                 <div className="border rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    <label className="text-xs font-medium text-muted-foreground">Payment Details</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <Wallet className="w-4 h-4 text-muted-foreground" />
+                      <label className="text-xs font-medium text-muted-foreground">Payment Address / Details</label>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs"
+                      onClick={() => copyToClipboard(selectedRequest.paymentDetails, 'Payment details')}
+                    >
+                      <Copy className="w-3 h-3 mr-1" />
+                      Copy
+                    </Button>
                   </div>
-                  <div className="text-sm font-semibold truncate">{selectedRequest.paymentDetails}</div>
+                  <div className="text-sm font-mono bg-muted/50 p-2 rounded break-all select-all">
+                    {selectedRequest.paymentDetails}
+                  </div>
                 </div>
               </div>
 
@@ -786,7 +805,7 @@ export default function AdminPayoutsPage() {
                   <div>
                     <label className="text-sm font-medium mb-2 block">Transaction ID *</label>
                     <Input
-                      placeholder="Enter transaction ID from payment provider (e.g., PayPal, Stripe)"
+                      placeholder="Enter transaction ID from payment provider (e.g., PayPal, blockchain tx hash)"
                       value={transactionId}
                       onChange={(e) => setTransactionId(e.target.value)}
                     />
@@ -802,11 +821,20 @@ export default function AdminPayoutsPage() {
                     />
                   </div>
 
-                  <DialogFooter>
+                  <DialogFooter className="flex-col sm:flex-row gap-2">
                     <Button
-                      className="w-full"
+                      variant="outline"
+                      onClick={() => handleProcess('revert')}
+                      disabled={processing}
+                      className="sm:flex-1"
+                    >
+                      <Clock className="w-4 h-4 mr-2" />
+                      Move Back to Pending
+                    </Button>
+                    <Button
                       onClick={() => handleProcess('complete')}
                       disabled={processing || !transactionId}
+                      className="sm:flex-1"
                     >
                       <CheckCircle2 className="w-4 h-4 mr-2" />
                       Mark as Paid & Complete
