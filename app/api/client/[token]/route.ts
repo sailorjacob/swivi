@@ -73,7 +73,7 @@ export async function GET(
             platform: true,
             status: true,
             initialViews: true,
-            earnings: true,
+            finalEarnings: true,
             userId: true,
             createdAt: true,
             users: {
@@ -93,7 +93,8 @@ export async function GET(
             },
             clips: {
               select: {
-                views: true
+                views: true,
+                earnings: true
               }
             }
           },
@@ -151,7 +152,7 @@ export async function GET(
       const initialViews = Number(sub.initialViews || 0)
       const currentViews = Number(sub.clips?.views || 0)
       const viewsGained = Math.max(0, currentViews - initialViews)
-      const earnings = Number(sub.earnings || 0)
+      const earnings = Number(sub.finalEarnings || sub.clips?.earnings || 0)
       const isApproved = sub.status === 'APPROVED' || sub.status === 'PAID'
       const isPending = sub.status === 'PENDING'
       const isRejected = sub.status === 'REJECTED'
