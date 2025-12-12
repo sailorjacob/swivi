@@ -280,28 +280,8 @@ export default function PartnerDashboardPage() {
           </Card>
         </div>
 
-        {/* Secondary Stats - Clippers & Pages */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4">
-          <Card>
-            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
-              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-                <Users className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="text-[10px] md:text-xs uppercase tracking-wide">Clippers</span>
-              </div>
-              <p className="text-xl md:text-3xl font-bold">{stats.uniqueClippers}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
-              <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-                <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="text-[10px] md:text-xs uppercase tracking-wide">Clippers Paid</span>
-              </div>
-              <p className="text-xl md:text-3xl font-bold">{stats.uniqueApprovedClippers}</p>
-            </CardContent>
-          </Card>
-
+        {/* Secondary Stats - Pages */}
+        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-4">
           <Card>
             <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
               <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
