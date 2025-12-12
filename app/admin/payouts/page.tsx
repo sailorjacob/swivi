@@ -741,24 +741,30 @@ export default function AdminPayoutsPage() {
                 
                 {/* Platform Fee Calculation - Admin View */}
                 <div className="mt-3 p-3 bg-muted/50 rounded-lg border border-dashed">
-                  <div className="text-xs text-muted-foreground mb-2">💡 Admin: Amount to Send (after 10% platform fee)</div>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm">
+                  <div className="text-xs text-muted-foreground mb-2">💡 Admin: Payout Breakdown</div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Requested amount:</span>
                       <span className="text-muted-foreground">${selectedRequest.amount.toFixed(2)}</span>
-                      <span className="text-muted-foreground mx-2">−</span>
-                      <span className="text-muted-foreground">${(selectedRequest.amount * 0.10).toFixed(2)} (10%)</span>
-                      <span className="text-muted-foreground mx-2">=</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-lg font-bold text-foreground">${(selectedRequest.amount * 0.90).toFixed(2)}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2"
-                        onClick={() => copyToClipboard((selectedRequest.amount * 0.90).toFixed(2), 'Amount to send')}
-                      >
-                        <Copy className="w-3 h-3" />
-                      </Button>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Platform fee (10%):</span>
+                      <span className="text-muted-foreground">−${(selectedRequest.amount * 0.10).toFixed(2)}</span>
+                    </div>
+                    <div className="border-t border-dashed my-2" />
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Amount to send:</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-lg font-bold text-foreground">${(selectedRequest.amount * 0.90).toFixed(2)}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2"
+                          onClick={() => copyToClipboard((selectedRequest.amount * 0.90).toFixed(2), 'Amount to send')}
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
