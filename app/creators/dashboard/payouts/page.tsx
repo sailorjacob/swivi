@@ -380,16 +380,6 @@ export default function PayoutsPage() {
                 </Select>
               </div>
 
-              {/* USDC Info Alert */}
-              {payoutMethod === 'ETHEREUM' && (
-                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-sm flex items-start gap-2">
-                  <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                  <div className="text-blue-200">
-                    <p className="font-medium">USDC on Ethereum Mainnet</p>
-                    <p className="text-xs mt-1 text-blue-300/80">Receive USDC on the default Ethereum chain. NOT <span className="line-through text-red-400">Base</span>, <span className="line-through text-red-400">Optimism</span>, or <span className="line-through text-red-400">Polygon</span>. Please make sure your wallet address is correct.</p>
-                  </div>
-                </div>
-              )}
 
               <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
                 <p className="font-medium text-foreground mb-1">Processing Time:</p>
