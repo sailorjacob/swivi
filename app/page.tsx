@@ -7,6 +7,7 @@ import { Features } from "@/components/marketing/features"
 import { HowItWorks } from "@/components/marketing/how-it-works"
 import { FAQ } from "@/components/marketing/faq"
 import { Founder } from "@/components/marketing/founder"
+import { BrandJourney } from "@/components/marketing/brand-journey"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 
@@ -17,6 +18,7 @@ export default function HomePage() {
       <main className="flex min-h-screen flex-col pt-16">
         <Hero />
         <Founder />
+        <BrandJourney />
         <div className="space-y-8 md:space-y-16">
           <Features />
           <HowItWorks />
