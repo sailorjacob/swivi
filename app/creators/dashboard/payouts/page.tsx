@@ -369,8 +369,8 @@ export default function PayoutsPage() {
                             <TooltipTrigger asChild>
                               <Info className="w-3.5 h-3.5 text-muted-foreground" />
                             </TooltipTrigger>
-                            <TooltipContent side="right" className="max-w-[250px]">
-                              <p className="text-xs">Receive USDC on the default Ethereum chain. NOT Base, Optimism, or Polygon. Please make sure your wallet address is correct.</p>
+                            <TooltipContent side="right" className="max-w-[280px]">
+                              <p className="text-xs">Receive USDC on the default Ethereum chain. NOT <span className="line-through text-red-400">Base</span>, <span className="line-through text-red-400">Optimism</span>, or <span className="line-through text-red-400">Polygon</span>. Please make sure your wallet address is correct.</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -386,7 +386,7 @@ export default function PayoutsPage() {
                   <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
                   <div className="text-blue-200">
                     <p className="font-medium">USDC on Ethereum Mainnet</p>
-                    <p className="text-xs mt-1 text-blue-300/80">Receive USDC on the default Ethereum chain. NOT Base, Optimism, or Polygon. Please make sure your wallet address is correct.</p>
+                    <p className="text-xs mt-1 text-blue-300/80">Receive USDC on the default Ethereum chain. NOT <span className="line-through text-red-400">Base</span>, <span className="line-through text-red-400">Optimism</span>, or <span className="line-through text-red-400">Polygon</span>. Please make sure your wallet address is correct.</p>
                   </div>
                 </div>
               )}
@@ -466,8 +466,8 @@ export default function PayoutsPage() {
                       <TooltipTrigger asChild>
                         <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
                       </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-[250px]">
-                        <p className="text-xs">Receive USDC on the default Ethereum chain. NOT Base, Optimism, or Polygon. Please make sure your wallet address is correct.</p>
+                      <TooltipContent side="right" className="max-w-[280px]">
+                        <p className="text-xs">Receive USDC on the default Ethereum chain. NOT <span className="line-through text-red-400">Base</span>, <span className="line-through text-red-400">Optimism</span>, or <span className="line-through text-red-400">Polygon</span>. Please make sure your wallet address is correct.</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -483,7 +483,7 @@ export default function PayoutsPage() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  USDC on Ethereum Mainnet only (not Base, Optimism, or Polygon)
+                  USDC on Ethereum Mainnet only
                 </p>
               </div>
 
