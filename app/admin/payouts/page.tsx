@@ -17,7 +17,7 @@ import {
   DialogFooter
 } from '@/components/ui/dialog'
 import { DollarSign, Check, X, Clock, AlertCircle, User, Mail, CreditCard, Calendar, FileText, CheckCircle2, XCircle, Wallet, Copy, Users, Target, RefreshCw } from 'lucide-react'
-import { useToast } from '@/components/ui/use-toast'
+import toast from 'react-hot-toast'
 
 interface PayoutRequest {
   id: string
@@ -82,7 +82,6 @@ export default function AdminPayoutsPage() {
   const [summary, setSummary] = useState<PayoutSummary | null>(null)
   const [usersWithBalances, setUsersWithBalances] = useState<UserWithBalance[]>([])
   const [summaryLoading, setSummaryLoading] = useState(true)
-  const { toast } = useToast()
 
   useEffect(() => {
     fetchPayoutRequests()
@@ -120,10 +119,7 @@ export default function AdminPayoutsPage() {
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
-    toast({
-      title: 'Copied!',
-      description: `${label} copied to clipboard`
-    })
+    toast.success(`${label} copied!`, { duration: 2000 })
   }
 
   const fetchPayoutRequests = async (status?: string) => {
@@ -139,18 +135,10 @@ export default function AdminPayoutsPage() {
       if (response.ok) {
         setPayoutRequests(data.payoutRequests)
       } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to fetch payout requests',
-          variant: 'destructive'
-        })
+        toast.error(data.error || 'Failed to fetch payout requests')
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch payout requests',
-        variant: 'destructive'
-      })
+      toast.error('Failed to fetch payout requests')
     } finally {
       setLoading(false)
     }
@@ -175,28 +163,17 @@ export default function AdminPayoutsPage() {
       const data = await response.json()
 
       if (response.ok) {
-        toast({
-          title: 'Success',
-          description: data.message
-        })
+        toast.success(data.message)
         
         setProcessDialogOpen(false)
         setTransactionId('')
         setNotes('')
         fetchPayoutRequests()
       } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to process payout request',
-          variant: 'destructive'
-        })
+        toast.error(data.error || 'Failed to process payout request')
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to process payout request',
-        variant: 'destructive'
-      })
+      toast.error('Failed to process payout request')
     } finally {
       setProcessing(false)
     }
