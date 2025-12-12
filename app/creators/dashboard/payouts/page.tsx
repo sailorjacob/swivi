@@ -341,11 +341,8 @@ export default function PayoutsPage() {
 
               <div>
                 <Label htmlFor="payout-method">Payout Method</Label>
-                <Select value={payoutMethod} onValueChange={(value) => {
-                  // Only allow PayPal for now
-                  if (value === 'PAYPAL') {
-                    setPayoutMethod(value)
-                  }
+                <Select value={payoutMethod} onValueChange={(value: 'PAYPAL' | 'BANK_TRANSFER' | 'STRIPE' | 'ETHEREUM' | 'BITCOIN') => {
+                  setPayoutMethod(value)
                 }} required>
                   <SelectTrigger id="payout-method" className="mt-1">
                     <SelectValue placeholder="Select payout method" />
@@ -355,6 +352,12 @@ export default function PayoutsPage() {
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4" />
                         PayPal
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="BITCOIN">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="w-4 h-4" />
+                        Bitcoin
                       </div>
                     </SelectItem>
                     <SelectItem value="ETHEREUM">
@@ -371,12 +374,6 @@ export default function PayoutsPage() {
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="BITCOIN">
-                      <div className="flex items-center gap-2">
-                        <Wallet className="w-4 h-4" />
-                        Bitcoin
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -397,8 +394,8 @@ export default function PayoutsPage() {
               <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
                 <p className="font-medium text-foreground mb-1">Processing Time:</p>
                 <p>• PayPal: 1-3 business days</p>
-                <p>• USDC (Ethereum): 1-2 business days</p>
-                <p>• Bitcoin: 1-2 business days</p>
+                <p>• Bitcoin: 3-4 hours</p>
+                <p>• USDC (Ethereum): 1-2 hours</p>
               </div>
 
               <Button 
@@ -433,7 +430,7 @@ export default function PayoutsPage() {
           <CardContent>
             <form onSubmit={handlePayoutSettingsSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="paypal">PayPal Email <span className="text-xs text-muted-foreground font-normal">(Required for payouts)</span></Label>
+                <Label htmlFor="paypal">PayPal Email</Label>
                 <div className="relative mt-1">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -447,10 +444,33 @@ export default function PayoutsPage() {
                 </div>
               </div>
 
-              <div className="opacity-60">
+              <div>
+                <Label htmlFor="bitcoin">Bitcoin Address</Label>
+                <div className="relative mt-1">
+                  <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="bitcoin"
+                    placeholder="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+                    value={payoutData.bitcoinAddress}
+                    onChange={(e) => setPayoutData(prev => ({ ...prev, bitcoinAddress: e.target.value }))}
+                    className="pl-10 font-mono text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
                 <Label htmlFor="wallet" className="flex items-center gap-2">
-                  Ethereum Wallet Address
-                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground">Coming Soon</span>
+                  USDC Wallet Address (Ethereum)
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-[250px]">
+                        <p className="text-xs">Receive USDC on the default Ethereum chain. NOT Base, Optimism, or Polygon. Please make sure your wallet address is correct.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </Label>
                 <div className="relative mt-1">
                   <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -463,27 +483,7 @@ export default function PayoutsPage() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Save your Ethereum address for future payouts
-                </p>
-              </div>
-
-              <div className="opacity-60">
-                <Label htmlFor="bitcoin" className="flex items-center gap-2">
-                  Bitcoin Address 
-                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground">Coming Soon</span>
-                </Label>
-                <div className="relative mt-1">
-                  <Wallet className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="bitcoin"
-                    placeholder="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
-                    value={payoutData.bitcoinAddress}
-                    onChange={(e) => setPayoutData(prev => ({ ...prev, bitcoinAddress: e.target.value }))}
-                    className="pl-10 font-mono text-sm"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Save your Bitcoin address for future payouts
+                  USDC on Ethereum Mainnet only (not Base, Optimism, or Polygon)
                 </p>
               </div>
 
