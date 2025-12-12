@@ -1,6 +1,7 @@
 "use client"
 
-import { Hero } from "@/components/marketing/hero"
+import { HeroOriginal } from "@/components/marketing/hero-original"
+import { HeroVideo } from "@/components/marketing/hero-video"
 // Force this page to be dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
 import { Features } from "@/components/marketing/features"
@@ -15,7 +16,13 @@ export default function HomePage() {
     <>
       <Header />
       <main className="relative">
-        <Hero />
+        {/* Original Hero - Shows first */}
+        <HeroOriginal />
+        
+        {/* Video Hero - Sticky, stays in background as you scroll */}
+        <HeroVideo />
+        
+        {/* Rest of content scrolls over video */}
         <div className="relative z-10 bg-background">
           <Founder />
           <div className="space-y-8 md:space-y-16">
