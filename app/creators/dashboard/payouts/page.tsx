@@ -21,8 +21,15 @@ import {
   Clock,
   XCircle,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Info
 } from "lucide-react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../../../components/ui/tooltip"
 import toast from "react-hot-toast"
 
 interface PayoutRequestItem {
@@ -350,27 +357,48 @@ export default function PayoutsPage() {
                         PayPal
                       </div>
                     </SelectItem>
-                    <SelectItem value="ETHEREUM" disabled>
-                      <div className="flex items-center gap-2 opacity-50">
+                    <SelectItem value="ETHEREUM">
+                      <div className="flex items-center gap-2">
                         <Wallet className="w-4 h-4" />
-                        Ethereum
-                        <span className="text-xs text-muted-foreground ml-1">(Coming Soon)</span>
+                        USDC (Ethereum)
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="w-3.5 h-3.5 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="max-w-[250px]">
+                              <p className="text-xs">Receive USDC on the default Ethereum chain. NOT Base, Optimism, or Polygon. Please make sure your wallet address is correct.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </SelectItem>
-                    <SelectItem value="BITCOIN" disabled>
-                      <div className="flex items-center gap-2 opacity-50">
+                    <SelectItem value="BITCOIN">
+                      <div className="flex items-center gap-2">
                         <Wallet className="w-4 h-4" />
                         Bitcoin
-                        <span className="text-xs text-muted-foreground ml-1">(Coming Soon)</span>
                       </div>
                     </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* USDC Info Alert */}
+              {payoutMethod === 'ETHEREUM' && (
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-sm flex items-start gap-2">
+                  <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                  <div className="text-blue-200">
+                    <p className="font-medium">USDC on Ethereum Mainnet</p>
+                    <p className="text-xs mt-1 text-blue-300/80">Receive USDC on the default Ethereum chain. NOT Base, Optimism, or Polygon. Please make sure your wallet address is correct.</p>
+                  </div>
+                </div>
+              )}
+
               <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
                 <p className="font-medium text-foreground mb-1">Processing Time:</p>
                 <p>• PayPal: 1-3 business days</p>
+                <p>• USDC (Ethereum): 1-2 business days</p>
+                <p>• Bitcoin: 1-2 business days</p>
               </div>
 
               <Button 
@@ -517,7 +545,12 @@ export default function PayoutsPage() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Method:</span>
-                        <span className="text-foreground">{payout.paymentMethod || 'N/A'}</span>
+                        <span className="text-foreground">
+                          {payout.paymentMethod === 'ETHEREUM' ? 'USDC (Ethereum)' : 
+                           payout.paymentMethod === 'BITCOIN' ? 'Bitcoin' :
+                           payout.paymentMethod === 'PAYPAL' ? 'PayPal' :
+                           payout.paymentMethod || 'N/A'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Requested:</span>

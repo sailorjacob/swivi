@@ -27,11 +27,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = payoutRequestSchema.parse(body)
 
-    // Currently only PayPal is supported for payouts
-    if (validatedData.paymentMethod !== 'PAYPAL') {
+    // Supported payout methods: PayPal, USDC (Ethereum), Bitcoin
+    const supportedMethods = ['PAYPAL', 'ETHEREUM', 'BITCOIN']
+    if (!supportedMethods.includes(validatedData.paymentMethod)) {
       return NextResponse.json({ 
         error: "Payment method not available",
-        details: "Only PayPal payouts are currently supported. Bitcoin and other methods coming soon."
+        details: "Supported payout methods: PayPal, USDC (Ethereum), and Bitcoin."
       }, { status: 400 })
     }
 
@@ -73,11 +74,11 @@ export async function POST(request: NextRequest) {
         .reduce((sum, s) => sum + Number(s.clips?.earnings || 0), 0)
 
       // Get list of active campaigns this user has earnings in
-      const activeCampaignTitles = [...new Set(
+      const activeCampaignTitles = Array.from(new Set(
         dbUser.clipSubmissions
           .filter(s => s.campaigns.status === 'ACTIVE' && Number(s.clips?.earnings || 0) > 0)
           .map(s => s.campaigns.title)
-      )]
+      ))
 
       // Use user.totalEarnings as the source of truth (not clip.earnings which can be stale)
       const availableBalance = Number(dbUser.totalEarnings || 0)
@@ -119,6 +120,26 @@ export async function POST(request: NextRequest) {
       // Validate payment details match the method
       if (validatedData.paymentMethod === 'PAYPAL' && !validatedData.paymentDetails.includes('@')) {
         throw new Error("INVALID_PAYPAL_EMAIL")
+      }
+      
+      // Basic validation for Ethereum address (USDC) - just check it looks like an ETH address
+      if (validatedData.paymentMethod === 'ETHEREUM') {
+        const trimmed = validatedData.paymentDetails.trim()
+        // Just check it starts with 0x and has reasonable length (not blocking valid addresses)
+        if (!trimmed.startsWith('0x') || trimmed.length < 40) {
+          throw new Error("INVALID_ETH_ADDRESS")
+        }
+      }
+      
+      // Basic validation for Bitcoin address - just check reasonable format
+      if (validatedData.paymentMethod === 'BITCOIN') {
+        const trimmed = validatedData.paymentDetails.trim()
+        // Bitcoin addresses start with 1, 3, or bc1 and are 26-62 chars
+        const looksLikeBTC = (trimmed.startsWith('1') || trimmed.startsWith('3') || trimmed.startsWith('bc1')) && 
+                            trimmed.length >= 26 && trimmed.length <= 62
+        if (!looksLikeBTC) {
+          throw new Error("INVALID_BTC_ADDRESS")
+        }
       }
 
       // Create payout request within transaction
@@ -225,6 +246,20 @@ export async function POST(request: NextRequest) {
       if (error.message === "INVALID_PAYPAL_EMAIL") {
         return NextResponse.json({
           error: "Invalid PayPal email address"
+        }, { status: 400 })
+      }
+      
+      if (error.message === "INVALID_ETH_ADDRESS") {
+        return NextResponse.json({
+          error: "Invalid Ethereum address",
+          details: "Please enter a valid Ethereum wallet address starting with 0x"
+        }, { status: 400 })
+      }
+      
+      if (error.message === "INVALID_BTC_ADDRESS") {
+        return NextResponse.json({
+          error: "Invalid Bitcoin address",
+          details: "Please enter a valid Bitcoin wallet address"
         }, { status: 400 })
       }
 

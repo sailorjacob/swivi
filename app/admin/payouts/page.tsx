@@ -266,7 +266,7 @@ export default function AdminPayoutsPage() {
                       <div className="font-medium truncate">
                         {request.paymentMethod === 'PAYPAL' ? 'PayPal' :
                          request.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' :
-                         request.paymentMethod === 'ETHEREUM' ? 'Ethereum' :
+                         request.paymentMethod === 'ETHEREUM' ? 'USDC (Ethereum)' :
                          request.paymentMethod === 'BITCOIN' ? 'Bitcoin' :
                          request.paymentMethod}
                       </div>
@@ -735,7 +735,7 @@ export default function AdminPayoutsPage() {
                   <div className="text-sm font-semibold">
                     {selectedRequest.paymentMethod === 'PAYPAL' ? 'PayPal' :
                      selectedRequest.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' :
-                     selectedRequest.paymentMethod === 'ETHEREUM' ? 'Ethereum' :
+                     selectedRequest.paymentMethod === 'ETHEREUM' ? 'USDC (Ethereum)' :
                      selectedRequest.paymentMethod === 'BITCOIN' ? 'Bitcoin' :
                      selectedRequest.paymentMethod}
                   </div>

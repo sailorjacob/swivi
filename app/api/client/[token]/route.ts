@@ -232,7 +232,7 @@ export async function GET(
         platformStats[platform].totalViews += currentViews
         totalViews += currentViews
       }
-
+      
       return {
         id: sub.id,
         clipUrl: sub.clipUrl,
@@ -247,7 +247,7 @@ export async function GET(
         submittedAt: sub.createdAt
       }
     })
-    
+
     // Get page stats
     const allSubmittedPages = Array.from(handleStatsMap.values())
     const totalPagesSubmitted = allSubmittedPages.length
