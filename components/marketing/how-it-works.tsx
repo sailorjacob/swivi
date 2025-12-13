@@ -102,7 +102,7 @@ export function HowItWorks() {
       {/* 3D Robot - Fixed position, follows mouse (Desktop only) */}
       <div 
         ref={modelContainerRef}
-        className="hidden md:flex items-center justify-center fixed"
+        className="hidden md:block fixed"
         style={{
           left: `${robotPos.x}vw`,
           top: `${robotPos.y}vh`,
@@ -111,16 +111,27 @@ export function HowItWorks() {
           height: '200px',
           zIndex: 99999,
           pointerEvents: 'none',
-          opacity: 1,
-          visibility: 'visible',
+          willChange: 'left, top, transform',
+          transition: 'none',
         }}
       >
+        {/* Debug: Show a visible marker where robot should be */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          width: '20px',
+          height: '20px',
+          background: 'red',
+          borderRadius: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 1,
+        }} />
         <div 
           style={{
             width: '100%',
             height: '100%',
-            opacity: 1,
-            visibility: 'visible',
+            position: 'relative',
           }}
           dangerouslySetInnerHTML={{
             __html: `
@@ -137,7 +148,7 @@ export function HowItWorks() {
                 camera-orbit="0deg 75deg 5m"
                 min-camera-orbit="auto auto 5m"
                 max-camera-orbit="auto auto 5m"
-                style="width: 100%; height: 100%; background-color: transparent; opacity: 1; visibility: visible; display: block;"
+                style="width: 100%; height: 100%; background-color: rgba(255,255,255,0.1);"
               ></model-viewer>
             `
           }}
