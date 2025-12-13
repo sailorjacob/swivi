@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -72,12 +73,17 @@ interface PayoutSummary {
   completedCampaignsCount: number
 }
 
-// Platform fee - fixed at 10%
-const PLATFORM_FEE_RATE = 0.10
+// Platform fee options (max 10%)
+const PLATFORM_FEE_OPTIONS = [
+  { value: 0, label: '0%' },
+  { value: 0.05, label: '5%' },
+  { value: 0.10, label: '10%' },
+] as const
+const DEFAULT_PLATFORM_FEE = 0.10
 
 // Helper to calculate payout after fee
-const calculatePayoutAfterFee = (amount: number) => {
-  const fee = amount * PLATFORM_FEE_RATE
+const calculatePayoutAfterFee = (amount: number, feeRate: number = DEFAULT_PLATFORM_FEE) => {
+  const fee = amount * feeRate
   const netAmount = amount - fee
   return { fee, netAmount, feeRate, feePercent: feeRate * 100 }
 }
@@ -98,8 +104,7 @@ export default function AdminPayoutsPage() {
   const [summary, setSummary] = useState<PayoutSummary | null>(null)
   const [usersWithBalances, setUsersWithBalances] = useState<UserWithBalance[]>([])
   const [summaryLoading, setSummaryLoading] = useState(true)
-  
-  // Platform fee rate - adjustable per payout
+  const [platformFeeRate, setPlatformFeeRate] = useState(DEFAULT_PLATFORM_FEE)
 
   useEffect(() => {
     fetchPayoutRequests()
@@ -175,7 +180,7 @@ export default function AdminPayoutsPage() {
           action,
           transactionId: action === 'complete' ? transactionId : undefined,
           notes,
-          platformFeeRate: action === 'complete' ? PLATFORM_FEE_RATE : undefined
+          platformFeeRate: action === 'complete' ? platformFeeRate : undefined
         })
       })
 
@@ -253,16 +258,16 @@ export default function AdminPayoutsPage() {
                     <DollarSign className="w-6 h-6 text-muted-foreground" />
                     <span className="text-3xl font-bold">{request.amount.toFixed(2)}</span>
                   </div>
-                  {/* Fee Preview - shown for pending/processing */}
-                  {['PENDING', 'APPROVED', 'PROCESSING'].includes(request.status) && (
+                  {/* Fee Preview - shown for pending/processing when fee > 0 */}
+                  {['PENDING', 'APPROVED', 'PROCESSING'].includes(request.status) && platformFeeRate > 0 && (
                     <div className="mt-2 pt-2 border-t border-dashed text-xs text-muted-foreground">
                       <div className="flex justify-between">
-                        <span>Fee (10%):</span>
-                        <span>−${(request.amount * PLATFORM_FEE_RATE).toFixed(2)}</span>
+                        <span>Fee ({platformFeeRate * 100}%):</span>
+                        <span>−${(request.amount * platformFeeRate).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between font-medium text-foreground mt-1">
                         <span>To send:</span>
-                        <span>${(request.amount * (1 - PLATFORM_FEE_RATE)).toFixed(2)}</span>
+                        <span>${(request.amount * (1 - platformFeeRate)).toFixed(2)}</span>
                       </div>
                     </div>
                   )}
@@ -549,12 +554,81 @@ export default function AdminPayoutsPage() {
         </Card>
       </div>
 
+      {/* Payout Requests Cards */}
+      <div className="space-y-4">
+        <Tabs defaultValue="pending" className="w-full" onValueChange={(value) => {
+          // Always fetch all and filter locally to avoid API mismatch
+          // The "processing" tab shows both APPROVED and PROCESSING statuses
+          fetchPayoutRequests()
+        }}>
+          <div className="flex items-center justify-between gap-4">
+            <TabsList>
+              <TabsTrigger value="pending">
+                Pending ({pendingRequests.length})
+              </TabsTrigger>
+              <TabsTrigger value="processing">
+                Processing ({processingRequests.length})
+              </TabsTrigger>
+              <TabsTrigger value="completed">
+                Completed ({completedRequests.length})
+              </TabsTrigger>
+              <TabsTrigger value="rejected">
+                Rejected ({rejectedRequests.length})
+              </TabsTrigger>
+              <TabsTrigger value="all">
+                All ({payoutRequests.length})
+              </TabsTrigger>
+            </TabsList>
+            
+            {/* Platform Fee Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground whitespace-nowrap">Platform Fee:</span>
+              <Select 
+                value={platformFeeRate.toString()} 
+                onValueChange={(val) => setPlatformFeeRate(parseFloat(val))}
+              >
+                <SelectTrigger className="w-[100px] h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PLATFORM_FEE_OPTIONS.map(option => (
+                    <SelectItem key={option.value} value={option.value.toString()}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <TabsContent value="pending" className="mt-6">
+            {renderPayoutCards(pendingRequests)}
+          </TabsContent>
+
+          <TabsContent value="processing" className="mt-6">
+            {renderPayoutCards(processingRequests)}
+          </TabsContent>
+
+          <TabsContent value="completed" className="mt-6">
+            {renderPayoutCards(completedRequests)}
+          </TabsContent>
+
+          <TabsContent value="rejected" className="mt-6">
+            {renderPayoutCards(rejectedRequests)}
+          </TabsContent>
+
+          <TabsContent value="all" className="mt-6">
+            {renderPayoutCards(payoutRequests)}
+          </TabsContent>
+        </Tabs>
+      </div>
+
       {/* Users with Balances Section */}
       {usersWithBalances.length > 0 && (
-        <Card className="mb-8">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wallet className="w-5 h-5" />
+              <Users className="w-5 h-5" />
               All Users with Balance ({usersWithBalances.length})
             </CardTitle>
             <CardDescription className="flex items-center justify-between">
@@ -674,53 +748,6 @@ export default function AdminPayoutsPage() {
         </Card>
       )}
 
-      {/* Payout Requests Cards */}
-      <div className="space-y-4">
-        <Tabs defaultValue="pending" className="w-full" onValueChange={(value) => {
-          // Always fetch all and filter locally to avoid API mismatch
-          // The "processing" tab shows both APPROVED and PROCESSING statuses
-          fetchPayoutRequests()
-        }}>
-          <TabsList>
-            <TabsTrigger value="pending">
-              Pending ({pendingRequests.length})
-            </TabsTrigger>
-            <TabsTrigger value="processing">
-              Processing ({processingRequests.length})
-            </TabsTrigger>
-            <TabsTrigger value="completed">
-              Completed ({completedRequests.length})
-            </TabsTrigger>
-            <TabsTrigger value="rejected">
-              Rejected ({rejectedRequests.length})
-            </TabsTrigger>
-            <TabsTrigger value="all">
-              All ({payoutRequests.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="pending" className="mt-6">
-            {renderPayoutCards(pendingRequests)}
-          </TabsContent>
-
-          <TabsContent value="processing" className="mt-6">
-            {renderPayoutCards(processingRequests)}
-          </TabsContent>
-
-          <TabsContent value="completed" className="mt-6">
-            {renderPayoutCards(completedRequests)}
-          </TabsContent>
-
-          <TabsContent value="rejected" className="mt-6">
-            {renderPayoutCards(rejectedRequests)}
-          </TabsContent>
-
-          <TabsContent value="all" className="mt-6">
-            {renderPayoutCards(payoutRequests)}
-          </TabsContent>
-        </Tabs>
-      </div>
-
       {/* Process Dialog */}
       <Dialog open={processDialogOpen} onOpenChange={setProcessDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
@@ -775,20 +802,22 @@ export default function AdminPayoutsPage() {
                       <span className="text-muted-foreground">Requested amount:</span>
                       <span className="text-muted-foreground">${selectedRequest.amount.toFixed(2)}</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Platform fee (10%):</span>
-                      <span className="text-muted-foreground">−${(selectedRequest.amount * PLATFORM_FEE_RATE).toFixed(2)}</span>
-                    </div>
+                    {platformFeeRate > 0 && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Platform fee ({platformFeeRate * 100}%):</span>
+                        <span className="text-muted-foreground">−${(selectedRequest.amount * platformFeeRate).toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="border-t border-dashed my-2" />
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Amount to send:</span>
                       <div className="flex items-center gap-1">
-                        <span className="text-lg font-bold text-foreground">${(selectedRequest.amount * (1 - PLATFORM_FEE_RATE)).toFixed(2)}</span>
+                        <span className="text-lg font-bold text-foreground">${(selectedRequest.amount * (1 - platformFeeRate)).toFixed(2)}</span>
                         <Button
                           variant="ghost"
                           size="sm"
                           className="h-6 px-2"
-                          onClick={() => copyToClipboard((selectedRequest.amount * (1 - PLATFORM_FEE_RATE)).toFixed(2), 'Amount to send')}
+                          onClick={() => copyToClipboard((selectedRequest.amount * (1 - platformFeeRate)).toFixed(2), 'Amount to send')}
                         >
                           <Copy className="w-3 h-3" />
                         </Button>
@@ -887,19 +916,21 @@ export default function AdminPayoutsPage() {
 
               {(selectedRequest.status === 'APPROVED' || selectedRequest.status === 'PROCESSING') && (
                 <>
-                  {/* Platform Fee Display (fixed 10%) */}
+                  {/* Platform Fee Display */}
                   <div className="p-3 bg-muted/50 rounded-lg text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Requested:</span>
                       <span className="font-medium">${selectedRequest.amount.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between mt-1">
-                      <span className="text-muted-foreground">Platform fee (10%):</span>
-                      <span className="text-red-400">−${(selectedRequest.amount * 0.10).toFixed(2)}</span>
-                    </div>
+                    {platformFeeRate > 0 && (
+                      <div className="flex justify-between mt-1">
+                        <span className="text-muted-foreground">Platform fee ({platformFeeRate * 100}%):</span>
+                        <span className="text-red-400">−${(selectedRequest.amount * platformFeeRate).toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between mt-1 pt-1 border-t">
                       <span className="font-medium">Amount to send:</span>
-                      <span className="font-bold">${(selectedRequest.amount * 0.90).toFixed(2)}</span>
+                      <span className="font-bold">${(selectedRequest.amount * (1 - platformFeeRate)).toFixed(2)}</span>
                     </div>
                   </div>
 
