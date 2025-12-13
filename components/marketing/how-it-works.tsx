@@ -27,7 +27,7 @@ export function HowItWorks() {
       <Script 
         type="module" 
         src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
-        strategy="lazyOnload"
+        strategy="afterInteractive"
       />
       <div className="max-width-wrapper section-padding">
         <div className="mb-16">
@@ -62,22 +62,25 @@ export function HowItWorks() {
           </div>
           
           {/* 3D Model Viewer - Desktop Only */}
-          <div className="flex-1 flex items-center justify-center">
-            <div className="w-full h-[500px] lg:h-[600px] rounded-2xl overflow-hidden bg-muted/20 border border-border">
-              {/* @ts-ignore - model-viewer is a custom element */}
-              <model-viewer
-                alt="3D Model"
-                src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
-                ar
-                environment-image="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"
-                poster="https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp"
-                shadow-intensity="1"
-                camera-controls
-                touch-action="pan-y"
-                auto-rotate
-                style={{ width: "100%", height: "100%" }}
-              />
-            </div>
+          <div className="w-[280px] lg:w-[320px] -mt-8 ml-auto">
+            <div 
+              className="w-full h-[320px] lg:h-[380px] rounded-xl overflow-hidden"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  <model-viewer
+                    alt="3D Spacesuit Model"
+                    src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
+                    environment-image="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"
+                    poster="https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp"
+                    shadow-intensity="1"
+                    camera-controls
+                    auto-rotate
+                    rotation-per-second="30deg"
+                    style="width: 100%; height: 100%; --poster-color: transparent;"
+                  ></model-viewer>
+                `
+              }}
+            />
           </div>
         </div>
 
