@@ -102,18 +102,26 @@ export function HowItWorks() {
       {/* 3D Robot - Fixed position, follows mouse (Desktop only) */}
       <div 
         ref={modelContainerRef}
-        className="hidden md:block fixed pointer-events-none"
+        className="hidden md:flex items-center justify-center fixed"
         style={{
           left: `${robotPos.x}vw`,
           top: `${robotPos.y}vh`,
           transform: 'translate(-50%, -50%)',
-          width: '180px',
-          height: '180px',
-          zIndex: 9999,
+          width: '200px',
+          height: '200px',
+          zIndex: 99999,
+          pointerEvents: 'none',
+          opacity: 1,
+          visibility: 'visible',
         }}
       >
         <div 
-          className="w-full h-full"
+          style={{
+            width: '100%',
+            height: '100%',
+            opacity: 1,
+            visibility: 'visible',
+          }}
           dangerouslySetInnerHTML={{
             __html: `
               <model-viewer
@@ -124,11 +132,12 @@ export function HowItWorks() {
                 shadow-intensity="1"
                 interaction-prompt="none"
                 loading="eager"
+                reveal="auto"
                 scale="0.2 0.2 0.2"
                 camera-orbit="0deg 75deg 5m"
                 min-camera-orbit="auto auto 5m"
                 max-camera-orbit="auto auto 5m"
-                style="width: 100%; height: 100%; --poster-color: transparent; background: transparent;"
+                style="width: 100%; height: 100%; background-color: transparent; opacity: 1; visibility: visible; display: block;"
               ></model-viewer>
             `
           }}
