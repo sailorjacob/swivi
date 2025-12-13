@@ -26,7 +26,9 @@ export function HowItWorks() {
   const modelContainerRef = useRef<HTMLDivElement>(null)
   const posRef = useRef({ x: 50, y: 50 })
   const targetPosRef = useRef({ x: 50, y: 50 })
+  const currentYawRef = useRef(0)
   const animationRef = useRef<number>()
+  const isInSectionRef = useRef(false)
 
   useEffect(() => {
     // Direct DOM manipulation animation loop - no React re-renders
@@ -38,10 +40,23 @@ export function HowItWorks() {
       posRef.current.x += dx * ease
       posRef.current.y += dy * ease
       
-      // Update position directly on DOM element
+      // Update position directly on DOM element (percentage of section)
       if (modelContainerRef.current) {
-        modelContainerRef.current.style.left = `${posRef.current.x}vw`
-        modelContainerRef.current.style.top = `${posRef.current.y}vh`
+        modelContainerRef.current.style.left = `${posRef.current.x}%`
+        modelContainerRef.current.style.top = `${posRef.current.y}%`
+        
+        // Update yaw based on movement direction (which way robot is running)
+        const movementX = dx
+        if (Math.abs(movementX) > 0.1) {
+          // Smooth yaw transition based on movement direction
+          const targetYaw = movementX > 0 ? 30 : -30 // Turn toward movement direction
+          currentYawRef.current += (targetYaw - currentYawRef.current) * 0.05
+          
+          const modelViewer = modelContainerRef.current.querySelector('model-viewer') as any
+          if (modelViewer) {
+            modelViewer.orientation = `0deg 0deg ${currentYawRef.current}deg`
+          }
+        }
       }
       
       animationRef.current = requestAnimationFrame(animate)
@@ -54,37 +69,25 @@ export function HowItWorks() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      // Calculate mouse position as percentage of viewport
-      const xPercent = (e.clientX / window.innerWidth) * 100
-      const yPercent = (e.clientY / window.innerHeight) * 100
+      if (!sectionRef.current) return
       
-      // Clamp to keep robot visible
+      const sectionRect = sectionRef.current.getBoundingClientRect()
+      
+      // Check if mouse is within the section
+      const inSection = e.clientY >= sectionRect.top && e.clientY <= sectionRect.bottom
+      isInSectionRef.current = inSection
+      
+      if (!inSection) return
+      
+      // Calculate mouse position as percentage within section
+      const xPercent = ((e.clientX - sectionRect.left) / sectionRect.width) * 100
+      const yPercent = ((e.clientY - sectionRect.top) / sectionRect.height) * 100
+      
+      // Clamp to keep robot visible within section
       targetPosRef.current = {
-        x: Math.max(5, Math.min(95, xPercent)),
-        y: Math.max(5, Math.min(95, yPercent))
+        x: Math.max(10, Math.min(90, xPercent)),
+        y: Math.max(10, Math.min(90, yPercent))
       }
-      
-      // Update robot orientation to face mouse
-      if (!modelContainerRef.current) return
-      const modelViewer = modelContainerRef.current.querySelector('model-viewer') as any
-      if (!modelViewer) return
-
-      const rect = modelContainerRef.current.getBoundingClientRect()
-      const centerX = rect.left + rect.width / 2
-      const centerY = rect.top + rect.height / 2
-      const deltaX = e.clientX - centerX
-      const deltaY = e.clientY - centerY
-      
-      // Yaw - horizontal rotation
-      const rawYaw = Math.atan2(deltaX, -deltaY) * (180 / Math.PI)
-      const maxYaw = 60
-      const yaw = Math.max(-maxYaw, Math.min(maxYaw, rawYaw))
-      
-      // Pitch - vertical tilt
-      const maxPitch = 15
-      const pitch = Math.max(-maxPitch, Math.min(maxPitch, (deltaY / 400) * maxPitch))
-      
-      modelViewer.orientation = `0deg ${pitch}deg ${yaw}deg`
     }
 
     window.addEventListener('mousemove', handleMouseMove)
@@ -92,7 +95,7 @@ export function HowItWorks() {
   }, [])
 
   return (
-    <section ref={sectionRef} id="how-it-works" className="py-20 md:py-32 border-t border-black/5 bg-background relative">
+    <section ref={sectionRef} id="how-it-works" className="py-20 md:py-32 border-t border-black/5 bg-background relative overflow-hidden">
       {/* Load model-viewer library */}
       <Script 
         type="module" 
@@ -101,17 +104,17 @@ export function HowItWorks() {
         crossOrigin="anonymous"
       />
       
-      {/* 3D Robot - Fixed position, follows mouse (Desktop only) */}
+      {/* 3D Robot - Absolute within section, follows mouse (Desktop only) */}
       <div 
         ref={modelContainerRef}
-        className="hidden md:block fixed"
+        className="hidden md:block absolute"
         style={{
-          left: '50vw',
-          top: '50vh',
+          left: '50%',
+          top: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '200px',
-          height: '200px',
-          zIndex: 99999,
+          width: '180px',
+          height: '180px',
+          zIndex: 5,
           pointerEvents: 'none',
         }}
       >
@@ -130,12 +133,10 @@ export function HowItWorks() {
                 autoplay
                 animation-name="Running"
                 shadow-intensity="1"
-                camera-controls
-                auto-rotate
                 loading="eager"
                 interaction-prompt="none"
-                scale="0.2 0.2 0.2"
-                camera-orbit="0deg 75deg 5m"
+                scale="0.18 0.18 0.18"
+                camera-orbit="0deg 80deg 4.5m"
                 style="width: 100%; height: 100%; background-color: transparent; --interaction-prompt-display: none;"
               ></model-viewer>
             `
