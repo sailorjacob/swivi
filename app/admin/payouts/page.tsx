@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -73,19 +72,12 @@ interface PayoutSummary {
   completedCampaignsCount: number
 }
 
-// Platform fee configuration - max 10%
-const PLATFORM_FEE_OPTIONS = [
-  { value: 0, label: '0% (No fee)' },
-  { value: 0.05, label: '5%' },
-  { value: 0.10, label: '10%' },
-] as const
-
-// Default fee rate - can be overridden per payout
-const DEFAULT_PLATFORM_FEE = 0.10
+// Platform fee - fixed at 10%
+const PLATFORM_FEE_RATE = 0.10
 
 // Helper to calculate payout after fee
-const calculatePayoutAfterFee = (amount: number, feeRate: number = DEFAULT_PLATFORM_FEE) => {
-  const fee = amount * feeRate
+const calculatePayoutAfterFee = (amount: number) => {
+  const fee = amount * PLATFORM_FEE_RATE
   const netAmount = amount - fee
   return { fee, netAmount, feeRate, feePercent: feeRate * 100 }
 }
@@ -108,7 +100,6 @@ export default function AdminPayoutsPage() {
   const [summaryLoading, setSummaryLoading] = useState(true)
   
   // Platform fee rate - adjustable per payout
-  const [currentFeeRate, setCurrentFeeRate] = useState(DEFAULT_PLATFORM_FEE)
 
   useEffect(() => {
     fetchPayoutRequests()
@@ -184,7 +175,7 @@ export default function AdminPayoutsPage() {
           action,
           transactionId: action === 'complete' ? transactionId : undefined,
           notes,
-          platformFeeRate: action === 'complete' ? currentFeeRate : undefined
+          platformFeeRate: action === 'complete' ? PLATFORM_FEE_RATE : undefined
         })
       })
 
@@ -263,15 +254,15 @@ export default function AdminPayoutsPage() {
                     <span className="text-3xl font-bold">{request.amount.toFixed(2)}</span>
                   </div>
                   {/* Fee Preview - shown for pending/processing */}
-                  {['PENDING', 'APPROVED', 'PROCESSING'].includes(request.status) && currentFeeRate > 0 && (
+                  {['PENDING', 'APPROVED', 'PROCESSING'].includes(request.status) && (
                     <div className="mt-2 pt-2 border-t border-dashed text-xs text-muted-foreground">
                       <div className="flex justify-between">
-                        <span>Fee ({currentFeeRate * 100}%):</span>
-                        <span>−${(request.amount * currentFeeRate).toFixed(2)}</span>
+                        <span>Fee (10%):</span>
+                        <span>−${(request.amount * PLATFORM_FEE_RATE).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between font-medium text-foreground mt-1">
                         <span>To send:</span>
-                        <span>${(request.amount * (1 - currentFeeRate)).toFixed(2)}</span>
+                        <span>${(request.amount * (1 - PLATFORM_FEE_RATE)).toFixed(2)}</span>
                       </div>
                     </div>
                   )}
@@ -732,7 +723,7 @@ export default function AdminPayoutsPage() {
 
       {/* Process Dialog */}
       <Dialog open={processDialogOpen} onOpenChange={setProcessDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Process Payout Request</DialogTitle>
             <DialogDescription>
@@ -784,22 +775,20 @@ export default function AdminPayoutsPage() {
                       <span className="text-muted-foreground">Requested amount:</span>
                       <span className="text-muted-foreground">${selectedRequest.amount.toFixed(2)}</span>
                     </div>
-                    {currentFeeRate > 0 && (
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Platform fee ({currentFeeRate * 100}%):</span>
-                        <span className="text-muted-foreground">−${(selectedRequest.amount * currentFeeRate).toFixed(2)}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Platform fee (10%):</span>
+                      <span className="text-muted-foreground">−${(selectedRequest.amount * PLATFORM_FEE_RATE).toFixed(2)}</span>
+                    </div>
                     <div className="border-t border-dashed my-2" />
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Amount to send:</span>
                       <div className="flex items-center gap-1">
-                        <span className="text-lg font-bold text-foreground">${(selectedRequest.amount * (1 - currentFeeRate)).toFixed(2)}</span>
+                        <span className="text-lg font-bold text-foreground">${(selectedRequest.amount * (1 - PLATFORM_FEE_RATE)).toFixed(2)}</span>
                         <Button
                           variant="ghost"
                           size="sm"
                           className="h-6 px-2"
-                          onClick={() => copyToClipboard((selectedRequest.amount * (1 - currentFeeRate)).toFixed(2), 'Amount to send')}
+                          onClick={() => copyToClipboard((selectedRequest.amount * (1 - PLATFORM_FEE_RATE)).toFixed(2), 'Amount to send')}
                         >
                           <Copy className="w-3 h-3" />
                         </Button>
@@ -898,26 +887,19 @@ export default function AdminPayoutsPage() {
 
               {(selectedRequest.status === 'APPROVED' || selectedRequest.status === 'PROCESSING') && (
                 <>
-                  {/* Platform Fee Rate Selector */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Platform Fee Rate</label>
-                    <Select 
-                      value={currentFeeRate.toString()} 
-                      onValueChange={(val) => setCurrentFeeRate(parseFloat(val))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PLATFORM_FEE_OPTIONS.map(option => (
-                          <SelectItem key={option.value} value={option.value.toString()}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      Fee: ${(selectedRequest.amount * currentFeeRate).toFixed(2)} → Send: ${(selectedRequest.amount * (1 - currentFeeRate)).toFixed(2)}
+                  {/* Platform Fee Display (fixed 10%) */}
+                  <div className="p-3 bg-muted/50 rounded-lg text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Requested:</span>
+                      <span className="font-medium">${selectedRequest.amount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between mt-1">
+                      <span className="text-muted-foreground">Platform fee (10%):</span>
+                      <span className="text-red-400">−${(selectedRequest.amount * 0.10).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between mt-1 pt-1 border-t">
+                      <span className="font-medium">Amount to send:</span>
+                      <span className="font-bold">${(selectedRequest.amount * 0.90).toFixed(2)}</span>
                     </div>
                   </div>
 
