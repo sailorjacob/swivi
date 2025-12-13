@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
-interface MoneyParticle {
+interface Particle {
   id: number
   x: number
   y: number
@@ -14,10 +14,14 @@ interface MoneyParticle {
   velocityY: number
 }
 
-const moneyEmojis = ["💸", "💵", "💰", "🤑", "💲", "🪙"]
+interface EmojiTrailProps {
+  emojis?: string[]
+}
 
-export function MoneyTrail() {
-  const [particles, setParticles] = useState<MoneyParticle[]>([])
+const defaultMoneyEmojis = ["💸", "💵", "💰", "🤑", "💲", "🪙"]
+
+export function EmojiTrail({ emojis = defaultMoneyEmojis }: EmojiTrailProps) {
+  const [particles, setParticles] = useState<Particle[]>([])
   const particleIdRef = useRef(0)
   const lastSpawnRef = useRef(0)
   const lastPosRef = useRef({ x: 0, y: 0 })
@@ -42,7 +46,7 @@ export function MoneyTrail() {
         
         // Spawn 2-4 particles at once for density
         const particleCount = Math.floor(Math.random() * 3) + 2
-        const newParticles: MoneyParticle[] = []
+        const newParticles: Particle[] = []
         
         for (let i = 0; i < particleCount; i++) {
           const id = particleIdRef.current++
@@ -53,7 +57,7 @@ export function MoneyTrail() {
             id,
             x: e.clientX + (Math.random() - 0.5) * 30,
             y: e.clientY + (Math.random() - 0.5) * 30,
-            emoji: moneyEmojis[Math.floor(Math.random() * moneyEmojis.length)],
+            emoji: emojis[Math.floor(Math.random() * emojis.length)],
             rotation: Math.random() * 360,
             scale: Math.random() * 0.5 + 0.5,
             velocityX: Math.cos(angle) * speed + dx * 0.1,
@@ -72,7 +76,7 @@ export function MoneyTrail() {
 
     window.addEventListener("mousemove", handleMouseMove)
     return () => window.removeEventListener("mousemove", handleMouseMove)
-  }, [])
+  }, [emojis])
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
@@ -112,5 +116,10 @@ export function MoneyTrail() {
       </AnimatePresence>
     </div>
   )
+}
+
+// Backwards compatible export
+export function MoneyTrail() {
+  return <EmojiTrail emojis={defaultMoneyEmojis} />
 }
 

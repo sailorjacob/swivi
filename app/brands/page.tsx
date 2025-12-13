@@ -7,8 +7,11 @@ import { motion, easeOut } from "framer-motion"
 import { TrendingUp, DollarSign, Users, BarChart3, ArrowRight } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { EmojiTrail } from "@/components/effects/money-trail"
 import Image from "next/image"
 import Link from "next/link"
+
+const brandEmojis = ["🎯", "💎", "🏆", "📊", "💼", "🌟"]
 
 const stats = [
   {
@@ -81,6 +84,7 @@ const itemVariants = {
 export default function BrandsPage() {
   return (
     <>
+      <EmojiTrail emojis={brandEmojis} />
       <Header />
       <main className="flex min-h-screen flex-col pt-16">
         {/* Hero Section */}
