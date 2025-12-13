@@ -62,21 +62,20 @@ export function HowItWorks() {
           </div>
           
           {/* 3D Model Viewer - Desktop Only */}
-          <div className="w-[280px] lg:w-[320px] -mt-8 ml-auto">
+          <div className="w-[260px] lg:w-[300px] -mt-12 ml-8">
             <div 
-              className="w-full h-[320px] lg:h-[380px] rounded-xl overflow-hidden"
+              className="w-full h-[300px] lg:h-[350px]"
               dangerouslySetInnerHTML={{
                 __html: `
                   <model-viewer
                     alt="3D Spacesuit Model"
                     src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
                     environment-image="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"
-                    poster="https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp"
-                    shadow-intensity="1"
+                    shadow-intensity="0.5"
                     camera-controls
                     auto-rotate
                     rotation-per-second="30deg"
-                    style="width: 100%; height: 100%; --poster-color: transparent;"
+                    style="width: 100%; height: 100%; background: transparent; --poster-color: transparent; --progress-bar-color: transparent;"
                   ></model-viewer>
                 `
               }}
