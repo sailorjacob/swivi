@@ -558,7 +558,7 @@ export default function PayoutsPage() {
                           <div className="font-bold text-foreground text-xl">
                             ${payout.netAmount.toFixed(2)}
                           </div>
-                          <div className="text-xs text-muted-foreground">Amount sent to you</div>
+                          <div className="text-xs text-muted-foreground">Final amount</div>
                         </div>
                       ) : (
                         <div className="font-bold text-foreground text-lg">
