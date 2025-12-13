@@ -63,12 +63,21 @@ export function HowItWorks() {
           
           {/* 3D Model Viewer - Desktop Only */}
           <div className="w-[280px] lg:w-[320px] mt-12 -ml-8">
-            <iframe
-              src="https://modelviewer.dev/examples/augmentedreality/index.html"
-              className="w-full h-[320px] lg:h-[380px] border-0 rounded-xl overflow-hidden"
-              style={{ background: "transparent" }}
-              allow="xr-spatial-tracking"
-              title="3D Spacesuit Model"
+            <div 
+              className="w-full h-[320px] lg:h-[380px]"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  <model-viewer
+                    alt="3D Spacesuit Model"
+                    src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
+                    shadow-intensity="1"
+                    camera-controls
+                    auto-rotate
+                    rotation-per-second="20deg"
+                    style="width: 100%; height: 100%;"
+                  ></model-viewer>
+                `
+              }}
             />
           </div>
         </div>
