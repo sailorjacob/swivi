@@ -118,8 +118,10 @@ export function HowItWorks() {
                     shadow-intensity="1"
                     interaction-prompt="none"
                     loading="eager"
-                    scale="0.7 0.7 0.7"
-                    camera-orbit="0deg 80deg 2.5m"
+                    scale="0.5 0.5 0.5"
+                    camera-orbit="0deg 75deg 4m"
+                    min-camera-orbit="auto auto 4m"
+                    max-camera-orbit="auto auto 4m"
                     style="width: 100%; height: 100%; --poster-color: transparent; background: transparent;"
                   ></model-viewer>
                 `
