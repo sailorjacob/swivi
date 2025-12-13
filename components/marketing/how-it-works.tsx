@@ -70,15 +70,14 @@ export function HowItWorks() {
                   <model-viewer
                     alt="3D Spacesuit Model"
                     src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
-                    environment-image="https://modelviewer.dev/shared-assets/environments/aircraft_workshop_01_1k.hdr"
-                    exposure="1"
+                    environment-image="neutral"
+                    exposure="0.5"
                     shadow-intensity="1"
                     shadow-softness="0.5"
                     camera-controls
                     touch-action="pan-y"
                     auto-rotate
                     rotation-per-second="20deg"
-                    poster="https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp"
                     style="width: 100%; height: 100%; background-color: transparent; --poster-color: transparent; --progress-bar-color: transparent;"
                   ></model-viewer>
                 `
