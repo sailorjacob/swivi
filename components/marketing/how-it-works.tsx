@@ -41,6 +41,15 @@ export function HowItWorks() {
           y: prev.y + dy * ease
         }
       })
+      
+      // Force model-viewer to keep rendering by touching it
+      if (modelContainerRef.current) {
+        const mv = modelContainerRef.current.querySelector('model-viewer') as any
+        if (mv && mv.requestRender) {
+          mv.requestRender()
+        }
+      }
+      
       animationRef.current = requestAnimationFrame(animate)
     }
     animationRef.current = requestAnimationFrame(animate)
@@ -115,18 +124,6 @@ export function HowItWorks() {
           transition: 'none',
         }}
       >
-        {/* Debug: Show a visible marker where robot should be */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          width: '20px',
-          height: '20px',
-          background: 'red',
-          borderRadius: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 1,
-        }} />
         <div 
           style={{
             width: '100%',
@@ -136,19 +133,18 @@ export function HowItWorks() {
           dangerouslySetInnerHTML={{
             __html: `
               <model-viewer
+                id="following-robot"
                 alt="An animated 3D robot"
                 src="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"
                 autoplay
                 animation-name="Running"
                 shadow-intensity="1"
-                interaction-prompt="none"
+                camera-controls
+                auto-rotate
                 loading="eager"
-                reveal="auto"
                 scale="0.2 0.2 0.2"
                 camera-orbit="0deg 75deg 5m"
-                min-camera-orbit="auto auto 5m"
-                max-camera-orbit="auto auto 5m"
-                style="width: 100%; height: 100%; background-color: rgba(255,255,255,0.1);"
+                style="width: 100%; height: 100%; background-color: transparent;"
               ></model-viewer>
             `
           }}
