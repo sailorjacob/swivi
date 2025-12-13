@@ -1,7 +1,7 @@
 "use client"
 
 import Script from "next/script"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 
 const steps = [
   {
@@ -24,30 +24,24 @@ const steps = [
 export function HowItWorks() {
   const sectionRef = useRef<HTMLElement>(null)
   const modelContainerRef = useRef<HTMLDivElement>(null)
-  const [robotPos, setRobotPos] = useState({ x: 50, y: 50 }) // percentage position
+  const posRef = useRef({ x: 50, y: 50 })
   const targetPosRef = useRef({ x: 50, y: 50 })
   const animationRef = useRef<number>()
 
   useEffect(() => {
-    // Smooth animation loop to move robot towards target
+    // Direct DOM manipulation animation loop - no React re-renders
     const animate = () => {
-      setRobotPos(prev => {
-        const dx = targetPosRef.current.x - prev.x
-        const dy = targetPosRef.current.y - prev.y
-        // Ease towards target (slow trailing effect)
-        const ease = 0.03
-        return {
-          x: prev.x + dx * ease,
-          y: prev.y + dy * ease
-        }
-      })
+      const dx = targetPosRef.current.x - posRef.current.x
+      const dy = targetPosRef.current.y - posRef.current.y
+      const ease = 0.03
       
-      // Force model-viewer to keep rendering by touching it
+      posRef.current.x += dx * ease
+      posRef.current.y += dy * ease
+      
+      // Update position directly on DOM element
       if (modelContainerRef.current) {
-        const mv = modelContainerRef.current.querySelector('model-viewer') as any
-        if (mv && mv.requestRender) {
-          mv.requestRender()
-        }
+        modelContainerRef.current.style.left = `${posRef.current.x}vw`
+        modelContainerRef.current.style.top = `${posRef.current.y}vh`
       }
       
       animationRef.current = requestAnimationFrame(animate)
@@ -60,8 +54,6 @@ export function HowItWorks() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!modelContainerRef.current) return
-      
       // Calculate mouse position as percentage of viewport
       const xPercent = (e.clientX / window.innerWidth) * 100
       const yPercent = (e.clientY / window.innerHeight) * 100
@@ -73,6 +65,7 @@ export function HowItWorks() {
       }
       
       // Update robot orientation to face mouse
+      if (!modelContainerRef.current) return
       const modelViewer = modelContainerRef.current.querySelector('model-viewer') as any
       if (!modelViewer) return
 
@@ -113,15 +106,13 @@ export function HowItWorks() {
         ref={modelContainerRef}
         className="hidden md:block fixed"
         style={{
-          left: `${robotPos.x}vw`,
-          top: `${robotPos.y}vh`,
+          left: '50vw',
+          top: '50vh',
           transform: 'translate(-50%, -50%)',
           width: '200px',
           height: '200px',
           zIndex: 99999,
           pointerEvents: 'none',
-          willChange: 'left, top, transform',
-          transition: 'none',
         }}
       >
         <div 
