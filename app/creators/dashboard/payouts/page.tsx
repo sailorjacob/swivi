@@ -595,11 +595,11 @@ export default function PayoutsPage() {
                         </div>
                       )}
 
-                      {/* Transaction ID for completed payouts */}
+                      {/* Transaction ID for completed payouts - FULL address */}
                       {payout.status === 'COMPLETED' && payout.transactionId && (
-                        <div className="flex justify-between">
+                        <div className="flex flex-col gap-1">
                           <span className="text-muted-foreground">Confirmation:</span>
-                          <span className="text-foreground font-mono text-xs">{payout.transactionId}</span>
+                          <span className="text-foreground font-mono text-xs break-all bg-muted/30 p-2 rounded">{payout.transactionId}</span>
                         </div>
                       )}
 
