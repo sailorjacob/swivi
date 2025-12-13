@@ -44,12 +44,15 @@ export function HowItWorks() {
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
       
       // Yaw - horizontal rotation (left/right)
-      const yaw = Math.atan2(deltaX, -deltaY) * (180 / Math.PI)
+      // Clamp to ±45 degrees so robot stays mostly facing forward
+      const rawYaw = Math.atan2(deltaX, -deltaY) * (180 / Math.PI)
+      const maxYaw = 45
+      const yaw = Math.max(-maxYaw, Math.min(maxYaw, rawYaw))
       
       // Pitch - vertical tilt (up/down) - based on Y distance from center
-      // Clamp between -30 and 30 degrees so robot doesn't flip over
-      const maxPitch = 30
-      const pitch = Math.max(-maxPitch, Math.min(maxPitch, (deltaY / 300) * maxPitch))
+      // Clamp between -20 and 20 degrees so robot doesn't tilt too much
+      const maxPitch = 20
+      const pitch = Math.max(-maxPitch, Math.min(maxPitch, (deltaY / 400) * maxPitch))
       
       // Update model orientation (roll, pitch, yaw) - rotate the model to face mouse
       modelViewer.orientation = `0deg ${pitch}deg ${yaw}deg`
@@ -115,6 +118,8 @@ export function HowItWorks() {
                     shadow-intensity="1"
                     interaction-prompt="none"
                     loading="eager"
+                    scale="0.7 0.7 0.7"
+                    camera-orbit="0deg 80deg 2.5m"
                     style="width: 100%; height: 100%; --poster-color: transparent; background: transparent;"
                   ></model-viewer>
                 `
