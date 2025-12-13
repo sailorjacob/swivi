@@ -62,21 +62,25 @@ export function HowItWorks() {
           </div>
           
           {/* 3D Model Viewer - Desktop Only */}
-          <div className="w-[280px] lg:w-[320px] mt-12 -ml-8">
+          <div 
+            className="w-[280px] lg:w-[320px] mt-12 -ml-8"
+            style={{ isolation: "isolate", colorScheme: "light" }}
+          >
             <div 
               className="w-full h-[320px] lg:h-[380px]"
+              style={{ colorScheme: "light" }}
               dangerouslySetInnerHTML={{
                 __html: `
                   <model-viewer
                     alt="3D Spacesuit Model"
                     src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
-                    environment-image="legacy"
+                    tone-mapping="commerce"
                     shadow-intensity="1"
                     camera-controls
                     touch-action="pan-y"
                     auto-rotate
                     rotation-per-second="20deg"
-                    style="width: 100%; height: 100%; background-color: transparent; --poster-color: transparent; --progress-bar-color: transparent;"
+                    style="width: 100%; height: 100%; background-color: transparent; --poster-color: transparent; --progress-bar-color: transparent; color-scheme: light;"
                   ></model-viewer>
                 `
               }}
