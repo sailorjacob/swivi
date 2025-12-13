@@ -64,11 +64,10 @@ export function HowItWorks() {
           {/* 3D Model Viewer - Desktop Only */}
           <div className="w-[280px] lg:w-[320px] mt-12 -ml-8">
             <div 
-              className="w-full h-[320px] lg:h-[380px] rounded-xl overflow-hidden"
+              className="w-full h-[320px] lg:h-[380px]"
               dangerouslySetInnerHTML={{
                 __html: `
                   <model-viewer
-                    id="spacesuit-model"
                     alt="Neil Armstrong's Spacesuit"
                     src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
                     disable-tap
@@ -76,7 +75,9 @@ export function HowItWorks() {
                     shadow-intensity="1"
                     camera-controls
                     touch-action="pan-y"
-                    style="width: 100%; height: 100%; background-color: white;"
+                    interaction-prompt="none"
+                    loading="eager"
+                    style="width: 100%; height: 100%; --poster-color: transparent; background: transparent;"
                   ></model-viewer>
                 `
               }}
