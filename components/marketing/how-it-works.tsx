@@ -51,21 +51,16 @@ export function HowItWorks() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!sectionRef.current || !modelContainerRef.current) return
+      if (!modelContainerRef.current) return
       
-      const sectionRect = sectionRef.current.getBoundingClientRect()
-      
-      // Check if mouse is within the section
-      if (e.clientY < sectionRect.top || e.clientY > sectionRect.bottom) return
-      
-      // Calculate mouse position as percentage within section
-      const xPercent = ((e.clientX - sectionRect.left) / sectionRect.width) * 100
-      const yPercent = ((e.clientY - sectionRect.top) / sectionRect.height) * 100
+      // Calculate mouse position as percentage of viewport
+      const xPercent = (e.clientX / window.innerWidth) * 100
+      const yPercent = (e.clientY / window.innerHeight) * 100
       
       // Clamp to keep robot visible
       targetPosRef.current = {
-        x: Math.max(10, Math.min(90, xPercent)),
-        y: Math.max(10, Math.min(90, yPercent))
+        x: Math.max(5, Math.min(95, xPercent)),
+        y: Math.max(5, Math.min(95, yPercent))
       }
       
       // Update robot orientation to face mouse
@@ -95,25 +90,26 @@ export function HowItWorks() {
   }, [])
 
   return (
-    <section ref={sectionRef} id="how-it-works" className="py-20 md:py-32 border-t border-black/5 bg-background relative overflow-hidden">
+    <section ref={sectionRef} id="how-it-works" className="py-20 md:py-32 border-t border-black/5 bg-background relative">
       {/* Load model-viewer library */}
       <Script 
         type="module" 
         src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
         strategy="afterInteractive"
+        crossOrigin="anonymous"
       />
       
-      {/* 3D Robot - Follows mouse across entire section (Desktop only) */}
+      {/* 3D Robot - Fixed position, follows mouse (Desktop only) */}
       <div 
         ref={modelContainerRef}
-        className="hidden md:block absolute pointer-events-none"
+        className="hidden md:block fixed pointer-events-none"
         style={{
-          left: `${robotPos.x}%`,
-          top: `${robotPos.y}%`,
+          left: `${robotPos.x}vw`,
+          top: `${robotPos.y}vh`,
           transform: 'translate(-50%, -50%)',
-          width: '200px',
-          height: '200px',
-          zIndex: 5,
+          width: '180px',
+          height: '180px',
+          zIndex: 9999,
         }}
       >
         <div 
@@ -128,11 +124,11 @@ export function HowItWorks() {
                 shadow-intensity="1"
                 interaction-prompt="none"
                 loading="eager"
-                scale="0.25 0.25 0.25"
-                camera-orbit="0deg 75deg 6m"
-                min-camera-orbit="auto auto 6m"
-                max-camera-orbit="auto auto 6m"
-                style="width: 100%; height: 100%; --poster-color: transparent; background: transparent; pointer-events: none;"
+                scale="0.2 0.2 0.2"
+                camera-orbit="0deg 75deg 5m"
+                min-camera-orbit="auto auto 5m"
+                max-camera-orbit="auto auto 5m"
+                style="width: 100%; height: 100%; --poster-color: transparent; background: transparent;"
               ></model-viewer>
             `
           }}
