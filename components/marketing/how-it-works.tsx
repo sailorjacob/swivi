@@ -61,20 +61,20 @@ export function HowItWorks() {
             </div>
           </div>
           
-          {/* 3D Model Viewer - Desktop Only */}
+          {/* 3D Model Viewer - Desktop Only - Animated Robot */}
           <div className="w-[280px] lg:w-[320px] mt-12 -ml-8">
             <div 
               className="w-full h-[320px] lg:h-[380px]"
               dangerouslySetInnerHTML={{
                 __html: `
                   <model-viewer
-                    alt="Neil Armstrong's Spacesuit"
-                    src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
-                    disable-tap
-                    auto-rotate
-                    shadow-intensity="1"
+                    alt="An animated 3D robot"
+                    src="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"
                     camera-controls
                     touch-action="pan-y"
+                    autoplay
+                    animation-name="Running"
+                    shadow-intensity="1"
                     interaction-prompt="none"
                     loading="eager"
                     style="width: 100%; height: 100%; --poster-color: transparent; background: transparent;"
