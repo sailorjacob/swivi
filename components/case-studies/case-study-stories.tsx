@@ -220,7 +220,7 @@ export function CaseStudyStories() {
   return (
     <>
       {/* Header Section */}
-      <section className="pt-20 sm:pt-24 pb-12 sm:pb-16 flex flex-col items-center justify-center px-4">
+      <section className="pt-32 sm:pt-40 lg:pt-48 pb-12 sm:pb-16 flex flex-col items-center justify-center px-4">
         <span className="inline-block text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium mb-4">
           Case Studies
         </span>
