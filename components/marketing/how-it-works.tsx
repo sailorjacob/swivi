@@ -1,7 +1,7 @@
 "use client"
 
 import Script from "next/script"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 const steps = [
   {
@@ -22,39 +22,71 @@ const steps = [
 ]
 
 export function HowItWorks() {
+  const sectionRef = useRef<HTMLElement>(null)
   const modelContainerRef = useRef<HTMLDivElement>(null)
+  const [robotPos, setRobotPos] = useState({ x: 50, y: 50 }) // percentage position
+  const targetPosRef = useRef({ x: 50, y: 50 })
+  const animationRef = useRef<number>()
+
+  useEffect(() => {
+    // Smooth animation loop to move robot towards target
+    const animate = () => {
+      setRobotPos(prev => {
+        const dx = targetPosRef.current.x - prev.x
+        const dy = targetPosRef.current.y - prev.y
+        // Ease towards target (slow trailing effect)
+        const ease = 0.03
+        return {
+          x: prev.x + dx * ease,
+          y: prev.y + dy * ease
+        }
+      })
+      animationRef.current = requestAnimationFrame(animate)
+    }
+    animationRef.current = requestAnimationFrame(animate)
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!modelContainerRef.current) return
+      if (!sectionRef.current || !modelContainerRef.current) return
       
+      const sectionRect = sectionRef.current.getBoundingClientRect()
+      
+      // Check if mouse is within the section
+      if (e.clientY < sectionRect.top || e.clientY > sectionRect.bottom) return
+      
+      // Calculate mouse position as percentage within section
+      const xPercent = ((e.clientX - sectionRect.left) / sectionRect.width) * 100
+      const yPercent = ((e.clientY - sectionRect.top) / sectionRect.height) * 100
+      
+      // Clamp to keep robot visible
+      targetPosRef.current = {
+        x: Math.max(10, Math.min(90, xPercent)),
+        y: Math.max(10, Math.min(90, yPercent))
+      }
+      
+      // Update robot orientation to face mouse
       const modelViewer = modelContainerRef.current.querySelector('model-viewer') as any
       if (!modelViewer) return
 
-      // Get the center of the model viewer element
       const rect = modelContainerRef.current.getBoundingClientRect()
       const centerX = rect.left + rect.width / 2
       const centerY = rect.top + rect.height / 2
-
-      // Calculate angle from center to mouse
       const deltaX = e.clientX - centerX
       const deltaY = e.clientY - centerY
       
-      // Calculate distance for pitch calculation
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-      
-      // Yaw - horizontal rotation (left/right)
-      // Clamp to ±45 degrees so robot stays mostly facing forward
+      // Yaw - horizontal rotation
       const rawYaw = Math.atan2(deltaX, -deltaY) * (180 / Math.PI)
-      const maxYaw = 45
+      const maxYaw = 60
       const yaw = Math.max(-maxYaw, Math.min(maxYaw, rawYaw))
       
-      // Pitch - vertical tilt (up/down) - based on Y distance from center
-      // Clamp between -20 and 20 degrees so robot doesn't tilt too much
-      const maxPitch = 20
+      // Pitch - vertical tilt
+      const maxPitch = 15
       const pitch = Math.max(-maxPitch, Math.min(maxPitch, (deltaY / 400) * maxPitch))
       
-      // Update model orientation (roll, pitch, yaw) - rotate the model to face mouse
       modelViewer.orientation = `0deg ${pitch}deg ${yaw}deg`
     }
 
@@ -63,14 +95,50 @@ export function HowItWorks() {
   }, [])
 
   return (
-    <section id="how-it-works" className="py-20 md:py-32 border-t border-black/5 bg-background relative">
+    <section ref={sectionRef} id="how-it-works" className="py-20 md:py-32 border-t border-black/5 bg-background relative overflow-hidden">
       {/* Load model-viewer library */}
       <Script 
         type="module" 
         src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
         strategy="afterInteractive"
       />
-      <div className="max-width-wrapper section-padding">
+      
+      {/* 3D Robot - Follows mouse across entire section (Desktop only) */}
+      <div 
+        ref={modelContainerRef}
+        className="hidden md:block absolute pointer-events-none z-0"
+        style={{
+          left: `${robotPos.x}%`,
+          top: `${robotPos.y}%`,
+          transform: 'translate(-50%, -50%)',
+          width: '200px',
+          height: '200px',
+        }}
+      >
+        <div 
+          className="w-full h-full"
+          dangerouslySetInnerHTML={{
+            __html: `
+              <model-viewer
+                alt="An animated 3D robot"
+                src="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"
+                autoplay
+                animation-name="Running"
+                shadow-intensity="1"
+                interaction-prompt="none"
+                loading="eager"
+                scale="0.25 0.25 0.25"
+                camera-orbit="0deg 75deg 6m"
+                min-camera-orbit="auto auto 6m"
+                max-camera-orbit="auto auto 6m"
+                style="width: 100%; height: 100%; --poster-color: transparent; background: transparent; pointer-events: none;"
+              ></model-viewer>
+            `
+          }}
+        />
+      </div>
+
+      <div className="max-width-wrapper section-padding relative z-10">
         <div className="mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
             How It Works
@@ -80,53 +148,24 @@ export function HowItWorks() {
           </p>
         </div>
 
-        {/* Desktop Layout: Text left, 3D Model right */}
-        <div className="hidden md:flex gap-16 items-start">
-          <div className="flex-1">
-            <div className="space-y-16">
-              {steps.map((step, index) => (
-                <div key={step.number} className="flex gap-8 items-start">
-                  <div className="flex-shrink-0">
-                    <span className="text-3xl font-light text-muted-foreground">
-                      {step.number}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-normal text-lg mb-2">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
-                      {step.description}
-                    </p>
-                  </div>
+        {/* Desktop Layout */}
+        <div className="hidden md:block">
+          <div className="space-y-16 max-w-2xl">
+            {steps.map((step, index) => (
+              <div key={step.number} className="flex gap-8 items-start">
+                <div className="flex-shrink-0">
+                  <span className="text-3xl font-light text-muted-foreground">
+                    {step.number}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* 3D Model Viewer - Desktop Only - Animated Robot */}
-          <div className="w-[280px] lg:w-[320px] mt-12 -ml-8" ref={modelContainerRef}>
-            <div 
-              className="w-full h-[320px] lg:h-[380px]"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  <model-viewer
-                    alt="An animated 3D robot"
-                    src="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"
-                    camera-controls
-                    touch-action="pan-y"
-                    autoplay
-                    animation-name="Running"
-                    shadow-intensity="1"
-                    interaction-prompt="none"
-                    loading="eager"
-                    scale="0.3 0.3 0.3"
-                    camera-orbit="0deg 75deg 8m"
-                    min-camera-orbit="auto auto 8m"
-                    max-camera-orbit="auto auto 8m"
-                    style="width: 100%; height: 100%; --poster-color: transparent; background: transparent;"
-                  ></model-viewer>
-                `
-              }}
-            />
+                <div className="flex-1">
+                  <h3 className="font-normal text-lg mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+                    {step.description}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
