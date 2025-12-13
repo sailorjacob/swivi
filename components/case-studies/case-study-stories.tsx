@@ -219,31 +219,31 @@ export function CaseStudyStories() {
 
   return (
     <>
-      {/* Header Section - Compact */}
-      <section className="py-8 sm:py-12 flex flex-col items-center justify-center px-4">
-        <span className="inline-block text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium mb-3">
+      {/* Header Section */}
+      <section className="py-12 sm:py-16 flex flex-col items-center justify-center px-4">
+        <span className="inline-block text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium mb-4">
           Case Studies
         </span>
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light mb-3 text-foreground text-center">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 text-foreground text-center">
           Real Results. <span className="font-normal">Real Brands.</span>
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto text-center mb-6">
+        <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto text-center mb-8">
           Scroll to explore how we've helped brands generate millions of views.
         </p>
         
         {/* Stats */}
-        <div className="flex justify-center gap-6 sm:gap-10">
+        <div className="flex justify-center gap-8 sm:gap-12">
           <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light text-foreground">100M+</div>
-            <div className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground mt-0.5">Total Views</div>
+            <div className="text-2xl sm:text-3xl font-light text-foreground">100M+</div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">Total Views</div>
           </div>
           <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light text-foreground">75M</div>
-            <div className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground mt-0.5">Network Reach</div>
+            <div className="text-2xl sm:text-3xl font-light text-foreground">75M</div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">Network Reach</div>
           </div>
           <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light text-foreground">3,000+</div>
-            <div className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground mt-0.5">Posts</div>
+            <div className="text-2xl sm:text-3xl font-light text-foreground">3,000+</div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">Posts</div>
           </div>
         </div>
       </section>
@@ -252,9 +252,9 @@ export function CaseStudyStories() {
       <div 
         ref={containerRef} 
         className="relative"
-        style={{ height: `${caseStudies.length * 100}vh` }}
+        style={{ height: `${(caseStudies.length - 1) * 100 + 100}vh` }}
       >
-        <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden flex items-center">
+        <div className="sticky top-0 h-screen overflow-hidden flex items-center">
           <motion.div 
             className="flex h-full"
             style={{ x }}
@@ -265,11 +265,11 @@ export function CaseStudyStories() {
           </motion.div>
           
           {/* Progress indicator */}
-          <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
             {caseStudies.map((_, idx) => (
               <motion.div
                 key={idx}
-                className="w-6 sm:w-8 h-1 rounded-full bg-muted-foreground/20 overflow-hidden"
+                className="w-8 h-1 rounded-full bg-muted-foreground/20 overflow-hidden"
               >
                 <motion.div
                   className="h-full bg-foreground rounded-full"
