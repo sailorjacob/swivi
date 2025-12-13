@@ -5,18 +5,14 @@ export const dynamic = 'force-dynamic'
 
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { CampaignsShowcase } from "@/components/marketing/campaigns-showcase"
+import { CaseStudyStories } from "@/components/case-studies/case-study-stories"
 
 export default function CaseStudiesPage() {
   return (
     <>
       <Header />
-      <main className="flex min-h-screen flex-col pt-16">
-        <section className="py-12 sm:py-16 md:py-20 lg:py-32">
-          <div className="max-width-wrapper section-padding">
-            <CampaignsShowcase showHeader={true} />
-          </div>
-        </section>
+      <main className="pt-16">
+        <CaseStudyStories />
       </main>
       <Footer />
     </>

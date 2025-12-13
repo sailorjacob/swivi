@@ -106,7 +106,7 @@ export function HeroVideo() {
                 <div className="text-sm uppercase tracking-wider">Views Delivered</div>
               </div>
               <div>
-                <div className="text-3xl font-light text-white">10M</div>
+                <div className="text-3xl font-light text-white">75M</div>
                 <div className="text-sm uppercase tracking-wider">Active Network</div>
               </div>
               <div>

@@ -189,7 +189,7 @@ export default function OwningManhattanProject() {
               <Badge variant="outline" className="text-xs text-gray-900 border-gray-300">Netflix TV Series</Badge>
               <span className="text-2xl">📸</span>
             </div>
-            <span className="text-sm text-muted-foreground">2 days • 6.7M views • 593% ROI</span>
+            <span className="text-sm text-muted-foreground">4 days • 22M views • 1000% ROI</span>
           </div>
         </motion.div>
 
@@ -241,7 +241,7 @@ export default function OwningManhattanProject() {
             <div className="text-xs sm:text-sm text-muted-foreground">Clips Created</div>
           </div>
           <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light mb-1">6.7M</div>
+            <div className="text-xl sm:text-2xl font-light mb-1">22M</div>
             <div className="text-xs sm:text-sm text-muted-foreground">Total Views</div>
           </div>
           <div className="text-center">

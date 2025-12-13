@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
+import { CryptoSpinnerInline } from "@/components/marketing/crypto-spinner"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -120,13 +121,9 @@ export function HeroOriginal() {
             variants={itemVariants}
             className="mt-16 pt-16 border-t border-white/10"
           >
-            <motion.p
-              className="text-sm text-muted-foreground"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              Helping brands go viral.
-            </motion.p>
+            <p className="text-sm text-muted-foreground">
+              Pay & get paid in <CryptoSpinnerInline />. Helping brands go viral.
+            </p>
           </motion.div>
         </motion.div>
       </div>

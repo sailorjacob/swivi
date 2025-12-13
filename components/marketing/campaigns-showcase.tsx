@@ -33,22 +33,22 @@ const campaignResults: CampaignResult[] = [
     clientName: "Owning Manhattan",
     clientType: "Entertainment",
     description: "Netflix series promotion campaign targeting real estate and lifestyle audiences",
-    budget: 968,
+    budget: 20000,
     budgetStructure: "$100 per 100,000 views",
-    goal: "6,700,000 views",
-    timeline: "2 days",
-    postsDistributed: 60,
-    postsPaid: 60,
-    viewsGenerated: 6700000,
-    roi: 593,
+    goal: "22,000,000 views",
+    timeline: "4 days",
+    postsDistributed: 600,
+    postsPaid: 600,
+    viewsGenerated: 22000000,
+    roi: 1000,
     exampleContent: "https://www.instagram.com/reel/DOKGK_ciO-9/",
     contentPlatform: "instagram",
     status: "completed",
     highlights: [
-      "6.7M views generated",
-      "Completed in just 2 days",
-      "60 posts submitted",
-      "$968 budget delivered"
+      "22M views generated",
+      "Completed in just 4 days",
+      "600 posts submitted",
+      "$20K budget delivered"
     ],
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
   },
@@ -135,7 +135,7 @@ const industryStats = [
   {
     icon: Users,
     label: "Total Views",
-    value: "24.5M+",
+    value: "100M+",
     description: "Generated for clients"
   },
   {
