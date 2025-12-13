@@ -331,7 +331,12 @@ export async function GET(request: NextRequest) {
         paymentMethod: pr.paymentMethod,
         requestedAt: pr.requestedAt,
         processedAt: pr.processedAt,
-        notes: pr.notes
+        notes: pr.notes,
+        // Fee tracking fields for completed payouts
+        transactionId: pr.transactionId,
+        platformFeeRate: pr.platformFeeRate ? Number(pr.platformFeeRate) : null,
+        platformFeeAmount: pr.platformFeeAmount ? Number(pr.platformFeeAmount) : null,
+        netAmount: pr.netAmount ? Number(pr.netAmount) : null
       }))
     })
 

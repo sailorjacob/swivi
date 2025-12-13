@@ -40,6 +40,11 @@ interface PayoutRequestItem {
   requestedAt: string
   processedAt?: string
   notes?: string
+  // Fee tracking for completed payouts
+  transactionId?: string
+  platformFeeRate?: number | null
+  platformFeeAmount?: number | null
+  netAmount?: number | null
 }
 
 export default function PayoutsPage() {
@@ -336,6 +341,24 @@ export default function PayoutsPage() {
                   <p className="text-xs text-muted-foreground mt-1">
                     Full balance from completed campaigns
                   </p>
+                  
+                  {/* Fee preview */}
+                  {payableBalance >= minimumPayout && (
+                    <div className="mt-3 pt-3 border-t border-border space-y-1 text-xs">
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Earnings:</span>
+                        <span>${payableBalance.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Platform fee (10%):</span>
+                        <span>−${(payableBalance * 0.10).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between pt-1 border-t border-border font-medium text-foreground">
+                        <span>You'll receive:</span>
+                        <span>${(payableBalance * 0.90).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -529,9 +552,19 @@ export default function PayoutsPage() {
                 {payoutHistory.map((payout) => (
                   <div key={payout.id} className="p-4 rounded-lg border bg-muted/30 border-border">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="font-bold text-foreground text-lg">
-                        ${(typeof payout.amount === 'number' ? payout.amount : parseFloat(payout.amount || 0)).toFixed(2)}
-                      </div>
+                      {/* For completed payouts, show net amount (what was sent) prominently */}
+                      {payout.status === 'COMPLETED' && payout.netAmount ? (
+                        <div>
+                          <div className="font-bold text-foreground text-xl">
+                            ${payout.netAmount.toFixed(2)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">Amount sent to you</div>
+                        </div>
+                      ) : (
+                        <div className="font-bold text-foreground text-lg">
+                          ${(typeof payout.amount === 'number' ? payout.amount : parseFloat(String(payout.amount) || '0')).toFixed(2)}
+                        </div>
+                      )}
                       <Badge variant="outline" className={getStatusColor(payout.status?.toLowerCase())}>
                         <span className="flex items-center gap-1.5">
                           {payout.status === 'COMPLETED' && <CheckCircle className="w-3 h-3" />}
@@ -544,6 +577,32 @@ export default function PayoutsPage() {
                     </div>
                     
                     <div className="space-y-2 text-sm">
+                      {/* For completed payouts, show fee breakdown */}
+                      {payout.status === 'COMPLETED' && payout.platformFeeAmount != null && (
+                        <div className="mb-3 p-2 bg-muted/50 rounded text-xs space-y-1">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Earnings:</span>
+                            <span className="text-foreground">${payout.amount.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Platform fee ({((payout.platformFeeRate || 0.10) * 100).toFixed(0)}%):</span>
+                            <span className="text-muted-foreground">−${payout.platformFeeAmount.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between pt-1 border-t border-border">
+                            <span className="font-medium text-foreground">You received:</span>
+                            <span className="font-medium text-foreground">${(payout.netAmount || payout.amount).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Transaction ID for completed payouts */}
+                      {payout.status === 'COMPLETED' && payout.transactionId && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Confirmation:</span>
+                          <span className="text-foreground font-mono text-xs">{payout.transactionId}</span>
+                        </div>
+                      )}
+
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Method:</span>
                         <span className="text-foreground">
@@ -565,7 +624,7 @@ export default function PayoutsPage() {
                       </div>
                       {payout.processedAt && (
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Processed:</span>
+                          <span className="text-muted-foreground">Paid:</span>
                           <span className="text-foreground">
                             {new Date(payout.processedAt).toLocaleDateString('en-US', {
                               month: 'short',
@@ -575,7 +634,7 @@ export default function PayoutsPage() {
                           </span>
                         </div>
                       )}
-                      {payout.notes && (
+                      {payout.notes && payout.status !== 'COMPLETED' && (
                         <div className="mt-2 pt-2 border-t border-border">
                           <span className="text-muted-foreground text-xs">Note: </span>
                           <span className="text-foreground text-xs">{payout.notes}</span>
