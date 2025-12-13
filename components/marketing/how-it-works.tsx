@@ -106,13 +106,14 @@ export function HowItWorks() {
       {/* 3D Robot - Follows mouse across entire section (Desktop only) */}
       <div 
         ref={modelContainerRef}
-        className="hidden md:block absolute pointer-events-none z-0"
+        className="hidden md:block absolute pointer-events-none"
         style={{
           left: `${robotPos.x}%`,
           top: `${robotPos.y}%`,
           transform: 'translate(-50%, -50%)',
           width: '200px',
           height: '200px',
+          zIndex: 5,
         }}
       >
         <div 
