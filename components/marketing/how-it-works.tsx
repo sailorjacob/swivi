@@ -1,3 +1,7 @@
+"use client"
+
+import Script from "next/script"
+
 const steps = [
   {
     number: "01",
@@ -19,6 +23,12 @@ const steps = [
 export function HowItWorks() {
   return (
     <section id="how-it-works" className="py-20 md:py-32 border-t border-black/5 bg-background relative">
+      {/* Load model-viewer library */}
+      <Script 
+        type="module" 
+        src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
+        strategy="lazyOnload"
+      />
       <div className="max-width-wrapper section-padding">
         <div className="mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
@@ -29,7 +39,7 @@ export function HowItWorks() {
           </p>
         </div>
 
-        {/* Desktop Layout: Text left, Image right */}
+        {/* Desktop Layout: Text left, 3D Model right */}
         <div className="hidden md:flex gap-16 items-start">
           <div className="flex-1">
             <div className="space-y-16">
@@ -48,6 +58,25 @@ export function HowItWorks() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+          
+          {/* 3D Model Viewer - Desktop Only */}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="w-full h-[500px] lg:h-[600px] rounded-2xl overflow-hidden bg-muted/20 border border-border">
+              {/* @ts-ignore - model-viewer is a custom element */}
+              <model-viewer
+                alt="3D Model"
+                src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
+                ar
+                environment-image="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"
+                poster="https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp"
+                shadow-intensity="1"
+                camera-controls
+                touch-action="pan-y"
+                auto-rotate
+                style={{ width: "100%", height: "100%" }}
+              />
             </div>
           </div>
         </div>
