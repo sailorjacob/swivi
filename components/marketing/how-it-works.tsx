@@ -70,10 +70,8 @@ export function HowItWorks() {
                   <model-viewer
                     alt="3D Spacesuit Model"
                     src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
-                    environment-image="neutral"
-                    exposure="0.5"
+                    environment-image="legacy"
                     shadow-intensity="1"
-                    shadow-softness="0.5"
                     camera-controls
                     touch-action="pan-y"
                     auto-rotate
