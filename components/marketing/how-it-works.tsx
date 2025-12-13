@@ -70,6 +70,9 @@ export function HowItWorks() {
                   <model-viewer
                     alt="3D Spacesuit Model"
                     src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
+                    poster="https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp"
+                    loading="eager"
+                    reveal="auto"
                     shadow-intensity="1"
                     camera-controls
                     touch-action="pan-y"
