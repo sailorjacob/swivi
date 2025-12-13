@@ -23,22 +23,22 @@ interface CaseStudy {
 
 const caseStudies: CaseStudy[] = [
   {
-    id: "owning-manhattan",
-    clientName: "Owning Manhattan",
-    clientType: "Netflix Series",
-    tagline: "22M views in 4 days",
-    description: "Viral campaign for Netflix's hit real estate series. We mobilized our creator network to generate massive awareness ahead of the show's premiere.",
-    budget: 20000,
-    timeline: "4 days",
-    viewsGenerated: 22000000,
-    postsSubmitted: 600,
+    id: "sportz-playz",
+    clientName: "Sportz Playz",
+    clientType: "Sports Platform",
+    tagline: "9.5M views, 3717% ROI",
+    description: "Sports betting platform targeting passionate sports fans. Our network delivered massive reach at an incredibly efficient cost per view.",
+    budget: 249,
+    timeline: "2 weeks",
+    viewsGenerated: 9500000,
+    postsSubmitted: 98,
     highlights: [
-      "Exceeded view targets by 300%",
-      "600 creators activated",
-      "Instagram & TikTok reach"
+      "Highest ROI campaign",
+      "Viral sports content",
+      "Community engagement"
     ],
-    exampleContent: "https://www.instagram.com/reel/DOKGK_ciO-9/",
-    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
+    exampleContent: "https://www.instagram.com/reel/DNVx_F0OKAx/",
+    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png"
   },
   {
     id: "shvfty",
@@ -59,22 +59,22 @@ const caseStudies: CaseStudy[] = [
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/shvty.jpeg"
   },
   {
-    id: "sportz-playz",
-    clientName: "Sportz Playz",
-    clientType: "Sports Platform",
-    tagline: "9.5M views, 3717% ROI",
-    description: "Sports betting platform targeting passionate sports fans. Our network delivered massive reach at an incredibly efficient cost per view.",
-    budget: 249,
-    timeline: "2 weeks",
-    viewsGenerated: 9500000,
-    postsSubmitted: 98,
+    id: "owning-manhattan",
+    clientName: "Owning Manhattan",
+    clientType: "Netflix Series",
+    tagline: "22M views in 4 days",
+    description: "Viral campaign for Netflix's hit real estate series. We mobilized our creator network to generate massive awareness ahead of the show's premiere.",
+    budget: 20000,
+    timeline: "4 days",
+    viewsGenerated: 22000000,
+    postsSubmitted: 600,
     highlights: [
-      "Highest ROI campaign",
-      "Viral sports content",
-      "Community engagement"
+      "Exceeded view targets by 300%",
+      "600 creators activated",
+      "Instagram & TikTok reach"
     ],
-    exampleContent: "https://www.instagram.com/reel/DNVx_F0OKAx/",
-    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/sportzplayz.png"
+    exampleContent: "https://www.instagram.com/reel/DOKGK_ciO-9/",
+    clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
   },
   {
     id: "rod-khlief",
@@ -221,31 +221,112 @@ export function CaseStudyStories() {
     <>
       {/* Header Section */}
       <section className="pt-32 sm:pt-40 lg:pt-48 pb-12 sm:pb-16 flex flex-col items-center justify-center px-4">
-        <span className="inline-block text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium mb-4">
+        <motion.span 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="inline-block text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium mb-4"
+        >
           Case Studies
-        </span>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 text-foreground text-center">
-          Real Results. <span className="font-normal">Real Brands.</span>
-        </h1>
-        <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto text-center mb-8">
-          Scroll to explore how we've helped brands generate millions of views.
-        </p>
+        </motion.span>
         
-        {/* Stats */}
-        <div className="flex justify-center gap-8 sm:gap-12">
-          <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-light text-foreground">100M+</div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">Total Views</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-light text-foreground">75M</div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">Network Reach</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-light text-foreground">3,000+</div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">Posts</div>
-          </div>
-        </div>
+        <motion.h1 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 text-foreground text-center"
+        >
+          <motion.span
+            className="inline-block bg-gradient-to-r from-foreground via-foreground/60 to-foreground bg-[length:200%_100%] bg-clip-text"
+            animate={{ backgroundPosition: ["0% 0%", "100% 0%", "0% 0%"] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          >
+            Real Results.
+          </motion.span>{" "}
+          <motion.span 
+            className="font-normal inline-block"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            Real Brands.
+          </motion.span>
+        </motion.h1>
+        
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto text-center mb-8"
+        >
+          <motion.span
+            animate={{ opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            Scroll to explore how we've helped brands generate millions of views.
+          </motion.span>
+        </motion.p>
+        
+        {/* Stats with stagger animation */}
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: { staggerChildren: 0.15, delayChildren: 0.5 }
+            }
+          }}
+          className="flex justify-center gap-8 sm:gap-12"
+        >
+          {[
+            { value: "100M+", label: "Total Views" },
+            { value: "75M", label: "Network Reach" },
+            { value: "3,000+", label: "Posts" }
+          ].map((stat, idx) => (
+            <motion.div
+              key={stat.label}
+              variants={{
+                hidden: { opacity: 0, y: 30, scale: 0.9 },
+                visible: { 
+                  opacity: 1, 
+                  y: 0, 
+                  scale: 1,
+                  transition: { type: "spring", stiffness: 100, damping: 15 }
+                }
+              }}
+              className="text-center"
+            >
+              <motion.div 
+                className="text-2xl sm:text-3xl font-light text-foreground relative overflow-hidden"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
+                <motion.span
+                  className="relative z-10"
+                  animate={{ 
+                    textShadow: [
+                      "0 0 0px transparent",
+                      "0 0 8px rgba(255,255,255,0.3)",
+                      "0 0 0px transparent"
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, delay: idx * 0.3 }}
+                >
+                  {stat.value}
+                </motion.span>
+              </motion.div>
+              <motion.div 
+                className="text-xs uppercase tracking-wider text-muted-foreground mt-1"
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 3, repeat: Infinity, delay: idx * 0.2 }}
+              >
+                {stat.label}
+              </motion.div>
+            </motion.div>
+          ))}
+        </motion.div>
       </section>
 
       {/* Horizontal Scroll Section - Sticky Container */}
