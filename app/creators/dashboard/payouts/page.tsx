@@ -350,7 +350,7 @@ export default function PayoutsPage() {
                         <span>${payableBalance.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-muted-foreground">
-                        <span>Platform fee (10%):</span>
+                        <span>Transaction fee (10%):</span>
                         <span>−${(payableBalance * 0.10).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between pt-1 border-t border-border font-medium text-foreground">

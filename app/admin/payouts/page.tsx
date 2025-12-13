@@ -804,7 +804,7 @@ export default function AdminPayoutsPage() {
                     </div>
                     {platformFeeRate > 0 && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Platform fee ({platformFeeRate * 100}%):</span>
+                        <span className="text-muted-foreground">Transaction fee ({platformFeeRate * 100}%):</span>
                         <span className="text-muted-foreground">−${(selectedRequest.amount * platformFeeRate).toFixed(2)}</span>
                       </div>
                     )}
@@ -924,7 +924,7 @@ export default function AdminPayoutsPage() {
                     </div>
                     {platformFeeRate > 0 && (
                       <div className="flex justify-between mt-1">
-                        <span className="text-muted-foreground">Platform fee ({platformFeeRate * 100}%):</span>
+                        <span className="text-muted-foreground">Transaction fee ({platformFeeRate * 100}%):</span>
                         <span className="text-red-400">−${(selectedRequest.amount * platformFeeRate).toFixed(2)}</span>
                       </div>
                     )}
