@@ -40,12 +40,19 @@ export function HowItWorks() {
       const deltaX = e.clientX - centerX
       const deltaY = e.clientY - centerY
       
-      // Convert to degrees - yaw rotation to face the mouse
-      // atan2(x, -y) because screen Y is inverted and we want forward to be up
+      // Calculate distance for pitch calculation
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+      
+      // Yaw - horizontal rotation (left/right)
       const yaw = Math.atan2(deltaX, -deltaY) * (180 / Math.PI)
       
+      // Pitch - vertical tilt (up/down) - based on Y distance from center
+      // Clamp between -30 and 30 degrees so robot doesn't flip over
+      const maxPitch = 30
+      const pitch = Math.max(-maxPitch, Math.min(maxPitch, (deltaY / 300) * maxPitch))
+      
       // Update model orientation (roll, pitch, yaw) - rotate the model to face mouse
-      modelViewer.orientation = `0deg 0deg ${yaw}deg`
+      modelViewer.orientation = `0deg ${pitch}deg ${yaw}deg`
     }
 
     window.addEventListener('mousemove', handleMouseMove)
