@@ -10,10 +10,12 @@ import { FAQ } from "@/components/marketing/faq"
 import { Founder } from "@/components/marketing/founder"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { MoneyTrail } from "@/components/effects/money-trail"
 
 export default function HomePage() {
   return (
     <>
+      <MoneyTrail />
       <Header />
       <main className="relative">
         {/* Original Hero - Shows first */}
