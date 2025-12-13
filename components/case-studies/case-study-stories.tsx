@@ -108,82 +108,82 @@ const formatNumber = (num: number) => {
 
 function CaseStudyCard({ study }: { study: CaseStudy }) {
   return (
-    <div className="w-screen h-full flex-shrink-0 flex items-center justify-center px-4 sm:px-8">
-      <div className="w-full max-w-2xl bg-card border border-border rounded-2xl p-6 sm:p-8 lg:p-10">
+    <div className="w-screen h-full flex-shrink-0 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-sm sm:max-w-xl lg:max-w-3xl bg-card border border-border rounded-2xl p-5 sm:p-8 lg:p-12">
         {/* Header */}
-        <div className="flex items-start gap-4 sm:gap-5 mb-6">
+        <div className="flex items-start gap-4 sm:gap-6 mb-4 sm:mb-6 lg:mb-8">
           <Image
             src={study.clientLogo}
             alt={study.clientName}
-            width={80}
-            height={80}
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover ring-1 ring-border flex-shrink-0"
+            width={120}
+            height={120}
+            className="w-14 h-14 sm:w-20 sm:h-20 lg:w-28 lg:h-28 rounded-xl object-cover ring-1 ring-border flex-shrink-0"
             unoptimized
           />
-          <div className="min-w-0">
-            <span className="text-[10px] sm:text-xs uppercase tracking-[0.15em] text-muted-foreground">
+          <div className="min-w-0 flex-1">
+            <span className="text-[10px] sm:text-xs lg:text-sm uppercase tracking-[0.15em] text-muted-foreground">
               {study.clientType}
             </span>
-            <h2 className="text-xl sm:text-2xl font-light text-foreground mt-0.5 truncate">
+            <h2 className="text-lg sm:text-2xl lg:text-3xl font-light text-foreground mt-0.5 sm:mt-1">
               {study.clientName}
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground mt-0.5">
+            <p className="text-sm sm:text-base lg:text-lg text-muted-foreground mt-0.5 sm:mt-1">
               {study.tagline}
             </p>
           </div>
         </div>
 
         {/* Description */}
-        <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+        <p className="text-xs sm:text-sm lg:text-base text-muted-foreground leading-relaxed mb-4 sm:mb-6 lg:mb-8">
           {study.description}
         </p>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6">
-          <div className="text-center p-2 sm:p-3 bg-muted/30 rounded-lg border border-border">
-            <TrendingUp className="w-3 h-3 mx-auto mb-1 text-muted-foreground" />
-            <div className="text-base sm:text-lg font-light text-foreground">
+        <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6 lg:mb-8">
+          <div className="text-center p-2 sm:p-3 lg:p-4 bg-muted/30 rounded-lg lg:rounded-xl border border-border">
+            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mx-auto mb-1 sm:mb-2 text-muted-foreground" />
+            <div className="text-sm sm:text-lg lg:text-2xl font-light text-foreground">
               {formatNumber(study.viewsGenerated)}
             </div>
-            <div className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wider">
+            <div className="text-[8px] sm:text-[10px] lg:text-xs text-muted-foreground uppercase tracking-wider">
               Views
             </div>
           </div>
-          <div className="text-center p-2 sm:p-3 bg-muted/30 rounded-lg border border-border">
-            <Users className="w-3 h-3 mx-auto mb-1 text-muted-foreground" />
-            <div className="text-base sm:text-lg font-light text-foreground">
+          <div className="text-center p-2 sm:p-3 lg:p-4 bg-muted/30 rounded-lg lg:rounded-xl border border-border">
+            <Users className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mx-auto mb-1 sm:mb-2 text-muted-foreground" />
+            <div className="text-sm sm:text-lg lg:text-2xl font-light text-foreground">
               {study.postsSubmitted}
             </div>
-            <div className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wider">
+            <div className="text-[8px] sm:text-[10px] lg:text-xs text-muted-foreground uppercase tracking-wider">
               Posts
             </div>
           </div>
-          <div className="text-center p-2 sm:p-3 bg-muted/30 rounded-lg border border-border">
-            <Clock className="w-3 h-3 mx-auto mb-1 text-muted-foreground" />
-            <div className="text-base sm:text-lg font-light text-foreground">
+          <div className="text-center p-2 sm:p-3 lg:p-4 bg-muted/30 rounded-lg lg:rounded-xl border border-border">
+            <Clock className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mx-auto mb-1 sm:mb-2 text-muted-foreground" />
+            <div className="text-sm sm:text-lg lg:text-2xl font-light text-foreground">
               {study.timeline}
             </div>
-            <div className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wider">
+            <div className="text-[8px] sm:text-[10px] lg:text-xs text-muted-foreground uppercase tracking-wider">
               Time
             </div>
           </div>
-          <div className="text-center p-2 sm:p-3 bg-muted/30 rounded-lg border border-border">
-            <div className="w-3 h-3 mx-auto mb-1 text-muted-foreground flex items-center justify-center text-[10px]">$</div>
-            <div className="text-base sm:text-lg font-light text-foreground">
-              ${study.budget}
+          <div className="text-center p-2 sm:p-3 lg:p-4 bg-muted/30 rounded-lg lg:rounded-xl border border-border">
+            <div className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mx-auto mb-1 sm:mb-2 text-muted-foreground flex items-center justify-center text-[10px] sm:text-xs lg:text-sm">$</div>
+            <div className="text-sm sm:text-lg lg:text-2xl font-light text-foreground">
+              {study.budget >= 1000 ? `${(study.budget / 1000).toFixed(0)}K` : study.budget}
             </div>
-            <div className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wider">
+            <div className="text-[8px] sm:text-[10px] lg:text-xs text-muted-foreground uppercase tracking-wider">
               Budget
             </div>
           </div>
         </div>
 
         {/* Highlights */}
-        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-6">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 lg:gap-3 mb-4 sm:mb-6">
           {study.highlights.map((highlight, idx) => (
             <span
               key={idx}
-              className="px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs bg-muted/50 border border-border text-muted-foreground"
+              className="px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs lg:text-sm bg-muted/50 border border-border text-muted-foreground"
             >
               {highlight}
             </span>
@@ -195,7 +195,7 @@ function CaseStudyCard({ study }: { study: CaseStudy }) {
           href={study.exampleContent}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm lg:text-base text-muted-foreground hover:text-foreground transition-colors"
         >
           <Play className="w-3 h-3 sm:w-4 sm:h-4" />
           View Example Content
@@ -219,31 +219,31 @@ export function CaseStudyStories() {
 
   return (
     <>
-      {/* Header Section */}
-      <section className="min-h-[60vh] flex flex-col items-center justify-center px-4 py-16">
-        <span className="inline-block text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium mb-4">
+      {/* Header Section - Compact */}
+      <section className="py-8 sm:py-12 flex flex-col items-center justify-center px-4">
+        <span className="inline-block text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium mb-3">
           Case Studies
         </span>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 text-foreground text-center">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light mb-3 text-foreground text-center">
           Real Results. <span className="font-normal">Real Brands.</span>
         </h1>
-        <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto text-center mb-8">
+        <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto text-center mb-6">
           Scroll to explore how we've helped brands generate millions of views.
         </p>
         
         {/* Stats */}
-        <div className="flex justify-center gap-8 sm:gap-12">
+        <div className="flex justify-center gap-6 sm:gap-10">
           <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-light text-foreground">100M+</div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">Total Views</div>
+            <div className="text-xl sm:text-2xl font-light text-foreground">100M+</div>
+            <div className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground mt-0.5">Total Views</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-light text-foreground">75M</div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">Network Reach</div>
+            <div className="text-xl sm:text-2xl font-light text-foreground">75M</div>
+            <div className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground mt-0.5">Network Reach</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-light text-foreground">3,000+</div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">Posts</div>
+            <div className="text-xl sm:text-2xl font-light text-foreground">3,000+</div>
+            <div className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground mt-0.5">Posts</div>
           </div>
         </div>
       </section>
@@ -254,7 +254,7 @@ export function CaseStudyStories() {
         className="relative"
         style={{ height: `${caseStudies.length * 100}vh` }}
       >
-        <div className="sticky top-0 h-screen overflow-hidden">
+        <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden flex items-center">
           <motion.div 
             className="flex h-full"
             style={{ x }}
@@ -265,11 +265,11 @@ export function CaseStudyStories() {
           </motion.div>
           
           {/* Progress indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+          <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
             {caseStudies.map((_, idx) => (
               <motion.div
                 key={idx}
-                className="w-8 h-1 rounded-full bg-muted-foreground/20 overflow-hidden"
+                className="w-6 sm:w-8 h-1 rounded-full bg-muted-foreground/20 overflow-hidden"
               >
                 <motion.div
                   className="h-full bg-foreground rounded-full"

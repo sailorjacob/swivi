@@ -111,7 +111,7 @@ export function HeroVideo() {
               </div>
               <div>
                 <div className="text-3xl font-light text-white">50%</div>
-                <div className="text-sm uppercase tracking-wider">Below Market CPM</div>
+                <div className="text-sm uppercase tracking-wider">Below Market Rates</div>
               </div>
             </div>
           </motion.div>

@@ -1,42 +1,38 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
 
-const paymentMethods = ["USDC", "Bitcoin", "PayPal", "USDC", "Bitcoin", "PayPal"]
+const paymentMethods = ["USDC", "Bitcoin", "PayPal"]
 
-// Smooth continuous scrolling spinner
+// Smooth continuous scrolling spinner - always goes down in order
 export function CryptoSpinnerInline() {
-  const [offset, setOffset] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(0)
   
   useEffect(() => {
     const interval = setInterval(() => {
-      setOffset((prev) => prev + 1)
+      setCurrentIndex((prev) => (prev + 1) % paymentMethods.length)
     }, 1500)
     return () => clearInterval(interval)
   }, [])
 
-  const currentIndex = offset % 3
-
   return (
     <span className="inline-block relative h-[1em] overflow-hidden align-middle" style={{ width: '5.5ch' }}>
-      <motion.span
-        className="absolute left-0 top-0 flex flex-col"
-        animate={{ y: `${-currentIndex * 1}em` }}
-        transition={{
-          duration: 0.4,
-          ease: [0.25, 0.1, 0.25, 1],
-        }}
-      >
-        {["USDC", "Bitcoin", "PayPal", "USDC"].map((method, idx) => (
-          <span 
-            key={idx} 
-            className="h-[1em] leading-[1em] text-foreground"
-          >
-            {method}
-          </span>
-        ))}
-      </motion.span>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={currentIndex}
+          initial={{ y: "100%" }}
+          animate={{ y: "0%" }}
+          exit={{ y: "-100%" }}
+          transition={{
+            duration: 0.35,
+            ease: [0.25, 0.1, 0.25, 1],
+          }}
+          className="absolute left-0 top-0 h-[1em] leading-[1em] text-foreground"
+        >
+          {paymentMethods[currentIndex]}
+        </motion.span>
+      </AnimatePresence>
     </span>
   )
 }

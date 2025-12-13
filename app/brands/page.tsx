@@ -20,7 +20,7 @@ const stats = [
   {
     icon: TrendingUp,
     label: "Total Views",
-    value: "50M+",
+    value: "100M+",
     description: "Across platforms"
   },
   {
@@ -32,7 +32,7 @@ const stats = [
   {
     icon: Users,
     label: "Creator Network",
-    value: "24+",
+    value: "300+",
     description: "Top creators"
   },
 ]
