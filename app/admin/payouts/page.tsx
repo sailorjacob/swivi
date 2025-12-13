@@ -192,7 +192,7 @@ export default function AdminPayoutsPage() {
         setProcessDialogOpen(false)
         setTransactionId('')
         setNotes('')
-        setCurrentFeeRate(DEFAULT_PLATFORM_FEE) // Reset to default
+        setPlatformFeeRate(DEFAULT_PLATFORM_FEE) // Reset to default
         fetchPayoutRequests()
         fetchPayoutSummary()
       } else {
