@@ -61,23 +61,14 @@ export function HowItWorks() {
             </div>
           </div>
           
-          {/* 3D Model Viewer - Desktop Only */}
-          <div className="w-[280px] lg:w-[320px] mt-12 -ml-8">
-            <div 
-              className="w-full h-[320px] lg:h-[380px]"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  <model-viewer
-                    alt="3D Spacesuit Model"
-                    src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
-                    shadow-intensity="1"
-                    camera-controls
-                    auto-rotate
-                    rotation-per-second="20deg"
-                    style="width: 100%; height: 100%;"
-                  ></model-viewer>
-                `
-              }}
+          {/* 3D Model Viewer - Desktop Only - Smithsonian Neil Armstrong Spacesuit */}
+          <div className="w-[300px] lg:w-[360px] mt-8 -ml-4">
+            <iframe 
+              name="Smithsonian Voyager" 
+              src="https://3d-api.si.edu/voyager//3d_package:d8c63ba6-4ebc-11ea-b77f-2e728ce88125" 
+              className="w-full h-[380px] lg:h-[450px] border-0 rounded-xl"
+              allow="xr; xr-spatial-tracking; fullscreen"
+              title="Neil Armstrong Spacesuit - Smithsonian"
             />
           </div>
         </div>
