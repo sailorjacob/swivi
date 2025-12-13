@@ -70,15 +70,12 @@ export function HowItWorks() {
                   <model-viewer
                     alt="3D Spacesuit Model"
                     src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
-                    ar
-                    environment-image="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"
-                    poster="https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp"
                     shadow-intensity="1"
                     camera-controls
                     touch-action="pan-y"
                     auto-rotate
                     rotation-per-second="20deg"
-                    style="width: 100%; height: 100%;"
+                    style="width: 100%; height: 100%; background-color: transparent;"
                   ></model-viewer>
                 `
               }}
