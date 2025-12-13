@@ -1,6 +1,7 @@
 "use client"
 
 import Script from "next/script"
+import { useEffect, useRef } from "react"
 
 const steps = [
   {
@@ -21,6 +22,36 @@ const steps = [
 ]
 
 export function HowItWorks() {
+  const modelContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!modelContainerRef.current) return
+      
+      const modelViewer = modelContainerRef.current.querySelector('model-viewer') as any
+      if (!modelViewer) return
+
+      // Get the center of the model viewer element
+      const rect = modelContainerRef.current.getBoundingClientRect()
+      const centerX = rect.left + rect.width / 2
+      const centerY = rect.top + rect.height / 2
+
+      // Calculate angle from center to mouse
+      const deltaX = e.clientX - centerX
+      const deltaY = e.clientY - centerY
+      
+      // Convert to degrees (theta is horizontal rotation)
+      // atan2 gives us the angle, we convert to degrees and offset
+      const theta = Math.atan2(deltaX, deltaY) * (180 / Math.PI)
+      
+      // Update camera orbit - keep phi (vertical) and radius the same
+      modelViewer.cameraOrbit = `${theta}deg 75deg 105%`
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+
   return (
     <section id="how-it-works" className="py-20 md:py-32 border-t border-black/5 bg-background relative">
       {/* Load model-viewer library */}
@@ -62,7 +93,7 @@ export function HowItWorks() {
           </div>
           
           {/* 3D Model Viewer - Desktop Only - Animated Robot */}
-          <div className="w-[280px] lg:w-[320px] mt-12 -ml-8">
+          <div className="w-[280px] lg:w-[320px] mt-12 -ml-8" ref={modelContainerRef}>
             <div 
               className="w-full h-[320px] lg:h-[380px]"
               dangerouslySetInnerHTML={{
