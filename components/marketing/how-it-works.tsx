@@ -133,9 +133,10 @@ export function HowItWorks() {
                 camera-controls
                 auto-rotate
                 loading="eager"
+                interaction-prompt="none"
                 scale="0.2 0.2 0.2"
                 camera-orbit="0deg 75deg 5m"
-                style="width: 100%; height: 100%; background-color: transparent;"
+                style="width: 100%; height: 100%; background-color: transparent; --interaction-prompt-display: none;"
               ></model-viewer>
             `
           }}
