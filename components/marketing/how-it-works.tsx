@@ -109,11 +109,14 @@ export function HowItWorks() {
         canvasContainerRef.current.style.top = `${posRef.current.y}%`
       }
       
-      // Rotate model based on movement
+      // Rotate model based on movement - more reactive and dramatic
       if (modelRef.current) {
-        const targetRotation = dx > 0.1 ? 0.3 : dx < -0.1 ? -0.3 : 0
-        modelRef.current.rotation.y += (targetRotation - modelRef.current.rotation.y) * 0.05
-        modelRef.current.rotation.y += 0.005 // Slow auto-rotate
+        // Stronger rotation based on movement speed (±60 degrees max)
+        const rotationStrength = Math.min(Math.abs(dx) * 0.15, 1.0)
+        const targetRotation = dx > 0.05 ? rotationStrength : dx < -0.05 ? -rotationStrength : 0
+        
+        // Faster easing for snappy response
+        modelRef.current.rotation.y += (targetRotation - modelRef.current.rotation.y) * 0.15
       }
       
       renderer.render(scene, camera)
