@@ -22,6 +22,14 @@ const steps = [
   },
 ]
 
+// Random 3D models to display
+const MODEL_URLS = [
+  'https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%205.glb',
+  'https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%209.glb',
+  'https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%208%20pink.glb',
+  'https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%209%20silver.glb',
+]
+
 export function HowItWorks() {
   const sectionRef = useRef<HTMLElement>(null)
   const canvasContainerRef = useRef<HTMLDivElement>(null)
@@ -68,10 +76,11 @@ export function HowItWorks() {
     hemiLight.position.set(0, 20, 0)
     scene.add(hemiLight)
     
-    // Load the model
+    // Load a random model
     const loader = new GLTFLoader()
+    const randomModelUrl = MODEL_URLS[Math.floor(Math.random() * MODEL_URLS.length)]
     loader.load(
-      'https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%205.glb',
+      randomModelUrl,
       (gltf: { scene: THREE.Group }) => {
         const model = gltf.scene
         
