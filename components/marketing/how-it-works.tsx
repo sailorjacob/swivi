@@ -129,6 +129,8 @@ export function HowItWorks() {
                 id="following-model"
                 alt="3D Model"
                 src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%205.glb"
+                environment-image="neutral"
+                exposure="1"
                 camera-controls
                 tone-mapping="agx"
                 shadow-intensity="0"
