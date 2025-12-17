@@ -116,9 +116,25 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* What We Believe */}
-        <section className="py-16 md:py-20 bg-foreground/[0.02] border-y border-black/5">
-          <div className="max-width-wrapper section-padding">
+        {/* What We Believe - Video Background */}
+        <section className="relative py-20 md:py-32 overflow-hidden">
+          {/* Video Background */}
+          <div className="absolute inset-0 overflow-hidden">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ filter: 'brightness(0.3)' }}
+            >
+              <source src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/bg3.mp4" type="video/mp4" />
+            </video>
+            {/* Gradient overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/20" />
+          </div>
+
+          <div className="max-width-wrapper section-padding relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -126,7 +142,7 @@ export default function AboutPage() {
               viewport={{ once: true }}
               className="mx-auto max-w-4xl"
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-10 text-white">
                 What We Believe
               </h2>
               
@@ -140,15 +156,15 @@ export default function AboutPage() {
                     viewport={{ once: true }}
                     className="flex items-start gap-4"
                   >
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-foreground/10 flex items-center justify-center mt-0.5">
-                      <Check className="w-3.5 h-3.5 text-foreground" />
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center mt-0.5">
+                      <Check className="w-3.5 h-3.5 text-white" />
                     </div>
-                    <p className="text-base sm:text-lg">{belief}</p>
+                    <p className="text-base sm:text-lg text-white">{belief}</p>
                   </motion.div>
                 ))}
               </div>
               
-              <p className="mt-10 text-muted-foreground text-base sm:text-lg">
+              <p className="mt-10 text-white/80 text-base sm:text-lg">
                 Our job is to turn short-form content into a repeatable distribution engine.
               </p>
             </motion.div>
