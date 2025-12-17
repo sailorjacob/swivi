@@ -47,24 +47,25 @@ export function HowItWorks() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.2
+    renderer.toneMappingExposure = 1.5
     rendererRef.current = renderer
     canvasContainerRef.current.appendChild(renderer.domElement)
     
-    // Lighting - like three-gltf-viewer
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+    // Lighting - matching test page that works
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1)
     scene.add(ambientLight)
     
-    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1)
-    directionalLight1.position.set(1, 2, 3)
+    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2)
+    directionalLight1.position.set(5, 10, 7.5)
     scene.add(directionalLight1)
     
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5)
-    directionalLight2.position.set(-1, 1, -2)
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1)
+    directionalLight2.position.set(-5, 5, -5)
     scene.add(directionalLight2)
     
     // Hemisphere light for better ambient
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6)
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1)
+    hemiLight.position.set(0, 20, 0)
     scene.add(hemiLight)
     
     // Load the model
