@@ -4,7 +4,6 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
-import { CryptoSpinnerInline } from "@/components/marketing/crypto-spinner"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -88,7 +87,7 @@ export function HeroOriginal() {
             variants={itemVariants}
             className="mb-6 text-base sm:text-lg text-muted-foreground max-w-2xl"
           >
-            We deploy creator-powered distribution to generate tens of millions of organic impressions during critical launch windows — at costs paid ads can't touch.
+            Hundreds of creators post your content on their pages — driving millions of real views during your most important launch moments.
           </motion.p>
 
           {/* Proof Line */}
@@ -96,7 +95,7 @@ export function HeroOriginal() {
             variants={itemVariants}
             className="mb-10 text-sm sm:text-base text-foreground/80 max-w-2xl font-normal"
           >
-            Recent campaign around a top-10 Netflix show generated 25M+ impressions in under a week.
+            We drove 25 million views across 600 posts for Netflix's top-10 show "Owning Manhattan" — for $20K instead of $140K+ in traditional ads.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -126,10 +125,10 @@ export function HeroOriginal() {
           {/* Trust indicator */}
           <motion.div
             variants={itemVariants}
-            className="mt-16 pt-16 border-t border-white/10"
+            className="mt-16 pt-16 border-t border-black/5"
           >
             <p className="text-sm text-muted-foreground">
-              Pay & get paid in <CryptoSpinnerInline />. Helping brands go viral.
+              Trusted by Netflix shows, major brands, and founders who need real reach.
             </p>
           </motion.div>
         </motion.div>

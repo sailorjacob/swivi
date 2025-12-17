@@ -5,20 +5,25 @@ import { motion } from "framer-motion"
 const features = [
   {
     name: "Organic Distribution Strategy",
-    description: "We design distribution frameworks that prioritize volume, timing, and platform-native formats — optimized for organic discovery.",
+    description: "We plan and execute large-scale posting campaigns across hundreds of creator accounts — timed perfectly for your launch.",
   },
   {
-    name: "Multi-Platform Amplification",
-    description: "Content is deployed simultaneously across TikTok, Instagram Reels, and YouTube Shorts to maximize algorithm lift.",
+    name: "Multi-Platform Reach",
+    description: "Your campaign goes live simultaneously on TikTok, Instagram Reels, and YouTube Shorts — maximizing visibility across platforms.",
   },
   {
-    name: "Performance Analytics",
-    description: "We track impressions, velocity, and creator performance in real time — allowing for fast optimization and budget efficiency.",
+    name: "Real-Time Performance Tracking",
+    description: "Watch your views and engagement grow in real time. We optimize throughout the campaign to maximize results.",
   },
   {
-    name: "Trend Alignment",
-    description: "Campaigns are structured around platform behavior, cultural moments, and short-form consumption patterns — not guesswork.",
+    name: "Trend-Aligned Content",
+    description: "Campaigns are built around what's working on each platform right now — not outdated playbooks or guesswork.",
   },
+]
+
+const clientTypes = [
+  "TV Shows", "Streamers", "Artists", "Brands", "Athletes", "Musicians", 
+  "Podcasters", "Founders", "Real Estate", "Entertainment", "Media Companies"
 ]
 
 export function Features() {
@@ -27,10 +32,10 @@ export function Features() {
       <div className="max-width-wrapper section-padding">
         <div className="mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
-            Distribution Solutions
+            How We Drive Reach
           </h2>
           <p className="text-muted-foreground max-w-2xl">
-            Every launch deserves momentum. Swivi provides the infrastructure to turn short-form content into measurable reach at scale.
+            Every launch deserves momentum. Hundreds of creators post your campaign across their pages to drive real views and engagement.
           </p>
         </div>
 
@@ -53,6 +58,36 @@ export function Features() {
           ))}
         </div>
 
+        {/* Animated Client Types Billboard */}
+        <div className="mt-16 pt-8 border-t border-black/5 overflow-hidden">
+          <motion.div
+            className="flex whitespace-nowrap"
+            animate={{
+              x: [0, -1200],
+            }}
+            transition={{
+              x: {
+                repeat: Infinity,
+                repeatType: "loop",
+                duration: 25,
+                ease: "linear",
+              },
+            }}
+          >
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex items-center space-x-8 mr-8">
+                {clientTypes.map((clientType, index) => (
+                  <span
+                    key={`${i}-${index}`}
+                    className="text-lg font-light text-muted-foreground/60"
+                  >
+                    {clientType}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </motion.div>
+        </div>
       </div>
     </section>
   )

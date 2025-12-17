@@ -4,17 +4,17 @@ import { motion } from "framer-motion"
 import { Check, X } from "lucide-react"
 
 const goodFit = [
-  "Care about reach and distribution efficiency",
-  "Have a real launch or release date",
-  "Already invest in marketing",
-  "Want organic scale, not vanity posts",
+  "Have a launch date and need massive reach",
+  "Want real organic views, not bots or fake engagement",
+  "Have a budget of $15K+ for a real campaign",
+  "Value results over vanity metrics",
 ]
 
 const notFit = [
-  "Want \"a few clips\"",
-  "Are testing with small budgets",
-  "Need custom content production",
-  "Are unsure about timing or goals",
+  "Just want a couple social media posts",
+  "Have a budget under $10K",
+  "Need us to create content from scratch",
+  "Don't have a clear launch date or goal",
 ]
 
 export function WhoIsFor() {
@@ -29,7 +29,7 @@ export function WhoIsFor() {
           className="max-w-5xl mx-auto"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-12 text-center">
-            Who Swivi Is (and Isn't) For
+            Are We a Good Fit?
           </h2>
           
           <div className="grid md:grid-cols-2 gap-12 md:gap-16">
@@ -40,7 +40,7 @@ export function WhoIsFor() {
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <h3 className="text-lg font-normal mb-6">Swivi is a fit if you:</h3>
+              <h3 className="text-lg font-normal mb-6">We're a great fit if you:</h3>
               <div className="space-y-4">
                 {goodFit.map((item, index) => (
                   <div key={index} className="flex items-start gap-3">
@@ -60,7 +60,7 @@ export function WhoIsFor() {
               transition={{ duration: 0.6, delay: 0.4 }}
               viewport={{ once: true }}
             >
-              <h3 className="text-lg font-normal mb-6">Swivi is not a fit if you:</h3>
+              <h3 className="text-lg font-normal mb-6">We're probably not a fit if you:</h3>
               <div className="space-y-4">
                 {notFit.map((item, index) => (
                   <div key={index} className="flex items-start gap-3">
@@ -81,7 +81,7 @@ export function WhoIsFor() {
             viewport={{ once: true }}
             className="text-center text-sm text-muted-foreground mt-12"
           >
-            This keeps campaigns effective on both sides.
+            Being honest about fit means better results for everyone.
           </motion.p>
         </motion.div>
       </div>

@@ -14,22 +14,22 @@ export function Positioning() {
           className="max-w-4xl mx-auto"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-8">
-            Performance-Driven Creator Distribution
+            How It Works
           </h2>
           
           <div className="space-y-6 text-base sm:text-lg text-muted-foreground leading-relaxed">
             <p>
-              Swivi Media operates large-scale creator networks across TikTok, Instagram Reels, and YouTube Shorts to deliver measurable reach at speed.
+              We manage a network of hundreds of creators across TikTok, Instagram Reels, and YouTube Shorts. When you launch a campaign, they all post your content on their pages at the same time.
             </p>
             
             <p>
-              Instead of relying on ads or one-off influencer posts, we coordinate hundreds of independent creators to distribute short-form content simultaneously — creating algorithm momentum, impression velocity, and cultural saturation.
+              Instead of paying for one expensive influencer or running ads, you get real organic views from real creator accounts — at a fraction of the cost.
             </p>
             
             <p className="text-foreground font-normal text-xl pt-4">
-              This is not content creation.
+              Think of it as organic advertising.
               <br />
-              It is organic media buying.
+              Real posts. Real views. Real results.
             </p>
           </div>
         </motion.div>

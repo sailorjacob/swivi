@@ -1,7 +1,14 @@
-# Homepage Redesign - December 2025
+# Homepage Redesign - December 2025 (v2 - Optimized)
 
 ## Overview
-Complete homepage overhaul with clearer, more concrete language that speaks to enterprise clients while remaining accessible. Removed vague marketing speak and replaced with specific, measurable value propositions.
+Complete homepage overhaul with clearer, more concrete language that speaks to enterprise clients while remaining accessible. Follows "Steve Jobs" principle — simple language that anyone can understand, with concrete proof points.
+
+**Key changes in v2:**
+- Brought back the scrolling client types banner (TV Shows, Athletes, Musicians, etc.)
+- Made all language simpler and more concrete
+- Added specific proof: "$20K vs $140K for traditional ads"
+- Removed all jargon like "CPM" from user-facing copy
+- Made it obvious: "hundreds of creators post your content on their pages"
 
 ## Key Changes
 
@@ -123,7 +130,7 @@ Strong closing:
 ## Design Philosophy
 
 ### Language Principles Applied:
-1. **Concrete over vague:** "22M+ impressions" instead of "viral moments"
+1. **Concrete over vague:** "25M+ impressions" instead of "viral moments"
 2. **Simple over jargon:** Avoided CPM in user-facing copy, used "costs" instead
 3. **Specific over generic:** Named actual platforms, timeframes, and numbers
 4. **Honest qualification:** Clear about who it's for and who it's not for
