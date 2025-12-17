@@ -44,16 +44,19 @@ export function HowItWorks() {
         modelContainerRef.current.style.left = `${posRef.current.x}%`
         modelContainerRef.current.style.top = `${posRef.current.y}%`
         
-        // Update yaw based on movement direction (which way robot is running)
+        // Update yaw based on movement direction
         const movementX = dx
         if (Math.abs(movementX) > 0.1) {
-          const targetYaw = movementX > 0 ? 30 : -30
-          currentYawRef.current += (targetYaw - currentYawRef.current) * 0.05
-          
-          const modelViewer = modelContainerRef.current.querySelector('model-viewer') as any
-          if (modelViewer) {
-            modelViewer.orientation = `0deg 0deg ${currentYawRef.current}deg`
-          }
+          const targetYaw = movementX > 0 ? 20 : -20
+          currentYawRef.current += (targetYaw - currentYawRef.current) * 0.03
+        } else {
+          // Return to center when not moving
+          currentYawRef.current += (0 - currentYawRef.current) * 0.02
+        }
+        
+        const modelViewer = modelContainerRef.current.querySelector('model-viewer') as any
+        if (modelViewer) {
+          modelViewer.orientation = `0deg ${currentYawRef.current}deg 0deg`
         }
       }
       
@@ -123,16 +126,15 @@ export function HowItWorks() {
           dangerouslySetInnerHTML={{
             __html: `
               <model-viewer
-                id="following-robot"
-                alt="An animated 3D robot"
-                src="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"
-                autoplay
-                animation-name="Running"
-                shadow-intensity="1"
+                id="following-model"
+                alt="3D Model"
+                src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%205.glb"
+                camera-controls
+                tone-mapping="agx"
+                shadow-intensity="0"
                 loading="eager"
                 interaction-prompt="none"
-                scale="0.18 0.18 0.18"
-                camera-orbit="0deg 80deg 4.5m"
+                camera-orbit="0deg 75deg 2m"
                 style="width: 100%; height: 100%; background-color: transparent; --interaction-prompt-display: none;"
               ></model-viewer>
             `
