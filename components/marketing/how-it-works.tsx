@@ -129,13 +129,17 @@ export function HowItWorks() {
                 id="following-model"
                 alt="3D Model"
                 src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%205.glb"
-                environment-image="https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.hdr"
-                exposure="0.8"
+                environment-image="neutral"
+                skybox-image="neutral"
+                tone-mapping="agx"
+                exposure="1"
                 shadow-intensity="0"
+                shadow-softness="0.31"
+                camera-controls
                 loading="eager"
                 interaction-prompt="none"
                 camera-orbit="0deg 75deg 2m"
-                style="width: 100%; height: 100%; background-color: transparent; --interaction-prompt-display: none;"
+                style="width: 100%; height: 100%; background-color: #ffffff; --interaction-prompt-display: none;"
               ></model-viewer>
             `
           }}
