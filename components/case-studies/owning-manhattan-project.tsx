@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, ExternalLink, Play, Eye, TrendingUp } from "lucide-react"
+import { ArrowLeft, ExternalLink, Play, Eye, TrendingUp, Check, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
@@ -69,6 +69,32 @@ const contentData: ContentItem[] = [
   { id: "content-44", creator: "soarhumor", url: "https://www.instagram.com/reel/DOHMa2FiHwr", platform: "instagram", date: "09-02-2025", views: 1673605, category: "Deal Making" }
 ]
 
+const whyItWorked = [
+  {
+    title: "Coordinated Distribution",
+    description: "Hundreds of creators posting simultaneously created sustained algorithm momentum across platforms.",
+  },
+  {
+    title: "Performance-Based Incentives",
+    description: "Creators were paid based on real views, aligning incentives with results.",
+  },
+  {
+    title: "Platform-Native Content",
+    description: "Short-form formats matched native consumption behavior, increasing watch time and share velocity.",
+  },
+  {
+    title: "Timing Discipline",
+    description: "The campaign was tightly aligned with the release window, maximizing impact when attention mattered most.",
+  },
+]
+
+const useThisModelIf = [
+  "Tens of millions of views quickly",
+  "Cost efficiency compared to paid ads",
+  "Organic reach without managing creators",
+  "Distribution aligned to a launch moment",
+]
+
 const getPlatformIcon = (platform: string) => {
   switch (platform) {
     case "youtube":
@@ -106,14 +132,12 @@ const formatViews = (views: number) => {
 }
 
 export default function OwningManhattanProject() {
-  const [visibleContent, setVisibleContent] = useState(16) // Start with 4x4 grid
-  const [contentItems] = useState(contentData.sort((a, b) => b.views - a.views)) // Sort by views descending
+  const [visibleContent, setVisibleContent] = useState(16)
+  const [contentItems] = useState(contentData.sort((a, b) => b.views - a.views))
   
   const loadMoreContent = () => {
     setVisibleContent(prev => Math.min(prev + 16, contentItems.length))
   }
-
-  // Theme is handled by the case studies layout now
 
   useEffect(() => {
     const handleScroll = () => {
@@ -153,107 +177,286 @@ export default function OwningManhattanProject() {
 
   return (
     <div className="w-full bg-white text-gray-900 min-h-screen">
-      {/* Header */}
+      
+      {/* Back Link */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8"
+      >
+        <Link 
+          href="/case-studies"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Case Studies
+        </Link>
+      </motion.div>
+
+      {/* Hero Header */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="mb-12"
       >
-        <motion.div variants={itemVariants} className="mb-6">
-          <Link 
-            href="/case-studies"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Case Studies
-          </Link>
-        </motion.div>
-
         <motion.div variants={itemVariants} className="text-center mb-8">
-          <div className="flex justify-center mb-4">
+          <Badge variant="outline" className="text-xs text-gray-600 border-gray-300 mb-4">
+            Netflix Original Series
+          </Badge>
+          <div className="flex justify-center mb-6">
             <Image
               src="https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
               alt="Owning Manhattan"
               width={300}
               height={300}
-              className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-2xl object-cover ring-2 ring-black/10"
+              className="w-48 h-48 sm:w-64 sm:h-64 rounded-2xl object-cover ring-2 ring-black/10"
               unoptimized
             />
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-light mb-3">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-light mb-4">
             Owning Manhattan
           </h1>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs text-gray-900 border-gray-300">Netflix TV Series</Badge>
-              <span className="text-2xl">📸</span>
-            </div>
-            <span className="text-sm text-muted-foreground">4 days • 22M views • 1000% ROI</span>
-          </div>
-        </motion.div>
-
-        <motion.p variants={itemVariants} className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto text-center mb-8 px-4">
-          Netflix series promotion campaign targeting real estate and lifestyle audiences. 
-          Our creator network created viral content showcasing the luxury real estate and drama 
-          from Netflix's hit series, achieving exceptional reach and engagement.
-        </motion.p>
-
-        {/* Campaign Results Summary */}
-        <motion.section
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="bg-gray-50 rounded-xl p-4 sm:p-6 mt-8 mb-8 max-w-6xl mx-auto"
-        >
-          <motion.h3 variants={itemVariants} className="text-lg font-light mb-4">
-            Impact
-          </motion.h3>
-          <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-            <div>
-              <h4 className="font-medium mb-2">Reach & Engagement</h4>
-              <p className="text-sm text-muted-foreground">
-                Generated 6.1M+ views across all platforms with high engagement rates, 
-                significantly exceeding the initial goal of 1M views.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-medium mb-2">Content Diversity</h4>
-              <p className="text-sm text-muted-foreground">
-                Created content across YouTube, TikTok, and Instagram, ensuring 
-                maximum platform optimization and audience reach.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-medium mb-2">ROI Achievement</h4>
-              <p className="text-sm text-muted-foreground">
-                Delivered exceptional 610% return on investment within just 2 days, 
-                demonstrating the power of our creator network.
-              </p>
-            </div>
-          </motion.div>
-        </motion.section>
-
-        {/* Campaign Stats */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-8 mb-8 max-w-6xl mx-auto px-4">
-          <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light mb-1">60</div>
-            <div className="text-xs sm:text-sm text-muted-foreground">Clips Created</div>
-          </div>
-          <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light mb-1">22M</div>
-            <div className="text-xs sm:text-sm text-muted-foreground">Total Views</div>
-          </div>
-          <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light mb-1">593%</div>
-            <div className="text-xs sm:text-sm text-muted-foreground">ROI Achieved</div>
-          </div>
-          <div className="text-center">
-            <div className="text-xl sm:text-2xl font-light mb-1">$968</div>
-            <div className="text-xs sm:text-sm text-muted-foreground">Total Budget</div>
-          </div>
         </motion.div>
       </motion.div>
+
+      {/* Overview Section */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="mb-16 max-w-4xl mx-auto"
+      >
+        <h2 className="text-2xl font-light mb-6">Overview</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-sm">
+          <div>
+            <p className="text-muted-foreground">Client</p>
+            <p className="font-normal">Ryan Serhant / Owning Manhattan</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Platform</p>
+            <p className="font-normal">Netflix</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Campaign Type</p>
+            <p className="font-normal">Organic Launch Amplification</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Partner</p>
+            <p className="font-normal">Swivi Media</p>
+          </div>
+        </div>
+        <p className="text-muted-foreground leading-relaxed">
+          <span className="font-normal text-foreground">Objective:</span> Drive large-scale organic reach during Season 2 release window
+        </p>
+      </motion.section>
+
+      {/* The Challenge */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="mb-16 max-w-4xl mx-auto"
+      >
+        <h2 className="text-2xl font-light mb-6">The Challenge</h2>
+        <p className="text-muted-foreground leading-relaxed mb-4">
+          Streaming releases compete for attention in a saturated media environment.
+        </p>
+        <div className="space-y-2 text-muted-foreground mb-6">
+          <p>Paid ads are expensive.</p>
+          <p>Influencer campaigns are fragmented.</p>
+          <p>Organic reach is unpredictable at scale.</p>
+        </div>
+        <p className="leading-relaxed">
+          The goal for Owning Manhattan Season 2 was to generate immediate, high-velocity organic visibility across short-form platforms during the launch window — without relying on traditional paid media.
+        </p>
+      </motion.section>
+
+      {/* The Strategy */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="mb-16 max-w-4xl mx-auto"
+      >
+        <h2 className="text-2xl font-light mb-6">The Strategy</h2>
+        <p className="text-muted-foreground leading-relaxed mb-6">
+          Swivi deployed a creator-powered distribution campaign designed to compress weeks of organic reach into days.
+        </p>
+        <p className="mb-4">
+          Instead of individual influencer placements, the campaign leveraged coordinated creator distribution at scale, optimized for:
+        </p>
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {["Volume", "Timing", "Platform-native formats", "Performance-based incentives"].map((item, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
+                <Check className="w-3 h-3" />
+              </div>
+              <span className="text-sm">{item}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-muted-foreground">
+          The strategy focused on saturation during the release window to maximize algorithmic lift and cultural visibility.
+        </p>
+      </motion.section>
+
+      {/* Campaign Structure */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="mb-16 max-w-4xl mx-auto bg-gray-50 rounded-xl p-6 sm:p-8"
+      >
+        <h2 className="text-2xl font-light mb-6">Campaign Structure</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+          <div>
+            <p className="text-2xl font-light">{"< 7 days"}</p>
+            <p className="text-sm text-muted-foreground">Duration</p>
+          </div>
+          <div>
+            <p className="text-2xl font-light">100+</p>
+            <p className="text-sm text-muted-foreground">Creators Activated</p>
+          </div>
+          <div>
+            <p className="text-2xl font-light">Hundreds</p>
+            <p className="text-sm text-muted-foreground">Posts Per Day</p>
+          </div>
+        </div>
+        <div className="mb-6">
+          <p className="text-sm text-muted-foreground mb-2">Platforms</p>
+          <p className="font-normal">TikTok, Instagram Reels, YouTube Shorts</p>
+        </div>
+        <div className="mb-6">
+          <p className="text-sm text-muted-foreground mb-2">Budget Model</p>
+          <p className="font-normal">Performance-based (pay per view)</p>
+        </div>
+        <div className="pt-6 border-t border-black/5">
+          <p className="text-sm text-muted-foreground mb-3">Swivi handled:</p>
+          <div className="space-y-2 text-sm">
+            <p>• Creator sourcing and coordination</p>
+            <p>• Content guidelines and duplication control</p>
+            <p>• Approval workflows</p>
+            <p>• Performance tracking and budget allocation</p>
+          </div>
+          <p className="mt-4 font-normal">The client remained hands-off.</p>
+        </div>
+      </motion.section>
+
+      {/* Results */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="mb-16 max-w-4xl mx-auto"
+      >
+        <h2 className="text-2xl font-light mb-8">Results</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+          <div className="text-center">
+            <p className="text-3xl sm:text-4xl font-light mb-1">22M+</p>
+            <p className="text-sm text-muted-foreground">Organic Views</p>
+          </div>
+          <div className="text-center">
+            <p className="text-3xl sm:text-4xl font-light mb-1">{"<$1"}</p>
+            <p className="text-sm text-muted-foreground">Effective Cost Per 1K Views</p>
+          </div>
+          <div className="text-center">
+            <p className="text-3xl sm:text-4xl font-light mb-1">{"<7 days"}</p>
+            <p className="text-sm text-muted-foreground">To Saturation</p>
+          </div>
+          <div className="text-center">
+            <p className="text-3xl sm:text-4xl font-light mb-1">600+</p>
+            <p className="text-sm text-muted-foreground">Posts Created</p>
+          </div>
+        </div>
+        <p className="text-muted-foreground leading-relaxed">
+          The campaign delivered reach comparable to large paid media buys — at a fraction of the cost and timeline.
+        </p>
+      </motion.section>
+
+      {/* Why It Worked */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="mb-16 max-w-4xl mx-auto"
+      >
+        <h2 className="text-2xl font-light mb-8">Why It Worked</h2>
+        <div className="grid md:grid-cols-2 gap-8">
+          {whyItWorked.map((item, index) => (
+            <div key={index}>
+              <h3 className="font-normal mb-2">{item.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* The Takeaway */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="mb-16 max-w-4xl mx-auto bg-gray-50 rounded-xl p-6 sm:p-8"
+      >
+        <h2 className="text-2xl font-light mb-6">The Takeaway</h2>
+        <p className="leading-relaxed mb-6">
+          This campaign demonstrates how creator-powered organic distribution can operate as a true media channel — delivering predictable reach, cost efficiency, and speed at scale.
+        </p>
+        <p className="text-muted-foreground mb-4">The model is repeatable across:</p>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <p>• Streaming releases</p>
+          <p>• Product launches</p>
+          <p>• Brand announcements</p>
+          <p>• Founder visibility campaigns</p>
+        </div>
+      </motion.section>
+
+      {/* Use This Model If */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="mb-16 max-w-4xl mx-auto"
+      >
+        <h2 className="text-2xl font-light mb-6">Use This Model If You Need:</h2>
+        <div className="space-y-3">
+          {useThisModelIf.map((item, index) => (
+            <div key={index} className="flex items-center gap-3">
+              <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
+                <Check className="w-3 h-3" />
+              </div>
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* CTA */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="mb-16 max-w-4xl mx-auto text-center py-12 border-y border-black/5"
+      >
+        <p className="text-lg text-muted-foreground mb-2">Planning a launch or release?</p>
+        <p className="text-xl font-normal mb-8">Deploy creator-powered distribution when timing matters most.</p>
+        <Button size="lg" className="font-normal bg-gray-900 text-white hover:bg-gray-800">
+          <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center">
+            Launch a Campaign
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      </motion.section>
 
       {/* Content Gallery */}
       <motion.section
@@ -262,6 +465,7 @@ export default function OwningManhattanProject() {
         animate="visible"
         className="mb-12"
       >
+        <h2 className="text-2xl font-light mb-8 max-w-4xl mx-auto">Campaign Content</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 max-w-6xl mx-auto px-4">
           <AnimatePresence>
@@ -284,7 +488,6 @@ export default function OwningManhattanProject() {
                           alt={`${item.creator} video thumbnail`}
                           className="absolute inset-0 w-full h-full object-cover"
                           onError={(e) => {
-                            // Fallback to medium quality thumbnail
                             const target = e.target as HTMLImageElement;
                             target.src = `https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg`;
                           }}
@@ -298,9 +501,6 @@ export default function OwningManhattanProject() {
                             <div className="w-16 h-16 bg-white/20 rounded-xl backdrop-blur-sm flex items-center justify-center">
                               <div className="text-3xl">📸</div>
                             </div>
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white flex items-center justify-center">
-                              <div className="text-xs text-white">IG</div>
-                            </div>
                           </div>
                         </div>
                       )}
@@ -311,9 +511,6 @@ export default function OwningManhattanProject() {
                           <div className="relative">
                             <div className="w-16 h-16 bg-white/20 rounded-xl backdrop-blur-sm flex items-center justify-center">
                               <div className="text-3xl">🎵</div>
-                            </div>
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full border-2 border-cyan-400 flex items-center justify-center">
-                              <div className="text-xs text-cyan-600 font-bold">T</div>
                             </div>
                           </div>
                         </div>
