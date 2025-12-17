@@ -7,18 +7,18 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 const steps = [
   {
     number: "01",
-    title: "Send Us Your Content",
-    description: "We build a private creator community tailored for your brand. Just send us your content (ideally via Google Drive), and we'll handle everything, including recruiting creators from your audience and our extensive network.",
+    title: "Align the Launch Window",
+    description: "You define a clear 7–14 day window tied to a release, drop, or announcement. Timing matters. We optimize for moments, not randomness.",
   },
   {
     number: "02",
-    title: "Launch & Coach",
-    description: "Once in your community, creators follow our streamlined launch process. We coach them to create high-quality content that matches your brand's vision, guidelines, and platform strategy.",
+    title: "Deploy Creator Distribution",
+    description: "We activate a large network of vetted creators to distribute short-form content across platforms at high velocity. Creators are incentivized on performance. Posting volume is coordinated. Duplication and low-quality content are filtered.",
   },
   {
     number: "03",
-    title: "Manage & Scale",
-    description: "Our team manages your community daily, engaging creators, answering questions, and keeping momentum strong. Every post is manually reviewed for quality before approval, ensuring only the best content earns payouts. As your top creators thrive, your brand's reach and impact grow.",
+    title: "Manage, Optimize, Scale",
+    description: "We manage approvals, payouts, quality enforcement, and performance tracking throughout the campaign. Budget is dynamically allocated toward what's working. You stay focused on the brand. We handle distribution.",
   },
 ]
 
@@ -180,11 +180,8 @@ export function HowItWorks() {
       <div className="max-width-wrapper section-padding relative z-10">
         <div className="mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
-            How It Works
+            How Swivi Campaigns Work
           </h2>
-          <p className="text-muted-foreground max-w-2xl">
-            We build and manage your creator community to boost your brand's reach.
-          </p>
         </div>
 
         {/* Desktop Layout */}

@@ -4,26 +4,21 @@ import { motion } from "framer-motion"
 
 const features = [
   {
-    name: "Viral Content Strategy",
-    description: "Transform your content into shareable moments that capture attention across platforms.",
+    name: "Organic Distribution Strategy",
+    description: "We design distribution frameworks that prioritize volume, timing, and platform-native formats — optimized for organic discovery.",
   },
   {
-    name: "Multi-Channel Amplification",
-    description: "Maximize your reach by distributing content across news, social, and digital channels.",
+    name: "Multi-Platform Amplification",
+    description: "Content is deployed simultaneously across TikTok, Instagram Reels, and YouTube Shorts to maximize algorithm lift.",
   },
   {
-    name: "Growth Analytics",
-    description: "Track your viral growth with real-time metrics and actionable insights.",
+    name: "Performance Analytics",
+    description: "We track impressions, velocity, and creator performance in real time — allowing for fast optimization and budget efficiency.",
   },
   {
-    name: "Trend Optimization",
-    description: "Stay ahead of the curve by identifying and capitalizing on emerging trends.",
+    name: "Trend Alignment",
+    description: "Campaigns are structured around platform behavior, cultural moments, and short-form consumption patterns — not guesswork.",
   },
-]
-
-const useCases = [
-  "Streamers", "Artists", "Brands", "Athletes", "Creators", "Musicians", "Podcasters",
-  "Influencers", "Coaches", "Entrepreneurs", "Authors", "Speakers"
 ]
 
 export function Features() {
@@ -32,11 +27,10 @@ export function Features() {
       <div className="max-width-wrapper section-padding">
         <div className="mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
-            Growth Solutions
+            Distribution Solutions
           </h2>
           <p className="text-muted-foreground max-w-2xl">
-            Every brand deserves to be seen. We provide the strategies and tools to 
-            make your content go viral.
+            Every launch deserves momentum. Swivi provides the infrastructure to turn short-form content into measurable reach at scale.
           </p>
         </div>
 
@@ -59,35 +53,6 @@ export function Features() {
           ))}
         </div>
 
-        {/* Animated Use Cases Billboard */}
-        <div className="mt-8 overflow-hidden">
-          <motion.div
-            className="flex whitespace-nowrap"
-            animate={{
-              x: [0, -1000],
-            }}
-            transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 20,
-              },
-            }}
-          >
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-center space-x-8 mr-8">
-                {useCases.map((useCase, index) => (
-                  <span
-                    key={`${i}-${index}`}
-                    className="text-lg font-light text-muted-foreground/60"
-                  >
-                    {useCase}
-                  </span>
-                ))}
-              </div>
-            ))}
-          </motion.div>
-        </div>
       </div>
     </section>
   )

@@ -73,23 +73,30 @@ export function HeroOriginal() {
             variants={itemVariants}
             className="mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light leading-tight"
           >
-            Supercharge Your Brand's{" "}
+            Organic Distribution{" "}
             <motion.span
               className="font-normal inline-block"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              Media Presence
+              at Scale
             </motion.span>
           </motion.h1>
 
           {/* Subheading */}
           <motion.p
             variants={itemVariants}
-            className="mb-10 text-base sm:text-lg text-muted-foreground max-w-xl"
+            className="mb-6 text-base sm:text-lg text-muted-foreground max-w-2xl"
           >
-            Turn your content into viral moments and more sales. We amplify your reach across 
-            all media. Book a call now!
+            We deploy creator-powered distribution to generate tens of millions of organic impressions during critical launch windows — at costs paid ads can't touch.
+          </motion.p>
+
+          {/* Proof Line */}
+          <motion.p
+            variants={itemVariants}
+            className="mb-10 text-sm sm:text-base text-foreground/80 max-w-2xl font-normal"
+          >
+            Recent campaign around a top-10 Netflix show generated 25M+ impressions in under a week.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -97,9 +104,9 @@ export function HeroOriginal() {
             variants={itemVariants}
             className="flex flex-col sm:flex-row gap-4"
           >
-            <Button size="lg" className="group font-normal bg-transparent text-foreground hover:bg-foreground hover:text-background border border-foreground">
+            <Button size="lg" className="group font-normal bg-foreground text-background hover:bg-foreground/90 border border-foreground">
               <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center">
-                Book a Call
+                Launch a Campaign
                 <motion.span
                   className="ml-2"
                   whileHover={{ x: 5 }}
@@ -111,7 +118,7 @@ export function HeroOriginal() {
             </Button>
             <Button size="lg" variant="outline" className="font-normal bg-transparent text-foreground hover:bg-foreground hover:text-background border-foreground">
               <Link href="/case-studies">
-                See Case Studies
+                View Case Studies
               </Link>
             </Button>
           </motion.div>

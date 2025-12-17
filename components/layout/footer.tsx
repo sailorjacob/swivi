@@ -34,8 +34,8 @@ export function Footer() {
                 className="h-20 w-auto"
               />
             </Link>
-            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-              Amplify your brand's reach with our expert media scaling solutions.
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Creator-powered organic distribution for brands, media, and founders who care about scale.
             </p>
           </div>
 
