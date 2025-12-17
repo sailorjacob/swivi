@@ -24,7 +24,7 @@ const steps = [
 
 // Random 3D models to display
 const MODEL_URLS = [
-  'https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%205.glb',
+  'https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%203silver.glb',
   'https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%209.glb',
   'https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%208%20pink.glb',
   'https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%209%20silver.glb',
