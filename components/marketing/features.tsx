@@ -22,8 +22,8 @@ const features = [
 ]
 
 const clientTypes = [
-  "TV Shows", "Streamers", "Artists", "Brands", "Athletes", "Musicians", 
-  "Podcasters", "Founders", "Real Estate", "Entertainment", "Media Companies"
+  "Streamers", "Artists", "Brands", "Athletes", "Creators", "Musicians", 
+  "Podcasters", "Influencers", "Coaches", "Entrepreneurs", "Authors", "Speakers"
 ]
 
 export function Features() {
@@ -58,23 +58,22 @@ export function Features() {
           ))}
         </div>
 
-        {/* Animated Client Types Billboard */}
-        <div className="mt-16 pt-8 border-t border-black/5 overflow-hidden">
+        {/* Animated Use Cases Billboard */}
+        <div className="mt-8 overflow-hidden">
           <motion.div
             className="flex whitespace-nowrap"
             animate={{
-              x: [0, -1200],
+              x: [0, -1000],
             }}
             transition={{
               x: {
                 repeat: Infinity,
                 repeatType: "loop",
-                duration: 25,
-                ease: "linear",
+                duration: 20,
               },
             }}
           >
-            {[...Array(4)].map((_, i) => (
+            {[...Array(3)].map((_, i) => (
               <div key={i} className="flex items-center space-x-8 mr-8">
                 {clientTypes.map((clientType, index) => (
                   <span
