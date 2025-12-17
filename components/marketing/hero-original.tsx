@@ -121,16 +121,6 @@ export function HeroOriginal() {
               </Link>
             </Button>
           </motion.div>
-
-          {/* Trust indicator */}
-          <motion.div
-            variants={itemVariants}
-            className="mt-16 pt-16 border-t border-black/5"
-          >
-            <p className="text-sm text-muted-foreground">
-              Trusted by Netflix shows, major brands, and founders who need real reach.
-            </p>
-          </motion.div>
         </motion.div>
       </div>
     </section>
