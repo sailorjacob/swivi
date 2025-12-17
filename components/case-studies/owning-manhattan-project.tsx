@@ -218,8 +218,8 @@ export default function OwningManhattanProject() {
           </motion.section>
 
           {/* Results */}
-          <motion.section variants={itemVariants} className="mb-16 py-12 px-8 bg-foreground text-background rounded-2xl">
-            <h2 className="text-2xl font-light mb-10 text-center">Results</h2>
+          <motion.section variants={itemVariants} className="mb-16 py-12 px-8 bg-foreground/[0.95] text-background rounded-2xl">
+            <h2 className="text-2xl font-light mb-10 text-center text-background">Results</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
               {results.map((result, index) => (
                 <motion.div
@@ -230,12 +230,12 @@ export default function OwningManhattanProject() {
                   viewport={{ once: true }}
                   className="text-center"
                 >
-                  <div className="text-3xl sm:text-4xl font-light mb-2">{result.value}</div>
+                  <div className="text-3xl sm:text-4xl font-light mb-2 text-background">{result.value}</div>
                   <div className="text-sm text-background/70">{result.label}</div>
                 </motion.div>
               ))}
             </div>
-            <p className="text-center text-background/80 max-w-2xl mx-auto">
+            <p className="text-center text-background/90 max-w-2xl mx-auto">
               The campaign delivered reach comparable to large paid media buys — at a fraction of the cost and timeline.
             </p>
           </motion.section>
