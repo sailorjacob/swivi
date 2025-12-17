@@ -129,10 +129,8 @@ export function HowItWorks() {
                 id="following-model"
                 alt="3D Model"
                 src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%205.glb"
-                environment-image="neutral"
-                exposure="1"
-                camera-controls
-                tone-mapping="agx"
+                environment-image="https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.hdr"
+                exposure="0.8"
                 shadow-intensity="0"
                 loading="eager"
                 interaction-prompt="none"
