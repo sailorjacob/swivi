@@ -130,16 +130,13 @@ export function HowItWorks() {
                 alt="3D Model"
                 src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%205.glb"
                 environment-image="neutral"
-                skybox-image="neutral"
                 tone-mapping="agx"
                 exposure="1"
                 shadow-intensity="0"
-                shadow-softness="0.31"
-                camera-controls
                 loading="eager"
                 interaction-prompt="none"
                 camera-orbit="0deg 75deg 2m"
-                style="width: 100%; height: 100%; background-color: #ffffff; --interaction-prompt-display: none;"
+                style="width: 100%; height: 100%; background: transparent; --poster-color: transparent; --interaction-prompt-display: none;"
               ></model-viewer>
             `
           }}
