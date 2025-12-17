@@ -62,18 +62,18 @@ const caseStudies: CaseStudy[] = [
     id: "owning-manhattan",
     clientName: "Owning Manhattan",
     clientType: "Netflix Series",
-    tagline: "22M views in 4 days",
-    description: "Viral campaign for Netflix's hit real estate series. We mobilized our creator network to generate massive awareness ahead of the show's premiere.",
+    tagline: "25M views in under 7 days",
+    description: "Creator-powered organic distribution for Netflix's hit real estate series. We deployed 100+ creators to generate massive awareness during the Season 2 launch window.",
     budget: 20000,
-    timeline: "4 days",
-    viewsGenerated: 22000000,
+    timeline: "< 7 days",
+    viewsGenerated: 25000000,
     postsSubmitted: 600,
     highlights: [
-      "Exceeded view targets by 300%",
-      "600 creators activated",
-      "Instagram & TikTok reach"
+      "Sub-$1 effective CPM",
+      "100+ creators activated",
+      "Cross-platform saturation"
     ],
-    exampleContent: "https://www.instagram.com/reel/DOKGK_ciO-9/",
+    exampleContent: "/case-studies/owning-manhattan",
     clientLogo: "https://twejikjgxkzmphocbvpt.supabase.co/storage/v1/object/public/havensvgs/owningmanhattan.avif"
   },
   {
@@ -191,16 +191,26 @@ function CaseStudyCard({ study }: { study: CaseStudy }) {
         </div>
 
         {/* CTA */}
-        <Link
-          href={study.exampleContent}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-xs sm:text-sm lg:text-base text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Play className="w-3 h-3 sm:w-4 sm:h-4" />
-          View Example Content
-          <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-        </Link>
+        {study.id === "owning-manhattan" ? (
+          <Link
+            href="/case-studies/owning-manhattan"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm lg:text-base text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Play className="w-3 h-3 sm:w-4 sm:h-4" />
+            View Full Case Study
+          </Link>
+        ) : (
+          <Link
+            href={study.exampleContent}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm lg:text-base text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Play className="w-3 h-3 sm:w-4 sm:h-4" />
+            View Example Content
+            <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+          </Link>
+        )}
       </div>
     </div>
   )
