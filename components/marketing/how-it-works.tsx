@@ -109,14 +109,17 @@ export function HowItWorks() {
         canvasContainerRef.current.style.top = `${posRef.current.y}%`
       }
       
-      // Rotate model based on movement - more reactive and dramatic
+      // Rotate model based on movement - reactive left/right AND up/down
       if (modelRef.current) {
-        // Stronger rotation based on movement speed (±60 degrees max)
-        const rotationStrength = Math.min(Math.abs(dx) * 0.15, 1.0)
-        const targetRotation = dx > 0.05 ? rotationStrength : dx < -0.05 ? -rotationStrength : 0
+        // Left/right rotation (yaw) - symmetric and dramatic
+        const yawStrength = Math.min(Math.abs(dx) * 0.2, 1.2) // Up to ~70 degrees
+        const targetYaw = dx > 0.03 ? yawStrength : dx < -0.03 ? -yawStrength : 0
+        modelRef.current.rotation.y += (targetYaw - modelRef.current.rotation.y) * 0.12
         
-        // Faster easing for snappy response
-        modelRef.current.rotation.y += (targetRotation - modelRef.current.rotation.y) * 0.15
+        // Up/down tilt (pitch) based on vertical movement
+        const pitchStrength = Math.min(Math.abs(dy) * 0.1, 0.4) // Up to ~23 degrees
+        const targetPitch = dy > 0.03 ? pitchStrength : dy < -0.03 ? -pitchStrength : 0
+        modelRef.current.rotation.x += (targetPitch - modelRef.current.rotation.x) * 0.12
       }
       
       renderer.render(scene, camera)
