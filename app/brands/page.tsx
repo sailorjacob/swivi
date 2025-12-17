@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { LightningHover } from "@/components/effects/lightning-hover"
 
 const brandUseCases = [
   "Product launches",
@@ -427,12 +428,14 @@ export default function BrandsPage() {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="group font-normal bg-foreground text-background hover:bg-foreground/90 border border-foreground">
-                  <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center">
-                    Launch a Campaign
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+                <LightningHover>
+                  <Button size="lg" className="group font-normal bg-foreground text-background hover:bg-foreground/90 border border-foreground">
+                    <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center">
+                      Launch a Campaign
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </LightningHover>
                 <Button size="lg" variant="outline" className="font-normal bg-transparent text-foreground hover:bg-foreground hover:text-background border-foreground">
                   <Link href="/case-studies">
                     View Case Studies

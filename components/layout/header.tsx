@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation"
 import { useSession } from "@/lib/supabase-auth-provider"
 import { useTheme } from "next-themes"
 import { Menu, X, ChevronDown } from "lucide-react"
+import { LightningHover } from "@/components/effects/lightning-hover"
 
 const navigation = [
   {
@@ -41,16 +42,18 @@ export function Header() {
     <header className="fixed top-0 z-50 w-full bg-background border-b border-border/50">
       <nav className="max-width-wrapper section-padding flex h-24 items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center">
-          <Image
-            src={logoSrc}
-            alt="Swivi"
-            width={300}
-            height={100}
-            className="h-16 w-auto"
-            priority
-          />
-        </Link>
+        <LightningHover>
+          <Link href="/" className="flex items-center">
+            <Image
+              src={logoSrc}
+              alt="Swivi"
+              width={300}
+              height={100}
+              className="h-16 w-auto"
+              priority
+            />
+          </Link>
+        </LightningHover>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex md:items-center md:space-x-8">
@@ -84,14 +87,16 @@ export function Header() {
               )}
             </div>
           ))}
-          <Link
-            href="https://calendly.com/bykevingeorge/30min?month=2025-05"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-normal border border-foreground bg-transparent text-foreground px-6 py-3 rounded-full hover:bg-foreground hover:text-background transition-all duration-300"
-          >
-            Launch a Campaign
-          </Link>
+          <LightningHover>
+            <Link
+              href="https://calendly.com/bykevingeorge/30min?month=2025-05"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-normal border border-foreground bg-transparent text-foreground px-6 py-3 rounded-full hover:bg-foreground hover:text-background transition-all duration-300"
+            >
+              Launch a Campaign
+            </Link>
+          </LightningHover>
           
           {/* Platform Access Button */}
           {session ? (
@@ -165,15 +170,17 @@ export function Header() {
                 )}
               </div>
             ))}
-            <Link
-              href="https://calendly.com/bykevingeorge/30min?month=2025-05"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block mt-4 text-sm font-normal border border-foreground bg-transparent text-foreground px-6 py-3 rounded-full hover:bg-foreground hover:text-background transition-all duration-300 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Launch a Campaign
-            </Link>
+            <LightningHover>
+              <Link
+                href="https://calendly.com/bykevingeorge/30min?month=2025-05"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block mt-4 text-sm font-normal border border-foreground bg-transparent text-foreground px-6 py-3 rounded-full hover:bg-foreground hover:text-background transition-all duration-300 text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Launch a Campaign
+              </Link>
+            </LightningHover>
             
             {/* Mobile Platform Access Buttons */}
             {session ? (

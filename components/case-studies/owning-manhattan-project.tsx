@@ -8,6 +8,7 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { LightningHover } from "@/components/effects/lightning-hover"
 
 interface ContentItem {
   id: string
@@ -450,12 +451,14 @@ export default function OwningManhattanProject() {
       >
         <p className="text-lg text-muted-foreground mb-2">Planning a launch or release?</p>
         <p className="text-xl font-normal mb-8">Deploy creator-powered distribution when timing matters most.</p>
-        <Button size="lg" className="font-normal bg-gray-900 text-white hover:bg-gray-800">
-          <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center">
-            Launch a Campaign
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
+        <LightningHover>
+          <Button size="lg" className="font-normal bg-gray-900 text-white hover:bg-gray-800">
+            <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center">
+              Launch a Campaign
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </LightningHover>
       </motion.section>
 
       {/* Content Gallery */}
