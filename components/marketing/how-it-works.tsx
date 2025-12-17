@@ -1,7 +1,8 @@
 "use client"
 
-import Script from "next/script"
 import { useEffect, useRef } from "react"
+import * as THREE from "three"
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
 const steps = [
   {
@@ -23,48 +24,107 @@ const steps = [
 
 export function HowItWorks() {
   const sectionRef = useRef<HTMLElement>(null)
-  const modelContainerRef = useRef<HTMLDivElement>(null)
+  const canvasContainerRef = useRef<HTMLDivElement>(null)
   const posRef = useRef({ x: 50, y: 50 })
   const targetPosRef = useRef({ x: 50, y: 50 })
-  const currentYawRef = useRef(0)
-  const animationRef = useRef<number>()
+  const modelRef = useRef<THREE.Group | null>(null)
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
 
   useEffect(() => {
-    // Direct DOM manipulation animation loop - no React re-renders
+    if (!canvasContainerRef.current) return
+    
+    // Setup Three.js scene
+    const scene = new THREE.Scene()
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100)
+    camera.position.set(0, 0.3, 1.5)
+    
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      alpha: true,
+      powerPreference: "high-performance"
+    })
+    renderer.setSize(200, 200)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.outputColorSpace = THREE.SRGBColorSpace
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.2
+    rendererRef.current = renderer
+    canvasContainerRef.current.appendChild(renderer.domElement)
+    
+    // Lighting - like three-gltf-viewer
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+    scene.add(ambientLight)
+    
+    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1)
+    directionalLight1.position.set(1, 2, 3)
+    scene.add(directionalLight1)
+    
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5)
+    directionalLight2.position.set(-1, 1, -2)
+    scene.add(directionalLight2)
+    
+    // Hemisphere light for better ambient
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6)
+    scene.add(hemiLight)
+    
+    // Load the model
+    const loader = new GLTFLoader()
+    loader.load(
+      'https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%205.glb',
+      (gltf: { scene: THREE.Group }) => {
+        const model = gltf.scene
+        
+        // Center and scale the model
+        const box = new THREE.Box3().setFromObject(model)
+        const center = box.getCenter(new THREE.Vector3())
+        const size = box.getSize(new THREE.Vector3())
+        const maxDim = Math.max(size.x, size.y, size.z)
+        const scale = 0.8 / maxDim
+        
+        model.scale.setScalar(scale)
+        model.position.sub(center.multiplyScalar(scale))
+        
+        scene.add(model)
+        modelRef.current = model
+      },
+      undefined,
+      (error: unknown) => console.error('Error loading model:', error)
+    )
+    
+    // Animation loop
+    let animationId: number
     const animate = () => {
+      animationId = requestAnimationFrame(animate)
+      
+      // Smooth position interpolation
       const dx = targetPosRef.current.x - posRef.current.x
       const dy = targetPosRef.current.y - posRef.current.y
-      const ease = 0.03
+      posRef.current.x += dx * 0.03
+      posRef.current.y += dy * 0.03
       
-      posRef.current.x += dx * ease
-      posRef.current.y += dy * ease
-      
-      // Update position directly on DOM element (percentage of section)
-      if (modelContainerRef.current) {
-        modelContainerRef.current.style.left = `${posRef.current.x}%`
-        modelContainerRef.current.style.top = `${posRef.current.y}%`
-        
-        // Update yaw based on movement direction
-        const movementX = dx
-        if (Math.abs(movementX) > 0.1) {
-          const targetYaw = movementX > 0 ? 20 : -20
-          currentYawRef.current += (targetYaw - currentYawRef.current) * 0.03
-        } else {
-          // Return to center when not moving
-          currentYawRef.current += (0 - currentYawRef.current) * 0.02
-        }
-        
-        const modelViewer = modelContainerRef.current.querySelector('model-viewer') as any
-        if (modelViewer) {
-          modelViewer.orientation = `0deg ${currentYawRef.current}deg 0deg`
-        }
+      // Update container position
+      if (canvasContainerRef.current) {
+        canvasContainerRef.current.style.left = `${posRef.current.x}%`
+        canvasContainerRef.current.style.top = `${posRef.current.y}%`
       }
       
-      animationRef.current = requestAnimationFrame(animate)
+      // Rotate model based on movement
+      if (modelRef.current) {
+        const targetRotation = dx > 0.1 ? 0.3 : dx < -0.1 ? -0.3 : 0
+        modelRef.current.rotation.y += (targetRotation - modelRef.current.rotation.y) * 0.05
+        modelRef.current.rotation.y += 0.005 // Slow auto-rotate
+      }
+      
+      renderer.render(scene, camera)
     }
-    animationRef.current = requestAnimationFrame(animate)
+    animate()
+    
     return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+      cancelAnimationFrame(animationId)
+      renderer.dispose()
+      if (canvasContainerRef.current && renderer.domElement) {
+        canvasContainerRef.current.removeChild(renderer.domElement)
+      }
     }
   }, [])
 
@@ -82,10 +142,10 @@ export function HowItWorks() {
       const xPercent = ((e.clientX - sectionRect.left) / sectionRect.width) * 100
       const yPercent = ((e.clientY - sectionRect.top) / sectionRect.height) * 100
       
-      // Clamp to keep robot visible within section
+      // Clamp to keep model visible within section
       targetPosRef.current = {
-        x: Math.max(10, Math.min(90, xPercent)),
-        y: Math.max(10, Math.min(90, yPercent))
+        x: Math.max(15, Math.min(85, xPercent)),
+        y: Math.max(15, Math.min(85, yPercent))
       }
     }
 
@@ -95,53 +155,20 @@ export function HowItWorks() {
 
   return (
     <section ref={sectionRef} id="how-it-works" className="py-20 md:py-32 border-t border-black/5 bg-background relative overflow-hidden">
-      {/* Load model-viewer library */}
-      <Script 
-        type="module" 
-        src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
-        strategy="afterInteractive"
-        crossOrigin="anonymous"
-      />
-      
-      {/* 3D Robot - Absolute within section, follows mouse (Desktop only) */}
+      {/* 3D Model with Three.js - follows mouse (Desktop only) */}
       <div 
-        ref={modelContainerRef}
+        ref={canvasContainerRef}
         className="hidden md:block absolute"
         style={{
           left: '50%',
           top: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '180px',
-          height: '180px',
+          width: '200px',
+          height: '200px',
           zIndex: 5,
           pointerEvents: 'none',
         }}
-      >
-        <div 
-          style={{
-            width: '100%',
-            height: '100%',
-            position: 'relative',
-          }}
-          dangerouslySetInnerHTML={{
-            __html: `
-              <model-viewer
-                id="following-model"
-                alt="3D Model"
-                src="https://xaxleljcctobmnwiwxvx.supabase.co/storage/v1/object/public/images/model%205.glb"
-                environment-image="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"
-                tone-mapping="agx"
-                exposure="1.2"
-                shadow-intensity="0"
-                loading="eager"
-                interaction-prompt="none"
-                camera-orbit="0deg 75deg 2m"
-                style="width: 100%; height: 100%; background: transparent; --poster-color: transparent; --interaction-prompt-display: none;"
-              ></model-viewer>
-            `
-          }}
-        />
-      </div>
+      />
 
       <div className="max-width-wrapper section-padding relative z-10">
         <div className="mb-16">
