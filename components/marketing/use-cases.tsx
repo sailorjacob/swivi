@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 
 const useCases = [
-  "Netflix shows & streaming releases",
+  "Series premieres shows & streaming releases",
   "Product launches & brand announcements",
   "Podcast & YouTube channel premieres",
   "Founder personal brand building",

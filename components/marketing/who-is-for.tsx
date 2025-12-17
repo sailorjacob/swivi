@@ -12,9 +12,7 @@ const goodFit = [
 
 const notFit = [
   "Just want a couple social media posts",
-  "Have a budget under $10K",
   "Need us to create content from scratch",
-  "Don't have a clear launch date or goal",
 ]
 
 export function WhoIsFor() {
@@ -73,16 +71,6 @@ export function WhoIsFor() {
               </div>
             </motion.div>
           </div>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center text-sm text-muted-foreground mt-12"
-          >
-            Being honest about fit means better results for everyone.
-          </motion.p>
         </motion.div>
       </div>
     </section>
