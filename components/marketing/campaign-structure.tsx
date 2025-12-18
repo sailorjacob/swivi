@@ -4,14 +4,14 @@ import { motion } from "framer-motion"
 
 const items = [
   {
-    label: "Campaign Budget",
+    label: "Media Budget",
     value: "$15,000–$25,000",
-    description: "you pay for views delivered",
+    description: "performance-based CPM",
   },
   {
-    label: "Campaign Length",
+    label: "Duration",
     value: "7–14 days",
-    description: "timed around your launch",
+    description: "",
   },
   {
     label: "Platforms",
@@ -19,16 +19,16 @@ const items = [
     description: "",
   },
   {
-    label: "What's Included",
-    value: "Creator coordination, quality control, reporting",
+    label: "Management Fee",
+    value: "Flat campaign fee",
     description: "",
   },
 ]
 
 const features = [
   "No long-term contracts.",
-  "No overpriced influencers.",
-  "Real views, real results.",
+  "No inflated influencer rates.",
+  "Full transparency.",
 ]
 
 export function CampaignStructure() {
@@ -43,7 +43,7 @@ export function CampaignStructure() {
           className="max-w-4xl mx-auto"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-12">
-            What a Campaign Looks Like
+            Campaign Structure
           </h2>
           
           <div className="space-y-8 mb-12">

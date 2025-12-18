@@ -7,18 +7,18 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 const steps = [
   {
     number: "01",
-    title: "Pick Your Launch Window",
-    description: "Tell us when you're launching — a new show, product, album, or announcement. We'll plan a 7–14 day campaign around that moment.",
+    title: "Align the Launch Window",
+    description: "You define a clear 7–14 day window tied to a release, drop, or announcement. Timing matters. We optimize for moments, not randomness.",
   },
   {
     number: "02",
-    title: "Creators Post Your Content",
-    description: "Hundreds of creators in our network post your content on their TikTok, Instagram Reels, and YouTube Shorts pages. All at once. All organic.",
+    title: "Deploy Creator Distribution",
+    description: "We activate a large network of vetted creators to distribute short-form content across platforms at high velocity. Creators are incentivized on performance. Posting volume is coordinated. Duplication and low-quality content are filtered.",
   },
   {
     number: "03",
-    title: "Watch the Views Roll In",
-    description: "We manage everything — approvals, quality control, creator payouts, and real-time tracking. You focus on your launch. We deliver the views.",
+    title: "Manage, Optimize, Scale",
+    description: "We manage approvals, payouts, quality enforcement, and performance tracking throughout the campaign. Budget is dynamically allocated toward what's working. You stay focused on the brand. We handle distribution.",
   },
 ]
 
@@ -189,7 +189,7 @@ export function HowItWorks() {
       <div className="max-width-wrapper section-padding relative z-10">
         <div className="mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
-            Three Simple Steps
+            How Swivi Campaigns Work
           </h2>
         </div>
 
@@ -236,7 +236,7 @@ export function HowItWorks() {
         {/* Simple CTA */}
         <div className="mt-20 pt-16 border-t border-black/5">
           <p className="text-sm text-muted-foreground mb-6">
-            Ready to get millions of views on your next launch?
+            Ready to turn your next launch into a distribution event?
           </p>
           <a
             href="https://calendly.com/bykevingeorge/30min?month=2025-05"
@@ -244,7 +244,7 @@ export function HowItWorks() {
             rel="noopener noreferrer"
             className="inline-flex items-center text-sm font-normal border border-foreground bg-transparent text-foreground hover:bg-foreground hover:text-background px-6 py-3 rounded-full transition-all duration-300"
           >
-            Book a Call →
+            Launch a Campaign →
           </a>
         </div>
       </div>

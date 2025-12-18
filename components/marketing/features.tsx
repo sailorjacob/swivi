@@ -5,19 +5,19 @@ import { motion } from "framer-motion"
 const features = [
   {
     name: "Organic Distribution Strategy",
-    description: "We plan and execute large-scale posting campaigns across hundreds of creator accounts — timed perfectly for your launch.",
+    description: "We design distribution frameworks that prioritize volume, timing, and platform-native formats — optimized for organic discovery.",
   },
   {
-    name: "Multi-Platform Reach",
-    description: "Your campaign goes live simultaneously on TikTok, Instagram Reels, and YouTube Shorts — maximizing visibility across platforms.",
+    name: "Multi-Platform Amplification",
+    description: "Content is deployed simultaneously across TikTok, Instagram Reels, and YouTube Shorts to maximize algorithm lift.",
   },
   {
-    name: "Real-Time Performance Tracking",
-    description: "Watch your views and engagement grow in real time. We optimize throughout the campaign to maximize results.",
+    name: "Performance Analytics",
+    description: "We track impressions, velocity, and creator performance in real time — allowing for fast optimization and budget efficiency.",
   },
   {
-    name: "Trend-Aligned Content",
-    description: "Campaigns are built around what's working on each platform right now — not outdated playbooks or guesswork.",
+    name: "Trend Alignment",
+    description: "Campaigns are structured around platform behavior, cultural moments, and short-form consumption patterns — not guesswork.",
   },
 ]
 
@@ -32,10 +32,10 @@ export function Features() {
       <div className="max-width-wrapper section-padding">
         <div className="mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
-            How We Drive Reach
+            Distribution Solutions
           </h2>
           <p className="text-muted-foreground max-w-2xl">
-            Every launch deserves momentum. Hundreds of creators post your campaign across their pages to drive real views and engagement.
+            Every launch deserves momentum. Swivi provides the infrastructure to turn short-form content into measurable reach at scale.
           </p>
         </div>
 

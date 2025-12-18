@@ -5,15 +5,15 @@ import { motion } from "framer-motion"
 const metrics = [
   {
     value: "100M+",
-    label: "total views delivered for clients",
+    label: "verified organic impressions delivered",
   },
   {
-    value: "600+",
-    label: "creators in our network",
+    value: "75M+",
+    label: "active creator network reach",
   },
   {
-    value: "Up to 85%",
-    label: "cheaper than traditional ads",
+    value: "Up to 50%",
+    label: "below paid social CPMs",
   },
 ]
 

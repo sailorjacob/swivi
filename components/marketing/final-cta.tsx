@@ -18,12 +18,12 @@ export function FinalCTA() {
           className="max-w-4xl mx-auto text-center"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-light mb-6 leading-tight">
-            Ready to Get{" "}
-            <span className="font-normal">Millions of Views?</span>
+            Turn Your Next Launch Into a{" "}
+            <span className="font-normal">Distribution Event</span>
           </h2>
           
           <p className="text-base sm:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
-            Let's talk about your next launch. Book a call and we'll show you exactly how we'd drive views for your brand.
+            Deploy creator-powered distribution and dominate organic reach when it matters most.
           </p>
 
           <motion.div

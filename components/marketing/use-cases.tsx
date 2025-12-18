@@ -3,12 +3,11 @@
 import { motion } from "framer-motion"
 
 const useCases = [
-  "Series premieres shows & streaming releases",
-  "Product launches & brand announcements",
-  "Podcast & YouTube channel premieres",
-  "Founder personal brand building",
-  "Music drops & entertainment releases",
-  "Real estate & luxury brand promotion",
+  "TV & streaming releases",
+  "Product or brand launches",
+  "Podcast and episode drops",
+  "Founder visibility pushes",
+  "Music and entertainment releases",
 ]
 
 export function UseCases() {
@@ -23,11 +22,11 @@ export function UseCases() {
           className="max-w-4xl mx-auto text-center"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-8">
-            Perfect For Big Launch Moments
+            Built for High-Impact Moments
           </h2>
           
           <p className="text-base sm:text-lg text-muted-foreground mb-8">
-            We work best when timing matters:
+            Swivi campaigns perform best for:
           </p>
 
           <div className="space-y-3 mb-12">
@@ -46,7 +45,7 @@ export function UseCases() {
           </div>
 
           <p className="text-base text-muted-foreground">
-            If you need millions of eyes on something important, we can help.
+            If reach and timing matter, Swivi works.
           </p>
         </motion.div>
       </div>

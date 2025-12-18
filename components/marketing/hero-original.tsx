@@ -88,7 +88,7 @@ export function HeroOriginal() {
             variants={itemVariants}
             className="mb-6 text-base sm:text-lg text-muted-foreground max-w-2xl"
           >
-            Hundreds of creators post your content on their pages — driving millions of real views during your most important launch moments.
+            We deploy creator-powered distribution to generate tens of millions of organic impressions during critical launch windows — at CPMs paid ads can't touch.
           </motion.p>
 
           {/* Proof Line */}
@@ -96,7 +96,7 @@ export function HeroOriginal() {
             variants={itemVariants}
             className="mb-10 text-sm sm:text-base text-foreground/80 max-w-2xl font-normal"
           >
-            We drove 25 million views across 600 posts for Netflix's top-10 show "Owning Manhattan" — for $20K instead of $140K+ in traditional ads.
+            Recent campaign around a Netflix original series generated 22M+ impressions in under a week.
           </motion.p>
 
           {/* CTA Buttons */}

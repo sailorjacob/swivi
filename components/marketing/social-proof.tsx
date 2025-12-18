@@ -3,10 +3,10 @@
 import { motion } from "framer-motion"
 
 const proofPoints = [
-  "25 million views delivered for Netflix's Owning Manhattan",
-  "600+ posts coordinated across 600 creator accounts",
-  "$20K campaign budget vs $140K+ for traditional ads",
-  "Same playbook, repeatable across any industry",
+  "Tens of millions of impressions delivered per campaign",
+  "Sub-market CPM performance",
+  "Hundreds of creators activated per launch",
+  "Repeatable across industries and verticals",
 ]
 
 export function SocialProof() {
@@ -21,7 +21,7 @@ export function SocialProof() {
           className="max-w-4xl mx-auto text-center"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-12">
-            Real Results, Not Promises
+            Proven at Scale
           </h2>
           
           <div className="space-y-6 mb-12">
@@ -40,7 +40,7 @@ export function SocialProof() {
           </div>
 
           <p className="text-base font-normal">
-            We deliver views. It's that simple.
+            Swivi is built for volume, speed, and predictability.
           </p>
         </motion.div>
       </div>
