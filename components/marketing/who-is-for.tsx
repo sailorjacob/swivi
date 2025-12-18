@@ -11,7 +11,7 @@ const goodFit = [
 ]
 
 const notFit = [
-  "Want "a few clips"",
+  'Want "a few clips"',
   "Are testing with small budgets",
   "Need custom content production",
   "Are unsure about timing or goals",
