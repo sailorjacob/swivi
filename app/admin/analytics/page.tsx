@@ -223,6 +223,19 @@ export default function AdminAnalyticsPage() {
 
       {/* Key Metrics - Large Hero Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-muted">
+                <Eye className="w-5 h-5 text-foreground" />
+              </div>
+              <span className="text-sm text-muted-foreground">Total Views</span>
+            </div>
+            <p className="text-4xl font-bold">{(platformStats?.overview.totalViews || 0).toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mt-1">All-time clip views</p>
+          </CardContent>
+        </Card>
+
         <Card className="bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 border-violet-500/20">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">

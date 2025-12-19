@@ -133,18 +133,18 @@ export default function ClientPortalPage() {
     }
   }, [token])
 
-  // Auto-refresh data every 30 seconds to show real-time view tracking updates
+  // Auto-refresh data when page becomes visible (user returns to tab)
   useEffect(() => {
     if (!token) return
 
-    const interval = setInterval(() => {
-      // Only refresh if not currently loading to avoid race conditions
-      if (!loading && !isRefreshing) {
-        fetchData(true) // Silent background refresh
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !loading && !isRefreshing) {
+        fetchData(true) // Silent background refresh when user returns to tab
       }
-    }, 30000) // 30 seconds
+    }
 
-    return () => clearInterval(interval)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [token, loading, isRefreshing])
 
   if (loading) {

@@ -279,11 +279,14 @@ export default function AdminDashboard() {
             <span className="text-muted-foreground">Total Views:</span>
             <span className="font-semibold">{Number(stats.totalViews).toLocaleString()}</span>
           </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Tracked Growth:</span>
+            <span className="font-semibold text-violet-600 dark:text-violet-400">+{Number(stats.trackedViews).toLocaleString()}</span>
+          </div>
           <Dialog>
             <DialogTrigger asChild>
               <button className="flex items-center gap-2 hover:text-foreground transition-colors">
-                <span className="text-muted-foreground">Tracked Growth:</span>
-                <span className="font-semibold underline decoration-dotted">{Number(stats.trackedViews).toLocaleString()}</span>
+                <span className="text-muted-foreground underline decoration-dotted">View Details</span>
               </button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
