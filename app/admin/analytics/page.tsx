@@ -289,7 +289,50 @@ export default function AdminAnalyticsPage() {
         </Card>
       </div>
 
-      {/* Secondary Stats Row */}
+      {/* Submission Status Breakdown */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+            <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+              <FileVideo className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="text-[10px] md:text-xs uppercase tracking-wide">Total Submissions</span>
+            </div>
+            <p className="text-xl md:text-3xl font-bold">{platformStats?.overview.totalSubmissions || 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+            <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+              <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="text-[10px] md:text-xs uppercase tracking-wide">Approved</span>
+            </div>
+            <p className="text-xl md:text-3xl font-bold">{platformStats?.overview.approvedSubmissions || 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+            <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+              <Clock className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="text-[10px] md:text-xs uppercase tracking-wide">Pending Review</span>
+            </div>
+            <p className="text-xl md:text-3xl font-bold">{platformStats?.overview.pendingSubmissions || 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+            <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
+              <XCircle className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="text-[10px] md:text-xs uppercase tracking-wide">Rejected</span>
+            </div>
+            <p className="text-xl md:text-3xl font-bold">{(platformStats?.overview.totalSubmissions || 0) - (platformStats?.overview.approvedSubmissions || 0) - (platformStats?.overview.pendingSubmissions || 0)}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Additional Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="py-4">
@@ -307,10 +350,10 @@ export default function AdminAnalyticsPage() {
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Pending Review</p>
-                <p className="text-2xl font-bold">{platformStats?.overview.pendingSubmissions || 0}</p>
+                <p className="text-xs text-muted-foreground">Paid Submissions</p>
+                <p className="text-2xl font-bold">{platformStats?.overview.paidSubmissions || 0}</p>
               </div>
-              <Clock className="w-8 h-8 text-muted-foreground/30" />
+              <CheckCircle className="w-8 h-8 text-muted-foreground/30" />
             </div>
           </CardContent>
         </Card>
