@@ -128,6 +128,39 @@ export async function GET(request: NextRequest) {
       return sum + Number(submission.clips?.views || 0)
     }, 0)
 
+    // Get all submissions (approved + pending) for comprehensive view metrics
+    const allActiveSubmissions = await prisma.clipSubmission.findMany({
+      where: {
+        status: { in: ['APPROVED', 'PENDING'] },
+        campaigns: realCampaignFilter
+      },
+      select: {
+        status: true,
+        clips: {
+          select: {
+            views: true,
+            earnings: true
+          }
+        }
+      }
+    })
+
+    // Calculate comprehensive view metrics
+    const approvedViews = totalViews
+    const pendingViews = allActiveSubmissions
+      .filter(s => s.status === 'PENDING')
+      .reduce((sum, s) => sum + Number(s.clips?.views || 0), 0)
+    const totalSubmittedViews = approvedViews + pendingViews
+
+    // Calculate views at completion (earnings ÷ payout rate)
+    const totalPayoutRate = await prisma.campaign.aggregate({
+      where: realCampaignFilter,
+      _avg: { payoutRate: true }
+    })
+    const avgPayoutRate = Number(totalPayoutRate._avg.payoutRate || 0)
+    const viewsAtCompletion = avgPayoutRate > 0 ? Math.round(totalEarnings / avgPayoutRate * 1000) : approvedViews
+    const viewsAfterCompletion = Math.max(0, approvedViews - viewsAtCompletion)
+
     // Get top performing campaigns (real campaigns only)
     const topCampaigns = await prisma.campaign.findMany({
       where: realCampaignFilter,
@@ -266,9 +299,16 @@ export async function GET(request: NextRequest) {
         activeCampaigns,
         testCampaigns, // Test campaigns (excluded from stats)
         archivedCampaigns, // Archived/deleted campaigns
-        totalViews: totalViews, // Real-time from clips
+        totalViews: totalViews, // Real-time from clips (approved only)
         trackedViews: totalTrackedViews, // Total tracked views (current - initial)
         totalEarnings: totalEarnings, // Real-time from clips
+        // Comprehensive view metrics
+        totalSubmittedViews, // Approved + pending views
+        approvedViews, // Approved submissions only
+        pendingViews, // Pending submissions only
+        viewsAtCompletion, // Views that generated earnings
+        viewsAfterCompletion, // Extra views tracked after campaign completion
+        // Submission status counts
         pendingSubmissions: 0, // We'll calculate these from submissions
         approvedSubmissions: 0,
         rejectedSubmissions: 0,

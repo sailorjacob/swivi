@@ -82,6 +82,13 @@ interface PlatformStats {
     totalViews: number
     trackedViews: number
     totalEarnings: number
+    // Additional view metrics
+    totalSubmittedViews: number
+    approvedViews: number
+    pendingViews: number
+    viewsAtCompletion: number
+    viewsAfterCompletion: number
+    // Submission status
     pendingSubmissions: number
     approvedSubmissions: number
     paidSubmissions: number
@@ -289,50 +296,7 @@ export default function AdminAnalyticsPage() {
         </Card>
       </div>
 
-      {/* Submission Status Breakdown */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
-            <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-              <FileVideo className="w-3 h-3 md:w-4 md:h-4" />
-              <span className="text-[10px] md:text-xs uppercase tracking-wide">Total Submissions</span>
-            </div>
-            <p className="text-xl md:text-3xl font-bold">{platformStats?.overview.totalSubmissions || 0}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
-            <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-              <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
-              <span className="text-[10px] md:text-xs uppercase tracking-wide">Approved</span>
-            </div>
-            <p className="text-xl md:text-3xl font-bold">{platformStats?.overview.approvedSubmissions || 0}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
-            <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-              <Clock className="w-3 h-3 md:w-4 md:h-4" />
-              <span className="text-[10px] md:text-xs uppercase tracking-wide">Pending Review</span>
-            </div>
-            <p className="text-xl md:text-3xl font-bold">{platformStats?.overview.pendingSubmissions || 0}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
-            <div className="flex items-center gap-1.5 md:gap-2 text-muted-foreground mb-1.5 md:mb-2">
-              <XCircle className="w-3 h-3 md:w-4 md:h-4" />
-              <span className="text-[10px] md:text-xs uppercase tracking-wide">Rejected</span>
-            </div>
-            <p className="text-xl md:text-3xl font-bold">{(platformStats?.overview.totalSubmissions || 0) - (platformStats?.overview.approvedSubmissions || 0) - (platformStats?.overview.pendingSubmissions || 0)}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Additional Stats Row */}
+      {/* Secondary Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="py-4">
@@ -350,10 +314,10 @@ export default function AdminAnalyticsPage() {
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Paid Submissions</p>
-                <p className="text-2xl font-bold">{platformStats?.overview.paidSubmissions || 0}</p>
+                <p className="text-xs text-muted-foreground">Pending Review</p>
+                <p className="text-2xl font-bold">{platformStats?.overview.pendingSubmissions || 0}</p>
               </div>
-              <CheckCircle className="w-8 h-8 text-muted-foreground/30" />
+              <Clock className="w-8 h-8 text-muted-foreground/30" />
             </div>
           </CardContent>
         </Card>
@@ -382,6 +346,49 @@ export default function AdminAnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Comprehensive Views Breakdown */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Eye className="w-5 h-5" />
+            Views Breakdown
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="text-center p-4 bg-muted/50 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">Total Submitted</p>
+              <p className="text-xl font-bold">{(platformStats?.overview.totalSubmittedViews || 0).toLocaleString()}</p>
+              <p className="text-[10px] text-muted-foreground">Approved + Pending</p>
+            </div>
+
+            <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+              <p className="text-xs text-muted-foreground mb-1">Approved</p>
+              <p className="text-xl font-bold text-green-600 dark:text-green-400">{(platformStats?.overview.approvedViews || 0).toLocaleString()}</p>
+              <p className="text-[10px] text-muted-foreground">Paid submissions</p>
+            </div>
+
+            <div className="text-center p-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
+              <p className="text-xs text-muted-foreground mb-1">Pending</p>
+              <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{(platformStats?.overview.pendingViews || 0).toLocaleString()}</p>
+              <p className="text-[10px] text-muted-foreground">Under review</p>
+            </div>
+
+            <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+              <p className="text-xs text-muted-foreground mb-1">At Completion</p>
+              <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{(platformStats?.overview.viewsAtCompletion || 0).toLocaleString()}</p>
+              <p className="text-[10px] text-muted-foreground">Generated earnings</p>
+            </div>
+
+            <div className="text-center p-4 bg-violet-500/10 rounded-lg border border-violet-500/20">
+              <p className="text-xs text-muted-foreground mb-1">Extra Tracked</p>
+              <p className="text-xl font-bold text-violet-600 dark:text-violet-400">+{(platformStats?.overview.viewsAfterCompletion || 0).toLocaleString()}</p>
+              <p className="text-[10px] text-muted-foreground">Post-campaign</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Two Column Layout */}
       <div className="grid lg:grid-cols-3 gap-6">
