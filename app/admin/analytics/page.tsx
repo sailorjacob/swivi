@@ -6,10 +6,10 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
+import {
   Loader2, CheckCircle, XCircle, ChevronDown, ChevronUp,
-  TrendingUp, DollarSign, FileVideo, BarChart3, 
-  Clock, ExternalLink, RefreshCw, Target, Zap
+  TrendingUp, DollarSign, FileVideo, BarChart3,
+  Clock, ExternalLink, RefreshCw, Target, Zap, Eye
 } from 'lucide-react'
 import { authenticatedFetch } from '@/lib/supabase-browser'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts'
