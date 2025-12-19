@@ -265,29 +265,52 @@ export default function AdminDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Compact Stats Bar */}
-        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-sm mb-8">
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Users:</span>
-            <span className="font-semibold">{stats.totalUsers}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Active:</span>
-            <span className="font-semibold">{stats.activeCampaigns}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Total Views:</span>
-            <span className="font-semibold">{Number(stats.totalViews).toLocaleString()}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Tracked Growth:</span>
-            <span className="font-semibold text-violet-600 dark:text-violet-400">+{Number(stats.trackedViews).toLocaleString()}</span>
-          </div>
+        {/* Key Metrics Overview */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <Card className="p-4">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground mb-1">Users</p>
+              <p className="text-2xl font-bold">{stats.totalUsers}</p>
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground mb-1">Active Campaigns</p>
+              <p className="text-2xl font-bold">{stats.activeCampaigns}</p>
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground mb-1">Total Views</p>
+              <p className="text-2xl font-bold">{Number(stats.totalViews).toLocaleString()}</p>
+            </div>
+          </Card>
+
+          <Card className="p-4 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 border-violet-500/20">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground mb-1">Tracked Growth</p>
+              <p className="text-2xl font-bold text-violet-600 dark:text-violet-400">+{Number(stats.trackedViews).toLocaleString()}</p>
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground mb-1">Total Earnings</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">${stats.totalEarnings.toFixed(2)}</p>
+            </div>
+          </Card>
+        </div>
+
+        {/* Detailed View Dialog */}
+        <div className="flex justify-center mb-6">
           <Dialog>
             <DialogTrigger asChild>
-              <button className="flex items-center gap-2 hover:text-foreground transition-colors">
-                <span className="text-muted-foreground underline decoration-dotted">View Details</span>
-              </button>
+              <Button variant="outline" size="sm">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                View Detailed Analytics
+              </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
