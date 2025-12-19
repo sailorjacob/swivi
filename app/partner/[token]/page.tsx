@@ -5,19 +5,20 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { 
-  Eye, 
-  TrendingUp, 
-  Users, 
-  DollarSign, 
-  ExternalLink, 
+import {
+  Eye,
+  TrendingUp,
+  Users,
+  DollarSign,
+  ExternalLink,
   CheckCircle,
   Clock,
   BarChart3,
   Play,
   Calendar,
   Target,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -91,32 +92,55 @@ interface DashboardData {
 export default function PartnerDashboardPage() {
   const params = useParams()
   const token = params.token as string
-  
+
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`/api/partner/${token}/dashboard`)
-        if (response.ok) {
-          const result = await response.json()
-          setData(result)
-        } else {
-          setError("Unable to load dashboard data")
-        }
-      } catch (err) {
-        setError("Connection error")
-      } finally {
-        setLoading(false)
+  const fetchData = async (isBackgroundRefresh = false) => {
+    try {
+      // Only show full loading on initial load, not background refresh
+      if (!isBackgroundRefresh) {
+        setLoading(true)
+      } else {
+        setIsRefreshing(true)
       }
-    }
 
+      const response = await fetch(`/api/partner/${token}/dashboard`)
+      if (response.ok) {
+        const result = await response.json()
+        setData(result)
+      } else {
+        setError("Unable to load dashboard data")
+      }
+    } catch (err) {
+      setError("Connection error")
+    } finally {
+      setLoading(false)
+      setIsRefreshing(false)
+    }
+  }
+
+  useEffect(() => {
     if (token) {
-      fetchData()
+      fetchData(false) // Initial load
     }
   }, [token])
+
+  // Auto-refresh data every 30 seconds to show real-time view tracking updates
+  useEffect(() => {
+    if (!token) return
+
+    const interval = setInterval(() => {
+      // Only refresh if not currently loading to avoid race conditions
+      if (!loading && !isRefreshing) {
+        fetchData(true) // Silent background refresh
+      }
+    }, 30000) // 30 seconds
+
+    return () => clearInterval(interval)
+  }, [token, loading, isRefreshing])
 
   if (loading) {
     return (
@@ -170,6 +194,16 @@ export default function PartnerDashboardPage() {
 
   return (
     <div className="px-4 py-4 md:px-6 md:py-6 w-full max-w-6xl mx-auto">
+      {/* Floating refresh indicator - positioned absolute so it doesn't push content */}
+      {isRefreshing && (
+        <div className="fixed top-20 right-4 z-50 pointer-events-none">
+          <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground shadow-sm">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>Updating...</span>
+          </div>
+        </div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

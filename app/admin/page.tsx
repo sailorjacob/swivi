@@ -276,25 +276,26 @@ export default function AdminDashboard() {
             <span className="font-semibold">{stats.activeCampaigns}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Views:</span>
+            <span className="text-muted-foreground">Total Views:</span>
             <span className="font-semibold">{Number(stats.totalViews).toLocaleString()}</span>
           </div>
           <Dialog>
             <DialogTrigger asChild>
               <button className="flex items-center gap-2 hover:text-foreground transition-colors">
-                <span className="text-muted-foreground">Tracked:</span>
+                <span className="text-muted-foreground">Tracked Growth:</span>
                 <span className="font-semibold underline decoration-dotted">{Number(stats.trackedViews).toLocaleString()}</span>
               </button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Tracked Views by Campaign</DialogTitle>
+                <DialogTitle>View Growth Tracking by Campaign</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Platform Tracked Views</p>
+                    <p className="text-sm text-muted-foreground">Total Platform View Growth</p>
                     <p className="text-3xl font-bold">{Number(stats.trackedViews).toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Views gained since initial tracking</p>
                   </div>
                   <Activity className="h-10 w-10 text-muted-foreground" />
                 </div>

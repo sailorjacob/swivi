@@ -95,34 +95,57 @@ interface CampaignData {
 export default function ClientPortalPage() {
   const params = useParams()
   const token = params.token as string
-  
+
   const [data, setData] = useState<CampaignData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`/api/client/${token}`)
-        if (response.ok) {
-          const result = await response.json()
-          setData(result)
-        } else if (response.status === 404) {
-          setError("Campaign not found. Please check your access link.")
-        } else {
-          setError("Unable to load campaign data.")
-        }
-      } catch (err) {
-        setError("Failed to connect. Please try again.")
-      } finally {
-        setLoading(false)
+  const fetchData = async (isBackgroundRefresh = false) => {
+    try {
+      // Only show full loading on initial load, not background refresh
+      if (!isBackgroundRefresh) {
+        setLoading(true)
+      } else {
+        setIsRefreshing(true)
       }
-    }
 
+      const response = await fetch(`/api/client/${token}`)
+      if (response.ok) {
+        const result = await response.json()
+        setData(result)
+      } else if (response.status === 404) {
+        setError("Campaign not found. Please check your access link.")
+      } else {
+        setError("Unable to load campaign data.")
+      }
+    } catch (err) {
+      setError("Failed to connect. Please try again.")
+    } finally {
+      setLoading(false)
+      setIsRefreshing(false)
+    }
+  }
+
+  useEffect(() => {
     if (token) {
-      fetchData()
+      fetchData(false) // Initial load
     }
   }, [token])
+
+  // Auto-refresh data every 30 seconds to show real-time view tracking updates
+  useEffect(() => {
+    if (!token) return
+
+    const interval = setInterval(() => {
+      // Only refresh if not currently loading to avoid race conditions
+      if (!loading && !isRefreshing) {
+        fetchData(true) // Silent background refresh
+      }
+    }, 30000) // 30 seconds
+
+    return () => clearInterval(interval)
+  }, [token, loading, isRefreshing])
 
   if (loading) {
     return (
@@ -197,6 +220,16 @@ export default function ClientPortalPage() {
           </div>
         </div>
       </header>
+
+      {/* Floating refresh indicator - positioned absolute so it doesn't push content */}
+      {isRefreshing && (
+        <div className="fixed top-20 right-4 z-50 pointer-events-none">
+          <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm border border-border rounded-full px-3 py-1.5 text-xs text-muted-foreground shadow-sm">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>Updating...</span>
+          </div>
+        </div>
+      )}
 
       <main className="container mx-auto px-4 py-4 md:py-8 max-w-6xl">
         <motion.div

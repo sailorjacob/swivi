@@ -321,6 +321,19 @@ export default function CampaignDetailPage() {
     return s.campaigns?.title === campaign?.title
   })
 
+  // Calculate totals for user's submissions in this campaign
+  const campaignTotals = campaignSubmissions.reduce((totals, submission) => {
+    const currentViews = parseInt(submission.currentViews || submission.clips?.views || submission.initialViews || "0")
+    const earnings = parseFloat(submission.finalEarnings || submission.clips?.earnings || "0")
+
+    return {
+      totalViews: totals.totalViews + currentViews,
+      totalEarnings: totals.totalEarnings + earnings,
+      approvedCount: totals.approvedCount + (submission.status === 'APPROVED' ? 1 : 0),
+      pendingCount: totals.pendingCount + (submission.status === 'PENDING' ? 1 : 0)
+    }
+  }, { totalViews: 0, totalEarnings: 0, approvedCount: 0, pendingCount: 0 })
+
   const onSubmit = async (data: z.infer<typeof submitSchema>) => {
     if (!campaign) return
     
@@ -992,10 +1005,34 @@ export default function CampaignDetailPage() {
           >
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileVideo className="w-5 h-5" />
-                  Your Submissions ({campaignSubmissions.length})
-                </CardTitle>
+                <div className="flex items-start justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <FileVideo className="w-5 h-5" />
+                    Your Submissions ({campaignSubmissions.length})
+                  </CardTitle>
+                  {campaignSubmissions.length > 0 && (
+                    <div className="text-right text-sm">
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <p className="text-muted-foreground">Total Views</p>
+                          <p className="font-semibold">{campaignTotals.totalViews.toLocaleString()}</p>
+                        </div>
+                        {campaignTotals.totalEarnings > 0 && (
+                          <div>
+                            <p className="text-muted-foreground">Total Earnings</p>
+                            <p className="font-semibold text-green-600">${campaignTotals.totalEarnings.toFixed(2)}</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                        <span>{campaignTotals.approvedCount} approved</span>
+                        {campaignTotals.pendingCount > 0 && (
+                          <span>• {campaignTotals.pendingCount} pending</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 {campaignSubmissions.length === 0 ? (
