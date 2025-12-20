@@ -95,14 +95,14 @@ interface CampaignData {
 export default function ClientPortalPage() {
   const params = useParams()
   const token = params.token as string
-
+  
   const [data, setData] = useState<CampaignData | null>(null)
   const [loading, setLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const fetchData = async (isBackgroundRefresh = false) => {
-    try {
+      try {
       // Only show full loading on initial load, not background refresh
       if (!isBackgroundRefresh) {
         setLoading(true)
@@ -110,22 +110,22 @@ export default function ClientPortalPage() {
         setIsRefreshing(true)
       }
 
-      const response = await fetch(`/api/client/${token}`)
-      if (response.ok) {
-        const result = await response.json()
-        setData(result)
-      } else if (response.status === 404) {
-        setError("Campaign not found. Please check your access link.")
-      } else {
-        setError("Unable to load campaign data.")
-      }
-    } catch (err) {
-      setError("Failed to connect. Please try again.")
-    } finally {
-      setLoading(false)
+        const response = await fetch(`/api/client/${token}`)
+        if (response.ok) {
+          const result = await response.json()
+          setData(result)
+        } else if (response.status === 404) {
+          setError("Campaign not found. Please check your access link.")
+        } else {
+          setError("Unable to load campaign data.")
+        }
+      } catch (err) {
+        setError("Failed to connect. Please try again.")
+      } finally {
+        setLoading(false)
       setIsRefreshing(false)
+      }
     }
-  }
 
   useEffect(() => {
     if (token) {

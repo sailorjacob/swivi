@@ -5,12 +5,12 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import { motion } from "framer-motion"
-import {
-  Eye,
-  TrendingUp,
-  Users,
-  DollarSign,
-  ExternalLink,
+import { 
+  Eye, 
+  TrendingUp, 
+  Users, 
+  DollarSign, 
+  ExternalLink, 
   CheckCircle,
   Clock,
   BarChart3,
@@ -92,14 +92,14 @@ interface DashboardData {
 export default function PartnerDashboardPage() {
   const params = useParams()
   const token = params.token as string
-
+  
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const fetchData = async (isBackgroundRefresh = false) => {
-    try {
+      try {
       // Only show full loading on initial load, not background refresh
       if (!isBackgroundRefresh) {
         setLoading(true)
@@ -107,20 +107,20 @@ export default function PartnerDashboardPage() {
         setIsRefreshing(true)
       }
 
-      const response = await fetch(`/api/partner/${token}/dashboard`)
-      if (response.ok) {
-        const result = await response.json()
-        setData(result)
-      } else {
-        setError("Unable to load dashboard data")
-      }
-    } catch (err) {
-      setError("Connection error")
-    } finally {
-      setLoading(false)
+        const response = await fetch(`/api/partner/${token}/dashboard`)
+        if (response.ok) {
+          const result = await response.json()
+          setData(result)
+        } else {
+          setError("Unable to load dashboard data")
+        }
+      } catch (err) {
+        setError("Connection error")
+      } finally {
+        setLoading(false)
       setIsRefreshing(false)
+      }
     }
-  }
 
   useEffect(() => {
     if (token) {

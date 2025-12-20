@@ -96,7 +96,7 @@ export function HeroOriginal() {
             variants={itemVariants}
             className="mb-10 text-sm sm:text-base text-foreground/80 max-w-2xl font-normal"
           >
-            Recent campaign around a Netflix original series generated 22M+ impressions in under a week.
+            Recent campaign around a Netflix original series generated 25M+ impressions in under a week.
           </motion.p>
 
           {/* CTA Buttons */}

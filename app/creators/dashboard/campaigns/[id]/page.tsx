@@ -1006,10 +1006,10 @@ export default function CampaignDetailPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <FileVideo className="w-5 h-5" />
-                    Your Submissions ({campaignSubmissions.length})
-                  </CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <FileVideo className="w-5 h-5" />
+                  Your Submissions ({campaignSubmissions.length})
+                </CardTitle>
                   {campaignSubmissions.length > 0 && (
                     <div className="text-right text-sm">
                       <div className="flex items-center gap-4">

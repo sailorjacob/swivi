@@ -45,7 +45,7 @@ const campaignResults: CampaignResult[] = [
     contentPlatform: "instagram",
     status: "completed",
     highlights: [
-      "22M views generated",
+      "25M views generated",
       "Completed in just 4 days",
       "600 posts submitted",
       "$20K budget delivered"
