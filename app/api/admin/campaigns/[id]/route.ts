@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from "next/server"
 import { getServerUserWithRole } from "@/lib/supabase-auth-server"
 import { prisma } from "@/lib/prisma"
+import { convertBigIntToNumber } from "@/lib/bigint-utils"
 import { z } from "zod"
 
 // Helper to extract handle from social media URL
@@ -518,9 +519,12 @@ export async function PUT(
       }
     })
 
-    console.log("🎉 Updated campaign:", JSON.stringify(campaign, null, 2))
+    // Convert BigInt and Decimal values for JSON serialization
+    const serializedCampaign = convertBigIntToNumber(campaign)
 
-    return NextResponse.json(campaign)
+    console.log("🎉 Updated campaign:", JSON.stringify(serializedCampaign, null, 2))
+
+    return NextResponse.json(serializedCampaign)
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid data", details: error.errors }, { status: 400 })
