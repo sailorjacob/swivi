@@ -8,6 +8,14 @@ import { NotificationService } from "@/lib/notification-service"
 import { RateLimitingService } from "@/lib/rate-limiting-service"
 import { z } from "zod"
 
+// Helper to validate optional URL fields (allows empty strings which become null)
+const optionalUrl = z.union([
+  z.string().url(),
+  z.literal(''),
+  z.null(),
+  z.undefined()
+]).transform(val => (val && val !== '') ? val : null)
+
 const createCampaignSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
@@ -18,8 +26,8 @@ const createCampaignSchema = z.object({
   targetPlatforms: z.array(z.enum(["TIKTOK", "YOUTUBE", "INSTAGRAM", "TWITTER"])),
   requirements: z.array(z.string()).optional().default([]),
   status: z.enum(["DRAFT", "SCHEDULED", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).optional().default("ACTIVE"),
-  featuredImage: z.string().url().optional().nullable(),
-  contentFolderUrl: z.string().url().optional().nullable(),
+  featuredImage: optionalUrl,
+  contentFolderUrl: optionalUrl,
 })
 
 export async function GET(request: NextRequest) {
@@ -109,18 +117,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting check
-    const rateLimitingService = RateLimitingService.getInstance()
-    const rateLimitResult = await rateLimitingService.checkRateLimit(
-      'campaign:create',
-      request.ip || 'unknown'
-    )
-
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        { error: "Rate limit exceeded. Please try again later." },
-        { status: 429 }
+    // Rate limiting check (non-fatal - don't block campaign creation if rate limiter fails)
+    try {
+      const rateLimitingService = RateLimitingService.getInstance()
+      const rateLimitResult = await rateLimitingService.checkRateLimit(
+        'campaign:create',
+        request.ip || 'unknown'
       )
+
+      if (!rateLimitResult.success) {
+        return NextResponse.json(
+          { error: "Rate limit exceeded. Please try again later." },
+          { status: 429 }
+        )
+      }
+    } catch (rateLimitError) {
+      console.warn("⚠️ Rate limiting check failed (allowing request):", rateLimitError)
+      // Continue with request even if rate limiting fails
     }
 
     const { user, error } = await getServerUserWithRole(request)
@@ -197,10 +210,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(campaign, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error("❌ Validation error creating campaign:", JSON.stringify(error.errors, null, 2))
       return NextResponse.json({ error: "Invalid data", details: error.errors }, { status: 400 })
     }
 
-    console.error("Error creating campaign:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("❌ Error creating campaign:", error)
+    console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack trace')
+    return NextResponse.json({ 
+      error: "Internal server error",
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
