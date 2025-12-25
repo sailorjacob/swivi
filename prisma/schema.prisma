@@ -105,6 +105,9 @@ model Campaign {
   budgetReachedAt DateTime?        @db.Timestamp(6) // When budget was first reached/exhausted
   budgetReachedViews BigInt?       @default(0) // Total views snapshot when budget reached
   clientAccessToken String?        @unique // Unique token for client portal access
+  // Team Update - JSON field for admin-created announcements to clippers
+  // Format: { title: string, date: string, sections: [{heading?: string, content: string[]}], contentFolders?: [{label: string, url: string}] }
+  teamUpdate      Json?
   createdAt          DateTime?           @default(now()) @db.Timestamp(6)
   updatedAt          DateTime?           @default(now()) @db.Timestamp(6)
   clipSubmissions    ClipSubmission[]

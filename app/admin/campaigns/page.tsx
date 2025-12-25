@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { FileUpload } from "@/components/ui/file-upload"
 import { CampaignStatusGuide } from "@/components/admin/campaign-status-guide"
+import { TeamUpdateEditorButton } from "@/components/admin/team-update-editor"
 import toast from "react-hot-toast"
 
 interface Campaign {
@@ -37,6 +38,7 @@ interface Campaign {
   requirements: string[]
   featuredImage?: string | null
   contentFolderUrl?: string | null
+  teamUpdate?: any // Admin-created announcement for clippers
   createdAt: string | Date
   updatedAt?: string | Date
   _count: {
@@ -1412,6 +1414,15 @@ export default function AdminCampaignsPage() {
                             
                             {/* Action Buttons */}
                             <div className="flex items-center gap-1 ml-4">
+                              {/* Team Update Editor */}
+                              {!campaign.deletedAt && (
+                                <TeamUpdateEditorButton
+                                  campaignId={campaign.id}
+                                  campaignTitle={campaign.title}
+                                  currentUpdate={campaign.teamUpdate}
+                                  onSave={fetchCampaigns}
+                                />
+                              )}
                               <button
                                 onClick={() => handleEditCampaign(campaign)}
                                 className="p-2 text-muted-foreground hover:text-foreground transition-colors"

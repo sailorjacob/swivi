@@ -243,15 +243,15 @@ export default function AdminAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 border-violet-500/20">
+        <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-violet-500/20">
-                <TrendingUp className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+              <div className="p-2 rounded-lg bg-muted">
+                <TrendingUp className="w-5 h-5 text-foreground" />
               </div>
               <span className="text-sm text-muted-foreground">View Growth</span>
             </div>
-            <p className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400 bg-clip-text text-transparent">{(platformStats?.overview.trackedViews || 0).toLocaleString()}</p>
+            <p className="text-4xl font-bold">{(platformStats?.overview.trackedViews || 0).toLocaleString()}</p>
             <p className="text-xs text-muted-foreground mt-1">Since clips were submitted</p>
           </CardContent>
         </Card>
@@ -357,33 +357,33 @@ export default function AdminAnalyticsPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <div className="text-center p-4 bg-muted/50 rounded-lg border border-border">
               <p className="text-xs text-muted-foreground mb-1">Total Submitted</p>
               <p className="text-xl font-bold">{(platformStats?.overview.totalSubmittedViews || 0).toLocaleString()}</p>
               <p className="text-[10px] text-muted-foreground">Approved + Pending</p>
             </div>
 
-            <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+            <div className="text-center p-4 bg-muted/50 rounded-lg border border-border">
               <p className="text-xs text-muted-foreground mb-1">Approved</p>
-              <p className="text-xl font-bold text-green-600 dark:text-green-400">{(platformStats?.overview.approvedViews || 0).toLocaleString()}</p>
+              <p className="text-xl font-bold">{(platformStats?.overview.approvedViews || 0).toLocaleString()}</p>
               <p className="text-[10px] text-muted-foreground">Paid submissions</p>
             </div>
 
-            <div className="text-center p-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
+            <div className="text-center p-4 bg-muted/50 rounded-lg border border-border">
               <p className="text-xs text-muted-foreground mb-1">Pending</p>
-              <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{(platformStats?.overview.pendingViews || 0).toLocaleString()}</p>
+              <p className="text-xl font-bold">{(platformStats?.overview.pendingViews || 0).toLocaleString()}</p>
               <p className="text-[10px] text-muted-foreground">Under review</p>
             </div>
 
-            <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+            <div className="text-center p-4 bg-muted/50 rounded-lg border border-border">
               <p className="text-xs text-muted-foreground mb-1">At Completion</p>
-              <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{(platformStats?.overview.viewsAtCompletion || 0).toLocaleString()}</p>
+              <p className="text-xl font-bold">{(platformStats?.overview.viewsAtCompletion || 0).toLocaleString()}</p>
               <p className="text-[10px] text-muted-foreground">Generated earnings</p>
             </div>
 
-            <div className="text-center p-4 bg-violet-500/10 rounded-lg border border-violet-500/20">
+            <div className="text-center p-4 bg-muted/50 rounded-lg border border-border">
               <p className="text-xs text-muted-foreground mb-1">Extra Tracked</p>
-              <p className="text-xl font-bold text-violet-600 dark:text-violet-400">+{(platformStats?.overview.viewsAfterCompletion || 0).toLocaleString()}</p>
+              <p className="text-xl font-bold">+{(platformStats?.overview.viewsAfterCompletion || 0).toLocaleString()}</p>
               <p className="text-[10px] text-muted-foreground">Post-campaign</p>
             </div>
           </div>
@@ -463,9 +463,9 @@ export default function AdminAnalyticsPage() {
                               <p className="text-xs text-muted-foreground mb-1">Current Views</p>
                               <p className="text-lg font-bold">{campaign.currentViews.toLocaleString()}</p>
                             </div>
-                            <div className="p-3 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 rounded-lg border border-violet-500/20">
-                              <p className="text-xs text-violet-600 dark:text-violet-400 mb-1">View Growth</p>
-                              <p className="text-lg font-bold text-violet-600 dark:text-violet-400">+{campaign.trackedViews.toLocaleString()}</p>
+                            <div className="p-3 bg-muted/50 rounded-lg border border-border">
+                              <p className="text-xs text-muted-foreground mb-1">View Growth</p>
+                              <p className="text-lg font-bold">+{campaign.trackedViews.toLocaleString()}</p>
                             </div>
                             <div className="p-3 bg-muted/50 rounded-lg">
                               <p className="text-xs text-muted-foreground mb-1">Growth</p>
@@ -527,7 +527,7 @@ export default function AdminAnalyticsPage() {
                                           <p className="font-bold">{clip.currentViews.toLocaleString()}</p>
                                           <p className="text-xs text-muted-foreground">views</p>
                                           {viewGrowth > 0 && (
-                                            <p className="text-xs text-violet-600 dark:text-violet-400">+{viewGrowth.toLocaleString()}</p>
+                                            <p className="text-xs text-muted-foreground">+{viewGrowth.toLocaleString()}</p>
                                           )}
                                           {clip.status === 'APPROVED' && clip.earnings > 0 && (
                                             <p className="text-xs font-medium mt-1">${clip.earnings.toFixed(2)}</p>

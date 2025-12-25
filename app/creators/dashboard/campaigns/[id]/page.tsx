@@ -684,8 +684,8 @@ export default function CampaignDetailPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Team Update Button */}
-              <CampaignUpdateButton campaignTitle={campaign.title} />
+              {/* Team Update Button - fetches from database */}
+              <CampaignUpdateButton campaignId={campaign.id} campaignTitle={campaign.title} />
               {/* Activity Button */}
               <Button
                 variant="outline"

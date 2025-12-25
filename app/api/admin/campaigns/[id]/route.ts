@@ -44,6 +44,20 @@ function extractHandleFromUrl(url: string, platform: string): string | null {
   return null
 }
 
+// Team Update schema for admin-created announcements
+const teamUpdateSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  date: z.string().min(1, "Date is required"),
+  sections: z.array(z.object({
+    heading: z.string().optional(),
+    content: z.array(z.string())
+  })),
+  contentFolders: z.array(z.object({
+    label: z.string(),
+    url: z.string().url()
+  })).optional()
+}).nullable()
+
 const updateCampaignSchema = z.object({
   title: z.string().min(1, "Title is required").optional(),
   description: z.string().min(10, "Description must be at least 10 characters").optional(),
@@ -69,6 +83,7 @@ const updateCampaignSchema = z.object({
   featuredImage: z.string().url().optional().nullable(),
   contentFolderUrl: z.string().url().optional().nullable(),
   completionReason: z.string().optional(),
+  teamUpdate: teamUpdateSchema.optional(), // Admin-created announcement for clippers
 })
 
 export async function GET(
@@ -109,6 +124,7 @@ export async function GET(
         requirements: true,
         featuredImage: true,
         contentFolderUrl: true,
+        teamUpdate: true,
         createdAt: true,
         updatedAt: true,
         completedAt: true,
@@ -487,6 +503,7 @@ export async function PUT(
     if (validatedData.contentFolderUrl !== undefined) updateData.contentFolderUrl = validatedData.contentFolderUrl
     if (validatedData.hidden !== undefined) updateData.hidden = validatedData.hidden
     if (validatedData.isTest !== undefined) updateData.isTest = validatedData.isTest
+    if (validatedData.teamUpdate !== undefined) updateData.teamUpdate = validatedData.teamUpdate
     
     // Handle restore from archive
     if (validatedData.restore === true) {

@@ -87,6 +87,7 @@ export async function GET(request: NextRequest) {
         targetPlatforms: true,
         requirements: true,
         featuredImage: true,
+        teamUpdate: true,
         createdAt: true,
         updatedAt: true,
         _count: {
