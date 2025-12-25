@@ -178,12 +178,20 @@ export async function POST(request: NextRequest) {
     console.log("🎉 Created campaign:", JSON.stringify(campaign, null, 2))
 
     // Send notification to all clippers about new campaign
+    // Important: This is non-blocking - we don't want notification failures to cause
+    // the campaign creation to appear as failed (which could lead to duplicate campaigns)
     if (campaign.status === "ACTIVE") {
-      const notificationService = new NotificationService()
-      await notificationService.notifyNewCampaignAvailable(
-        campaign.id,
-        campaign.title
-      )
+      try {
+        const notificationService = new NotificationService()
+        await notificationService.notifyNewCampaignAvailable(
+          campaign.id,
+          campaign.title
+        )
+        console.log("✅ Notifications sent for new campaign")
+      } catch (notificationError) {
+        // Log the error but don't fail the request - campaign is already created
+        console.error("⚠️ Failed to send notifications (campaign still created):", notificationError)
+      }
     }
 
     return NextResponse.json(campaign, { status: 201 })

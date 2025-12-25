@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Plus, Edit, Trash2, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle, ChevronDown, ChevronUp, EyeOff, Eye, FlaskConical, ArchiveRestore, Archive, Link2, Copy, RefreshCw } from "lucide-react"
@@ -120,6 +120,9 @@ export default function AdminCampaignsPage() {
   })
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Ref to prevent double submission (in addition to state)
+  const submissionInProgressRef = useRef(false)
 
   // Fetch campaigns
   const fetchCampaigns = async () => {
@@ -177,7 +180,15 @@ export default function AdminCampaignsPage() {
   // Create campaign
   const handleCreateCampaign = async () => {
     console.log("🚀 handleCreateCampaign started")
+    
+    // Double-submission guard using ref (synchronous check)
+    if (submissionInProgressRef.current) {
+      console.log("⚠️ Submission already in progress, ignoring duplicate click")
+      return
+    }
+    submissionInProgressRef.current = true
     setIsSubmitting(true)
+    
     try {
       // Handle image upload first if there's a file (optional)
       let imageUrl = formData.featuredImage
@@ -337,12 +348,10 @@ export default function AdminCampaignsPage() {
         const result = await response.json()
         console.log("✅ Campaign created successfully:", result)
         toast.success("Campaign created successfully!")
-        // Show success state briefly before closing
-        setTimeout(() => {
-          setShowCreateDialog(false)
-          resetForm()
-          fetchCampaigns()
-        }, 1500)
+        // Close dialog immediately and refresh
+        setShowCreateDialog(false)
+        resetForm()
+        fetchCampaigns()
       } else {
         const errorText = await response.text()
         console.error("❌ Campaign creation failed:", {
@@ -366,6 +375,7 @@ export default function AdminCampaignsPage() {
       toast.error("Failed to create campaign")
     } finally {
       setIsSubmitting(false)
+      submissionInProgressRef.current = false
     }
   }
 
@@ -1518,7 +1528,7 @@ export default function AdminCampaignsPage() {
                                 <AlertDialogTrigger asChild>
                                   <button
                                     className="p-2 text-muted-foreground hover:text-destructive transition-colors"
-                                    title={campaign.deletedAt ? "Permanently delete" : "Archive campaign"}
+                                    title={campaign.deletedAt ? "Permanently delete" : "Delete/Archive campaign"}
                                   >
                                     {campaign.deletedAt ? <Trash2 className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
                                   </button>
@@ -1526,7 +1536,8 @@ export default function AdminCampaignsPage() {
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>
-                                      {campaign.deletedAt ? 'Permanently Delete Campaign' : 'Archive Campaign'}
+                                      {campaign.deletedAt ? 'Permanently Delete Campaign' : 
+                                       campaign._count.clipSubmissions === 0 ? 'Delete Campaign' : 'Archive Campaign'}
                                     </AlertDialogTitle>
                                     <AlertDialogDescription className="space-y-2">
                                       {campaign.deletedAt ? (
@@ -1534,13 +1545,16 @@ export default function AdminCampaignsPage() {
                                           <p>Permanently delete &quot;{campaign.title}&quot; and ALL its data?</p>
                                           <p className="font-medium">This action cannot be undone. All submissions and earnings data will be lost.</p>
                                         </>
+                                      ) : campaign._count.clipSubmissions === 0 ? (
+                                        <>
+                                          <p>Delete &quot;{campaign.title}&quot;?</p>
+                                          <p>This campaign has no submissions and can be permanently deleted. This is useful for removing duplicates.</p>
+                                        </>
                                       ) : (
                                         <>
                                           <p>Archive &quot;{campaign.title}&quot;?</p>
                                           <p>The campaign will be hidden but all data (submissions, earnings, view tracking) will be preserved for historical records.</p>
-                                          {campaign._count.clipSubmissions > 0 && (
-                                            <p className="text-sm">This campaign has {campaign._count.clipSubmissions} submission(s).</p>
-                                          )}
+                                          <p className="text-sm">This campaign has {campaign._count.clipSubmissions} submission(s).</p>
                                         </>
                                       )}
                                     </AlertDialogDescription>
@@ -1553,6 +1567,13 @@ export default function AdminCampaignsPage() {
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                       >
                                         Permanently Delete
+                                      </AlertDialogAction>
+                                    ) : campaign._count.clipSubmissions === 0 ? (
+                                      <AlertDialogAction
+                                        onClick={() => handlePermanentDelete(campaign)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Delete Permanently
                                       </AlertDialogAction>
                                     ) : (
                                       <AlertDialogAction
