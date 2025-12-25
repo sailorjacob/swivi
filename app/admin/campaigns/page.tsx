@@ -127,8 +127,8 @@ export default function AdminCampaignsPage() {
   // Fetch campaigns
   const fetchCampaigns = async () => {
     try {
-      // Admin should see ALL campaigns including DRAFT ones
-      const response = await authenticatedFetch("/api/campaigns?status=all")
+      // Admin should see ALL campaigns including DRAFT, TEST, and ARCHIVED ones
+      const response = await authenticatedFetch("/api/campaigns?status=all&includeDeleted=true&includeTest=true")
       if (response.ok) {
         const data = await response.json()
         console.log('🔍 Fetched campaigns data:', data)
@@ -1305,18 +1305,16 @@ export default function AdminCampaignsPage() {
               Test ({testCampaignsCount})
             </button>
           )}
-          {archivedCampaignsCount > 0 && (
-            <button
-              onClick={() => setStatusFilter('ARCHIVED')}
-              className={`pb-2 text-sm transition-colors ${
-                statusFilter === 'ARCHIVED' 
-                  ? 'text-foreground border-b-2 border-foreground -mb-px' 
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Archived ({archivedCampaignsCount})
-            </button>
-          )}
+          <button
+            onClick={() => setStatusFilter('ARCHIVED')}
+            className={`pb-2 text-sm transition-colors ${
+              statusFilter === 'ARCHIVED' 
+                ? 'text-foreground border-b-2 border-foreground -mb-px' 
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Archived ({archivedCampaignsCount})
+          </button>
         </div>
 
         {/* Campaigns List */}
