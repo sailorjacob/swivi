@@ -15,6 +15,7 @@ const SEEN_UPDATES_KEY = "swivi-seen-updates"
 
 // Campaign updates configuration
 // This could later be moved to database
+// Add new campaign updates here as needed - they'll automatically show for matching campaigns
 export const CAMPAIGN_UPDATES: Record<string, {
   id: string
   title: string
@@ -26,56 +27,18 @@ export const CAMPAIGN_UPDATES: Record<string, {
   }[]
   contentFolders?: { label: string; url: string }[]
 }> = {
-  "serhant-dec-2025": {
-    id: "serhant-dec-2025",
-    title: "SERHANT Team Update",
-    date: "December 9, 2025",
-    campaignMatch: (title: string) => {
-      const t = title.toLowerCase()
-      return t.includes("owning manhattan") && t.includes("season 2")
-    },
-    sections: [
-      {
-        heading: "From the SERHANT Team",
-        content: [
-          "New batch of content is now live — some of the punchier moments from the show. There could be shorter clips made out of these.",
-        ]
-      },
-      {
-        heading: "What They're Looking For",
-        content: [
-          "Add punchy on-video text to your clips.",
-          "Watch the full video and understand the context before clipping.",
-          "Create clever stuff, memeable stuff, content people can connect and relate to — stuff they want to share with a friend.",
-          "Avoid duplicate content. Recycled posts will not be accepted."
-        ]
-      },
-      {
-        heading: "The Takeaway",
-        content: [
-          "The team is happy with the momentum so far, but they want the next level.",
-          "Funnier. Punchier. Sharper text. More context-aware edits. Zero duplicates."
-        ]
-      },
-      {
-        heading: "Your Action Items",
-        content: [
-          "Pull clips from the new content batch.",
-          "Watch the full videos first.",
-          "Extract the human moments.",
-          "Build edits that hit instantly.",
-          "Add on-screen captions that elevate the joke, the awkwardness, the drama, or the relatability.",
-          "No recycled angles. No repeats."
-        ]
-      }
-    ],
-    contentFolders: [
-      { 
-        label: "New Content Folder", 
-        url: "https://drive.google.com/drive/folders/1PBQcFZhCJrUOGH0QyARz60GshRnbz4kH?usp=drive_link" 
-      }
-    ]
-  }
+  // No active campaign updates at this time
+  // Add new updates here when needed, using this format:
+  // "update-id": {
+  //   id: "update-id",
+  //   title: "Update Title",
+  //   date: "Month Day, Year",
+  //   campaignMatch: (title: string) => title.toLowerCase().includes("campaign name"),
+  //   sections: [
+  //     { heading: "Section Title", content: ["Point 1", "Point 2"] }
+  //   ],
+  //   contentFolders: [{ label: "Folder Name", url: "https://..." }]
+  // }
 }
 
 // Get all updates as array
