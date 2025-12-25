@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Plus, Edit, Trash2, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle, ChevronDown, ChevronUp, EyeOff, Eye, FlaskConical, ArchiveRestore, Archive, Link2, Copy, RefreshCw } from "lucide-react"
+import { Plus, Edit, Trash2, Users, DollarSign, TrendingUp, Calendar, Target, Loader2, CheckCircle, ChevronDown, ChevronUp, EyeOff, Eye, FlaskConical, ArchiveRestore, Archive, Link2, Copy, RefreshCw, Trophy } from "lucide-react"
 import { authenticatedFetch } from "@/lib/supabase-browser"
 import { supabase } from "@/lib/supabase-auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -39,6 +39,7 @@ interface Campaign {
   featuredImage?: string | null
   contentFolderUrl?: string | null
   teamUpdate?: any // Admin-created announcement for clippers
+  bountiesEnabled?: boolean // Show bounty/bonus section to clippers
   createdAt: string | Date
   updatedAt?: string | Date
   _count: {
@@ -578,6 +579,32 @@ export default function AdminCampaignsPage() {
     } catch (error) {
       console.error("Error toggling campaign visibility:", error)
       toast.error("Failed to update campaign visibility")
+    }
+  }
+
+  // Toggle bounties visibility for a campaign
+  const handleToggleBounties = async (campaignId: string, currentlyEnabled: boolean) => {
+    try {
+      const response = await authenticatedFetch(`/api/admin/campaigns/${campaignId}`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bountiesEnabled: !currentlyEnabled
+        })
+      })
+
+      if (response.ok) {
+        toast.success(currentlyEnabled ? "Bounties disabled for this campaign" : "Bounties enabled for this campaign")
+        await fetchCampaigns()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to update bounties setting")
+      }
+    } catch (error) {
+      console.error("Error toggling bounties:", error)
+      toast.error("Failed to update bounties setting")
     }
   }
 
@@ -1422,6 +1449,16 @@ export default function AdminCampaignsPage() {
                                   currentUpdate={campaign.teamUpdate}
                                   onSave={fetchCampaigns}
                                 />
+                              )}
+                              {/* Bounties Toggle */}
+                              {!campaign.deletedAt && (
+                                <button
+                                  onClick={() => handleToggleBounties(campaign.id, campaign.bountiesEnabled || false)}
+                                  className={`p-2 transition-colors ${campaign.bountiesEnabled ? 'text-amber-500 hover:text-muted-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                  title={campaign.bountiesEnabled ? "Bounties enabled - click to disable" : "Bounties disabled - click to enable"}
+                                >
+                                  <Trophy className="h-4 w-4" />
+                                </button>
                               )}
                               <button
                                 onClick={() => handleEditCampaign(campaign)}

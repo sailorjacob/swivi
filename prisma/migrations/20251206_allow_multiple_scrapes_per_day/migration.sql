@@ -29,3 +29,5 @@ CREATE INDEX IF NOT EXISTS "view_tracking_clipId_scrapedAt_idx" ON "view_trackin
 
 
 
+
+

@@ -84,6 +84,7 @@ const updateCampaignSchema = z.object({
   contentFolderUrl: z.string().url().optional().nullable(),
   completionReason: z.string().optional(),
   teamUpdate: teamUpdateSchema.optional(), // Admin-created announcement for clippers
+  bountiesEnabled: z.boolean().optional(), // Show bounty/bonus section to clippers
 })
 
 export async function GET(
@@ -125,6 +126,7 @@ export async function GET(
         featuredImage: true,
         contentFolderUrl: true,
         teamUpdate: true,
+        bountiesEnabled: true,
         createdAt: true,
         updatedAt: true,
         completedAt: true,
@@ -504,6 +506,7 @@ export async function PUT(
     if (validatedData.hidden !== undefined) updateData.hidden = validatedData.hidden
     if (validatedData.isTest !== undefined) updateData.isTest = validatedData.isTest
     if (validatedData.teamUpdate !== undefined) updateData.teamUpdate = validatedData.teamUpdate
+    if (validatedData.bountiesEnabled !== undefined) updateData.bountiesEnabled = validatedData.bountiesEnabled
     
     // Handle restore from archive
     if (validatedData.restore === true) {

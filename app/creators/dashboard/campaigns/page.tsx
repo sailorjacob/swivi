@@ -49,6 +49,7 @@ interface Campaign {
   targetPlatforms: string[]
   requirements: string[]
   featuredImage?: string
+  bountiesEnabled?: boolean
   createdAt: string
   _count: {
     clipSubmissions: number
@@ -121,10 +122,9 @@ const platformIcons = {
   // twitter: Twitter, // Hidden - re-enable when Apify actors are working
 }
 
-// Helper to check if a campaign has special bonuses
+// Helper to check if a campaign has special bonuses (now controlled via admin settings)
 const hasBonuses = (campaign: Campaign) => {
-  return campaign.title.toLowerCase().includes('owning manhattan') && 
-         campaign.title.toLowerCase().includes('season 2')
+  return campaign.bountiesEnabled === true
 }
 
 // Activity data type

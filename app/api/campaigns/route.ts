@@ -88,6 +88,7 @@ export async function GET(request: NextRequest) {
         requirements: true,
         featuredImage: true,
         teamUpdate: true,
+        bountiesEnabled: true,
         createdAt: true,
         updatedAt: true,
         _count: {

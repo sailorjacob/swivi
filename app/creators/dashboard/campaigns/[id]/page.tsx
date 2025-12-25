@@ -93,6 +93,7 @@ interface Campaign {
   requirements: string[]
   featuredImage?: string
   contentFolderUrl?: string
+  bountiesEnabled?: boolean
   createdAt: string
   _count: {
     clipSubmissions: number
@@ -152,10 +153,9 @@ const submitSchema = z.object({
   socialAccountId: z.string().min(1, "Please select your verified account"),
 })
 
-// Helper to check if a campaign has special bonuses
+// Helper to check if a campaign has special bonuses (now controlled via admin settings)
 const hasBonuses = (campaign: Campaign) => {
-  return campaign.title.toLowerCase().includes('owning manhattan') && 
-         campaign.title.toLowerCase().includes('season 2')
+  return campaign.bountiesEnabled === true
 }
 
 export default function CampaignDetailPage() {
