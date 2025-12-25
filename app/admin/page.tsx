@@ -93,17 +93,17 @@ export default function AdminDashboard() {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'USER_SIGNUP':
-        return <UserPlus className="h-4 w-4 text-muted-foreground" />
+        return <UserPlus className="h-4 w-4 text-blue-500" />
       case 'SUBMISSION':
-        return <FileVideo className="h-4 w-4 text-muted-foreground" />
+        return <FileVideo className="h-4 w-4 text-blue-500" />
       case 'SUBMISSION_UPDATE':
-        return <CheckCircle className="h-4 w-4 text-muted-foreground" />
+        return <CheckCircle className="h-4 w-4 text-green-500" />
       case 'PAYOUT_REQUEST':
-        return <DollarSign className="h-4 w-4 text-muted-foreground" />
+        return <DollarSign className="h-4 w-4 text-amber-500" />
       case 'PAYOUT_COMPLETED':
-        return <CheckCircle className="h-4 w-4 text-muted-foreground" />
+        return <CheckCircle className="h-4 w-4 text-green-500" />
       case 'VIEW_SCRAPE':
-        return <Eye className="h-4 w-4 text-muted-foreground" />
+        return <Eye className="h-4 w-4 text-cyan-500" />
       default:
         return <Activity className="h-4 w-4 text-muted-foreground" />
     }
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
       case 'SUBMISSION':
         return <><span className="font-medium">{data.userName}</span> submitted a clip to <span className="font-medium">{data.campaignTitle}</span></>
       case 'SUBMISSION_UPDATE':
-        return <>Submission by <span className="font-medium">{data.userName}</span> was <span className="font-medium">{data.status?.toLowerCase()}</span></>
+        return <>Submission by <span className="font-medium">{data.userName}</span> was <span className={data.status === 'APPROVED' ? 'text-green-500' : 'text-red-500'}>{data.status?.toLowerCase()}</span></>
       case 'PAYOUT_REQUEST':
         return <><span className="font-medium">{data.userName}</span> requested <span className="font-medium">${data.amount?.toFixed(2)}</span> payout</>
       case 'PAYOUT_COMPLETED':
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
         return <>
           <span className="font-medium">{data.userName || 'Clipper'}</span>
           {' '}{data.viewGrowth > 0 ? 'gained' : 'at'}{' '}
-          <span className="font-medium">{viewGrowthDisplay}</span>
+          <span className="font-medium text-cyan-500">{viewGrowthDisplay}</span>
           {' '}views on{' '}
           <span className="text-muted-foreground">{data.shortUrl || data.platform}</span>
         </>
@@ -298,7 +298,7 @@ export default function AdminDashboard() {
           <Card className="p-4">
             <div className="text-center">
               <p className="text-xs text-muted-foreground mb-1">Total Earnings</p>
-              <p className="text-2xl font-bold">${stats.totalEarnings.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">${stats.totalEarnings.toFixed(2)}</p>
             </div>
           </Card>
         </div>

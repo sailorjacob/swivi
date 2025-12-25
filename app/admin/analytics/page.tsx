@@ -228,163 +228,107 @@ export default function AdminAnalyticsPage() {
         </Button>
       </div>
 
-      {/* Key Metrics - Large Hero Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Key Metrics - Clean 4-column Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-muted">
-                <Eye className="w-5 h-5 text-foreground" />
-              </div>
-              <span className="text-sm text-muted-foreground">Total Views</span>
-            </div>
-            <p className="text-4xl font-bold">{(platformStats?.overview.totalViews || 0).toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground mt-1">All-time clip views</p>
+          <CardContent className="pt-5 pb-4">
+            <p className="text-xs text-muted-foreground mb-1">Total Views</p>
+            <p className="text-3xl font-bold">{(platformStats?.overview.totalViews || 0).toLocaleString()}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-muted">
-                <TrendingUp className="w-5 h-5 text-foreground" />
-              </div>
-              <span className="text-sm text-muted-foreground">View Growth</span>
-            </div>
-            <p className="text-4xl font-bold">{(platformStats?.overview.trackedViews || 0).toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground mt-1">Since clips were submitted</p>
+          <CardContent className="pt-5 pb-4">
+            <p className="text-xs text-muted-foreground mb-1">View Growth</p>
+            <p className="text-3xl font-bold">+{(platformStats?.overview.trackedViews || 0).toLocaleString()}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-muted">
-                <DollarSign className="w-5 h-5 text-foreground" />
-              </div>
-              <span className="text-sm text-muted-foreground">Total Paid Out</span>
-            </div>
-            <p className="text-4xl font-bold">${(platformStats?.payoutStats.totalPaid || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-            <p className="text-xs text-muted-foreground mt-1">To creators</p>
+          <CardContent className="pt-5 pb-4">
+            <p className="text-xs text-muted-foreground mb-1">Total Paid Out</p>
+            <p className="text-3xl font-bold text-green-600 dark:text-green-400">${(platformStats?.payoutStats.totalPaid || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-muted">
-                <Zap className="w-5 h-5 text-foreground" />
-              </div>
-              <span className="text-sm text-muted-foreground">Effective CPM</span>
-            </div>
-            <p className="text-4xl font-bold">${effectiveCPM.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground mt-1">Cost per 1K views</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-muted">
-                <FileVideo className="w-5 h-5 text-foreground" />
-              </div>
-              <span className="text-sm text-muted-foreground">Submissions</span>
-            </div>
-            <p className="text-4xl font-bold">{(platformStats?.overview.approvedSubmissions || 0).toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground mt-1">of {platformStats?.overview.totalSubmissions || 0} total approved</p>
+          <CardContent className="pt-5 pb-4">
+            <p className="text-xs text-muted-foreground mb-1">Effective CPM</p>
+            <p className="text-3xl font-bold">${effectiveCPM.toFixed(2)}</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Secondary Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
         <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Active Campaigns</p>
-                <p className="text-2xl font-bold">{platformStats?.overview.activeCampaigns || 0}</p>
-              </div>
-              <Target className="w-8 h-8 text-muted-foreground/30" />
-            </div>
+          <CardContent className="py-3 px-4">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Submissions</p>
+            <p className="text-xl font-bold">{platformStats?.overview.totalSubmissions || 0}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Pending Review</p>
-                <p className="text-2xl font-bold">{platformStats?.overview.pendingSubmissions || 0}</p>
-              </div>
-              <Clock className="w-8 h-8 text-muted-foreground/30" />
-            </div>
+          <CardContent className="py-3 px-4">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Approved</p>
+            <p className="text-xl font-bold text-green-600 dark:text-green-400">{platformStats?.overview.approvedSubmissions || 0}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Pending Payouts</p>
-                <p className="text-2xl font-bold">${(platformStats?.payoutStats.pendingPayouts || 0).toFixed(0)}</p>
-              </div>
-              <DollarSign className="w-8 h-8 text-muted-foreground/30" />
-            </div>
+          <CardContent className="py-3 px-4">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Pending</p>
+            <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{platformStats?.overview.pendingSubmissions || 0}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground">Total Campaigns</p>
-                <p className="text-2xl font-bold">{platformStats?.overview.totalCampaigns || 0}</p>
-              </div>
-              <BarChart3 className="w-8 h-8 text-muted-foreground/30" />
-            </div>
+          <CardContent className="py-3 px-4">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Active</p>
+            <p className="text-xl font-bold">{platformStats?.overview.activeCampaigns || 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="py-3 px-4">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Campaigns</p>
+            <p className="text-xl font-bold">{platformStats?.overview.totalCampaigns || 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="py-3 px-4">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Pending $</p>
+            <p className="text-xl font-bold">${(platformStats?.payoutStats.pendingPayouts || 0).toFixed(0)}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Comprehensive Views Breakdown */}
+      {/* Views Breakdown - Compact */}
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Eye className="w-5 h-5" />
-            Views Breakdown
-          </CardTitle>
+        <CardHeader className="pb-2 pt-4">
+          <CardTitle className="text-sm font-medium text-muted-foreground">Views by Status</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div className="text-center p-4 bg-muted/50 rounded-lg border border-border">
-              <p className="text-xs text-muted-foreground mb-1">Total Submitted</p>
-              <p className="text-xl font-bold">{(platformStats?.overview.totalSubmittedViews || 0).toLocaleString()}</p>
-              <p className="text-[10px] text-muted-foreground">Approved + Pending</p>
+        <CardContent className="pb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="p-3 rounded-lg border border-border">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Submitted</p>
+              <p className="text-lg font-bold">{(platformStats?.overview.totalSubmittedViews || 0).toLocaleString()}</p>
             </div>
 
-            <div className="text-center p-4 bg-muted/50 rounded-lg border border-border">
-              <p className="text-xs text-muted-foreground mb-1">Approved</p>
-              <p className="text-xl font-bold">{(platformStats?.overview.approvedViews || 0).toLocaleString()}</p>
-              <p className="text-[10px] text-muted-foreground">Paid submissions</p>
+            <div className="p-3 rounded-lg border border-border">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Approved</p>
+              <p className="text-lg font-bold">{(platformStats?.overview.approvedViews || 0).toLocaleString()}</p>
             </div>
 
-            <div className="text-center p-4 bg-muted/50 rounded-lg border border-border">
-              <p className="text-xs text-muted-foreground mb-1">Pending</p>
-              <p className="text-xl font-bold">{(platformStats?.overview.pendingViews || 0).toLocaleString()}</p>
-              <p className="text-[10px] text-muted-foreground">Under review</p>
+            <div className="p-3 rounded-lg border border-border">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">At Completion</p>
+              <p className="text-lg font-bold">{(platformStats?.overview.viewsAtCompletion || 0).toLocaleString()}</p>
             </div>
 
-            <div className="text-center p-4 bg-muted/50 rounded-lg border border-border">
-              <p className="text-xs text-muted-foreground mb-1">At Completion</p>
-              <p className="text-xl font-bold">{(platformStats?.overview.viewsAtCompletion || 0).toLocaleString()}</p>
-              <p className="text-[10px] text-muted-foreground">Generated earnings</p>
-            </div>
-
-            <div className="text-center p-4 bg-muted/50 rounded-lg border border-border">
-              <p className="text-xs text-muted-foreground mb-1">Extra Tracked</p>
-              <p className="text-xl font-bold">+{(platformStats?.overview.viewsAfterCompletion || 0).toLocaleString()}</p>
-              <p className="text-[10px] text-muted-foreground">Post-campaign</p>
+            <div className="p-3 rounded-lg border border-border">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Post-Campaign</p>
+              <p className="text-lg font-bold">+{(platformStats?.overview.viewsAfterCompletion || 0).toLocaleString()}</p>
             </div>
           </div>
         </CardContent>
@@ -454,24 +398,18 @@ export default function AdminAnalyticsPage() {
                           </div>
 
                           {/* Stats Grid */}
-                          <div className="grid grid-cols-4 gap-4">
+                          <div className="grid grid-cols-3 gap-3">
                             <div className="p-3 bg-muted/50 rounded-lg">
-                              <p className="text-xs text-muted-foreground mb-1">Initial Views</p>
+                              <p className="text-xs text-muted-foreground mb-1">Initial</p>
                               <p className="text-lg font-bold">{campaign.initialViews.toLocaleString()}</p>
                             </div>
                             <div className="p-3 bg-muted/50 rounded-lg">
-                              <p className="text-xs text-muted-foreground mb-1">Current Views</p>
+                              <p className="text-xs text-muted-foreground mb-1">Current</p>
                               <p className="text-lg font-bold">{campaign.currentViews.toLocaleString()}</p>
-                            </div>
-                            <div className="p-3 bg-muted/50 rounded-lg border border-border">
-                              <p className="text-xs text-muted-foreground mb-1">View Growth</p>
-                              <p className="text-lg font-bold">+{campaign.trackedViews.toLocaleString()}</p>
                             </div>
                             <div className="p-3 bg-muted/50 rounded-lg">
                               <p className="text-xs text-muted-foreground mb-1">Growth</p>
-                              <p className="text-lg font-bold">
-                                {campaign.initialViews > 0 ? `${((campaign.trackedViews / campaign.initialViews) * 100).toFixed(1)}%` : '—'}
-                              </p>
+                              <p className="text-lg font-bold text-green-600 dark:text-green-400">+{campaign.trackedViews.toLocaleString()}</p>
                             </div>
                           </div>
                         </div>
@@ -527,7 +465,7 @@ export default function AdminAnalyticsPage() {
                                           <p className="font-bold">{clip.currentViews.toLocaleString()}</p>
                                           <p className="text-xs text-muted-foreground">views</p>
                                           {viewGrowth > 0 && (
-                                            <p className="text-xs text-muted-foreground">+{viewGrowth.toLocaleString()}</p>
+                                            <p className="text-xs text-green-600 dark:text-green-400">+{viewGrowth.toLocaleString()}</p>
                                           )}
                                           {clip.status === 'APPROVED' && clip.earnings > 0 && (
                                             <p className="text-xs font-medium mt-1">${clip.earnings.toFixed(2)}</p>
