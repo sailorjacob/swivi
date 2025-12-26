@@ -35,17 +35,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
     const platform = searchParams.get("platform")
+    const limit = searchParams.get("limit")
 
     const where: any = {}
-    
+
     // Filter out soft-deleted campaigns by default
     const includeDeleted = searchParams.get("includeDeleted") === "true"
     const includeTest = searchParams.get("includeTest") === "true"
-    
+
     if (!includeDeleted) {
       where.deletedAt = null
     }
-    
+
     if (!includeTest) {
       where.isTest = false
     }
@@ -71,6 +72,7 @@ export async function GET(request: NextRequest) {
       orderBy: {
         createdAt: "desc"
       },
+      take: limit ? parseInt(limit) : undefined,
       select: {
         id: true,
         title: true,

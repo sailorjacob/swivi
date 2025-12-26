@@ -7,10 +7,9 @@ export const dynamic = 'force-dynamic'
 import { Positioning } from "@/components/marketing/positioning"
 import { MetricsStrip } from "@/components/marketing/metrics-strip"
 import { HowItWorks } from "@/components/marketing/how-it-works"
-import { CampaignStructure } from "@/components/marketing/campaign-structure"
 import { UseCases } from "@/components/marketing/use-cases"
 import { Features } from "@/components/marketing/features"
-import { WhoIsFor } from "@/components/marketing/who-is-for"
+import { CampaignsPreview } from "@/components/marketing/campaigns-preview"
 import { SocialProof } from "@/components/marketing/social-proof"
 import { FinalCTA } from "@/components/marketing/final-cta"
 import { Founder } from "@/components/marketing/founder"
@@ -40,10 +39,9 @@ export default function HomePage() {
             <Positioning />
             <MetricsStrip />
             <HowItWorks />
-            <CampaignStructure />
             <UseCases />
             <Features />
-            <WhoIsFor />
+            <CampaignsPreview />
             <SocialProof />
             <FinalCTA />
           </div>

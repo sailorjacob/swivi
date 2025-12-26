@@ -91,22 +91,14 @@ export function HeroOriginal() {
             We deploy creator-powered distribution to generate tens of millions of organic impressions during critical launch windows — at CPMs paid ads can't touch.
           </motion.p>
 
-          {/* Proof Line */}
-          <motion.p
-            variants={itemVariants}
-            className="mb-10 text-sm sm:text-base text-foreground/80 max-w-2xl font-normal"
-          >
-            Recent campaign around a Netflix original series generated 25M+ impressions in under a week.
-          </motion.p>
-
           {/* CTA Buttons */}
           <motion.div
             variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4"
+            className="flex flex-col sm:flex-row gap-4 mb-10"
           >
             <LightningHover>
-              <Button size="lg" className="group font-normal bg-foreground text-background hover:bg-foreground/90 border border-foreground">
-                <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center">
+              <Button size="lg" className="group font-normal bg-foreground text-background hover:bg-foreground/90 border border-foreground w-full sm:w-auto">
+                <Link href="https://calendly.com/bykevingeorge/30min?month=2025-05" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full">
                   Launch a Campaign
                   <motion.span
                     className="ml-2"
@@ -118,12 +110,20 @@ export function HeroOriginal() {
                 </Link>
               </Button>
             </LightningHover>
-            <Button size="lg" variant="outline" className="font-normal bg-transparent text-foreground hover:bg-foreground hover:text-background border-foreground">
-              <Link href="/case-studies">
+            <Button size="lg" variant="outline" className="font-normal bg-transparent text-foreground hover:bg-foreground hover:text-background border-foreground w-full sm:w-auto">
+              <Link href="/case-studies" className="w-full text-center">
                 View Case Studies
               </Link>
             </Button>
           </motion.div>
+
+          {/* Proof Line */}
+          <motion.p
+            variants={itemVariants}
+            className="text-sm sm:text-base text-foreground/80 max-w-2xl font-normal"
+          >
+            Our last campaign for Netflix original series generated 25M+ impressions in under a week.
+          </motion.p>
         </motion.div>
       </div>
     </section>

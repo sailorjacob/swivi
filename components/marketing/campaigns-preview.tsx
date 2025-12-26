@@ -1,184 +1,268 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { TrendingUp, ArrowRight, Award, Target } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import { LinkifyText } from "@/components/ui/linkify-text"
+import {
+  DollarSign,
+  Users,
+  Clock,
+  Instagram,
+  Youtube,
+  Music,
+  Eye,
+  Loader2
+} from "lucide-react"
 import Link from "next/link"
 
-const campaignHighlights = [
-  {
-    client: "Owning Manhattan",
-    type: "Netflix Series",
-    roi: "610% ROI",
-    views: "6.1M views",
-    budget: "$1,000",
-    highlight: "610% ROI in 2 days",
-    color: "text-red-600"
-  },
-  {
-    client: "Shvfty",
-    type: "Twitch Streamer", 
-    roi: "211% ROI",
-    views: "1.9M views",
-    budget: "$900",
-    highlight: "258 posts in 5 days",
-    color: "text-purple-600"
-  },
-  {
-    client: "Sportz Playz",
-    type: "Gambling Company",
-    roi: "3,240% ROI",
-    views: "8.1M views", 
-    budget: "$250",
-    highlight: "324x return on investment",
-    color: "text-green-600"
+interface Campaign {
+  id: string
+  title: string
+  description: string
+  creator: string
+  budget: number
+  spent: number
+  payoutRate: number
+  targetPlatforms: string[]
+  requirements: string[]
+  featuredImage?: string
+  bountiesEnabled?: boolean
+  _count: {
+    clipSubmissions: number
   }
-]
+}
 
-const stats = [
-  {
-    value: "1,020%",
-    label: "Average ROI",
-    description: "Across all campaigns"
-  },
-  {
-    value: "16M+",
-    label: "Total Views",
-    description: "Generated for clients"
-  },
-  {
-    value: "6 days",
-    label: "Avg. Timeline",
-    description: "Campaign completion"
-  }
-]
+const platformIcons = {
+  tiktok: Music,
+  instagram: Instagram,
+  youtube: Youtube,
+}
 
 export function CampaignsPreview() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch("/api/campaigns?status=ACTIVE&limit=6")
+        if (response.ok) {
+          const data = await response.json()
+          setCampaigns(data.slice(0, 6)) // Show max 6 campaigns
+        } else {
+          console.error("Failed to fetch campaigns")
+          setError("Unable to load campaigns")
+        }
+      } catch (error) {
+        console.error("Error fetching campaigns:", error)
+        setError("Unable to load campaigns")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCampaigns()
+  }, [])
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
   }
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-      },
-    },
+  const getProgressPercentage = (spent: number, budget: number) => {
+    return budget > 0 ? (spent / budget) * 100 : 0
+  }
+
+  if (loading) {
+    return (
+      <section className="py-20 md:py-32 border-t border-black/5 bg-background relative">
+        <div className="max-width-wrapper section-padding">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (error || campaigns.length === 0) {
+    return null // Don't show the section if there are no campaigns or error
   }
 
   return (
-    <section className="py-20 md:py-32 border-t border-black/5">
+    <section className="py-20 md:py-32 border-t border-black/5 bg-background relative">
       <div className="max-width-wrapper section-padding">
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
           viewport={{ once: true }}
+          className="max-w-7xl mx-auto"
         >
-          {/* Header */}
-          <motion.div variants={itemVariants} className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-4">
-              Proven <span className="font-normal">Campaign Results</span>
+              Active Campaigns
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              From Netflix series to gaming streamers, see how we've helped clients 
-              achieve exceptional ROI through our creator network.
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+              See what's happening on our platform right now. Join creators in building authentic content that drives real results.
             </p>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div variants={itemVariants} className="grid grid-cols-3 gap-8 md:gap-12 mb-16">
-            {stats.map((stat, index) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-2xl md:text-3xl font-light mb-1">{stat.value}</div>
-                <div className="text-sm font-normal mb-1">{stat.label}</div>
-                <div className="text-xs text-muted-foreground">{stat.description}</div>
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Campaign Highlights */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            {campaignHighlights.map((campaign, index) => (
-              <motion.div
-                key={campaign.client}
-                variants={itemVariants}
-                whileHover={{ y: -5 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Card className="h-full hover:shadow-lg transition-shadow duration-300 bg-neutral-800/60 border-neutral-700">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="font-medium text-lg mb-1">{campaign.client}</h3>
-                        <p className="text-sm text-muted-foreground">{campaign.type}</p>
-                      </div>
-                      <Award className="h-5 w-5 text-yellow-500" />
-                    </div>
-                    
-                    <div className="space-y-3 mb-4">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Investment:</span>
-                        <span className="text-sm font-medium">{campaign.budget}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Views Generated:</span>
-                        <span className="text-sm font-medium">{campaign.views}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Return:</span>
-                        <span className={`text-sm font-medium ${campaign.color}`}>
-                          {campaign.roi}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="pt-3 border-t border-black/5">
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-green-600" />
-                        <span className="text-xs text-muted-foreground font-medium">
-                          {campaign.highlight}
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
           </div>
 
-          {/* CTA */}
-          <motion.div variants={itemVariants} className="text-center">
-            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Ready to achieve similar results for your brand? See our complete campaign portfolio 
-              and learn how we can help you reach millions of engaged viewers.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/case-studies"
-                  className="inline-flex items-center text-sm font-normal bg-foreground text-background px-8 py-4 rounded-full hover:bg-foreground/90 transition-all duration-300 group"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {campaigns.map((campaign, index) => {
+              const budgetNum = Number(campaign.budget ?? 0)
+              const spentNum = Number(campaign.spent ?? 0)
+              const progress = getProgressPercentage(spentNum, budgetNum)
+              const remainingBudget = Math.max(0, budgetNum - spentNum)
+              const budgetText = remainingBudget > 0 ? `$${remainingBudget.toFixed(0)} left` : "Budget Full"
+
+              return (
+                <motion.div
+                  key={campaign.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -4 }}
                 >
-                  View All Case Studies
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              <Link
-                href="/brands"
-                className="inline-flex items-center text-sm font-normal border border-black/20 px-8 py-4 rounded-full hover:bg-black/5 transition-all duration-300 group"
-              >
-                <Target className="mr-2 h-4 w-4" />
-                Start Your Campaign
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  <Card className="bg-card border-border hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+                    <CardContent className="p-0">
+                      {/* Campaign Image */}
+                      <div className="relative h-40 bg-muted overflow-hidden">
+                        {campaign.featuredImage && campaign.featuredImage.trim() !== '' ? (
+                          <>
+                            <img
+                              src={campaign.featuredImage}
+                              alt={campaign.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                console.log('Image failed to load:', campaign.featuredImage)
+                                e.currentTarget.style.display = 'none'
+                                const fallback = e.currentTarget.parentElement?.querySelector('.gradient-fallback') as HTMLElement
+                                if (fallback) {
+                                  fallback.style.display = 'flex'
+                                }
+                              }}
+                            />
+                            <div className="gradient-fallback hidden w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                              <span className="text-white text-sm font-medium text-center px-2">{campaign.title}</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                            <span className="text-white text-sm font-medium text-center px-2">{campaign.title}</span>
+                          </div>
+                        )}
+
+                        {/* Live Badge */}
+                        <div className="absolute top-3 left-3 z-10">
+                          <Badge className="bg-foreground text-background text-xs px-2 py-1">
+                            LIVE
+                          </Badge>
+                        </div>
+
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/20 backdrop-blur-sm rounded-full p-2">
+                            <Eye className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Campaign Info */}
+                      <div className="p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-medium">
+                            {campaign.creator.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-sm text-muted-foreground">{campaign.creator}</span>
+                        </div>
+
+                        <h3 className="text-base font-medium text-foreground mb-2 line-clamp-2">
+                          {campaign.title}
+                        </h3>
+
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                          <LinkifyText text={campaign.description} />
+                        </p>
+
+                        {/* Budget Progress */}
+                        <div className="mb-3">
+                          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                            <span>{formatCurrency(campaign.spent)} / {formatCurrency(campaign.budget)}</span>
+                            <span>{budgetText}</span>
+                          </div>
+                          <Progress value={progress} className="h-2" />
+                        </div>
+
+                        {/* Key Metrics */}
+                        <div className="space-y-2 mb-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              <DollarSign className="w-3 h-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">${campaign.payoutRate} per 1K views</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Users className="w-3 h-3 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">{campaign._count.clipSubmissions} submissions</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Platforms */}
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="flex gap-1">
+                            {campaign.targetPlatforms.slice(0, 3).map((platform) => {
+                              const Icon = platformIcons[platform.toLowerCase() as keyof typeof platformIcons]
+                              return (
+                                <div key={platform} className="w-4 h-4 rounded bg-muted flex items-center justify-center">
+                                  {Icon && <Icon className="w-2.5 h-2.5 text-muted-foreground" />}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <Button
+                          className="w-full bg-foreground text-background hover:bg-foreground/90 text-sm"
+                          asChild
+                        >
+                          <Link href="/creators/dashboard/campaigns">
+                            View Campaign
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </div>
+
+          {/* View All Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="text-center mt-8"
+          >
+            <Button variant="outline" size="lg" asChild>
+              <Link href="/creators/dashboard/campaigns">
+                View All Campaigns
               </Link>
-            </div>
+            </Button>
           </motion.div>
         </motion.div>
       </div>

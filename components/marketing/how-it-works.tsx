@@ -171,8 +171,8 @@ export function HowItWorks() {
 
   return (
     <section ref={sectionRef} id="how-it-works" className="py-20 md:py-32 border-t border-black/5 bg-background relative overflow-hidden">
-      {/* 3D Model with Three.js - follows mouse (Desktop only) */}
-      <div 
+      {/* 3D Model with Three.js - hidden for now */}
+      {/* <div 
         ref={canvasContainerRef}
         className="hidden md:block absolute"
         style={{
@@ -184,7 +184,7 @@ export function HowItWorks() {
           zIndex: 5,
           pointerEvents: 'none',
         }}
-      />
+      /> */}
 
       <div className="max-width-wrapper section-padding relative z-10">
         <div className="mb-16">
